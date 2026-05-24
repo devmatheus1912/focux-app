@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
+import '../theme/brand_palette.dart';
 import '../theme/design_tokens.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_motion.dart';
@@ -23,13 +23,40 @@ class FxSecondaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final enabled = onPressed != null;
+
+    if (!enabled) {
+      final button = Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: TokensStrip.s5,
+          vertical: TokensStrip.s3,
+        ),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE8EAED),
+          borderRadius: BorderRadius.circular(TokensStrip.rButton),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: Color(0xFF9CA3AF),
+            fontWeight: FontWeight.w600,
+            fontSize: 15,
+          ),
+        ),
+      );
+      if (!expand) return button;
+      return SizedBox(width: double.infinity, child: button);
+    }
+
     final button = OutlinedButton.icon(
       onPressed: onPressed,
       icon: icon != null ? Icon(icon, size: 18) : const SizedBox.shrink(),
       label: Text(label),
       style: OutlinedButton.styleFrom(
         foregroundColor: primary,
-        side: BorderSide(color: primary),
+        backgroundColor: Colors.white,
+        side: BorderSide(color: primary, width: 1.2),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(TokensStrip.rButton),
         ),
@@ -75,12 +102,17 @@ class FxStripChip extends StatelessWidget {
           decoration: BoxDecoration(
             color:
                 selected
-                    ? primary.withValues(alpha: isDark ? 0.22 : 0.12)
-                    : Colors.transparent,
+                    ? TokensStrip.chipSelectedFill
+                    : Colors.white,
             borderRadius: BorderRadius.circular(TokensStrip.rButton),
             border: Border.all(
               color: selected ? primary : primary.withValues(alpha: 0.55),
+              width: selected ? 1.2 : 1,
             ),
+            boxShadow:
+                selected
+                    ? TokensStrip.coloredDepthGlow(primary, strength: 0.22)
+                    : null,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -112,35 +144,249 @@ class FxStripChip extends StatelessWidget {
 enum FxStripBadgeKind { error, success, info, warning, notification }
 
 class FxStripBadge extends StatelessWidget {
-  const FxStripBadge({super.key, required this.kind, this.size = 28});
+  const FxStripBadge({
+    super.key,
+    required this.kind,
+    this.size = 36,
+    this.showLabel = false,
+    this.label = 'Status',
+  });
 
   final FxStripBadgeKind kind;
   final double size;
+  final bool showLabel;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
-    final (color, icon) = switch (kind) {
-      FxStripBadgeKind.error => (EagleTokens.bad, Icons.close_rounded),
-      FxStripBadgeKind.success => (EagleTokens.good, Icons.check_rounded),
-      FxStripBadgeKind.info => (TokensStrip.primary, Icons.info_outline_rounded),
-      FxStripBadgeKind.warning => (EagleTokens.warn, Icons.warning_amber_rounded),
+    final (color, bg, icon) = switch (kind) {
+      FxStripBadgeKind.error => (
+        TokensStrip.badgeError,
+        TokensStrip.badgeErrorBg,
+        Icons.close_rounded,
+      ),
+      FxStripBadgeKind.success => (
+        TokensStrip.badgeSuccess,
+        TokensStrip.badgeSuccessBg,
+        Icons.check_rounded,
+      ),
+      FxStripBadgeKind.info => (
+        TokensStrip.badgeInfo,
+        TokensStrip.badgeInfoBg,
+        Icons.info_outline_rounded,
+      ),
+      FxStripBadgeKind.warning => (
+        TokensStrip.badgeWarning,
+        TokensStrip.badgeWarningBg,
+        Icons.warning_amber_rounded,
+      ),
       FxStripBadgeKind.notification => (
-        EagleTokens.gold,
+        TokensStrip.badgeNotify,
+        TokensStrip.badgeNotifyBg,
         Icons.notifications_none_rounded,
       ),
     };
 
-    return Container(
+    final badge = Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.14),
+        color: bg,
         shape: BoxShape.circle,
-        border: Border.all(color: color.withValues(alpha: 0.45)),
+        boxShadow: TokensStrip.coloredDepthGlow(color, strength: 0.55),
       ),
-      child: Icon(icon, size: size * 0.48, color: color),
+      child: Icon(icon, size: size * 0.46, color: color),
+    );
+
+    if (!showLabel) return badge;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        badge,
+        const SizedBox(height: 6),
+        Text(
+          label,
+          style: AppTypography.inter(
+            fontSize: 10,
+            color: TokensStrip.textSecondary,
+          ),
+        ),
+      ],
     );
   }
+}
+
+/// Success toast — pale mint surface from TOKENS STRIP spec.
+class FxStripToast extends StatelessWidget {
+  const FxStripToast({
+    super.key,
+    this.title = 'Toast message',
+    this.subtitle = 'Additional text if granted',
+    this.onClose,
+  });
+
+  final String title;
+  final String subtitle;
+  final VoidCallback? onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: TokensStrip.toastSuccessBg,
+        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        border: Border.all(color: TokensStrip.toastSuccessBorder, width: 1.2),
+        boxShadow: TokensStrip.coloredDepthGlow(
+          TokensStrip.badgeSuccess,
+          strength: 0.25,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: TokensStrip.badgeSuccess.withValues(alpha: 0.35),
+                width: 2,
+              ),
+            ),
+            child: Icon(
+              Icons.check_rounded,
+              size: 18,
+              color: TokensStrip.badgeSuccess,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppTypography.inter(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13.5,
+                    color: TokensStrip.textPrimary,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: AppTypography.inter(
+                    fontSize: 11.5,
+                    color: TokensStrip.textSecondary,
+                    height: 1.25,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: onClose,
+            icon: Icon(
+              Icons.close_rounded,
+              size: 18,
+              color: TokensStrip.textSecondary.withValues(alpha: 0.8),
+            ),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Info tooltip bubble with tail — TOKENS STRIP spec.
+class FxStripTooltip extends StatelessWidget {
+  const FxStripTooltip({super.key, this.message = 'Small info bubble'});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _TooltipBubblePainter(
+        fill: TokensStrip.tooltipBg,
+        border: TokensStrip.tooltipBorder,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 10, 14, 16),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 22,
+              height: 22,
+              decoration: const BoxDecoration(
+                color: TokensStrip.primary,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.info_outline_rounded,
+                size: 14,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              message,
+              style: AppTypography.inter(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: TokensStrip.textPrimary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TooltipBubblePainter extends CustomPainter {
+  _TooltipBubblePainter({required this.fill, required this.border});
+
+  final Color fill;
+  final Color border;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const radius = 10.0;
+    const tailW = 12.0;
+    const tailH = 8.0;
+    final rrect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, 0, size.width, size.height - tailH),
+      const Radius.circular(radius),
+    );
+
+    final path =
+        Path()
+          ..addRRect(rrect)
+          ..moveTo(22, size.height - tailH)
+          ..lineTo(22 + tailW / 2, size.height)
+          ..lineTo(22 + tailW, size.height - tailH)
+          ..close();
+
+    canvas.drawShadow(path, Colors.black.withValues(alpha: 0.08), 6, false);
+    canvas.drawPath(path, Paint()..color = fill);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2
+        ..color = border,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _TooltipBubblePainter oldDelegate) =>
+      fill != oldDelegate.fill || border != oldDelegate.border;
 }
 
 /// Horizontal stepper — 3-step TOKENS STRIP pattern.
@@ -225,7 +471,7 @@ class FxStripBreadcrumbs extends StatelessWidget {
         for (var i = 0; i < segments.length; i++) ...[
           Text(
             segments[i],
-            style: GoogleFonts.outfit(
+            style: AppTypography.inter(
               color: primary.withValues(alpha: i == segments.length - 1 ? 1 : 0.72),
               fontWeight: FontWeight.w600,
               fontSize: 12.5,
@@ -350,7 +596,7 @@ class FxStripEmptyState extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: GoogleFonts.outfit(
+              style: AppTypography.inter(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: ink,
@@ -370,6 +616,105 @@ class FxStripEmptyState extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// TOKENS STRIP card — white surface + teal depth glow (showcase spec).
+class FxStripCard extends StatelessWidget {
+  const FxStripCard({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.all(TokensStrip.s4),
+    this.onTap,
+    this.accent,
+    this.radius = TokensStrip.rCard,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final VoidCallback? onTap;
+  final Color? accent;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = accent ?? Theme.of(context).colorScheme.primary;
+
+    final decoration = BoxDecoration(
+      color: isDark ? TokensStrip.cinematicSurface : TokensStrip.cardBg,
+      borderRadius: BorderRadius.circular(radius),
+      border: Border.all(
+        color: isDark
+            ? TokensStrip.glassBorder(dark: true, accent: primary)
+            : TokensStrip.borderDefault,
+      ),
+      boxShadow: isDark
+          ? TokensStrip.elevation(4, dark: true, accent: primary)
+          : [
+              ...TokensStrip.cardShadow(),
+              ...TokensStrip.coloredDepthGlow(primary, strength: 0.28),
+            ],
+    );
+
+    final content = Padding(padding: padding, child: child);
+
+    if (onTap == null) {
+      return DecoratedBox(decoration: decoration, child: content);
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(radius),
+        child: Ink(decoration: decoration, child: content),
+      ),
+    );
+  }
+}
+
+/// Section label — uppercase micro type from TOKENS STRIP panels.
+class FxStripSectionLabel extends StatelessWidget {
+  const FxStripSectionLabel(this.label, {super.key});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label.toUpperCase(),
+      style: TokensStrip.bodyMuted(
+        fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
+      ).copyWith(
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.6,
+      ),
+    );
+  }
+}
+
+/// Section heading — H2 teal hierarchy.
+class FxStripSectionTitle extends StatelessWidget {
+  const FxStripSectionTitle(this.title, {super.key, this.color});
+
+  final String title;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    return Text(
+      title,
+      style: TokensStrip.h2(
+        color:
+            color ??
+            BrandPalette.sectionHeading(primary, dark: isDark),
+        fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
       ),
     );
   }

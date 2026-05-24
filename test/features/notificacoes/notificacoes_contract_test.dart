@@ -40,7 +40,7 @@ void main() {
 
     expect(router, contains("path: '/notificacoes'"));
     expect(alunoDashboard, contains('NotificacaoBadgeButton'));
-    expect(personalDashboard, contains("'/notificacoes'"));
+    expect(personalDashboard, contains('NotificacaoBadgeButton'));
     expect(personalDashboard, contains('notificacoesNaoLidasProvider'));
     expect(screen, contains('Ler todas'));
     expect(repo, contains('/api/notificacoes'));

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/brand_palette.dart';
@@ -13,6 +13,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 // ─── Providers ───────────────────────────────────────────────────────────────
 final medidasProvider = FutureProvider.family<List<MedidaCorporal>, int>((
@@ -85,8 +86,8 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
       data: (lista) => _variacaoPeso(lista),
     );
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Evolução — ${widget.alunoNome}',
         onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
@@ -99,7 +100,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
             indicatorColor: primary,
             labelColor: primary,
             unselectedLabelColor:
-                isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
             indicatorWeight: 2.5,
             tabs: const [
               Tab(text: 'Medidas Corporais'),
@@ -381,7 +382,7 @@ class _TabMedidas extends StatelessWidget {
         final weightData =
             pesos.where((m) => m.peso != null).map((m) => m.peso!).toList();
         return ListView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 80),
           itemCount: ordenada.length + (weightData.length > 1 ? 1 : 0),
           itemBuilder: (_, i) {
             if (weightData.length > 1 && i == 0) {
@@ -392,7 +393,7 @@ class _TabMedidas extends StatelessWidget {
                   accent: EagleTokens.good,
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(TokensStrip.s4),
                   child: FxSparkline(
                     data: weightData,
                     width: 320,
@@ -432,13 +433,13 @@ class _CardMedida extends StatelessWidget {
                 const Icon(
                   Icons.calendar_today,
                   size: 14,
-                  color: EagleTokens.inkMute,
+                  color: TokensStrip.textSecondary,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   fxDateShort(DateTime.parse(medida.data)),
                   style: const TextStyle(
-                    color: EagleTokens.inkMute,
+                    color: TokensStrip.textSecondary,
                     fontSize: 12,
                   ),
                 ),
@@ -496,7 +497,7 @@ class _TabRecordes extends StatelessWidget {
         }
         final ordenada = [...lista]..sort((a, b) => b.data.compareTo(a.data));
         return ListView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 80),
           itemCount: ordenada.length,
           itemBuilder: (_, i) => _CardRecorde(recorde: ordenada[i]),
         );
@@ -539,7 +540,7 @@ class _CardRecorde extends StatelessWidget {
               if (recorde.repeticoes != null) '${recorde.repeticoes} reps',
               fxDateShort(DateTime.parse(recorde.data)),
             ].join(' × '),
-            style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute),
+            style: const TextStyle(fontSize: 12, color: TokensStrip.textSecondary),
           ),
           trailing: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -581,7 +582,7 @@ class _Chip extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 10, color: EagleTokens.inkMute),
+            style: const TextStyle(fontSize: 10, color: TokensStrip.textSecondary),
           ),
           Text(
             valor,

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,6 +10,7 @@ import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/notificacoes_repository.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class NotificacoesScreen extends ConsumerWidget {
   const NotificacoesScreen({super.key});
@@ -37,9 +38,8 @@ class NotificacoesScreen extends ConsumerWidget {
       }
     }
 
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Notificações',
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
@@ -58,7 +58,7 @@ class NotificacoesScreen extends ConsumerWidget {
         child: async.when(
           loading:
               () => ListView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+                padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 12, 16, 120),
                 children: const [SkeletonList(count: 5)],
               ),
           error:
@@ -84,7 +84,7 @@ class NotificacoesScreen extends ConsumerWidget {
 
             final showQuietFooter = entries.length <= 2;
             return ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 120),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 120),
               itemCount: entries.length + (showQuietFooter ? 1 : 0),
               separatorBuilder: (_, __) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
@@ -112,7 +112,7 @@ class NotificacoesScreen extends ConsumerWidget {
                             color:
                                 isDark
                                     ? EagleTokens.darkInkMute
-                                    : EagleTokens.inkMute,
+                                    : TokensStrip.textSecondary,
                             letterSpacing: 0.9,
                           ),
                         ),
@@ -355,9 +355,9 @@ class _RadarNotificationGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final unread = items.any((item) => !item.lida);
     final time = _timeLabel(items.first.criadaEm);
     final label = items.length == 1 ? 'sinal' : 'sinais';
@@ -496,8 +496,8 @@ class _RadarRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final name = _radarName(item);
 
     return InkWell(
@@ -552,8 +552,8 @@ class _QuietFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Container(
       margin: const EdgeInsets.only(top: 4),
@@ -621,8 +621,8 @@ class _NotificationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final tipoColor = _notifColor(item.tipo, primary);
     final unread = !item.lida;
     final time = _timeLabel(item.criadaEm);
@@ -819,10 +819,10 @@ class _NotificationsStateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 120),
+      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 24, 16, 120),
       children: [
         Container(
           padding: const EdgeInsets.all(18),

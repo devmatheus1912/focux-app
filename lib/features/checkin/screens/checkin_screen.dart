@@ -21,6 +21,7 @@ import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_celebration_overlay.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import '../widgets/pose_coach_panel.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class CheckinScreen extends ConsumerStatefulWidget {
   final int treinoId;
@@ -479,7 +480,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                 ),
               ),
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+                padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 14, 16, 8),
                 sliver: SliverList.separated(
                   itemCount: exercicios.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
@@ -509,7 +510,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
               ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 2, 16, 16),
+                  padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 2, 16, 16),
                   child: _LiveCoachingCard(
                     brand: brand,
                     brandDeep: brandDeep,
@@ -537,7 +538,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
               ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 130),
+                  padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 130),
                   child: FxLiquidPrimaryButton(
                     label: 'Finalizar treino',
                     icon: Icons.flag_rounded,
@@ -618,7 +619,7 @@ class _WorkoutHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 58, 20, 18),
+      padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 58, 20, 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -675,7 +676,7 @@ class _WorkoutHeader extends StatelessWidget {
               children: [
                 Text(
                   duration,
-                  style: GoogleFonts.outfit(
+                  style: AppTypography.inter(
                     color: ink,
                     fontSize: 56,
                     fontWeight: FontWeight.w600,
@@ -868,7 +869,7 @@ class _SerieCard extends StatelessWidget {
         initiallyExpanded: !ee.concluido,
         shape: const Border(),
         collapsedShape: const Border(),
-        tilePadding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+        tilePadding: const EdgeInsets.fromLTRB(TokensStrip.s4, 8, 16, 8),
         leading: Container(
           width: 42,
           height: 42,
@@ -909,7 +910,7 @@ class _SerieCard extends StatelessWidget {
         ),
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1049,7 +1050,7 @@ class _SerieCard extends StatelessWidget {
                           backgroundColor:
                               dark
                                   ? EagleTokens.darkLine
-                                  : EagleTokens.lineSoft,
+                                  : TokensStrip.borderDefault,
                           valueColor: AlwaysStoppedAnimation(
                             ee.concluido ? EagleTokens.good : brand,
                           ),
@@ -1419,7 +1420,7 @@ class _PreviousPerformance extends StatelessWidget {
           Icon(
             Icons.history_rounded,
             size: 18,
-            color: dark ? Colors.white70 : EagleTokens.ink,
+            color: dark ? Colors.white70 : TokensStrip.textPrimary,
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -1629,7 +1630,7 @@ class _SerieDetailSheetState extends State<_SerieDetailSheet> {
       curve: Curves.easeOut,
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 8, 16, 16),
         child: ShellSurface(
           radius: 28,
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
@@ -1648,7 +1649,7 @@ class _SerieDetailSheetState extends State<_SerieDetailSheet> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: TokensStrip.s4),
               Row(
                 children: [
                   Expanded(
@@ -1705,7 +1706,7 @@ class _SerieDetailSheetState extends State<_SerieDetailSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: TokensStrip.s4),
               Text(
                 'Sensacao',
                 style: TextStyle(
@@ -1745,7 +1746,7 @@ class _SerieDetailSheetState extends State<_SerieDetailSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: TokensStrip.s4),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: fxListCardDecoration(context),
@@ -1907,7 +1908,7 @@ class _SerieField extends StatelessWidget {
         prefixIcon: Icon(icon, color: mute, size: 18),
         filled: true,
         fillColor:
-            dark ? Colors.white.withValues(alpha: 0.05) : EagleTokens.lineSoft,
+            dark ? Colors.white.withValues(alpha: 0.05) : TokensStrip.borderDefault,
         enabledBorder: FxInputDeco.outlineBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: line),
@@ -2017,7 +2018,7 @@ class _ExerciseThumbnailPreview extends StatelessWidget {
             errorBuilder:
                 (_, __, ___) => Container(
                   height: 120,
-                  color: dark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
+                  color: dark ? EagleTokens.darkCardHi : TokensStrip.borderDefault,
                   alignment: Alignment.center,
                   child: Icon(Icons.play_circle_outline_rounded, color: brand),
                 ),
@@ -2093,7 +2094,7 @@ class _ExerciseMediaPreview extends StatelessWidget {
             errorBuilder:
                 (_, __, ___) => Container(
                   height: 120,
-                  color: dark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
+                  color: dark ? EagleTokens.darkCardHi : TokensStrip.borderDefault,
                   alignment: Alignment.center,
                   child: Icon(Icons.play_circle_outline_rounded, color: brand),
                 ),
@@ -2195,7 +2196,7 @@ class _ExerciseVideoPreviewState extends State<_ExerciseVideoPreview> {
         height: 168,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: widget.dark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
+          color: widget.dark ? EagleTokens.darkCardHi : TokensStrip.borderDefault,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: widget.brand.withValues(alpha: 0.22)),
         ),
@@ -2292,7 +2293,7 @@ class _VideoFallback extends StatelessWidget {
       height: 118,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: dark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
+        color: dark ? EagleTokens.darkCardHi : TokensStrip.borderDefault,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: brand.withValues(alpha: 0.26)),
       ),
@@ -2424,7 +2425,7 @@ class _LiveCoachingCard extends StatelessWidget {
               height: 1.42,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           Row(
             children: [
               Expanded(
@@ -2524,7 +2525,7 @@ class _RestTimerDock extends StatelessWidget {
                   ),
                   Text(
                     '$seconds',
-                    style: GoogleFonts.outfit(
+                    style: AppTypography.inter(
                       fontSize: 42,
                       fontWeight: FontWeight.w600,
                       color: ink,

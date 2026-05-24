@@ -114,19 +114,19 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final chrome = ShellChrome.forDark(isDark);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Convidar aluno',
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
       ),
       body: FxPremiumEntrance(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+          padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 8, 20, 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -175,7 +175,7 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                                 children: [
                                   Text(
                                     'Link gerado',
-                                    style: GoogleFonts.outfit(
+                                    style: AppTypography.inter(
                                       fontWeight: FontWeight.w800,
                                       fontSize: 16,
                                       color: ink,
@@ -279,7 +279,7 @@ class _HeroCard extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             primary.withValues(alpha: isDark ? 0.22 : 0.12),
-            (isDark ? EagleTokens.darkCard : EagleTokens.card)
+            (isDark ? EagleTokens.darkCard : TokensStrip.cardBg)
                 .withValues(alpha: 0.96),
           ],
         ),
@@ -303,7 +303,7 @@ class _HeroCard extends StatelessWidget {
               children: [
                 Text(
                   'Convite único',
-                  style: GoogleFonts.outfit(
+                  style: AppTypography.inter(
                     color: ink,
                     fontWeight: FontWeight.w800,
                     fontSize: 17,

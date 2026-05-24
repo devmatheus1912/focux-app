@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -138,7 +138,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
                 Icon(
                   tipo.icon,
                   size: 14,
-                  color: isSelected ? Colors.white : EagleTokens.inkMute,
+                  color: isSelected ? Colors.white : TokensStrip.textSecondary,
                 ),
                 const SizedBox(width: 4),
                 Text(tipo.label),
@@ -149,7 +149,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
             labelStyle: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: isSelected ? Colors.white : EagleTokens.ink,
+              color: isSelected ? Colors.white : TokensStrip.textPrimary,
             ),
             backgroundColor:
                 Theme.of(context).brightness == Brightness.dark
@@ -175,7 +175,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 8),
           child: Row(
             children: [
               Text(
@@ -364,10 +364,10 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
                           size: 64,
                           color: Color(0xFFD1D5DB),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: TokensStrip.s4),
                         Text(
                           'Digite ao menos 2 caracteres',
-                          style: TextStyle(color: EagleTokens.inkMute),
+                          style: TextStyle(color: TokensStrip.textSecondary),
                         ),
                       ],
                     ),
@@ -383,10 +383,10 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
                           size: 64,
                           color: Color(0xFFD1D5DB),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: TokensStrip.s4),
                         Text(
                           'Nenhum resultado para "$query"',
-                          style: TextStyle(color: EagleTokens.inkMute),
+                          style: TextStyle(color: TokensStrip.textSecondary),
                         ),
                       ],
                     ),
@@ -398,19 +398,19 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
                     return Center(
                       child: Text(
                         'Nenhum resultado em ${filter.label}',
-                        style: TextStyle(color: EagleTokens.inkMute),
+                        style: TextStyle(color: TokensStrip.textSecondary),
                       ),
                     );
                   }
                   return ListView(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 12, 16, 4),
                         child: Text(
                           '${items.length} resultado${items.length > 1 ? 's' : ''} em ${filter.label}',
                           style: TextStyle(
                             fontSize: 13,
-                            color: EagleTokens.inkMute,
+                            color: TokensStrip.textSecondary,
                           ),
                         ),
                       ),
@@ -427,12 +427,12 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
                 return ListView(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 8, 16, 0),
                       child: Text(
                         '${result.totalCount} resultado${result.totalCount > 1 ? 's' : ''}',
                         style: TextStyle(
                           fontSize: 13,
-                          color: EagleTokens.inkMute,
+                          color: TokensStrip.textSecondary,
                         ),
                       ),
                     ),
@@ -466,7 +466,7 @@ class _BuscaItemTile extends StatelessWidget {
     'ALUNO' => const Color(0xFF1EC8C8),
     'TREINO' => const Color(0xFF22C55E),
     'COBRANCA' => const Color(0xFFF59E0B),
-    _ => EagleTokens.inkMute,
+    _ => TokensStrip.textSecondary,
   };
 
   @override

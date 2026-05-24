@@ -54,6 +54,7 @@ void main() {
   test('lib only keeps Focux brand reset in central theme entrypoints', () {
     const allowedBrandTokenFiles = {
       'lib/core/theme/theme_provider.dart',
+      'lib/core/theme/tokens_strip.dart',
       'lib/main.dart',
     };
 

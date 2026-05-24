@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +7,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 /// Landscape-optimized training screen for in-person coaching sessions.
 ///
@@ -135,7 +136,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.error_outline, color: EagleTokens.darkInkMute, size: 48),
-              const SizedBox(height: 16),
+              const SizedBox(height: TokensStrip.s4),
               Text(
                 'Treino não encontrado',
                 style: TextStyle(
@@ -143,7 +144,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
                   fontSize: 18,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: TokensStrip.s5),
               FxLiquidPrimaryButton(
                 label: 'Voltar',
                 onPressed: () => Navigator.pop(context),
@@ -185,7 +186,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
               letterSpacing: 4,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           Text(
             '$_restSecs',
             style: const TextStyle(
@@ -194,7 +195,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
               fontWeight: FontWeight.w900,
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: TokensStrip.s5),
           SizedBox(
             width: 200,
             child: LinearProgressIndicator(
@@ -299,7 +300,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
         // ── Center: Exercise info ──────────────────────────────────
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(TokensStrip.s5),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -324,7 +325,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: TokensStrip.s4),
                 Row(
                   children: [
                     _InfoChip(
@@ -345,7 +346,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
                     ],
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: TokensStrip.s5),
                 // ── Series progress ──────────────────────────────────
                 Row(
                   children: List.generate(ex.series ?? 3, (i) {
@@ -388,7 +389,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
         // ── Right: Action buttons ──────────────────────────────────
         Container(
           width: 180,
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(TokensStrip.s4),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -433,7 +434,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
                 ),
               ] else ...[
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(TokensStrip.s4),
                   decoration: BoxDecoration(
                     color: const Color(0xFF22C55E).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(16),

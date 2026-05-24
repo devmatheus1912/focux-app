@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'conversation_screen.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class ChatAlunoScreen extends StatelessWidget {
   const ChatAlunoScreen({super.key});

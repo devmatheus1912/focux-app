@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
@@ -26,8 +27,8 @@ class ProgressaoAceitarScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final sugestoesAsync = ref.watch(sugestoesProgressaoProvider);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Progressão de Carga — Sugestões',
         onBack: () => safePopOrGo(context, '/ia/copiloto'),
@@ -55,7 +56,7 @@ class ProgressaoAceitarScreen extends ConsumerWidget {
                     'Erro ao carregar sugestões: $e',
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: TokensStrip.s4),
                   FxLiquidPrimaryButton(
                     label: 'Tentar novamente',
                     icon: Icons.refresh,
@@ -87,7 +88,7 @@ class ProgressaoAceitarScreen extends ConsumerWidget {
             );
           }
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(TokensStrip.s4),
             itemCount: lista.length,
             itemBuilder:
                 (_, i) => _CardSugestao(
@@ -173,7 +174,7 @@ class _CardSugestao extends StatelessWidget {
       child: DecoratedBox(
         decoration: fxListCardDecoration(context, accent: primary),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(TokensStrip.s4),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -217,7 +218,7 @@ class _CardSugestao extends StatelessWidget {
                 _CargaBox(
                   label: 'Carga Atual',
                   valor: cargaAtual != null ? '${cargaAtual}kg' : '—',
-                  cor: EagleTokens.inkMute,
+                  cor: TokensStrip.textSecondary,
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -237,7 +238,7 @@ class _CardSugestao extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: EagleTokens.inkMute.withValues(alpha: 0.08),
+                  color: TokensStrip.textSecondary.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -246,7 +247,7 @@ class _CardSugestao extends StatelessWidget {
                     const Icon(
                       Icons.info_outline,
                       size: 14,
-                      color: EagleTokens.inkMute,
+                      color: TokensStrip.textSecondary,
                     ),
                     const SizedBox(width: 6),
                     Expanded(
@@ -254,7 +255,7 @@ class _CardSugestao extends StatelessWidget {
                         motivo,
                         style: const TextStyle(
                           fontSize: 12,
-                          color: EagleTokens.inkMute,
+                          color: TokensStrip.textSecondary,
                         ),
                       ),
                     ),
@@ -329,7 +330,7 @@ class _CargaBox extends StatelessWidget {
           ),
           Text(
             label,
-            style: const TextStyle(fontSize: 10, color: EagleTokens.inkMute),
+            style: const TextStyle(fontSize: 10, color: TokensStrip.textSecondary),
           ),
         ],
       ),

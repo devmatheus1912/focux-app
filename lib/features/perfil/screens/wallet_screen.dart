@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -103,8 +103,8 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   Widget build(BuildContext context) {
     final perfilAsync = ref.watch(perfilProvider);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Wallet / Pagamentos',
         onBack: () => context.pop(),
@@ -115,7 +115,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
         data: (perfil) {
           _preencherDadosAtuais(perfil);
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(TokensStrip.s4),
             child: Form(
               key: _formKey,
               child: Column(
@@ -185,7 +185,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: TokensStrip.s5),
 
                   // Seção bancária
                   Text(
@@ -355,7 +355,7 @@ class _Stat extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 12, color: EagleTokens.inkMute),
+          style: const TextStyle(fontSize: 12, color: TokensStrip.textSecondary),
         ),
         Text(
           valor,

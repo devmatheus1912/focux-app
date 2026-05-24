@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_icon.dart';
+import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../providers/onboarding_provider.dart';
 import '../../perfil/providers/perfil_provider.dart';
-import '../../../core/widgets/fx_loading.dart';
 
 class SetupOnboardingWidget extends ConsumerWidget {
   const SetupOnboardingWidget({super.key});
@@ -12,6 +16,10 @@ class SetupOnboardingWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statusAsync = ref.watch(onboardingStatusProvider);
+    final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final mute =
+        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return statusAsync.when(
       loading: () => const FxLoading(),
@@ -19,76 +27,84 @@ class SetupOnboardingWidget extends ConsumerWidget {
       data: (data) {
         if (data.progressoPercentual == 100) return const SizedBox.shrink();
 
-        return Card(
-          color: Theme.of(context).colorScheme.primaryContainer,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+        return Container(
+          margin: const EdgeInsets.only(bottom: TokensStrip.s5),
+          padding: const EdgeInsets.all(TokensStrip.s4),
+          decoration: fxStripCardDecoration(
+            context,
+            accent: primary,
+            radius: TokensStrip.rCard,
           ),
-          margin: const EdgeInsets.only(bottom: 24),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Sua Ativação',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Sua ativação',
+                    style: TokensStrip.h2(
+                      color: primary,
+                      fontFamily:
+                          Theme.of(context).textTheme.bodyLarge?.fontFamily,
                     ),
-                    Text(
-                      '${data.progressoPercentual}%',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                LinearProgressIndicator(
+                  ),
+                  Text(
+                    '${data.progressoPercentual}%',
+                    style: TokensStrip.body(
+                      color: primary,
+                      fontFamily:
+                          Theme.of(context).textTheme.bodyLarge?.fontFamily,
+                    ).copyWith(fontWeight: FontWeight.w700),
+                  ),
+                ],
+              ),
+              const SizedBox(height: TokensStrip.s2),
+              Text(
+                'Complete os passos para liberar todo o fluxo do app.',
+                style: TokensStrip.bodyMuted(color: mute),
+              ),
+              const SizedBox(height: TokensStrip.s3),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(TokensStrip.rInput),
+                child: LinearProgressIndicator(
                   value: data.progressoPercentual / 100,
-                  backgroundColor: Colors.white.withValues(alpha: 0.5),
-                  color: Theme.of(context).colorScheme.primary,
+                  backgroundColor: primary.withValues(alpha: 0.12),
+                  color: primary,
                   minHeight: 8,
-                  borderRadius: BorderRadius.circular(4),
                 ),
-                const SizedBox(height: 16),
-                _StepTile(
-                  title: 'Configure seu Perfil',
-                  isDone: data.perfilCompleto,
-                  onTap: () async {
-                    try {
-                      final perfil = await ref.read(perfilProvider.future);
-                      if (context.mounted) {
-                        context.push('/perfil/editar', extra: perfil);
-                      }
-                    } catch (_) {
-                      if (context.mounted) context.push('/perfil');
+              ),
+              const SizedBox(height: TokensStrip.s4),
+              _StepTile(
+                title: 'Configure seu perfil',
+                isDone: data.perfilCompleto,
+                onTap: () async {
+                  try {
+                    final perfil = await ref.read(perfilProvider.future);
+                    if (context.mounted) {
+                      context.push('/perfil/editar', extra: perfil);
                     }
-                  },
-                ),
-                _StepTile(
-                  title: 'Adicione o primeiro Aluno',
-                  isDone: data.primeiroAlunoAdicionado,
-                  onTap: () => context.push('/alunos/novo'),
-                ),
-                _StepTile(
-                  title: 'Crie um Treino',
-                  isDone: data.primeiroTreinoCriado,
-                  onTap: () => context.push('/treinos/novo'),
-                ),
-                _StepTile(
-                  title: 'Configure Pagamentos',
-                  isDone: data.pagamentoConfigurado,
-                  onTap: () => context.push('/perfil/wallet'),
-                ),
-              ],
-            ),
+                  } catch (_) {
+                    if (context.mounted) context.push('/perfil');
+                  }
+                },
+              ),
+              _StepTile(
+                title: 'Adicione o primeiro aluno',
+                isDone: data.primeiroAlunoAdicionado,
+                onTap: () => context.push('/alunos/novo'),
+              ),
+              _StepTile(
+                title: 'Crie um treino',
+                isDone: data.primeiroTreinoCriado,
+                onTap: () => context.push('/treinos/novo'),
+              ),
+              _StepTile(
+                title: 'Configure pagamentos',
+                isDone: data.pagamentoConfigurado,
+                onTap: () => context.push('/perfil/wallet'),
+              ),
+            ],
           ),
         );
       },
@@ -109,38 +125,71 @@ class _StepTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: isDone ? null : onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Row(
-          children: [
-            Icon(
-              isDone ? Icons.check_circle : Icons.radio_button_unchecked,
-              color: isDone ? EagleTokens.good : EagleTokens.inkMute,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  decoration: isDone ? TextDecoration.lineThrough : null,
+    final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute =
+        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: isDone ? null : onTap,
+        borderRadius: BorderRadius.circular(TokensStrip.rInput),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
+          child: Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
                   color:
                       isDone
-                          ? EagleTokens.inkMute
-                          : Theme.of(context).textTheme.bodyLarge?.color,
-                  fontWeight: isDone ? FontWeight.normal : FontWeight.w600,
+                          ? TokensStrip.badgeSuccessBg
+                          : primary.withValues(alpha: 0.10),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color:
+                        isDone
+                            ? TokensStrip.badgeSuccess.withValues(alpha: 0.45)
+                            : primary.withValues(alpha: 0.28),
+                  ),
+                ),
+                child: Center(
+                  child:
+                      isDone
+                          ? Icon(
+                            Icons.check_rounded,
+                            size: 16,
+                            color: TokensStrip.badgeSuccess,
+                          )
+                          : Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: mute, width: 1.6),
+                            ),
+                          ),
                 ),
               ),
-            ),
-            if (!isDone)
-              const Icon(
-                Icons.arrow_forward_ios,
-                size: 14,
-                color: EagleTokens.inkMute,
+              const SizedBox(width: TokensStrip.s3),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    decoration: isDone ? TextDecoration.lineThrough : null,
+                    color: isDone ? mute : ink,
+                    fontWeight: isDone ? FontWeight.w500 : FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
               ),
-          ],
+              if (!isDone)
+                FxIcon(name: 'chevron-right', size: 14, color: mute),
+            ],
+          ),
         ),
       ),
     );

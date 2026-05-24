@@ -1,8 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../data/qa_endpoint_runner.dart';
 import '../data/qa_smoke_catalog.dart';
+import '../widgets/qa_route_preview.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 /// Tela QA — navega por todas as rotas de smoke test catalogadas.
 ///
@@ -17,8 +20,11 @@ class QaSmokeScreen extends StatefulWidget {
 
 class _QaSmokeScreenState extends State<QaSmokeScreen> {
   final Map<String, _RouteResult> _results = {};
+  final Map<String, _EndpointResult> _endpointResults = {};
   bool _running = false;
   int _currentIndex = -1;
+  int _batchTotal = 0;
+  String? _batchLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -33,14 +39,24 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
         title: const Text('🧪 QA Smoke Test'),
         actions: [
           TextButton.icon(
-            onPressed: () => context.push('/qa/tokens-strip'),
+            onPressed: _running ? null : () => context.go('/qa/tokens-strip'),
             icon: const Icon(Icons.palette_outlined),
-            label: const Text('TOKENS STRIP'),
+            label: const Text('TOKENS'),
           ),
           TextButton.icon(
             onPressed: _running ? null : _runPublicRoutes,
             icon: const Icon(Icons.play_arrow),
-            label: const Text('Testar Públicas'),
+            label: const Text('Públicas'),
+          ),
+          TextButton.icon(
+            onPressed: _running ? null : _runPrivateRoutes,
+            icon: const Icon(Icons.lock_open),
+            label: const Text('Logadas'),
+          ),
+          TextButton.icon(
+            onPressed: _running ? null : _runEndpoints,
+            icon: const Icon(Icons.cloud_outlined),
+            label: const Text('APIs'),
           ),
           TextButton.icon(
             onPressed: _resetResults,
@@ -51,23 +67,35 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
       ),
       body: Column(
         children: [
-          // Progress bar
           if (_running)
             LinearProgressIndicator(
               value:
-                  _currentIndex >= 0
-                      ? (_currentIndex + 1) / qaSmokeRoutes.length
+                  _currentIndex >= 0 && _batchTotal > 0
+                      ? (_currentIndex + 1) / _batchTotal
                       : null,
             ),
+          if (_running && _batchLabel != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 4, 16, 0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  _batchLabel!,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+                  ),
+                ),
+              ),
+            ),
 
-          // Stats bar
           DecoratedBox(
             decoration: fxListCardDecoration(context),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
                 children: [
-                  _statChip('Total', qaSmokeRoutes.length, Colors.blue),
+                  _statChip('Rotas', qaSmokeRoutes.length, Colors.blue),
                   const SizedBox(width: 8),
                   _statChip(
                     '✅',
@@ -82,16 +110,15 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
                   ),
                   const SizedBox(width: 8),
                   _statChip(
-                    '⏳',
-                    qaSmokeRoutes.length - _results.length,
-                    Colors.orange,
+                    'API ✅',
+                    _endpointResults.values.where((r) => r.ok).length,
+                    Colors.teal,
                   ),
                 ],
               ),
             ),
           ),
 
-          // Routes list
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.all(12),
@@ -111,14 +138,18 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       subtitle: Text(
-                        '${route.authMode} • ${route.path}',
+                        _routeSubtitle(route, result, isDark),
                         style: TextStyle(
                           fontSize: 12,
                           color:
-                              isDark
+                              result != null && !result.ok
+                                  ? Colors.red.shade700
+                                  : isDark
                                   ? EagleTokens.darkInkMute
-                                  : EagleTokens.inkMute,
+                                  : TokensStrip.textSecondary,
                         ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -127,7 +158,10 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
                           const SizedBox(width: 8),
                           IconButton(
                             icon: const Icon(Icons.open_in_new, size: 18),
-                            onPressed: () => _navigateAndRecord(route),
+                            onPressed:
+                                _running
+                                    ? null
+                                    : () => _navigateAndRecord(route),
                           ),
                         ],
                       ),
@@ -138,7 +172,6 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
             ),
           ),
 
-          // Endpoints section
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
@@ -147,7 +180,7 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
                   'API Endpoints (${qaSmokeEndpoints.length})',
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                    color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                   ),
                 ),
               ],
@@ -160,15 +193,24 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
               itemCount: qaSmokeEndpoints.length,
               itemBuilder: (context, index) {
                 final ep = qaSmokeEndpoints[index];
+                final result = _endpointResults[ep.id];
                 return Card(
                   margin: const EdgeInsets.only(bottom: 4),
                   child: ListTile(
                     dense: true,
-                    leading: _methodChip(ep.method),
+                    leading: _endpointStatusIcon(result),
                     title: Text(ep.path, style: const TextStyle(fontSize: 12)),
                     subtitle: Text(
-                      '${ep.authMode} • expect: ${ep.expectedAnonymousStatus}',
-                      style: const TextStyle(fontSize: 10),
+                      _endpointSubtitle(ep, result),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color:
+                            result != null && !result.ok
+                                ? Colors.red.shade700
+                                : null,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 );
@@ -180,6 +222,27 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
     );
   }
 
+  String _routeSubtitle(
+    QaSmokeRoute route,
+    _RouteResult? result,
+    bool isDark,
+  ) {
+    if (result != null && !result.ok && result.error != null) {
+      return result.error!;
+    }
+    return '${route.authMode} • ${route.path}';
+  }
+
+  String _endpointSubtitle(QaSmokeEndpoint ep, _EndpointResult? result) {
+    if (result == null) {
+      return '${ep.authMode} • expect anon: ${ep.expectedAnonymousStatus}';
+    }
+    if (result.ok) {
+      return '${ep.method} • HTTP ${result.statusCode}';
+    }
+    return result.error ?? '${ep.method} • falhou';
+  }
+
   Widget _statusIcon(_RouteResult? result) {
     if (result == null) {
       return const Icon(Icons.radio_button_unchecked, color: Colors.grey);
@@ -187,6 +250,17 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
     return result.ok
         ? const Icon(Icons.check_circle, color: Colors.green)
         : const Icon(Icons.error, color: Colors.red);
+  }
+
+  Widget _endpointStatusIcon(_EndpointResult? result) {
+    if (result == null) {
+      return _methodChip('…');
+    }
+    return Icon(
+      result.ok ? Icons.check_circle : Icons.error,
+      color: result.ok ? Colors.green : Colors.red,
+      size: 18,
+    );
   }
 
   Widget _statChip(String label, int count, Color color) {
@@ -250,52 +324,79 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
     );
   }
 
+  Future<void> _waitForRouteTransition() async {
+    await WidgetsBinding.instance.endOfFrame;
+    await Future.delayed(const Duration(milliseconds: 350));
+  }
+
   Future<void> _navigateAndRecord(QaSmokeRoute route) async {
+    if (_running) return;
     try {
-      if (mounted) {
-        context.push(route.path);
-      }
-      // Registra como visitada com sucesso se não crashou
-      await Future.delayed(const Duration(milliseconds: 500));
-      if (mounted) {
-        setState(() {
-          _results[route.id] = _RouteResult(ok: true);
-        });
-      }
+      final previewError = await QaRoutePreviewDialog.show(context, route.path);
+      if (!mounted) return;
+      setState(() {
+        _results[route.id] = _RouteResult(
+          ok: previewError == null,
+          error: previewError,
+        );
+      });
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _results[route.id] = _RouteResult(ok: false, error: e.toString());
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _results[route.id] = _RouteResult(ok: false, error: e.toString());
+      });
     }
   }
 
-  Future<void> _runPublicRoutes() async {
-    setState(() => _running = true);
+  Future<void> _runPublicRoutes() => _runRouteBatch(
+    qaPublicRoutes,
+    label: 'Testando rotas públicas…',
+  );
 
-    for (int i = 0; i < qaPublicRoutes.length; i++) {
+  Future<void> _runPrivateRoutes() => _runRouteBatch(
+    qaPrivateRoutes,
+    label: 'Testando rotas logadas…',
+  );
+
+  Future<void> _runRouteBatch(
+    List<QaSmokeRoute> routes, {
+    required String label,
+  }) async {
+    if (_running) return;
+    setState(() {
+      _running = true;
+      _batchTotal = routes.length;
+      _currentIndex = 0;
+      _batchLabel = label;
+    });
+
+    for (var i = 0; i < routes.length; i++) {
       if (!mounted) break;
-      setState(() => _currentIndex = i);
-      final route = qaPublicRoutes[i];
+      final route = routes[i];
+      setState(() {
+        _currentIndex = i;
+        _batchLabel = '$label ${route.label}';
+      });
 
       try {
-        context.push(route.path);
-        await Future.delayed(const Duration(seconds: 2));
-        if (mounted) {
-          setState(() {
-            _results[route.id] = _RouteResult(ok: true);
-          });
-          // Go back
-          if (context.canPop()) context.pop();
-          await Future.delayed(const Duration(milliseconds: 500));
-        }
+        final previewError = await QaRoutePreviewDialog.showTimed(
+          context,
+          route.path,
+        );
+        if (!mounted) break;
+        await _waitForRouteTransition();
+
+        setState(() {
+          _results[route.id] = _RouteResult(
+            ok: previewError == null,
+            error: previewError,
+          );
+        });
       } catch (e) {
-        if (mounted) {
-          setState(() {
-            _results[route.id] = _RouteResult(ok: false, error: e.toString());
-          });
-        }
+        if (!mounted) break;
+        setState(() {
+          _results[route.id] = _RouteResult(ok: false, error: e.toString());
+        });
       }
     }
 
@@ -303,6 +404,47 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
       setState(() {
         _running = false;
         _currentIndex = -1;
+        _batchTotal = 0;
+        _batchLabel = null;
+      });
+    }
+  }
+
+  Future<void> _runEndpoints() async {
+    if (_running) return;
+    setState(() {
+      _running = true;
+      _batchTotal = qaSmokeEndpoints.length;
+      _currentIndex = 0;
+      _batchLabel = 'Testando APIs…';
+    });
+
+    for (var i = 0; i < qaSmokeEndpoints.length; i++) {
+      if (!mounted) break;
+      final endpoint = qaSmokeEndpoints[i];
+      setState(() {
+        _currentIndex = i;
+        _batchLabel = 'API ${endpoint.method} ${endpoint.path}';
+      });
+
+      final result = await runQaSmokeEndpoint(endpoint);
+      if (!mounted) break;
+
+      setState(() {
+        _endpointResults[endpoint.id] = _EndpointResult(
+          ok: result.ok,
+          statusCode: result.statusCode,
+          error: result.error,
+        );
+      });
+    }
+
+    if (mounted) {
+      setState(() {
+        _running = false;
+        _currentIndex = -1;
+        _batchTotal = 0;
+        _batchLabel = null;
       });
     }
   }
@@ -310,7 +452,10 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
   void _resetResults() {
     setState(() {
       _results.clear();
+      _endpointResults.clear();
       _currentIndex = -1;
+      _batchTotal = 0;
+      _batchLabel = null;
     });
   }
 }
@@ -319,4 +464,11 @@ class _RouteResult {
   final bool ok;
   final String? error;
   const _RouteResult({required this.ok, this.error});
+}
+
+class _EndpointResult {
+  final bool ok;
+  final int? statusCode;
+  final String? error;
+  const _EndpointResult({required this.ok, this.statusCode, this.error});
 }

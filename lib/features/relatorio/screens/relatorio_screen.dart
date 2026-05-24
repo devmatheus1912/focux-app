@@ -12,6 +12,7 @@ import 'package:printing/printing.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/relatorio_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class RelatorioScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -210,9 +211,8 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Relatório',
         subtitle: widget.alunoNome,
@@ -230,7 +230,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(TokensStrip.s4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -253,7 +253,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
               Card(
                 color: theme.colorScheme.errorContainer,
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(TokensStrip.s4),
                   child: Text(
                     'Erro ao carregar relatório: $_erro',
                     style: TextStyle(color: theme.colorScheme.onErrorContainer),
@@ -262,10 +262,10 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
               )
             else if (_dados != null) ...[
               _CardAderencia(dados: _dados!),
-              const SizedBox(height: 16),
+              const SizedBox(height: TokensStrip.s4),
               if (_comparativo != null) ...[
                 _CardComparativo(comparativo: _comparativo!),
-                const SizedBox(height: 16),
+                const SizedBox(height: TokensStrip.s4),
               ],
               Row(
                 children: [
@@ -330,7 +330,7 @@ class _SeletorPeriodo extends StatelessWidget {
               'Período de análise',
               style: Theme.of(
                 context,
-              ).textTheme.titleSmall?.copyWith(color: EagleTokens.inkMute),
+              ).textTheme.titleSmall?.copyWith(color: TokensStrip.textSecondary),
             ),
             const SizedBox(height: 8),
             Wrap(
@@ -393,7 +393,7 @@ class _PeriodPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -403,13 +403,13 @@ class _PeriodPill extends StatelessWidget {
           color:
               active
                   ? primary
-                  : (isDark ? EagleTokens.darkCardHi : EagleTokens.lineSoft),
+                  : (isDark ? EagleTokens.darkCardHi : TokensStrip.borderDefault),
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
             color:
                 active
                     ? primary
-                    : (isDark ? EagleTokens.darkLine : EagleTokens.line),
+                    : (isDark ? EagleTokens.darkLine : TokensStrip.borderDefault),
           ),
         ),
         child: Text(
@@ -445,11 +445,11 @@ class _CardAderencia extends StatelessWidget {
       width: double.infinity,
       decoration: fxListCardDecoration(context, accent: cor),
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(TokensStrip.s5),
         child: Column(
           children: [
             Text('Taxa de Aderência', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 24),
+            const SizedBox(height: TokensStrip.s5),
             SizedBox(
               width: 140,
               height: 140,
@@ -468,7 +468,7 @@ class _CardAderencia extends StatelessWidget {
                     children: [
                       Text(
                         '${taxa.toInt()}%',
-                        style: GoogleFonts.outfit(
+                        style: AppTypography.inter(
                           fontSize: 28,
                           fontWeight: FontWeight.w700,
                           color: cor,
@@ -553,7 +553,7 @@ class _CardInfo extends StatelessWidget {
       width: double.infinity,
       decoration: fxListCardDecoration(context, accent: cor),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(TokensStrip.s4),
         child: Column(
           children: [
             Icon(icone, color: cor, size: 32),
@@ -568,7 +568,7 @@ class _CardInfo extends StatelessWidget {
             Text(
               titulo,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: EagleTokens.inkMute,
+                color: TokensStrip.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -602,7 +602,7 @@ class _CardComparativo extends StatelessWidget {
       width: double.infinity,
       decoration: fxListCardDecoration(context, accent: primaryAccent),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(TokensStrip.s4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -621,7 +621,7 @@ class _CardComparativo extends StatelessWidget {
                     Text(
                       'Este período',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: EagleTokens.inkMute,
+                        color: TokensStrip.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -635,7 +635,7 @@ class _CardComparativo extends StatelessWidget {
                     Text(
                       '${comparativo.checkInsAtual} check-ins',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: EagleTokens.inkMute,
+                        color: TokensStrip.textSecondary,
                       ),
                     ),
                   ],
@@ -670,7 +670,7 @@ class _CardComparativo extends StatelessWidget {
                     Text(
                       'Anterior',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: EagleTokens.inkMute,
+                        color: TokensStrip.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -678,13 +678,13 @@ class _CardComparativo extends StatelessWidget {
                       '${comparativo.aderenciaAnterior.toStringAsFixed(1)}%',
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: EagleTokens.inkMute,
+                        color: TokensStrip.textSecondary,
                       ),
                     ),
                     Text(
                       '${comparativo.checkInsAnterior} check-ins',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: EagleTokens.inkMute,
+                        color: TokensStrip.textSecondary,
                       ),
                     ),
                   ],

@@ -301,7 +301,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                               children: [
                                 Text(
                                   'Pular',
-                                  style: GoogleFonts.outfit(
+                                  style: AppTypography.inter(
                                     color: Colors.white.withValues(alpha: 0.62),
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
@@ -340,7 +340,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
                   // Dots
                   Padding(
-                    padding: const EdgeInsets.only(top: 12, bottom: 16),
+                    padding: const EdgeInsets.only(top: 8, bottom: 12),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(
@@ -373,7 +373,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                   : 'Começar agora',
                           onPressed: _next,
                         ),
-                        const SizedBox(height: TokensStrip.s3),
+                        const SizedBox(height: TokensStrip.s2),
                         GestureDetector(
                           onTap: () => context.go('/login'),
                           child: RichText(
@@ -395,7 +395,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                             ),
                           ),
                         ),
-                        const SizedBox(height: TokensStrip.s3),
+                        SizedBox(height: MediaQuery.paddingOf(context).bottom + 8),
                       ],
                     ),
                   ),
@@ -562,7 +562,7 @@ class _OBPageWidget extends StatelessWidget {
                     child: RichText(
                       textAlign: TextAlign.center,
                       text: TextSpan(
-                        style: GoogleFonts.outfit(
+                        style: AppTypography.inter(
                           color: Colors.white,
                           fontSize: 30,
                           fontWeight: FontWeight.w700,
@@ -592,7 +592,7 @@ class _OBPageWidget extends StatelessWidget {
                       child: Text(
                         data.subtitle,
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.outfit(
+                        style: AppTypography.inter(
                           color: Colors.white.withValues(alpha: 0.62),
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
@@ -669,7 +669,7 @@ class _OBPageWidget extends StatelessWidget {
                                     Expanded(
                                       child: Text(
                                         e.value,
-                                        style: GoogleFonts.outfit(
+                                        style: AppTypography.inter(
                                           color: Colors.white.withValues(
                                             alpha: 0.72,
                                           ),
@@ -719,7 +719,7 @@ class _OBPageWidget extends StatelessWidget {
                           const SizedBox(width: 8),
                           Text(
                             'Usado por +200 personal trainers',
-                            style: GoogleFonts.outfit(
+                            style: AppTypography.inter(
                               color: Colors.white.withValues(alpha: 0.48),
                               fontSize: 11.5,
                               fontWeight: FontWeight.w500,
@@ -762,7 +762,7 @@ class _MetricChipWidget extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             metric.value,
-            style: GoogleFonts.outfit(
+            style: AppTypography.inter(
               color: Colors.white,
               fontSize: 15,
               fontWeight: FontWeight.w700,
@@ -774,7 +774,7 @@ class _MetricChipWidget extends StatelessWidget {
             metric.label,
             textAlign: TextAlign.center,
             maxLines: 2,
-            style: GoogleFonts.outfit(
+            style: AppTypography.inter(
               color: Colors.white.withValues(alpha: 0.42),
               fontSize: 10,
               fontWeight: FontWeight.w500,

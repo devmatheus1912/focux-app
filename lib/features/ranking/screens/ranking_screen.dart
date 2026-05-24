@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/theme/brand_palette.dart';
@@ -139,7 +139,7 @@ class RankingScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: TokensStrip.s4),
                 ],
 
                 // Lista completa
@@ -268,7 +268,7 @@ class _RankingTile extends StatelessWidget {
         child: Text(
           '${item.posicao}',
           style: TextStyle(
-            color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+            color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
             fontWeight: FontWeight.w700,
           ),
         ),

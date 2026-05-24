@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 const _kCols = ['LEAD', 'TESTE', 'ATIVO', 'INADIMPLENTE', 'CANCELADO'];
 const _kLabels = {
@@ -111,7 +112,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
     }
     if (status == 'INADIMPLENTE') return EagleTokens.bad;
     if (status == 'CANCELADO') {
-      return isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+      return isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     }
     return fallback; // LEAD
   }
@@ -176,12 +177,12 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final brand = Theme.of(context).colorScheme.primary;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Funil de Leads',
         subtitle: 'CRM',
@@ -201,7 +202,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
           children: [
             if (_showIntro)
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 12),
                 child: Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
@@ -237,7 +238,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
             else ...[
               // Summary row
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 16),
                 child: Row(
                   children:
                       _kCols
@@ -481,9 +482,9 @@ class _LeadCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final brand = Theme.of(context).colorScheme.primary;
     final brandSoft = BrandPalette.soft(brand, dark: isDark);
     final brandDeep = BrandPalette.deep(brand);

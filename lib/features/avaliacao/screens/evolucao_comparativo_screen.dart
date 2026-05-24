@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/router/safe_navigation.dart';
@@ -9,6 +9,7 @@ import '../../evolucao/data/evolucao_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 String _fmtData(String? iso) {
   if (iso == null || iso.isEmpty) return '—';
@@ -84,7 +85,7 @@ class _EvolucaoComparativoScreenState
       backgroundColor:
           Theme.of(context).brightness == Brightness.dark
               ? EagleTokens.darkBg
-              : EagleTokens.paper,
+              : TokensStrip.pageBg,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -100,22 +101,22 @@ class _EvolucaoComparativoScreenState
               : _erro != null
               ? Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(TokensStrip.s5),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Icon(
                         Icons.info_outline,
                         size: 48,
-                        color: EagleTokens.inkMute,
+                        color: TokensStrip.textSecondary,
                       ),
                       const SizedBox(height: 12),
                       Text(
                         _erro!,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(color: EagleTokens.inkMute),
+                        style: const TextStyle(color: TokensStrip.textSecondary),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: TokensStrip.s4),
                       OutlinedButton.icon(
                         onPressed: _load,
                         icon: const Icon(Icons.refresh),
@@ -134,7 +135,7 @@ class _EvolucaoComparativoScreenState
     final atual = c.atual;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -151,7 +152,7 @@ class _EvolucaoComparativoScreenState
                           'Primeira',
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
-                            color: EagleTokens.inkMute,
+                            color: TokensStrip.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -163,7 +164,7 @@ class _EvolucaoComparativoScreenState
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Icon(Icons.arrow_forward, color: EagleTokens.inkMute),
+                  const Icon(Icons.arrow_forward, color: TokensStrip.textSecondary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(
@@ -172,7 +173,7 @@ class _EvolucaoComparativoScreenState
                           'Atual',
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
-                            color: EagleTokens.inkMute,
+                            color: TokensStrip.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -187,7 +188,7 @@ class _EvolucaoComparativoScreenState
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
 
           // Tabela de comparativo
           Card(
@@ -254,28 +255,28 @@ class _EvolucaoComparativoScreenState
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           const Row(
             children: [
               Icon(Icons.circle, size: 10, color: EagleTokens.good),
               SizedBox(width: 4),
               Text(
                 'Melhora',
-                style: TextStyle(fontSize: 12, color: EagleTokens.inkMute),
+                style: TextStyle(fontSize: 12, color: TokensStrip.textSecondary),
               ),
               SizedBox(width: 12),
               Icon(Icons.circle, size: 10, color: EagleTokens.bad),
               SizedBox(width: 4),
               Text(
                 'Piora',
-                style: TextStyle(fontSize: 12, color: EagleTokens.inkMute),
+                style: TextStyle(fontSize: 12, color: TokensStrip.textSecondary),
               ),
               SizedBox(width: 12),
-              Icon(Icons.circle, size: 10, color: EagleTokens.inkMute),
+              Icon(Icons.circle, size: 10, color: TokensStrip.textSecondary),
               SizedBox(width: 4),
               Text(
                 'Sem alteração',
-                style: TextStyle(fontSize: 12, color: EagleTokens.inkMute),
+                style: TextStyle(fontSize: 12, color: TokensStrip.textSecondary),
               ),
             ],
           ),
@@ -314,7 +315,7 @@ class _EvolucaoComparativoScreenState
     const style = TextStyle(
       fontWeight: FontWeight.w700,
       fontSize: 13,
-      color: EagleTokens.inkMute,
+      color: TokensStrip.textSecondary,
     );
     return const Padding(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -345,7 +346,7 @@ class _EvolucaoComparativoScreenState
     required double? vAtual,
     required bool menorEMelhor,
   }) {
-    Color deltaColor = EagleTokens.inkMute;
+    Color deltaColor = TokensStrip.textSecondary;
     String deltaText = '—';
     IconData? deltaIcon;
 

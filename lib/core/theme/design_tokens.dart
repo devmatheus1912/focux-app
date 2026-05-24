@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
+export 'app_typography.dart';
+
 /// FX Design System — Focux · TOKENS STRIP v1.0.0
 /// Fonte única de verdade para todos os tokens visuais.
 ///
 /// Palette: Neon cyan-teal + cinematic dark · Liquid Glass surfaces.
-/// Typography: Outfit (display/body) + JetBrains Mono (technical/numbers).
+/// Typography: Inter (display/body) + JetBrains Mono (technical/numbers).
 abstract class EagleTokens {
   // ── Brand (TOKENS STRIP #13C2C2) ───────────────────────────────────
   static const Color brand = Color(0xFF13C2C2);

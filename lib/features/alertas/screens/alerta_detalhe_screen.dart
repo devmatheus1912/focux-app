@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +8,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class AlertaDetalheScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -63,9 +64,8 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Análise — ${widget.alunoNome}',
         onBack: () => safePopOrGo(context, '/alertas'),
@@ -79,7 +79,7 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
               : _erro != null
               ? Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(TokensStrip.s5),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -128,7 +128,7 @@ class _Body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -139,7 +139,7 @@ class _Body extends StatelessWidget {
           _CardFinanceiro(status: detalhe.statusFinanceiro),
           const SizedBox(height: 12),
           _CardSugestaoIa(sugestao: detalhe.sugestaoIa),
-          const SizedBox(height: 24),
+          const SizedBox(height: TokensStrip.s5),
           Row(
             children: [
               Expanded(
@@ -179,7 +179,7 @@ class _CardUltimoTreino extends StatelessWidget {
     return DecoratedBox(
       decoration: fxListCardDecoration(context),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(TokensStrip.s4),
         child: Row(
           children: [
             Icon(Icons.fitness_center, color: primary),
@@ -191,7 +191,7 @@ class _CardUltimoTreino extends StatelessWidget {
                   Text(
                     'Último Treino',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: EagleTokens.inkMute,
+                      color: TokensStrip.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -199,7 +199,7 @@ class _CardUltimoTreino extends StatelessWidget {
                     ultimoTreino ?? 'Sem treinos recentes',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: ultimoTreino == null ? EagleTokens.inkMute : null,
+                      color: ultimoTreino == null ? TokensStrip.textSecondary : null,
                     ),
                   ),
                 ],
@@ -228,7 +228,7 @@ class _CardCheckIns extends StatelessWidget {
     return DecoratedBox(
       decoration: fxListCardDecoration(context),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(TokensStrip.s4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -240,7 +240,7 @@ class _CardCheckIns extends StatelessWidget {
                   'Check-ins (30d)',
                   style: Theme.of(
                     context,
-                  ).textTheme.titleSmall?.copyWith(color: EagleTokens.inkMute),
+                  ).textTheme.titleSmall?.copyWith(color: TokensStrip.textSecondary),
                 ),
                 const Spacer(),
                 Text(
@@ -292,7 +292,7 @@ class _CardFinanceiro extends StatelessWidget {
     return DecoratedBox(
       decoration: fxListCardDecoration(context),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(TokensStrip.s4),
         child: Row(
           children: [
             Icon(Icons.account_balance_wallet_outlined, color: cor),
@@ -304,7 +304,7 @@ class _CardFinanceiro extends StatelessWidget {
                   'Situação Financeira',
                   style: Theme.of(
                     context,
-                  ).textTheme.titleSmall?.copyWith(color: EagleTokens.inkMute),
+                  ).textTheme.titleSmall?.copyWith(color: TokensStrip.textSecondary),
                 ),
                 const SizedBox(height: 6),
                 Chip(
@@ -343,7 +343,7 @@ class _CardSugestaoIa extends StatelessWidget {
         accent: theme.colorScheme.secondary,
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(TokensStrip.s4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

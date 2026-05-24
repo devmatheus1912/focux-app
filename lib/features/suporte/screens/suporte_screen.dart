@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
@@ -12,6 +12,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 const _severidades = ['BAIXA', 'MEDIA', 'ALTA', 'CRITICA'];
 
@@ -181,7 +182,7 @@ class _SuporteScreenState extends ConsumerState<SuporteScreen> {
             Expanded(
               child: ListView.builder(
                 controller: _scrollCtrl,
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
+                padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 14, 16, 18),
                 itemCount: _mensagens.length + (_enviandoChat ? 1 : 0),
                 itemBuilder: (context, index) {
                   if (index >= _mensagens.length) {
@@ -215,7 +216,7 @@ class _SupportHeader extends StatelessWidget {
     final onSurface = Theme.of(context).colorScheme.onSurface;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 12, 12, 12),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         border: Border(
@@ -287,7 +288,7 @@ class _SupportHeader extends StatelessWidget {
                       Text(
                         '  /  Ticket #${ticket!.id}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: EagleTokens.inkMute,
+                          color: TokensStrip.textSecondary,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -628,7 +629,7 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
   Widget build(BuildContext context) {
     final bottom = MediaQuery.of(context).viewInsets.bottom;
     return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottom),
+      padding: EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 16 + bottom),
       child: Form(
         key: _formKey,
         child: Column(
@@ -705,7 +706,7 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
                                 Icons.circle,
                                 size: 10,
                                 color:
-                                    _severidadeColors[s] ?? EagleTokens.inkMute,
+                                    _severidadeColors[s] ?? TokensStrip.textSecondary,
                               ),
                               const SizedBox(width: 8),
                               Text(s),
@@ -791,7 +792,7 @@ class _MeusTicketsTabState extends ConsumerState<_MeusTicketsTab> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 8, 8),
+          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 14, 8, 8),
           child: Row(
             children: [
               const Expanded(
@@ -861,7 +862,7 @@ class _TicketCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final statusColor = _statusColor(context, ticket.status);
     final sevColor =
-        _severidadeColors[ticket.severidade] ?? EagleTokens.inkMute;
+        _severidadeColors[ticket.severidade] ?? TokensStrip.textSecondary;
     final resolvido = ticket.status == 'RESOLVIDO';
     final temResposta = resolvido && ticket.respostaAdmin != null;
 
@@ -882,7 +883,7 @@ class _TicketCard extends StatelessWidget {
                   horizontal: 16,
                   vertical: 4,
                 ),
-                childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                childrenPadding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 12),
                 title: _TicketTileContent(
                   ticket: ticket,
                   statusColor: statusColor,
@@ -1000,7 +1001,7 @@ class _TicketTileContent extends StatelessWidget {
             'Aberto em ${fxTimeAgo(DateTime.parse(ticket.criadoEm!))}',
             style: Theme.of(
               context,
-            ).textTheme.bodySmall?.copyWith(color: EagleTokens.inkMute),
+            ).textTheme.bodySmall?.copyWith(color: TokensStrip.textSecondary),
           ),
         ],
       ],

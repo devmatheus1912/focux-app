@@ -90,4 +90,16 @@ class BrandPalette {
         .withLightness((hsl.lightness + 0.18).clamp(0.0, 1.0));
     return next.toColor();
   }
+
+  /// H2 section titles on page surfaces — deep teal (light) / glow (dark).
+  static Color sectionHeading(Color primary, {required bool dark}) =>
+      dark ? accent(primary) : deep(primary);
+
+  /// Section action links and chips — vivid in light, glow in dark.
+  static Color sectionAction(Color primary, {required bool dark}) =>
+      dark ? accent(primary) : primary;
+
+  /// Icons and micro-labels in branded rows.
+  static Color sectionAccent(Color primary, {required bool dark}) =>
+      dark ? accent(primary) : deep(primary);
 }

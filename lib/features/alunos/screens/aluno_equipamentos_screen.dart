@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../exercicios/data/enums.dart';
@@ -43,8 +43,8 @@ class _AlunoEquipamentosScreenState
     final alunoAsync = ref.watch(alunoProvider(widget.alunoId));
     final selected = _selected;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Equipamentos do aluno',
         onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
@@ -86,7 +86,7 @@ class _AlunoEquipamentosScreenState
               const Text(
                 'Use isto para filtrar substituicoes inteligentes e evitar prescrever algo que o aluno nao consegue executar.',
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: TokensStrip.s4),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/router/safe_navigation.dart';
@@ -106,8 +106,8 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Editar Aluno',
         onBack: () => safePopOrGo(context, '/alunos/${widget.aluno.id}'),
@@ -115,7 +115,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
             [
               _salvando
                   ? const Padding(
-                    padding: EdgeInsets.all(16),
+                    padding: EdgeInsets.all(TokensStrip.s4),
                     child: SizedBox(
                       width: 20,
                       height: 20,
@@ -171,7 +171,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                          color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                         ),
                       ),
                     ],
@@ -184,7 +184,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
                   icon: Icons.person_outline,
                   isDark: isDark,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: TokensStrip.s4),
                 _FxFormField(
                   controller: _nome,
                   label: 'Nome completo *',
@@ -227,7 +227,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
                   icon: Icons.tune,
                   isDark: isDark,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: TokensStrip.s4),
                 _FxFormField(
                   controller: _objetivo,
                   label: 'Objetivo',
@@ -242,7 +242,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
                   'Gênero',
                   style: TextStyle(
                     color:
-                        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -265,7 +265,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
                                     ? primary
                                     : (isDark
                                         ? EagleTokens.darkInkMute
-                                        : EagleTokens.inkMute),
+                                        : TokensStrip.textSecondary),
                             fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
                           ),
                           side: BorderSide(
@@ -274,7 +274,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
                                     ? primary.withValues(alpha: 0.4)
                                     : (isDark
                                         ? EagleTokens.darkLine
-                                        : EagleTokens.line),
+                                        : TokensStrip.borderDefault),
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -288,7 +288,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
                   'Consultoria',
                   style: TextStyle(
                     color:
-                        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -317,7 +317,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
                                     ? primary
                                     : (isDark
                                         ? EagleTokens.darkInkMute
-                                        : EagleTokens.inkMute),
+                                        : TokensStrip.textSecondary),
                             fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
                           ),
                           side: BorderSide(
@@ -326,7 +326,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen>
                                     ? primary.withValues(alpha: 0.4)
                                     : (isDark
                                         ? EagleTokens.darkLine
-                                        : EagleTokens.line),
+                                        : TokensStrip.borderDefault),
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -428,7 +428,7 @@ class _FxFormField extends StatelessWidget {
       maxLines: maxLines,
       validator: validator,
       style: TextStyle(
-        color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+        color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
         fontSize: 15,
       ),
       cursorColor: primary,
@@ -437,12 +437,12 @@ class _FxFormField extends StatelessWidget {
         prefixIcon: Icon(
           icon,
           size: 20,
-          color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+          color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
         ),
         filled: true,
-        fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+        fillColor: isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
         labelStyle: TextStyle(
-          color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+          color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -451,13 +451,13 @@ class _FxFormField extends StatelessWidget {
         border: FxInputDeco.outlineBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(
-            color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+            color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
           ),
         ),
         enabledBorder: FxInputDeco.outlineBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(
-            color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+            color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
           ),
         ),
         focusedBorder: FxInputDeco.outlineBorder(

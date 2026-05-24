@@ -24,7 +24,6 @@ class _TokensStripShowcaseScreenState extends State<TokensStripShowcaseScreen> {
   int _tabIndex = 0;
   int _page = 1;
   bool _dropdownOpen = false;
-  bool _loadingBtn = false;
   bool _obscure = true;
 
   @override
@@ -56,8 +55,7 @@ class _TokensStripShowcaseScreenState extends State<TokensStripShowcaseScreen> {
                     _panel(wide, 1, 'Typography', _TypographyPanel(isDark: isDark)),
                     _panel(wide, 1, 'Icon set', _IconGrid(primary: primary)),
                     _panel(wide, 1, 'Spacing scale', const _SpacingTable()),
-                    _panel(wide, 1, 'Border weights', _BorderWeights(primary: primary)),
-                    _panel(wide, 1, 'Corner radius', _CornerRadius(primary: primary)),
+                    _panel(wide, 1, 'Border & radius', _BorderRadiusSpec(primary: primary)),
                     _panel(wide, 1, 'Shadow depth', const _ShadowDepth()),
                     _panel(
                       wide,
@@ -65,15 +63,7 @@ class _TokensStripShowcaseScreenState extends State<TokensStripShowcaseScreen> {
                       'Surface elevation',
                       _ElevationStrip(isDark: isDark, primary: primary),
                     ),
-                    _panel(wide, 1, 'Buttons', _ButtonsPanel(
-                      loading: _loadingBtn,
-                      onLoadingTap: () {
-                        setState(() => _loadingBtn = true);
-                        Future.delayed(const Duration(seconds: 2), () {
-                          if (mounted) setState(() => _loadingBtn = false);
-                        });
-                      },
-                    )),
+                    _panel(wide, 1, 'Buttons', const _ButtonsPanel()),
                     _panel(wide, 1, 'Inputs', _InputsPanel(obscure: _obscure, onToggleObscure: () => setState(() => _obscure = !_obscure))),
                     _panel(wide, 1, 'Toggle', _TogglePanel(value: _toggleOn, onChanged: (v) => setState(() => _toggleOn = v))),
                     _panel(wide, 1, 'Tabs', _TabsPanel(index: _tabIndex, onChanged: (i) => setState(() => _tabIndex = i))),
@@ -85,8 +75,8 @@ class _TokensStripShowcaseScreenState extends State<TokensStripShowcaseScreen> {
                     )),
                     _panel(wide, 2, 'Stepper / Steps', const FxStripStepper(currentStep: 0, labels: ['Label progress', 'Label progress', 'Label progress'])),
                     _panel(wide, 2, 'Component anatomy: button', const _ButtonAnatomy()),
-                    _panel(wide, 2, 'Notifications', const _ToastPreview()),
-                    _panel(wide, 1, 'Tooltip', const _TooltipPreview()),
+                    _panel(wide, 2, 'Notifications', const FxStripToast()),
+                    _panel(wide, 1, 'Tooltip', const FxStripTooltip()),
                     _panel(wide, 1, 'Badge', const _BadgeRow()),
                     _panel(wide, 2, 'Pagination', FxStripPagination(page: _page, totalPages: 5, onPage: (p) => setState(() => _page = p))),
                     _panel(wide, 2, 'Breadcrumbs', const FxStripBreadcrumbs(segments: ['Navigation', 'Sub-page', 'Trail'])),
@@ -128,7 +118,7 @@ class _HeaderBadge extends StatelessWidget {
       children: [
         Text(
           'TOKENS STRIP',
-          style: GoogleFonts.outfit(
+          style: AppTypography.inter(
             fontSize: 28,
             fontWeight: FontWeight.w800,
             color: TokensStrip.textPrimary,
@@ -176,11 +166,12 @@ class _ShowcaseSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            title,
-            style: GoogleFonts.outfit(
-              fontSize: 13,
+            title.toUpperCase(),
+            style: AppTypography.inter(
+              fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: TokensStrip.primary,
+              letterSpacing: 0.6,
+              color: TokensStrip.textSecondary,
             ),
           ),
           const SizedBox(height: TokensStrip.s3),
@@ -199,18 +190,30 @@ class _TypographyPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final h2Color = isDark ? TokensStrip.neonGlow : TokensStrip.textH2;
+    final fontFamily = Theme.of(context).textTheme.bodyLarge?.fontFamily;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('H1: System OS', style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.w800, color: ink)),
-        const SizedBox(height: 8),
-        Text('H2: Section Title', style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.w700, color: TokensStrip.primary)),
-        const SizedBox(height: 8),
-        Text('Body: Default text', style: GoogleFonts.outfit(fontSize: 15, color: ink)),
-        const SizedBox(height: 8),
+        Text(
+          'H1: System OS',
+          style: TokensStrip.h1(color: ink, fontFamily: fontFamily),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'H2: Section Title',
+          style: TokensStrip.h2(color: h2Color, fontFamily: fontFamily),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Body: Default text',
+          style: TokensStrip.body(color: ink, fontFamily: fontFamily),
+        ),
+        const SizedBox(height: 6),
         Text(
           'The quick brown fox jumps over the lazy dog. 0123456789',
-          style: GoogleFonts.outfit(fontSize: 13, color: mute, height: 1.4),
+          style: TokensStrip.bodyMuted(color: mute, fontFamily: fontFamily),
         ),
       ],
     );
@@ -239,10 +242,31 @@ class _IconGrid extends StatelessWidget {
       crossAxisCount: 3,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 8,
-      crossAxisSpacing: 8,
-      childAspectRatio: 1.4,
-      children: _icons.map((i) => Icon(i, color: primary, size: 22)).toList(),
+      mainAxisSpacing: 10,
+      crossAxisSpacing: 10,
+      childAspectRatio: 1.35,
+      children:
+          _icons.map((icon) {
+            return Center(
+              child: Icon(
+                icon,
+                color: primary,
+                size: 24,
+                shadows: [
+                  Shadow(
+                    color: primary.withValues(alpha: 0.42),
+                    blurRadius: 14,
+                    offset: const Offset(0, 5),
+                  ),
+                  Shadow(
+                    color: primary.withValues(alpha: 0.18),
+                    blurRadius: 22,
+                    offset: const Offset(2, 8),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
     );
   }
 }
@@ -292,50 +316,69 @@ class _SpacingTable extends StatelessWidget {
   TextStyle _cell() => GoogleFonts.jetBrainsMono(fontSize: 11, color: TokensStrip.textSecondary);
 }
 
-class _BorderWeights extends StatelessWidget {
-  const _BorderWeights({required this.primary});
+class _BorderRadiusSpec extends StatelessWidget {
+  const _BorderRadiusSpec({required this.primary});
   final Color primary;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [0.5, 1.0, 1.5, 2.0, 3.0].map((w) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 6),
-          child: Container(height: w, color: primary),
-        );
-      }).toList(),
-    );
-  }
-}
+    const weights = [1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0];
+    const radii = [24.0, 16.0, 12.0, 8.0];
 
-class _CornerRadius extends StatelessWidget {
-  const _CornerRadius({required this.primary});
-  final Color primary;
-
-  @override
-  Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [4.0, 8.0, 12.0, 50.0].map((r) {
-        return Column(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: primary.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(r),
-                ),
-                border: Border.all(color: primary),
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text('${r.toInt()}', style: GoogleFonts.jetBrainsMono(fontSize: 9, color: TokensStrip.textSecondary)),
-          ],
-        );
-      }).toList(),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            children:
+                weights.map((w) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Container(
+                      width: double.infinity,
+                      height: w,
+                      decoration: BoxDecoration(
+                        color: primary,
+                        borderRadius: BorderRadius.circular(w / 2),
+                      ),
+                    ),
+                  );
+                }).toList(),
+          ),
+        ),
+        const SizedBox(width: 20),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children:
+                radii.map((r) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: SizedBox(
+                      width: 56,
+                      height: 44,
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            border: Border(
+                              top: BorderSide(color: primary, width: 2.2),
+                              right: BorderSide(color: primary, width: 2.2),
+                            ),
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(r),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -345,30 +388,43 @@ class _ShadowDepth extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
       children: [
-        _box(TokensStrip.cardShadow(), Colors.white, 'Light'),
-        _box([
-          BoxShadow(color: Colors.pink.withValues(alpha: 0.25), blurRadius: 16, offset: const Offset(0, 4)),
-        ], Colors.pink.withValues(alpha: 0.08), 'Medium'),
-        _box([
-          BoxShadow(color: Colors.blue.withValues(alpha: 0.35), blurRadius: 20, offset: const Offset(0, 6)),
-        ], Colors.blue.withValues(alpha: 0.08), 'Strong'),
+        _depthTile(TokensStrip.primary, 'Teal'),
+        const SizedBox(height: 14),
+        _depthTile(const Color(0xFFEC4899), 'Pink'),
+        const SizedBox(height: 14),
+        _depthTile(const Color(0xFF38BDF8), 'Blue'),
       ],
     );
   }
 
-  Widget _box(List<BoxShadow> shadows, Color fill, String label) {
-    return Column(
+  Widget _depthTile(Color color, String label) {
+    return Row(
       children: [
         Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(color: fill, borderRadius: BorderRadius.circular(8), boxShadow: shadows),
+          width: 64,
+          height: 64,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(TokensStrip.rCard),
+            gradient: LinearGradient(
+              colors: [color.withValues(alpha: 0.10), Colors.white],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            border: Border.all(color: color.withValues(alpha: 0.55), width: 1.2),
+            boxShadow: TokensStrip.coloredDepthGlow(color),
+          ),
         ),
-        const SizedBox(height: 4),
-        Text(label, style: GoogleFonts.outfit(fontSize: 10, color: TokensStrip.textSecondary)),
+        const SizedBox(width: 12),
+        Text(
+          label,
+          style: AppTypography.inter(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: TokensStrip.textSecondary,
+          ),
+        ),
       ],
     );
   }
@@ -417,21 +473,17 @@ class _ElevationStrip extends StatelessWidget {
 }
 
 class _ButtonsPanel extends StatelessWidget {
-  const _ButtonsPanel({required this.loading, required this.onLoadingTap});
-  final bool loading;
-  final VoidCallback onLoadingTap;
+  const _ButtonsPanel();
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        FxLiquidPrimaryButton(label: 'Primary', icon: Icons.check_rounded, onPressed: () {}),
+        FxLiquidPrimaryButton(label: 'Primary', onPressed: () {}),
         const SizedBox(height: 10),
         FxSecondaryButton(label: 'Secondary', onPressed: () {}),
         const SizedBox(height: 10),
         FxSecondaryButton(label: 'Disabled', onPressed: null),
-        const SizedBox(height: 10),
-        FxLiquidPrimaryButton(label: 'Loading', loading: loading, onPressed: loading ? null : onLoadingTap),
       ],
     );
   }
@@ -492,12 +544,20 @@ class _TabsPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    return Row(
-      children: [
-        _tab(context, 'Active', 0, primary, filled: true),
-        _tab(context, 'Inactive', 1, primary, filled: false),
-        _tab(context, 'Disabled', 2, primary, filled: false, disabled: true),
-      ],
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0F3F6),
+        borderRadius: BorderRadius.circular(TokensStrip.rButton),
+        boxShadow: TokensStrip.cardShadow(),
+      ),
+      child: Row(
+        children: [
+          _tab(context, 'Active', 0, primary, filled: true),
+          _tab(context, 'Inactive', 1, primary, filled: false),
+          _tab(context, 'Disabled', 2, primary, filled: false, disabled: true),
+        ],
+      ),
     );
   }
 
@@ -519,10 +579,16 @@ class _TabsPanel extends StatelessWidget {
             onTap: disabled ? null : () => onChanged(i),
             borderRadius: BorderRadius.circular(TokensStrip.rButton),
             child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.symmetric(vertical: 10),
               decoration: BoxDecoration(
-                color: selected && filled ? primary : Colors.transparent,
+                gradient: selected && filled
+                    ? TokensStrip.primaryButtonGradient(primary)
+                    : null,
+                color: selected && filled ? null : Colors.transparent,
                 borderRadius: BorderRadius.circular(TokensStrip.rButton),
+                boxShadow: selected && filled
+                    ? TokensStrip.coloredDepthGlow(primary, strength: 0.45)
+                    : null,
               ),
               alignment: Alignment.center,
               child: Text(
@@ -552,11 +618,22 @@ class _ChipsPanel extends StatelessWidget {
       spacing: 8,
       runSpacing: 8,
       children: [
-        FxStripChip(label: 'Filter', onDismiss: () {}),
+        FxStripChip(label: 'Filter', selected: true, onDismiss: () {}),
         FxStripChip(label: 'Action', onDismiss: () {}),
-        Opacity(
-          opacity: 0.45,
-          child: FxStripChip(label: 'Disabled', onTap: null),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            color: const Color(0xFFE8EAED),
+            borderRadius: BorderRadius.circular(TokensStrip.rButton),
+          ),
+          child: const Text(
+            'Disabled',
+            style: TextStyle(
+              color: Color(0xFF9CA3AF),
+              fontSize: 12.5,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ),
       ],
     );
@@ -607,7 +684,7 @@ class _MiniCalendar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Icon(Icons.chevron_left, size: 18, color: primary),
-            Text('June 2022', style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 13)),
+            Text('June 2022', style: AppTypography.inter(fontWeight: FontWeight.w700, fontSize: 13)),
             Icon(Icons.chevron_right, size: 18, color: primary),
           ],
         ),
@@ -637,47 +714,74 @@ class _DropdownPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        InkWell(
-          onTap: onToggle,
-          borderRadius: BorderRadius.circular(TokensStrip.rInput),
+    final borderColor = primary.withValues(alpha: 0.55);
+
+    Widget menuItem(String label, {bool active = false}) {
+      if (active) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(8, 2, 8, 8),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             decoration: BoxDecoration(
-              border: Border.all(color: TokensStrip.borderDefault),
-              borderRadius: BorderRadius.circular(TokensStrip.rInput),
+              color: primary.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: Row(
-              children: [
-                const Expanded(child: Text('Select options', style: TextStyle(fontSize: 13))),
-                Icon(open ? Icons.expand_less : Icons.expand_more, size: 20, color: TokensStrip.textSecondary),
-              ],
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: TokensStrip.textPrimary,
+              ),
             ),
           ),
-        ),
-        if (open) ...[
-          const SizedBox(height: 4),
-          ...['Select options', 'Select options', 'Select options', 'Select options'].map((o) => ListTile(
-            dense: true,
-            title: Text(o, style: const TextStyle(fontSize: 13)),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-          )),
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            decoration: BoxDecoration(
-              color: primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(TokensStrip.rInput),
-            ),
-            child: const ListTile(
-              dense: true,
-              title: Text('Active menu', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-              contentPadding: EdgeInsets.symmetric(horizontal: 8),
+        );
+      }
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Text(label, style: const TextStyle(fontSize: 13)),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          InkWell(
+            onTap: onToggle,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text('Select options', style: TextStyle(fontSize: 13)),
+                  ),
+                  Icon(
+                    open ? Icons.expand_less : Icons.expand_more,
+                    size: 20,
+                    color: TokensStrip.textSecondary,
+                  ),
+                ],
+              ),
             ),
           ),
+          if (open) ...[
+            Divider(height: 1, color: borderColor.withValues(alpha: 0.45)),
+            menuItem('Select options'),
+            menuItem('Select options'),
+            menuItem('Select options'),
+            menuItem('Select options'),
+            menuItem('Active menu', active: true),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
@@ -690,88 +794,163 @@ class _ButtonAnatomy extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     return Column(
       children: [
-        _row('IDLE STATE', OutlinedButton(onPressed: () {}, child: const Text('Engage'))),
-        _row('ICON LEFT', OutlinedButton.icon(onPressed: () {}, icon: const Icon(Icons.star_outline, size: 16), label: const Text('ICON'))),
-        _row('HOVER STATE', FilledButton(onPressed: () {}, style: FilledButton.styleFrom(backgroundColor: TokensStrip.primaryHover), child: const Text('HOVER STATE'))),
-        _row('DISABLED', OutlinedButton(onPressed: null, child: const Text('Engage'))),
-        _row('LOADING', SizedBox(height: 44, child: Center(child: FxLoading(color: primary)))),
+        _anatomyRow(
+          'IDLE STATE',
+          'LABEL',
+          'Text or icon or both',
+          _specButton(
+            label: 'Engage',
+            fill: TokensStrip.specIdleFill,
+            border: TokensStrip.specIdleBorder,
+            shadow: TokensStrip.cardShadow(),
+          ),
+        ),
+        _anatomyRow(
+          'ICON LEFT',
+          'ICON',
+          'Icon left and text',
+          _specButton(
+            label: 'ICON',
+            icon: Icons.star_outline_rounded,
+            fill: TokensStrip.specIdleFill,
+            border: TokensStrip.specIdleBorder,
+            shadow: TokensStrip.cardShadow(),
+          ),
+        ),
+        _anatomyRow(
+          'HOVER STATE',
+          'HOVER STATE',
+          'State when hover and focus',
+          _specButton(
+            label: 'HOVER STATE',
+            filled: true,
+            primary: primary,
+            shadow: TokensStrip.coloredDepthGlow(primary, strength: 0.55),
+          ),
+        ),
+        _anatomyRow(
+          'DISABLED STATE',
+          '',
+          '',
+          _specButton(
+            label: 'Engage',
+            disabled: true,
+          ),
+        ),
+        _anatomyRow(
+          'LOADING STATE',
+          'LOADING SPINNER',
+          'In awaiting spinner',
+          SizedBox(
+            height: 44,
+            child: _specButton(
+              loading: true,
+              fill: TokensStrip.specIdleFill,
+              border: TokensStrip.specIdleBorder,
+              shadow: TokensStrip.cardShadow(),
+            ),
+          ),
+        ),
       ],
     );
   }
 
-  Widget _row(String label, Widget button) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          SizedBox(width: 88, child: Text(label, style: GoogleFonts.jetBrainsMono(fontSize: 9, color: TokensStrip.textSecondary))),
-          Expanded(child: button),
-        ],
+  Widget _specButton({
+    String? label,
+    IconData? icon,
+    bool filled = false,
+    bool disabled = false,
+    bool loading = false,
+    Color? primary,
+    Color? fill,
+    Color? border,
+    List<BoxShadow>? shadow,
+  }) {
+    return Container(
+      height: 44,
+      decoration: BoxDecoration(
+        gradient: filled && primary != null
+            ? TokensStrip.primaryButtonGradient(primary)
+            : null,
+        color: disabled
+            ? const Color(0xFFE8EAED)
+            : (filled ? null : fill ?? TokensStrip.specIdleFill),
+        borderRadius: BorderRadius.circular(TokensStrip.rButton),
+        border: disabled ? null : Border.all(color: border ?? TokensStrip.specIdleBorder),
+        boxShadow: disabled ? null : shadow,
       ),
+      alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: loading
+          ? FxLoading(color: primary ?? TokensStrip.primary, strokeWidth: 2)
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 16, color: filled ? Colors.white : TokensStrip.textPrimary),
+                  const SizedBox(width: 6),
+                ],
+                if (label != null)
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      color: disabled
+                          ? const Color(0xFF9CA3AF)
+                          : (filled ? Colors.white : TokensStrip.textPrimary),
+                    ),
+                  ),
+              ],
+            ),
     );
   }
-}
 
-class _ToastPreview extends StatelessWidget {
-  const _ToastPreview();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: TokensStrip.cardBg,
-        borderRadius: BorderRadius.circular(TokensStrip.rCard),
-        border: Border.all(color: TokensStrip.borderDefault),
-        boxShadow: TokensStrip.cardShadow(),
-      ),
+  Widget _anatomyRow(String left, String mid, String right, Widget button) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: const BoxDecoration(color: EagleTokens.goodSoft, shape: BoxShape.circle),
-            child: const Icon(Icons.check_rounded, color: EagleTokens.good, size: 16),
+          SizedBox(
+            width: 92,
+            child: Text(
+              left,
+              style: GoogleFonts.jetBrainsMono(
+                fontSize: 8.5,
+                color: TokensStrip.textSecondary,
+                height: 1.2,
+              ),
+            ),
           ),
-          const SizedBox(width: 10),
-          const Expanded(
+          Expanded(child: button),
+          SizedBox(
+            width: 92,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Toast message', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                Text('Additional text if granted', style: TextStyle(fontSize: 11, color: TokensStrip.textSecondary)),
+                if (mid.isNotEmpty)
+                  Text(
+                    mid,
+                    style: GoogleFonts.jetBrainsMono(
+                      fontSize: 8.5,
+                      fontWeight: FontWeight.w700,
+                      color: TokensStrip.textPrimary,
+                    ),
+                  ),
+                if (right.isNotEmpty)
+                  Text(
+                    right,
+                    style: GoogleFonts.jetBrainsMono(
+                      fontSize: 8,
+                      color: TokensStrip.textSecondary,
+                      height: 1.2,
+                    ),
+                  ),
               ],
             ),
           ),
-          Icon(Icons.close_rounded, size: 18, color: TokensStrip.textSecondary),
         ],
-      ),
-    );
-  }
-}
-
-class _TooltipPreview extends StatelessWidget {
-  const _TooltipPreview();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: TokensStrip.cardBg,
-          borderRadius: BorderRadius.circular(TokensStrip.rInput),
-          border: Border.all(color: TokensStrip.borderDefault),
-          boxShadow: TokensStrip.cardShadow(),
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.info_outline, size: 16, color: Colors.blue),
-            SizedBox(width: 6),
-            Text('Small info bubble', style: TextStyle(fontSize: 12)),
-          ],
-        ),
       ),
     );
   }
@@ -782,20 +961,15 @@ class _BadgeRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: const [
-            FxStripBadge(kind: FxStripBadgeKind.error),
-            FxStripBadge(kind: FxStripBadgeKind.success),
-            FxStripBadge(kind: FxStripBadgeKind.info),
-            FxStripBadge(kind: FxStripBadgeKind.warning),
-            FxStripBadge(kind: FxStripBadgeKind.notification),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Text('Status', style: GoogleFonts.outfit(fontSize: 10, color: TokensStrip.textSecondary)),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: const [
+        FxStripBadge(kind: FxStripBadgeKind.error, showLabel: true),
+        FxStripBadge(kind: FxStripBadgeKind.success),
+        FxStripBadge(kind: FxStripBadgeKind.info),
+        FxStripBadge(kind: FxStripBadgeKind.warning),
+        FxStripBadge(kind: FxStripBadgeKind.notification),
       ],
     );
   }
@@ -809,18 +983,40 @@ class _SpecCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('TITLE', style: GoogleFonts.outfit(fontSize: 11, fontWeight: FontWeight.w700, color: primary, letterSpacing: 0.6)),
-        const SizedBox(height: 6),
-        Text('Content block title', style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w700, color: ink)),
-        const SizedBox(height: 6),
-        Text(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-          style: GoogleFonts.outfit(fontSize: 12.5, color: TokensStrip.textSecondary, height: 1.45),
-        ),
-      ],
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        boxShadow: [
+          ...TokensStrip.cardShadow(),
+          ...TokensStrip.coloredDepthGlow(primary, strength: 0.32),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Title',
+            style: AppTypography.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: primary,
+              letterSpacing: 0.4,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Content block title',
+            style: AppTypography.inter(fontSize: 15, fontWeight: FontWeight.w700, color: ink),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+            style: AppTypography.inter(fontSize: 12.5, color: TokensStrip.textSecondary, height: 1.45),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -833,8 +1029,8 @@ class _TablePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    TextStyle head() => GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w700, color: primary);
-    TextStyle cell() => GoogleFonts.outfit(fontSize: 12, color: ink);
+    TextStyle head() => AppTypography.inter(fontSize: 12, fontWeight: FontWeight.w700, color: primary);
+    TextStyle cell() => AppTypography.inter(fontSize: 12, color: ink);
 
     Widget row(List<String> cells, {bool header = false}) {
       return Container(

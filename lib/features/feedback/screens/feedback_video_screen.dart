@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
@@ -10,6 +10,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class FeedbackVideoScreen extends ConsumerStatefulWidget {
   final int? alunoId;
@@ -107,7 +108,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(
-          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+          color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
         ),
         title: Text(
           widget.alunoNome != null
@@ -118,7 +119,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
           IconButton(
             icon: Icon(
               Icons.refresh,
-              color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+              color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
             ),
             onPressed: _load,
           ),
@@ -149,7 +150,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
               : _feedbacks.isEmpty
               ? const Center(child: Text('Nenhum feedback encontrado.'))
               : ListView.builder(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(TokensStrip.s4),
                 itemCount: _feedbacks.length,
                 itemBuilder: (_, i) {
                   final f = _feedbacks[i];
@@ -172,7 +173,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                             'Data: ${fxDateShort(f.criadoEm)}',
                             style: const TextStyle(
                               fontSize: 12,
-                              color: EagleTokens.inkMute,
+                              color: TokensStrip.textSecondary,
                             ),
                           ),
                         ],

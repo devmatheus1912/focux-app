@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+﻿import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../providers/treinos_provider.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 const _niveis = ['INICIANTE', 'INTERMEDIARIO', 'AVANCADO'];
 const _niveisLabel = ['Iniciante', 'Intermediário', 'Avançado'];
@@ -156,8 +157,8 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
             ? 'Nível em aberto'
             : _niveisLabel[_niveis.indexOf(_nivel!)];
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title:
             widget.alunoId == null
@@ -227,7 +228,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
                                       ? 'Informe o nome'
                                       : null,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: TokensStrip.s4),
                         _LevelSelector(
                           selected: _nivel,
                           isDark: isDark,
@@ -249,7 +250,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen>
                           maxLines: 2,
                         ),
                         if (_error != null) ...[
-                          const SizedBox(height: 16),
+                          const SizedBox(height: TokensStrip.s4),
                           _ErrorNotice(message: _error!),
                         ],
                         const SizedBox(height: 26),
@@ -352,7 +353,7 @@ class _CreationHero extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           Text(
             title,
             maxLines: 1,
@@ -374,7 +375,7 @@ class _CreationHero extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           Row(
             children: [
               Expanded(child: _HeroPill(label: goal, icon: Icons.flag_rounded)),
@@ -440,8 +441,8 @@ class _SectionKicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Row(
       children: [
@@ -513,7 +514,7 @@ class _PresetRail extends StatelessWidget {
                 children: [
                   Icon(
                     preset.icon,
-                    color: active ? primary : EagleTokens.inkMute,
+                    color: active ? primary : TokensStrip.textSecondary,
                     size: 20,
                   ),
                   const Spacer(),
@@ -522,7 +523,7 @@ class _PresetRail extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                      color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                       fontSize: 12.5,
                       fontWeight: FontWeight.w900,
                     ),
@@ -536,7 +537,7 @@ class _PresetRail extends StatelessWidget {
                       color:
                           isDark
                               ? EagleTokens.darkInkMute
-                              : EagleTokens.inkMute,
+                              : TokensStrip.textSecondary,
                       fontSize: 10.5,
                       fontWeight: FontWeight.w700,
                     ),
@@ -592,7 +593,7 @@ class _LevelSelector extends StatelessWidget {
                             ? _niveisCor[i]
                             : (isDark
                                 ? EagleTokens.darkInkMute
-                                : EagleTokens.inkMute),
+                                : TokensStrip.textSecondary),
                     size: 16,
                   ),
                   const SizedBox(width: 5),
@@ -607,7 +608,7 @@ class _LevelSelector extends StatelessWidget {
                                 ? _niveisCor[i]
                                 : (isDark
                                     ? EagleTokens.darkInkMute
-                                    : EagleTokens.inkMute),
+                                    : TokensStrip.textSecondary),
                         fontSize: 11,
                         fontWeight: sel ? FontWeight.w900 : FontWeight.w700,
                       ),
@@ -682,7 +683,7 @@ class _FxField extends StatelessWidget {
       maxLines: maxLines,
       validator: validator,
       style: TextStyle(
-        color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+        color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
         fontSize: 15,
         fontWeight: FontWeight.w700,
       ),
@@ -692,12 +693,12 @@ class _FxField extends StatelessWidget {
         prefixIcon: Icon(
           icon,
           size: 20,
-          color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+          color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
         ),
         filled: true,
-        fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+        fillColor: isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
         labelStyle: TextStyle(
-          color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+          color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
           fontWeight: FontWeight.w600,
         ),
         contentPadding: const EdgeInsets.symmetric(
@@ -707,13 +708,13 @@ class _FxField extends StatelessWidget {
         border: FxInputDeco.outlineBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(
-            color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+            color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
           ),
         ),
         enabledBorder: FxInputDeco.outlineBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(
-            color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+            color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
           ),
         ),
         focusedBorder: FxInputDeco.outlineBorder(

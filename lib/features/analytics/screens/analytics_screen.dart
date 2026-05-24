@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../data/analytics_repository.dart';
 import '../providers/analytics_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class AnalyticsScreen extends ConsumerWidget {
   const AnalyticsScreen({super.key});
@@ -21,9 +22,8 @@ class AnalyticsScreen extends ConsumerWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final async = ref.watch(analyticsDashboardProvider);
 
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Analytics',
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
@@ -44,7 +44,7 @@ class AnalyticsScreen extends ConsumerWidget {
                   Text(
                     'Erro ao carregar analytics',
                     style: TextStyle(
-                      color: dark ? EagleTokens.darkInk : EagleTokens.ink,
+                      color: dark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -53,7 +53,7 @@ class AnalyticsScreen extends ConsumerWidget {
                     friendlyError(e),
                     style: TextStyle(
                       color:
-                          dark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                          dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
                       fontSize: 12,
                     ),
                     textAlign: TextAlign.center,
@@ -90,8 +90,8 @@ class _AnalyticsBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final brand = Theme.of(context).colorScheme.primary;
     final mrr = data.totalAlunos * 79.0;
     final churn = data.taxaInadimplencia;
@@ -106,7 +106,7 @@ class _AnalyticsBody extends StatelessWidget {
           bottom: false,
           sliver: SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 8),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 10, 20, 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -169,7 +169,7 @@ class _AnalyticsBody extends StatelessWidget {
         // ── KPIs principais ─────────────────────────────────────────────────
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 8, 16, 16),
             child: GridView.count(
               crossAxisCount: 2,
               crossAxisSpacing: 10,
@@ -206,7 +206,7 @@ class _AnalyticsBody extends StatelessWidget {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 14),
               child: _FunilCard(funil: data.funil!, dark: dark),
             ),
           ),
@@ -219,7 +219,7 @@ class _AnalyticsBody extends StatelessWidget {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 14),
               child: _WauChart(wau: data.evolucaoWau, dark: dark),
             ),
           ),
@@ -232,7 +232,7 @@ class _AnalyticsBody extends StatelessWidget {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 14),
               child: _CohortTable(cohort: data.cohort, dark: dark),
             ),
           ),
@@ -244,7 +244,7 @@ class _AnalyticsBody extends StatelessWidget {
         ),
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 110),
+            padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 110),
             child: _InadimplenciaCard(data: data, dark: dark),
           ),
         ),
@@ -268,9 +268,9 @@ class _KpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = dark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final line = dark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final primary = Theme.of(context).colorScheme.primary;
     final delta = switch (label) {
       'CHURN' => -2.4,
@@ -303,7 +303,7 @@ class _KpiCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             value,
-            style: GoogleFonts.outfit(
+            style: AppTypography.inter(
               color: ink,
               fontSize: 26,
               fontWeight: FontWeight.w700,
@@ -346,11 +346,11 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 10),
+      padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 4, 20, 10),
       child: Text(
         title,
         style: TextStyle(
-          color: dark ? EagleTokens.darkInk : EagleTokens.ink,
+          color: dark ? EagleTokens.darkInk : TokensStrip.textPrimary,
           fontSize: 18,
           fontWeight: FontWeight.w600,
           letterSpacing: -0.4,
@@ -370,9 +370,9 @@ class _FunilCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final line = dark ? EagleTokens.darkLine : EagleTokens.line;
-    final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = dark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = Theme.of(context).colorScheme.primary;
 
     final steps = [
@@ -395,7 +395,7 @@ class _FunilCard extends StatelessWidget {
     ];
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 18, 16, 18),
       decoration: fxListCardDecoration(
         context,
         accent: primary,
@@ -421,7 +421,7 @@ class _FunilCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           ...steps.map(
             (s) => _FunilBar(step: s, ink: ink, mute: mute, dark: dark),
           ),
@@ -527,15 +527,15 @@ class _WauChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final line = dark ? EagleTokens.darkLine : EagleTokens.line;
-    final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = dark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = Theme.of(context).colorScheme.primary;
     final primaryDeep = BrandPalette.deep(primary);
     final maxVal = wau.map((e) => e.usuarios).reduce(max).toDouble();
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 18, 16, 18),
       decoration: fxListCardDecoration(
         context,
         accent: primary,
@@ -564,7 +564,7 @@ class _WauChart extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           SizedBox(
             height: 110,
             child: Row(
@@ -655,13 +655,13 @@ class _CohortTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final line = dark ? EagleTokens.darkLine : EagleTokens.line;
-    final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = dark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = Theme.of(context).colorScheme.primary;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 18, 16, 12),
+      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 18, 16, 12),
       decoration: fxListCardDecoration(
         context,
         accent: primary,
@@ -799,9 +799,9 @@ class _InadimplenciaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final line = dark ? EagleTokens.darkLine : EagleTokens.line;
-    final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = dark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final churn = data.taxaInadimplencia;
     final isGood = churn < 5.0;
     final primary = Theme.of(context).colorScheme.primary;
@@ -829,7 +829,7 @@ class _InadimplenciaCard extends StatelessWidget {
               _PillTag(label: isGood ? 'Saudável' : 'Atenção', dark: dark),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           Row(
             children: [
               Expanded(
@@ -889,7 +889,7 @@ class _InadimplenciaCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: (churn / 10).clamp(0.0, 1.0),
               minHeight: 6,
-              backgroundColor: dark ? EagleTokens.darkLine : EagleTokens.line,
+              backgroundColor: dark ? EagleTokens.darkLine : TokensStrip.borderDefault,
               color: isGood ? EagleTokens.good : EagleTokens.bad,
             ),
           ),

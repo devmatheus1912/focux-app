@@ -59,7 +59,7 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     final perfil = ref.watch(perfilProvider).valueOrNull;
     final currentPlan = subscriptionPlanFromApi(perfil?.plano);
@@ -69,21 +69,21 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
         trialEndsAt != null && trialEndsAt.isAfter(DateTime.now());
     final primary = Theme.of(context).colorScheme.primary;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Planos',
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
       ),
       body: FxPremiumEntrance(
         child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 4, 20, 40),
+        padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 4, 20, 40),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Escolha o plano ideal',
-              style: GoogleFonts.outfit(
+              style: AppTypography.inter(
                 fontSize: 24,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.4,
@@ -97,11 +97,11 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
 
             // ── Trial ativo banner ───────────────────────────────────────
             if (trialAtivo) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: TokensStrip.s4),
               _TrialActiveBanner(endsAt: trialEndsAt),
             ],
 
-            const SizedBox(height: 24),
+            const SizedBox(height: TokensStrip.s5),
 
             FxStaggerItem(
               index: 0,
@@ -131,7 +131,7 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
             ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: TokensStrip.s4),
 
             FxStaggerItem(
               index: 1,
@@ -179,7 +179,7 @@ class _PlanosScreenState extends ConsumerState<PlanosScreen> {
             ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: TokensStrip.s4),
 
             FxStaggerItem(
               index: 2,
@@ -280,9 +280,9 @@ class _PlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     final card = Container(
       padding: const EdgeInsets.all(20),
@@ -332,7 +332,7 @@ class _PlanCard extends StatelessWidget {
           ),
 
           // CTA
-          if (cta != null) ...[const SizedBox(height: 16), cta!],
+          if (cta != null) ...[const SizedBox(height: TokensStrip.s4), cta!],
           if (ctaLabel != null && cta == null) ...[
             const SizedBox(height: 12),
             Center(
@@ -375,8 +375,8 @@ class _EnterpriseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Container(
       decoration: BoxDecoration(
@@ -527,7 +527,7 @@ class _EnterpriseCard extends StatelessWidget {
                     color:
                         (isDark
                             ? EagleTokens.darkCardHi
-                            : EagleTokens.lineSoft),
+                            : TokensStrip.borderDefault),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
@@ -554,7 +554,7 @@ class _EnterpriseCard extends StatelessWidget {
 
             // Plano atual → gerenciar
             if (isCurrent) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: TokensStrip.s4),
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
@@ -606,7 +606,7 @@ class _FeatureRow extends StatelessWidget {
                 ? (isDark
                     ? EagleTokens.goodSoft.withValues(alpha: 0.15)
                     : EagleTokens.goodSoft)
-                : (isDark ? EagleTokens.darkCardHi : EagleTokens.lineSoft),
+                : (isDark ? EagleTokens.darkCardHi : TokensStrip.borderDefault),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(

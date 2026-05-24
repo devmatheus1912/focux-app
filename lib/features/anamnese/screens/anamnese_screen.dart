@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
@@ -8,6 +8,8 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/anamnese_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 
 class AnamneseScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -212,26 +214,26 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
     }
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
           'Anamnese',
           style: TextStyle(
-            color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+            color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
             fontWeight: FontWeight.w700,
           ),
         ),
         iconTheme: IconThemeData(
-          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+          color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
         ),
         bottom: TabBar(
           indicatorColor: primary,
           labelColor: primary,
           unselectedLabelColor:
-              isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+              isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
           indicatorWeight: 2.5,
           controller: _tabController,
           tabs: const [
@@ -267,7 +269,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
   }
 
   Widget _tabBasico() => SingleChildScrollView(
-    padding: const EdgeInsets.all(16),
+    padding: const EdgeInsets.all(TokensStrip.s4),
     child: Column(
       children: [
         _field(_objetivoCtrl, 'Objetivo', maxLines: 2),
@@ -298,7 +300,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
   );
 
   Widget _tabSaude() => SingleChildScrollView(
-    padding: const EdgeInsets.all(16),
+    padding: const EdgeInsets.all(TokensStrip.s4),
     child: Column(
       children: [
         _field(_historicoCtrl, 'Histórico médico', maxLines: 4),
@@ -310,12 +312,12 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
   );
 
   Widget _tabTreinoNutricao() => SingleChildScrollView(
-    padding: const EdgeInsets.all(16),
+    padding: const EdgeInsets.all(TokensStrip.s4),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _field(_objDetalhadoCtrl, 'Objetivo detalhado', maxLines: 3),
-        const SizedBox(height: 16),
+        const SizedBox(height: TokensStrip.s4),
         Row(
           children: [
             Expanded(
@@ -330,7 +332,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
           data: SliderTheme.of(context).copyWith(
             trackHeight: 5,
             activeTrackColor: Theme.of(context).colorScheme.primary,
-            inactiveTrackColor: EagleTokens.lineSoft,
+            inactiveTrackColor: TokensStrip.borderDefault,
             thumbColor: Theme.of(context).colorScheme.surface,
             overlayColor: Theme.of(
               context,

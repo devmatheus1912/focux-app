@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -6,6 +6,7 @@ import '../data/evolucao_repository.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class EngajamentoScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -83,8 +84,8 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Engajamento — ${widget.alunoNome}',
         onBack: () => safePopOrGo(context, '/evolucao'),
@@ -119,7 +120,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
               : _eventos.isEmpty
               ? const Center(child: Text('Nenhum evento registrado'))
               : ListView.separated(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(TokensStrip.s4),
                 itemCount: _eventos.length,
                 separatorBuilder:
                     (_, __) => const Divider(height: 1, indent: 56),
@@ -141,7 +142,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                       _formatarDataHora(e.dataHora),
                       style: const TextStyle(
                         fontSize: 12,
-                        color: EagleTokens.inkMute,
+                        color: TokensStrip.textSecondary,
                       ),
                     ),
                   );

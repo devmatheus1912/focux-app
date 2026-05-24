@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -193,7 +193,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: TokensStrip.s4),
                             DropdownButtonFormField<String>(
                               value: tipoSelecionado,
                               decoration: InputDecoration(
@@ -345,7 +345,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                 ),
                               ],
                             ],
-                            const SizedBox(height: 24),
+                            const SizedBox(height: TokensStrip.s5),
                             FxLiquidPrimaryButton(
                               label: salvando ? 'Publicando...' : 'Publicar',
                               icon: Icons.send,
@@ -497,7 +497,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   color: primary,
                   onRefresh: _load,
                   child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 110),
+                    padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 110),
                     itemCount: _posts.length + 1,
                     itemBuilder: (_, i) {
                       if (i == 0) {
@@ -513,7 +513,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                     color:
                                         isDark
                                             ? EagleTokens.darkInk
-                                            : EagleTokens.ink,
+                                            : TokensStrip.textPrimary,
                                     fontSize: 28,
                                     fontWeight: FontWeight.w900,
                                     letterSpacing: -0.5,
@@ -565,7 +565,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                           accent: p.fixado ? primary : null,
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+                          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 14, 16, 12),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -767,7 +767,7 @@ class _EmptyFeed extends StatelessWidget {
           Text(
             'Nenhuma publicação',
             style: TextStyle(
-              color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+              color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
               fontSize: 17,
               fontWeight: FontWeight.w600,
             ),
@@ -776,7 +776,7 @@ class _EmptyFeed extends StatelessWidget {
           Text(
             'Crie a primeira publicação!',
             style: TextStyle(
-              color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+              color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
               fontSize: 14,
             ),
           ),
@@ -828,7 +828,7 @@ class _PostAuthorHeader extends StatelessWidget {
             : 'Personal';
     final avatarUrl = post.autorAvatarUrl?.trim();
     final hasAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Row(
       children: [

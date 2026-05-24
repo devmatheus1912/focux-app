@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'brand_palette.dart';
 import 'design_tokens.dart';
 import 'fx_page_transitions_builder.dart';
@@ -16,61 +15,35 @@ class AppTheme {
         : EagleTokens.ink;
   }
 
-  // ── Premium Typography: Outfit ──────────────────────────────────────
-  // Replaces Inter (banned) and Space Grotesk with a single cohesive
-  // geometric sans-serif that has strong character without shouting.
-  static TextStyle _outfit({
+  // ── Premium Typography: Inter ───────────────────────────────────────
+  // Primary UI sans-serif across TOKENS STRIP (see AppTypography).
+  static TextStyle _inter({
     double? fontSize,
     FontWeight? fontWeight,
     Color? color,
     double? letterSpacing,
     double? height,
-  }) {
-    if (!GoogleFonts.config.allowRuntimeFetching) {
-      return TextStyle(
-        fontFamily: 'Outfit',
+  }) =>
+      AppTypography.inter(
         fontSize: fontSize,
         fontWeight: fontWeight,
         color: color,
         letterSpacing: letterSpacing,
         height: height,
       );
-    }
 
-    return GoogleFonts.outfit(
-      fontSize: fontSize,
-      fontWeight: fontWeight,
-      color: color,
-      letterSpacing: letterSpacing,
-      height: height,
-    );
-  }
-
-  // ── Technical Mono: JetBrains Mono ──────────────────────────────────
-  // For metric numbers, technical labels, and uppercase micro-type.
   static TextStyle _mono({
     double? fontSize,
     FontWeight? fontWeight,
     Color? color,
     double? letterSpacing,
-  }) {
-    if (!GoogleFonts.config.allowRuntimeFetching) {
-      return TextStyle(
-        fontFamily: 'JetBrains Mono',
+  }) =>
+      AppTypography.mono(
         fontSize: fontSize,
         fontWeight: fontWeight,
         color: color,
         letterSpacing: letterSpacing,
       );
-    }
-
-    return GoogleFonts.jetBrainsMono(
-      fontSize: fontSize,
-      fontWeight: fontWeight,
-      color: color,
-      letterSpacing: letterSpacing,
-    );
-  }
 
   static ThemeData _build(Color primary, bool dark) {
     final primarySoft = BrandPalette.soft(primary, dark: dark);
@@ -124,80 +97,82 @@ class AppTheme {
       surfaceTint: primary,
     );
 
-    // ── Text Theme (Outfit throughout, tight tracking on display) ─────
+    // ── Text Theme (Inter throughout, tight tracking on display) ──────
     final textTheme = TextTheme(
-      displayLarge: _outfit(
+      displayLarge: _inter(
         fontSize: 42,
         fontWeight: FontWeight.w700,
         color: onSurface,
         letterSpacing: -0.5,
       ),
-      displayMedium: _outfit(
-        fontSize: 32,
-        fontWeight: FontWeight.w700,
+      displayMedium: _inter(
+        fontSize: TokensStrip.fontH1,
+        fontWeight: TokensStrip.weightH1,
         color: onSurface,
-        letterSpacing: -0.3,
+        letterSpacing: TokensStrip.trackingH1,
       ),
-      displaySmall: _outfit(
+      displaySmall: _inter(
         fontSize: 25,
         fontWeight: FontWeight.w700,
         color: onSurface,
         letterSpacing: -0.2,
       ),
-      headlineLarge: _outfit(
-        fontSize: 22,
-        fontWeight: FontWeight.w600,
+      headlineLarge: _inter(
+        fontSize: TokensStrip.fontH2,
+        fontWeight: TokensStrip.weightH2,
         color: onSurface,
-        letterSpacing: -0.2,
+        letterSpacing: TokensStrip.trackingH2,
       ),
-      headlineMedium: _outfit(
+      headlineMedium: _inter(
         fontSize: 18,
         fontWeight: FontWeight.w600,
         color: onSurface,
         letterSpacing: -0.1,
       ),
-      headlineSmall: _outfit(
+      headlineSmall: _inter(
         fontSize: 16,
         fontWeight: FontWeight.w600,
         color: onSurface,
         letterSpacing: 0,
       ),
-      titleLarge: _outfit(
+      titleLarge: _inter(
         fontSize: 15,
         fontWeight: FontWeight.w600,
         color: onSurface,
         letterSpacing: 0,
       ),
-      titleMedium: _outfit(
+      titleMedium: _inter(
         fontSize: 13.5,
         fontWeight: FontWeight.w600,
         color: onSurface,
         letterSpacing: 0,
       ),
-      titleSmall: _outfit(
+      titleSmall: _inter(
         fontSize: 12,
         fontWeight: FontWeight.w600,
         color: onSurface,
         letterSpacing: 0.1,
       ),
-      bodyLarge: _outfit(
-        fontSize: 15,
-        fontWeight: FontWeight.w400,
+      bodyLarge: _inter(
+        fontSize: TokensStrip.fontBody,
+        fontWeight: TokensStrip.weightBody,
         color: onSurface,
         letterSpacing: 0,
+        height: TokensStrip.leadingBody,
       ),
-      bodyMedium: _outfit(
-        fontSize: 13,
-        fontWeight: FontWeight.w400,
+      bodyMedium: _inter(
+        fontSize: TokensStrip.fontBodySm,
+        fontWeight: TokensStrip.weightBody,
         color: onSurface,
         letterSpacing: 0,
+        height: TokensStrip.leadingBody,
       ),
-      bodySmall: _outfit(
+      bodySmall: _inter(
         fontSize: 11.5,
         fontWeight: FontWeight.w400,
         color: onSurfMute,
       ),
-      labelLarge: _outfit(
+      labelLarge: _inter(
         fontSize: 12.5,
         fontWeight: FontWeight.w600,
         color: onSurface,
@@ -219,7 +194,7 @@ class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
-      fontFamily: _outfit().fontFamily,
+      fontFamily: _inter().fontFamily,
       visualDensity: VisualDensity.compact,
       colorScheme: cs,
       scaffoldBackgroundColor: scaffold,
@@ -233,7 +208,7 @@ class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0.5,
         centerTitle: false,
-        titleTextStyle: _outfit(
+        titleTextStyle: _inter(
           fontSize: 16.5,
           fontWeight: FontWeight.w600,
           color: onSurface,
@@ -275,8 +250,8 @@ class AppTheme {
           horizontal: TokensStrip.s4,
           vertical: TokensStrip.s3,
         ),
-        hintStyle: _outfit(color: onSurfMute, fontSize: 14),
-        labelStyle: _outfit(color: onSurfMute, fontSize: 14),
+        hintStyle: _inter(color: onSurfMute, fontSize: 14),
+        labelStyle: _inter(color: onSurfMute, fontSize: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(TokensStrip.rInput),
           borderSide: BorderSide(
@@ -307,14 +282,16 @@ class AppTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: primary,
-          foregroundColor: onPrimary,
+          // Brand fills are saturated teals — always white label (onPrimary
+          // would pick dark ink on bright primaries like #13C2C2).
+          foregroundColor: Colors.white,
           disabledBackgroundColor: TokensStrip.disabled.withValues(alpha: 0.35),
           disabledForegroundColor: TokensStrip.disabled,
           minimumSize: const Size.fromHeight(48),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(TokensStrip.rButton),
           ),
-          textStyle: _outfit(fontSize: 15, fontWeight: FontWeight.w700),
+          textStyle: _inter(fontSize: 15, fontWeight: FontWeight.w700),
           elevation: 0,
           shadowColor: primary.withValues(alpha: 0.35),
         ),
@@ -334,14 +311,14 @@ class AppTheme {
                 : primary,
             width: 1.2,
           ),
-          textStyle: _outfit(fontSize: 15, fontWeight: FontWeight.w600),
+          textStyle: _inter(fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
 
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: primary,
-          textStyle: _outfit(fontSize: 14, fontWeight: FontWeight.w600),
+          textStyle: _inter(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ),
 
@@ -349,7 +326,7 @@ class AppTheme {
       chipTheme: ChipThemeData(
         backgroundColor: dark ? EagleTokens.darkCardHi : EagleTokens.lineSoft,
         selectedColor: dark ? EagleTokens.darkCardHi : primarySoft,
-        labelStyle: _outfit(
+        labelStyle: _inter(
           fontSize: 12,
           color: onSurface,
           fontWeight: FontWeight.w500,
@@ -379,7 +356,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(EagleTokens.radiusXl),
         ),
         backgroundColor: dark ? EagleTokens.darkCard : surface,
-        titleTextStyle: _outfit(
+        titleTextStyle: _inter(
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: onSurface,
@@ -408,13 +385,13 @@ class AppTheme {
         }),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return _outfit(
+            return _inter(
               fontSize: 10.5,
               fontWeight: FontWeight.w700,
               color: primary,
             );
           }
-          return _outfit(
+          return _inter(
             fontSize: 10.5,
             fontWeight: FontWeight.w500,
             color: onSurfMute,
@@ -439,7 +416,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(EagleTokens.radiusSm),
         ),
         backgroundColor: dark ? EagleTokens.darkCardHi : EagleTokens.ink,
-        contentTextStyle: _outfit(color: Colors.white, fontSize: 14),
+        contentTextStyle: _inter(color: Colors.white, fontSize: 14),
       ),
 
       switchTheme: SwitchThemeData(
@@ -483,8 +460,8 @@ class AppTheme {
         labelColor: primary,
         unselectedLabelColor: onSurfMute,
         indicatorColor: primary,
-        labelStyle: _outfit(fontSize: 13, fontWeight: FontWeight.w600),
-        unselectedLabelStyle: _outfit(fontSize: 13, fontWeight: FontWeight.w500),
+        labelStyle: _inter(fontSize: 13, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: _inter(fontSize: 13, fontWeight: FontWeight.w500),
       ),
 
       // ── Badge ───────────────────────────────────────────────────────
@@ -499,7 +476,7 @@ class AppTheme {
           color: dark ? EagleTokens.darkCardHi : EagleTokens.ink,
           borderRadius: BorderRadius.circular(EagleTokens.radiusXs),
         ),
-        textStyle: _outfit(color: Colors.white, fontSize: 12),
+        textStyle: _inter(color: Colors.white, fontSize: 12),
       ),
     );
   }

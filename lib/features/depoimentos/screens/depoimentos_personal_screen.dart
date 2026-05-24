@@ -1,10 +1,12 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/depoimento_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 
 class DepoimentosPersonalScreen extends ConsumerStatefulWidget {
   const DepoimentosPersonalScreen({super.key});
@@ -55,9 +57,8 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -75,12 +76,12 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
                   'Nenhum depoimento ainda.',
                   style: TextStyle(
                     color:
-                        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
                   ),
                 ),
               )
               : ListView.separated(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(TokensStrip.s4),
                 itemCount: _items!.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (_, i) {
@@ -88,10 +89,10 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
                   return Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: isDark ? EagleTokens.darkCard : EagleTokens.card,
+                      color: isDark ? EagleTokens.darkCard : TokensStrip.cardBg,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                        color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
                       ),
                     ),
                     child: Column(
@@ -131,7 +132,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
                                       color:
                                           isDark
                                               ? EagleTokens.darkInk
-                                              : EagleTokens.ink,
+                                              : TokensStrip.textPrimary,
                                     ),
                                   ),
                                   Row(
@@ -186,7 +187,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
                             color:
                                 isDark
                                     ? EagleTokens.darkInkMute
-                                    : EagleTokens.inkMute,
+                                    : TokensStrip.textSecondary,
                             fontSize: 13,
                             height: 1.5,
                           ),

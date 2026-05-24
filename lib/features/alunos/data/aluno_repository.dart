@@ -25,6 +25,9 @@ class Aluno {
   final int? aderenciaPercent;
   final int? diasSemTreino;
   final String? riscoNivel;
+  final String? proximoContato;
+  final String? snoozedUntil;
+  final String? ultimoContato;
 
   Aluno({
     required this.id,
@@ -49,7 +52,28 @@ class Aluno {
     this.aderenciaPercent,
     this.diasSemTreino,
     this.riscoNivel,
+    this.proximoContato,
+    this.snoozedUntil,
+    this.ultimoContato,
   });
+
+  DateTime? get followUpDate {
+    final raw = proximoContato?.trim();
+    if (raw == null || raw.isEmpty) return null;
+    final parsed = DateTime.tryParse(raw);
+    if (parsed == null) return null;
+    return DateTime(parsed.year, parsed.month, parsed.day);
+  }
+
+  DateTime? get snoozedUntilDate => DateTime.tryParse(snoozedUntil ?? '');
+
+  DateTime? get ultimoContatoDate {
+    final raw = ultimoContato?.trim();
+    if (raw == null || raw.isEmpty) return null;
+    final parsed = DateTime.tryParse(raw);
+    if (parsed == null) return null;
+    return DateTime(parsed.year, parsed.month, parsed.day);
+  }
 
   int? get idade {
     if (dataNascimento == null) return null;
@@ -86,6 +110,9 @@ class Aluno {
     aderenciaPercent: (json['aderenciaPercent'] as num?)?.toInt(),
     diasSemTreino: (json['diasSemTreino'] as num?)?.toInt(),
     riscoNivel: json['riscoNivel'] as String?,
+    proximoContato: json['proximoContato'] as String?,
+    snoozedUntil: json['snoozedUntil'] as String?,
+    ultimoContato: json['ultimoContato'] as String?,
     equipamentosDisponiveis:
         parseEnumCsv(
           Equipamento.values,
@@ -93,6 +120,30 @@ class Aluno {
               json['equipamentosDisponiveisCsv'] ??
               json['equipamentos_disponiveis'],
         ).toSet(),
+  );
+}
+
+class AlunosStats {
+  final int total;
+  final int totalAtivos;
+  final int totalInadimplentes;
+  final int totalRiscoAlto;
+  final int totalConvites;
+
+  const AlunosStats({
+    required this.total,
+    required this.totalAtivos,
+    required this.totalInadimplentes,
+    required this.totalRiscoAlto,
+    required this.totalConvites,
+  });
+
+  factory AlunosStats.fromJson(Map<String, dynamic> json) => AlunosStats(
+    total: (json['total'] as num?)?.toInt() ?? 0,
+    totalAtivos: (json['totalAtivos'] as num?)?.toInt() ?? 0,
+    totalInadimplentes: (json['totalInadimplentes'] as num?)?.toInt() ?? 0,
+    totalRiscoAlto: (json['totalRiscoAlto'] as num?)?.toInt() ?? 0,
+    totalConvites: (json['totalConvites'] as num?)?.toInt() ?? 0,
   );
 }
 
@@ -260,6 +311,42 @@ class AlunoRepository {
     final response = await _dio.get('/api/alunos');
     final list = response.data as List<dynamic>;
     return list.map((e) => Aluno.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<AlunosStats> buscarStats() async {
+    final response = await _dio.get('/api/alunos/stats');
+    return AlunosStats.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<Aluno> atualizarFollowUp(
+    int id, {
+    String? proximoContato,
+    String? snoozedUntil,
+    bool clearSnooze = false,
+    bool clearFollowUp = false,
+  }) async {
+    final response = await _dio.patch(
+      '/api/alunos/$id/follow-up',
+      data: {
+        if (proximoContato != null) 'proximoContato': proximoContato,
+        if (snoozedUntil != null) 'snoozedUntil': snoozedUntil,
+        if (clearSnooze) 'clearSnooze': true,
+        if (clearFollowUp) 'clearFollowUp': true,
+      },
+    );
+    return Aluno.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<Aluno> marcarContatoRealizado(int id) async {
+    final response = await _dio.post('/api/alunos/$id/contato-realizado');
+    return Aluno.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<void> atualizarStatusLote(List<int> ids, String status) async {
+    await _dio.patch(
+      '/api/alunos/lote/status',
+      data: {'alunoIds': ids, 'status': status},
+    );
   }
 
   Future<Aluno> buscar(int id) async {

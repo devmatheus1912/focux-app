@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,7 +54,7 @@ class AlunoDashboardScreen extends ConsumerWidget {
         title: 'Meu Treino',
         leading: const SizedBox(width: 8),
         actions: [
-          NotificacaoBadgeButton(isDark: isDark),
+          NotificacaoBadgeButton(),
           alunoAsync.when(
             data:
                 (aluno) => _AlunoAppBarProfileMenu(
@@ -120,12 +120,12 @@ class AlunoDashboardScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             const ProgressoSemanalWidget(),
-            const SizedBox(height: 16),
+            const SizedBox(height: TokensStrip.s4),
             _PerformanceEvolutionCard(
               historicoAsync: historicoAsync,
               isDark: isDark,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: TokensStrip.s4),
             alunoAsync.when(
               data:
                   (aluno) => _StudentJourneyCard(
@@ -139,7 +139,7 @@ class AlunoDashboardScreen extends ConsumerWidget {
               loading: () => const SizedBox.shrink(),
               error: (_, __) => const SizedBox.shrink(),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: TokensStrip.s5),
             _StudentToolsSection(isDark: isDark),
             const SizedBox(height: 20),
             alunoAsync.when(
@@ -262,8 +262,8 @@ class _AlunoHeroCard extends StatelessWidget {
             ? brand.slogan!
             : 'Seu treino organizado para hoje.';
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -369,7 +369,7 @@ class _HeroPill extends StatelessWidget {
           Text(
             value,
             style: TextStyle(
-              color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+              color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
               fontSize: 11,
               fontWeight: FontWeight.w800,
             ),
@@ -397,7 +397,7 @@ class _TodayFocusCard extends StatelessWidget {
     final softText = onPrimary.withValues(alpha: 0.72);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -712,8 +712,8 @@ class _PerformanceEvolutionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -959,8 +959,8 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = widget.isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = widget.isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = widget.isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     final medidas = widget.medidasAsync.valueOrNull ?? const <MedidaCorporal>[];
     final historico =
@@ -1047,7 +1047,7 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(14),
@@ -1156,9 +1156,9 @@ void _showAlunoPlanSheet(
   required AlunoAutonomyPlan plan,
   required void Function(AlunoAutonomyTask task) onOpenTask,
 }) {
-  final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
-  final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-  final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+  final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+  final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+  final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
   showModalBottomSheet<void>(
     context: context,
@@ -1291,8 +1291,8 @@ class _NextBestTaskPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final icon = Container(
       width: 42,
       height: 42,
@@ -1423,8 +1423,8 @@ class _AutonomyTaskTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     final icon = Container(
       width: 38,
@@ -1611,8 +1611,8 @@ class _StudentToolsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final tools = [
       _StudentToolAction(
         icon: Icons.fitness_center,
@@ -1666,7 +1666,7 @@ class _StudentToolsSection extends StatelessWidget {
     ];
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       decoration: fxListCardDecoration(context, accent: primary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1775,8 +1775,8 @@ class _StudentToolTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final bg =
         action.emphasis
             ? primary.withValues(alpha: isDark ? 0.18 : 0.075)
@@ -1788,7 +1788,7 @@ class _StudentToolTile extends StatelessWidget {
             ? primary.withValues(alpha: 0.16)
             : isDark
             ? EagleTokens.darkLine
-            : EagleTokens.lineSoft;
+            : TokensStrip.borderDefault;
 
     return InkWell(
       onTap: () => context.push(action.route),
@@ -1852,7 +1852,7 @@ class _HeroCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shimmer = isDark ? EagleTokens.darkCardHi : EagleTokens.lineSoft;
+    final shimmer = isDark ? EagleTokens.darkCardHi : TokensStrip.borderDefault;
     return Container(
       height: 170,
       decoration: BoxDecoration(
@@ -1870,7 +1870,7 @@ class _FocusCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shimmer = isDark ? EagleTokens.darkCard : EagleTokens.lineSoft;
+    final shimmer = isDark ? EagleTokens.darkCard : TokensStrip.borderDefault;
     return Container(
       height: 220,
       decoration: BoxDecoration(
@@ -1911,8 +1911,8 @@ class _AlunoProfileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final textColor = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final muteColor = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final textColor = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final muteColor = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     final hasFoto = aluno.fotoUrl != null && aluno.fotoUrl!.isNotEmpty;
     final genderLabel = _genderLabel(aluno.genero);
@@ -2031,7 +2031,7 @@ class _Chip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final fg = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final fg = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -2066,7 +2066,7 @@ class _ProfileCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shimmer = isDark ? EagleTokens.darkCardHi : EagleTokens.lineSoft;
+    final shimmer = isDark ? EagleTokens.darkCardHi : TokensStrip.borderDefault;
     final primary = Theme.of(context).colorScheme.primary;
 
     return Container(

@@ -22,5 +22,15 @@ void main() {
     expect(widget, contains('Shimmer.fromColors'));
     expect(widget, contains('maxLines: 2'));
     expect(widget, contains('TextOverflow.ellipsis'));
+    expect(widget, contains('class _DayPulseStrip'));
+    expect(widget, contains('class _PulseChip'));
+    expect(widget, contains('Pulso operacional'));
+    expect(widget, contains('BoxConstraints(minHeight: 48)'));
+    expect(widget, contains('hideRiscoChip'));
+    expect(widget, contains('_RiskWaveBanner'));
+    expect(widget, contains('_AderenciaSemanaEmptyCard'));
+    expect(widget, contains('_isRiskEchoCopy'));
+    expect(widget, contains('BrandPalette.sectionHeading'));
+    expect(widget, contains('BrandPalette.sectionAction'));
   });
 }

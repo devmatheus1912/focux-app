@@ -1,4 +1,4 @@
-import 'dart:math';
+﻿import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -116,8 +116,8 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final inkColor = isDark ? EagleTokens.darkInk : EagleTokens.card;
-    final inkMuteColor = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final inkColor = isDark ? EagleTokens.darkInk : TokensStrip.cardBg;
+    final inkMuteColor = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = Theme.of(context).colorScheme.primary;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -394,7 +394,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                           ],
                         ),
 
-                        const SizedBox(height: 24),
+                        const SizedBox(height: TokensStrip.s5),
 
                         // Standard fields
                         _FxTextField(
@@ -460,7 +460,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
 
                         // Error
                         if (_error != null) ...[
-                          const SizedBox(height: 16),
+                          const SizedBox(height: TokensStrip.s4),
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -574,8 +574,8 @@ class _FxTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final inkColor = isDark ? EagleTokens.darkInk : EagleTokens.card;
-    final inkMuteColor = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final inkColor = isDark ? EagleTokens.darkInk : TokensStrip.cardBg;
+    final inkMuteColor = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = Theme.of(context).colorScheme.primary;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

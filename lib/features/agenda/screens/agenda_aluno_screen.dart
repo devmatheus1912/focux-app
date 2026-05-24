@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class AgendaAlunoScreen extends ConsumerStatefulWidget {
   const AgendaAlunoScreen({super.key});
@@ -89,7 +90,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
                 ],
               )
               : ListView.builder(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(TokensStrip.s4),
                 itemCount: _ags.length,
                 itemBuilder:
                     (_, i) => _AgCard(ag: _ags[i], onConfirmar: _confirmar),
@@ -113,7 +114,7 @@ class _AgCard extends StatelessWidget {
       child: DecoratedBox(
         decoration: fxListCardDecoration(context, accent: cor),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(TokensStrip.s4),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -137,13 +138,13 @@ class _AgCard extends StatelessWidget {
                   const Icon(
                     Icons.calendar_today,
                     size: 14,
-                    color: EagleTokens.inkMute,
+                    color: TokensStrip.textSecondary,
                   ),
                   const SizedBox(width: 4),
                   Text(
                     '${inicio.day.toString().padLeft(2, '0')}/${inicio.month.toString().padLeft(2, '0')}/${inicio.year}',
                     style: const TextStyle(
-                      color: EagleTokens.inkMute,
+                      color: TokensStrip.textSecondary,
                       fontSize: 13,
                     ),
                   ),
@@ -151,13 +152,13 @@ class _AgCard extends StatelessWidget {
                   const Icon(
                     Icons.access_time,
                     size: 14,
-                    color: EagleTokens.inkMute,
+                    color: TokensStrip.textSecondary,
                   ),
                   const SizedBox(width: 4),
                   Text(
                     '${_hm(inicio)} – ${_hm(fim)}',
                     style: const TextStyle(
-                      color: EagleTokens.inkMute,
+                      color: TokensStrip.textSecondary,
                       fontSize: 13,
                     ),
                   ),
@@ -189,9 +190,9 @@ class _AgCard extends StatelessWidget {
       case 'CONCLUIDO':
         return Theme.of(context).colorScheme.primary;
       case 'CANCELADO':
-        return EagleTokens.inkMute;
+        return TokensStrip.textSecondary;
       default:
-        return EagleTokens.inkMute;
+        return TokensStrip.textSecondary;
     }
   }
 }

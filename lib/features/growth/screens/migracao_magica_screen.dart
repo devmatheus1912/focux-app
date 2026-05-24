@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,6 +11,7 @@ import '../../../core/widgets/feature_gate.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 // BUG-03: ConumerStatefulWidget para acesso ao ref (apiClientProvider autenticado)
 class MigracaoMagicaScreen extends ConsumerStatefulWidget {
@@ -153,16 +154,15 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
 
   Widget _buildContent(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final brand = Theme.of(context).colorScheme.primary;
     final brandDeep = BrandPalette.deep(brand);
     final brandSoft = BrandPalette.soft(brand, dark: isDark);
     final brandSofter = BrandPalette.softer(brand, dark: isDark);
 
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Migração mágica',
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
@@ -174,7 +174,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
           children: [
             // Header
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 18),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 10, 20, 18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -227,9 +227,9 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
 
             // Hero Card
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 16),
               child: Container(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+                padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 20, 20, 18),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
                   gradient:
@@ -301,7 +301,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
 
             // Text paste area
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 16),
               child: Container(
                 padding: const EdgeInsets.all(14),
                 decoration: fxListCardDecoration(
@@ -425,7 +425,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
             if (_alunosEncontrados != null &&
                 _alunosEncontrados!.isNotEmpty) ...[
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 0, 20, 12),
                 child: Text(
                   '${_alunosEncontrados!.length} alunos encontrados',
                   style: TextStyle(
@@ -531,7 +531,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 0),
                 child: InkWell(
                   // BUG-04: chama API real
                   onTap: _isSaving ? null : _salvarAlunos,

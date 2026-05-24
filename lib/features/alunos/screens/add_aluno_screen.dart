@@ -3,16 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../providers/alunos_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 const _generos = ['Masculino', 'Feminino', 'Outro'];
 const _tiposConsultoria = ['ONLINE', 'PRESENCIAL', 'HIBRIDO'];
@@ -196,7 +197,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                   width: 42,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+                    color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
@@ -214,14 +215,14 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                     size: 29,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: TokensStrip.s4),
                 Text(
                   'Aluno cadastrado',
-                  style: GoogleFonts.outfit(
+                  style: AppTypography.inter(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.6,
-                    color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                    color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -229,7 +230,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                   'Compartilhe o convite para o aluno acessar o app.',
                   style: TextStyle(
                     color:
-                        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
                     fontSize: 13.4,
                     height: 1.35,
                   ),
@@ -252,7 +253,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                           color:
                               isDark
                                   ? EagleTokens.darkInkMute
-                                  : EagleTokens.inkMute,
+                                  : TokensStrip.textSecondary,
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
                         ),
@@ -265,7 +266,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                           fontSize: 31,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 5.5,
-                          color: isDark ? Colors.white : EagleTokens.ink,
+                          color: isDark ? Colors.white : TokensStrip.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 9),
@@ -276,7 +277,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                           color:
                               isDark
                                   ? EagleTokens.darkInkMute
-                                  : EagleTokens.inkMute,
+                                  : TokensStrip.textSecondary,
                           fontSize: 11.8,
                           fontWeight: FontWeight.w500,
                         ),
@@ -358,18 +359,18 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                       icon: Icon(
                         Icons.copy_rounded,
                         size: 18,
-                        color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                        color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                       ),
                       label: Text(
                         'Copiar convite',
                         style: TextStyle(
-                          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                          color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                         ),
                       ),
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(
                           color:
-                              isDark ? EagleTokens.darkLine : EagleTokens.line,
+                              isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -399,7 +400,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                         color:
                             isDark
                                 ? EagleTokens.darkInkMute
-                                : EagleTokens.inkMute,
+                                : TokensStrip.textSecondary,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -423,11 +424,11 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Novo aluno',
-        subtitle: 'Novo item',
+        subtitle: 'Cadastro rápido',
         onBack: () => safePopOrGo(context, '/alunos'),
       ),
       body: SafeArea(
@@ -440,7 +441,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                 child: SlideTransition(
                   position: _entrySlide,
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 132),
+                    padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 8, 20, 132),
                     child: Form(
                       key: _formKey,
                       child: Column(
@@ -454,7 +455,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                             ).hasMatch(_emailCtrl.text.trim()),
                             isDark: isDark,
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: TokensStrip.s4),
                           _SectionCard(
                             icon: Icons.person_outline_rounded,
                             title: 'Identidade',
@@ -650,11 +651,12 @@ class _SectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final accent = BrandPalette.sectionAccent(primary, dark: isDark);
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 18),
       decoration: fxListCardDecoration(
         context,
         accent: primary,
@@ -668,10 +670,10 @@ class _SectionCard extends StatelessWidget {
                 width: 34,
                 height: 34,
                 decoration: BoxDecoration(
-                  color: primary.withValues(alpha: isDark ? 0.18 : 0.08),
+                  color: accent.withValues(alpha: isDark ? 0.18 : 0.10),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: primary, size: 18),
+                child: Icon(icon, color: accent, size: 18),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -696,7 +698,7 @@ class _SectionCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           ...children,
         ],
       ),
@@ -720,8 +722,9 @@ class _AccessProgressStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final action = BrandPalette.sectionAction(primary, dark: isDark);
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final ready = hasName && hasEmail;
     final progress = (hasName ? 1 : 0) + (hasEmail ? 1 : 0);
 
@@ -750,13 +753,13 @@ class _AccessProgressStrip extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: primary.withValues(alpha: isDark ? 0.18 : 0.08),
+                  color: action.withValues(alpha: isDark ? 0.18 : 0.10),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
                   '$progress/2',
                   style: TextStyle(
-                    color: primary,
+                    color: action,
                     fontSize: 11,
                     fontWeight: FontWeight.w900,
                   ),
@@ -787,14 +790,29 @@ class _ProgressStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final action = BrandPalette.sectionAction(primary, dark: isDark);
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
 
     return Container(
-      height: 4,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      height: 5,
       decoration: BoxDecoration(
-        color: done ? primary : line.withValues(alpha: isDark ? 0.7 : 0.75),
+        color: done ? action : line.withValues(alpha: isDark ? 0.7 : 0.75),
         borderRadius: BorderRadius.circular(999),
+        boxShadow:
+            done
+                ? [
+                  BoxShadow(
+                    color: action.withValues(alpha: isDark ? 0.55 : 0.42),
+                    blurRadius: 10,
+                    spreadRadius: 0,
+                  ),
+                  BoxShadow(
+                    color: Colors.white.withValues(alpha: isDark ? 0.18 : 0.32),
+                    blurRadius: 6,
+                    spreadRadius: -2,
+                  ),
+                ]
+                : null,
       ),
     );
   }
@@ -826,9 +844,9 @@ class _FxFormField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -860,7 +878,7 @@ class _FxFormField extends StatelessWidget {
             fillColor:
                 isDark
                     ? EagleTokens.darkCardHi
-                    : EagleTokens.paper.withValues(alpha: 0.78),
+                    : TokensStrip.pageBg.withValues(alpha: 0.78),
             hintStyle: TextStyle(color: mute.withValues(alpha: 0.62)),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -915,7 +933,7 @@ class _LabelRow extends StatelessWidget {
     return Text(
       label,
       style: TextStyle(
-        color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+        color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
         fontSize: 11,
         fontWeight: FontWeight.w800,
       ),
@@ -939,8 +957,9 @@ class _OptionChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final action = BrandPalette.sectionAction(primary, dark: isDark);
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
 
     return InkWell(
       onTap: onTap,
@@ -952,27 +971,37 @@ class _OptionChip extends StatelessWidget {
         decoration: BoxDecoration(
           color:
               selected
-                  ? primary.withValues(alpha: isDark ? 0.22 : 0.12)
+                  ? action.withValues(alpha: isDark ? 0.22 : 0.12)
                   : (isDark
                       ? Colors.white.withValues(alpha: 0.05)
-                      : EagleTokens.paper),
+                      : TokensStrip.pageBg),
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
-            color: selected ? primary.withValues(alpha: 0.58) : line,
+            color: selected ? action.withValues(alpha: 0.58) : line,
             width: selected ? 1.4 : 1.0,
           ),
+          boxShadow:
+              selected
+                  ? [
+                    BoxShadow(
+                      color: action.withValues(alpha: isDark ? 0.28 : 0.18),
+                      blurRadius: 12,
+                      spreadRadius: -2,
+                    ),
+                  ]
+                  : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (selected) ...[
-              Icon(Icons.check_rounded, size: 15, color: primary),
+              Icon(Icons.check_rounded, size: 15, color: action),
               const SizedBox(width: 5),
             ],
             Text(
               label,
               style: TextStyle(
-                color: selected ? primary : ink,
+                color: selected ? action : ink,
                 fontSize: 12.5,
                 fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
               ),
@@ -1000,9 +1029,9 @@ class _InvitePreviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
 
     return Container(
       padding: const EdgeInsets.all(15),
@@ -1178,15 +1207,15 @@ class _BottomSubmitBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return SafeArea(
       top: false,
       child: Container(
-        padding: EdgeInsets.fromLTRB(20, canSubmit ? 9 : 8, 20, 12),
+        padding: EdgeInsets.fromLTRB(TokensStrip.s5, canSubmit ? 9 : 8, 20, 12),
         decoration: BoxDecoration(
-          color: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+          color: isDark ? EagleTokens.darkBg : TokensStrip.pageBg,
           border: Border(top: BorderSide(color: line.withValues(alpha: 0.65))),
         ),
         child: Column(

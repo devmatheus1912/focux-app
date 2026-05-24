@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+﻿import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class EvolucaoFotosScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -108,8 +109,8 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Evolução · ${widget.alunoNome}',
         onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}/evolucao'),
@@ -137,14 +138,14 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(TokensStrip.s5),
             decoration: BoxDecoration(
               color: p.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.compare, size: 64, color: p),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: TokensStrip.s5),
           const Text(
             'Nenhuma foto de evolução',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
@@ -153,9 +154,9 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
           Text(
             'Tire a primeira foto para acompanhar a evolução.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: EagleTokens.inkMute),
+            style: TextStyle(color: TokensStrip.textSecondary),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: TokensStrip.s5),
           FxLiquidPrimaryButton(
             label: 'Tirar Foto',
             icon: Icons.camera_alt_rounded,
@@ -170,7 +171,7 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
   Widget _content(bool isDark, Color primary) => Column(
     children: [
       if (_selBefore != null && _selAfter != null) ...[
-        Padding(padding: const EdgeInsets.all(16), child: _comparison()),
+        Padding(padding: const EdgeInsets.all(TokensStrip.s4), child: _comparison()),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Slider(
@@ -188,14 +189,14 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
                 'Antes',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
-                  color: EagleTokens.inkMute,
+                  color: TokensStrip.textSecondary,
                 ),
               ),
               Text(
                 'Depois',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
-                  color: EagleTokens.inkMute,
+                  color: TokensStrip.textSecondary,
                 ),
               ),
             ],
@@ -204,14 +205,14 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
         const SizedBox(height: 8),
       ],
       Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 12, 16, 4),
         child: Row(
           children: [
             Text(
               '${_fotos.length} foto${_fotos.length > 1 ? 's' : ''}',
               style: TextStyle(
                 fontSize: 13,
-                color: EagleTokens.inkMute,
+                color: TokensStrip.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -230,7 +231,7 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
       ),
       Expanded(
         child: GridView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(TokensStrip.s4),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
             mainAxisSpacing: 8,

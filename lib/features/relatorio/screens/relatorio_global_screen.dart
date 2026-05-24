@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/router/safe_navigation.dart';
@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/relatorio_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class RelatorioGlobalScreen extends ConsumerStatefulWidget {
   const RelatorioGlobalScreen({super.key});
@@ -52,9 +53,8 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Relatorio global',
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
@@ -108,7 +108,7 @@ class _ReportContent extends StatelessWidget {
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 12, 16, 32),
         children: [
           _HeroCard(dados: dados),
           const SizedBox(height: 12),
@@ -140,7 +140,7 @@ class _ReportContent extends StatelessWidget {
             value: '$alunosComTreino de ${dados.totalAlunos}',
             tone: EagleTokens.warn,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: TokensStrip.s5),
           const _SectionHeader(
             icon: Icons.workspace_premium_rounded,
             title: 'Mais comprometidos',
@@ -165,7 +165,7 @@ class _ReportContent extends StatelessWidget {
                     tipo: _TipoRank.top,
                   ),
                 ),
-          const SizedBox(height: 24),
+          const SizedBox(height: TokensStrip.s5),
           const _SectionHeader(
             icon: Icons.report_problem_rounded,
             title: 'Precisam de atencao',
@@ -259,7 +259,7 @@ class _HeroCard extends StatelessWidget {
               _HeroPill(text: status),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: TokensStrip.s5),
           Text(
             '${aderencia.toStringAsFixed(1)}%',
             style: const TextStyle(
@@ -371,7 +371,7 @@ class _MetricTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color:
-                        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
                     fontSize: 11.5,
                     fontWeight: FontWeight.w700,
                   ),
@@ -382,7 +382,7 @@ class _MetricTile extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                    color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
                   ),
@@ -432,7 +432,7 @@ class _SectionHeader extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                  color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                   fontSize: 17,
                   fontWeight: FontWeight.w900,
                 ),
@@ -441,7 +441,7 @@ class _SectionHeader extends StatelessWidget {
               Text(
                 subtitle,
                 style: TextStyle(
-                  color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                  color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
                   fontSize: 12.5,
                 ),
               ),
@@ -500,7 +500,7 @@ class _AlunoRankCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                          color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                           fontWeight: FontWeight.w900,
                           fontSize: 15.5,
                         ),
@@ -514,7 +514,7 @@ class _AlunoRankCard extends StatelessWidget {
                   '${aluno.treinosConcluidos} de ${aluno.totalTreinos} treinos concluidos',
                   style: TextStyle(
                     color:
-                        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
                     fontSize: 12.5,
                     fontWeight: FontWeight.w600,
                   ),
@@ -526,7 +526,7 @@ class _AlunoRankCard extends StatelessWidget {
                     value: aderencia / 100,
                     minHeight: 6,
                     backgroundColor:
-                        isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+                        isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
                     valueColor: AlwaysStoppedAnimation(tone),
                   ),
                 ),
@@ -541,7 +541,7 @@ class _AlunoRankCard extends StatelessWidget {
                       color:
                           isDark
                               ? EagleTokens.darkInkMute
-                              : EagleTokens.inkMute,
+                              : TokensStrip.textSecondary,
                       fontSize: 11.5,
                     ),
                   ),
@@ -644,7 +644,7 @@ class _EmptyList extends StatelessWidget {
         text,
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+          color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -663,7 +663,7 @@ class _ErrorState extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(TokensStrip.s5),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -677,7 +677,7 @@ class _ErrorState extends StatelessWidget {
               'Nao foi possivel carregar o relatorio.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                 fontWeight: FontWeight.w900,
                 fontSize: 16,
               ),
@@ -687,7 +687,7 @@ class _ErrorState extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
                 fontSize: 12.5,
               ),
             ),

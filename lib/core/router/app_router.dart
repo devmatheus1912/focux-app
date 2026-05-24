@@ -777,19 +777,25 @@ class AppRouter {
               child: const GamificacaoScreen(),
             ),
       ),
-      // QA — Smoke test (debug only)
+        ],
+      ),
+
+      // QA — root-level routes (debug only). Outside ShellRoute so smoke
+      // push/pop does not collide page keys with shell sub-routes.
       if (kDebugMode) ...[
         GoRoute(
           path: '/qa/smoke',
-          builder: (context, state) => const QaSmokeScreen(),
+          builder:
+              (context, state) =>
+                  const FxRouteChrome(child: QaSmokeScreen()),
         ),
         GoRoute(
           path: '/qa/tokens-strip',
-          builder: (context, state) => const TokensStripShowcaseScreen(),
+          builder:
+              (context, state) =>
+                  const FxRouteChrome(child: TokensStripShowcaseScreen()),
         ),
       ],
-        ],
-      ),
     ],
   );
 }
@@ -933,6 +939,7 @@ AlunoFiltro _alunoFiltroFromQuery(String? value) {
     'ativos' => AlunoFiltro.ativos,
     'inadimplentes' => AlunoFiltro.inadimplentes,
     'risco' => AlunoFiltro.risco,
+    'contato' || 'contato-hoje' || 'contatohoje' => AlunoFiltro.contatoHoje,
     'novos' => AlunoFiltro.novos,
     _ => AlunoFiltro.todos,
   };

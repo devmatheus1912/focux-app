@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/health/health_service.dart';
@@ -139,14 +139,14 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(TokensStrip.s5),
               decoration: BoxDecoration(
                 color: primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.favorite, size: 64, color: primary),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: TokensStrip.s5),
             const Text(
               'Conecte seu Apple Health\nou Google Fit',
               textAlign: TextAlign.center,
@@ -156,7 +156,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
             Text(
               'Sincronize passos, frequência cardíaca, calorias e sono para acompanhar sua saúde.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 15, color: EagleTokens.inkMute),
+              style: TextStyle(fontSize: 15, color: TokensStrip.textSecondary),
             ),
             const SizedBox(height: 32),
             FxLiquidPrimaryButton(
@@ -179,7 +179,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
     return RefreshIndicator(
       onRefresh: _loadData,
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(TokensStrip.s4),
         children: [
           Container(
             padding: const EdgeInsets.all(18),
@@ -227,16 +227,16 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
             Text(
               'Resumo de Hoje',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
               ),
             ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           Row(
             children: [
               Expanded(
@@ -290,7 +290,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: TokensStrip.s5),
           OutlinedButton.icon(
             onPressed: () async {
               HapticFeedback.mediumImpact();
@@ -349,13 +349,13 @@ class _MetricCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w700,
-              color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+              color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             label,
-            style: TextStyle(fontSize: 13, color: EagleTokens.inkMute),
+            style: TextStyle(fontSize: 13, color: TokensStrip.textSecondary),
           ),
         ],
       ),

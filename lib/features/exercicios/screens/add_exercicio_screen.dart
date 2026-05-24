@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -120,8 +120,8 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bottom = MediaQuery.paddingOf(context).bottom;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Novo Exercício',
         subtitle: 'NOVO ITEM',
@@ -134,7 +134,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(20, 0, 20, 118 + bottom),
+                padding: EdgeInsets.fromLTRB(TokensStrip.s5, 0, 20, 118 + bottom),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -338,13 +338,13 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
       ),
       bottomNavigationBar: DecoratedBox(
         decoration: BoxDecoration(
-          color: isDark ? EagleTokens.darkBg : EagleTokens.paper,
+          color: isDark ? EagleTokens.darkBg : TokensStrip.pageBg,
           border: Border(
             top: BorderSide(
               color:
                   isDark
                       ? EagleTokens.darkLine
-                      : EagleTokens.line.withValues(alpha: 0.54),
+                      : TokensStrip.borderDefault.withValues(alpha: 0.54),
             ),
           ),
           boxShadow: [
@@ -358,7 +358,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
         child: SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
+            padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 10, 20, 12),
             child: FxLiquidPrimaryButton(
               label: 'Cadastrar exercício',
               onPressed: _loading ? null : _submit,
@@ -479,7 +479,7 @@ class _QuickSetupStrip extends StatelessWidget {
         Text(
           'Perfil rápido',
           style: TextStyle(
-            color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+            color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
             fontSize: 12,
             fontWeight: FontWeight.w900,
           ),
@@ -572,7 +572,7 @@ class _SectionCard extends StatelessWidget {
               Text(
                 subtitle,
                 style: TextStyle(
-                  color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                  color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
                   fontSize: 12,
                   height: 1.25,
                   fontWeight: FontWeight.w600,
@@ -589,7 +589,7 @@ class _SectionCard extends StatelessWidget {
             curve: Curves.easeOutCubic,
             child: Icon(
               Icons.keyboard_arrow_down_rounded,
-              color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+              color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
             ),
           ),
         ],
@@ -630,7 +630,7 @@ class _SectionCard extends StatelessWidget {
                           color:
                               isDark
                                   ? EagleTokens.darkLine
-                                  : EagleTokens.line.withValues(alpha: 0.58),
+                                  : TokensStrip.borderDefault.withValues(alpha: 0.58),
                         ),
                         const SizedBox(height: 14),
                         child,
@@ -687,7 +687,7 @@ class _TextInput extends StatelessWidget {
             color:
                 Theme.of(context).brightness == Brightness.dark
                     ? EagleTokens.darkLine
-                    : EagleTokens.line,
+                    : TokensStrip.borderDefault,
           ),
         ),
       ),
@@ -718,7 +718,7 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final fillColor = isDark ? EagleTokens.darkCard : Colors.white;
-    final borderColor = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final borderColor = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     return FormField<T>(
       initialValue: value,
       validator: validator,
@@ -814,10 +814,10 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
                           effectiveValue == null
                               ? (isDark
                                   ? EagleTokens.darkInkMute
-                                  : EagleTokens.inkMute)
+                                  : TokensStrip.textSecondary)
                               : (isDark
                                   ? EagleTokens.darkInk
-                                  : EagleTokens.ink),
+                                  : TokensStrip.textPrimary),
                       fontWeight:
                           effectiveValue == null
                               ? FontWeight.w500
@@ -827,7 +827,7 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
                 ),
                 Icon(
                   Icons.keyboard_arrow_down_rounded,
-                  color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                  color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
                 ),
               ],
             ),
@@ -854,8 +854,8 @@ class _EnumPickerCompact<T extends Enum> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = Theme.of(context).colorScheme.primary;
 
     return SafeArea(
@@ -867,7 +867,7 @@ class _EnumPickerCompact<T extends Enum> extends StatelessWidget {
             child: Container(
               width: width,
               margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 14, 16, 12),
               decoration: fxListCardDecoration(context, accent: primary),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -1013,8 +1013,8 @@ class _EnumPickerFullScreenState<T extends Enum>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = Theme.of(context).colorScheme.primary;
     final bottom = MediaQuery.paddingOf(context).bottom;
     final filtered =
@@ -1027,7 +1027,7 @@ class _EnumPickerFullScreenState<T extends Enum>
       color: Colors.transparent,
       child: SafeArea(
         child: Padding(
-          padding: EdgeInsets.fromLTRB(20, 14, 20, 12 + bottom),
+          padding: EdgeInsets.fromLTRB(TokensStrip.s5, 14, 20, 12 + bottom),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -1077,7 +1077,7 @@ class _EnumPickerFullScreenState<T extends Enum>
                     prefixIcon: Icon(Icons.search_rounded, color: mute),
                     filled: true,
                     fillColor:
-                        isDark ? EagleTokens.darkCard : EagleTokens.paper,
+                        isDark ? EagleTokens.darkCard : TokensStrip.pageBg,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 12,
@@ -1085,13 +1085,13 @@ class _EnumPickerFullScreenState<T extends Enum>
                     border: FxInputDeco.outlineBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide(
-                        color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                        color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
                       ),
                     ),
                     enabledBorder: FxInputDeco.outlineBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide(
-                        color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                        color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
                       ),
                     ),
                   ),
@@ -1109,7 +1109,7 @@ class _EnumPickerFullScreenState<T extends Enum>
                         color:
                             isDark
                                 ? EagleTokens.darkLine
-                                : EagleTokens.line.withValues(alpha: 0.72),
+                                : TokensStrip.borderDefault.withValues(alpha: 0.72),
                       ),
                   itemBuilder: (context, index) {
                     final item = filtered[index];
@@ -1152,8 +1152,8 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = Theme.of(context).colorScheme.primary;
     final screenHeight = MediaQuery.sizeOf(context).height;
     final bottom = MediaQuery.paddingOf(context).bottom;
@@ -1174,7 +1174,7 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
         child: Container(
           height: sheetHeight,
           margin: EdgeInsets.zero,
-          padding: EdgeInsets.fromLTRB(16, 10, 16, 12 + bottom),
+          padding: EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 12 + bottom),
           decoration: fxListCardDecoration(context, accent: primary).copyWith(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(TokensStrip.rXl)),
           ),
@@ -1187,7 +1187,7 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
                   color:
                       isDark
                           ? Colors.white.withValues(alpha: 0.16)
-                          : EagleTokens.line,
+                          : TokensStrip.borderDefault,
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
@@ -1223,7 +1223,7 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
                     prefixIcon: Icon(Icons.search_rounded, color: mute),
                     filled: true,
                     fillColor:
-                        isDark ? EagleTokens.darkCard : EagleTokens.paper,
+                        isDark ? EagleTokens.darkCard : TokensStrip.pageBg,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 12,
@@ -1231,13 +1231,13 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
                     border: FxInputDeco.outlineBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide(
-                        color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                        color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
                       ),
                     ),
                     enabledBorder: FxInputDeco.outlineBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide(
-                        color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                        color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
                       ),
                     ),
                   ),
@@ -1254,7 +1254,7 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
                         color:
                             isDark
                                 ? EagleTokens.darkLine
-                                : EagleTokens.line.withValues(alpha: 0.72),
+                                : TokensStrip.borderDefault.withValues(alpha: 0.72),
                       ),
                   itemBuilder: (context, index) {
                     final item = filtered[index];
@@ -1308,7 +1308,7 @@ class _ChoiceGroup<T extends Enum> extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final selectedValues =
         values.where((value) => selected.contains(value)).toList();
     final availableValues =
@@ -1331,20 +1331,20 @@ class _ChoiceGroup<T extends Enum> extends StatelessWidget {
           color:
               isSelected
                   ? primary
-                  : (isDark ? EagleTokens.darkInk : EagleTokens.ink),
+                  : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary),
           fontSize: isSelected ? 12 : 11.5,
           fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
         ),
         selectedColor: primary.withValues(alpha: 0.1),
         backgroundColor:
-            isDark ? Colors.white.withValues(alpha: 0.035) : EagleTokens.paper,
+            isDark ? Colors.white.withValues(alpha: 0.035) : TokensStrip.pageBg,
         side: BorderSide(
           color:
               isSelected
                   ? primary.withValues(alpha: 0.22)
                   : (isDark
                       ? EagleTokens.darkLine
-                      : EagleTokens.line.withValues(alpha: 0.72)),
+                      : TokensStrip.borderDefault.withValues(alpha: 0.72)),
         ),
       );
     }
@@ -1369,13 +1369,13 @@ class _ChoiceGroup<T extends Enum> extends StatelessWidget {
               color:
                   isDark
                       ? Colors.white.withValues(alpha: 0.035)
-                      : EagleTokens.paper,
+                      : TokensStrip.pageBg,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color:
                     isDark
                         ? EagleTokens.darkLine
-                        : EagleTokens.line.withValues(alpha: 0.72),
+                        : TokensStrip.borderDefault.withValues(alpha: 0.72),
               ),
             ),
             child: Text(
@@ -1423,7 +1423,7 @@ class _GroupLabel extends StatelessWidget {
     final mute =
         Theme.of(context).brightness == Brightness.dark
             ? EagleTokens.darkInkMute
-            : EagleTokens.inkMute;
+            : TokensStrip.textSecondary;
     return Row(
       children: [
         Expanded(
@@ -1492,7 +1492,7 @@ class _SwitchRow extends StatelessWidget {
                       color:
                           isDark
                               ? EagleTokens.darkInkMute
-                              : EagleTokens.inkMute,
+                              : TokensStrip.textSecondary,
                       fontSize: 11.5,
                       height: 1.25,
                       fontWeight: FontWeight.w600,

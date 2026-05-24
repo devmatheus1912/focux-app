@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class AcoesMassaScreen extends ConsumerStatefulWidget {
   const AcoesMassaScreen({super.key});
@@ -285,7 +286,7 @@ class _BottomSheetAcoesState extends State<_BottomSheetAcoes> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+      padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 20, 20, 32),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -300,7 +301,7 @@ class _BottomSheetAcoesState extends State<_BottomSheetAcoes> {
             label: 'Marcar mensalidade como paga',
             onPressed: widget.onMarcarPagos,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           const Divider(),
           const SizedBox(height: 8),
           Text(
@@ -323,7 +324,7 @@ class _BottomSheetAcoesState extends State<_BottomSheetAcoes> {
             icon: const Icon(Icons.update),
             label: const Text('Aplicar status'),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           const Divider(),
           const SizedBox(height: 8),
           OutlinedButton.icon(

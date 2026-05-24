@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -19,6 +19,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 // Legacy editorial import contract still lives in repository/tests:
+import '../../../core/theme/tokens_strip.dart';
 // "Aprovar editorialmente", "Notas editoriais padrao",
 // previewMidias(midias), importarMidias(midias).
 class ExerciciosListScreen extends ConsumerStatefulWidget {
@@ -327,7 +328,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   Widget build(BuildContext context) {
     final asyncList = ref.watch(exerciciosProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -412,7 +413,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                 error:
                     (e, _) => Center(
                       child: Padding(
-                        padding: const EdgeInsets.all(24),
+                        padding: const EdgeInsets.all(TokensStrip.s5),
                         child: Text(friendlyError(e)),
                       ),
                     ),
@@ -421,7 +422,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                   return Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 10),
                         child: Row(
                           children: [
                             Text(

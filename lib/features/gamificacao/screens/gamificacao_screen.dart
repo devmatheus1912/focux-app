@@ -50,7 +50,7 @@ List<Map<String, dynamic>> _buildBadgeTiles(GamificacaoData data, Color brand) {
       'tipo': entry.key,
       'icon': entry.value.icon,
       'label': entry.value.label,
-      'cor': EagleTokens.inkMute,
+      'cor': TokensStrip.textSecondary,
       'earned': false,
     });
   }
@@ -64,9 +64,9 @@ class GamificacaoScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dark = Theme.of(context).brightness == Brightness.dark;
-    final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = dark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final line = dark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final brand = Theme.of(context).colorScheme.primary;
     final brandSofter = BrandPalette.softer(brand, dark: dark);
 
@@ -83,8 +83,8 @@ class GamificacaoScreen extends ConsumerWidget {
       ),
     );
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Minha evolução',
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
@@ -215,7 +215,7 @@ class GamificacaoScreen extends ConsumerWidget {
                                                 ? cor.withValues(alpha: 0.13)
                                                 : (dark
                                                     ? const Color(0x0AFFFFFF)
-                                                    : EagleTokens.lineSoft),
+                                                    : TokensStrip.borderDefault),
                                         shape: BoxShape.circle,
                                       ),
                                       child: Center(
@@ -400,7 +400,7 @@ class GamificacaoScreen extends ConsumerWidget {
                           color:
                               dark
                                   ? const Color(0x0FFFFFFF)
-                                  : EagleTokens.lineSoft,
+                                  : TokensStrip.borderDefault,
                           borderRadius: BorderRadius.circular(TokensStrip.rCard),
                           border: Border.all(color: line),
                         ),
@@ -482,7 +482,7 @@ class _StreakHeroStatic extends StatelessWidget {
                       children: [
                         Text(
                           '$streak dias',
-                          style: GoogleFonts.outfit(
+                          style: AppTypography.inter(
                             color: Colors.white,
                             fontSize: 44,
                             fontWeight: FontWeight.w600,

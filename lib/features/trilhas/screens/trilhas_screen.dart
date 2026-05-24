@@ -1,10 +1,12 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 
@@ -104,9 +106,8 @@ class TrilhasScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final trilhasAsync = ref.watch(trilhasAlunoProvider(alunoId));
 
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -146,10 +147,10 @@ class TrilhasScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.route, size: 64, color: const Color(0xFFD1D5DB)),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: TokensStrip.s4),
                   const Text(
                     'Nenhuma trilha criada ainda',
-                    style: TextStyle(color: EagleTokens.inkMute),
+                    style: TextStyle(color: TokensStrip.textSecondary),
                   ),
                   const SizedBox(height: 12),
                   FxLiquidPrimaryButton(
@@ -163,7 +164,7 @@ class TrilhasScreen extends ConsumerWidget {
             );
           }
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(TokensStrip.s4),
             itemCount: trilhas.length,
             itemBuilder:
                 (ctx, i) =>
@@ -206,7 +207,7 @@ class TrilhasScreen extends ConsumerWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: TokensStrip.s4),
                     TextField(
                       controller: tituloCtrl,
                       decoration: FxInputDeco.build(
@@ -305,7 +306,7 @@ class _TrilhaCard extends StatelessWidget {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(TokensStrip.s4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -427,7 +428,7 @@ class _MarcoTile extends StatelessWidget {
         icon: Icon(
           marco.concluido ? Icons.check_circle : Icons.radio_button_unchecked,
           color:
-              marco.concluido ? const Color(0xFF22C55E) : EagleTokens.inkMute,
+              marco.concluido ? const Color(0xFF22C55E) : TokensStrip.textSecondary,
         ),
         onPressed:
             marco.concluido
@@ -445,7 +446,7 @@ class _MarcoTile extends StatelessWidget {
         style: TextStyle(
           fontSize: 13,
           decoration: marco.concluido ? TextDecoration.lineThrough : null,
-          color: marco.concluido ? EagleTokens.inkMute : null,
+          color: marco.concluido ? TokensStrip.textSecondary : null,
         ),
       ),
     );

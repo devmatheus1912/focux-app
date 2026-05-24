@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -111,7 +111,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
       context: context,
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+        final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
         return AlertDialog(
           title: Text(
             ids.length == 1 ? 'Excluir mensagens?' : 'Excluir conversas?',
@@ -402,7 +402,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
       );
     }
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
+      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 8, 16, 110),
       itemCount: _searchResults!.length,
       separatorBuilder: (_, __) => const SizedBox(height: 4),
       itemBuilder: (context, index) {
@@ -484,7 +484,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
           color: primary,
           onRefresh: () async => ref.invalidate(provider),
           child: ListView.separated(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
+            padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 8, 16, 110),
             itemCount: items.length,
             separatorBuilder: (_, __) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
@@ -598,7 +598,7 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
         child: SizedBox(
           height: MediaQuery.sizeOf(context).height * 0.72,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 12, 16, 16),
             child: Column(
               children: [
                 Container(

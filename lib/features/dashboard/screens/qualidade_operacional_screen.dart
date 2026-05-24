@@ -57,8 +57,8 @@ class QualidadeOperacionalScreen extends ConsumerWidget {
     final asyncData = ref.watch(qualidadeProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Qualidade Operacional',
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
@@ -89,9 +89,9 @@ class _QualidadeBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final accent = BrandPalette.accent(primary);
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final lineBg = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final lineBg = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
 
     final scoreColor =
         data.score >= 80
@@ -158,7 +158,7 @@ class _QualidadeBody extends StatelessWidget {
                           const SizedBox(width: 5),
                           Text(
                             'Focux Score™',
-                            style: GoogleFonts.outfit(
+                            style: AppTypography.inter(
                               color: Colors.white.withValues(alpha: 0.8),
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -169,7 +169,7 @@ class _QualidadeBody extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: TokensStrip.s4),
                 Text(
                   '${data.score}',
                   style: GoogleFonts.jetBrainsMono(
@@ -204,7 +204,7 @@ class _QualidadeBody extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: TokensStrip.s4),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
@@ -216,7 +216,7 @@ class _QualidadeBody extends StatelessWidget {
                   ),
                   child: Text(
                     data.recomendacao,
-                    style: GoogleFonts.outfit(
+                    style: AppTypography.inter(
                       color: Colors.white.withValues(alpha: 0.9),
                       fontSize: 12.5,
                       fontWeight: FontWeight.w500,
@@ -229,7 +229,7 @@ class _QualidadeBody extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: TokensStrip.s5),
 
           // ── Score Breakdown ──
           Container(
@@ -259,7 +259,7 @@ class _QualidadeBody extends StatelessWidget {
                     const SizedBox(width: 10),
                     Text(
                       'Diagnóstico',
-                      style: GoogleFonts.outfit(
+                      style: AppTypography.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: ink,
@@ -267,7 +267,7 @@ class _QualidadeBody extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: TokensStrip.s4),
                 _ScoreRow(
                   label: 'Precificação',
                   value: _ticketScore(),
@@ -292,7 +292,7 @@ class _QualidadeBody extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
 
           // ── Ticket Médio ──
           _MetricCompareCard(
@@ -336,7 +336,7 @@ class _QualidadeBody extends StatelessWidget {
             accent: accent,
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
 
           // ── Status Badge ──
           Container(
@@ -414,8 +414,8 @@ class _ScoreRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     return Row(
       children: [
         Expanded(
@@ -518,7 +518,7 @@ class _MetricCompareCard extends StatelessWidget {
               const SizedBox(width: 10),
               Text(
                 title,
-                style: GoogleFonts.outfit(
+                style: AppTypography.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: ink,

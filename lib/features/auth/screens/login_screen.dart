@@ -1,4 +1,4 @@
-import 'dart:io' show Platform;
+﻿import 'dart:io' show Platform;
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -16,6 +16,7 @@ import '../providers/auth_provider.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/google_sign_in_button.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -273,7 +274,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       child: Scaffold(
         body: AuthShell(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(24, 52, 24, 36),
+            padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 52, TokensStrip.s5, 36),
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 minHeight: MediaQuery.of(context).size.height - 100,

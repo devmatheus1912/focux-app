@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -38,7 +38,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         'nome': 'FREE',
         'preco': null,
         'trial': null,
-        'cor': EagleTokens.inkMute,
+        'cor': TokensStrip.textSecondary,
         'tag': null,
         'sub': 'Para começar',
         'plan': SubscriptionPlan.FREE,
@@ -93,7 +93,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   Color _planAccent(SubscriptionPlan plan, Color primary, bool isDark) {
     return switch (plan) {
       SubscriptionPlan.FREE =>
-        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
       SubscriptionPlan.PREMIUM => primary,
       SubscriptionPlan.ENTERPRISE => const Color(0xFFC49A2A),
     };
@@ -247,8 +247,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       ctaLabel = 'Assinar Enterprise';
     }
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Premium',
         leading: IconButton(
@@ -293,7 +293,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                     color:
                         isDark
                             ? Colors.white.withValues(alpha: 0.08)
-                            : EagleTokens.lineSoft,
+                            : TokensStrip.borderDefault,
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: line),
                   ),
@@ -331,7 +331,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 0, 20, 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -464,7 +464,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 child: Column(
                   children: [
                     Container(
-                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 14, 16, 14),
                       decoration: BoxDecoration(
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(20),
@@ -652,7 +652,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                                   : EagleTokens.goodSoft)
                                               : (isDark
                                                   ? EagleTokens.darkCardHi
-                                                  : EagleTokens.lineSoft),
+                                                  : TokensStrip.borderDefault),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Row(

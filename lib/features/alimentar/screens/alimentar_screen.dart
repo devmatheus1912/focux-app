@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +9,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class AlimentarScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -45,9 +46,8 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -76,7 +76,7 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
               : _planos.isEmpty
               ? const Center(child: Text('Nenhum plano alimentar criado.'))
               : ListView.builder(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(TokensStrip.s4),
                 itemCount: _planos.length,
                 itemBuilder: (_, i) {
                   final p = _planos[i];
@@ -97,7 +97,7 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
                               ),
                             ),
                         child: Padding(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(TokensStrip.s4),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -114,7 +114,7 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
                                   ),
                                   const Icon(
                                     Icons.chevron_right,
-                                    color: EagleTokens.inkMute,
+                                    color: TokensStrip.textSecondary,
                                   ),
                                 ],
                               ),
@@ -266,9 +266,8 @@ class _NovoPlanoScreenState extends ConsumerState<_NovoPlanoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -280,7 +279,7 @@ class _NovoPlanoScreenState extends ConsumerState<_NovoPlanoScreen> {
         title: const Text('Novo Plano Alimentar'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(TokensStrip.s4),
         child: Column(
           children: [
             _field(_nome, 'Nome do plano *'),
@@ -289,7 +288,7 @@ class _NovoPlanoScreenState extends ConsumerState<_NovoPlanoScreen> {
             _num(_carb, 'Carboidrato (g)'),
             _num(_gord, 'Gordura (g)'),
             _field(_obs, 'Observações', maxLines: 3),
-            const SizedBox(height: 16),
+            const SizedBox(height: TokensStrip.s4),
             FxLiquidPrimaryButton(
               label: 'Criar Plano',
               loading: _saving,

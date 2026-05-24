@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -53,8 +53,8 @@ class AlunoActivationScreen extends ConsumerWidget {
     final historicoAsync = ref.watch(historicoCheckinProvider);
     final chatAsync = ref.watch(chatAlunoDashboardProvider);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Boas-vindas',
         leading: const SizedBox(width: 8),
@@ -97,14 +97,14 @@ class AlunoActivationScreen extends ConsumerWidget {
                         size: 32,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: TokensStrip.s4),
                     Text(
                       friendlyError(e),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
-                        color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                        color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -273,7 +273,7 @@ class AlunoActivationScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: TokensStrip.s4),
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: fxListCardDecoration(
@@ -291,7 +291,7 @@ class AlunoActivationScreen extends ConsumerWidget {
                           color:
                               isDark
                                   ? EagleTokens.darkInkMute
-                                  : EagleTokens.inkMute,
+                                  : TokensStrip.textSecondary,
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                         ),
@@ -302,7 +302,7 @@ class AlunoActivationScreen extends ConsumerWidget {
                             ? 'Sua base inicial esta fechada. Agora o app consegue te acompanhar melhor.'
                             : nextStep.title,
                         style: TextStyle(
-                          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                          color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
                         ),
@@ -316,11 +316,11 @@ class AlunoActivationScreen extends ConsumerWidget {
                           color:
                               isDark
                                   ? EagleTokens.darkInkMute
-                                  : EagleTokens.inkMute,
+                                  : TokensStrip.textSecondary,
                           height: 1.45,
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: TokensStrip.s4),
                       Row(
                         children: [
                           Expanded(
@@ -347,7 +347,7 @@ class AlunoActivationScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: TokensStrip.s4),
                 ...steps.map(
                   (step) => Padding(
                     padding: const EdgeInsets.only(bottom: 10),
@@ -404,11 +404,11 @@ class _ActivationStepCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       decoration: fxListCardDecoration(context, accent: primary),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

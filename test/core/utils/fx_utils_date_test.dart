@@ -2,6 +2,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/utils/fx_utils.dart';
 
 void main() {
+  group('fxTitleCaseName', () {
+    test('title-cases single and multi-word names', () {
+      expect(fxTitleCaseName('thales'), 'Thales');
+      expect(fxTitleCaseName('matheus silva'), 'Matheus Silva');
+      expect(fxTitleCaseName('  '), 'Aluno');
+    });
+  });
+
   group('fxDateFull', () {
     test('formats date in full Portuguese', () {
       final d = DateTime(2026, 5, 4);

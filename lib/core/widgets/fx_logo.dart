@@ -59,7 +59,7 @@ class FxLogo extends StatelessWidget {
                 children: [
                   TextSpan(
                     text: 'FOCUX',
-                    style: GoogleFonts.outfit(
+                    style: AppTypography.inter(
                       fontSize: iconSize * 0.55,
                       fontWeight: FontWeight.w700,
                       color: wordmarkColor,
@@ -70,7 +70,7 @@ class FxLogo extends StatelessWidget {
                   WidgetSpan(child: SizedBox(width: iconSize * 0.14)),
                   TextSpan(
                     text: 'PERSONAL',
-                    style: GoogleFonts.outfit(
+                    style: AppTypography.inter(
                       fontSize: iconSize * 0.55,
                       fontWeight: FontWeight.w400,
                       color: muteColor,

@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +25,7 @@ import '../utils/perfil_readiness.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class PerfilScreen extends ConsumerStatefulWidget {
   const PerfilScreen({super.key});
@@ -200,15 +201,15 @@ class _PerfilLoadingScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
-    final surface = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final bg = isDark ? EagleTokens.darkBg : TokensStrip.pageBg;
+    final surface = isDark ? EagleTokens.darkCard : TokensStrip.cardBg;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(TokensStrip.s4),
           child: Column(
             children: [
               Container(
@@ -251,16 +252,16 @@ class _PerfilErrorScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkBg : EagleTokens.paper;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final bg = isDark ? EagleTokens.darkBg : TokensStrip.pageBg;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(TokensStrip.s5),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -277,7 +278,7 @@ class _PerfilErrorScaffold extends StatelessWidget {
                     size: 28,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: TokensStrip.s4),
                 Text(
                   'Perfil indisponivel',
                   style: theme.textTheme.titleLarge?.copyWith(
@@ -334,8 +335,8 @@ class _PerfilBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final themePrimary = theme.colorScheme.primary;
 
     final primaryColor = _parseColor(
@@ -413,7 +414,7 @@ class _PerfilBody extends StatelessWidget {
                       transform: const GradientRotation(160 * math.pi / 180),
                       colors:
                           isDark
-                              ? [EagleTokens.brandInk, EagleTokens.brandDeep]
+                              ? [TokensStrip.primaryHover, EagleTokens.brandDeep]
                               : [heroPrimary, heroSecondary],
                     ),
                     boxShadow: [
@@ -787,7 +788,7 @@ class _PerfilBody extends StatelessWidget {
                               accent: accent,
                               mute: mute,
                               line: line,
-                              onTap: () => context.push('/qa/tokens-strip'),
+                              onTap: () => context.go('/qa/tokens-strip'),
                             ),
                             _ActionTile(
                               icon: Icons.science_outlined,
@@ -796,7 +797,7 @@ class _PerfilBody extends StatelessWidget {
                               accent: accent,
                               mute: mute,
                               line: line,
-                              onTap: () => context.push('/qa/smoke'),
+                              onTap: () => context.go('/qa/smoke'),
                             ),
                           ],
                           _ActionTile(
@@ -824,7 +825,7 @@ class _PerfilBody extends StatelessWidget {
                       ),
                     ),
                     if (!profileComplete) ...[
-                      const SizedBox(height: 16),
+                      const SizedBox(height: TokensStrip.s4),
                       _PerfilBottomActions(
                         profileComplete: profileComplete,
                         walletComplete: _hasWallet(perfil),
@@ -1098,7 +1099,7 @@ class _CardSection extends StatelessWidget {
     return Container(
       decoration: chrome.panel(radius: 20),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1256,7 +1257,7 @@ class _PerfilStickyBar extends StatelessWidget {
       color: Colors.transparent,
       child: Container(
         decoration: BoxDecoration(
-          color: (isDark ? EagleTokens.darkCard : EagleTokens.card)
+          color: (isDark ? EagleTokens.darkCard : TokensStrip.cardBg)
               .withValues(alpha: 0.96),
           border: Border(top: BorderSide(color: chrome.line.withValues(alpha: 0.7))),
           boxShadow: [
@@ -1532,7 +1533,7 @@ class _CompletenessCard extends StatelessWidget {
     final complete = score >= 100;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       decoration: chrome.panel(radius: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1593,7 +1594,7 @@ class _CompletenessCard extends StatelessWidget {
                         color:
                             isDark
                                 ? Colors.white.withValues(alpha: 0.08)
-                                : EagleTokens.lineSoft,
+                                : TokensStrip.borderDefault,
                       ),
                       FractionallySizedBox(
                         alignment: Alignment.centerLeft,
@@ -1695,7 +1696,7 @@ class _ReadyFocusStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Container(
       width: double.infinity,
@@ -1704,7 +1705,7 @@ class _ReadyFocusStrip extends StatelessWidget {
         color:
             isDark
                 ? Colors.white.withValues(alpha: 0.05)
-                : EagleTokens.lineSoft,
+                : TokensStrip.borderDefault,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -1747,7 +1748,7 @@ class _ChecklistChip extends StatelessWidget {
     final color =
         item.done
             ? accent
-            : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute);
+            : (isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary);
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -1761,7 +1762,7 @@ class _ChecklistChip extends StatelessWidget {
                     ? accent.withValues(alpha: isDark ? 0.16 : 0.09)
                     : (isDark
                         ? Colors.white.withValues(alpha: 0.05)
-                        : EagleTokens.lineSoft),
+                        : TokensStrip.borderDefault),
             borderRadius: BorderRadius.circular(999),
             border:
                 onTap != null
@@ -1816,7 +1817,7 @@ class _ProfessionalDataPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
 
     return _CardSection(
       title: 'Dados profissionais',
@@ -1947,7 +1948,7 @@ class _InfoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final content = Container(
       padding: const EdgeInsets.symmetric(vertical: 15),
       decoration: BoxDecoration(
@@ -2034,7 +2035,7 @@ class _ActionTile extends StatelessWidget {
     final ink =
         danger
             ? (isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad)
-            : (isDark ? EagleTokens.darkInk : EagleTokens.ink);
+            : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
 
     return InkWell(
       onTap: onTap,

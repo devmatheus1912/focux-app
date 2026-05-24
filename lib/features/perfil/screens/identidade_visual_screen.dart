@@ -18,6 +18,8 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class IdentidadeVisualScreen extends ConsumerStatefulWidget {
   const IdentidadeVisualScreen({super.key, this.isSetup = false});
@@ -234,7 +236,7 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
                           logoUrl: _logoUrl,
                           paletteName: _palette.name,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: TokensStrip.s4),
                         ShellSurface(
                           accent: _corPrimaria,
                           padding: const EdgeInsets.all(18),
@@ -339,7 +341,7 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
                                             const SizedBox(width: 6),
                                             Text(
                                               'Restaurar cores padrão',
-                                              style: GoogleFonts.outfit(
+                                              style: AppTypography.inter(
                                                 color: _corPrimaria,
                                                 fontWeight: FontWeight.w700,
                                                 fontSize: 12,
@@ -515,7 +517,7 @@ class _LiveBrandHero extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text(
                         'Preview ao vivo · $paletteName',
-                        style: GoogleFonts.outfit(
+                        style: AppTypography.inter(
                           color: Colors.white.withValues(alpha: 0.92),
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
@@ -525,7 +527,7 @@ class _LiveBrandHero extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: TokensStrip.s4),
                 Row(
                   children: [
                     CircleAvatar(
@@ -539,7 +541,7 @@ class _LiveBrandHero extends StatelessWidget {
                           logoUrl == null || logoUrl!.isEmpty
                               ? Text(
                                 name.isNotEmpty ? name[0].toUpperCase() : 'P',
-                                style: GoogleFonts.outfit(
+                                style: AppTypography.inter(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w800,
                                   fontSize: 22,
@@ -556,7 +558,7 @@ class _LiveBrandHero extends StatelessWidget {
                             name.isNotEmpty ? name : 'Seu app Focux',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.outfit(
+                            style: AppTypography.inter(
                               color: Colors.white,
                               fontWeight: FontWeight.w800,
                               fontSize: 20,
@@ -571,7 +573,7 @@ class _LiveBrandHero extends StatelessWidget {
                                 : 'Slogan aparece aqui em tempo real',
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.outfit(
+                            style: AppTypography.inter(
                               color: Colors.white.withValues(alpha: 0.82),
                               fontSize: 12.5,
                               height: 1.3,
@@ -652,7 +654,7 @@ class _LogoUploadRing extends StatelessWidget {
                     : Center(
                       child: Text(
                         nome.isNotEmpty ? nome[0].toUpperCase() : '?',
-                        style: GoogleFonts.outfit(
+                        style: AppTypography.inter(
                           fontSize: 36,
                           fontWeight: FontWeight.w800,
                           color: primary,
@@ -825,7 +827,7 @@ class _CuratedPaletteGrid extends StatelessWidget {
                     palette.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.outfit(
+                    style: AppTypography.inter(
                       fontWeight: FontWeight.w800,
                       fontSize: 12.5,
                       color: chrome.ink,
@@ -882,7 +884,7 @@ class _BrandField extends StatelessWidget {
       children: [
         Text(
           label.toUpperCase(),
-          style: GoogleFonts.outfit(
+          style: AppTypography.inter(
             fontSize: 10.5,
             fontWeight: FontWeight.w800,
             letterSpacing: 0.8,
@@ -912,7 +914,7 @@ class _BrandField extends StatelessWidget {
             enabled: enabled,
             maxLines: maxLines,
             maxLength: maxLength,
-            style: GoogleFonts.outfit(
+            style: AppTypography.inter(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: chrome.ink,
@@ -1002,7 +1004,7 @@ class _PanelTitle extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: GoogleFonts.outfit(
+                style: AppTypography.inter(
                   fontWeight: FontWeight.w800,
                   fontSize: 16,
                   letterSpacing: -0.3,
@@ -1090,7 +1092,7 @@ class _PaywallCard extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 'Recurso Premium',
-                style: GoogleFonts.outfit(
+                style: AppTypography.inter(
                   fontWeight: FontWeight.w800,
                   fontSize: 16,
                   color: chrome.ink,

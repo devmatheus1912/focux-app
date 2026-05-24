@@ -1,4 +1,4 @@
-import 'dart:io' show Platform;
+﻿import 'dart:io' show Platform;
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -17,6 +17,7 @@ import '../providers/auth_provider.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../widgets/password_strength_meter.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -199,7 +200,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   AuthBackButton(onTap: () => context.go('/login')),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: TokensStrip.s4),
                   Row(
                     children: [
                       const AuthLogoMark(size: 40),

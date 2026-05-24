@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 import '../../../core/utils/friendly_error.dart';
@@ -853,7 +853,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                     ),
                     child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
+                  padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 14, 16, 20),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -866,18 +866,18 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                             color:
                                 isDark
                                     ? EagleTokens.darkLine
-                                    : EagleTokens.line,
+                                    : TokensStrip.borderDefault,
                             borderRadius: BorderRadius.circular(999),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: TokensStrip.s4),
                       if (canInteract) ...[
                         Text(
                           'Reagir',
                           style: TextStyle(
                             color:
-                                isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                                isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                           ),
@@ -999,7 +999,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                 ),
                 child: SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+                    padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 14, 16, 24),
                     child: Wrap(
                 spacing: 10,
                 runSpacing: 10,
@@ -1063,7 +1063,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                 ),
                 child: SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
+                    padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 14, 16, 20),
                     child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -1071,7 +1071,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                     width: 36,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: isDark ? EagleTokens.darkLine : EagleTokens.line,
+                      color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
                       borderRadius: BorderRadius.circular(999),
                     ),
                   ),
@@ -1158,7 +1158,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                 child: SafeArea(
                   top: false,
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                    padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 14, 16, 16),
                     child: SizedBox(
                       height: sheetHeight,
                       child: Column(
@@ -1170,11 +1170,11 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                               color:
                                   isDark
                                       ? EagleTokens.darkLine
-                                      : EagleTokens.line,
+                                      : TokensStrip.borderDefault,
                               borderRadius: BorderRadius.circular(999),
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: TokensStrip.s4),
                           TextField(
                             controller: ctrl,
                             autofocus: true,
@@ -1217,7 +1217,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                               fillColor:
                                   isDark
                                       ? EagleTokens.darkCardHi
-                                      : EagleTokens.card,
+                                      : TokensStrip.cardBg,
                               border: FxInputDeco.outlineBorder(
                                 borderRadius: BorderRadius.circular(18),
                                 borderSide: BorderSide.none,
@@ -1473,7 +1473,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
               builder: (context, setSheetState) {
                 final items = filtered(selected);
                 return Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
+                  padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 14, 16, 18),
                   child: SizedBox(
                     height: MediaQuery.of(sheetContext).size.height * 0.72,
                     child: Column(
@@ -1487,7 +1487,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                               color:
                                   isDark
                                       ? EagleTokens.darkLine
-                                      : EagleTokens.line,
+                                      : TokensStrip.borderDefault,
                               borderRadius: BorderRadius.circular(999),
                             ),
                           ),
@@ -1497,7 +1497,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                           'Midias da conversa',
                           style: TextStyle(
                             color:
-                                isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                                isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
                           ),
@@ -1815,8 +1815,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final title = _displayName(brand);
     final subtitle = _subtitle(brand);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: title,
         subtitle: subtitle,
@@ -1889,7 +1889,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                       Text(
                         'Enviando anexo...',
                         style: TextStyle(
-                          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                          color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                           fontSize: 13,
                         ),
                       ),
@@ -2025,7 +2025,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                               ? null
                               : _showAttachmentSheet,
                       icon: const Icon(Icons.add_circle),
-                      color: EagleTokens.inkMute,
+                      color: TokensStrip.textSecondary,
                     ),
                     Expanded(
                       child: ClipRRect(
@@ -2067,7 +2067,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                           color:
                                               isDark
                                                   ? EagleTokens.darkInk
-                                                  : EagleTokens.ink,
+                                                  : TokensStrip.textPrimary,
                                           fontSize: 15,
                                         ),
                                         cursorColor: primary,
@@ -2077,7 +2077,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                             color:
                                                 isDark
                                                     ? EagleTokens.darkInkMute
-                                                    : EagleTokens.inkMute,
+                                                    : TokensStrip.textSecondary,
                                           ),
                                           contentPadding:
                                               const EdgeInsets.symmetric(
@@ -2100,7 +2100,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                     IconButton(
                                       onPressed: _showEmojiSheet,
                                       icon: const Icon(Icons.auto_awesome),
-                                      color: EagleTokens.inkMute,
+                                      color: TokensStrip.textSecondary,
                                     ),
                                     if (_composerHasText || _sending)
                                       Padding(
@@ -2257,7 +2257,7 @@ class _EmptyConversation extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(TokensStrip.s5),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -2278,7 +2278,7 @@ class _EmptyConversation extends StatelessWidget {
             Text(
               title,
               style: TextStyle(
-                color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -2287,7 +2287,7 @@ class _EmptyConversation extends StatelessWidget {
               subtitle,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
               ),
             ),
           ],
@@ -2310,11 +2310,11 @@ class _ConversationErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final muted = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final muted = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(TokensStrip.s5),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -2388,7 +2388,7 @@ class _DateDivider extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: isDark ? const Color(0xFF94A3B8) : EagleTokens.inkMute,
+              color: isDark ? const Color(0xFF94A3B8) : TokensStrip.textSecondary,
               fontSize: 11,
               fontWeight: FontWeight.w600,
             ),
@@ -2507,8 +2507,8 @@ class _TypingIndicatorState extends State<_TypingIndicator>
 
   @override
   Widget build(BuildContext context) {
-    final bg = widget.isDark ? EagleTokens.darkCardHi : EagleTokens.card;
-    final border = widget.isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final bg = widget.isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg;
+    final border = widget.isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
       decoration: BoxDecoration(
@@ -2735,11 +2735,11 @@ class _Bubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textColor =
-        mine ? Colors.white : (isDark ? EagleTokens.darkInk : EagleTokens.ink);
+        mine ? Colors.white : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
     final metaColor =
         mine
             ? Colors.white.withValues(alpha: 0.75)
-            : (isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute);
+            : (isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary);
     final deleted = msg.deletedAt != null;
     final displayText = formatChatTextForDisplay(msg.conteudo);
     final bubbleMaxWidth = (MediaQuery.sizeOf(context).width - 56).clamp(
@@ -2768,7 +2768,7 @@ class _Bubble extends StatelessWidget {
             color:
                 mine
                     ? null
-                    : (isDark ? EagleTokens.darkCardHi : EagleTokens.card),
+                    : (isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg),
             borderRadius: BorderRadius.only(
               topLeft: const Radius.circular(18),
               topRight: const Radius.circular(18),
@@ -2781,7 +2781,7 @@ class _Bubble extends StatelessWidget {
                       ? accentColor
                       : mine
                       ? Colors.transparent
-                      : (isDark ? EagleTokens.darkLine : EagleTokens.lineSoft),
+                      : (isDark ? EagleTokens.darkLine : TokensStrip.borderDefault),
               width: highlighted ? 1.6 : 1,
             ),
             boxShadow:
@@ -2859,7 +2859,7 @@ class _Bubble extends StatelessWidget {
                                       ? Colors.white.withValues(alpha: 0.10)
                                       : (isDark
                                           ? EagleTokens.darkBg
-                                          : EagleTokens.paper)),
+                                          : TokensStrip.pageBg)),
                           borderRadius: BorderRadius.circular(999),
                           border: Border.all(
                             color:
@@ -2942,7 +2942,7 @@ class _ReplySnippet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textColor =
-        mine ? Colors.white : (isDark ? EagleTokens.darkInk : EagleTokens.ink);
+        mine ? Colors.white : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
@@ -3036,7 +3036,7 @@ class _ReplyComposerBar extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color:
-                        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
                     fontSize: 12,
                   ),
                 ),
@@ -3069,18 +3069,18 @@ class _SearchState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(TokensStrip.s5),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 30, color: EagleTokens.inkMute),
+            Icon(icon, size: 30, color: TokensStrip.textSecondary),
             const SizedBox(height: 10),
             Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
             const SizedBox(height: 4),
             Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: EagleTokens.inkMute),
+              style: const TextStyle(color: TokensStrip.textSecondary),
             ),
           ],
         ),
@@ -3105,8 +3105,8 @@ class _RecordingComposerBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
@@ -3246,7 +3246,7 @@ class _MediaPreview extends StatelessWidget {
     }
 
     final textColor =
-        mine ? Colors.white : (isDark ? EagleTokens.darkInk : EagleTokens.ink);
+        mine ? Colors.white : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
 
     if (tipo == 'AUDIO') {
       return Padding(
@@ -3331,7 +3331,7 @@ class _MediaFilterChip extends StatelessWidget {
     final ink =
         selected
             ? Colors.white
-            : (isDark ? EagleTokens.darkInk : EagleTokens.ink);
+            : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: InkWell(
@@ -3343,13 +3343,13 @@ class _MediaFilterChip extends StatelessWidget {
             color:
                 selected
                     ? primary
-                    : (isDark ? EagleTokens.darkCardHi : EagleTokens.card),
+                    : (isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg),
             borderRadius: BorderRadius.circular(999),
             border: Border.all(
               color:
                   selected
                       ? primary
-                      : (isDark ? EagleTokens.darkLine : EagleTokens.line),
+                      : (isDark ? EagleTokens.darkLine : TokensStrip.borderDefault),
             ),
           ),
           child: Text(
@@ -3385,8 +3385,8 @@ class _MediaGalleryTile extends StatelessWidget {
     final url = msg.primaryMediaUrl;
     final isImage = tipo == 'IMAGE';
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final muted = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final muted = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return InkWell(
       onTap: onTap,
@@ -3539,7 +3539,7 @@ class _AudioInlinePlayerState extends State<_AudioInlinePlayer> {
     final ink =
         widget.mine
             ? Colors.white
-            : (widget.isDark ? EagleTokens.darkInk : EagleTokens.ink);
+            : (widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
     final muted = ink.withValues(alpha: 0.70);
     final name = widget.label.trim().isEmpty ? 'Audio' : widget.label.trim();
 

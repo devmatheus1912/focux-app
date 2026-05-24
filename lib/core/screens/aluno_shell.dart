@@ -16,7 +16,7 @@ class AlunoShell extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bottomInset = MediaQuery.of(context).padding.bottom;
     final compact = MediaQuery.sizeOf(context).width < 390;
-    final dockClearance = bottomInset + (compact ? 82.0 : 92.0);
+    final dockClearance = bottomInset + (compact ? 88.0 : 98.0);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(

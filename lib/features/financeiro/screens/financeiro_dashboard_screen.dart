@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class FinanceiroDashboardScreen extends ConsumerStatefulWidget {
   const FinanceiroDashboardScreen({super.key});
@@ -58,8 +59,8 @@ class _FinanceiroDashboardScreenState
     }
     if (_data == null) {
       final isDarkErr = Theme.of(context).brightness == Brightness.dark;
-      final inkErr = isDarkErr ? EagleTokens.darkInk : EagleTokens.ink;
-      final muteErr = isDarkErr ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+      final inkErr = isDarkErr ? EagleTokens.darkInk : TokensStrip.textPrimary;
+      final muteErr = isDarkErr ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
       final primaryErr = Theme.of(context).colorScheme.primary;
       return Center(
         child: Padding(
@@ -85,7 +86,7 @@ class _FinanceiroDashboardScreenState
               const SizedBox(height: 14),
               Text(
                 'Erro ao carregar',
-                style: GoogleFonts.outfit(
+                style: AppTypography.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: inkErr,
@@ -97,7 +98,7 @@ class _FinanceiroDashboardScreenState
                 textAlign: TextAlign.center,
                 style: TextStyle(color: muteErr, fontSize: 13, height: 1.35),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: TokensStrip.s4),
               OutlinedButton.icon(
                 onPressed: _load,
                 icon: const Icon(Icons.refresh_rounded, size: 18),
@@ -131,7 +132,7 @@ class _FinanceiroDashboardScreenState
       child: ListView(
         padding: const EdgeInsets.only(bottom: 110),
         children: [
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           // Hero — ring with received amount
           _HeroRing(data: d, isDark: isDark),
 
@@ -144,16 +145,16 @@ class _FinanceiroDashboardScreenState
           // Vencimentos próximos
           if (d.vencimentosProximos.isNotEmpty) ...[
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 22, 20, 10),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 22, 20, 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     'Vencimentos',
-                    style: GoogleFonts.outfit(
+                    style: AppTypography.inter(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                      color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                       letterSpacing: -0.3,
                     ),
                   ),
@@ -182,13 +183,13 @@ class _FinanceiroDashboardScreenState
           // Top alunos
           if (d.topAlunos.isNotEmpty) ...[
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 22, 20, 10),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 22, 20, 10),
               child: Text(
                 'Top alunos · acumulado',
-                style: GoogleFonts.outfit(
+                style: AppTypography.inter(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                  color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                   letterSpacing: -0.3,
                 ),
               ),
@@ -221,7 +222,7 @@ class _FinanceiroDashboardScreenState
                                         color:
                                             isDark
                                                 ? EagleTokens.darkLine
-                                                : EagleTokens.line,
+                                                : TokensStrip.borderDefault,
                                         width: 0.5,
                                       ),
                                     ),
@@ -278,7 +279,7 @@ class _FinanceiroDashboardScreenState
                                     color:
                                         isDark
                                             ? EagleTokens.darkInk
-                                            : EagleTokens.ink,
+                                            : TokensStrip.textPrimary,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -291,7 +292,7 @@ class _FinanceiroDashboardScreenState
                                   color:
                                       isDark
                                           ? EagleTokens.darkInk
-                                          : EagleTokens.ink,
+                                          : TokensStrip.textPrimary,
                                 ),
                               ),
                             ],
@@ -327,7 +328,7 @@ class _HeroRing extends StatelessWidget {
     final metaSuperada = data.previsaoReceita > 0 && data.receitaMes >= data.previsaoReceita;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
+      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 18),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
         decoration: BoxDecoration(
@@ -558,7 +559,7 @@ class _TriGrid extends StatelessWidget {
     final pendente = math.max(0.0, data.previsaoReceita - data.receitaMes);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 22),
+      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 22),
       child: Row(
         children: [
           Expanded(
@@ -658,7 +659,7 @@ class _EvolucaoChart extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 18, 16, 14),
+        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 18, 16, 14),
         decoration: fxListCardDecoration(context, accent: primary),
         child: Column(
           children: [
@@ -694,7 +695,7 @@ class _EvolucaoChart extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: TokensStrip.s4),
             SizedBox(
               height: 130,
               child: Row(

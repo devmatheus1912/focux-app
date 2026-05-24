@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/friendly_error.dart';
 
@@ -10,6 +10,7 @@ import '../data/broadcast_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 final _broadcastRepositoryProvider = Provider<BroadcastRepository>(
   (ref) => BroadcastRepository(ref.read(apiClientProvider)),
@@ -80,8 +81,8 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
   Widget build(BuildContext context) {
     final historicoAsync = ref.watch(_broadcastHistoricoProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final brand = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
@@ -90,7 +91,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
         child: RefreshIndicator(
           onRefresh: () async => ref.invalidate(_broadcastHistoricoProvider),
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
+            padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 28),
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(4, 0, 4, 18),
@@ -210,7 +211,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
               historicoAsync.when(
                 loading:
                     () => const Padding(
-                      padding: EdgeInsets.all(24),
+                      padding: EdgeInsets.all(TokensStrip.s5),
                       child: FxLoading(),
                     ),
                 error:
@@ -260,10 +261,10 @@ class _DesignField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final fill =
-        isDark ? Colors.white.withValues(alpha: 0.05) : EagleTokens.paper;
+        isDark ? Colors.white.withValues(alpha: 0.05) : TokensStrip.pageBg;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -323,8 +324,8 @@ class _AudienceChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final brand = Theme.of(context).colorScheme.primary;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
@@ -337,7 +338,7 @@ class _AudienceChip extends StatelessWidget {
                   ? brand
                   : (isDark
                       ? Colors.white.withValues(alpha: 0.05)
-                      : EagleTokens.paper),
+                      : TokensStrip.pageBg),
           borderRadius: BorderRadius.circular(10),
           border: selected ? null : Border.all(color: line),
           boxShadow:
@@ -374,8 +375,8 @@ class _BroadcastCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final brand = Theme.of(context).colorScheme.primary;
     final publico = broadcast.tipoConsultoriaAlvo ?? 'TODOS';
     return Container(
@@ -459,13 +460,13 @@ class _StateCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       decoration: fxListCardDecoration(context, radius: 18),
       child: Text(
         text,
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+          color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
         ),
       ),
     );

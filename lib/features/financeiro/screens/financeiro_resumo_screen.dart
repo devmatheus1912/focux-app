@@ -7,6 +7,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class FinanceiroResumoScreen extends ConsumerStatefulWidget {
   const FinanceiroResumoScreen({super.key});
@@ -101,8 +102,8 @@ class _FinanceiroResumoScreenState
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
@@ -124,7 +125,7 @@ class _FinanceiroResumoScreenState
                 const SizedBox(width: 16),
                 Text(
                   '${_meses[_mes]} $_ano',
-                  style: GoogleFonts.outfit(
+                  style: AppTypography.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: ink,
@@ -188,7 +189,7 @@ class _FinanceiroResumoScreenState
             const SizedBox(height: 14),
             Text(
               'Erro ao carregar resumo',
-              style: GoogleFonts.outfit(
+              style: AppTypography.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: ink,
@@ -200,7 +201,7 @@ class _FinanceiroResumoScreenState
               textAlign: TextAlign.center,
               style: TextStyle(color: mute, fontSize: 13, height: 1.35),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: TokensStrip.s4),
             OutlinedButton.icon(
               onPressed: _carregar,
               icon: const Icon(Icons.refresh_rounded, size: 18),
@@ -240,7 +241,7 @@ class _FinanceiroResumoScreenState
           const SizedBox(height: 14),
           Text(
             'Sem dados para exibir',
-            style: GoogleFonts.outfit(
+            style: AppTypography.inter(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: ink,
@@ -260,10 +261,10 @@ class _FinanceiroResumoScreenState
     final r = _resumo!;
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 32),
       children: [
         _DonutChartCard(resumo: r, isDark: isDark),
-        const SizedBox(height: 16),
+        const SizedBox(height: TokensStrip.s4),
         _MetricRow(
           label: 'Total recebido',
           value: 'R\$ ${r.totalRecebido.toStringAsFixed(0)}',
@@ -319,8 +320,8 @@ class _NavArrow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -429,7 +430,7 @@ class _DonutChartCard extends StatelessWidget {
             ),
           ),
           if (!isEmpty) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: TokensStrip.s4),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

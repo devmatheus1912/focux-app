@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/router/safe_navigation.dart';
@@ -115,15 +115,15 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Progressão de Carga',
         subtitle: widget.alunoNome,
         onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(TokensStrip.s4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -176,7 +176,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
             onPressed: _loading ? null : _gerar,
           ),
           if (_erro != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: TokensStrip.s4),
             Container(
               decoration: fxListCardDecoration(context, accent: primary),
               clipBehavior: Clip.antiAlias,
@@ -213,7 +213,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
             const Divider(),
             const SizedBox(height: 8),
             MarkdownBody(data: _resultado!, selectable: true),
-            const SizedBox(height: 16),
+            const SizedBox(height: TokensStrip.s4),
             OutlinedButton.icon(
               onPressed: () => _exportarPdf(_resultado!),
               icon: const Icon(Icons.picture_as_pdf),

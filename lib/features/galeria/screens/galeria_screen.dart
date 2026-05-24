@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,6 +9,8 @@ import '../data/galeria_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 
 class GaleriaScreen extends ConsumerStatefulWidget {
   const GaleriaScreen({super.key});
@@ -109,9 +111,8 @@ class _State extends ConsumerState<GaleriaScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -119,7 +120,7 @@ class _State extends ConsumerState<GaleriaScreen> {
         actions: [
           if (_uploading)
             const Padding(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.all(TokensStrip.s4),
               child: SizedBox(
                 width: 20,
                 height: 20,
@@ -147,19 +148,19 @@ class _State extends ConsumerState<GaleriaScreen> {
                       color:
                           isDark
                               ? EagleTokens.darkInkMute
-                              : EagleTokens.inkMute,
+                              : TokensStrip.textSecondary,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: TokensStrip.s4),
                     Text(
                       'Nenhuma foto ainda.',
                       style: TextStyle(
                         color:
                             isDark
                                 ? EagleTokens.darkInkMute
-                                : EagleTokens.inkMute,
+                                : TokensStrip.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: TokensStrip.s4),
                     FxLiquidPrimaryButton(
                       icon: Icons.add_photo_alternate_outlined,
                       label: 'Adicionar foto',

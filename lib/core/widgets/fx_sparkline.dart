@@ -52,7 +52,17 @@ class _SparklinePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (data.length < 2) return;
+    final padding = strokeWidth / 2;
+
+    if (data.isEmpty || data.every((value) => value <= 0)) {
+      _paintEmptyTrack(canvas, size, padding);
+      return;
+    }
+
+    if (data.length < 2) {
+      _paintEmptyTrack(canvas, size, padding);
+      return;
+    }
 
     final paint =
         Paint()
@@ -65,8 +75,6 @@ class _SparklinePainter extends CustomPainter {
     double maxVal = data.reduce((a, b) => a > b ? a : b);
     double minVal = data.reduce((a, b) => a < b ? a : b);
 
-    // Add some padding so the stroke doesn't get cut off
-    final padding = strokeWidth / 2;
     final w = size.width - (padding * 2);
     final h = size.height - (padding * 2);
 
@@ -127,6 +135,22 @@ class _SparklinePainter extends CustomPainter {
           ..close();
 
     canvas.drawPath(fillPath, fillPaint);
+  }
+
+  void _paintEmptyTrack(Canvas canvas, Size size, double padding) {
+    final trackPaint =
+        Paint()
+          ..color = color.withValues(alpha: 0.22)
+          ..strokeWidth = 1.4
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
+
+    final y = size.height - padding - 1;
+    canvas.drawLine(
+      Offset(padding, y),
+      Offset(size.width - padding, y),
+      trackPaint,
+    );
   }
 
   @override

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -63,8 +63,8 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
       _load();
     }
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Funil de Leads',
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
@@ -72,7 +72,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
           IconButton(
             icon: Icon(
               Icons.view_column,
-              color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+              color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
             ),
             tooltip: 'Visão Kanban',
             onPressed: () async {
@@ -86,7 +86,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
           IconButton(
             icon: Icon(
               Icons.refresh,
-              color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+              color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
             ),
             onPressed: _load,
           ),
@@ -149,7 +149,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                         color:
                             isDark
                                 ? EagleTokens.darkInkMute
-                                : EagleTokens.inkMute,
+                                : TokensStrip.textSecondary,
                         fontSize: 14,
                       ),
                     ),
@@ -158,7 +158,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
               )
               : SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+                padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 96),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -209,8 +209,8 @@ class _KanbanColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final border = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final border = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
 
     return SizedBox(
       width: 240,
@@ -308,8 +308,8 @@ class _KanbanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),

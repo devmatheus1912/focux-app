@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class AlertasScreen extends ConsumerStatefulWidget {
   const AlertasScreen({super.key});
@@ -200,9 +201,9 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final brand = Theme.of(context).colorScheme.primary;
     final brandDeep = BrandPalette.deep(brand);
 
@@ -245,9 +246,8 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
       );
     }
 
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Alertas de Risco',
         subtitle: 'MOTOR ANTI-CHURN',
@@ -271,7 +271,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
               // Config strip
               if (_config != null)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 16),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
@@ -343,7 +343,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
 
               // Summary chips
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 16),
                 child: Row(
                   children: [
                     Expanded(
@@ -495,7 +495,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                           ),
                         )
                         : ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 100),
                           itemCount: _filtrados.length,
                           itemBuilder: (_, i) {
                             final a = _filtrados[i];

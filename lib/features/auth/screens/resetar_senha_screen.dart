@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+﻿import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../widgets/auth_shell.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class ResetarSenhaScreen extends StatefulWidget {
   final String? token;

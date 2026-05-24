@@ -58,7 +58,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     }
     if (s == 'FALTA') return isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad;
     if (s == 'CANCELADO') {
-      return isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+      return isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     }
     return primary; // AGENDADO
   }
@@ -166,7 +166,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
           children: [
             // Header
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 16, 20, 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -341,11 +341,11 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: TokensStrip.s4),
 
             // Today's info
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 0, 20, 10),
               child: Text.rich(
                 TextSpan(
                   children: [
@@ -382,7 +382,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                   _loading
                       ? const FxLoading()
                       : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 100),
                         itemCount:
                             dailyEvents.length + (dailyEvents.isEmpty ? 2 : 1),
                         itemBuilder: (_, i) {
@@ -601,7 +601,7 @@ class _AgendaEmptyState extends StatelessWidget {
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(22),
-      border: Border.all(color: EagleTokens.line),
+      border: Border.all(color: TokensStrip.borderDefault),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -618,7 +618,7 @@ class _AgendaEmptyState extends StatelessWidget {
               child: const Icon(
                 Icons.event_available_outlined,
                 size: 19,
-                color: EagleTokens.brandInk,
+                color: TokensStrip.primaryHover,
               ),
             ),
             const SizedBox(width: 12),
@@ -628,10 +628,10 @@ class _AgendaEmptyState extends StatelessWidget {
                 children: [
                   Text(
                     'Dia livre',
-                    style: GoogleFonts.outfit(
+                    style: AppTypography.inter(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
-                      color: EagleTokens.ink,
+                      color: TokensStrip.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -640,7 +640,7 @@ class _AgendaEmptyState extends StatelessWidget {
                     style: GoogleFonts.jetBrainsMono(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: EagleTokens.inkMute,
+                      color: TokensStrip.textSecondary,
                     ),
                   ),
                 ],
@@ -651,10 +651,10 @@ class _AgendaEmptyState extends StatelessWidget {
         const SizedBox(height: 14),
         Text(
           'Nenhum atendimento marcado. Use este espaço para encaixar uma avaliação, retorno ou sessão avulsa.',
-          style: GoogleFonts.outfit(
+          style: AppTypography.inter(
             fontSize: 12,
             height: 1.35,
-            color: EagleTokens.inkMute,
+            color: TokensStrip.textSecondary,
           ),
         ),
       ],
@@ -686,7 +686,7 @@ class _AgendaEventSheet extends StatelessWidget {
 
     return SafeArea(
       child: Container(
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+        padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 10, 20, 20),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -700,7 +700,7 @@ class _AgendaEventSheet extends StatelessWidget {
                 width: 38,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: EagleTokens.line,
+                  color: TokensStrip.borderDefault,
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
@@ -731,10 +731,10 @@ class _AgendaEventSheet extends StatelessWidget {
                         title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.outfit(
+                        style: AppTypography.inter(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
-                          color: EagleTokens.ink,
+                          color: TokensStrip.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -742,9 +742,9 @@ class _AgendaEventSheet extends StatelessWidget {
                         agendamento.alunoNome,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.outfit(
+                        style: AppTypography.inter(
                           fontSize: 12,
-                          color: EagleTokens.inkMute,
+                          color: TokensStrip.textSecondary,
                         ),
                       ),
                     ],
@@ -766,7 +766,7 @@ class _AgendaEventSheet extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             _AgendaInfoTile(label: 'Status', value: statusLabel),
-            const SizedBox(height: 16),
+            const SizedBox(height: TokensStrip.s4),
             OutlinedButton.icon(
               onPressed: onDelete,
               icon: const Icon(Icons.delete_outline_rounded, size: 18),
@@ -814,10 +814,10 @@ class _AgendaInfoTile extends StatelessWidget {
       children: [
         Text(
           label,
-          style: GoogleFonts.outfit(
+          style: AppTypography.inter(
             fontSize: 10,
             fontWeight: FontWeight.w700,
-            color: EagleTokens.inkMute,
+            color: TokensStrip.textSecondary,
           ),
         ),
         const SizedBox(height: 4),
@@ -825,10 +825,10 @@ class _AgendaInfoTile extends StatelessWidget {
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.outfit(
+          style: AppTypography.inter(
             fontSize: 13,
             fontWeight: FontWeight.w800,
-            color: EagleTokens.ink,
+            color: TokensStrip.textPrimary,
           ),
         ),
       ],
@@ -959,7 +959,7 @@ class _NovoAgendamentoScreenState
       ),
     ),
     body: SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       child: Column(
         children: [
           ref
@@ -984,7 +984,7 @@ class _NovoAgendamentoScreenState
             controller: _titulo,
             decoration: const InputDecoration(labelText: 'Título (opcional)'),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           ListTile(
             title: const Text('Início'),
             subtitle: Text(_fmtDt(_inicio)),
@@ -997,7 +997,7 @@ class _NovoAgendamentoScreenState
             trailing: const Icon(Icons.calendar_today),
             onTap: () => _pickDateTime(false),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           FxLiquidPrimaryButton(
             label: 'Agendar',
             loading: _saving,
@@ -1039,11 +1039,11 @@ class _AgendaAlunoButton extends StatelessWidget {
                     aluno?.nome ?? 'Aluno',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.outfit(
+                    style: AppTypography.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
                       color:
-                          aluno == null ? EagleTokens.inkMute : EagleTokens.ink,
+                          aluno == null ? TokensStrip.textSecondary : TokensStrip.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 3),
@@ -1051,9 +1051,9 @@ class _AgendaAlunoButton extends StatelessWidget {
                     aluno?.email ?? 'Selecione quem sera atendido',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.outfit(
+                    style: AppTypography.inter(
                       fontSize: 11,
-                      color: EagleTokens.inkMute,
+                      color: TokensStrip.textSecondary,
                     ),
                   ),
                 ],
@@ -1061,7 +1061,7 @@ class _AgendaAlunoButton extends StatelessWidget {
             ),
             const Icon(
               Icons.keyboard_arrow_down_rounded,
-              color: EagleTokens.inkMute,
+              color: TokensStrip.textSecondary,
             ),
           ],
         ),
@@ -1091,10 +1091,10 @@ class _AgendaAlunoAvatar extends StatelessWidget {
                 : Center(
                   child: Text(
                     _initials(aluno?.nome ?? ''),
-                    style: GoogleFonts.outfit(
+                    style: AppTypography.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
-                      color: EagleTokens.brandInk,
+                      color: TokensStrip.primaryHover,
                     ),
                   ),
                 ),
@@ -1159,12 +1159,12 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                   width: 38,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: EagleTokens.line,
+                    color: TokensStrip.borderDefault,
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+                  padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 18, 20, 12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1172,10 +1172,10 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                         children: [
                           Text(
                             'Selecionar aluno',
-                            style: GoogleFonts.outfit(
+                            style: AppTypography.inter(
                               fontSize: 20,
                               fontWeight: FontWeight.w800,
-                              color: EagleTokens.ink,
+                              color: TokensStrip.textPrimary,
                             ),
                           ),
                           const Spacer(),
@@ -1184,7 +1184,7 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                             style: GoogleFonts.jetBrainsMono(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: EagleTokens.brandInk,
+                              color: TokensStrip.primaryHover,
                             ),
                           ),
                         ],
@@ -1197,17 +1197,17 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                           hintText: 'Buscar por nome, e-mail ou objetivo',
                           prefixIcon: const Icon(Icons.search, size: 19),
                           filled: true,
-                          fillColor: EagleTokens.card,
+                          fillColor: TokensStrip.cardBg,
                           border: FxInputDeco.outlineBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide: const BorderSide(
-                              color: EagleTokens.line,
+                              color: TokensStrip.borderDefault,
                             ),
                           ),
                           enabledBorder: FxInputDeco.outlineBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide: const BorderSide(
-                              color: EagleTokens.line,
+                              color: TokensStrip.borderDefault,
                             ),
                           ),
                           focusedBorder: FxInputDeco.outlineBorder(
@@ -1222,7 +1222,7 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                 Expanded(
                   child: ListView.separated(
                     controller: controller,
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+                    padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 0, 20, 28),
                     itemCount: alunos.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
                     itemBuilder: (_, index) {
@@ -1237,10 +1237,10 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                             color:
                                 selected
                                     ? EagleTokens.brandSofter
-                                    : EagleTokens.card,
+                                    : TokensStrip.cardBg,
                             borderRadius: BorderRadius.circular(18),
                             border: Border.all(
-                              color: selected ? primary : EagleTokens.line,
+                              color: selected ? primary : TokensStrip.borderDefault,
                             ),
                           ),
                           child: Row(
@@ -1255,10 +1255,10 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                                       aluno.nome,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: GoogleFonts.outfit(
+                                      style: AppTypography.inter(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w800,
-                                        color: EagleTokens.ink,
+                                        color: TokensStrip.textPrimary,
                                       ),
                                     ),
                                     const SizedBox(height: 3),
@@ -1270,9 +1270,9 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                                       ].join(' · '),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: GoogleFonts.outfit(
+                                      style: AppTypography.inter(
                                         fontSize: 11,
-                                        color: EagleTokens.inkMute,
+                                        color: TokensStrip.textSecondary,
                                       ),
                                     ),
                                   ],
@@ -1284,8 +1284,8 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                                     : Icons.chevron_right_rounded,
                                 color:
                                     selected
-                                        ? EagleTokens.brandInk
-                                        : EagleTokens.inkMute,
+                                        ? TokensStrip.primaryHover
+                                        : TokensStrip.textSecondary,
                               ),
                             ],
                           ),
@@ -1344,7 +1344,7 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
 
     return SafeArea(
       child: Container(
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+        padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 10, 20, 20),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -1358,7 +1358,7 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
                 width: 38,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: EagleTokens.line,
+                  color: TokensStrip.borderDefault,
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
@@ -1366,10 +1366,10 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
             const SizedBox(height: 18),
             Text(
               widget.title,
-              style: GoogleFonts.outfit(
+              style: AppTypography.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
-                color: EagleTokens.ink,
+                color: TokensStrip.textPrimary,
               ),
             ),
             const SizedBox(height: 14),
@@ -1389,10 +1389,10 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
                       width: 58,
                       padding: const EdgeInsets.symmetric(vertical: 9),
                       decoration: BoxDecoration(
-                        color: selected ? primary : EagleTokens.card,
+                        color: selected ? primary : TokensStrip.cardBg,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: selected ? primary : EagleTokens.line,
+                          color: selected ? primary : TokensStrip.borderDefault,
                         ),
                       ),
                       child: Column(
@@ -1400,20 +1400,20 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
                         children: [
                           Text(
                             _weekLabel(day.weekday),
-                            style: GoogleFonts.outfit(
+                            style: AppTypography.inter(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                               color:
-                                  selected ? Colors.white : EagleTokens.inkMute,
+                                  selected ? Colors.white : TokensStrip.textSecondary,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             '${day.day}',
-                            style: GoogleFonts.outfit(
+                            style: AppTypography.inter(
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
-                              color: selected ? Colors.white : EagleTokens.ink,
+                              color: selected ? Colors.white : TokensStrip.textPrimary,
                             ),
                           ),
                         ],
@@ -1423,7 +1423,7 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
                 },
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: TokensStrip.s4),
             SizedBox(
               height: 230,
               child: GridView.builder(
@@ -1445,10 +1445,10 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
                     child: Container(
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: selected ? primary : EagleTokens.card,
+                        color: selected ? primary : TokensStrip.cardBg,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: selected ? primary : EagleTokens.line,
+                          color: selected ? primary : TokensStrip.borderDefault,
                         ),
                       ),
                       child: Text(
@@ -1456,7 +1456,7 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
                         style: GoogleFonts.jetBrainsMono(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
-                          color: selected ? Colors.white : EagleTokens.ink,
+                          color: selected ? Colors.white : TokensStrip.textPrimary,
                         ),
                       ),
                     ),

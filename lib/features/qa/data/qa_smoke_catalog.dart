@@ -27,6 +27,7 @@ class QaSmokeEndpoint {
     required this.path,
     required this.authMode,
     required this.expectedAnonymousStatus,
+    this.queryParameters,
   });
 
   final String id;
@@ -35,6 +36,7 @@ class QaSmokeEndpoint {
   final String path;
   final String authMode;
   final int expectedAnonymousStatus;
+  final Map<String, String>? queryParameters;
 
   bool get isPublic => authMode == 'PUBLIC';
 }
@@ -455,6 +457,7 @@ const qaSmokeEndpoints = <QaSmokeEndpoint>[
     path: '/api/chat/inbox/search',
     authMode: 'PERSONAL',
     expectedAnonymousStatus: 403,
+    queryParameters: {'q': 'smoke'},
   ),
   QaSmokeEndpoint(
     id: 'chat-inbox-archived',
@@ -504,7 +507,7 @@ const qaSmokeEndpoints = <QaSmokeEndpoint>[
     id: 'financeiro-dashboard',
     area: 'financeiro',
     method: 'GET',
-    path: '/api/financeiro/dashboard',
+    path: '/api/financeiro/mensalidades/dashboard',
     authMode: 'PERSONAL',
     expectedAnonymousStatus: 403,
   ),

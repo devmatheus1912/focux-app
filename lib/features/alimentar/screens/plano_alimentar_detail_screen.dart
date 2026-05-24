@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -9,6 +9,8 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class PlanoAlimentarDetailScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -116,7 +118,7 @@ class _PlanoAlimentarDetailScreenState
                       const Text(
                         'A IA vai criar refeições estruturadas e adicionar diretamente neste plano.',
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: TokensStrip.s4),
                       TextField(
                         controller: objetivoCtrl,
                         decoration: const InputDecoration(
@@ -187,9 +189,8 @@ class _PlanoAlimentarDetailScreenState
   @override
   Widget build(BuildContext context) {
     final p = widget.plano;
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -524,7 +525,7 @@ class _NovaRefeicaoSheetState extends ConsumerState<_NovaRefeicaoSheet> {
   Widget build(BuildContext context) {
     final bottom = MediaQuery.of(context).viewInsets.bottom;
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 20, 16, bottom + 20),
+      padding: EdgeInsets.fromLTRB(TokensStrip.s4, 20, 16, bottom + 20),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -534,7 +535,7 @@ class _NovaRefeicaoSheetState extends ConsumerState<_NovaRefeicaoSheet> {
               'Nova Refeição',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: TokensStrip.s4),
             _field(_nome, 'Nome da refeição *'),
             _field(_horario, 'Horário (ex: 07:30)'),
             _num(_cal, 'Calorias (kcal)'),
@@ -542,7 +543,7 @@ class _NovaRefeicaoSheetState extends ConsumerState<_NovaRefeicaoSheet> {
             _num(_carbo, 'Carboidrato (g)'),
             _num(_gord, 'Gordura (g)'),
             _field(_alimentos, 'Alimentos', maxLines: 4),
-            const SizedBox(height: 16),
+            const SizedBox(height: TokensStrip.s4),
             FxLiquidPrimaryButton(
               label: 'Adicionar Refeição',
               loading: _saving,

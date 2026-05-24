@@ -7,6 +7,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class FinanceiroAlunoScreen extends ConsumerStatefulWidget {
   const FinanceiroAlunoScreen({super.key});
@@ -98,8 +99,8 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = Theme.of(context).colorScheme.primary;
 
     return FxShellScaffold(
@@ -129,7 +130,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
               : RefreshIndicator(
                 onRefresh: _carregar,
                 child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                  padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 8, 16, 32),
                   itemCount: _mensalidades.length,
                   itemBuilder:
                       (_, i) => _MensalidadeCard(
@@ -166,7 +167,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
             const SizedBox(height: 14),
             Text(
               'Erro ao carregar',
-              style: GoogleFonts.outfit(
+              style: AppTypography.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: ink,
@@ -178,7 +179,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(color: mute, fontSize: 13, height: 1.35),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: TokensStrip.s4),
             OutlinedButton.icon(
               onPressed: _carregar,
               icon: const Icon(Icons.refresh_rounded, size: 18),
@@ -218,7 +219,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
           const SizedBox(height: 14),
           Text(
             'Nenhuma mensalidade',
-            style: GoogleFonts.outfit(
+            style: AppTypography.inter(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: ink,
@@ -250,9 +251,9 @@ class _MensalidadeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final card = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final card = isDark ? EagleTokens.darkCard : TokensStrip.cardBg;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final sColor = statusColor(m.status);
 
     return Container(

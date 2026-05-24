@@ -342,10 +342,10 @@ class _AddExercicioToTreinoScreenState
     final exerciciosAsync = ref.watch(exerciciosProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Adicionar Exercício',
         subtitle: 'NOVO ITEM',
@@ -385,7 +385,7 @@ class _AddExercicioToTreinoScreenState
                               setState(() => _tabIndex = index);
                             },
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: TokensStrip.s4),
                           AnimatedSwitcher(
                             duration: const Duration(milliseconds: 180),
                             switchInCurve: Curves.easeOutCubic,
@@ -448,7 +448,7 @@ class _AddExercicioToTreinoScreenState
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: TokensStrip.s4),
                             Row(
                               children: [
                                 Expanded(
@@ -487,7 +487,7 @@ class _AddExercicioToTreinoScreenState
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: TokensStrip.s4),
                             _SerieTypeSelector(
                               value: _tipoSerie,
                               primary: primary,
@@ -496,7 +496,7 @@ class _AddExercicioToTreinoScreenState
                                   (value) => setState(() => _tipoSerie = value),
                             ),
                             if (_tipoSerie == 'SUPERSET') ...[
-                              const SizedBox(height: 16),
+                              const SizedBox(height: TokensStrip.s4),
                               TextFormField(
                                 controller: _grupoSupersetCtrl,
                                 decoration: _fxInputDecoration(
@@ -523,7 +523,7 @@ class _AddExercicioToTreinoScreenState
                                 isDark: isDark,
                               ),
                             ],
-                            const SizedBox(height: 16),
+                            const SizedBox(height: TokensStrip.s4),
                             TextFormField(
                               controller: _observacoesCtrl,
                               decoration: _fxInputDecoration(
@@ -539,7 +539,7 @@ class _AddExercicioToTreinoScreenState
                               ),
                             ),
                             if (_error != null) ...[
-                              const SizedBox(height: 16),
+                              const SizedBox(height: TokensStrip.s4),
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 14,
@@ -606,8 +606,8 @@ class _PrescriptionSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     return Row(
       children: [
         Container(
@@ -669,8 +669,8 @@ class _AddExerciseTabStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
 
     return Container(
       decoration: BoxDecoration(
@@ -748,8 +748,8 @@ class _ExercisePickerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final selected = exercicio != null;
     final hasMediaIssue = selected && exercicio!.mediaTrustLevel != 'READY';
 
@@ -932,15 +932,15 @@ class _ExerciseMediaStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final hasVideo = exercicio.videoUrl?.trim().isNotEmpty == true;
     final statusColor =
         hasVideo
             ? primary
             : isDark
             ? Colors.white.withValues(alpha: 0.68)
-            : EagleTokens.inkMute;
+            : TokensStrip.textSecondary;
     final statusIcon =
         mediaLoading
             ? Icons.hourglass_empty_rounded
@@ -1069,8 +1069,8 @@ class _RemoveExerciseVideoSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final bottom = MediaQuery.of(context).padding.bottom;
 
     return SafeArea(
@@ -1091,7 +1091,7 @@ class _RemoveExerciseVideoSheet extends StatelessWidget {
                   color:
                       isDark
                           ? Colors.white.withValues(alpha: 0.16)
-                          : EagleTokens.line,
+                          : TokensStrip.borderDefault,
                   borderRadius: BorderRadius.circular(99),
                 ),
               ),
@@ -1248,8 +1248,8 @@ class _ExerciseVideoPreviewSheetState
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final bottom = MediaQuery.of(context).padding.bottom;
 
     return SafeArea(
@@ -1257,7 +1257,7 @@ class _ExerciseVideoPreviewSheetState
       child: Padding(
         padding: EdgeInsets.fromLTRB(12, 0, 12, bottom + 10),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 16),
           decoration: fxListCardDecoration(context, accent: primary),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1272,7 +1272,7 @@ class _ExerciseVideoPreviewSheetState
                     color:
                         isDark
                             ? Colors.white.withValues(alpha: 0.16)
-                            : EagleTokens.line,
+                            : TokensStrip.borderDefault,
                     borderRadius: BorderRadius.circular(99),
                   ),
                 ),
@@ -1510,9 +1510,9 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final bottom = MediaQuery.of(context).padding.bottom;
     final normalized = _query.trim().toLowerCase();
     final filtered =
@@ -1534,7 +1534,7 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
           constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height * 0.82,
           ),
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 16),
           decoration: fxListCardDecoration(context, accent: primary),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1547,7 +1547,7 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
                   color:
                       isDark
                           ? Colors.white.withValues(alpha: 0.16)
-                          : EagleTokens.line,
+                          : TokensStrip.borderDefault,
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
@@ -1598,7 +1598,7 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
                   hintText: 'Buscar por nome, músculo ou equipamento',
                   prefixIcon: Icon(Icons.search_rounded, color: primary),
                   filled: true,
-                  fillColor: isDark ? EagleTokens.darkCardHi : EagleTokens.card,
+                  fillColor: isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 14,
                     vertical: 14,
@@ -1681,9 +1681,9 @@ class _ExercisePickerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
 
     return InkWell(
       onTap: onTap,
@@ -1813,11 +1813,11 @@ class _PresetSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selected = workoutBuilderPresetById(selectedId);
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       decoration: fxListCardDecoration(context, accent: primary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1909,7 +1909,7 @@ class _SerieTypeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final options = const [
       ('NORMAL', Icons.fitness_center_rounded, 'Normal'),
       ('SUPERSET', Icons.link_rounded, 'Superset'),
@@ -1979,7 +1979,7 @@ class _ModeHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -2023,8 +2023,8 @@ class _ExercicioErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Center(
       child: Padding(
@@ -2049,7 +2049,7 @@ class _ExercicioErrorState extends StatelessWidget {
             Text(
               'Erro ao carregar exercícios',
               textAlign: TextAlign.center,
-              style: GoogleFonts.outfit(
+              style: AppTypography.inter(
                 color: ink,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -2095,8 +2095,8 @@ InputDecoration _fxInputDecoration({
   required Color primary,
   String? helper,
 }) {
-  final fillColor = isDark ? EagleTokens.darkCardHi : EagleTokens.card;
-  final lineColor = isDark ? EagleTokens.darkLine : EagleTokens.line;
+  final fillColor = isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg;
+  final lineColor = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
 
   return InputDecoration(
     labelText: label,

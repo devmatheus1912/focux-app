@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -73,8 +73,8 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
     final pendentes = plano.marcos.where((m) => !m.atingido).toList();
     final atual = pendentes.isEmpty ? null : pendentes.first.id;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Plano de Sucesso',
         subtitle: 'Aluno #${widget.alunoId}',
@@ -155,7 +155,7 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: TokensStrip.s4),
             Text(
               'Marcos',
               style: TextStyle(
@@ -322,7 +322,7 @@ class _MarcoTile extends StatelessWidget {
                                 ? currentBg
                                 : (isDark
                                     ? Colors.white.withValues(alpha: 0.04)
-                                    : EagleTokens.lineSoft)),
+                                    : TokensStrip.borderDefault)),
                     shape: BoxShape.circle,
                   ),
                   child: Center(

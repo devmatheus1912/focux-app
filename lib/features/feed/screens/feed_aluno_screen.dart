@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
@@ -12,6 +12,7 @@ import '../widgets/feed_comments_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class FeedAlunoScreen extends ConsumerStatefulWidget {
   const FeedAlunoScreen({super.key});
@@ -152,7 +153,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                       Text(
                         'Nenhuma publicação disponível.',
                         style: TextStyle(
-                          color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                          color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -164,7 +165,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                   color: primary,
                   onRefresh: _load,
                   child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 110),
+                    padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 110),
                     itemCount: _posts.length + 1,
                     itemBuilder: (_, i) {
                       if (i == 0) {
@@ -176,7 +177,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                               color:
                                   isDark
                                       ? EagleTokens.darkInk
-                                      : EagleTokens.ink,
+                                      : TokensStrip.textPrimary,
                               fontSize: 28,
                               fontWeight: FontWeight.w900,
                               letterSpacing: -0.5,
@@ -198,7 +199,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                           accent: p.fixado ? primary : null,
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(TokensStrip.s4),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -339,7 +340,7 @@ class _PostAuthorHeader extends StatelessWidget {
             : 'Personal';
     final avatarUrl = post.autorAvatarUrl?.trim();
     final hasAvatar = avatarUrl != null && avatarUrl.isNotEmpty;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Row(
       children: [

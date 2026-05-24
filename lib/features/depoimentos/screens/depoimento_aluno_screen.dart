@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/depoimento_repository.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class DepoimentoAlunoScreen extends ConsumerStatefulWidget {
   const DepoimentoAlunoScreen({super.key});
@@ -64,7 +65,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
                         color: EagleTokens.good,
                         size: 72,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: TokensStrip.s4),
                       Text(
                         'Depoimento enviado!',
                         style: Theme.of(context).textTheme.headlineSmall
@@ -78,7 +79,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
                           color:
                               isDark
                                   ? EagleTokens.darkInkMute
-                                  : EagleTokens.inkMute,
+                                  : TokensStrip.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 32),
@@ -91,7 +92,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
                 ),
               )
               : SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(TokensStrip.s5),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -106,10 +107,10 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
                           color:
                               isDark
                                   ? EagleTokens.darkInkMute
-                                  : EagleTokens.inkMute,
+                                  : TokensStrip.textSecondary,
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: TokensStrip.s4),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(
@@ -129,7 +130,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: TokensStrip.s5),
                       Text(
                         'DEPOIMENTO',
                         style: TextStyle(
@@ -139,7 +140,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
                           color:
                               isDark
                                   ? EagleTokens.darkInkMute
-                                  : EagleTokens.inkMute,
+                                  : TokensStrip.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -158,7 +159,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
                                     ? 'Mínimo 10 caracteres'
                                     : null,
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: TokensStrip.s5),
                       FxLiquidPrimaryButton(
                         label: 'Enviar depoimento',
                         loading: _enviando,

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +9,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class AlertasConfigScreen extends ConsumerStatefulWidget {
   const AlertasConfigScreen({super.key});
@@ -88,9 +89,8 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
 
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Configurar Alertas',
         onBack: () => safePopOrGo(context, '/alertas'),
@@ -101,7 +101,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
               : _erro != null
               ? Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(TokensStrip.s5),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -177,7 +177,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                             Text(
                               'Alerta quando o aluno não treina por X dias consecutivos',
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: EagleTokens.inkMute,
+                                color: TokensStrip.textSecondary,
                               ),
                             ),
                             Slider(
@@ -197,13 +197,13 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                                 Text(
                                   '1 dia',
                                   style: theme.textTheme.bodySmall?.copyWith(
-                                    color: EagleTokens.inkMute,
+                                    color: TokensStrip.textSecondary,
                                   ),
                                 ),
                                 Text(
                                   '30 dias',
                                   style: theme.textTheme.bodySmall?.copyWith(
-                                    color: EagleTokens.inkMute,
+                                    color: TokensStrip.textSecondary,
                                   ),
                                 ),
                               ],
@@ -212,7 +212,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: TokensStrip.s4),
                     DecoratedBox(
                       decoration: fxListCardDecoration(
                         context,
@@ -262,7 +262,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                             Text(
                               'Alerta quando a taxa de aderência cair abaixo deste valor',
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: EagleTokens.inkMute,
+                                color: TokensStrip.textSecondary,
                               ),
                             ),
                             Slider(
@@ -283,13 +283,13 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                                 Text(
                                   '10%',
                                   style: theme.textTheme.bodySmall?.copyWith(
-                                    color: EagleTokens.inkMute,
+                                    color: TokensStrip.textSecondary,
                                   ),
                                 ),
                                 Text(
                                   '90%',
                                   style: theme.textTheme.bodySmall?.copyWith(
-                                    color: EagleTokens.inkMute,
+                                    color: TokensStrip.textSecondary,
                                   ),
                                 ),
                               ],

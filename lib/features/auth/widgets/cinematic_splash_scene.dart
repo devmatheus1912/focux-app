@@ -148,7 +148,7 @@ class _PremiumSplashWordmark extends StatelessWidget {
         Text(
           'FOCUX',
           textAlign: TextAlign.center,
-          style: GoogleFonts.outfit(
+          style: AppTypography.inter(
             color: Colors.white,
             fontSize: 38,
             fontWeight: FontWeight.w700,
@@ -160,7 +160,7 @@ class _PremiumSplashWordmark extends StatelessWidget {
         Text(
           'PERSONAL',
           textAlign: TextAlign.center,
-          style: GoogleFonts.outfit(
+          style: AppTypography.inter(
             color: primary,
             fontSize: 12,
             fontWeight: FontWeight.w600,
@@ -212,7 +212,7 @@ class _PremiumSplashWordmark extends StatelessWidget {
         Text(
           'Treine com dados. Evolua com inteligência.',
           textAlign: TextAlign.center,
-          style: GoogleFonts.outfit(
+          style: AppTypography.inter(
             color: Colors.white.withValues(alpha: 0.48),
             fontSize: 13.5,
             fontStyle: FontStyle.italic,
@@ -246,7 +246,7 @@ class _PremiumLoadingRail extends StatelessWidget {
       children: [
         Text(
           'CARREGANDO',
-          style: GoogleFonts.outfit(
+          style: AppTypography.inter(
             color: primary.withValues(alpha: 0.88),
             fontSize: 10.5,
             fontWeight: FontWeight.w600,

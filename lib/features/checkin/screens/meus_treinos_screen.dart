@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -21,8 +21,8 @@ class MeusTreinosScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Sua rotina',
         subtitle: 'TREINOS',
@@ -85,7 +85,7 @@ class MeusTreinosScreen extends ConsumerWidget {
                   const SliverToBoxAdapter(child: SizedBox(height: 8)),
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
+                      padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 0, 20, 18),
                       child: _TrainingHero(
                         ativos: ativos,
                         total: treinos.length,
@@ -96,7 +96,7 @@ class MeusTreinosScreen extends ConsumerWidget {
                     ),
                   ),
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+                    padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 0, 20, 14),
                     sliver: SliverList.separated(
                       itemCount: treinos.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
@@ -114,7 +114,7 @@ class MeusTreinosScreen extends ConsumerWidget {
                   ),
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 110),
+                      padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 0, 20, 110),
                       child: _TrainingReadinessSection(
                         totalExercicios: totalExercicios,
                         totalConcluidos: totalConcluidos,
@@ -283,8 +283,8 @@ class _TrainingPlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final done = treino.exercicios.where((e) => e.concluido).length;
     final progress =
         treino.exercicios.isEmpty ? 0.0 : done / treino.exercicios.length;
@@ -310,7 +310,7 @@ class _TrainingPlanCard extends StatelessWidget {
       onTap: handleAction,
       borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(TokensStrip.s4),
         decoration: fxListCardDecoration(
           context,
           accent: concluido ? EagleTokens.good : primary,
@@ -393,7 +393,7 @@ class _TrainingPlanCard extends StatelessWidget {
                   value: progress,
                   minHeight: 7,
                   backgroundColor:
-                      isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+                      isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
                   valueColor: AlwaysStoppedAnimation(
                     concluido ? EagleTokens.good : primary,
                   ),
@@ -403,7 +403,7 @@ class _TrainingPlanCard extends StatelessWidget {
               Container(
                 height: 7,
                 decoration: BoxDecoration(
-                  color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+                  color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
@@ -468,8 +468,8 @@ void _showTrainingPendingSheet({
   required bool isDark,
 }) {
   final primary = Theme.of(context).colorScheme.primary;
-  final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-  final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+  final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+  final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
   showModalBottomSheet<void>(
     context: context,
@@ -538,7 +538,7 @@ void _showTrainingPendingSheet({
                 const SizedBox(height: 18),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(TokensStrip.s4),
                   decoration: fxListCardDecoration(
                     sheetContext,
                     accent: primary,
@@ -553,7 +553,7 @@ void _showTrainingPendingSheet({
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: TokensStrip.s4),
                 SizedBox(
                   width: double.infinity,
                   child: FxLiquidPrimaryButton(
@@ -586,12 +586,12 @@ class _TrainingReadinessSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final hasExercises = totalExercicios > 0;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       decoration: fxListCardDecoration(
         context,
         accent: primary,
@@ -698,8 +698,8 @@ class _ReadinessMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Container(
       padding: const EdgeInsets.all(10),
@@ -764,8 +764,8 @@ class _ReadinessPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -860,15 +860,15 @@ class _TrainingEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Center(
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(24),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(TokensStrip.s5),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -881,7 +881,7 @@ class _TrainingEmptyState extends StatelessWidget {
                 ),
                 child: Icon(icon, color: primary, size: 32),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: TokensStrip.s4),
               Text(
                 title,
                 textAlign: TextAlign.center,

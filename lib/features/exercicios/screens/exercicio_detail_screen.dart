@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -14,6 +14,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class ExercicioDetailScreen extends ConsumerStatefulWidget {
   final int exercicioId;
@@ -152,12 +153,12 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
     final exercicioAsync = ref.watch(exercicioProvider(widget.exercicioId));
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = Theme.of(context).colorScheme.primary;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Exercicio',
         subtitle: 'DETALHES',
@@ -189,7 +190,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
           error: (e, _) => Center(child: Text('Erro: $e')),
           data:
               (ex) => SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(TokensStrip.s4),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -303,7 +304,7 @@ class _CompactPill extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+              color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
               fontSize: 12,
               fontWeight: FontWeight.w800,
             ),
@@ -347,8 +348,8 @@ class _SimpleInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: fxListCardDecoration(context),
@@ -473,7 +474,7 @@ class _CleanExpansion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     return Container(
       decoration: fxListCardDecoration(context),
       child: Theme(
@@ -511,8 +512,8 @@ class _PrescriptionReadinessPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final color = _trustColor(exercicio, primary);
 
     return Container(
@@ -605,7 +606,7 @@ class _ReadinessCheck extends StatelessWidget {
     final fallback =
         Theme.of(context).brightness == Brightness.dark
             ? EagleTokens.darkInkMute
-            : EagleTokens.inkMute;
+            : TokensStrip.textSecondary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
@@ -750,8 +751,8 @@ class _EditorialReviewPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final color = switch (status) {
       'APPROVED' => EagleTokens.good,
       'REJECTED' => EagleTokens.bad,
@@ -890,7 +891,7 @@ class _GuidanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: fxListCardDecoration(context, accent: color),
@@ -941,8 +942,8 @@ class _MediaMetadataPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final licensed = licenseStatus == 'LICENSED';
     final primary = Theme.of(context).colorScheme.primary;
     return Container(
@@ -1165,8 +1166,8 @@ class _OwnVideoPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Container(
       padding: const EdgeInsets.all(14),

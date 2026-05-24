@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -171,10 +171,10 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
       builder: (ctx) {
         final dark = Theme.of(ctx).brightness == Brightness.dark;
         final primary = Theme.of(ctx).colorScheme.primary;
-        final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
-        final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-        final line = dark ? EagleTokens.darkLine : EagleTokens.line;
-        final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
+        final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+        final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+        final line = dark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+        final cardBg = dark ? EagleTokens.darkCard : TokensStrip.cardBg;
         var query = '';
 
         return StatefulBuilder(
@@ -280,7 +280,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: TokensStrip.s4),
                         TextField(
                           controller: search,
                           onChanged:
@@ -316,7 +316,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                         const SizedBox(height: 14),
                         if (filtered.isEmpty)
                           Container(
-                            padding: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.all(TokensStrip.s4),
                             decoration: fxListCardDecoration(ctx, radius: 18),
                             child: Text(
                               'Nenhum aluno encontrado para essa busca.',
@@ -605,10 +605,10 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
     final dark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final brand = dark ? BrandPalette.accent(primary) : primary;
-    final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = dark ? EagleTokens.darkLine : EagleTokens.line;
-    final cardBg = dark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final line = dark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final cardBg = dark ? EagleTokens.darkCard : TokensStrip.cardBg;
     final controller = TextEditingController(text: acaoInicial);
 
     final result = await showModalBottomSheet<_CopilotTaskDraft>(
@@ -693,7 +693,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: TokensStrip.s4),
                   Text(
                     'Ação',
                     style: TextStyle(
@@ -817,9 +817,9 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
   Future<void> _abrirMenu() async {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = dark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final line = dark ? EagleTokens.darkLine : TokensStrip.borderDefault;
 
     final action = await showModalBottomSheet<String>(
       context: context,
@@ -894,7 +894,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: TokensStrip.s4),
                 _CopilotMenuAction(
                   icon: Icons.person_search_outlined,
                   title: 'Trocar aluno',
@@ -971,7 +971,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
           bottom: false,
           child: Container(
             color: Colors.transparent,
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
+            padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 8, 16, 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -1046,7 +1046,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
             const SizedBox(height: 10),
 
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 12),
               child: _CopilotStudentSelector(
                 alunoNome: _selectedAlunoNome,
                 brand: brand,
@@ -1058,7 +1058,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
 
             // Mode selector
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 14),
               child: _CopilotModeSelector(
                 modes: _modes,
                 selectedIndex: _modeIdx,
@@ -1072,7 +1072,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
 
             // Contexto e preparo
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 14),
               child: _CopilotReadinessCard(
                 modeDisplay: _modeDisplay,
                 icon: _modeIcon,
@@ -1087,7 +1087,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
 
             // Safety disclaimer
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 12),
               child: _CopilotSafetyNote(
                 ink: ink,
                 mute: mute,
@@ -1097,7 +1097,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
 
             // Generate button / progress
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 18),
               child:
                   !_gerado && !_gerando
                       ? _CopilotPrimaryAction(
@@ -1120,7 +1120,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
 
             if (!_gerado && !_gerando && _erro == null)
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
+                padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 18),
                 child: _CopilotPreviewCard(
                   mode: _mode,
                   brand: brand,
@@ -1133,7 +1133,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
             // Result card — vinculado ao backend (/api/ia/copiloto/insights)
             if (_erro != null) ...[
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 16),
                 child: Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
@@ -1177,7 +1177,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                   return insightsAsync.when(
                     loading:
                         () => Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 16),
                           child: _CopilotInsightsLoading(
                             ink: ink,
                             mute: mute,
@@ -1186,7 +1186,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                         ),
                     error:
                         (e, _) => Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 16),
                           child: Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
@@ -1232,7 +1232,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                       });
                       if (insights.isEmpty) {
                         return Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 16),
                           child: Container(
                             padding: const EdgeInsets.all(18),
                             decoration: fxListCardDecoration(
@@ -1262,7 +1262,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                         );
                       }
                       return Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 16),
                         child: Container(
                           decoration: fxListCardDecoration(
                             context,
@@ -1355,7 +1355,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                   chipBg:
                                       dark
                                           ? const Color(0x0FFFFFFF)
-                                          : EagleTokens.lineSoft,
+                                          : TokensStrip.borderDefault,
                                 );
                               }),
                             ],
@@ -1367,7 +1367,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                 },
               ),
               Container(
-                margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                margin: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 12),
                 padding: const EdgeInsets.all(14),
                 decoration: fxListCardDecoration(
                   context,
@@ -1394,7 +1394,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 0),
                 child: Row(
                   children: [
                     Expanded(
@@ -1454,7 +1454,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
               ),
               if (_tarefaCriada && _proximaAcao != null)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 12, 16, 0),
                   child: Container(
                     padding: const EdgeInsets.all(13),
                     decoration: fxListCardDecoration(
@@ -2083,7 +2083,7 @@ class _CopilotReadinessCard extends StatelessWidget {
     final visibleChecks = checks.take(2).toList();
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       decoration: chrome.panel(radius: 22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2311,7 +2311,7 @@ class _CopilotInsightsLoading extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       decoration: fxListCardDecoration(context, accent: primary, radius: 22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2354,7 +2354,7 @@ class _CopilotInsightsLoading extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           for (final width in const [0.92, 0.74, 0.84])
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
@@ -2504,7 +2504,7 @@ class _CopilotGenerationStatus extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       decoration: fxListCardDecoration(context, accent: primary, radius: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2613,7 +2613,7 @@ class _CopilotPreviewCard extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       decoration: fxListCardDecoration(context, accent: primary, radius: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

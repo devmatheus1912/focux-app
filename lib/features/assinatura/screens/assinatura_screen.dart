@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +21,7 @@ import '../data/assinatura_repository.dart';
 import '../providers/assinatura_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class AssinaturaScreen extends ConsumerStatefulWidget {
   final String? initialPlan;
@@ -315,9 +316,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final primary = theme.colorScheme.primary;
 
     final perfil = ref.watch(perfilProvider).valueOrNull;
@@ -327,8 +328,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     _selectedPlanName ??=
         widget.initialPlan?.trim().toUpperCase() ?? currentPlan.apiName;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Assinatura',
         onBack: () => safePopOrGo(context, '/planos'),
@@ -371,7 +372,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   : 'Assinar Premium';
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+            padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 12, 16, 28),
             children: [
               // ── Header ────────────────────────────────────────────────
               Text(
@@ -427,7 +428,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   _enterprisePreview != null) ...[
                 const SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(TokensStrip.s4),
                   decoration: fxListCardDecoration(
                     context,
                     accent: primary,
@@ -531,7 +532,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                         softColor:
                             isDark
                                 ? EagleTokens.darkCardHi
-                                : EagleTokens.lineSoft,
+                                : TokensStrip.borderDefault,
                         isDark: isDark,
                       ),
                     ],
@@ -545,7 +546,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                         softColor:
                             isDark
                                 ? EagleTokens.darkCardHi
-                                : EagleTokens.lineSoft,
+                                : TokensStrip.borderDefault,
                         isDark: isDark,
                       ),
                     ],
@@ -607,7 +608,7 @@ class _TrialInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     if (loading) {
       return Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(TokensStrip.s4),
         decoration: fxListCardDecoration(context),
         child: const FxLoading(),
       );
@@ -771,13 +772,13 @@ class _PlanoCard extends StatelessWidget {
     final plan = subscriptionPlanFromApi(plano.nome);
     final isSelected = plan == selectedPlan;
     final isCurrent = plan == currentPlan;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = Theme.of(context).colorScheme.primary;
     final accent = switch (plan) {
       SubscriptionPlan.FREE =>
-        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
       SubscriptionPlan.PREMIUM => primary,
       SubscriptionPlan.ENTERPRISE => const Color(0xFFC49A2A),
     };

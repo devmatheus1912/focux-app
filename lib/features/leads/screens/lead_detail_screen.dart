@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -26,7 +26,7 @@ Color _statusColor(String status, Color fallback) {
   if (status == 'TESTE') return EagleTokens.warn;
   if (status == 'ATIVO') return EagleTokens.good;
   if (status == 'INADIMPLENTE') return EagleTokens.bad;
-  return EagleTokens.inkMute;
+  return TokensStrip.textSecondary;
 }
 
 const _tiposInteracao = ['WHATSAPP', 'LIGACAO', 'EMAIL', 'PRESENCIAL', 'OUTRO'];
@@ -242,7 +242,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                         'Nova Interação',
                         style: Theme.of(ctx).textTheme.titleMedium,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: TokensStrip.s4),
                       DropdownButtonFormField<String>(
                         value: tipo,
                         decoration: InputDecoration(
@@ -286,7 +286,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                         ),
                         maxLines: 3,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: TokensStrip.s4),
                       SizedBox(
                         width: double.infinity,
                         child: FxLiquidPrimaryButton(
@@ -345,8 +345,8 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
     final podeConverter =
         _lead.status != 'CONVERTIDO' && _lead.status != 'ATIVO';
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: _lead.nome,
         onBack: () => safePopOrGo(context, '/leads'),
@@ -409,7 +409,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                 avatar: Icon(Icons.circle, size: 10, color: color),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: TokensStrip.s4),
 
             // Info card
             Container(
@@ -456,7 +456,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                           Text(
                             'Próximo Contato',
                             style: Theme.of(context).textTheme.labelMedium
-                                ?.copyWith(color: EagleTokens.inkMute),
+                                ?.copyWith(color: TokensStrip.textSecondary),
                           ),
                           const SizedBox(height: 2),
                           Text(
@@ -466,7 +466,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                               color:
                                   _lead.proximoContato != null
                                       ? const Color(0xFF6D28D9)
-                                      : EagleTokens.inkMute,
+                                      : TokensStrip.textSecondary,
                             ),
                           ),
                         ],
@@ -494,7 +494,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                       Text(
                         'Observações',
                         style: Theme.of(context).textTheme.labelMedium
-                            ?.copyWith(color: EagleTokens.inkMute),
+                            ?.copyWith(color: TokensStrip.textSecondary),
                       ),
                       const SizedBox(height: TokensStrip.s2),
                       Text(_lead.observacoes!),
@@ -555,12 +555,12 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
               icon: const Icon(Icons.archive),
               label: const Text('Arquivar Lead'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: EagleTokens.inkMute,
+                foregroundColor: TokensStrip.textSecondary,
               ),
             ),
 
             // Interações
-            const SizedBox(height: 24),
+            const SizedBox(height: TokensStrip.s5),
             Row(
               children: [
                 const Icon(Icons.timeline, size: 20),
@@ -575,7 +575,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                     '${_interacoes.length}',
                     style: Theme.of(
                       context,
-                    ).textTheme.bodySmall?.copyWith(color: EagleTokens.inkMute),
+                    ).textTheme.bodySmall?.copyWith(color: TokensStrip.textSecondary),
                   ),
               ],
             ),
@@ -595,7 +595,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                   padding: EdgeInsets.all(TokensStrip.s4),
                   child: Text(
                     'Nenhuma interação registrada.',
-                    style: TextStyle(color: EagleTokens.inkMute),
+                    style: TextStyle(color: TokensStrip.textSecondary),
                   ),
                 ),
               )
@@ -667,7 +667,7 @@ class _InteracaoTile extends StatelessWidget {
                         dataStr,
                         style: const TextStyle(
                           fontSize: 11,
-                          color: EagleTokens.inkMute,
+                          color: TokensStrip.textSecondary,
                         ),
                       ),
                     ],
@@ -694,7 +694,7 @@ class _InfoRow extends StatelessWidget {
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(color: EagleTokens.inkMute)),
+        Text(label, style: const TextStyle(color: TokensStrip.textSecondary)),
         Flexible(
           child: Text(
             value,

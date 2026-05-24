@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -17,6 +17,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 final minhasMedidasProvider = FutureProvider<List<MedidaCorporal>>((ref) async {
   final repo = EvolucaoRepository(ref.read(apiClientProvider));
@@ -479,12 +480,12 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                           width: 42,
                           height: 4,
                           decoration: BoxDecoration(
-                            color: EagleTokens.lineSoft,
+                            color: TokensStrip.borderDefault,
                             borderRadius: BorderRadius.circular(999),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: TokensStrip.s4),
                       Text(
                         'Registrar progresso',
                         style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
@@ -499,7 +500,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                           height: 1.4,
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: TokensStrip.s4),
                       _Field(
                         controller: dataCtrl,
                         label: 'Data AAAA-MM-DD',
@@ -601,12 +602,12 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
     final async = ref.watch(alunoMeProvider);
     final medidasAsync = ref.watch(minhasMedidasProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Meu perfil',
         onBack: () => safePopOrGo(context, '/dashboard/aluno'),
@@ -633,7 +634,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
           return Form(
             key: _formKey,
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 28),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -786,7 +787,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: TokensStrip.s4),
                   _SectionCard(
                     title: 'Identidade e contato',
                     subtitle: 'Dados basicos para contato e rotina do aluno.',
@@ -976,7 +977,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                               const SizedBox(height: 12),
                               if (medidas.isEmpty)
                                 Container(
-                                  padding: const EdgeInsets.all(16),
+                                  padding: const EdgeInsets.all(TokensStrip.s4),
                                   decoration: BoxDecoration(
                                     color:
                                         isDark
@@ -1134,7 +1135,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: TokensStrip.s4),
                   FxLiquidPrimaryButton(
                     loading: _saving,
                     icon: Icons.check,
@@ -1193,7 +1194,7 @@ class _SectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       decoration: fxListCardDecoration(context, accent: primary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1205,7 +1206,7 @@ class _SectionCard extends StatelessWidget {
                 child: Text(
                   title,
                   style: TextStyle(
-                    color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                    color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                   ),
@@ -1218,12 +1219,12 @@ class _SectionCard extends StatelessWidget {
           Text(
             subtitle,
             style: TextStyle(
-              color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+              color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
               fontSize: 12.5,
               height: 1.4,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           ...children,
         ],
       ),
@@ -1262,7 +1263,7 @@ class _ProfileChip extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+              color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -1300,7 +1301,7 @@ class _MetricHighlightCard extends StatelessWidget {
                 : BrandPalette.softer(primary),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
+          color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
         ),
       ),
       child: Row(
@@ -1324,7 +1325,7 @@ class _MetricHighlightCard extends StatelessWidget {
                   label,
                   style: TextStyle(
                     color:
-                        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -1333,7 +1334,7 @@ class _MetricHighlightCard extends StatelessWidget {
                 Text(
                   value,
                   style: TextStyle(
-                    color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                    color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
                   ),
@@ -1345,7 +1346,7 @@ class _MetricHighlightCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color:
-                        isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+                        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
                     fontSize: 11.5,
                     height: 1.35,
                   ),
@@ -1408,7 +1409,7 @@ class _ProgressEntryCard extends StatelessWidget {
               Text(
                 formatarData(medida.data),
                 style: TextStyle(
-                  color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
+                  color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                   fontWeight: FontWeight.w700,
                 ),
               ),

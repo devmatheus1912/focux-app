@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
@@ -12,6 +12,7 @@ import '../../../core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class IaAlunoScreen extends ConsumerStatefulWidget {
   const IaAlunoScreen({super.key});
@@ -287,7 +288,7 @@ class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
 
   @override
   Widget build(BuildContext context) => SingleChildScrollView(
-    padding: const EdgeInsets.all(16),
+    padding: const EdgeInsets.all(TokensStrip.s4),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -298,7 +299,7 @@ class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
         const SizedBox(height: 8),
         const Text(
           'Gere recomendações personalizadas de progressão de carga com base no seu histórico de treinos.',
-          style: TextStyle(color: EagleTokens.inkMute),
+          style: TextStyle(color: TokensStrip.textSecondary),
         ),
         const SizedBox(height: 8),
         const IaSafetyDisclaimer(compact: true),

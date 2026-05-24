@@ -15,7 +15,54 @@ abstract class TokensStrip {
   static const Color cardBg = Color(0xFFFFFFFF);
   static const Color textPrimary = Color(0xFF1A1A2E);
   static const Color textSecondary = Color(0xFF6B7280);
+  static const Color textH2 = primaryHover;
   static const Color borderDefault = Color(0xFFE5E7EB);
+
+  // ── Typography hierarchy (TOKENS STRIP spec) ─────────────────────────
+  static const double fontH1 = 32;
+  static const double fontH2 = 22;
+  static const double fontBody = 15;
+  static const double fontBodySm = 13;
+  static const FontWeight weightH1 = FontWeight.w800;
+  static const FontWeight weightH2 = FontWeight.w700;
+  static const FontWeight weightBody = FontWeight.w400;
+  static const double trackingH1 = -0.3;
+  static const double trackingH2 = -0.2;
+  static const double leadingBody = 1.5;
+
+  static TextStyle h1({required Color color, String? fontFamily}) => TextStyle(
+        fontFamily: fontFamily,
+        fontSize: fontH1,
+        fontWeight: weightH1,
+        color: color,
+        letterSpacing: trackingH1,
+        height: 1.15,
+      );
+
+  static TextStyle h2({Color? color, String? fontFamily}) => TextStyle(
+        fontFamily: fontFamily,
+        fontSize: fontH2,
+        fontWeight: weightH2,
+        color: color ?? textH2,
+        letterSpacing: trackingH2,
+        height: 1.2,
+      );
+
+  static TextStyle body({required Color color, String? fontFamily}) => TextStyle(
+        fontFamily: fontFamily,
+        fontSize: fontBody,
+        fontWeight: weightBody,
+        color: color,
+        height: leadingBody,
+      );
+
+  static TextStyle bodyMuted({Color? color, String? fontFamily}) => TextStyle(
+        fontFamily: fontFamily,
+        fontSize: fontBodySm,
+        fontWeight: weightBody,
+        color: color ?? textSecondary,
+        height: leadingBody,
+      );
 
   // ── Neon cyan / teal premium (aliases) ───────────────────────────────
   static const Color neonCyan = primary;
@@ -75,6 +122,49 @@ abstract class TokensStrip {
       ),
     ];
   }
+
+  /// Colored glow shadows — TOKENS STRIP “Shadow depth” spec.
+  static List<BoxShadow> coloredDepthGlow(
+    Color color, {
+    double strength = 1,
+  }) {
+    final s = strength.clamp(0.0, 1.5);
+    return [
+      BoxShadow(
+        color: color.withValues(alpha: 0.40 * s),
+        blurRadius: 22,
+        spreadRadius: -2,
+        offset: const Offset(0, 8),
+      ),
+      BoxShadow(
+        color: color.withValues(alpha: 0.16 * s),
+        blurRadius: 36,
+        spreadRadius: 2,
+        offset: const Offset(0, 14),
+      ),
+    ];
+  }
+
+  // ── Feedback surfaces (toast / tooltip) ───────────────────────────────
+  static const Color toastSuccessBg = Color(0xFFEAF7F0);
+  static const Color toastSuccessBorder = Color(0xFFB8E6D0);
+  static const Color tooltipBg = Color(0xFFE8F8FA);
+  static const Color tooltipBorder = Color(0xFF9DE8E8);
+  static const Color specIdleFill = Color(0xFFEAF8F8);
+  static const Color specIdleBorder = Color(0xFF9DE8E8);
+  static const Color chipSelectedFill = Color(0xFFD4F5F5);
+
+  // ── Badge palette ─────────────────────────────────────────────────────
+  static const Color badgeError = Color(0xFFDC2626);
+  static const Color badgeErrorBg = Color(0xFFFEE2E2);
+  static const Color badgeSuccess = Color(0xFF16A34A);
+  static const Color badgeSuccessBg = Color(0xFFDCFCE7);
+  static const Color badgeInfo = Color(0xFF1D4ED8);
+  static const Color badgeInfoBg = Color(0xFFDBEAFE);
+  static const Color badgeWarning = Color(0xFFEA580C);
+  static const Color badgeWarningBg = Color(0xFFFFEDD5);
+  static const Color badgeNotify = Color(0xFFF59E0B);
+  static const Color badgeNotifyBg = Color(0xFFFEF3C7);
   static List<BoxShadow> elevation(
     int level, {
     required bool dark,

@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+﻿import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../data/auth_repository.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class EsqueciSenhaScreen extends StatefulWidget {
   const EsqueciSenhaScreen({super.key});
@@ -178,7 +179,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                       ),
                       child: Icon(Icons.send_rounded, color: primary, size: 30),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: TokensStrip.s5),
                     const Text(
                       'Recuperar senha',
                       style: TextStyle(
@@ -292,7 +293,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: TokensStrip.s5),
                     if (_emailDeliveryAvailable == false) ...[
                       AuthOperationalNotice(
                         icon: Icons.mark_email_unread_outlined,

@@ -1,10 +1,12 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 
@@ -55,9 +57,8 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
     final permissoesAsync = ref.watch(permissoesProvider);
     final primary = Theme.of(context).colorScheme.primary;
 
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -84,10 +85,10 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
                     size: 64,
                     color: const Color(0xFF9CA3AF),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: TokensStrip.s4),
                   const Text(
                     'Nenhuma permissão especial concedida.',
-                    style: TextStyle(color: EagleTokens.inkMute),
+                    style: TextStyle(color: TokensStrip.textSecondary),
                   ),
                 ],
               ),
@@ -95,7 +96,7 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
           }
           return ListView.builder(
             itemCount: permissoes.length,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(TokensStrip.s4),
             itemBuilder: (ctx, i) {
               final p = permissoes[i];
               return Card(
@@ -170,7 +171,7 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: TokensStrip.s4),
                     TextField(
                       controller: usuarioIdCtrl,
                       decoration: FxInputDeco.build(
@@ -179,7 +180,7 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
                       ),
                       keyboardType: TextInputType.number,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: TokensStrip.s4),
                     DropdownButtonFormField<String>(
                       value: recursoSelecionado,
                       decoration: FxInputDeco.build(context, 'Recurso'),
@@ -203,7 +204,7 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
                       ],
                       onChanged: (v) => setState(() => recursoSelecionado = v!),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: TokensStrip.s4),
                     DropdownButtonFormField<String>(
                       value: nivelSelecionado,
                       decoration: FxInputDeco.build(context, 'Nível de Acesso'),
@@ -223,7 +224,7 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
                       ],
                       onChanged: (v) => setState(() => nivelSelecionado = v!),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: TokensStrip.s5),
                     FxLiquidPrimaryButton(
                       label: 'Salvar',
                       onPressed: () async {

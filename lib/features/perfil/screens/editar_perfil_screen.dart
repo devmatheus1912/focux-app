@@ -146,11 +146,11 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final chrome = ShellChrome.forDark(isDark);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Editar Perfil',
         onBack: () => safePopOrGo(context, '/perfil'),
@@ -159,11 +159,11 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
         color: Colors.transparent,
         child: Container(
           decoration: BoxDecoration(
-            color: (isDark ? EagleTokens.darkCard : EagleTokens.card)
+            color: (isDark ? EagleTokens.darkCard : TokensStrip.cardBg)
                 .withValues(alpha: 0.96),
             border: Border(top: BorderSide(color: chrome.line)),
           ),
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+          padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 12, 20, 12),
           child: SafeArea(
             top: false,
             child: FxLiquidPrimaryButton(
@@ -178,7 +178,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
         child: SafeArea(
           bottom: false,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+            padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 8, 20, 24),
             child: Form(
               key: _formKey,
               child: Column(
@@ -204,7 +204,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                                       widget.perfil.nome.isNotEmpty
                                           ? widget.perfil.nome[0].toUpperCase()
                                           : '?',
-                                      style: GoogleFonts.outfit(
+                                      style: AppTypography.inter(
                                         fontSize: 36,
                                         fontWeight: FontWeight.w800,
                                         color: primary,
@@ -224,7 +224,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                                   color:
                                       isDark
                                           ? EagleTokens.darkBg
-                                          : EagleTokens.paper,
+                                          : TokensStrip.pageBg,
                                   width: 2,
                                 ),
                               ),
@@ -364,8 +364,8 @@ class _SectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Container(
       padding: const EdgeInsets.all(TokensStrip.s4),
@@ -375,7 +375,7 @@ class _SectionCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: GoogleFonts.outfit(
+            style: AppTypography.inter(
               color: ink,
               fontWeight: FontWeight.w800,
               fontSize: 14,

@@ -12,8 +12,8 @@ class ShellPalette {
 
   final bool isDark;
 
-  Color get ink => isDark ? EagleTokens.darkInk : EagleTokens.ink;
-  Color get mute => isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+  Color get ink => isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+  Color get mute => isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
   Color get line => isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
   Color get lineStrong => isDark ? EagleTokens.glassBorder : EagleTokens.line;
 
@@ -47,7 +47,13 @@ class ShellPalette {
                 : TokensStrip.borderDefault,
         width: accent != null ? 1.2 : 1,
       ),
-      boxShadow: TokensStrip.cardShadow(),
+      boxShadow: [
+        ...TokensStrip.cardShadow(),
+        ...TokensStrip.coloredDepthGlow(
+          accent ?? TokensStrip.primary,
+          strength: 0.2,
+        ),
+      ],
     );
   }
 
@@ -76,10 +82,21 @@ class ShellPalette {
   }
 
   BoxDecoration headerAction({double radius = TokensStrip.rSm}) {
-    return TokensStrip.glassPanel(
-      dark: isDark,
-      radius: radius,
-      elevationLevel: 4,
+    if (isDark) {
+      return TokensStrip.glassPanel(
+        dark: true,
+        radius: radius,
+        elevationLevel: 4,
+      );
+    }
+    return BoxDecoration(
+      color: TokensStrip.cardBg,
+      borderRadius: BorderRadius.circular(radius),
+      border: Border.all(color: TokensStrip.primary.withValues(alpha: 0.14)),
+      boxShadow: [
+        ...TokensStrip.cardShadow(),
+        ...TokensStrip.coloredDepthGlow(TokensStrip.primary, strength: 0.22),
+      ],
     );
   }
 
@@ -123,7 +140,7 @@ abstract class ShellChrome {
   static ShellPalette forDark(bool isDark) => ShellPalette(isDark);
 }
 
-/// Moon/sun toggle used on shell tab headers.
+/// Moon/sun toggle — TOKENS STRIP header chrome.
 class ShellThemeToggle extends ConsumerWidget {
   const ShellThemeToggle({super.key, this.size = 40});
 
@@ -131,24 +148,115 @@ class ShellThemeToggle extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final chrome = ShellChrome.of(context);
-    final icon = isDark ? 'sun' : 'moon';
+    final icon = chrome.isDark ? 'sun' : 'moon';
 
-    return Material(
+    return ShellHeaderIconButton(
+      icon: icon,
+      size: size,
+      onTap: () => ref.read(themeModeProvider.notifier).toggle(),
+    );
+  }
+}
+
+/// Circular header control — strip card (light) / glass (dark).
+class ShellHeaderIconButton extends StatelessWidget {
+  const ShellHeaderIconButton({
+    super.key,
+    required this.icon,
+    required this.onTap,
+    this.size = 38,
+    this.badgeCount = 0,
+    this.tooltip,
+  });
+
+  final String icon;
+  final VoidCallback onTap;
+  final double size;
+  final int badgeCount;
+  final String? tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final radius = size / 2;
+    final compact = size <= 38;
+    final dotSize = compact ? 7.0 : 8.0;
+
+    final button = Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => ref.read(themeModeProvider.notifier).toggle(),
-        borderRadius: BorderRadius.circular(TokensStrip.rSm),
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(radius),
         child: Container(
           width: size,
           height: size,
-          decoration: chrome.headerAction(),
-          child: Center(
-            child: FxIcon(name: icon, size: 18, color: chrome.mute),
+          decoration: chrome.headerAction(radius: radius),
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              FxIcon(name: icon, size: size * 0.48, color: chrome.ink),
+              if (badgeCount > 0)
+                Positioned(
+                  top: compact ? -1 : size * 0.06,
+                  right: compact ? -1 : size * 0.08,
+                  child: Container(
+                    width: badgeCount > 9 ? null : dotSize,
+                    height: badgeCount > 9 ? null : dotSize,
+                    constraints: badgeCount > 9
+                        ? BoxConstraints(
+                          minWidth: compact ? 15 : 18,
+                          minHeight: compact ? 14 : 16,
+                        )
+                        : null,
+                    padding: badgeCount > 9
+                        ? EdgeInsets.symmetric(
+                          horizontal: compact ? 3 : 4,
+                          vertical: compact ? 1 : 0,
+                        )
+                        : null,
+                    decoration: BoxDecoration(
+                      color: TokensStrip.primary,
+                      shape: badgeCount > 9
+                          ? BoxShape.rectangle
+                          : BoxShape.circle,
+                      borderRadius:
+                          badgeCount > 9
+                              ? BorderRadius.circular(999)
+                              : null,
+                      border: Border.all(
+                        color: chrome.isDark
+                            ? TokensStrip.cinematicSurface
+                            : TokensStrip.cardBg,
+                        width: compact ? 1.25 : 1.5,
+                      ),
+                      boxShadow: TokensStrip.coloredDepthGlow(
+                        TokensStrip.primary,
+                        strength: compact ? 0.28 : 0.35,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: badgeCount > 9
+                        ? Text(
+                          '9+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: compact ? 7 : 8,
+                            fontWeight: FontWeight.w800,
+                            height: 1,
+                          ),
+                        )
+                        : null,
+                  ),
+                ),
+            ],
           ),
         ),
       ),
     );
+
+    if (tooltip == null) return button;
+    return Tooltip(message: tooltip!, child: button);
   }
 }

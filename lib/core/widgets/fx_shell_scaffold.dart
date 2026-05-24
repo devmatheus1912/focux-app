@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
@@ -121,11 +120,9 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
           subtitle == null
               ? Text(
                 title,
-                style: GoogleFonts.outfit(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
+                style: TokensStrip.h2(
                   color: ink,
-                  letterSpacing: -0.4,
+                  fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
                 ),
               )
               : Column(
@@ -133,16 +130,19 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.outfit(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
+                    style: TokensStrip.h2(
                       color: ink,
-                      letterSpacing: -0.35,
-                    ),
+                      fontFamily:
+                          Theme.of(context).textTheme.bodyLarge?.fontFamily,
+                    ).copyWith(fontSize: 17),
                   ),
                   Text(
                     subtitle!,
-                    style: TextStyle(fontSize: 11.5, color: mute, height: 1.1),
+                    style: TokensStrip.bodyMuted(
+                      color: mute,
+                      fontFamily:
+                          Theme.of(context).textTheme.bodyLarge?.fontFamily,
+                    ).copyWith(fontSize: 11.5, height: 1.1),
                   ),
                 ],
               ),
@@ -207,3 +207,32 @@ BoxDecoration fxListCardDecoration(
 Color fxScreenInk(BuildContext context) => ShellChrome.of(context).ink;
 
 Color fxScreenMute(BuildContext context) => ShellChrome.of(context).mute;
+
+/// TOKENS STRIP card — white surface + visible teal depth glow (showcase spec).
+BoxDecoration fxStripCardDecoration(
+  BuildContext context, {
+  Color? accent,
+  double radius = TokensStrip.rCard,
+  double glowStrength = 0.44,
+}) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final primary = accent ?? Theme.of(context).colorScheme.primary;
+
+  if (isDark) {
+    return ShellChrome.of(context).panel(
+      radius: radius,
+      accent: primary,
+      elevationLevel: 8,
+    );
+  }
+
+  return BoxDecoration(
+    color: TokensStrip.cardBg,
+    borderRadius: BorderRadius.circular(radius),
+    border: Border.all(color: primary.withValues(alpha: 0.16), width: 1),
+    boxShadow: [
+      ...TokensStrip.cardShadow(),
+      ...TokensStrip.coloredDepthGlow(primary, strength: glowStrength),
+    ],
+  );
+}

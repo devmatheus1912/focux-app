@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/brand_palette.dart';
@@ -6,9 +6,9 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/theme/theme_provider.dart';
-import '../../../core/widgets/fx_logo.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_sparkline.dart';
+import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -24,6 +24,8 @@ import '../../notificacoes/data/notificacoes_repository.dart';
 import '../../onboarding/screens/setup_onboarding_widget.dart';
 import '../../chat/screens/chat_inbox_screen.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 
 class PersonalDashboardScreen extends ConsumerStatefulWidget {
   const PersonalDashboardScreen({super.key});
@@ -31,6 +33,29 @@ class PersonalDashboardScreen extends ConsumerStatefulWidget {
   @override
   ConsumerState<PersonalDashboardScreen> createState() =>
       _PersonalDashboardScreenState();
+}
+
+String _dashboardGreeting(String? nome) {
+  final hour = DateTime.now().hour;
+  final prefix =
+      hour < 12
+          ? 'Bom dia'
+          : hour < 18
+          ? 'Boa tarde'
+          : 'Boa noite';
+  final first = nome?.split(' ').first.trim();
+  if (first != null && first.isNotEmpty) {
+    return '$prefix, ${fxTitleCaseName(first)}';
+  }
+  return prefix;
+}
+
+bool _isRiskEchoCopy(String text) {
+  final lower = text.toLowerCase();
+  return lower.contains('risco') ||
+      lower.contains('abandono') ||
+      lower.contains('aderência') ||
+      lower.contains('aderencia');
 }
 
 class _PersonalDashboardScreenState
@@ -69,7 +94,7 @@ class _PersonalDashboardScreenState
     ).animate(CurvedAnimation(parent: _counterCtrl, curve: Curves.easeOut));
     _heroFade = CurvedAnimation(
       parent: _entryCtrl,
-      curve: const Interval(0.0, 0.55, curve: Curves.easeOutCubic),
+      curve: const Interval(0.32, 0.78, curve: Curves.easeOutCubic),
     );
     _heroSlide = Tween<Offset>(
       begin: const Offset(0, 0.05),
@@ -77,11 +102,11 @@ class _PersonalDashboardScreenState
     ).animate(_heroFade);
     _kpiFade = CurvedAnimation(
       parent: _entryCtrl,
-      curve: const Interval(0.22, 0.82, curve: Curves.easeOutCubic),
+      curve: const Interval(0.48, 0.92, curve: Curves.easeOutCubic),
     );
     _commandFade = CurvedAnimation(
       parent: _entryCtrl,
-      curve: const Interval(0.38, 0.96, curve: Curves.easeOutCubic),
+      curve: const Interval(0.08, 0.58, curve: Curves.easeOutCubic),
     );
     _loadFin();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -136,8 +161,6 @@ class _PersonalDashboardScreenState
     final themeDark = Theme.of(context).brightness == Brightness.dark;
     final alunosAsync = ref.watch(alunosProvider);
     final historicoCheckinsAsync = ref.watch(historicoCheckinProvider);
-    final notificacoesNaoLidas =
-        ref.watch(notificacoesNaoLidasProvider).valueOrNull ?? 0;
     final chromeOnDark = themeDark;
 
     return Scaffold(
@@ -214,6 +237,17 @@ class _PersonalDashboardScreenState
                 },
                 orElse: () => 0,
               );
+              final commandAsync = ref.watch(commandCenterProvider);
+              final agendaHoje = commandAsync.maybeWhen(
+                data: (cc) => cc.agendaHoje.length,
+                orElse: () => 0,
+              );
+              final attentionVisible = alunosEmRisco.isNotEmpty ||
+                  (_finData != null &&
+                      _finData!.vencimentosProximos.isNotEmpty);
+              final riskDominante =
+                  alunosAtivos > 0 &&
+                  riscoAlto >= math.max(2, (alunosAtivos * 0.5).ceil());
 
               return RefreshIndicator(
                 onRefresh: () async {
@@ -230,7 +264,12 @@ class _PersonalDashboardScreenState
                   slivers: [
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          4,
+                          TokensStrip.s4,
+                          TokensStrip.s3,
+                        ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
@@ -239,113 +278,65 @@ class _PersonalDashboardScreenState
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  FxLogo(
-                                    iconSize: 34,
-                                    showLabel: true,
-                                    horizontal: true,
-                                    light: chromeOnDark,
-                                  ),
-                                  const SizedBox(height: 10),
                                   Text(
-                                    'Hoje · Bom dia, ${data.nomePersonal?.split(' ').first ?? ''}',
+                                    _dashboardGreeting(data.nomePersonal),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 12,
+                                    style: TokensStrip.h2(
                                       color:
                                           themeDark
                                               ? EagleTokens.darkInk
-                                              : EagleTokens.ink,
-                                      fontWeight: FontWeight.w700,
+                                              : TokensStrip.textPrimary,
+                                      fontFamily:
+                                          Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge
+                                              ?.fontFamily,
+                                    ).copyWith(
+                                      fontSize: 20,
+                                      letterSpacing: -0.35,
+                                      height: 1.15,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Prioridades do dia',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TokensStrip.bodyMuted(
+                                      color:
+                                          themeDark
+                                              ? EagleTokens.darkInkMute
+                                              : TokensStrip.textSecondary,
+                                      fontFamily:
+                                          Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge
+                                              ?.fontFamily,
+                                    ).copyWith(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: 8),
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 const ShellThemeToggle(size: 36),
-                                const SizedBox(width: 8),
-                                InkWell(
-                                  onTap:
-                                      () => context.push(
-                                        '/notificacoes',
-                                      ), // Rota de notificações
-                                  borderRadius: BorderRadius.circular(18),
-                                  child: Container(
-                                    width: 36,
-                                    height: 36,
-                                    decoration: ShellChrome.forDark(
-                                      themeDark,
-                                    ).headerAction(radius: 18),
-                                    child: Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        FxIcon(
-                                          name: 'bell',
-                                          size: 20,
-                                          color:
-                                              themeDark
-                                                  ? EagleTokens.darkInk
-                                                  : EagleTokens.ink,
-                                          strokeWidth: 1.9,
-                                        ),
-                                        if (notificacoesNaoLidas > 0)
-                                          Positioned(
-                                            top: 8,
-                                            right: 9,
-                                            child: Container(
-                                              width: 7,
-                                              height: 7,
-                                              decoration: BoxDecoration(
-                                                color: primary,
-                                                shape: BoxShape.circle,
-                                                border: Border.all(
-                                                  color:
-                                                      themeDark
-                                                          ? EagleTokens.darkCard
-                                                          : EagleTokens.card,
-                                                  width: 2,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
+                                const SizedBox(width: 6),
+                                const NotificacaoBadgeButton(size: 36),
+                                const SizedBox(width: 6),
+                                _HeaderProfileAvatar(
+                                  primary: primary,
+                                  isDark: themeDark,
+                                  photoUrl: data.logoUrl,
+                                  initials: fxInitials(
+                                    data.nomePersonal ?? 'F',
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                InkWell(
-                                  onTap:
-                                      () => context.push(
-                                        '/perfil',
-                                      ), // Rota de perfil do personal
-                                  borderRadius: BorderRadius.circular(18),
-                                  child:
-                                      data.logoUrl != null &&
-                                              data.logoUrl!.isNotEmpty
-                                          ? CircleAvatar(
-                                            backgroundImage: NetworkImage(
-                                              data.logoUrl!,
-                                            ),
-                                            radius: 18,
-                                          )
-                                          : CircleAvatar(
-                                            radius: 18,
-                                            backgroundColor: primary,
-                                            child: Text(
-                                              fxInitials(
-                                                data.nomePersonal ?? 'F',
-                                              ),
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w700,
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                          ),
+                                  onTap: () => context.push('/perfil'),
                                 ),
                               ],
                             ),
@@ -354,7 +345,159 @@ class _PersonalDashboardScreenState
                       ),
                     ),
 
-                    // HERO CARD
+                    // CENTRAL DE COMANDO — protagonista do dia
+                    SliverToBoxAdapter(
+                      child: FadeTransition(
+                        opacity: _commandFade,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0, 0.04),
+                            end: Offset.zero,
+                          ).animate(_commandFade),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              TokensStrip.s4,
+                              0,
+                              TokensStrip.s4,
+                              TokensStrip.s4,
+                            ),
+                            child: _CommandCenterSection(
+                              isDark: themeDark,
+                              primary: primary,
+                              finData: _finData,
+                              hideRiskSummary: alunosEmRisco.isNotEmpty,
+                              contextualSubtitle:
+                                  alunosEmRisco.isNotEmpty
+                                      ? 'Cobrança, mensagens e agenda agora. Aderência está no bloco abaixo.'
+                                      : null,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // PRECISA DE ATENÇÃO — rostos + CTA (só quando houver sinal)
+                    if (attentionVisible) ...[
+                      SliverToBoxAdapter(
+                        child: _SectionTitle(
+                          title: 'Precisa de atenção',
+                          action:
+                              riscoAlto > 1
+                                  ? 'Ver tudo · +${riscoAlto - 1}'
+                                  : 'Ver tudo',
+                          onAction: () => context.go('/alunos?filtro=risco'),
+                          isDark: themeDark,
+                        ),
+                      ),
+                      if (riskDominante)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              TokensStrip.s4,
+                              0,
+                              TokensStrip.s4,
+                              TokensStrip.s2,
+                            ),
+                            child: _RiskWaveBanner(
+                              riscoAlto: riscoAlto,
+                              alunosAtivos: alunosAtivos,
+                              isDark: themeDark,
+                              onTap:
+                                  () => context.push('/dashboard/qualidade'),
+                            ),
+                          ),
+                        ),
+                      SliverToBoxAdapter(
+                        child: SizedBox(
+                          height: riskDominante ? 156 : 168,
+                          child: ListView.separated(
+                            key: const PageStorageKey(
+                              'personal-attention-rail',
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: TokensStrip.s4,
+                            ),
+                            scrollDirection: Axis.horizontal,
+                            itemCount:
+                                [
+                                  ...alunosEmRisco.take(riskDominante ? 2 : 4),
+                                  ...(_finData?.vencimentosProximos ?? const [])
+                                      .take(2),
+                                ].length,
+                            separatorBuilder:
+                                (_, __) => const SizedBox(width: 12),
+                            itemBuilder: (context, index) {
+                              final riskItems =
+                                  alunosEmRisco
+                                      .take(riskDominante ? 2 : 4)
+                                      .toList();
+                              if (index < riskItems.length) {
+                                final aluno = riskItems[index];
+                                return _AttentionCard(
+                                  nome: aluno.nome,
+                                  objetivo: aluno.objetivo,
+                                  titulo:
+                                      aluno.inadimplente
+                                          ? 'Inadimplente'
+                                          : 'Risco de aderência',
+                                  subt:
+                                      aluno.inadimplente
+                                          ? 'Financeiro e aderência exigem contato'
+                                          : 'Acompanhar antes de perder ritmo',
+                                  acao: 'Revisar',
+                                  isDark: themeDark,
+                                  onTap:
+                                      () => context.push('/alunos/${aluno.id}'),
+                                );
+                              }
+                              final v =
+                                  (_finData!.vencimentosProximos)[index -
+                                      riskItems.length];
+                              return _AttentionCard(
+                                nome: v.alunoNome,
+                                titulo: 'Inadimplente',
+                                subt:
+                                    'R\$ ${v.valor.toStringAsFixed(0)} pendente',
+                                acao: 'Cobrar',
+                                isDark: themeDark,
+                                onTap: () => context.go('/financeiro'),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      const SliverToBoxAdapter(child: SizedBox(height: 8)),
+                    ],
+
+                    // HERO FINANCEIRO — contexto de receita (não bloqueia ação)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          TokensStrip.s2,
+                          TokensStrip.s4,
+                          0,
+                        ),
+                        child: Text(
+                          'Panorama financeiro',
+                          style: TokensStrip.bodyMuted(
+                            color:
+                                themeDark
+                                    ? EagleTokens.darkInkMute
+                                    : TokensStrip.textSecondary,
+                            fontFamily:
+                                Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.fontFamily,
+                          ).copyWith(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.45,
+                          ),
+                        ),
+                      ),
+                    ),
                     SliverToBoxAdapter(
                       child: FadeTransition(
                         opacity: _heroFade,
@@ -392,6 +535,10 @@ class _PersonalDashboardScreenState
                                         end: end,
                                       ),
                                       boxShadow: [
+                                        ...TokensStrip.coloredDepthGlow(
+                                          heroPrimary,
+                                          strength: themeDark ? 0.5 : 0.65,
+                                        ),
                                         BoxShadow(
                                           color: heroPrimary.withValues(
                                             alpha: themeDark ? 0.34 : 0.26,
@@ -453,8 +600,7 @@ class _PersonalDashboardScreenState
                                       const SizedBox(height: 10),
                                       Row(
                                         crossAxisAlignment:
-                                            CrossAxisAlignment.baseline,
-                                        textBaseline: TextBaseline.alphabetic,
+                                            CrossAxisAlignment.end,
                                         children: [
                                           _loadingFin
                                               ? Shimmer.fromColors(
@@ -490,13 +636,21 @@ class _PersonalDashboardScreenState
                                                           ),
                                                     ),
                                               ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            'recebido',
-                                            style: const TextStyle(
-                                              color: Colors.white54,
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w700,
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              left: 8,
+                                              bottom: 5,
+                                            ),
+                                            child: Text(
+                                              'recebido',
+                                              style: TextStyle(
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.62,
+                                                ),
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                letterSpacing: 0.1,
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -517,18 +671,20 @@ class _PersonalDashboardScreenState
                                             Container(
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                    horizontal: 7,
-                                                    vertical: 3,
+                                                    horizontal: 8,
+                                                    vertical: 4,
                                                   ),
                                               decoration: BoxDecoration(
                                                 color: Colors.white.withValues(
-                                                  alpha: 0.16,
+                                                  alpha: 0.14,
                                                 ),
                                                 borderRadius:
-                                                    BorderRadius.circular(999),
+                                                    BorderRadius.circular(
+                                                      TokensStrip.rInput,
+                                                    ),
                                                 border: Border.all(
                                                   color: Colors.white
-                                                      .withValues(alpha: 0.22),
+                                                      .withValues(alpha: 0.28),
                                                 ),
                                               ),
                                               child: const Text(
@@ -537,7 +693,7 @@ class _PersonalDashboardScreenState
                                                   color: Colors.white,
                                                   fontSize: 9,
                                                   fontWeight: FontWeight.w800,
-                                                  letterSpacing: 0.6,
+                                                  letterSpacing: 0.55,
                                                 ),
                                               ),
                                             ),
@@ -550,7 +706,7 @@ class _PersonalDashboardScreenState
                                         exceeded: metaSuperada,
                                         glow: BrandPalette.accent(heroPrimary),
                                       ),
-                                      const SizedBox(height: 16),
+                                      const SizedBox(height: TokensStrip.s4),
                                       Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
@@ -598,127 +754,36 @@ class _PersonalDashboardScreenState
                       ),
                     ),
 
-                    // PULSO DO DIA — asymmetric KPI rail
+                    // PULSO DO DIA — strip compacto (sem competir com o comando)
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
-                        child: _KpiAsymmetricGrid(
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          TokensStrip.s3,
+                          TokensStrip.s4,
+                          TokensStrip.s4,
+                        ),
+                        child: _DayPulseStrip(
                           fade: _kpiFade,
                           isDark: themeDark,
                           alunosAtivos: alunosAtivos,
                           checkinsHoje: checkinsHoje,
                           riscoAlto: riscoAlto,
+                          agendaHoje: agendaHoje,
+                          hideRiscoChip: alunosEmRisco.isNotEmpty,
                           primary: primary,
-                          onAtivos: () => context.go('/alunos'),
-                          onCheckins: () => context.push('/relatorios/global'),
-                          onRisco: () => context.push('/dashboard/qualidade'),
+                          onAtivos: () => context.go('/alunos?filtro=ativos'),
+                          onCheckins: () => context.go('/agenda'),
+                          onAgenda: () => context.go('/agenda'),
+                          onRisco:
+                              riscoAlto > 0
+                                  ? () => context.go('/alunos?filtro=risco')
+                                  : () => context.go('/alunos'),
                         ),
                       ),
                     ),
 
-                    // CENTRAL DE COMANDO
-                    SliverToBoxAdapter(
-                      child: FadeTransition(
-                        opacity: _commandFade,
-                        child: SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(0, 0.04),
-                            end: Offset.zero,
-                          ).animate(_commandFade),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                            child: _CommandCenterSection(
-                              isDark: themeDark,
-                              primary: primary,
-                              finData: _finData,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // ONBOARDING WIDGET (Atualizado visualmente dentro dele se necessário, aqui chamamos)
-                    const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: SetupOnboardingWidget(),
-                      ),
-                    ),
-
-                    // SECTION: PRECISA DE ATENÇÃO
-                    if (alunosEmRisco.isNotEmpty ||
-                        (_finData != null &&
-                            _finData!.vencimentosProximos.isNotEmpty)) ...[
-                      const SliverToBoxAdapter(child: SizedBox(height: 28)),
-                      SliverToBoxAdapter(
-                        child: _SectionTitle(
-                          title: 'Precisa de atenção',
-                          action:
-                              riscoAlto > 1
-                                  ? 'Ver tudo · +${riscoAlto - 1}'
-                                  : 'Ver tudo',
-                          onAction: () => context.go('/alunos?filtro=risco'),
-                          isDark: themeDark,
-                        ),
-                      ),
-                      SliverToBoxAdapter(
-                        child: SizedBox(
-                          height: 168,
-                          child: ListView.separated(
-                            key: const PageStorageKey(
-                              'personal-attention-rail',
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            scrollDirection: Axis.horizontal,
-                            itemCount:
-                                [
-                                  ...alunosEmRisco.take(4),
-                                  ...(_finData?.vencimentosProximos ?? const [])
-                                      .take(2),
-                                ].length,
-                            separatorBuilder:
-                                (_, __) => const SizedBox(width: 12),
-                            itemBuilder: (context, index) {
-                              final riskItems = alunosEmRisco.take(4).toList();
-                              if (index < riskItems.length) {
-                                final aluno = riskItems[index];
-                                return _AttentionCard(
-                                  nome: aluno.nome,
-                                  objetivo: aluno.objetivo,
-                                  titulo:
-                                      aluno.inadimplente
-                                          ? 'Inadimplente'
-                                          : 'Risco de aderência',
-                                  subt:
-                                      aluno.inadimplente
-                                          ? 'Financeiro e aderência exigem contato'
-                                          : 'Acompanhar antes de perder ritmo',
-                                  acao: 'Revisar',
-                                  isDark: themeDark,
-                                  onTap:
-                                      () => context.push('/alunos/${aluno.id}'),
-                                );
-                              }
-                              final v =
-                                  (_finData!.vencimentosProximos)[index -
-                                      riskItems.length];
-                              return _AttentionCard(
-                                nome: v.alunoNome,
-                                titulo: 'Inadimplente',
-                                subt:
-                                    'R\$ ${v.valor.toStringAsFixed(0)} pendente',
-                                acao: 'Cobrar',
-                                isDark: themeDark,
-                                onTap: () => context.go('/financeiro'),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-
-                    // SEUS ALUNOS (ADERÊNCIA DA SEMANA)
-                    const SliverToBoxAdapter(child: SizedBox(height: 28)),
+                    const SliverToBoxAdapter(child: SizedBox(height: 8)),
                     SliverToBoxAdapter(
                       child: _SectionTitle(
                         title: 'Aderência da semana',
@@ -729,13 +794,14 @@ class _PersonalDashboardScreenState
                     ),
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: TokensStrip.s4,
+                        ),
                         child: _AderenciaSemanaWidget(isDark: themeDark),
                       ),
                     ),
 
-                    // ATALHOS — 6 quick action shortcuts (design spec)
-                    const SliverToBoxAdapter(child: SizedBox(height: 18)),
+                    const SliverToBoxAdapter(child: SizedBox(height: 12)),
                     SliverToBoxAdapter(
                       child: _SectionTitle(
                         title: 'Mais ferramentas',
@@ -744,11 +810,11 @@ class _PersonalDashboardScreenState
                     ),
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          16,
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
                           0,
-                          16,
-                          MediaQuery.of(context).padding.bottom + 90,
+                          TokensStrip.s4,
+                          TokensStrip.s3,
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -810,6 +876,23 @@ class _PersonalDashboardScreenState
                         ),
                       ),
                     ),
+
+                    const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          0,
+                          TokensStrip.s4,
+                          0,
+                        ),
+                        child: SetupOnboardingWidget(),
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: MediaQuery.of(context).padding.bottom + 88,
+                      ),
+                    ),
                   ],
                 ),
               );
@@ -820,8 +903,8 @@ class _PersonalDashboardScreenState
   }
 
   Widget _buildShimmerLoading(BuildContext context, bool themeDark) {
-    final base = themeDark ? EagleTokens.darkCard : EagleTokens.line;
-    final highlight = themeDark ? EagleTokens.darkCardHi : EagleTokens.lineSoft;
+    final base = themeDark ? EagleTokens.darkCard : TokensStrip.borderDefault;
+    final highlight = themeDark ? EagleTokens.darkCardHi : TokensStrip.borderDefault;
 
     Widget bone(double w, double h, {double radius = 12}) => Container(
       width: w,
@@ -837,56 +920,37 @@ class _PersonalDashboardScreenState
       highlightColor: highlight,
       child: SingleChildScrollView(
         physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 6, 16, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Header bar (logo + greeting + icons) ──
             Row(
               children: [
-                bone(28, 28, radius: 8),
-                const SizedBox(width: 10),
-                bone(100, 14),
-                const Spacer(),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      bone(170, 18, radius: 8),
+                      const SizedBox(height: 4),
+                      bone(110, 10, radius: 6),
+                    ],
+                  ),
+                ),
                 bone(36, 36, radius: 18),
-                const SizedBox(width: 8),
-                bone(36, 36, radius: 18),
-                const SizedBox(width: 8),
+                const SizedBox(width: 6),
+                bone(40, 40, radius: 20),
+                const SizedBox(width: 6),
                 bone(36, 36, radius: 18),
               ],
             ),
-            const SizedBox(height: 6),
-            bone(180, 11),
-
-            const SizedBox(height: 18),
-
-            // ── Hero revenue card ──
-            bone(double.infinity, 220, radius: 28),
-
-            const SizedBox(height: 18),
-
-            // ── 3 Stat tiles (Ativos, Check-ins, Risco) ──
-            Row(
-              children: [
-                Expanded(child: bone(double.infinity, 92, radius: 20)),
-                const SizedBox(width: 9),
-                Expanded(child: bone(double.infinity, 92, radius: 20)),
-                const SizedBox(width: 9),
-                Expanded(child: bone(double.infinity, 92, radius: 20)),
-              ],
-            ),
-
-            const SizedBox(height: 28),
-
-            // ── Section title ──
-            bone(140, 16),
 
             const SizedBox(height: 14),
 
-            // ── Command center items ──
-            for (int i = 0; i < 3; i++) ...[
+            bone(140, 16),
+            const SizedBox(height: 12),
+            for (int i = 0; i < 2; i++) ...[
               Padding(
-                padding: EdgeInsets.only(bottom: i < 2 ? 10 : 0),
+                padding: EdgeInsets.only(bottom: i < 1 ? 10 : 0),
                 child: Row(
                   children: [
                     bone(40, 40, radius: 12),
@@ -907,7 +971,23 @@ class _PersonalDashboardScreenState
               ),
             ],
 
-            const SizedBox(height: 28),
+            const SizedBox(height: 18),
+
+            bone(double.infinity, 200, radius: 28),
+
+            const SizedBox(height: 12),
+
+            Row(
+              children: [
+                Expanded(child: bone(double.infinity, 52, radius: 12)),
+                const SizedBox(width: 8),
+                Expanded(child: bone(double.infinity, 52, radius: 12)),
+                const SizedBox(width: 8),
+                Expanded(child: bone(double.infinity, 52, radius: 12)),
+              ],
+            ),
+
+            const SizedBox(height: 20),
 
             // ── Aderência section ──
             bone(120, 16),
@@ -941,6 +1021,82 @@ class _PersonalDashboardScreenState
   }
 }
 
+class _HeaderProfileAvatar extends StatelessWidget {
+  const _HeaderProfileAvatar({
+    required this.primary,
+    required this.isDark,
+    required this.initials,
+    required this.onTap,
+    this.photoUrl,
+  });
+
+  final Color primary;
+  final bool isDark;
+  final String initials;
+  final VoidCallback onTap;
+  final String? photoUrl;
+
+  static const double _outer = 40;
+  static const double _ring = 2;
+  static const double _gap = 2;
+
+  @override
+  Widget build(BuildContext context) {
+    final neon = BrandPalette.accent(primary);
+    final avatarRadius = (_outer - _ring * 2 - _gap * 2) / 2;
+
+    return Semantics(
+      button: true,
+      label: 'Abrir perfil',
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(_outer / 2),
+        child: Container(
+          width: _outer,
+          height: _outer,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: neon.withValues(alpha: isDark ? 0.98 : 0.88),
+              width: _ring,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: neon.withValues(alpha: isDark ? 0.58 : 0.42),
+                blurRadius: isDark ? 16 : 12,
+              ),
+              BoxShadow(
+                color: primary.withValues(alpha: isDark ? 0.34 : 0.22),
+                blurRadius: isDark ? 24 : 20,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(_gap),
+          child:
+              photoUrl != null && photoUrl!.isNotEmpty
+                  ? CircleAvatar(
+                    backgroundImage: NetworkImage(photoUrl!),
+                    radius: avatarRadius,
+                  )
+                  : CircleAvatar(
+                    radius: avatarRadius,
+                    backgroundColor: primary,
+                    child: Text(
+                      initials,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: avatarRadius * 0.72,
+                      ),
+                    ),
+                  ),
+        ),
+      ),
+    );
+  }
+}
+
 class _HeroProgressRail extends StatelessWidget {
   const _HeroProgressRail({
     required this.progress,
@@ -963,7 +1119,7 @@ class _HeroProgressRail extends StatelessWidget {
         final fillWidth = width * displayProgress;
 
         return SizedBox(
-          height: exceeded ? 12 : 10,
+          height: exceeded ? 12 : 14,
           child: Stack(
             clipBehavior: Clip.none,
             alignment: Alignment.centerLeft,
@@ -971,10 +1127,10 @@ class _HeroProgressRail extends StatelessWidget {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(99),
-                  color: Colors.white.withValues(alpha: exceeded ? 0.16 : 0.12),
+                  color: Colors.white.withValues(alpha: exceeded ? 0.20 : 0.14),
                   border: Border.all(
                     color: Colors.white.withValues(
-                      alpha: exceeded ? 0.24 : 0.16,
+                      alpha: exceeded ? 0.30 : 0.20,
                     ),
                   ),
                 ),
@@ -983,7 +1139,8 @@ class _HeroProgressRail extends StatelessWidget {
                 Positioned(
                   left: 0,
                   width: fillWidth,
-                  height: exceeded ? 12 : 10,
+                  height: exceeded ? 10 : 10,
+                  top: exceeded ? 1 : 2,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(99),
@@ -991,50 +1148,26 @@ class _HeroProgressRail extends StatelessWidget {
                         colors:
                             exceeded
                                 ? [
-                                  Colors.white.withValues(alpha: 0.78),
-                                  Colors.white,
-                                  const Color(0xFFFFF3C4),
-                                  glow.withValues(alpha: 0.95),
+                                  Colors.white.withValues(alpha: 0.65),
+                                  Colors.white.withValues(alpha: 0.95),
                                 ]
                                 : [
-                                  Colors.white.withValues(alpha: 0.72),
-                                  Colors.white,
-                                  glow.withValues(alpha: 0.92),
+                                  Colors.white.withValues(alpha: 0.58),
+                                  Colors.white.withValues(alpha: 0.86),
+                                  glow.withValues(alpha: 0.88),
                                 ],
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color:
-                              exceeded
-                                  ? const Color(
-                                    0xFFFFF3C4,
-                                  ).withValues(alpha: 0.45)
-                                  : Colors.white.withValues(alpha: 0.35),
-                          blurRadius: exceeded ? 18 : 12,
-                          spreadRadius: exceeded ? 0 : -2,
+                          color: Colors.white.withValues(
+                            alpha: exceeded ? 0.48 : 0.36,
+                          ),
+                          blurRadius: exceeded ? 16 : 12,
+                          spreadRadius: exceeded ? 1 : 0,
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-              if (fillWidth > 12)
-                Positioned(
-                  left: fillWidth - (exceeded ? 10 : 9),
-                  child: Container(
-                    width: exceeded ? 18 : 16,
-                    height: exceeded ? 18 : 16,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                      boxShadow: [
                         BoxShadow(
-                          color:
-                              exceeded
-                                  ? const Color(
-                                    0xFFFFF3C4,
-                                  ).withValues(alpha: 0.70)
-                                  : glow.withValues(alpha: 0.55),
-                          blurRadius: exceeded ? 20 : 14,
+                          color: glow.withValues(alpha: exceeded ? 0.72 : 0.58),
+                          blurRadius: exceeded ? 22 : 18,
                           spreadRadius: exceeded ? 2 : 1,
                         ),
                       ],
@@ -1096,16 +1229,19 @@ class _HeroMiniStat extends StatelessWidget {
   }
 }
 
-class _KpiAsymmetricGrid extends StatelessWidget {
-  const _KpiAsymmetricGrid({
+class _DayPulseStrip extends StatelessWidget {
+  const _DayPulseStrip({
     required this.fade,
     required this.isDark,
     required this.alunosAtivos,
     required this.checkinsHoje,
     required this.riscoAlto,
+    required this.agendaHoje,
+    required this.hideRiscoChip,
     required this.primary,
     required this.onAtivos,
     required this.onCheckins,
+    required this.onAgenda,
     required this.onRisco,
   });
 
@@ -1114,203 +1250,208 @@ class _KpiAsymmetricGrid extends StatelessWidget {
   final int alunosAtivos;
   final int checkinsHoje;
   final int riscoAlto;
+  final int agendaHoje;
+  final bool hideRiscoChip;
   final Color primary;
   final VoidCallback onAtivos;
   final VoidCallback onCheckins;
+  final VoidCallback onAgenda;
   final VoidCallback onRisco;
 
   @override
   Widget build(BuildContext context) {
     final slide = Tween<Offset>(
-      begin: const Offset(0, 0.04),
+      begin: const Offset(0, 0.03),
       end: Offset.zero,
     ).animate(fade);
+    final riscoAccent =
+        riscoAlto > 0 ? EagleTokens.warn : TokensStrip.badgeSuccess;
+    final tight = MediaQuery.sizeOf(context).width < 400;
+    final gap = tight ? 6.0 : TokensStrip.s2;
+    final mute =
+        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chipAccent = BrandPalette.sectionAccent(primary, dark: isDark);
 
     return FadeTransition(
       opacity: fade,
       child: SlideTransition(
         position: slide,
-        child: SizedBox(
-          height: 196,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                flex: 5,
-                child: _QuickTile(
-                  icon: 'users',
-                  label: 'Ativos',
-                  value: alunosAtivos.toString(),
-                  accent: primary,
-                  isDark: isDark,
-                  tall: true,
-                  onTap: onAtivos,
-                ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Pulso operacional',
+              style: TokensStrip.bodyMuted(color: mute).copyWith(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.45,
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                flex: 4,
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: _QuickTile(
-                        icon: 'circle-check',
-                        label: 'Check-ins',
-                        value: checkinsHoje.toString(),
-                        accent: EagleTokens.good,
-                        chipLabel: 'hoje',
-                        chipColor: EagleTokens.good,
-                        isDark: isDark,
-                        compact: true,
-                        onTap: onCheckins,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Expanded(
-                      child: _QuickTile(
-                        icon: 'alert-triangle',
-                        label: 'Risco',
-                        value: riscoAlto.toString(),
-                        accent: EagleTokens.warn,
-                        chipLabel: riscoAlto > 0 ? 'atenção' : 'ok',
-                        chipColor:
-                            riscoAlto > 0 ? EagleTokens.warn : EagleTokens.good,
-                        isDark: isDark,
-                        compact: true,
-                        onTap: onRisco,
-                      ),
-                    ),
-                  ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Expanded(
+                  child: _PulseChip(
+                    icon: 'users',
+                    value: alunosAtivos.toString(),
+                    label: 'Ativos',
+                    accent: chipAccent,
+                    isDark: isDark,
+                    compact: tight,
+                    onTap: onAtivos,
+                  ),
                 ),
-              ),
-            ],
-          ),
+                SizedBox(width: gap),
+                Expanded(
+                  child: _PulseChip(
+                    icon: 'circle-check',
+                    value: checkinsHoje.toString(),
+                    label: tight ? 'Checks' : 'Check-ins',
+                    accent: EagleTokens.good,
+                    isDark: isDark,
+                    compact: tight,
+                    onTap: onCheckins,
+                  ),
+                ),
+                SizedBox(width: gap),
+                Expanded(
+                  child:
+                      hideRiscoChip
+                          ? _PulseChip(
+                            icon: 'calendar',
+                            value: agendaHoje.toString(),
+                            label: tight ? 'Agenda' : 'Agenda hoje',
+                            accent: chipAccent,
+                            isDark: isDark,
+                            compact: tight,
+                            onTap: onAgenda,
+                          )
+                          : _PulseChip(
+                            icon:
+                                riscoAlto > 0
+                                    ? 'alert-triangle'
+                                    : 'circle-check',
+                            value: riscoAlto.toString(),
+                            label: 'Risco',
+                            accent: riscoAccent,
+                            isDark: isDark,
+                            compact: tight,
+                            onTap: onRisco,
+                          ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _QuickTile extends StatelessWidget {
-  final String icon;
-  final String label, value;
-  final Color accent;
-  final bool isDark;
-  final bool tall;
-  final bool compact;
-  final String? chipLabel;
-  final Color? chipColor;
-  final VoidCallback? onTap;
-  const _QuickTile({
+class _PulseChip extends StatelessWidget {
+  const _PulseChip({
     required this.icon,
-    required this.label,
     required this.value,
+    required this.label,
     required this.accent,
     required this.isDark,
-    this.tall = false,
-    this.compact = false,
-    this.chipLabel,
-    this.chipColor,
-    this.onTap,
+    required this.compact,
+    required this.onTap,
   });
+
+  final String icon;
+  final String value;
+  final String label;
+  final Color accent;
+  final bool isDark;
+  final bool compact;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
-    final ink = chrome.ink;
-    final valueSize = tall ? 28.0 : (compact ? 17.0 : 21.0);
-    final labelSize = compact ? 10.0 : 11.0;
-    final chip = chipLabel;
-    final chipTint = chipColor ?? accent;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final iconSize = compact ? 22.0 : 24.0;
+    final iconGlyph = compact ? 11.0 : 12.0;
+    final valueSize = compact ? 14.0 : 15.0;
+    final labelSize = compact ? 9.5 : 10.0;
+    final hPad = compact ? 7.0 : 9.0;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: AnimatedScale(
-        scale: 1,
-        duration: const Duration(milliseconds: 120),
-        child: Container(
-          height: tall || compact ? null : 92,
-          padding: EdgeInsets.fromLTRB(
-            compact ? 10 : 11,
-            compact ? 9 : 11,
-            compact ? 10 : 11,
-            compact ? 8 : 10,
-          ),
-          decoration: chrome.accentPanel(accent: accent),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+    return Semantics(
+      button: true,
+      label: '$value $label',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(TokensStrip.rCard),
+          child: Ink(
+            padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 9),
+            decoration: fxStripCardDecoration(
+              context,
+              accent: accent,
+              radius: TokensStrip.rCard,
+              glowStrength: 0.14,
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: compact ? 24 : 28,
-                    height: compact ? 24 : 28,
-                    decoration: BoxDecoration(
-                      color: accent.withValues(alpha: isDark ? 0.18 : 0.10),
-                      borderRadius: BorderRadius.circular(compact ? 10 : 12),
-                    ),
-                    child: Center(
-                      child: FxIcon(
-                        name: icon,
-                        size: compact ? 12 : 14,
+                  Row(
+                    children: [
+                      Container(
+                        width: iconSize,
+                        height: iconSize,
+                        decoration: BoxDecoration(
+                          color: accent.withValues(
+                            alpha: isDark ? 0.18 : 0.10,
+                          ),
+                          borderRadius:
+                              BorderRadius.circular(TokensStrip.rInput),
+                        ),
+                        child: Center(
+                          child: FxIcon(
+                            name: icon,
+                            size: iconGlyph,
+                            color: accent,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: compact ? 5 : 6),
+                      Expanded(
+                        child: Text(
+                          value,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.jetBrainsMono(
+                            fontSize: valueSize,
+                            fontWeight: FontWeight.w700,
+                            color: ink,
+                            height: 1,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: compact ? 2 : 3),
+                  Padding(
+                    padding: EdgeInsets.only(left: iconSize + (compact ? 5 : 6)),
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: labelSize,
+                        fontWeight: FontWeight.w600,
                         color: accent,
+                        height: 1.1,
                       ),
                     ),
                   ),
-                  if (chip != null) ...[
-                    const Spacer(),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: compact ? 5 : 6,
-                        vertical: compact ? 2 : 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: chipTint.withValues(
-                          alpha: isDark ? 0.14 : 0.08,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        chip,
-                        style: TextStyle(
-                          fontSize: compact ? 8 : 9,
-                          fontWeight: FontWeight.w800,
-                          color: chipTint,
-                          letterSpacing: 0.4,
-                        ),
-                      ),
-                    ),
-                  ],
                 ],
               ),
-              if (tall) const Spacer(flex: 2) else const Spacer(),
-              Text(
-                value,
-                style: GoogleFonts.jetBrainsMono(
-                  fontSize: valueSize,
-                  fontWeight: FontWeight.w700,
-                  color: ink,
-                  height: 1,
-                  letterSpacing: -0.5,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              SizedBox(height: compact ? 2 : 3),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: labelSize,
-                  fontWeight: FontWeight.w800,
-                  color: ink,
-                  height: 1.1,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              if (tall) const Spacer(),
-            ],
+            ),
           ),
         ),
       ),
@@ -1333,9 +1474,10 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final primaryAccent = BrandPalette.accent(primary);
+    final heading = BrandPalette.sectionHeading(primary, dark: isDark);
+    final actionColor = BrandPalette.sectionAction(primary, dark: isDark);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, TokensStrip.s4, 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -1343,30 +1485,125 @@ class _SectionTitle extends StatelessWidget {
         children: [
           Text(
             title,
-            style: GoogleFonts.outfit(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: isDark ? EagleTokens.darkInk : EagleTokens.ink,
-              letterSpacing: -0.5,
+            style: TokensStrip.h2(
+              color: heading,
+              fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
             ),
           ),
           if (action != null)
-            InkWell(
-              borderRadius: BorderRadius.circular(999),
-              onTap: onAction,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                child: Text(
-                  '$action →',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? primaryAccent : primary,
+            Semantics(
+              button: true,
+              label: action,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(999),
+                  onTap: onAction,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minWidth: 48,
+                      minHeight: 48,
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Text(
+                          '$action →',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: actionColor,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _RiskWaveBanner extends StatelessWidget {
+  const _RiskWaveBanner({
+    required this.riscoAlto,
+    required this.alunosAtivos,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  final int riscoAlto;
+  final int alunosAtivos;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final warn = EagleTokens.warn;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: fxStripCardDecoration(
+            context,
+            accent: warn,
+            radius: TokensStrip.rCard,
+            glowStrength: 0.18,
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: warn.withValues(alpha: isDark ? 0.18 : 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: FxIcon(name: 'alert-triangle', size: 17, color: warn),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$riscoAlto de $alunosAtivos alunos precisam de retomada',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: ink,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Abrir plano de qualidade operacional',
+                      style: TextStyle(fontSize: 11.5, color: mute, height: 1.2),
+                    ),
+                  ],
+                ),
+              ),
+              FxIcon(
+                name: 'chevron-right',
+                size: 16,
+                color: BrandPalette.sectionAction(primary, dark: isDark),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1391,25 +1628,20 @@ class _AttentionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
-    final chrome = ShellChrome.forDark(isDark);
-    final cardBg = chrome.cardFill;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final accent = EagleTokens.bad; // simplificado para overdue
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: Container(
         width: 240,
         padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-            width: 1,
-          ),
+        decoration: fxStripCardDecoration(
+          context,
+          accent: primary,
+          radius: TokensStrip.rCard,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1430,7 +1662,7 @@ class _AttentionCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        nome,
+                        fxTitleCaseName(nome),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -1462,13 +1694,17 @@ class _AttentionCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 5),
-                Text(
-                  titulo.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w600,
-                    color: accent,
-                    letterSpacing: 0.5,
+                Expanded(
+                  child: Text(
+                    titulo.toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      color: accent,
+                      letterSpacing: 0.35,
+                    ),
                   ),
                 ),
               ],
@@ -1483,18 +1719,26 @@ class _AttentionCard extends StatelessWidget {
             const Spacer(),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.symmetric(vertical: 9),
               decoration: BoxDecoration(
                 color: primarySoft,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(TokensStrip.rInput),
+                border: Border.all(
+                  color: primary.withValues(alpha: isDark ? 0.45 : 0.28),
+                ),
+                boxShadow: TokensStrip.coloredDepthGlow(
+                  primary,
+                  strength: 0.14,
+                ),
               ),
               alignment: Alignment.center,
               child: Text(
-                '$acao →',
+                acao,
                 style: TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   color: primary,
+                  letterSpacing: 0.2,
                 ),
               ),
             ),
@@ -1521,26 +1765,20 @@ class _ShortcutBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final primaryAccent = BrandPalette.accent(primary);
-    final chrome = ShellChrome.forDark(isDark);
-    final cardBg = chrome.cardFill;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final rowAccent = BrandPalette.sectionAccent(primary, dark: isDark);
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color:
-                isDark
-                    ? EagleTokens.darkLine
-                    : EagleTokens.line.withValues(alpha: 0.85),
-            width: 1,
-          ),
+        decoration: fxStripCardDecoration(
+          context,
+          accent: primary,
+          radius: TokensStrip.rCard,
+          glowStrength: 0.12,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -1553,10 +1791,10 @@ class _ShortcutBtn extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    (isDark ? primaryAccent : primary).withValues(
+                    (isDark ? primaryAccent : rowAccent).withValues(
                       alpha: isDark ? 0.20 : 0.12,
                     ),
-                    (isDark ? primaryAccent : primary).withValues(
+                    (isDark ? primaryAccent : rowAccent).withValues(
                       alpha: isDark ? 0.08 : 0.04,
                     ),
                   ],
@@ -1567,7 +1805,7 @@ class _ShortcutBtn extends StatelessWidget {
                 child: FxIcon(
                   name: icon,
                   size: 17,
-                  color: isDark ? primaryAccent : primary,
+                  color: isDark ? primaryAccent : rowAccent,
                   strokeWidth: 1.9,
                 ),
               ),
@@ -1586,10 +1824,11 @@ class _ShortcutBtn extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 16,
-              color: mute.withValues(alpha: 0.5),
+            FxIcon(
+              name: 'chevron-right',
+              size: 14,
+              color: mute.withValues(alpha: 0.55),
+              strokeWidth: 1.8,
             ),
           ],
         ),
@@ -1606,13 +1845,17 @@ class _ToolGroupLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final labelColor =
+        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     return Text(
-      label,
-      style: TextStyle(
-        color: isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute,
+      label.toUpperCase(),
+      style: TokensStrip.bodyMuted(
+        color: labelColor,
+        fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
+      ).copyWith(
         fontSize: 11,
         fontWeight: FontWeight.w700,
-        letterSpacing: 0.75,
+        letterSpacing: 0.65,
       ),
     );
   }
@@ -1626,18 +1869,25 @@ class _CommandCenterSection extends ConsumerWidget {
   final bool isDark;
   final Color primary;
   final FinanceiroDashboard? finData;
+  final bool hideRiskSummary;
+  final String? contextualSubtitle;
 
   const _CommandCenterSection({
     required this.isDark,
     required this.primary,
     required this.finData,
+    this.hideRiskSummary = false,
+    this.contextualSubtitle,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final heading = BrandPalette.sectionHeading(primary, dark: isDark);
+    final actionColor = BrandPalette.sectionAction(primary, dark: isDark);
+    final rowAccent = BrandPalette.sectionAccent(primary, dark: isDark);
 
     // Chat inbox — count total unread messages
     final chatAsync = ref.watch(chatInboxProvider);
@@ -1691,6 +1941,26 @@ class _CommandCenterSection extends ConsumerWidget {
       data: (cc) => cc.cobrancasPendentes.length,
       orElse: () => finData?.totalInadimplentes ?? 0,
     );
+    final filaNaoCopilot =
+        filaAcoes.where((a) => a.tipo != 'IA_COPILOTO').toList();
+    final queueAction =
+        filaNaoCopilot.isEmpty
+            ? null
+            : (hideRiskSummary &&
+                    _isRiskEchoCopy(
+                      '${filaNaoCopilot.first.titulo} ${filaNaoCopilot.first.descricao}',
+                    )
+                ? null
+                : _CommandActionItem(
+                  icon: 'zap',
+                  title: 'Executar próxima ação',
+                  subtitle: filaNaoCopilot.first.descricao,
+                  route:
+                      filaNaoCopilot.first.acaoUrl.startsWith('/')
+                          ? filaNaoCopilot.first.acaoUrl
+                          : '/dashboard/personal',
+                  tone: _CommandActionTone.primary,
+                ));
     final nextActions = <_CommandActionItem>[
       if (copilotAcoes.isNotEmpty)
         _CommandActionItem(
@@ -1712,12 +1982,13 @@ class _CommandCenterSection extends ConsumerWidget {
           route: '/chat/inbox',
           tone: _CommandActionTone.hot,
         ),
-      if (alunosRisco > 0)
+      if (alunosRisco > 0 && !hideRiskSummary)
         _CommandActionItem(
           icon: 'alert-triangle',
-          title: 'Recuperar aderência',
-          subtitle: '$alunosRisco aluno${alunosRisco == 1 ? '' : 's'} em risco',
-          route: '/dashboard/qualidade',
+          title: 'Contato hoje',
+          subtitle:
+              '$alunosRisco no radar · risco, inadimplência ou pausa no treino',
+          route: '/alunos?filtro=contato',
           tone: _CommandActionTone.hot,
         ),
       if (cobrancasPendentes > 0)
@@ -1729,21 +2000,7 @@ class _CommandCenterSection extends ConsumerWidget {
           route: '/financeiro',
           tone: _CommandActionTone.money,
         ),
-      if (filaAcoes.where((a) => a.tipo != 'IA_COPILOTO').isNotEmpty)
-        _CommandActionItem(
-          icon: 'zap',
-          title: 'Executar próxima ação',
-          subtitle:
-              filaAcoes.firstWhere((a) => a.tipo != 'IA_COPILOTO').descricao,
-          route:
-              filaAcoes
-                      .firstWhere((a) => a.tipo != 'IA_COPILOTO')
-                      .acaoUrl
-                      .startsWith('/')
-                  ? filaAcoes.firstWhere((a) => a.tipo != 'IA_COPILOTO').acaoUrl
-                  : '/dashboard/personal',
-          tone: _CommandActionTone.primary,
-        ),
+      if (queueAction != null) queueAction,
       if (agendaHoje > 0)
         _CommandActionItem(
           icon: 'calendar',
@@ -1766,23 +2023,25 @@ class _CommandCenterSection extends ConsumerWidget {
     }
 
     Widget card({
+      required double width,
       required String icon,
       required String title,
       required String subtitle,
       required VoidCallback onTap,
     }) {
       return SizedBox(
-        width: 178,
+        width: width,
         child: Padding(
           padding: const EdgeInsets.only(right: 10),
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(TokensStrip.rCard),
             child: Container(
               padding: const EdgeInsets.all(13),
-              decoration: ShellChrome.forDark(isDark).panel(
-                radius: 20,
+              decoration: fxStripCardDecoration(
+                context,
                 accent: primary,
+                radius: TokensStrip.rCard,
               ),
               child: Row(
                 children: [
@@ -1794,7 +2053,7 @@ class _CommandCenterSection extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(13),
                     ),
                     child: Center(
-                      child: FxIcon(name: icon, size: 17, color: primary),
+                      child: FxIcon(name: icon, size: 17, color: rowAccent),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -1842,17 +2101,21 @@ class _CommandCenterSection extends ConsumerWidget {
                 children: [
                   Text(
                     'Central de Comando',
-                    style: GoogleFonts.outfit(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      color: ink,
-                      letterSpacing: -0.8,
+                    style: TokensStrip.h2(
+                      color: heading,
+                      fontFamily:
+                          Theme.of(context).textTheme.bodyLarge?.fontFamily,
                     ),
                   ),
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 4),
                   Text(
-                    'A melhor próxima ação para proteger receita e aderência.',
-                    style: TextStyle(fontSize: 12.5, color: mute, height: 1.25),
+                    contextualSubtitle ??
+                        'A melhor próxima ação para proteger receita e aderência.',
+                    style: TokensStrip.bodyMuted(
+                      color: mute,
+                      fontFamily:
+                          Theme.of(context).textTheme.bodyLarge?.fontFamily,
+                    ),
                   ),
                 ],
               ),
@@ -1887,14 +2150,18 @@ class _CommandCenterSection extends ConsumerWidget {
                             ? 'lendo sinais'
                             : 'Ver ${nextActions.length}',
                         style: TextStyle(
-                          color: primary,
+                          color: actionColor,
                           fontSize: 11.5,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
                       if (!isCommandPreparing) ...[
                         const SizedBox(width: 4),
-                        FxIcon(name: 'chevron-right', size: 13, color: primary),
+                        FxIcon(
+                          name: 'chevron-right',
+                          size: 13,
+                          color: actionColor,
+                        ),
                       ],
                     ],
                   ),
@@ -1911,48 +2178,59 @@ class _CommandCenterSection extends ConsumerWidget {
           actions: nextActions.take(2).toList(growable: false),
         ),
         const SizedBox(height: 14),
-        SizedBox(
-          height: 82,
-          child: ListView(
-            key: const PageStorageKey('personal-command-modules'),
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            children: [
-              card(
-                icon: 'zap',
-                title: 'Copiloto',
-                subtitle:
-                    copilotAcoes.isEmpty
-                        ? 'Sem tarefas'
-                        : '${copilotAcoes.length} aberta${copilotAcoes.length == 1 ? '' : 's'}',
-                onTap: () => context.push('/dashboard/command-center/copiloto'),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final moduleWidth = (constraints.maxWidth * 0.46).clamp(150.0, 188.0);
+            return SizedBox(
+              height: 82,
+              child: ListView(
+                key: const PageStorageKey('personal-command-modules'),
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                children: [
+                  card(
+                    width: moduleWidth,
+                    icon: 'zap',
+                    title: 'Copiloto',
+                    subtitle:
+                        copilotAcoes.isEmpty
+                            ? 'Sem tarefas'
+                            : '${copilotAcoes.length} aberta${copilotAcoes.length == 1 ? '' : 's'}',
+                    onTap:
+                        () => context.push('/dashboard/command-center/copiloto'),
+                  ),
+                  card(
+                    width: moduleWidth,
+                    icon: 'message-circle',
+                    title: 'Mensagens',
+                    subtitle: chatSubtitle,
+                    onTap: () => context.go('/chat/inbox'),
+                  ),
+                  card(
+                    width: moduleWidth,
+                    icon: 'users',
+                    title: 'Alunos',
+                    subtitle: '$alunosAtivos ativos',
+                    onTap: () => context.go('/alunos'),
+                  ),
+                  card(
+                    width: moduleWidth,
+                    icon: 'calendar',
+                    title: 'Agenda',
+                    subtitle: agendaSubtitle,
+                    onTap: () => context.go('/agenda'),
+                  ),
+                  card(
+                    width: moduleWidth,
+                    icon: 'dollar-sign',
+                    title: 'Financeiro',
+                    subtitle: finSubtitle,
+                    onTap: () => context.go('/financeiro'),
+                  ),
+                ],
               ),
-              card(
-                icon: 'message-circle',
-                title: 'Mensagens',
-                subtitle: chatSubtitle,
-                onTap: () => context.go('/chat/inbox'),
-              ),
-              card(
-                icon: 'users',
-                title: 'Alunos',
-                subtitle: '$alunosAtivos ativos',
-                onTap: () => context.go('/alunos'),
-              ),
-              card(
-                icon: 'calendar',
-                title: 'Agenda',
-                subtitle: agendaSubtitle,
-                onTap: () => context.go('/agenda'),
-              ),
-              card(
-                icon: 'dollar-sign',
-                title: 'Financeiro',
-                subtitle: finSubtitle,
-                onTap: () => context.go('/financeiro'),
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ],
     );
@@ -1965,11 +2243,8 @@ void _showCommandActionsSheet(
   required Color primary,
   required List<_CommandActionItem> actions,
 }) {
-  final chrome = ShellChrome.forDark(isDark);
-  final cardBg = chrome.cardFill;
-  final line = isDark ? EagleTokens.darkLine : EagleTokens.line;
-  final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-  final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+  final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+  final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
   showModalBottomSheet<void>(
     context: context,
@@ -1989,17 +2264,10 @@ void _showCommandActionsSheet(
         child: Container(
           constraints: BoxConstraints(maxHeight: media.size.height * 0.72),
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: line.withValues(alpha: 0.86)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.36 : 0.12),
-                blurRadius: 34,
-                offset: const Offset(0, 18),
-              ),
-            ],
+          decoration: fxStripCardDecoration(
+            sheetContext,
+            radius: 28,
+            glowStrength: isDark ? 0.28 : 0.48,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -2036,20 +2304,25 @@ void _showCommandActionsSheet(
                       children: [
                         Text(
                           'Todas as prioridades',
-                          style: TextStyle(
-                            color: ink,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.45,
+                          style: TokensStrip.h2(
+                            color: primary,
+                            fontFamily:
+                                Theme.of(sheetContext)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.fontFamily,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           'Ordenadas pelo impacto de hoje.',
-                          style: TextStyle(
+                          style: TokensStrip.bodyMuted(
                             color: mute,
-                            fontSize: 12.2,
-                            height: 1.2,
+                            fontFamily:
+                                Theme.of(sheetContext)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.fontFamily,
                           ),
                         ),
                       ],
@@ -2152,22 +2425,22 @@ class _CommandActionPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final heading = BrandPalette.sectionHeading(primary, dark: isDark);
+    final rowAccent = BrandPalette.sectionAccent(primary, dark: isDark);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            FxIcon(name: 'route', size: 17, color: primary),
+            FxIcon(name: 'route', size: 17, color: rowAccent),
             const SizedBox(width: 8),
             Text(
               'Próximas ações',
-              style: TextStyle(
-                color: ink,
-                fontSize: 15,
-                fontWeight: FontWeight.w900,
-              ),
+              style: TokensStrip.h2(
+                color: heading,
+                fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
+              ).copyWith(fontSize: 15),
             ),
             const Spacer(),
             Text(
@@ -2185,7 +2458,7 @@ class _CommandActionPanel extends StatelessWidget {
           color:
               isDark
                   ? EagleTokens.glassBorder
-                  : EagleTokens.line.withValues(alpha: 0.85),
+                  : TokensStrip.borderDefault.withValues(alpha: 0.85),
           height: 1,
         ),
         const SizedBox(height: 12),
@@ -2211,7 +2484,7 @@ class _CommandActionPanel extends StatelessWidget {
                 color:
                     isDark
                         ? EagleTokens.glassBorder.withValues(alpha: 0.65)
-                        : EagleTokens.line.withValues(alpha: 0.75),
+                        : TokensStrip.borderDefault.withValues(alpha: 0.75),
                 height: 1,
               ),
               const SizedBox(height: 10),
@@ -2237,12 +2510,12 @@ class _CommandLoadingTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final chrome = ShellChrome.forDark(isDark);
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: chrome.panel(radius: 18, accent: primary),
+      decoration: chrome.panel(radius: TokensStrip.rCard, accent: primary),
       child: Row(
         children: [
           Shimmer.fromColors(
@@ -2301,62 +2574,69 @@ class _CommandActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final chrome = ShellChrome.forDark(isDark);
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final accent = _commandToneAccent(item.tone, primary);
     return InkWell(
       onTap: onTap ?? () => context.go(item.route),
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: AnimatedScale(
         scale: 1,
         duration: const Duration(milliseconds: 110),
         child: Container(
           padding: const EdgeInsets.all(12),
-          decoration: chrome.panel(radius: 18, accent: accent),
+          decoration: fxStripCardDecoration(
+            context,
+            accent: accent,
+            radius: TokensStrip.rCard,
+          ),
           child: Row(
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: accent.withValues(alpha: isDark ? 0.24 : 0.14),
-                borderRadius: BorderRadius.circular(15),
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: isDark ? 0.24 : 0.14),
+                  borderRadius: BorderRadius.circular(TokensStrip.rInput),
+                ),
+                child: Center(
+                  child: FxIcon(name: item.icon, color: accent, size: 18),
+                ),
               ),
-              child: Center(
-                child: FxIcon(name: item.icon, color: accent, size: 18),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: ink,
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w900,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    item.subtitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: mute, fontSize: 11.6, height: 1.2),
-                  ),
-                ],
+                    const SizedBox(height: 2),
+                    Text(
+                      item.subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: mute,
+                        fontSize: 11.6,
+                        height: 1.2,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            FxIcon(name: 'chevron-right', color: mute, size: 20),
-          ],
+              const SizedBox(width: 8),
+              FxIcon(name: 'chevron-right', color: mute, size: 20),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -2372,11 +2652,9 @@ class _AderenciaSemanaWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
-    final primaryAccent = BrandPalette.accent(primary);
-    final chrome = ShellChrome.forDark(isDark);
-    final cardBg = chrome.cardFill;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final rowAccent = BrandPalette.sectionAccent(primary, dark: isDark);
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Consumer(
       builder: (context, ref, _) {
@@ -2386,14 +2664,7 @@ class _AderenciaSemanaWidget extends StatelessWidget {
               () => Container(
                 height: 184,
                 padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(
-                    color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-                    width: 1,
-                  ),
-                ),
+              decoration: fxStripCardDecoration(context, radius: TokensStrip.rCard),
                 child: Column(
                   children: List.generate(3, (index) {
                     return Expanded(
@@ -2438,15 +2709,8 @@ class _AderenciaSemanaWidget extends StatelessWidget {
               ),
           error:
               (e, _) => Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(
-                    color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-                    width: 1,
-                  ),
-                ),
+                padding: const EdgeInsets.all(TokensStrip.s4),
+              decoration: fxStripCardDecoration(context, radius: TokensStrip.rCard),
                 child: Row(
                   children: [
                     Container(
@@ -2494,53 +2758,39 @@ class _AderenciaSemanaWidget extends StatelessWidget {
               ),
           data: (items) {
             if (items.isEmpty) {
-              return Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(
-                    color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: primarySoft,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Center(
-                        child: FxIcon(
-                          name: 'circle-check',
-                          color: primary,
-                          size: 18,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Sem check-ins nesta semana. Quando alunos treinarem, a aderência aparece aqui.',
-                        style: TextStyle(color: mute, height: 1.3),
-                      ),
-                    ),
-                  ],
-                ),
+              return _AderenciaSemanaEmptyCard(
+                isDark: isDark,
+                primary: primary,
+                mute: mute,
+                title: 'Sem check-ins nesta semana',
+                body:
+                    'Quando alunos treinarem, a aderência aparece aqui com ranking automático.',
+                primaryAction: 'Abrir agenda',
+                onPrimary: () => context.go('/agenda'),
+              );
+            }
+
+            final semanaParada = items.every((a) => a.totalCheckinsSemana == 0);
+            if (semanaParada) {
+              return _AderenciaSemanaEmptyCard(
+                isDark: isDark,
+                primary: primary,
+                mute: mute,
+                title: 'Semana ainda parada',
+                body:
+                    'Nenhum check-in registrado. Acione sua base antes do fim da semana.',
+                primaryAction: 'Ver agenda',
+                secondaryAction: 'Plano retomada',
+                onPrimary: () => context.go('/agenda'),
+                onSecondary: () => context.push('/dashboard/qualidade'),
               );
             }
 
             return Container(
-              decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(22),
-                border: Border.all(
-                  color: isDark ? EagleTokens.darkLine : EagleTokens.line,
-                  width: 1,
-                ),
+              decoration: fxStripCardDecoration(
+                context,
+                accent: primary,
+                radius: TokensStrip.rCard,
               ),
               child: Column(
                 children: List.generate(items.length, (index) {
@@ -2560,7 +2810,7 @@ class _AderenciaSemanaWidget extends StatelessWidget {
                                     color:
                                         isDark
                                             ? EagleTokens.darkLine
-                                            : EagleTokens.line,
+                                            : TokensStrip.borderDefault,
                                     width: 0.5,
                                   ),
                                 )
@@ -2574,7 +2824,7 @@ class _AderenciaSemanaWidget extends StatelessWidget {
                             child: Text(
                               fxInitials(a.nome),
                               style: TextStyle(
-                                color: isDark ? primaryAccent : primary,
+                                color: rowAccent,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -2585,7 +2835,7 @@ class _AderenciaSemanaWidget extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  a.nome,
+                                  fxTitleCaseName(a.nome),
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
@@ -2605,7 +2855,7 @@ class _AderenciaSemanaWidget extends StatelessWidget {
                             data: a.sparkline,
                             width: 56,
                             height: 22,
-                            color: isDark ? primaryAccent : primary,
+                            color: rowAccent,
                           ),
                           const SizedBox(width: 14),
                           SizedBox(
@@ -2634,6 +2884,155 @@ class _AderenciaSemanaWidget extends StatelessWidget {
   }
 }
 
+class _AderenciaSemanaEmptyCard extends StatelessWidget {
+  const _AderenciaSemanaEmptyCard({
+    required this.isDark,
+    required this.primary,
+    required this.mute,
+    required this.title,
+    required this.body,
+    required this.primaryAction,
+    required this.onPrimary,
+    this.secondaryAction,
+    this.onSecondary,
+  });
+
+  final bool isDark;
+  final Color primary;
+  final Color mute;
+  final String title;
+  final String body;
+  final String primaryAction;
+  final VoidCallback onPrimary;
+  final String? secondaryAction;
+  final VoidCallback? onSecondary;
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+
+    return Container(
+      padding: const EdgeInsets.all(TokensStrip.s4),
+      decoration: fxStripCardDecoration(
+        context,
+        accent: primary,
+        radius: TokensStrip.rCard,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: primary.withValues(alpha: isDark ? 0.18 : 0.10),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Center(
+                  child: FxIcon(
+                    name: 'calendar',
+                    size: 18,
+                    color: BrandPalette.sectionAccent(primary, dark: isDark),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: ink,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      body,
+                      style: TextStyle(color: mute, height: 1.35, fontSize: 12.5),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final stacked = constraints.maxWidth < 340;
+              final primaryBtn = SizedBox(
+                width: stacked ? double.infinity : null,
+                child: FilledButton(
+                  onPressed: onPrimary,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(44),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(TokensStrip.rButton),
+                    ),
+                  ),
+                  child: Text(primaryAction),
+                ),
+              );
+              final secondaryBtn =
+                  secondaryAction != null && onSecondary != null
+                      ? SizedBox(
+                        width: stacked ? double.infinity : null,
+                        child: OutlinedButton(
+                          onPressed: onSecondary,
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(44),
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                TokensStrip.rButton,
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            secondaryAction!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 12.5, height: 1.1),
+                          ),
+                        ),
+                      )
+                      : null;
+
+              if (stacked) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    primaryBtn,
+                    if (secondaryBtn != null) ...[
+                      const SizedBox(height: 8),
+                      secondaryBtn,
+                    ],
+                  ],
+                );
+              }
+
+              return Row(
+                children: [
+                  Expanded(child: primaryBtn),
+                  if (secondaryBtn != null) ...[
+                    const SizedBox(width: 8),
+                    Expanded(child: secondaryBtn),
+                  ],
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Premium Error State — replaces raw Text(friendlyError)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2652,8 +3051,8 @@ class _DashboardErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = chromeOnDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = chromeOnDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = chromeOnDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = chromeOnDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -2676,7 +3075,7 @@ class _DashboardErrorState extends StatelessWidget {
             const SizedBox(height: 18),
             Text(
               'Algo saiu do ar',
-              style: GoogleFonts.outfit(
+              style: AppTypography.inter(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: ink,

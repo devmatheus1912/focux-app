@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -116,9 +116,9 @@ class _DefinirSenhaAlunoScreenState
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
-    final line = isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final strength = _passwordStrength();
 
     return Scaffold(
@@ -237,7 +237,7 @@ class _DefinirSenhaAlunoScreenState
                               fillColor:
                                   isDark
                                       ? Colors.white.withValues(alpha: 0.04)
-                                      : EagleTokens.paper,
+                                      : TokensStrip.pageBg,
                             ),
                             validator:
                                 (v) =>
@@ -245,7 +245,7 @@ class _DefinirSenhaAlunoScreenState
                                         ? 'Informe a senha atual'
                                         : null,
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: TokensStrip.s4),
 
                           // Nova senha
                           TextFormField(
@@ -292,7 +292,7 @@ class _DefinirSenhaAlunoScreenState
                               fillColor:
                                   isDark
                                       ? Colors.white.withValues(alpha: 0.04)
-                                      : EagleTokens.paper,
+                                      : TokensStrip.pageBg,
                             ),
                             validator: (v) {
                               if (v == null || v.isEmpty) {
@@ -333,7 +333,7 @@ class _DefinirSenhaAlunoScreenState
                               ],
                             ),
                           ],
-                          const SizedBox(height: 16),
+                          const SizedBox(height: TokensStrip.s4),
 
                           // Confirmar
                           TextFormField(
@@ -381,7 +381,7 @@ class _DefinirSenhaAlunoScreenState
                               fillColor:
                                   isDark
                                       ? Colors.white.withValues(alpha: 0.04)
-                                      : EagleTokens.paper,
+                                      : TokensStrip.pageBg,
                             ),
                             validator: (v) {
                               if (v == null || v.isEmpty) {
@@ -435,7 +435,7 @@ class _DefinirSenhaAlunoScreenState
                         ],
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: TokensStrip.s5),
 
                     FxLiquidPrimaryButton(
                       label: 'Salvar nova senha',

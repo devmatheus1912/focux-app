@@ -20,6 +20,7 @@ import 'financeiro_resumo_screen.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class FinanceiroScreen extends ConsumerStatefulWidget {
   const FinanceiroScreen({super.key});
@@ -72,8 +73,9 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
       extendBody: true,
       backgroundColor: Colors.transparent,
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(112),
+        preferredSize: const Size.fromHeight(136),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             FxShellAppBar(
               title: 'Financeiro',
@@ -328,7 +330,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                             Expanded(
                               child: Text(
                                 'Editar Mensalidade',
-                                style: GoogleFonts.outfit(
+                                style: AppTypography.inter(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: -0.3,
@@ -341,7 +343,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: TokensStrip.s4),
                         TextFormField(
                           controller: valorCtrl,
                           decoration: _fxDeco(
@@ -422,7 +424,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                                 () => selectedStatus = v ?? selectedStatus,
                               ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: TokensStrip.s5),
                         FxLiquidPrimaryButton(
                           label: salvando ? 'Salvando...' : 'Salvar',
                           icon: Icons.save,
@@ -625,7 +627,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                               width: 200,
                               height: 200,
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: TokensStrip.s4),
                             TextButton.icon(
                               icon: const Icon(Icons.copy),
                               label: const Text('Copiar codigo PIX'),
@@ -691,7 +693,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                             Expanded(
                               child: Text(
                                 'Nova Mensalidade',
-                                style: GoogleFonts.outfit(
+                                style: AppTypography.inter(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: -0.3,
@@ -704,7 +706,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: TokensStrip.s4),
                         ref
                             .watch(alunosProvider)
                             .when(
@@ -813,7 +815,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: TokensStrip.s5),
                         FxLiquidPrimaryButton(
                           label:
                               salvando
@@ -905,7 +907,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
     body: Column(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 12, 16, 4),
           child: TextField(
             controller: _searchCtrl,
             decoration: InputDecoration(
@@ -974,7 +976,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                   : _filtered.isEmpty
                   ? _buildMensalidadesEmpty(context)
                   : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
+                    padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 4, 16, 80),
                     itemCount: _filtered.length,
                     itemBuilder: (_, i) {
                       final m = _filtered[i];
@@ -1096,7 +1098,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
 
   Widget _buildMensalidadesLoading(BuildContext context) {
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
+      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 4, 16, 80),
       itemCount: 5,
       itemBuilder:
           (_, __) => Padding(
@@ -1131,7 +1133,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
           const SizedBox(height: 14),
           Text(
             'Nenhuma mensalidade',
-            style: GoogleFonts.outfit(
+            style: AppTypography.inter(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: ink,

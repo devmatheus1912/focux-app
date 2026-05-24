@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 class HistoricoCheckinScreen extends ConsumerWidget {
   const HistoricoCheckinScreen({super.key});
@@ -20,8 +21,8 @@ class HistoricoCheckinScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final historicoAsync = ref.watch(historicoCheckinProvider);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Histórico de Treinos',
         onBack: () => safePopOrGo(context, '/checkin/treinos'),
@@ -54,7 +55,7 @@ class HistoricoCheckinScreen extends ConsumerWidget {
                       onRefresh:
                           () async => ref.invalidate(historicoCheckinProvider),
                       child: ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 8, 16, 100),
                         itemCount: historico.length,
                         itemBuilder:
                             (context, i) => _HistoricoCard(
@@ -84,8 +85,8 @@ class _HistoricoCard extends StatelessWidget {
         concluido
             ? EagleTokens.good.withValues(alpha: 0.12)
             : EagleTokens.warn.withValues(alpha: 0.12);
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     var dateLabel = '';
     if (entry.iniciadoEm != null) {
@@ -137,7 +138,7 @@ class _HistoricoCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: chipBg,
-              borderRadius: BorderRadius.circular(EagleTokens.radiusSm),
+              borderRadius: BorderRadius.circular(TokensStrip.rCard),
             ),
             child: Text(
               concluido ? 'Concluído' : 'Em andamento',

@@ -1,16 +1,19 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../data/aluno_contact_utils.dart';
+import '../data/aluno_followup_store.dart';
+import '../providers/aluno_followup_provider.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/utils/fx_utils.dart';
-import '../../../core/widgets/fx_sparkline.dart';
 import '../../dashboard/data/command_center_data.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../ia/data/ia_repository.dart';
@@ -123,7 +126,7 @@ class AlunoDetailScreen extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        FeedbackHelper.showSuccess(context, 'Erro: $e');
+        FeedbackHelper.showError(context, 'Erro: $e');
       }
     }
   }
@@ -202,7 +205,7 @@ class AlunoDetailScreen extends ConsumerWidget {
             child: ShellSurface(
               accent: primary,
               radius: TokensStrip.rCard,
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 12, 20, 20),
               child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -224,7 +227,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                   ),
                   child: Icon(Icons.key_rounded, color: primary, size: 28),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: TokensStrip.s4),
                 Text(
                   'Nova senha provisória',
                   style: TextStyle(
@@ -427,21 +430,31 @@ class AlunoDetailScreen extends ConsumerWidget {
       backgroundColor: Colors.transparent,
       body: alunoAsync.when(
         loading: () => const FxLoading(),
-        error: (e, _) => Center(child: Text('Erro: $e')),
+        error:
+            (e, _) => _AlunoDetailErrorState(
+              message: '$e',
+              onRetry: () {
+                ref.invalidate(alunoProvider(alunoId));
+              },
+            ),
         data: (aluno) {
-          final perfil = '${_perfilCompletion(aluno)}%';
-          final financeiro =
-              aluno.statusFinanceiro == 'INADIMPLENTE' ? 'Ação' : 'OK';
-          final medida =
-              aluno.peso == null
-                  ? 'Falta'
-                  : '${aluno.peso!.toStringAsFixed(1)} kg';
-          final contexto =
-              aluno.equipamentosDisponiveis.isEmpty
-                  ? 'Base'
-                  : '${aluno.equipamentosDisponiveis.length} eq.';
+          ref.watch(alertasConfigProvider);
+          final aderencia =
+              aluno.aderenciaPercent == null
+                  ? '—'
+                  : '${aluno.aderenciaPercent}%';
+          final diasTreino =
+              aluno.diasSemTreino == null ? '—' : '${aluno.diasSemTreino}d';
+          final risco = formatRiscoNivel(aluno.riscoNivel);
+          final proximoContato = formatProximoContato(aluno);
 
-          return CustomScrollView(
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(alunoProvider(alunoId));
+              ref.invalidate(alunoRecoveryProvider(alunoId));
+            },
+            child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverAppBar(
                 expandedHeight: 196,
@@ -470,13 +483,13 @@ class AlunoDetailScreen extends ConsumerWidget {
                 flexibleSpace: FlexibleSpaceBar(
                   collapseMode: CollapseMode.pin,
                   background: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 72, 16, 10),
+                    padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 72, 16, 10),
                     child: Container(
                       decoration: chrome.panel(
                         radius: TokensStrip.rCard,
                         accent: primary,
                       ),
-                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 14, 16, 14),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -534,28 +547,25 @@ class AlunoDetailScreen extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              _HeroStat(label: 'Perfil', value: perfil),
+                              _HeroStat(label: 'Aderência', value: aderencia),
                               Container(
                                 width: 1,
                                 height: 24,
                                 color: chrome.line,
                               ),
-                              _HeroStat(
-                                label: 'Financeiro',
-                                value: financeiro,
-                              ),
+                              _HeroStat(label: 'Sem treino', value: diasTreino),
                               Container(
                                 width: 1,
                                 height: 24,
                                 color: chrome.line,
                               ),
-                              _HeroStat(label: 'Medida', value: medida),
+                              _HeroStat(label: 'Risco', value: risco),
                               Container(
                                 width: 1,
                                 height: 24,
                                 color: chrome.line,
                               ),
-                              _HeroStat(label: 'Contexto', value: contexto),
+                              _HeroStat(label: 'Contato', value: proximoContato),
                             ],
                           ),
                         ],
@@ -633,26 +643,34 @@ class AlunoDetailScreen extends ConsumerWidget {
                               extra: aluno.nome,
                             ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: TokensStrip.s4),
+                      _AlunoOperationalPulseCard(
+                        aluno: aluno,
+                        isDark: isDark,
+                        primary: primary,
+                      ),
+                      const SizedBox(height: TokensStrip.s4),
+                      _AlunoFollowUpCard(aluno: aluno, isDark: isDark),
+                      const SizedBox(height: TokensStrip.s4),
                       _AlunoRecoveryInsightCard(
                         recoveryAsync: recoveryAsync,
                         isDark: isDark,
                         primary: primary,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: TokensStrip.s4),
                       _Aluno360CopilotCard(
                         aluno: aluno,
                         resumoAsync: autonomiaResumoAsync,
                         isDark: isDark,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: TokensStrip.s4),
                       _EvolucaoInteligenteCard(
                         alunoId: alunoId,
                         alunoNome: aluno.nome,
                         evolucaoAsync: evolucaoAsync,
                         isDark: isDark,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: TokensStrip.s4),
                       _Aluno360TimelineCard(
                         aluno: aluno,
                         eventosAsync: autonomiaAsync,
@@ -660,7 +678,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                         timelineApiAsync: timeline360ApiAsync,
                         isDark: isDark,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: TokensStrip.s4),
 
                       // Weight evolution card
                       Container(
@@ -682,7 +700,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                                         color:
                                             isDark
                                                 ? EagleTokens.darkInkMute
-                                                : EagleTokens.inkMute,
+                                                : TokensStrip.textSecondary,
                                         fontSize: 11.5,
                                         fontWeight: FontWeight.w600,
                                         letterSpacing: 0.8,
@@ -712,52 +730,9 @@ class AlunoDetailScreen extends ConsumerWidget {
                                               color:
                                                   isDark
                                                       ? EagleTokens.darkInkMute
-                                                      : EagleTokens.inkMute,
+                                                      : TokensStrip.textSecondary,
                                               fontSize: 14,
                                               fontWeight: FontWeight.w400,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 3,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color:
-                                                  isDark
-                                                      ? const Color(0x1F6FE296)
-                                                      : EagleTokens.goodSoft,
-                                              borderRadius:
-                                                  BorderRadius.circular(999),
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.arrow_downward,
-                                                  size: 10,
-                                                  color:
-                                                      isDark
-                                                          ? const Color(
-                                                            0xFF6FE296,
-                                                          )
-                                                          : EagleTokens.good,
-                                                ),
-                                                const SizedBox(width: 3),
-                                                Text(
-                                                  '3.9 kg',
-                                                  style: TextStyle(
-                                                    color:
-                                                        isDark
-                                                            ? const Color(
-                                                              0xFF6FE296,
-                                                            )
-                                                            : EagleTokens.good,
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                              ],
                                             ),
                                           ),
                                         ],
@@ -767,13 +742,13 @@ class AlunoDetailScreen extends ConsumerWidget {
                                 ),
                                 Text(
                                   aluno.peso == null
-                                      ? 'Sem medida'
-                                      : 'Meta · 62 kg',
+                                      ? 'Sem medida registrada'
+                                      : 'Ver evolução completa',
                                   style: TextStyle(
                                     color:
                                         isDark
                                             ? EagleTokens.darkInkMute
-                                            : EagleTokens.inkMute,
+                                            : TokensStrip.textSecondary,
                                     fontSize: 11.5,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -798,24 +773,24 @@ class AlunoDetailScreen extends ConsumerWidget {
                                           isDark: isDark,
                                         ),
                                       )
-                                      : FxSparkline(
-                                        data: const [
-                                          68,
-                                          67.5,
-                                          66.8,
-                                          66.0,
-                                          65.2,
-                                          64.8,
-                                          64.1,
-                                        ],
-                                        color: primary,
-                                        fill: true,
+                                      : InkWell(
+                                        borderRadius: BorderRadius.circular(14),
+                                        onTap:
+                                            () => context.push(
+                                              '/alunos/$alunoId/evolucao',
+                                              extra: aluno.nome,
+                                            ),
+                                        child: _EmptyMiniState(
+                                          icon: Icons.show_chart_rounded,
+                                          text: 'Abrir evolução de peso',
+                                          isDark: isDark,
+                                        ),
                                       ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: TokensStrip.s4),
 
                       // Measurements Grid
                       GridView.count(
@@ -856,11 +831,11 @@ class AlunoDetailScreen extends ConsumerWidget {
 
                       Text(
                         'Módulos',
-                        style: TextStyle(
+                        style: AppTypography.inter(
                           fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: ink,
-                          letterSpacing: -0.5,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.4,
+                          color: BrandPalette.sectionHeading(primary, dark: isDark),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -1005,6 +980,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                 ),
               ),
             ],
+          ),
           );
         },
       ),
@@ -1339,7 +1315,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
               child: ShellSurface(
                 radius: TokensStrip.rCard,
                 accent: primary,
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 8, 20, 20),
                 child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1384,7 +1360,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: TokensStrip.s4),
                   if (gaps.isEmpty)
                     Container(
                       width: double.infinity,
@@ -1485,7 +1461,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
       builder:
           (sheetContext) => SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 4, 20, 20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1930,7 +1906,7 @@ class _EvolucaoInteligenteCard extends StatelessWidget {
       case 'PLATÔ':
         return EagleTokens.warn;
       default:
-        return EagleTokens.inkMute;
+        return TokensStrip.textSecondary;
     }
   }
 
@@ -1946,7 +1922,7 @@ class _EvolucaoInteligenteCard extends StatelessWidget {
       builder:
           (sheetContext) => SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 4, 20, 20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1988,7 +1964,7 @@ class _EvolucaoInteligenteCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: TokensStrip.s4),
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(14),
@@ -2001,7 +1977,7 @@ class _EvolucaoInteligenteCard extends StatelessWidget {
                     ),
                     child: Text(message, style: const TextStyle(height: 1.35)),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: TokensStrip.s4),
                   Row(
                     children: [
                       Expanded(
@@ -2054,7 +2030,7 @@ class _EvolucaoInteligenteCard extends StatelessWidget {
     final mute = fxScreenMute(context);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       decoration: fxListCardDecoration(context),
       child: evolucaoAsync.when(
         loading: () => const LinearProgressIndicator(minHeight: 2),
@@ -2275,7 +2251,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
           kind = 'Chat';
         } else {
           icon = Icons.bolt_outlined;
-          color = EagleTokens.inkMute;
+          color = TokensStrip.textSecondary;
           kind = tipo;
         }
     }
@@ -2365,7 +2341,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
     return switch (action.toUpperCase()) {
       'CLICKED' => EagleTokens.warn,
       'COMPLETED' => EagleTokens.good,
-      _ => EagleTokens.inkMute,
+      _ => TokensStrip.textSecondary,
     };
   }
 
@@ -2384,7 +2360,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
     final hasMore = items.length > visibleItems.length;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       decoration: fxListCardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2471,7 +2447,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
             maxChildSize: 0.92,
             builder:
                 (context, controller) => Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 8, 16, 0),
                   child: ShellSurface(
                     radius: 28,
                     padding: EdgeInsets.fromLTRB(
@@ -2546,8 +2522,8 @@ class _Timeline360Tile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final link = item.deepLink;
     final child = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2682,8 +2658,8 @@ class _Aluno360SignalTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
@@ -2754,8 +2730,8 @@ class _CopilotPrescription extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -2816,8 +2792,8 @@ class _CopilotTaskStatus extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -3007,11 +2983,11 @@ class _HeroStat extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           value,
-          style: TextStyle(
+          style: GoogleFonts.jetBrainsMono(
             color: ink,
-            fontSize: 20,
+            fontSize: 18,
             fontWeight: FontWeight.w700,
-            letterSpacing: -0.5,
+            letterSpacing: -0.4,
           ),
         ),
       ],
@@ -3033,7 +3009,7 @@ class _EmptyMiniState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
@@ -3285,7 +3261,7 @@ class _AlunoRecoveryInsightCard extends StatelessWidget {
         }
         return FxPremiumEntrance(
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(TokensStrip.s4),
             decoration: chrome.panel(
               radius: TokensStrip.rCard,
               accent: primary,
@@ -3334,6 +3310,388 @@ class _AlunoRecoveryInsightCard extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _AlunoOperationalPulseCard extends StatelessWidget {
+  const _AlunoOperationalPulseCard({
+    required this.aluno,
+    required this.isDark,
+    required this.primary,
+  });
+
+  final Aluno aluno;
+  final bool isDark;
+  final Color primary;
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
+    final riscoColor =
+        aluno.emRisco
+            ? (isDark ? const Color(0xFFFFB77A) : EagleTokens.warn)
+            : (isDark ? const Color(0xFF6FE296) : EagleTokens.good);
+
+    return Container(
+      decoration: fxListCardDecoration(context),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.insights_rounded, size: 18, color: primary),
+              const SizedBox(width: 8),
+              Text(
+                'Pulso operacional',
+                style: TextStyle(
+                  color: ink,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Sinais do backend para priorizar ação do personal',
+            style: TextStyle(color: mute, fontSize: 11.5, height: 1.3),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: _OperationalMetricTile(
+                  label: 'Prontidão',
+                  value:
+                      aluno.scoreProntidao == null
+                          ? '—'
+                          : '${aluno.scoreProntidao}',
+                  hint: 'Score API',
+                  color: primary,
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _OperationalMetricTile(
+                  label: 'Risco',
+                  value: formatRiscoNivel(aluno.riscoNivel),
+                  hint: aluno.emRisco ? 'Em risco' : 'Estável',
+                  color: riscoColor,
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _OperationalMetricTile(
+                  label: 'Sem treino',
+                  value:
+                      aluno.diasSemTreino == null
+                          ? '—'
+                          : '${aluno.diasSemTreino}d',
+                  hint: 'Dias parados',
+                  color:
+                      (aluno.diasSemTreino ?? 0) >=
+                              AlunoFollowUpStore.diasSemTreinoLimite
+                          ? EagleTokens.warn
+                          : mute,
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _OperationalMetricTile(
+                  label: 'Aderência',
+                  value:
+                      aluno.aderenciaPercent == null
+                          ? '—'
+                          : '${aluno.aderenciaPercent}%',
+                  hint: 'Semana atual',
+                  color: EagleTokens.aderenciaColor(
+                    (aluno.aderenciaPercent ?? 0).toDouble(),
+                    isDark: isDark,
+                  ),
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OperationalMetricTile extends StatelessWidget {
+  const _OperationalMetricTile({
+    required this.label,
+    required this.value,
+    required this.hint,
+    required this.color,
+    required this.isDark,
+  });
+
+  final String label;
+  final String value;
+  final String hint;
+  final Color color;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.12 : 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: isDark ? 0.24 : 0.16)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: TextStyle(
+              color: mute,
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.4,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              color: ink,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.3,
+            ),
+          ),
+          Text(hint, style: TextStyle(color: color, fontSize: 10.5)),
+        ],
+      ),
+    );
+  }
+}
+
+class _AlunoFollowUpCard extends ConsumerWidget {
+  const _AlunoFollowUpCard({required this.aluno, required this.isDark});
+
+  final Aluno aluno;
+  final bool isDark;
+
+  String _formatDate(DateTime date) {
+    final d = date.day.toString().padLeft(2, '0');
+    final m = date.month.toString().padLeft(2, '0');
+    return '$d/$m/${date.year}';
+  }
+
+  Future<void> _pickFollowUpDate(BuildContext context, WidgetRef ref) async {
+    final now = DateTime.now();
+    final current = aluno.followUpDate;
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: current ?? now,
+      firstDate: now.subtract(const Duration(days: 1)),
+      lastDate: now.add(const Duration(days: 365)),
+      helpText: 'Próximo contato',
+    );
+    if (picked == null) return;
+    await ref.read(alunoFollowUpActionsProvider).setFollowUpDate(aluno.id, picked);
+    if (context.mounted) {
+      FeedbackHelper.showSuccess(
+        context,
+        'Follow-up definido para ${_formatDate(picked)}',
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    final followUpDate = aluno.followUpDate;
+    final snoozedUntil = aluno.snoozedUntilDate;
+    final isSnoozed =
+        snoozedUntil != null && snoozedUntil.isAfter(DateTime.now());
+    final actions = ref.read(alunoFollowUpActionsProvider);
+
+    return Container(
+      decoration: fxListCardDecoration(context),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.event_available_rounded, size: 18, color: primary),
+              const SizedBox(width: 8),
+              Text(
+                'Follow-up do personal',
+                style: TextStyle(
+                  color: ink,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            followUpDate == null
+                ? 'Sem data definida · sincronizado com a nuvem'
+                : 'Próximo contato: ${_formatDate(followUpDate)}',
+            style: TextStyle(color: mute, fontSize: 12, height: 1.35),
+          ),
+          if (aluno.ultimoContatoDate != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Último contato: ${_formatDate(aluno.ultimoContatoDate!)}',
+              style: TextStyle(color: mute, fontSize: 11.5),
+            ),
+          ],
+          if (isSnoozed) ...[
+            const SizedBox(height: 6),
+            Text(
+              'Adiado até ${_formatDate(snoozedUntil)} ${_formatTime(snoozedUntil)}',
+              style: TextStyle(
+                color: EagleTokens.warn,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              OutlinedButton.icon(
+                onPressed: () => _pickFollowUpDate(context, ref),
+                icon: const Icon(Icons.calendar_month_rounded, size: 16),
+                label: const Text('Definir data'),
+              ),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  await actions.snooze(aluno.id);
+                  if (context.mounted) {
+                    FeedbackHelper.showSuccess(context, 'Adiado por 24h');
+                  }
+                },
+                icon: const Icon(Icons.snooze_rounded, size: 16),
+                label: const Text('Adiar 24h'),
+              ),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  await actions.snooze(aluno.id, duration: const Duration(days: 3));
+                  if (context.mounted) {
+                    FeedbackHelper.showSuccess(context, 'Adiado por 3 dias');
+                  }
+                },
+                icon: const Icon(Icons.schedule_rounded, size: 16),
+                label: const Text('Adiar 3d'),
+              ),
+              FilledButton.icon(
+                onPressed: () async {
+                  await actions.markContactDone(aluno.id);
+                  if (context.mounted) {
+                    FeedbackHelper.showSuccess(context, 'Contato registrado');
+                  }
+                },
+                icon: const Icon(Icons.check_rounded, size: 16),
+                label: const Text('Contato feito'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: primary,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+              if (followUpDate != null || isSnoozed)
+                TextButton(
+                  onPressed: () async {
+                    await actions.clearFollowUp(aluno.id);
+                    if (context.mounted) {
+                      FeedbackHelper.showSuccess(context, 'Follow-up limpo');
+                    }
+                  },
+                  child: const Text('Limpar'),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatTime(DateTime value) {
+    final h = value.hour.toString().padLeft(2, '0');
+    final m = value.minute.toString().padLeft(2, '0');
+    return '$h:$m';
+  }
+}
+
+class _AlunoDetailErrorState extends StatelessWidget {
+  const _AlunoDetailErrorState({
+    required this.message,
+    required this.onRetry,
+  });
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.cloud_off_rounded, size: 40, color: primary),
+            const SizedBox(height: 14),
+            Text(
+              'Não foi possível carregar o aluno',
+              textAlign: TextAlign.center,
+              style: AppTypography.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: ink,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: mute, fontSize: 13, height: 1.35),
+            ),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text('Tentar novamente'),
+              style: FilledButton.styleFrom(
+                backgroundColor: primary,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

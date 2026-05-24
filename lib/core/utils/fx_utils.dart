@@ -1,3 +1,17 @@
+/// Title-cases a person name for display ("thales silva" → "Thales Silva").
+String fxTitleCaseName(String value) {
+  final trimmed = value.trim();
+  if (trimmed.isEmpty) return 'Aluno';
+
+  return trimmed
+      .split(RegExp(r'\s+'))
+      .map((part) {
+        if (part.isEmpty) return part;
+        return part[0].toUpperCase() + part.substring(1).toLowerCase();
+      })
+      .join(' ');
+}
+
 /// Returns the 2-letter initials for a full name.
 ///
 /// Design spec: first letter of first + last word.
