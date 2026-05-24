@@ -546,6 +546,24 @@ class _AddExercicioToTreinoScreenState
     return null;
   }
 
+  Future<void> _scheduleMediaRefresh(int exercicioId) async {
+    for (final delay in [
+      const Duration(seconds: 2),
+      const Duration(seconds: 5),
+    ]) {
+      await Future<void>.delayed(delay);
+      if (!mounted) return;
+      ref.invalidate(exerciciosProvider);
+      final fresh = await _freshExercicio(exercicioId);
+      if (fresh == null || !mounted) continue;
+      if (_selecionado?.id == exercicioId) {
+        setState(() => _selecionado = fresh);
+      }
+      final poster = exercisePreviewMediaUrlFor(fresh);
+      if (poster != null && poster.isNotEmpty) return;
+    }
+  }
+
   Future<void> _uploadSelectedExerciseVideo() async {
     final exercicio = _selecionado;
     if (exercicio == null) return;
@@ -596,6 +614,7 @@ class _AddExercicioToTreinoScreenState
         context,
         'Vídeo enviado! Miniatura e prévia atualizadas.',
       );
+      unawaited(_scheduleMediaRefresh(fresh.id));
       return fresh;
     } catch (e) {
       if (!mounted) return null;
@@ -659,12 +678,7 @@ class _AddExercicioToTreinoScreenState
 
   Future<void> _previewSelectedExerciseVideo() async {
     final exercicio = _selecionado;
-    if (exercicio == null) return;
-    if (!exercicioHasPersonalVideo(exercicio) &&
-        !exercicioHasPublishedLibraryMedia(exercicio) &&
-        !exercicio.hasPlayableMedia) {
-      return;
-    }
+    if (exercicio == null || !canPreviewExerciseMedia(exercicio)) return;
     HapticFeedback.selectionClick();
     await showExerciseMediaPreview(context, exercicio: exercicio);
   }
@@ -789,8 +803,7 @@ class _AddExercicioToTreinoScreenState
                   alreadyInTreinoIds: alreadyInTreinoIds,
                 ),
                 onPreview:
-                    exercicioHasPersonalVideo(_selecionado!) ||
-                            exercicioHasPublishedLibraryMedia(_selecionado!)
+                    canPreviewExerciseMedia(_selecionado!)
                         ? _previewSelectedExerciseVideo
                         : null,
               ),
@@ -867,6 +880,12 @@ class _AddExercicioToTreinoScreenState
                       _pickerFilter = const ExercisePickerFilter();
                       _buscaCtrl.clear();
                     }),
+                onBrowseLibrary:
+                    () => _openExercisePicker(
+                      allExercicios,
+                      alreadyInTreinoIds: alreadyInTreinoIds,
+                    ),
+                showBrowseLibrary: _pickerFilter.somenteFavoritos,
               ),
             ],
             if (!showFilterEmpty && curatedSuggestions.isNotEmpty) ...[
@@ -893,7 +912,7 @@ class _AddExercicioToTreinoScreenState
                 alreadyInTreinoIds: alreadyInTreinoIds,
                 onSelect: _selectExercise,
                 onPreview: (ex) {
-                  if (!ex.hasPlayableMedia) return;
+                  if (!canPreviewExerciseMedia(ex)) return;
                   showExerciseMediaPreview(context, exercicio: ex);
                 },
               ),
@@ -917,7 +936,7 @@ class _AddExercicioToTreinoScreenState
                 alreadyInTreinoIds: alreadyInTreinoIds,
                 onSelect: _selectExercise,
                 onPreview: (ex) {
-                  if (!ex.hasPlayableMedia) return;
+                  if (!canPreviewExerciseMedia(ex)) return;
                   showExerciseMediaPreview(context, exercicio: ex);
                 },
               ),
@@ -932,7 +951,7 @@ class _AddExercicioToTreinoScreenState
                 alreadyInTreinoIds: alreadyInTreinoIds,
                 onSelect: _selectExercise,
                 onPreview: (ex) {
-                  if (!ex.hasPlayableMedia) return;
+                  if (!canPreviewExerciseMedia(ex)) return;
                   showExerciseMediaPreview(context, exercicio: ex);
                 },
               ),
@@ -1617,7 +1636,7 @@ class _SuggestionList extends StatelessWidget {
                   isDark: isDark,
                   onTap: () => onSelect(exercicio),
                   onPreviewThumb:
-                      exercicio.hasPlayableMedia
+                      canPreviewExerciseMedia(exercicio)
                           ? () => onPreview(exercicio)
                           : null,
                 ),
@@ -1639,7 +1658,7 @@ class _SuggestionList extends StatelessWidget {
                   isDark: isDark,
                   onTap: () => onSelect(exercicio),
                   onPreviewThumb:
-                      exercicio.hasPlayableMedia
+                      canPreviewExerciseMedia(exercicio)
                           ? () => onPreview(exercicio)
                           : null,
                 ),
@@ -1658,6 +1677,8 @@ class _BuscarFilterEmptyState extends StatelessWidget {
     required this.isDark,
     required this.primary,
     required this.onClearFilters,
+    this.onBrowseLibrary,
+    this.showBrowseLibrary = false,
   });
 
   final String title;
@@ -1665,6 +1686,8 @@ class _BuscarFilterEmptyState extends StatelessWidget {
   final bool isDark;
   final Color primary;
   final VoidCallback onClearFilters;
+  final VoidCallback? onBrowseLibrary;
+  final bool showBrowseLibrary;
 
   @override
   Widget build(BuildContext context) {
@@ -1696,8 +1719,20 @@ class _BuscarFilterEmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
+          if (showBrowseLibrary && onBrowseLibrary != null) ...[
+            FilledButton(
+              onPressed: onBrowseLibrary,
+              style: FilledButton.styleFrom(
+                backgroundColor: primary,
+                minimumSize: const Size.fromHeight(44),
+              ),
+              child: const Text('Ver biblioteca completa'),
+            ),
+            const SizedBox(height: 8),
+          ],
           FilledButton.tonal(
             onPressed: onClearFilters,
+            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(44)),
             child: const Text('Limpar filtros e busca'),
           ),
         ],
@@ -3288,7 +3323,7 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
                                     Navigator.pop(context, exercicio);
                                   },
                                   onPreviewThumb:
-                                      exercicio.hasPlayableMedia
+                                      canPreviewExerciseMedia(exercicio)
                                           ? () => showExerciseMediaPreview(
                                             context,
                                             exercicio: exercicio,

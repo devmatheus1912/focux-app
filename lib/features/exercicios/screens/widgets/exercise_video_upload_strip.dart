@@ -87,7 +87,7 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
             : 'Vídeo do exercício (opcional)';
     final statusSubtitle =
         mediaLoading
-            ? 'Aguarde. A miniatura atualiza em instantes.'
+            ? 'Não feche o app. A miniatura atualiza em instantes.'
             : hasPersonalVideo
             ? 'Prévia, troca ou remoção a qualquer momento.'
             : hasLibraryDemo
@@ -307,6 +307,32 @@ class _DenseActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (mediaLoading) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              minHeight: 6,
+              backgroundColor: primary.withValues(alpha: 0.12),
+              color: primary,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Enviando para a nuvem...',
+            textAlign: TextAlign.center,
+            style: AppTypography.inter(
+              color: mute,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -321,12 +347,12 @@ class _DenseActions extends StatelessWidget {
             child: Text(hasPersonalVideo ? 'Ver seu vídeo' : 'Ver demo'),
           ),
         if (canPreview && !mediaLoading) const SizedBox(height: 8),
-        FxLiquidPrimaryButton(
-          label: uploadLabel,
-          onPressed: mediaLoading ? null : onUpload,
-          loading: mediaLoading,
-          expand: true,
-        ),
+        if (!mediaLoading)
+          FxLiquidPrimaryButton(
+            label: uploadLabel,
+            onPressed: onUpload,
+            expand: true,
+          ),
         if (hasPersonalVideo) ...[
           const SizedBox(height: 4),
           Align(

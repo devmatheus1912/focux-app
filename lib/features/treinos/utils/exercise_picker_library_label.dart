@@ -73,7 +73,12 @@ String buscarTabEmptyTitle({
 
 String buscarTabEmptyMessage({required ExercisePickerFilter filter}) {
   if (filter.somenteFavoritos) {
-    return 'Favorite exercícios na biblioteca para vê-los aqui com um toque.';
+    return 'Favorite exercícios na biblioteca ou explore os 141 disponíveis '
+        'para montar sua lista rápida.';
   }
-  return 'Tente outro termo ou limpe os filtros para ver toda a biblioteca.';
+  if (filter.somenteComVideo) {
+    return 'Nenhum exercício com vídeo próprio ainda. Envie sua demonstração '
+        'ao selecionar um exercício.';
+  }
+  return 'Tente outro termo, abra a biblioteca completa ou limpe os filtros.';
 }

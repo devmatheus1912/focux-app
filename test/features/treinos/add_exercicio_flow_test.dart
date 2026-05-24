@@ -131,6 +131,31 @@ void main() {
       );
       expect(exercicioHasPersonalVideo(personal), isTrue);
     });
+
+    test('preview personal prioriza thumbnailUrl do backend', () {
+      final personal = Exercicio(
+        id: 3,
+        nome: 'Ab wheel',
+        videoUrl:
+            'https://res.cloudinary.com/demo/video/upload/v456/ab.mp4',
+        thumbnailUrl:
+            'https://res.cloudinary.com/demo/image/upload/v456/poster.jpg',
+        videoSource: 'PERSONAL_UPLOAD',
+      );
+      final preview = exercisePreviewMediaUrlFor(personal);
+      expect(preview, contains('poster.jpg'));
+      expect(preview, contains('_v=456'));
+    });
+
+    test('canPreviewExerciseMedia inclui curado em standby', () {
+      final curado = Exercicio(
+        id: 4,
+        nome: 'Agachamento',
+        curado: true,
+        curatedId: 10,
+      );
+      expect(canPreviewExerciseMedia(curado), isTrue);
+    });
   });
 
   group('workoutBuilderPresets', () {

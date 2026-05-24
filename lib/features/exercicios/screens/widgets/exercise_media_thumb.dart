@@ -45,7 +45,9 @@ class ExerciseMediaThumb extends StatelessWidget {
       size: size,
       radius: radius,
       iconSize: iconSize,
-      showPlayBadge: showPlayBadge ?? exercicio.hasPlayableMedia,
+      showPlayBadge:
+          showPlayBadge ??
+          (exercicioHasPersonalVideo(exercicio) || exercicio.hasPlayableMedia),
       expectMedia: pendingPublish,
     );
   }
@@ -55,6 +57,7 @@ class ExerciseMediaThumb extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final url = mediaUrl?.trim();
     final label = exercicio?.nomeDisplay ?? 'Exercício';
+    final ex = exercicio;
 
     Widget thumb;
     if (url != null && url.isNotEmpty) {
@@ -80,10 +83,26 @@ class ExerciseMediaThumb extends StatelessWidget {
         ),
       );
     } else {
-      thumb = _fallback(primary, missing: expectMedia);
+      thumb = _fallback(
+        primary,
+        missing: expectMedia,
+        personalPending:
+            ex != null &&
+            exercicioHasPersonalVideo(ex) &&
+            (url == null || url.isEmpty),
+      );
     }
 
-    final ex = exercicio;
+    thumb = AnimatedSwitcher(
+      duration: const Duration(milliseconds: 280),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      child: KeyedSubtree(
+        key: ValueKey(url ?? 'fallback-${ex?.id}'),
+        child: thumb,
+      ),
+    );
+
     thumb = Semantics(
       label:
           ex != null && exercicioHasPersonalVideo(ex)
@@ -123,7 +142,11 @@ class ExerciseMediaThumb extends StatelessWidget {
     );
   }
 
-  Widget _fallback(Color primary, {required bool missing}) {
+  Widget _fallback(
+    Color primary, {
+    required bool missing,
+    bool personalPending = false,
+  }) {
     return Container(
       width: size,
       height: size,
@@ -131,12 +154,14 @@ class ExerciseMediaThumb extends StatelessWidget {
         color: primary.withValues(alpha: missing ? 0.06 : 0.10),
         borderRadius: BorderRadius.circular(radius),
         border:
-            missing
+            missing || personalPending
                 ? Border.all(color: primary.withValues(alpha: 0.2))
                 : null,
       ),
       child: Icon(
-        missing
+        personalPending
+            ? Icons.videocam_rounded
+            : missing
             ? Icons.cloud_sync_outlined
             : Icons.fitness_center_rounded,
         color: primary.withValues(alpha: missing ? 0.55 : 1),
@@ -196,12 +221,21 @@ List<String> exerciseLibraryPreviewCandidates(Exercicio exercicio) {
 
 /// URL estática para thumb na lista (prioriza vídeo do personal, depois biblioteca).
 String? exercisePreviewMediaUrlFor(Exercicio exercicio) {
-  if (exercicio.isPersonalUpload) {
+  if (exercicio.isPersonalUpload || exercicioHasPersonalVideo(exercicio)) {
+    final thumb = exercicio.thumbnailUrl?.trim();
+    if (thumb != null && thumb.isNotEmpty) {
+      final resolved =
+          _resolveCloudinaryOrRaster(thumb) ?? cloudinaryImageThumbUrl(thumb);
+      if (resolved != null) {
+        return _cacheBustMediaUrl(resolved, exercicio.videoUrl);
+      }
+    }
     final video = exercicio.videoUrl?.trim();
     if (video != null && video.isNotEmpty) {
       final poster = cloudinaryVideoPosterUrl(video);
-      if (poster != null) return poster;
+      if (poster != null) return _cacheBustMediaUrl(poster, video);
     }
+    return null;
   }
   if (!exercicioHasPublishedLibraryMedia(exercicio)) return null;
   return exercisePreviewMediaUrl(
@@ -209,6 +243,15 @@ String? exercisePreviewMediaUrlFor(Exercicio exercicio) {
     gifUrl: exercicio.gifUrl,
     videoUrl: exercicio.videoUrl,
   );
+}
+
+String _cacheBustMediaUrl(String url, String? seed) {
+  final token = seed?.trim();
+  if (token == null || token.isEmpty) return url;
+  final version = RegExp(r'/v(\d+)/').firstMatch(token)?.group(1);
+  if (version == null) return url;
+  final separator = url.contains('?') ? '&' : '?';
+  return '$url${separator}_v=$version';
 }
 
 String? exercisePreviewMediaUrl({
@@ -312,4 +355,12 @@ String? cloudinaryVideoPosterUrl(String videoUrl) {
 bool exercicioHasPersonalVideo(Exercicio exercicio) {
   return exercicio.isPersonalUpload &&
       exercicio.videoUrl?.trim().isNotEmpty == true;
+}
+
+/// Abre prévia útil: vídeo próprio, demo publicada ou sheet standby.
+bool canPreviewExerciseMedia(Exercicio exercicio) {
+  if (exercicioHasPersonalVideo(exercicio)) return true;
+  if (exercicioHasPublishedLibraryMedia(exercicio)) return true;
+  if (kBibliotecaLibraryVideosStandby && exercicio.curado) return true;
+  return exercicio.hasPlayableMedia;
 }
