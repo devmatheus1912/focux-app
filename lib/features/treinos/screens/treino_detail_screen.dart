@@ -106,10 +106,7 @@ class TreinoDetailScreen extends ConsumerWidget {
                     Positioned(
                       top: 8,
                       left: TokensStrip.s5 - 4,
-                      child: _TreinoDetailBackButton(
-                        alunoId: alunoId,
-                        onHero: true,
-                      ),
+                      child: _TreinoDetailBackButton(alunoId: alunoId),
                     ),
                   ],
                 ),
@@ -146,35 +143,21 @@ void _popTreinoDetail(BuildContext context, {int? alunoId}) {
 
 class _TreinoDetailBackButton extends StatelessWidget {
   final int? alunoId;
-  final bool onHero;
 
-  const _TreinoDetailBackButton({
-    required this.alunoId,
-    this.onHero = false,
-  });
+  const _TreinoDetailBackButton({required this.alunoId});
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
-    final ink = onHero ? Colors.white : chrome.ink;
 
     return IconButton(
       onPressed: () => _popTreinoDetail(context, alunoId: alunoId),
       icon: Container(
         width: 38,
         height: 38,
-        decoration:
-            onHero
-                ? BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.14),
-                  ),
-                )
-                : chrome.headerAction(radius: 12),
+        decoration: chrome.headerAction(radius: 12),
         child: Center(
-          child: FxIcon(name: 'arrow-left', size: 18, color: ink),
+          child: FxIcon(name: 'arrow-left', size: 18, color: chrome.ink),
         ),
       ),
     );
@@ -527,7 +510,7 @@ class _TreinoDetailBody extends StatelessWidget {
           iconTheme: const IconThemeData(color: Colors.white),
           leading: Padding(
             padding: const EdgeInsets.only(left: 4),
-            child: _TreinoDetailBackButton(alunoId: alunoId, onHero: true),
+            child: _TreinoDetailBackButton(alunoId: alunoId),
           ),
           flexibleSpace: FlexibleSpaceBar(
             collapseMode: CollapseMode.pin,
