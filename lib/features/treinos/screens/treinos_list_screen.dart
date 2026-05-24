@@ -8,6 +8,8 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/pt_br_display.dart';
+import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -17,6 +19,15 @@ import '../../alunos/providers/alunos_provider.dart';
 import '../data/treino_repository.dart';
 import '../providers/treinos_provider.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
+
+String _readyPlansLabel(int count) =>
+    count == 1 ? '1 plano pronto para uso.' : '$count planos prontos para uso.';
+
+String _readyCountLabel(int count) =>
+    count == 1 ? '1 pronto' : '$count prontos';
+
+String _templateCountLabel(int count) =>
+    count == 1 ? '1 template' : '$count templates';
 
 class TreinosListScreen extends ConsumerWidget {
   final int? alunoId;
@@ -164,6 +175,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       context: context,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.34),
+      isScrollControlled: true,
       builder:
           (_) => _TreinoActionsSheet(
             treino: treino,
@@ -207,7 +219,10 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       builder:
           (context) => _DeleteWorkoutSheet(
             count: count,
-            name: count == 1 ? treinos.first.nome : null,
+            name:
+                count == 1
+                    ? displayWorkoutName(treinos.first.nome)
+                    : null,
             unlinkOnly: widget.alunoId != null,
           ),
     );
@@ -679,23 +694,29 @@ class _TreinoActionsSheet extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final chrome = ShellChrome.forDark(isDark);
     final bottom = MediaQuery.of(context).padding.bottom;
+    final maxHeight = MediaQuery.sizeOf(context).height * 0.82;
+    final displayName = displayWorkoutName(treino.nome);
 
     return SafeArea(
       top: false,
       child: Padding(
         padding: EdgeInsets.fromLTRB(12, 0, 12, 12 + bottom),
         child: Container(
+          constraints: BoxConstraints(maxHeight: maxHeight),
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
           decoration: chrome.bottomSheet(radius: 28),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                width: 42,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: chrome.mute.withValues(alpha: 0.26),
-                  borderRadius: BorderRadius.circular(999),
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: chrome.mute.withValues(alpha: 0.26),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
                 ),
               ),
               const SizedBox(height: 18),
@@ -720,7 +741,7 @@ class _TreinoActionsSheet extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          treino.nome,
+                          displayName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.inter(
@@ -744,33 +765,46 @@ class _TreinoActionsSheet extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: TokensStrip.s4),
-              _TreinoActionTile(
-                icon: Icons.open_in_new_rounded,
-                label: 'Abrir treino',
-                onTap: () => Navigator.pop(context, _TreinoAction.open),
-              ),
-              if (canAssign) ...[
-                _TreinoActionTile(
-                  icon: Icons.person_add_alt_1_rounded,
-                  label: 'Atribuir a aluno',
-                  onTap: () => Navigator.pop(context, _TreinoAction.assign),
+              Flexible(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _TreinoActionTile(
+                        icon: Icons.open_in_new_rounded,
+                        label: 'Abrir treino',
+                        onTap: () => Navigator.pop(context, _TreinoAction.open),
+                      ),
+                      if (canAssign) ...[
+                        _TreinoActionTile(
+                          icon: Icons.person_add_alt_1_rounded,
+                          label: 'Atribuir a um aluno',
+                          onTap:
+                              () => Navigator.pop(context, _TreinoAction.assign),
+                        ),
+                        _TreinoActionTile(
+                          icon: Icons.assignment_ind_rounded,
+                          label: 'Copiar para aluno',
+                          onTap:
+                              () => Navigator.pop(context, _TreinoAction.clone),
+                        ),
+                      ],
+                      _TreinoActionTile(
+                        icon: Icons.control_point_duplicate_rounded,
+                        label: 'Duplicar treino',
+                        onTap:
+                            () => Navigator.pop(context, _TreinoAction.duplicate),
+                      ),
+                      _TreinoActionTile(
+                        icon: Icons.delete_outline_rounded,
+                        label: 'Excluir treino',
+                        color: EagleTokens.bad,
+                        onTap: () => Navigator.pop(context, _TreinoAction.delete),
+                      ),
+                    ],
+                  ),
                 ),
-                _TreinoActionTile(
-                  icon: Icons.content_copy_rounded,
-                  label: 'Copiar para aluno',
-                  onTap: () => Navigator.pop(context, _TreinoAction.clone),
-                ),
-              ],
-              _TreinoActionTile(
-                icon: Icons.copy_rounded,
-                label: 'Duplicar treino',
-                onTap: () => Navigator.pop(context, _TreinoAction.duplicate),
-              ),
-              _TreinoActionTile(
-                icon: Icons.delete_outline_rounded,
-                label: 'Excluir treino',
-                color: EagleTokens.bad,
-                onTap: () => Navigator.pop(context, _TreinoAction.delete),
               ),
             ],
           ),
@@ -1158,16 +1192,15 @@ class _TreinosHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           if (showBack) ...[
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onBack,
-                borderRadius: BorderRadius.circular(14),
-                child: Container(
-                  width: 44,
-                  height: 44,
-                  decoration: chrome.headerAction(radius: 14),
-                  child: Icon(Icons.arrow_back_rounded, color: ink),
+            IconButton(
+              onPressed: onBack,
+              tooltip: 'Voltar',
+              icon: Container(
+                width: 44,
+                height: 44,
+                decoration: chrome.headerAction(radius: 14),
+                child: Center(
+                  child: FxIcon(name: 'arrow-left', size: 18, color: ink),
                 ),
               ),
             ),
@@ -1321,7 +1354,7 @@ class _TreinosCommandCard extends StatelessWidget {
                     Text(
                       assembling == 0
                           ? ultraCompact
-                              ? '${treinos.length} plano${treinos.length == 1 ? '' : 's'} prontos para uso.'
+                              ? _readyPlansLabel(treinos.length)
                               : 'Todos os planos têm exercícios.'
                           : '$assembling plano${assembling == 1 ? '' : 's'} ainda em montagem.',
                       style: AppTypography.inter(
@@ -1424,7 +1457,7 @@ class _CommandInlineMetrics extends StatelessWidget {
         border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
       ),
       child: Text(
-        '$ready pronto · $totalExercises exercícios · $templates templates',
+        '${_readyCountLabel(ready)} · $totalExercises exercícios · ${_templateCountLabel(templates)}',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: AppTypography.inter(
@@ -1732,7 +1765,10 @@ class _LibraryControls extends StatelessWidget {
                     ),
           ),
           const SizedBox(height: 11),
-          TextField(
+          Semantics(
+            label: 'Buscar treino por nome, objetivo ou nível',
+            textField: true,
+            child: TextField(
             onChanged: onQueryChanged,
             controller: controller,
             textInputAction: TextInputAction.search,
@@ -1780,6 +1816,7 @@ class _LibraryControls extends StatelessWidget {
                 borderSide: BorderSide.none,
               ),
             ),
+          ),
           ),
         ],
       ),
@@ -2006,8 +2043,19 @@ class _TreinoCard extends StatelessWidget {
     );
     final estimatedMinutes =
         hasExercises ? (treino.exercicios.length * 5).clamp(12, 90) : 0;
+    final displayName = displayWorkoutName(treino.nome);
+    final cardSemantics =
+        selectionMode
+            ? selected
+                ? 'Desmarcar $displayName'
+                : 'Selecionar $displayName'
+            : '$displayName, ${treino.exercicios.length} exercícios, '
+                'toque para abrir, segure para selecionar';
 
-    return InkWell(
+    return Semantics(
+      label: cardSemantics,
+      button: true,
+      child: InkWell(
       onTap:
           selectionMode
               ? onToggleSelection
@@ -2056,7 +2104,7 @@ class _TreinoCard extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              treino.nome,
+                              displayName,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTypography.inter(
@@ -2097,14 +2145,17 @@ class _TreinoCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 if (selectionMode)
-                  Checkbox(
-                    value: selected,
-                    onChanged: (_) => onToggleSelection(),
-                    activeColor: primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
+                  Semantics(
+                    label: selected ? 'Desmarcar treino' : 'Marcar treino',
+                    child: Checkbox(
+                      value: selected,
+                      onChanged: (_) => onToggleSelection(),
+                      activeColor: primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      visualDensity: VisualDensity.compact,
                     ),
-                    visualDensity: VisualDensity.compact,
                   )
                 else
                   Semantics(
@@ -2240,6 +2291,7 @@ class _TreinoCard extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
