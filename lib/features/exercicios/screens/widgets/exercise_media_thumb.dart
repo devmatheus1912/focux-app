@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/skeleton_loader.dart';
+
 class ExerciseMediaThumb extends StatelessWidget {
   const ExerciseMediaThumb({
     super.key,
@@ -33,19 +35,10 @@ class ExerciseMediaThumb extends StatelessWidget {
                 errorBuilder: (_, __, ___) => _fallback(primary),
                 loadingBuilder: (context, child, progress) {
                   if (progress == null) return child;
-                  return SizedBox(
+                  return SkeletonLoader(
                     width: size,
                     height: size,
-                    child: Center(
-                      child: SizedBox(
-                        width: iconSize,
-                        height: iconSize,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: primary.withValues(alpha: 0.7),
-                        ),
-                      ),
-                    ),
+                    borderRadius: radius,
                   );
                 },
               ),

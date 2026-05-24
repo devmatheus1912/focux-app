@@ -1,21 +1,55 @@
 import 'exercise_picker_filter.dart';
 
-/// Subtítulo contextual do seletor de biblioteca (contador honesto com filtros).
-String exercisePickerLibrarySubtitle({
+/// Linhas curtas para o seletor (evita truncar em uma linha).
+class ExercisePickerLibraryLines {
+  const ExercisePickerLibraryLines({required this.primary, this.secondary});
+
+  final String primary;
+  final String? secondary;
+}
+
+ExercisePickerLibraryLines exercisePickerLibraryLines({
   required int filteredCount,
   required int totalCount,
   required ExercisePickerFilter filter,
 }) {
   if (filter.somenteFavoritos && filteredCount == 0) {
-    return 'Nenhum favorito ainda · $totalCount na biblioteca';
+    return ExercisePickerLibraryLines(
+      primary: 'Sem favoritos',
+      secondary: '$totalCount no total',
+    );
   }
   if (filteredCount == 0 && filter.isActive) {
-    return 'Nenhum com estes filtros · $totalCount no total';
+    return ExercisePickerLibraryLines(
+      primary: 'Nenhum com filtros',
+      secondary: '$totalCount no total',
+    );
   }
   if (filter.isActive && filteredCount != totalCount) {
-    return '$filteredCount com estes filtros · $totalCount no total';
+    return ExercisePickerLibraryLines(
+      primary: '$filteredCount filtrados',
+      secondary: '$totalCount no total',
+    );
   }
-  return '$filteredCount exercícios na biblioteca';
+  return ExercisePickerLibraryLines(
+    primary: '$filteredCount exercícios',
+    secondary: null,
+  );
+}
+
+/// Uma linha para CTAs compactos.
+String exercisePickerLibrarySubtitle({
+  required int filteredCount,
+  required int totalCount,
+  required ExercisePickerFilter filter,
+}) {
+  final lines = exercisePickerLibraryLines(
+    filteredCount: filteredCount,
+    totalCount: totalCount,
+    filter: filter,
+  );
+  if (lines.secondary == null) return lines.primary;
+  return '${lines.primary} · ${lines.secondary}';
 }
 
 String buscarTabEmptyTitle({

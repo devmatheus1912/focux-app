@@ -324,33 +324,57 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     return Semantics(
       button: true,
       selected: selected,
-      label: label,
-      child: FilterChip(
-        label: Text(label),
-        avatar: icon == null ? null : Icon(icon, size: 16),
-        selected: selected,
-        showCheckmark: false,
-        onSelected: (_) => onTap(),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        visualDensity: VisualDensity.compact,
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-        labelStyle: AppTypography.inter(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          color: selected ? primary : null,
-        ),
-        selectedColor: primary.withValues(alpha: isDark ? 0.18 : 0.12),
-        backgroundColor: isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
-        side: BorderSide(
-          color:
-              selected
-                  ? primary.withValues(alpha: 0.35)
-                  : (isDark
-                      ? Colors.white.withValues(alpha: 0.08)
-                      : TokensStrip.borderDefault),
+      label: selected ? '$label, ativo' : label,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(999),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            curve: Curves.easeOutCubic,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color:
+                  selected
+                      ? primary
+                      : (isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color:
+                    selected
+                        ? primary
+                        : (isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : TokensStrip.borderDefault),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[
+                  Icon(
+                    icon,
+                    size: 16,
+                    color: selected ? Colors.white : primary,
+                  ),
+                  const SizedBox(width: 6),
+                ],
+                Text(
+                  label,
+                  style: AppTypography.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: selected ? Colors.white : ink,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

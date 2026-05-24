@@ -661,7 +661,7 @@ class _AddExercicioToTreinoScreenState
       default:
         final compact = _selecionado != null;
         final query = _buscaQuery.trim().toLowerCase();
-        final librarySubtitle = exercisePickerLibrarySubtitle(
+        final libraryLines = exercisePickerLibraryLines(
           filteredCount: exercicios.length,
           totalCount: totalLibraryCount,
           filter: _pickerFilter,
@@ -700,6 +700,12 @@ class _AddExercicioToTreinoScreenState
                   recentIds: _recentIds,
                 )
                 : const <Exercicio>[];
+        final hasBrowseShortcuts =
+            !showFilterEmpty &&
+            !compact &&
+            (curatedSuggestions.isNotEmpty ||
+                favoriteShortcuts.isNotEmpty ||
+                quickMatches.isNotEmpty);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -851,32 +857,53 @@ class _AddExercicioToTreinoScreenState
               ),
               const SizedBox(height: 8),
             ],
-            if (!compact)
+            if (!compact && hasBrowseShortcuts) ...[
+              const SizedBox(height: 12),
+              _BrowseLibraryCta(
+                totalCount: totalLibraryCount,
+                libraryLines: libraryLines,
+                isDark: isDark,
+                primary: primary,
+                onOpenPicker:
+                    () => _openExercisePicker(
+                      allExercicios,
+                      alreadyInTreinoIds: alreadyInTreinoIds,
+                    ),
+                onCreate: () async {
+                  final criado = await context.push<bool>('/exercicios/novo');
+                  if (criado == true) {
+                    ref.invalidate(exerciciosProvider);
+                  }
+                },
+              ),
+            ] else if (!compact)
               _ExercisePickerCard(
-              exercicio: _selecionado,
-              isDark: isDark,
-              primary: primary,
-              librarySubtitle: librarySubtitle,
-              compactMode: false,
-              showPrescriptionHint: !_prescriptionInView,
-              onTap:
-                  () => _openExercisePicker(
-                    allExercicios,
-                    alreadyInTreinoIds: alreadyInTreinoIds,
-                  ),
-              mediaLoading: _mediaLoading,
-              videoExpanded: _videoExpanded,
-              onToggleVideo: () => setState(() => _videoExpanded = !_videoExpanded),
-              onPreviewVideo: _previewSelectedExerciseVideo,
-              onUploadVideo: _uploadSelectedExerciseVideo,
-              onRemoveVideo: _removeSelectedExerciseVideo,
-              onCreate: () async {
-                final criado = await context.push<bool>('/exercicios/novo');
-                if (criado == true) {
-                  ref.invalidate(exerciciosProvider);
-                }
-              },
-            ),
+                exercicio: _selecionado,
+                isDark: isDark,
+                primary: primary,
+                libraryLines: libraryLines,
+                compactMode: false,
+                showPrescriptionHint: !_prescriptionInView,
+                showBrowseHint: !hasBrowseShortcuts,
+                onTap:
+                    () => _openExercisePicker(
+                      allExercicios,
+                      alreadyInTreinoIds: alreadyInTreinoIds,
+                    ),
+                mediaLoading: _mediaLoading,
+                videoExpanded: _videoExpanded,
+                onToggleVideo:
+                    () => setState(() => _videoExpanded = !_videoExpanded),
+                onPreviewVideo: _previewSelectedExerciseVideo,
+                onUploadVideo: _uploadSelectedExerciseVideo,
+                onRemoveVideo: _removeSelectedExerciseVideo,
+                onCreate: () async {
+                  final criado = await context.push<bool>('/exercicios/novo');
+                  if (criado == true) {
+                    ref.invalidate(exerciciosProvider);
+                  }
+                },
+              ),
             if (_selecionado != null) ...[
               const SizedBox(height: 8),
               Align(
@@ -2177,12 +2204,77 @@ class _AddExerciseTabStrip extends StatelessWidget {
   }
 }
 
+class _BrowseLibraryCta extends StatelessWidget {
+  const _BrowseLibraryCta({
+    required this.totalCount,
+    required this.libraryLines,
+    required this.isDark,
+    required this.primary,
+    required this.onOpenPicker,
+    required this.onCreate,
+  });
+
+  final int totalCount;
+  final ExercisePickerLibraryLines libraryLines;
+  final bool isDark;
+  final Color primary;
+  final VoidCallback onOpenPicker;
+  final VoidCallback onCreate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: onOpenPicker,
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+              side: BorderSide(color: primary.withValues(alpha: 0.35)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            icon: Icon(Icons.library_books_outlined, color: primary, size: 20),
+            label: Text(
+              'Ver biblioteca ($totalCount)',
+              style: AppTypography.inter(
+                color: primary,
+                fontWeight: FontWeight.w900,
+                fontSize: 13.5,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Semantics(
+          button: true,
+          label: 'Criar exercício personalizado',
+          child: IconButton.filled(
+            onPressed: onCreate,
+            style: IconButton.styleFrom(
+              minimumSize: const Size(48, 48),
+              backgroundColor: primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            icon: const Icon(Icons.add_rounded, size: 26),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _ExercisePickerCard extends StatelessWidget {
   final Exercicio? exercicio;
   final bool isDark;
   final Color primary;
-  final String librarySubtitle;
+  final ExercisePickerLibraryLines libraryLines;
   final bool showPrescriptionHint;
+  final bool showBrowseHint;
   final bool compactMode;
   final VoidCallback onTap;
   final bool mediaLoading;
@@ -2197,8 +2289,9 @@ class _ExercisePickerCard extends StatelessWidget {
     required this.exercicio,
     required this.isDark,
     required this.primary,
-    required this.librarySubtitle,
+    required this.libraryLines,
     this.showPrescriptionHint = true,
+    this.showBrowseHint = true,
     this.compactMode = false,
     required this.onTap,
     required this.mediaLoading,
@@ -2278,19 +2371,47 @@ class _ExercisePickerCard extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              selected
-                                  ? _exerciseMeta(exercicio!)
-                                  : librarySubtitle,
-                              maxLines: selected ? 2 : 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTypography.inter(
-                                color: _metaTextColor(isDark, muted: !selected),
-                                fontSize: 12,
-                                height: 1.18,
-                                fontWeight: FontWeight.w700,
+                            if (selected)
+                              Text(
+                                _exerciseMeta(exercicio!),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.inter(
+                                  color: _metaTextColor(isDark),
+                                  fontSize: 12,
+                                  height: 1.18,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              )
+                            else
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    libraryLines.primary,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTypography.inter(
+                                      color: _metaTextColor(isDark),
+                                      fontSize: 12,
+                                      height: 1.18,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  if (libraryLines.secondary != null)
+                                    Text(
+                                      libraryLines.secondary!,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppTypography.inter(
+                                        color: _metaTextColor(isDark),
+                                        fontSize: 11.5,
+                                        height: 1.15,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                ],
                               ),
-                            ),
                           ],
                         ),
                       ),
@@ -2334,6 +2455,7 @@ class _ExercisePickerCard extends StatelessWidget {
           ],
         ),
         if (!compactMode &&
+            showBrowseHint &&
             (!selected || (showPrescriptionHint && !hasMediaIssue))) ...[
           const SizedBox(height: 12),
           AnimatedSize(
@@ -3610,10 +3732,28 @@ InputDecoration _fxInputDecoration({
 }) {
   final fillColor = isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg;
   final lineColor = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+  final labelColor =
+      isDark
+          ? EagleTokens.darkInk
+          : Color.lerp(
+            TokensStrip.textSecondary,
+            TokensStrip.textPrimary,
+            0.55,
+          )!;
 
   return InputDecoration(
     labelText: label,
     helperText: helper,
+    labelStyle: AppTypography.inter(
+      color: labelColor,
+      fontSize: 13,
+      fontWeight: FontWeight.w800,
+    ),
+    floatingLabelStyle: AppTypography.inter(
+      color: primary,
+      fontSize: 12.5,
+      fontWeight: FontWeight.w900,
+    ),
     filled: true,
     fillColor: fillColor,
     border: FxInputDeco.outlineBorder(
