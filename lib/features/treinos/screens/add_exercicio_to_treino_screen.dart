@@ -41,6 +41,7 @@ import '../utils/exercise_picker_filter.dart';
 import '../utils/exercise_picker_sort.dart';
 import '../utils/exercise_picker_suggestions.dart';
 import '../utils/exercise_search_highlight.dart';
+import '../utils/exercise_picker_library_label.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class AddExercicioToTreinoScreen extends ConsumerStatefulWidget {
@@ -602,6 +603,8 @@ class _AddExercicioToTreinoScreenState
   Widget _buildTabContent({
     required BuildContext context,
     required List<Exercicio> exercicios,
+    required List<Exercicio> allExercicios,
+    required int totalLibraryCount,
     required bool isDark,
     required Color primary,
     required Set<int> alreadyInTreinoIds,
@@ -658,6 +661,15 @@ class _AddExercicioToTreinoScreenState
       default:
         final compact = _selecionado != null;
         final query = _buscaQuery.trim().toLowerCase();
+        final librarySubtitle = exercisePickerLibrarySubtitle(
+          filteredCount: exercicios.length,
+          totalCount: totalLibraryCount,
+          filter: _pickerFilter,
+        );
+        final showFilterEmpty =
+            !compact &&
+            exercicios.isEmpty &&
+            (_pickerFilter.isActive || _buscaQuery.trim().length >= 2);
         final favoriteShortcuts =
             query.length >= 2 || _pickerFilter.somenteFavoritos
                 ? const <Exercicio>[]
@@ -692,48 +704,85 @@ class _AddExercicioToTreinoScreenState
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (!compact) ...[
-            if (_alunoFilterNome != null && _pickerFilter.filtrarPorAluno)
-              _AlunoEquipmentFilterBanner(
-                alunoNome: _alunoFilterNome!,
-                equipamentos: _pickerFilter.equipamentosAluno,
+            if (compact && _selecionado != null) ...[
+              _CompactSelectedExerciseBar(
+                exercicio: _selecionado!,
                 isDark: isDark,
                 primary: primary,
-                onClear:
-                    () => setState(
-                      () => _pickerFilter = _pickerFilter.copyWith(clearAluno: true),
-                    ),
+                onChange: () => _openExercisePicker(
+                  allExercicios,
+                  alreadyInTreinoIds: alreadyInTreinoIds,
+                ),
+                onPreview:
+                    _selecionado!.hasPlayableMedia
+                        ? _previewSelectedExerciseVideo
+                        : null,
               ),
-            ExercisePickerFilterBar(
-              filter: _pickerFilter,
-              isDark: isDark,
-              primary: primary,
-              onChanged: (ExercisePickerFilter next) => setState(() => _pickerFilter = next),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _buscaCtrl,
-              decoration: InputDecoration(
-                hintText: 'Buscar supino, agachamento, remada...',
-                prefixIcon: Icon(Icons.search_rounded, color: primary),
-                suffixIcon:
-                    _buscaQuery.isEmpty
-                        ? null
-                        : IconButton(
-                          onPressed: () => _buscaCtrl.clear(),
-                          icon: const Icon(Icons.close_rounded),
-                        ),
-                filled: true,
-                fillColor:
-                    isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
+              const SizedBox(height: 10),
+            ],
+            if (!compact) ...[
+              TextField(
+                controller: _buscaCtrl,
+                decoration: InputDecoration(
+                  hintText: 'Buscar supino, agachamento, remada...',
+                  prefixIcon: Icon(Icons.search_rounded, color: primary),
+                  suffixIcon:
+                      _buscaQuery.isEmpty
+                          ? null
+                          : IconButton(
+                            onPressed: () => _buscaCtrl.clear(),
+                            icon: const Icon(Icons.close_rounded),
+                            tooltip: 'Limpar busca',
+                          ),
+                  filled: true,
+                  fillColor:
+                      isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
-            ),
+              const SizedBox(height: 10),
+              if (_alunoFilterNome != null && _pickerFilter.filtrarPorAluno)
+                _AlunoEquipmentFilterBanner(
+                  alunoNome: _alunoFilterNome!,
+                  equipamentos: _pickerFilter.equipamentosAluno,
+                  isDark: isDark,
+                  primary: primary,
+                  onClear:
+                      () => setState(
+                        () =>
+                            _pickerFilter = _pickerFilter.copyWith(clearAluno: true),
+                      ),
+                ),
+              ExercisePickerFilterBar(
+                filter: _pickerFilter,
+                isDark: isDark,
+                primary: primary,
+                onChanged:
+                    (ExercisePickerFilter next) =>
+                        setState(() => _pickerFilter = next),
+              ),
             ],
-            if (curatedSuggestions.isNotEmpty) ...[
+            if (showFilterEmpty) ...[
+              const SizedBox(height: 16),
+              _BuscarFilterEmptyState(
+                title: buscarTabEmptyTitle(
+                  filter: _pickerFilter,
+                  query: _buscaQuery,
+                ),
+                message: buscarTabEmptyMessage(filter: _pickerFilter),
+                isDark: isDark,
+                primary: primary,
+                onClearFilters:
+                    () => setState(() {
+                      _pickerFilter = const ExercisePickerFilter();
+                      _buscaCtrl.clear();
+                    }),
+              ),
+            ],
+            if (!showFilterEmpty && curatedSuggestions.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
                 _recentIds.isNotEmpty
@@ -749,18 +798,20 @@ class _AddExercicioToTreinoScreenState
                 ),
               ),
               const SizedBox(height: 8),
-              ...curatedSuggestions.map(
-                (exercicio) => _QuickSearchResultTile(
-                  exercicio: exercicio,
-                  highlightQuery: query,
-                  alreadyInTreino: alreadyInTreinoIds.contains(exercicio.id),
-                  primary: primary,
-                  isDark: isDark,
-                  onTap: () => _selectExercise(exercicio),
-                ),
+              _SuggestionList(
+                exercicios: curatedSuggestions,
+                query: query,
+                isDark: isDark,
+                primary: primary,
+                alreadyInTreinoIds: alreadyInTreinoIds,
+                onSelect: _selectExercise,
+                onPreview: (ex) {
+                  if (!ex.hasPlayableMedia) return;
+                  showExerciseVideoPreview(context, exercicio: ex);
+                },
               ),
             ],
-            if (!compact && favoriteShortcuts.isNotEmpty) ...[
+            if (!showFilterEmpty && !compact && favoriteShortcuts.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
                 'Seus favoritos',
@@ -771,41 +822,46 @@ class _AddExercicioToTreinoScreenState
                 ),
               ),
               const SizedBox(height: 8),
-              ...favoriteShortcuts.map(
-                (exercicio) => _QuickSearchResultTile(
-                  exercicio: exercicio,
-                  highlightQuery: query,
-                  alreadyInTreino: alreadyInTreinoIds.contains(exercicio.id),
-                  primary: primary,
-                  isDark: isDark,
-                  onTap: () => _selectExercise(exercicio),
-                ),
+              _SuggestionList(
+                exercicios: favoriteShortcuts,
+                query: query,
+                isDark: isDark,
+                primary: primary,
+                alreadyInTreinoIds: alreadyInTreinoIds,
+                onSelect: _selectExercise,
+                onPreview: (ex) {
+                  if (!ex.hasPlayableMedia) return;
+                  showExerciseVideoPreview(context, exercicio: ex);
+                },
               ),
             ],
-            if (!compact && quickMatches.isNotEmpty) ...[
+            if (!showFilterEmpty && !compact && quickMatches.isNotEmpty) ...[
               const SizedBox(height: 10),
-              ...quickMatches.map(
-                (exercicio) => _QuickSearchResultTile(
-                  exercicio: exercicio,
-                  highlightQuery: query,
-                  alreadyInTreino: alreadyInTreinoIds.contains(exercicio.id),
-                  primary: primary,
-                  isDark: isDark,
-                  onTap: () => _selectExercise(exercicio),
-                ),
+              _SuggestionList(
+                exercicios: quickMatches,
+                query: query,
+                isDark: isDark,
+                primary: primary,
+                alreadyInTreinoIds: alreadyInTreinoIds,
+                onSelect: _selectExercise,
+                onPreview: (ex) {
+                  if (!ex.hasPlayableMedia) return;
+                  showExerciseVideoPreview(context, exercicio: ex);
+                },
               ),
               const SizedBox(height: 8),
             ],
-            _ExercisePickerCard(
+            if (!compact)
+              _ExercisePickerCard(
               exercicio: _selecionado,
               isDark: isDark,
               primary: primary,
-              total: exercicios.length,
-              compactMode: compact,
+              librarySubtitle: librarySubtitle,
+              compactMode: false,
               showPrescriptionHint: !_prescriptionInView,
               onTap:
                   () => _openExercisePicker(
-                    exercicios,
+                    allExercicios,
                     alreadyInTreinoIds: alreadyInTreinoIds,
                   ),
               mediaLoading: _mediaLoading,
@@ -826,7 +882,7 @@ class _AddExercicioToTreinoScreenState
               Align(
                 alignment: Alignment.centerLeft,
                 child: TextButton.icon(
-                  onPressed: () => _openSimilarPicker(exercicios),
+                  onPressed: () => _openSimilarPicker(allExercicios),
                   icon: Icon(Icons.swap_horiz_rounded, color: primary, size: 18),
                   label: Text(
                     'Trocar por similar',
@@ -976,6 +1032,8 @@ class _AddExercicioToTreinoScreenState
                                     child: _buildTabContent(
                                       context: context,
                                       exercicios: _visibleExercicios(exercicios),
+                                      allExercicios: exercicios,
+                                      totalLibraryCount: exercicios.length,
                                       isDark: isDark,
                                       primary: primary,
                                       alreadyInTreinoIds: alreadyInTreinoIds,
@@ -1407,6 +1465,217 @@ class _EmptyBibliotecaState extends StatelessWidget {
   }
 }
 
+class _SuggestionList extends StatelessWidget {
+  const _SuggestionList({
+    required this.exercicios,
+    required this.query,
+    required this.isDark,
+    required this.primary,
+    required this.alreadyInTreinoIds,
+    required this.onSelect,
+    required this.onPreview,
+  });
+
+  final List<Exercicio> exercicios;
+  final String query;
+  final bool isDark;
+  final Color primary;
+  final Set<int> alreadyInTreinoIds;
+  final ValueChanged<Exercicio> onSelect;
+  final ValueChanged<Exercicio> onPreview;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final wide = constraints.maxWidth > 560;
+        if (!wide) {
+          return Column(
+            children: [
+              for (final exercicio in exercicios)
+                _QuickSearchResultTile(
+                  exercicio: exercicio,
+                  highlightQuery: query,
+                  alreadyInTreino: alreadyInTreinoIds.contains(exercicio.id),
+                  primary: primary,
+                  isDark: isDark,
+                  onTap: () => onSelect(exercicio),
+                  onPreviewThumb:
+                      exercicio.hasPlayableMedia
+                          ? () => onPreview(exercicio)
+                          : null,
+                ),
+            ],
+          );
+        }
+        return Wrap(
+          spacing: 8,
+          runSpacing: 0,
+          children: [
+            for (final exercicio in exercicios)
+              SizedBox(
+                width: (constraints.maxWidth - 8) / 2,
+                child: _QuickSearchResultTile(
+                  exercicio: exercicio,
+                  highlightQuery: query,
+                  alreadyInTreino: alreadyInTreinoIds.contains(exercicio.id),
+                  primary: primary,
+                  isDark: isDark,
+                  onTap: () => onSelect(exercicio),
+                  onPreviewThumb:
+                      exercicio.hasPlayableMedia
+                          ? () => onPreview(exercicio)
+                          : null,
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _BuscarFilterEmptyState extends StatelessWidget {
+  const _BuscarFilterEmptyState({
+    required this.title,
+    required this.message,
+    required this.isDark,
+    required this.primary,
+    required this.onClearFilters,
+  });
+
+  final String title;
+  final String message;
+  final bool isDark;
+  final Color primary;
+  final VoidCallback onClearFilters;
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      decoration: fxListCardDecoration(context, accent: primary),
+      child: Column(
+        children: [
+          Icon(Icons.search_off_rounded, color: primary.withValues(alpha: 0.75), size: 40),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: AppTypography.inter(
+              fontSize: 15,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: AppTypography.inter(
+              color: mute,
+              fontSize: 13,
+              height: 1.35,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 16),
+          FilledButton.tonal(
+            onPressed: onClearFilters,
+            child: const Text('Limpar filtros e busca'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CompactSelectedExerciseBar extends StatelessWidget {
+  const _CompactSelectedExerciseBar({
+    required this.exercicio,
+    required this.isDark,
+    required this.primary,
+    required this.onChange,
+    this.onPreview,
+  });
+
+  final Exercicio exercicio;
+  final bool isDark;
+  final Color primary;
+  final VoidCallback onChange;
+  final VoidCallback? onPreview;
+
+  @override
+  Widget build(BuildContext context) {
+    final mediaUrl = exercisePreviewMediaUrl(
+      thumbnailUrl: exercicio.thumbnailUrl,
+      gifUrl: exercicio.gifUrl,
+      videoUrl: exercicio.videoUrl,
+    );
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: fxListCardDecoration(context, accent: primary, selected: true),
+      child: Row(
+        children: [
+          if (onPreview != null)
+            GestureDetector(
+              onTap: onPreview,
+              child: ExerciseMediaThumb(
+                mediaUrl: mediaUrl,
+                size: 44,
+                showPlayBadge: exercicio.hasPlayableMedia,
+              ),
+            )
+          else
+            ExerciseMediaThumb(
+              mediaUrl: mediaUrl,
+              size: 44,
+              showPlayBadge: exercicio.hasPlayableMedia,
+            ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  exercicio.nomeDisplay,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.inter(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                Text(
+                  _exerciseMeta(exercicio),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.inter(
+                    color: _metaTextColor(isDark),
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: onChange,
+            child: Text(
+              'Trocar',
+              style: AppTypography.inter(
+                color: primary,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _QuickSearchResultTile extends StatelessWidget {
   const _QuickSearchResultTile({
     required this.exercicio,
@@ -1415,6 +1684,7 @@ class _QuickSearchResultTile extends StatelessWidget {
     required this.isDark,
     required this.onTap,
     this.highlightQuery = '',
+    this.onPreviewThumb,
   });
 
   final Exercicio exercicio;
@@ -1423,56 +1693,76 @@ class _QuickSearchResultTile extends StatelessWidget {
   final bool isDark;
   final VoidCallback onTap;
   final String highlightQuery;
+  final VoidCallback? onPreviewThumb;
 
   @override
   Widget build(BuildContext context) {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: fxListCardDecoration(context, accent: primary),
-          child: Row(
-            children: [
-              ExerciseMediaThumb(
-                mediaUrl: exercisePreviewMediaUrl(
-                  thumbnailUrl: exercicio.thumbnailUrl,
-                  gifUrl: exercicio.gifUrl,
-                  videoUrl: exercicio.videoUrl,
-                ),
-                size: 40,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    highlightedExerciseName(
-                      name: exercicio.nomeDisplay,
-                      query: highlightQuery,
-                      baseStyle: AppTypography.inter(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w800,
+      child: Semantics(
+        button: true,
+        label: exercicio.nomeDisplay,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: fxListCardDecoration(context, accent: primary),
+            child: Row(
+              children: [
+                if (onPreviewThumb != null)
+                  GestureDetector(
+                    onTap: onPreviewThumb,
+                    child: ExerciseMediaThumb(
+                      mediaUrl: exercisePreviewMediaUrl(
+                        thumbnailUrl: exercicio.thumbnailUrl,
+                        gifUrl: exercicio.gifUrl,
+                        videoUrl: exercicio.videoUrl,
                       ),
-                      highlightColor: primary,
+                      size: 40,
+                      showPlayBadge: exercicio.hasPlayableMedia,
                     ),
-                    if (alreadyInTreino)
-                      Text(
-                        'Já está neste treino',
-                        style: AppTypography.inter(
-                          color: mute,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
+                  )
+                else
+                  ExerciseMediaThumb(
+                    mediaUrl: exercisePreviewMediaUrl(
+                      thumbnailUrl: exercicio.thumbnailUrl,
+                      gifUrl: exercicio.gifUrl,
+                      videoUrl: exercicio.videoUrl,
+                    ),
+                    size: 40,
+                    showPlayBadge: exercicio.hasPlayableMedia,
+                  ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      highlightedExerciseName(
+                        name: exercicio.nomeDisplay,
+                        query: highlightQuery,
+                        baseStyle: AppTypography.inter(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w800,
                         ),
+                        highlightColor: primary,
                       ),
-                  ],
+                      if (alreadyInTreino)
+                        Text(
+                          'Já está neste treino',
+                          style: AppTypography.inter(
+                            color: mute,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-              Icon(Icons.chevron_right_rounded, color: mute, size: 20),
-            ],
+                Icon(Icons.chevron_right_rounded, color: mute, size: 20),
+              ],
+            ),
           ),
         ),
       ),
@@ -1891,7 +2181,7 @@ class _ExercisePickerCard extends StatelessWidget {
   final Exercicio? exercicio;
   final bool isDark;
   final Color primary;
-  final int total;
+  final String librarySubtitle;
   final bool showPrescriptionHint;
   final bool compactMode;
   final VoidCallback onTap;
@@ -1907,7 +2197,7 @@ class _ExercisePickerCard extends StatelessWidget {
     required this.exercicio,
     required this.isDark,
     required this.primary,
-    required this.total,
+    required this.librarySubtitle,
     this.showPrescriptionHint = true,
     this.compactMode = false,
     required this.onTap,
@@ -1991,11 +2281,11 @@ class _ExercisePickerCard extends StatelessWidget {
                             Text(
                               selected
                                   ? _exerciseMeta(exercicio!)
-                                  : '$total exercícios na biblioteca',
+                                  : librarySubtitle,
                               maxLines: selected ? 2 : 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTypography.inter(
-                                color: _metaTextColor(isDark),
+                                color: _metaTextColor(isDark, muted: !selected),
                                 fontSize: 12,
                                 height: 1.18,
                                 fontWeight: FontWeight.w700,
@@ -3029,10 +3319,12 @@ String _exerciseMeta(Exercicio exercicio) {
   return clean.isEmpty ? 'Sem detalhes' : clean.take(3).join(' · ');
 }
 
-Color _metaTextColor(bool isDark) {
+Color _metaTextColor(bool isDark, {bool muted = true}) {
   final base =
       isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-  return isDark ? base : Color.lerp(base, TokensStrip.textPrimary, 0.22)!;
+  if (isDark) return base;
+  final lerp = muted ? 0.38 : 0.22;
+  return Color.lerp(base, TokensStrip.textPrimary, lerp)!;
 }
 
 String _humanizeMetaToken(String value) => displayMetaToken(value);

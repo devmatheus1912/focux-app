@@ -7,48 +7,77 @@ class ExerciseMediaThumb extends StatelessWidget {
     this.size = 44,
     this.radius = 14,
     this.iconSize = 20,
+    this.showPlayBadge = false,
   });
 
   final String? mediaUrl;
   final double size;
   final double radius;
   final double iconSize;
+  final bool showPlayBadge;
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final url = mediaUrl?.trim();
-    if (url != null && url.isNotEmpty) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(radius),
-        child: Image.network(
-          url,
-          width: size,
-          height: size,
-          fit: BoxFit.cover,
-          gaplessPlayback: true,
-          errorBuilder: (_, __, ___) => _fallback(primary),
-          loadingBuilder: (context, child, progress) {
-            if (progress == null) return child;
-            return SizedBox(
-              width: size,
-              height: size,
-              child: Center(
-                child: SizedBox(
-                  width: iconSize,
-                  height: iconSize,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: primary.withValues(alpha: 0.7),
-                  ),
-                ),
+    final thumb =
+        url != null && url.isNotEmpty
+            ? ClipRRect(
+              borderRadius: BorderRadius.circular(radius),
+              child: Image.network(
+                url,
+                width: size,
+                height: size,
+                fit: BoxFit.cover,
+                gaplessPlayback: true,
+                errorBuilder: (_, __, ___) => _fallback(primary),
+                loadingBuilder: (context, child, progress) {
+                  if (progress == null) return child;
+                  return SizedBox(
+                    width: size,
+                    height: size,
+                    child: Center(
+                      child: SizedBox(
+                        width: iconSize,
+                        height: iconSize,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: primary.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
-            );
-          },
+            )
+            : _fallback(primary);
+
+    if (!showPlayBadge) return thumb;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        thumb,
+        Positioned(
+          right: -2,
+          bottom: -2,
+          child: Container(
+            width: size * 0.42,
+            height: size * 0.42,
+            decoration: BoxDecoration(
+              color: primary,
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 1.5),
+            ),
+            child: Icon(
+              Icons.play_arrow_rounded,
+              color: Colors.white,
+              size: size * 0.26,
+            ),
+          ),
         ),
-      );
-    }
-    return _fallback(primary);
+      ],
+    );
   }
 
   Widget _fallback(Color primary) {
@@ -71,7 +100,14 @@ String? exercisePreviewMediaUrl({
 }) {
   for (final raw in [thumbnailUrl, gifUrl]) {
     final value = raw?.trim();
-    if (value != null && value.isNotEmpty) return value;
+    if (value == null || value.isEmpty) continue;
+    if (value.contains('/video/upload/')) {
+      return cloudinaryVideoPosterUrl(value) ?? value;
+    }
+    if (value.endsWith('.mp4') || value.endsWith('.mov')) {
+      return cloudinaryVideoPosterUrl(value) ?? value;
+    }
+    return value;
   }
   final video = videoUrl?.trim();
   if (video != null && video.isNotEmpty) {

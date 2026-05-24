@@ -45,14 +45,6 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
     Equipamento.banda,
   ];
 
-  @override
-  void didUpdateWidget(covariant ExercisePickerFilterBar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.filter.isActive && !_expanded) {
-      _expanded = true;
-    }
-  }
-
   int get _activeCount {
     var n = 0;
     if (widget.filter.somenteFavoritos) n++;
@@ -66,7 +58,7 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
   @override
   Widget build(BuildContext context) {
     final mute = widget.isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final showFull = _expanded || widget.filter.isActive;
+    final showFull = _expanded;
 
     if (!showFull) {
       return SingleChildScrollView(
@@ -159,8 +151,8 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
                 '$_activeCount ativo${_activeCount == 1 ? '' : 's'}',
                 style: AppTypography.inter(
                   color: widget.primary,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
             TextButton(
@@ -182,7 +174,18 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
             ),
           ],
         ),
-        const SizedBox(height: 6),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Text(
+            'Espaço',
+            style: AppTypography.inter(
+              color: mute,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.35,
+            ),
+          ),
+        ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.only(right: 16),
@@ -258,7 +261,18 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
             ],
           ),
         ),
-        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.only(top: 4, bottom: 6),
+          child: Text(
+            'Equipamento',
+            style: AppTypography.inter(
+              color: mute,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.35,
+            ),
+          ),
+        ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.only(right: 16),
