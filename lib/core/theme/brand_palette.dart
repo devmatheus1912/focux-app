@@ -99,6 +99,10 @@ class BrandPalette {
   static Color sectionAction(Color primary, {required bool dark}) =>
       dark ? accent(primary) : primary;
 
+  /// Plain-text section links (Ver tudo, Ver lista) — editorial in light.
+  static Color sectionLink(Color primary, {required bool dark}) =>
+      dark ? accent(primary) : Color.lerp(deep(primary), primary, 0.2)!;
+
   /// Icons and micro-labels in branded rows.
   static Color sectionAccent(Color primary, {required bool dark}) =>
       dark ? accent(primary) : deep(primary);

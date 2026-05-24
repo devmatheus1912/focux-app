@@ -1513,7 +1513,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final heading = BrandPalette.sectionHeading(primary, dark: isDark);
-    final actionColor = BrandPalette.sectionAction(primary, dark: isDark);
+    final actionColor = BrandPalette.sectionLink(primary, dark: isDark);
     return Padding(
       padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, TokensStrip.s4, 12),
       child: Row(
@@ -1637,7 +1637,7 @@ class _RiskWaveBanner extends StatelessWidget {
               FxIcon(
                 name: 'chevron-right',
                 size: 16,
-                color: BrandPalette.sectionAction(primary, dark: isDark),
+                color: BrandPalette.sectionLink(primary, dark: isDark),
               ),
             ],
           ),

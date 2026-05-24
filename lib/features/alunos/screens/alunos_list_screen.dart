@@ -2116,13 +2116,13 @@ class _AlunosTriageBanner extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: BrandPalette.sectionAction(primary, dark: isDark),
+                  color: BrandPalette.sectionLink(primary, dark: isDark),
                 ),
               ),
               Icon(
                 Icons.chevron_right_rounded,
                 size: 18,
-                color: BrandPalette.sectionAction(primary, dark: isDark),
+                color: BrandPalette.sectionLink(primary, dark: isDark),
               ),
             ],
           ),
