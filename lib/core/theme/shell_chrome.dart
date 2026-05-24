@@ -13,7 +13,8 @@ class ShellPalette {
   final bool isDark;
 
   Color get ink => isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-  Color get mute => isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+  Color get mute =>
+      isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
   Color get line => isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
   Color get lineStrong => isDark ? EagleTokens.glassBorder : EagleTokens.line;
 
@@ -67,10 +68,7 @@ class ShellPalette {
       return BoxDecoration(
         color: accent.withValues(alpha: isDark ? 0.20 : 0.10),
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(
-          color: accent.withValues(alpha: 0.55),
-          width: 1.5,
-        ),
+        border: Border.all(color: accent.withValues(alpha: 0.55), width: 1.5),
         boxShadow: TokensStrip.interactiveGlow(
           accent,
           intensity: 0.55,
@@ -101,11 +99,9 @@ class ShellPalette {
   }
 
   BoxDecoration bottomSheet({double radius = TokensStrip.rXl}) {
-    final edge = TokensStrip.glassBorder(dark: isDark);
     return BoxDecoration(
       color: sheetFill,
       borderRadius: BorderRadius.vertical(top: Radius.circular(radius)),
-      border: Border.all(color: edge.withValues(alpha: isDark ? 0.55 : 0.45)),
       boxShadow: TokensStrip.elevation(24, dark: isDark),
     );
   }
@@ -197,31 +193,31 @@ class ShellHeaderIconButton extends StatelessWidget {
                   child: Container(
                     width: badgeCount > 9 ? null : dotSize,
                     height: badgeCount > 9 ? null : dotSize,
-                    constraints: badgeCount > 9
-                        ? BoxConstraints(
-                          minWidth: compact ? 15 : 18,
-                          minHeight: compact ? 14 : 16,
-                        )
-                        : null,
-                    padding: badgeCount > 9
-                        ? EdgeInsets.symmetric(
-                          horizontal: compact ? 3 : 4,
-                          vertical: compact ? 1 : 0,
-                        )
-                        : null,
+                    constraints:
+                        badgeCount > 9
+                            ? BoxConstraints(
+                              minWidth: compact ? 15 : 18,
+                              minHeight: compact ? 14 : 16,
+                            )
+                            : null,
+                    padding:
+                        badgeCount > 9
+                            ? EdgeInsets.symmetric(
+                              horizontal: compact ? 3 : 4,
+                              vertical: compact ? 1 : 0,
+                            )
+                            : null,
                     decoration: BoxDecoration(
                       color: TokensStrip.primary,
-                      shape: badgeCount > 9
-                          ? BoxShape.rectangle
-                          : BoxShape.circle,
+                      shape:
+                          badgeCount > 9 ? BoxShape.rectangle : BoxShape.circle,
                       borderRadius:
-                          badgeCount > 9
-                              ? BorderRadius.circular(999)
-                              : null,
+                          badgeCount > 9 ? BorderRadius.circular(999) : null,
                       border: Border.all(
-                        color: chrome.isDark
-                            ? TokensStrip.cinematicSurface
-                            : TokensStrip.cardBg,
+                        color:
+                            chrome.isDark
+                                ? TokensStrip.cinematicSurface
+                                : TokensStrip.cardBg,
                         width: compact ? 1.25 : 1.5,
                       ),
                       boxShadow: TokensStrip.coloredDepthGlow(
@@ -230,17 +226,18 @@ class ShellHeaderIconButton extends StatelessWidget {
                       ),
                     ),
                     alignment: Alignment.center,
-                    child: badgeCount > 9
-                        ? Text(
-                          '9+',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: compact ? 7 : 8,
-                            fontWeight: FontWeight.w800,
-                            height: 1,
-                          ),
-                        )
-                        : null,
+                    child:
+                        badgeCount > 9
+                            ? Text(
+                              '9+',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: compact ? 7 : 8,
+                                fontWeight: FontWeight.w800,
+                                height: 1,
+                              ),
+                            )
+                            : null,
                   ),
                 ),
             ],
