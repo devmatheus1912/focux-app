@@ -98,6 +98,68 @@ TextStyle _dashboardSectionKickerStyle(
 String _financeInadimplLabel(double width) =>
     width < 360 ? 'Inadimpl.' : 'Inadimplentes';
 
+String _financePercentLabel(double progressRaw, {required bool exceeded}) {
+  final pct = (progressRaw * 100).round();
+  if (exceeded) {
+    return '$pct% da meta · barra no teto';
+  }
+  return '$pct% da meta';
+}
+
+Color _pulseCheckinsAccent({
+  required int checkinsHoje,
+  required Color neutralAccent,
+}) =>
+    checkinsHoje > 0 ? EagleTokens.good : neutralAccent;
+
+/// Fade na borda direita para indicar scroll horizontal.
+class _HorizontalScrollPeek extends StatelessWidget {
+  const _HorizontalScrollPeek({
+    required this.child,
+    required this.showPeek,
+  });
+
+  final Widget child;
+  final bool showPeek;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!showPeek) return child;
+
+    final base = Theme.of(context).scaffoldBackgroundColor;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Semantics(
+          label: 'Deslize horizontalmente para ver mais',
+          child: child,
+        ),
+        Positioned(
+          right: 0,
+          top: 0,
+          bottom: 0,
+          child: IgnorePointer(
+            child: Container(
+              width: 32,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    base.withValues(alpha: 0),
+                    base.withValues(alpha: 0.92),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _PersonalDashboardScreenState
     extends ConsumerState<PersonalDashboardScreen>
     with TickerProviderStateMixin {
@@ -425,7 +487,15 @@ class _PersonalDashboardScreenState
                         ),
                       ),
                       SliverToBoxAdapter(
-                        child: SizedBox(
+                        child: _HorizontalScrollPeek(
+                          showPeek:
+                              [
+                                ...alunosEmRisco.take(riskDominante ? 2 : 4),
+                                ...(_finData?.vencimentosProximos ?? const [])
+                                    .take(2),
+                              ].length >
+                              1,
+                          child: SizedBox(
                           height: 168,
                           child: ListView.separated(
                             key: const PageStorageKey(
@@ -486,6 +556,7 @@ class _PersonalDashboardScreenState
                               );
                             },
                           ),
+                        ),
                         ),
                       ),
                       const SliverToBoxAdapter(child: SizedBox(height: 8)),
@@ -755,10 +826,17 @@ class _PersonalDashboardScreenState
                                         progress: progressRaw.clamp(0.0, 1.0),
                                         exceeded: metaSuperada,
                                         glow: BrandPalette.accent(heroPrimary),
-                                        percentLabel:
+                                        percentLabel: _financePercentLabel(
+                                          progressRaw,
+                                          exceeded: metaSuperada,
+                                        ),
+                                        excessBeyondMeta:
                                             metaSuperada
-                                                ? '${(progressRaw * 100).round()}% da meta'
-                                                : '${(progressRaw * 100).round()}% da meta',
+                                                ? math.max(
+                                                  0,
+                                                  progressRaw - 1,
+                                                )
+                                                : 0,
                                       ),
                                       const SizedBox(height: TokensStrip.s3),
                                       Row(
@@ -1083,12 +1161,14 @@ class _HeroProgressRail extends StatelessWidget {
     required this.glow,
     this.exceeded = false,
     this.percentLabel,
+    this.excessBeyondMeta = 0,
   });
 
   final double progress;
   final Color glow;
   final bool exceeded;
   final String? percentLabel;
+  final double excessBeyondMeta;
 
   @override
   Widget build(BuildContext context) {
@@ -1175,6 +1255,34 @@ class _HeroProgressRail extends StatelessWidget {
                             ),
                           ],
                         ),
+                      ),
+                    ),
+                  if (exceeded && excessBeyondMeta > 0)
+                    Positioned(
+                      right: -6,
+                      top: exceeded ? -1 : 0,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (var i = 0; i < 3; i++)
+                            Container(
+                              width: 5,
+                              height: exceeded ? 12 : 10,
+                              margin: EdgeInsets.only(left: i == 0 ? 0 : 3),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(99),
+                                color: Colors.white.withValues(
+                                  alpha: 0.92 - (i * 0.22),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: glow.withValues(alpha: 0.55),
+                                    blurRadius: 8,
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                 ],
@@ -1309,7 +1417,10 @@ class _DayPulseStrip extends StatelessWidget {
                     icon: 'circle-check',
                     value: checkinsHoje.toString(),
                     label: tight ? 'Checks' : 'Check-ins',
-                    accent: EagleTokens.good,
+                    accent: _pulseCheckinsAccent(
+                      checkinsHoje: checkinsHoje,
+                      neutralAccent: neutralAccent,
+                    ),
                     isDark: isDark,
                     compact: tight,
                     onTap: onCheckins,
@@ -2247,54 +2358,55 @@ class _CommandCenterSection extends ConsumerWidget {
                 ],
               ),
             ),
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap:
-                    isCommandPreparing
-                        ? null
-                        : () => _showCommandActionsSheet(
-                          context,
-                          isDark: isDark,
-                          primary: primary,
-                          actions: nextActions,
+            if (nextActions.length > 1)
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap:
+                      isCommandPreparing
+                          ? null
+                          : () => _showCommandActionsSheet(
+                            context,
+                            isDark: isDark,
+                            primary: primary,
+                            actions: nextActions,
+                          ),
+                  borderRadius: BorderRadius.circular(999),
+                  child: Ink(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: primarySoft,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          isCommandPreparing
+                              ? 'lendo sinais'
+                              : 'Ver ${nextActions.length}',
+                          style: TextStyle(
+                            color: actionColor,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
-                borderRadius: BorderRadius.circular(999),
-                child: Ink(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 7,
-                  ),
-                  decoration: BoxDecoration(
-                    color: primarySoft,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        isCommandPreparing
-                            ? 'lendo sinais'
-                            : 'Ver ${nextActions.length}',
-                        style: TextStyle(
-                          color: actionColor,
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      if (!isCommandPreparing) ...[
-                        const SizedBox(width: 4),
-                        FxIcon(
-                          name: 'chevron-right',
-                          size: 13,
-                          color: actionColor,
-                        ),
+                        if (!isCommandPreparing) ...[
+                          const SizedBox(width: 4),
+                          FxIcon(
+                            name: 'chevron-right',
+                            size: 13,
+                            color: actionColor,
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
         const SizedBox(height: 20),
@@ -2308,7 +2420,9 @@ class _CommandCenterSection extends ConsumerWidget {
         LayoutBuilder(
           builder: (context, constraints) {
             final moduleWidth = (constraints.maxWidth * 0.46).clamp(150.0, 188.0);
-            return SizedBox(
+            return _HorizontalScrollPeek(
+              showPeek: true,
+              child: SizedBox(
               height: 82,
               child: ListView(
                 key: const PageStorageKey('personal-command-modules'),
@@ -2356,6 +2470,7 @@ class _CommandCenterSection extends ConsumerWidget {
                   ),
                 ],
               ),
+            ),
             );
           },
         ),

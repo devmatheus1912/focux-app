@@ -14,13 +14,16 @@ void main() {
     expect(screen, contains("'Pulso operacional'"));
     expect(screen, contains("'Impacto hoje'"));
     expect(screen, contains('_financeInadimplLabel'));
+    expect(screen, contains('_financePercentLabel'));
+    expect(screen, contains('barra no teto'));
+    expect(screen, contains('_pulseCheckinsAccent'));
+    expect(screen, contains('_HorizontalScrollPeek'));
+    expect(screen, contains('Deslize horizontalmente para ver mais'));
     expect(screen, contains("label: 'Pendente'"));
     expect(screen, contains("label: 'Ticket médio'"));
-    expect(screen, contains('percentLabel:'));
-    expect(screen, contains('% da meta'));
+    expect(screen, contains('excessBeyondMeta'));
     expect(screen, contains('BrandPalette.sectionLink'));
-    expect(screen, contains('class _AttentionCard'));
-    expect(screen, contains('class _CommandActionTile'));
+    expect(screen, contains('nextActions.length > 1'));
     expect(screen, contains('Recolher mais ferramentas'));
     expect(screen, contains('Expandir mais ferramentas, 6 atalhos'));
 
