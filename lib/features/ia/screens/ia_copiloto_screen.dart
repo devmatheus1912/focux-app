@@ -189,6 +189,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
         final dark = Theme.of(ctx).brightness == Brightness.dark;
@@ -208,13 +209,19 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                   return haystack.contains(query.trim().toLowerCase());
                 }).toList();
 
-            return DraggableScrollableSheet(
-              initialChildSize: 0.58,
-              minChildSize: 0.42,
-              maxChildSize: 0.82,
-              expand: false,
-              builder: (ctx, scrollController) {
-                return ClipRRect(
+            return Semantics(
+              scopesRoute: true,
+              namesRoute: true,
+              explicitChildNodes: true,
+              label:
+                  'Selecionar aluno, ${filtered.length} de ${alunos.length}',
+              child: DraggableScrollableSheet(
+                initialChildSize: 0.58,
+                minChildSize: 0.42,
+                maxChildSize: 0.82,
+                expand: false,
+                builder: (ctx, scrollController) {
+                  return ClipRRect(
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(28),
                   ),
@@ -453,7 +460,8 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                   ),
                 ),
               );
-              },
+                },
+              ),
             );
           },
         );
@@ -636,6 +644,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
     final result = await showModalBottomSheet<_CopilotTaskDraft>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
         return Padding(
@@ -845,6 +854,8 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
 
     final action = await showModalBottomSheet<String>(
       context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
         return SafeArea(
@@ -984,84 +995,36 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
     final line = chrome.line;
     final brand = dark ? primaryAccent : primary;
 
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.transparent,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(82),
-        child: SafeArea(
-          bottom: false,
-          child: Container(
-            color: Colors.transparent,
-            padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 8, 16, 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed:
-                          () => safePopOr(
-                            context,
-                            () => goToRoleHome(context, ref),
-                          ),
-                      icon: Icon(
-                        Icons.arrow_back_ios_new,
-                        color: ink,
-                        size: 18,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Copiloto',
-                          style: TextStyle(
-                            color: ink,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -1,
-                            height: 1,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            Icon(Icons.auto_awesome, color: brand, size: 13),
-                            const SizedBox(width: 5),
-                            Text(
-                              'IA FOCUX',
-                              style: TextStyle(
-                                color: brand,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 1,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const ShellThemeToggle(size: 36),
-                const SizedBox(width: 8),
-                _CopilotHeaderStatus(
-                  dark: dark,
-                  brand: brand,
-                  line: line,
-                  ink: ink,
-                ),
-              ],
-            ),
+    return FxShellScaffold(
+      useMesh: true,
+      safeArea: false,
+      appBar: FxShellAppBar(
+        title: 'Copiloto',
+        subtitle: 'IA FOCUX',
+        onBack: () => safePopOr(context, () => goToRoleHome(context, ref)),
+        actions: [
+          _CopilotHeaderStatus(
+            dark: dark,
+            brand: brand,
+            line: line,
+            ink: ink,
           ),
-        ),
+        ],
       ),
-      body: SingleChildScrollView(
+      bottomNavigationBar:
+          _gerado
+              ? _CopilotResultActionBar(
+                brand: brand,
+                ink: ink,
+                onCreateTask: _atribuir,
+                onMore: _abrirMenu,
+              )
+              : null,
+      body: SafeArea(
+        bottom: false,
+        child: SingleChildScrollView(
         clipBehavior: Clip.hardEdge,
-        padding: const EdgeInsets.only(bottom: 110),
+        padding: EdgeInsets.only(bottom: _gerado ? 108 : 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1355,7 +1318,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                     0xFFFFB020,
                                   ).withValues(alpha: 0.12),
                                   child: Text(
-                                    'A IA respondeu fora do formato ideal. Mantivemos o resultado como rascunho para revisão.',
+                                    'A IA respondeu fora do formato ideal. Mantivemos as recomendações para revisão manual.',
                                     style: TextStyle(
                                       color: ink,
                                       fontSize: 12,
@@ -1411,65 +1374,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                               dark ? EagleTokens.darkInk : EagleTokens.inkSoft,
                           height: 1.45,
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: _atribuir,
-                        child: Container(
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: brand,
-                            borderRadius: BorderRadius.circular(14),
-                            boxShadow: [
-                              BoxShadow(
-                                color: brand.withValues(alpha: 0.35),
-                                blurRadius: 16,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(
-                                Icons.assignment_turned_in_outlined,
-                                color: Colors.white,
-                                size: 16,
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                'Criar tarefa',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: _abrirMenu,
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: fxListCardDecoration(
-                          context,
-                          accent: brand,
-                          radius: 14,
-                        ),
-                        child: Icon(Icons.more_vert, color: ink),
                       ),
                     ),
                   ],
@@ -1572,6 +1476,68 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
           ],
         ),
       ),
+      ),
+    );
+  }
+}
+
+class _CopilotResultActionBar extends StatelessWidget {
+  const _CopilotResultActionBar({
+    required this.brand,
+    required this.ink,
+    required this.onCreateTask,
+    required this.onMore,
+  });
+
+  final Color brand;
+  final Color ink;
+  final VoidCallback onCreateTask;
+  final VoidCallback onMore;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(22, 10, 22, 12),
+        child: Row(
+          children: [
+            Expanded(
+              child: Semantics(
+                button: true,
+                label: 'Criar tarefa no Command Center',
+                child: FxLiquidPrimaryButton(
+                  label: 'Criar tarefa',
+                  icon: Icons.assignment_turned_in_outlined,
+                  onPressed: onCreateTask,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Semantics(
+              button: true,
+              label: 'Mais ações do Copiloto',
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: onMore,
+                  borderRadius: BorderRadius.circular(14),
+                  child: Ink(
+                    width: 50,
+                    height: 50,
+                    decoration: fxListCardDecoration(
+                      context,
+                      accent: brand,
+                      radius: 14,
+                    ),
+                    child: Icon(Icons.more_vert, color: ink),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -1636,22 +1602,28 @@ class _CopilotStudentSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final selected = alunoNome != null;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
-        decoration: fxListCardDecoration(context, accent: brand, radius: 18),
-        child: Row(
-          children: [
-            Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                color: brand.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(12),
+    return Semantics(
+      button: true,
+      label:
+          selected
+              ? 'Aluno selecionado, $alunoNome. Toque para trocar.'
+              : 'Selecionar aluno',
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
+          decoration: fxListCardDecoration(context, accent: brand, radius: 18),
+          child: Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: brand.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Icons.person_search_outlined, color: brand, size: 18),
               ),
-              child: Icon(Icons.person_search_outlined, color: brand, size: 18),
-            ),
             const SizedBox(width: 11),
             Expanded(
               child: Column(
@@ -1687,6 +1659,7 @@ class _CopilotStudentSelector extends StatelessWidget {
             Icon(Icons.keyboard_arrow_down_rounded, color: mute, size: 22),
           ],
         ),
+      ),
       ),
     );
   }
@@ -1724,15 +1697,19 @@ class _CopilotModeSelector extends StatelessWidget {
             modes.asMap().entries.map((e) {
               final selected = e.key == selectedIndex;
               return Expanded(
-                child: GestureDetector(
-                  onTap: () => onSelect(e.key),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    curve: Curves.easeOutCubic,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: selected ? brand : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
+                child: Semantics(
+                  button: true,
+                  selected: selected,
+                  label: 'Modo ${_label(e.value)}',
+                  child: GestureDetector(
+                    onTap: () => onSelect(e.key),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      curve: Curves.easeOutCubic,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: selected ? brand : Colors.transparent,
+                        borderRadius: BorderRadius.circular(12),
                       boxShadow:
                           selected
                               ? [
@@ -1755,6 +1732,7 @@ class _CopilotModeSelector extends StatelessWidget {
                       ),
                     ),
                   ),
+                ),
                 ),
               );
             }).toList(),
@@ -1907,12 +1885,15 @@ class _CopilotInsightItemState extends State<_CopilotInsightItem> {
         (widget.insight['tipo'] ?? widget.insight['categoria'] ?? '')
             .toString();
 
-    return InkWell(
-      onTap:
-          detalhe.length > 150
-              ? () => setState(() => _expanded = !_expanded)
-              : null,
-      child: Container(
+    return Semantics(
+      button: detalhe.length > 150,
+      label: '$titulo. $tipo. $detalhe',
+      child: InkWell(
+        onTap:
+            detalhe.length > 150
+                ? () => setState(() => _expanded = !_expanded)
+                : null,
+        child: Container(
         margin:
             widget.highlighted
                 ? const EdgeInsets.fromLTRB(10, 10, 10, 8)
@@ -2041,6 +2022,7 @@ class _CopilotInsightItemState extends State<_CopilotInsightItem> {
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -2465,14 +2447,17 @@ class _CopilotPrimaryAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
-        height: 54,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: [brand, primaryDeep]),
-          borderRadius: BorderRadius.circular(18),
+    return Semantics(
+      button: true,
+      label: label,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          height: 54,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: [brand, primaryDeep]),
+            borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
               color: brand.withValues(alpha: 0.28),
@@ -2496,6 +2481,7 @@ class _CopilotPrimaryAction extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -2639,15 +2625,18 @@ class _CopilotPreviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
 
-    return Container(
-      padding: const EdgeInsets.all(TokensStrip.s4),
-      decoration: fxListCardDecoration(context, accent: primary, radius: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.info_outline_rounded, color: brand, size: 18),
+    return Semantics(
+      container: true,
+      label: 'Como funciona o Copiloto. $howItWorks',
+      child: Container(
+        padding: const EdgeInsets.all(TokensStrip.s4),
+        decoration: fxListCardDecoration(context, accent: primary, radius: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.info_outline_rounded, color: brand, size: 18),
               const SizedBox(width: 8),
               Text(
                 'Como funciona',
@@ -2686,6 +2675,7 @@ class _CopilotPreviewCard extends StatelessWidget {
               ),
             ),
         ],
+      ),
       ),
     );
   }
