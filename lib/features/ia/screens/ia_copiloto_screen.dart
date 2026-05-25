@@ -10,6 +10,7 @@ import '../../dashboard/providers/dashboard_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/router/role_home.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../copilot_insight_text.dart';
 import '../data/ia_repository.dart';
 import '../../health/data/health_repository.dart';
 import 'package:focux_app/core/theme/tokens_strip.dart';
@@ -905,7 +906,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Ações do rascunho',
+                            'Ações das recomendações',
                             style: TextStyle(
                               color: ink,
                               fontSize: 18,
@@ -931,7 +932,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                 _CopilotMenuAction(
                   icon: Icons.person_search_outlined,
                   title: 'Trocar aluno',
-                  subtitle: 'Gera um novo rascunho para outra pessoa.',
+                  subtitle: 'Gera novas recomendações para outro aluno.',
                   ink: ink,
                   mute: mute,
                   onTap: () => Navigator.of(ctx).pop('trocar'),
@@ -1864,26 +1865,9 @@ class _CopilotInsightItemState extends State<_CopilotInsightItem> {
 
   @override
   Widget build(BuildContext context) {
-    final rawTitulo =
-        (widget.insight['titulo'] ?? widget.insight['title'] ?? '').toString();
-    final titulo =
-        rawTitulo.trim().isEmpty ||
-                RegExp(
-                  r'^insight\s+\d+$',
-                  caseSensitive: false,
-                ).hasMatch(rawTitulo.trim())
-            ? 'Recomendação ${widget.index + 1}'
-            : rawTitulo;
-    final detalhe =
-        (widget.insight['detalhe'] ??
-                widget.insight['descricao'] ??
-                widget.insight['descrição'] ??
-                widget.insight['mensagem'] ??
-                '')
-            .toString();
-    final tipo =
-        (widget.insight['tipo'] ?? widget.insight['categoria'] ?? '')
-            .toString();
+    final titulo = copilotInsightTitulo(widget.insight, widget.index);
+    final detalhe = copilotInsightDetalhe(widget.insight);
+    final tipo = copilotInsightTipo(widget.insight);
 
     return Semantics(
       button: detalhe.length > 150,

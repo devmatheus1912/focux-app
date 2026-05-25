@@ -16,5 +16,9 @@ void main() {
     expect(screen, contains('useSafeArea: true'));
     expect(screen, contains('Semantics('));
     expect(screen, isNot(contains('rascunho editável')));
+    expect(screen, contains('copilot_insight_text.dart'));
+    expect(screen, contains('copilotInsightDetalhe'));
+    expect(screen, isNot(contains('Ações do rascunho')));
+    expect(screen, contains('Ações das recomendações'));
   });
 }
