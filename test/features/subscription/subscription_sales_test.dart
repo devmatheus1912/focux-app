@@ -29,6 +29,7 @@ void main() {
     expect(products, contains('focux_premium_yearly'));
     expect(products, contains('focux_enterprise_yearly'));
     expect(products, contains('annualDiscountRate'));
+    expect(products, contains('annualSavingsCompactLabel'));
   });
 
   test('matriz de vendas: entitlements, banner e gate contextual', () {

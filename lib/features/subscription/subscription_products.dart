@@ -66,6 +66,15 @@ class SubscriptionProducts {
   static String savingsLabel() =>
       'Economize ${(annualDiscountRate * 100).round()}% no plano anual';
 
+  /// Texto curto para o segmento Anual (ex.: −20% · −R$ 192/ano).
+  static String annualSavingsCompactLabel(double monthlyPrice) {
+    if (monthlyPrice <= 0) {
+      return 'Economize ${(annualDiscountRate * 100).round()}%';
+    }
+    final saved = monthlyPrice * 12 * annualDiscountRate;
+    return '−${(annualDiscountRate * 100).round()}% · −R\$ ${saved.toStringAsFixed(0)}/ano';
+  }
+
   static String periodLabel(SubscriptionBillingPeriod period) =>
       period == SubscriptionBillingPeriod.yearly ? 'Anual' : 'Mensal';
 }

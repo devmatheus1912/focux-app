@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/legal/focux_legal.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -516,10 +517,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 ? 'Gerenciar assinatura na loja'
                 : 'Plano atual';
         ctaEnabled = subscriptionUsesNativeStore && !_loadingCheckout;
-        footnote =
-            subscriptionUsesNativeStore
-                ? 'Renovação, período (mensal/anual) e cancelamento na ${subscriptionChannelLabel()}.'
-                : 'Este plano já está ativo na sua conta.';
+        footnote = '';
       } else if (isDowngrade) {
         ctaMode =
             subscriptionUsesNativeStore
@@ -553,9 +551,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         footnote =
             subscriptionUsesNativeStore
                 ? (_billingPeriod == SubscriptionBillingPeriod.yearly
-                    ? 'Plano anual com renovação automática pela loja. Cancele quando quiser.'
-                    : 'Renovação automática mensal pela loja. Cancele quando quiser.')
-                : 'Checkout seguro via Mercado Pago.';
+                    ? 'Cobrança anual com renovação automática. Cancele na loja quando quiser.'
+                    : 'Cobrança mensal com renovação automática. Cancele na loja quando quiser.')
+                : 'Checkout seguro via Mercado Pago. Ao continuar, você aceita os Termos e a Privacidade.';
       }
     }
 
@@ -666,6 +664,11 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     line: line,
                     primary: primary,
                     isDark: isDark,
+                    annualSavingsLabel: SubscriptionProducts.annualSavingsCompactLabel(
+                      paid
+                          .map((p) => p.precoMensal)
+                          .fold<double>(0, (a, b) => a > b ? a : b),
+                    ),
                     onChanged: (period) {
                       HapticFeedback.selectionClick();
                       setState(() => _billingPeriod = period);
@@ -697,6 +700,12 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                                 plano,
                                 monthlyProduct,
                                 SubscriptionBillingPeriod.monthly,
+                              )
+                              : null,
+                      yearlySavingsNote:
+                          _billingPeriod == SubscriptionBillingPeriod.yearly
+                              ? SubscriptionProducts.annualSavingsCompactLabel(
+                                plano.precoMensal,
                               )
                               : null,
                       subtitle: _planSubtitle(plan),
@@ -786,7 +795,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 ],
                 const SizedBox(height: 20),
                 _ClaudeLegalFooter(
+                  ink: ink,
                   mute: mute,
+                  primary: primary,
+                  showStoreBillingNote: subscriptionUsesNativeStore,
                   restoring: _restoringPurchases,
                   onRestore:
                       subscriptionUsesNativeStore ? _restorePurchases : null,
@@ -968,17 +980,11 @@ class _AssinaturaStickyFooter extends StatelessWidget {
           Text(
             footnote,
             textAlign: TextAlign.center,
-            style: TextStyle(color: mute, fontSize: 11.5, height: 1.4),
-          ),
-        ],
-        if (mode == _AssinaturaCtaMode.manageStore &&
-            footnote.isEmpty &&
-            subscriptionUsesNativeStore) ...[
-          const SizedBox(height: 8),
-          Text(
-            'Para mudar ou cancelar o plano, use as configurações de assinatura do dispositivo.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: mute, fontSize: 11.5, height: 1.4),
+            style: TextStyle(
+              color: ink.withValues(alpha: 0.55),
+              fontSize: 12,
+              height: 1.45,
+            ),
           ),
         ],
       ],

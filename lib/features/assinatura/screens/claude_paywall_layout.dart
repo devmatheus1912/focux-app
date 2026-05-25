@@ -96,6 +96,7 @@ class _ClaudeBillingSegment extends StatelessWidget {
   final Color line;
   final Color primary;
   final bool isDark;
+  final String annualSavingsLabel;
   final ValueChanged<SubscriptionBillingPeriod> onChanged;
 
   const _ClaudeBillingSegment({
@@ -105,6 +106,7 @@ class _ClaudeBillingSegment extends StatelessWidget {
     required this.line,
     required this.primary,
     required this.isDark,
+    required this.annualSavingsLabel,
     required this.onChanged,
   });
 
@@ -157,9 +159,10 @@ class _ClaudeBillingSegment extends StatelessWidget {
                   if (value == SubscriptionBillingPeriod.yearly) ...[
                     const SizedBox(height: 2),
                     Text(
-                      'Economize 20%',
+                      annualSavingsLabel,
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 10.5,
                         fontWeight: FontWeight.w700,
                         color: selected ? primary : EagleTokens.good,
                       ),
@@ -197,6 +200,7 @@ class _ClaudePlanOptionTile extends StatelessWidget {
   final SubscriptionBillingPeriod billingPeriod;
   final String priceLabel;
   final String? monthlyEquiv;
+  final String? yearlySavingsNote;
   final String subtitle;
   final Color ink;
   final Color mute;
@@ -213,6 +217,7 @@ class _ClaudePlanOptionTile extends StatelessWidget {
     required this.billingPeriod,
     required this.priceLabel,
     this.monthlyEquiv,
+    this.yearlySavingsNote,
     required this.subtitle,
     required this.ink,
     required this.mute,
@@ -348,17 +353,28 @@ class _ClaudePlanOptionTile extends StatelessWidget {
                           ),
                         ),
                         if (billingPeriod ==
-                                SubscriptionBillingPeriod.yearly &&
-                            monthlyEquiv != null) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            'vs $monthlyEquiv',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: primary.withValues(alpha: 0.85),
-                              fontWeight: FontWeight.w600,
+                            SubscriptionBillingPeriod.yearly) ...[
+                          if (yearlySavingsNote != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              yearlySavingsNote!,
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: primary,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                          ),
+                          ],
+                          if (monthlyEquiv != null) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              'vs $monthlyEquiv',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: ink.withValues(alpha: 0.5),
+                              ),
+                            ),
+                          ],
                         ],
                       ],
                     ),
@@ -500,81 +516,87 @@ class _ClaudeFeaturePanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final comparing = plan != currentPlan && currentPlan != SubscriptionPlan.FREE;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'O que inclui ${plan.apiName}',
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-            color: ink,
-            letterSpacing: -0.2,
-          ),
-        ),
-        if (comparing) ...[
-          const SizedBox(height: 6),
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 220),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      child: Column(
+        key: ValueKey(plan.apiName),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Text(
-            'Comparando com o ${currentPlan.apiName} que você usa hoje.',
-            style: TextStyle(fontSize: 13, color: mute, height: 1.4),
-          ),
-        ],
-        const SizedBox(height: 14),
-        ..._rows.map(
-          (row) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  row.included ? Icons.check_circle_rounded : Icons.cancel_rounded,
-                  size: 20,
-                  color:
-                      row.included
-                          ? primary
-                          : mute.withValues(alpha: 0.4),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    row.label,
-                    style: TextStyle(
-                      fontSize: 15,
-                      height: 1.35,
-                      color:
-                          row.included
-                              ? ink
-                              : mute.withValues(alpha: 0.5),
-                      fontWeight: FontWeight.w400,
-                      decoration:
-                          row.included ? null : TextDecoration.lineThrough,
-                    ),
-                  ),
-                ),
-              ],
+            'O que inclui ${plan.apiName}',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: ink,
+              letterSpacing: -0.2,
             ),
           ),
-        ),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            Icon(Icons.lock_outline, size: 14, color: primary.withValues(alpha: 0.8)),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                subscriptionUsesNativeStore
-                    ? 'Pagamento seguro · Cancele quando quiser · ${subscriptionChannelLabel()}'
-                    : 'Checkout seguro via Mercado Pago',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: ink.withValues(alpha: 0.55),
-                  height: 1.4,
-                ),
-              ),
+          if (comparing) ...[
+            const SizedBox(height: 6),
+            Text(
+              'Comparando com o ${currentPlan.apiName} que você usa hoje.',
+              style: TextStyle(fontSize: 13, color: mute, height: 1.4),
             ),
           ],
-        ),
-      ],
+          const SizedBox(height: 14),
+          ..._rows.map(
+            (row) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    row.included ? Icons.check_circle_rounded : Icons.cancel_rounded,
+                    size: 20,
+                    color:
+                        row.included
+                            ? primary
+                            : mute.withValues(alpha: 0.4),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      row.label,
+                      style: TextStyle(
+                        fontSize: 15,
+                        height: 1.35,
+                        color:
+                            row.included
+                                ? ink
+                                : mute.withValues(alpha: 0.5),
+                        fontWeight: FontWeight.w400,
+                        decoration:
+                            row.included ? null : TextDecoration.lineThrough,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Icon(Icons.lock_outline, size: 14, color: primary.withValues(alpha: 0.8)),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  subscriptionUsesNativeStore
+                      ? 'Pagamento seguro · Cancele quando quiser · ${subscriptionChannelLabel()}'
+                      : 'Checkout seguro via Mercado Pago',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: ink.withValues(alpha: 0.55),
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -642,18 +664,32 @@ class _ClaudeInlineNote extends StatelessWidget {
 }
 
 class _ClaudeLegalFooter extends StatelessWidget {
+  final Color ink;
   final Color mute;
+  final Color primary;
+  final bool showStoreBillingNote;
   final bool restoring;
   final VoidCallback? onRestore;
 
   const _ClaudeLegalFooter({
+    required this.ink,
     required this.mute,
+    required this.primary,
+    required this.showStoreBillingNote,
     required this.restoring,
     this.onRestore,
   });
 
   @override
   Widget build(BuildContext context) {
+    TextStyle linkStyle({bool underline = true}) => TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w600,
+      color: primary,
+      decoration: underline ? TextDecoration.underline : null,
+      decorationColor: primary.withValues(alpha: 0.5),
+    );
+
     return Column(
       children: [
         if (onRestore != null)
@@ -663,20 +699,57 @@ class _ClaudeLegalFooter extends StatelessWidget {
               restoring ? 'Restaurando compras…' : 'Restaurar compras',
               style: TextStyle(
                 fontSize: 14,
-                color: mute,
+                color: ink.withValues(alpha: 0.7),
                 fontWeight: FontWeight.w500,
               ),
             ),
           ),
+        Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 4,
+          children: [
+            Semantics(
+              button: true,
+              label: 'Abrir termos de uso',
+              child: GestureDetector(
+                onTap: () => FocuxLegal.openTerms(),
+                child: Text('Termos de uso', style: linkStyle()),
+              ),
+            ),
+            Text('·', style: TextStyle(color: mute, fontSize: 12)),
+            Semantics(
+              button: true,
+              label: 'Abrir política de privacidade',
+              child: GestureDetector(
+                onTap: () => FocuxLegal.openPrivacy(),
+                child: Text('Política de privacidade', style: linkStyle()),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
         Text(
-          'Cobrança pela loja do dispositivo. Renovação automática até você cancelar.',
+          'Ao assinar, você concorda com os Termos de uso e a Política de privacidade.',
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 11.5,
+            fontSize: 12,
             height: 1.45,
-            color: mute.withValues(alpha: 0.9),
+            color: ink.withValues(alpha: 0.55),
           ),
         ),
+        if (showStoreBillingNote) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Cobrança e renovação automática pela ${subscriptionChannelLabel()}. Cancele quando quiser nas configurações do dispositivo.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 12,
+              height: 1.45,
+              color: ink.withValues(alpha: 0.55),
+            ),
+          ),
+        ],
       ],
     );
   }
