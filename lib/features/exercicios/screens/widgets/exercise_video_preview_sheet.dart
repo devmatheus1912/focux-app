@@ -3,6 +3,7 @@ import 'package:video_player/video_player.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/tokens_strip.dart';
+import '../../../../core/widgets/fx_loading.dart';
 import '../../../../core/widgets/fx_shell_scaffold.dart';
 import '../../data/exercicio_repository.dart';
 import '../../services/biblioteca_media_config.dart';
@@ -356,7 +357,7 @@ class _PreviewLoading extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(color: Colors.white),
+            const FxLoading(size: 28, color: Colors.white),
             const SizedBox(height: 12),
             Text(
               'Carregando demonstração...',
@@ -511,9 +512,7 @@ class _ExerciseVideoPreviewSheetState extends State<ExerciseVideoPreviewSheet> {
                             : _ready && _controller != null
                             ? VideoPlayer(_controller!)
                             : const Center(
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
+                              child: FxLoading(size: 28, color: Colors.white),
                             ),
                   ),
                 ),

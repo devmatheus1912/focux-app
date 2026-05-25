@@ -8,7 +8,7 @@ import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_strip_components.dart';
+import '../widgets/fx_strip_components.dart';
 
 /// QA board — visual reference for TOKENS STRIP v1.0.0 (debug only).
 class TokensStripShowcaseScreen extends StatefulWidget {

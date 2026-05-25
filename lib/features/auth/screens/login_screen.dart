@@ -213,10 +213,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (shouldOfferTrial ||
           (plan != SubscriptionPlan.PREMIUM &&
               plan != SubscriptionPlan.ENTERPRISE)) {
-        return '/paywall';
+        return '/assinatura';
       }
     } catch (_) {
-      return '/paywall';
+      return '/assinatura';
     }
     return fallback;
   }

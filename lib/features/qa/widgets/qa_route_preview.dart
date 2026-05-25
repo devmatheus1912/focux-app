@@ -74,6 +74,8 @@ Widget _buildQaRouteScreen(Uri uri) {
     '/gamificacao' => const GamificacaoScreen(),
     '/dashboard/qualidade' => const QualidadeOperacionalScreen(),
     '/planos' => const AssinaturaScreen(),
+    '/paywall' => const AssinaturaScreen(),
+    '/assinatura' => const AssinaturaScreen(),
     '/kanban' => const AcoesMassaScreen(),
     '/alertas' => const AlertasScreen(),
     '/dashboard/aluno' => const AlunoDashboardScreen(),

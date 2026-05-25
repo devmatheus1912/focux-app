@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../theme/brand_palette.dart';
-import '../theme/design_tokens.dart';
-import '../theme/tokens_strip.dart';
-import 'fx_motion.dart';
+import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_motion.dart';
 
 /// TOKENS STRIP v1.0.0 — secondary pill button (white + teal border).
 class FxSecondaryButton extends StatelessWidget {

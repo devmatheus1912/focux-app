@@ -80,7 +80,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       }
 
       ref.invalidate(perfilProvider);
-      context.go('/paywall');
+      context.go('/assinatura');
     } catch (error) {
       HapticFeedback.heavyImpact();
       setState(() {
@@ -130,7 +130,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
       if (!mounted) return;
       ref.invalidate(perfilProvider);
-      context.go('/paywall');
+      context.go('/assinatura');
     } catch (error) {
       HapticFeedback.heavyImpact();
       if (!mounted) return;

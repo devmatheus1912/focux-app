@@ -79,7 +79,6 @@ import '../../features/depoimentos/screens/depoimento_aluno_screen.dart';
 import '../../features/depoimentos/screens/depoimentos_personal_screen.dart';
 import '../../features/galeria/screens/galeria_screen.dart';
 import '../../features/planos/screens/enterprise_promo_screen.dart';
-import '../../features/subscription/screens/paywall_screen.dart';
 import '../../features/growth/screens/migracao_magica_screen.dart';
 import '../../features/gamificacao/screens/gamificacao_screen.dart';
 import '../../features/anamnese/screens/anamnese_screen.dart';
@@ -88,8 +87,7 @@ import '../../features/ia/screens/ia_progressao_screen.dart';
 import '../../features/chat/screens/chat_screen.dart';
 import '../../features/perfil/screens/wallet_screen.dart';
 import '../../features/notificacoes/screens/notificacoes_screen.dart';
-import '../../features/qa/screens/qa_smoke_screen.dart';
-import '../../features/qa/screens/tokens_strip_showcase_screen.dart';
+import 'qa_routes.dart' if (dart.vm.product) 'qa_routes_stub.dart';
 import '../auth/session_invalidator.dart';
 import '../storage/secure_storage.dart';
 import '../widgets/fx_route_chrome.dart';
@@ -748,7 +746,13 @@ class AppRouter {
           ),
           GoRoute(
             path: '/paywall',
-            builder: (context, state) => const PaywallScreen(),
+            redirect: (context, state) {
+              final plano = state.uri.queryParameters['plano'];
+              if (plano != null && plano.trim().isNotEmpty) {
+                return '/assinatura?plano=${Uri.encodeComponent(plano.trim())}';
+              }
+              return '/assinatura';
+            },
           ),
           GoRoute(
             path: '/assinatura',
@@ -825,21 +829,8 @@ class AppRouter {
         ],
       ),
 
-      // QA — root-level routes (debug only). Outside ShellRoute so smoke
-      // push/pop does not collide page keys with shell sub-routes.
-      if (kDebugMode) ...[
-        GoRoute(
-          path: '/qa/smoke',
-          builder:
-              (context, state) => const FxRouteChrome(child: QaSmokeScreen()),
-        ),
-        GoRoute(
-          path: '/qa/tokens-strip',
-          builder:
-              (context, state) =>
-                  const FxRouteChrome(child: TokensStripShowcaseScreen()),
-        ),
-      ],
+      // QA — fora do ShellRoute; stub vazio em release (dart.vm.product).
+      ...buildQaRoutes(),
     ],
   );
 }

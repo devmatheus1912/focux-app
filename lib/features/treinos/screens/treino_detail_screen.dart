@@ -6,6 +6,8 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -2663,15 +2665,16 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
   }
 
   InputDecoration _decoration(String label, Color primary) {
+    final radius = BorderRadius.circular(14);
     return InputDecoration(
       labelText: label,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+      border: FxInputDeco.outlineBorder(borderRadius: radius),
+      enabledBorder: FxInputDeco.outlineBorder(
+        borderRadius: radius,
         borderSide: BorderSide(color: primary.withValues(alpha: 0.22)),
       ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+      focusedBorder: FxInputDeco.outlineBorder(
+        borderRadius: radius,
         borderSide: BorderSide(color: primary, width: 1.4),
       ),
     );
@@ -2814,13 +2817,10 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
                   ),
                   child:
                       _saving
-                          ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
+                          ? const FxLoading(
+                            size: 22,
+                            strokeWidth: 2,
+                            color: Colors.white,
                           )
                           : const Text('Salvar prescrição'),
                 ),

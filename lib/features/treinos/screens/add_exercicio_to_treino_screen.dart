@@ -12,6 +12,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_bottom_sheet.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -44,7 +45,6 @@ import '../utils/exercise_picker_sort.dart';
 import '../utils/exercise_picker_suggestions.dart';
 import '../utils/exercise_search_highlight.dart';
 import '../utils/exercise_picker_library_label.dart';
-import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class AddExercicioToTreinoScreen extends ConsumerStatefulWidget {
   final int treinoId;
@@ -891,7 +891,7 @@ class _AddExercicioToTreinoScreenState
                   filled: true,
                   fillColor:
                       isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg,
-                  border: OutlineInputBorder(
+                  border: FxInputDeco.outlineBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide.none,
                   ),
@@ -1465,10 +1465,7 @@ class _BibliotecaSyncBanner extends StatelessWidget {
               SizedBox(
                 width: 16,
                 height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: primary,
-                ),
+                child: FxLoading(size: 16, strokeWidth: 2, color: primary),
               )
             else
               Icon(Icons.sync_rounded, color: primary, size: 18),

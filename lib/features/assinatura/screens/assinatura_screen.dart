@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/legal/focux_legal.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -175,6 +176,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.track(ProductEvents.paywallOpened);
     _selectedPlanName = null;
     if (!kIsWeb) {
       _purchaseSubscription = InAppPurchase.instance.purchaseStream.listen(

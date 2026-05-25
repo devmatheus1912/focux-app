@@ -16,7 +16,7 @@ void main() {
 
     expect(exercicio.isReadyForStudent, isTrue);
     expect(exercicio.mediaTrustLevel, 'READY');
-    expect(exercicio.mediaTrustLabel, 'video do personal');
+    expect(exercicio.mediaTrustLabel, 'Vídeo do personal');
   });
 
   test('licensed approved library video is ready for students', () {
@@ -30,7 +30,7 @@ void main() {
     );
 
     expect(exercicio.isReadyForStudent, isTrue);
-    expect(exercicio.mediaTrustLabel, 'licenciado');
+    expect(exercicio.mediaTrustLabel, 'Demonstração Focux');
   });
 
   test('exercise without video asks for media before premium prescription', () {
@@ -43,7 +43,7 @@ void main() {
 
     expect(exercicio.isReadyForStudent, isFalse);
     expect(exercicio.mediaTrustLevel, 'NO_VIDEO');
-    expect(exercicio.mediaTrustDescription, contains('Adicione video'));
+    expect(exercicio.mediaTrustDescription, contains('Adicione vídeo'));
   });
 
   test('workout builder and detail expose prescription trust UI', () {
@@ -61,10 +61,10 @@ void main() {
         ).readAsStringSync();
 
     expect(builder, contains('_ExercisePickerCard'));
-    expect(builder, contains('_ExerciseMediaStatus'));
-    expect(builder, contains('mediaTrustLevel'));
     expect(builder, contains('onUploadVideo'));
+    expect(builder, contains('canPreviewExerciseMedia'));
     expect(detail, contains('_PrescriptionReadinessPanel'));
+    expect(detail, contains('mediaTrustLabel'));
     expect(treinoDetail, contains('mediaTrustLabel'));
   });
 

@@ -31,7 +31,7 @@ jobs:
 
       - name: Flutter analyze
         working-directory: focux-app
-        run: flutter analyze
+        run: dart analyze --fatal-warnings
 
       - name: Flutter unit tests
         working-directory: focux-app

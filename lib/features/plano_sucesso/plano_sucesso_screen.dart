@@ -7,7 +7,7 @@ import '../../core/router/safe_navigation.dart';
 import '../../core/theme/brand_palette.dart';
 import '../../core/theme/design_tokens.dart';
 import '../../core/theme/tokens_strip.dart';
-import '../../core/widgets/empty_state.dart';
+import '../../core/widgets/fx_empty_state.dart';
 import '../../core/widgets/feedback_helper.dart';
 import '../../core/widgets/fx_shell_scaffold.dart';
 import '../../core/widgets/skeleton_loader.dart';
@@ -58,10 +58,10 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
           onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
         ),
         body: const SafeArea(
-          child: EmptyStateWidget(
-            icon: Icons.flag_outlined,
+          child: FxEmptyState(
+            icon: 'flag',
             title: 'Nenhum Plano Ativo',
-            description: 'Este aluno ainda nao possui plano de sucesso.',
+            subtitle: 'Este aluno ainda não possui plano de sucesso.',
           ),
         ),
       );
