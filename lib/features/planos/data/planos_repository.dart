@@ -189,6 +189,8 @@ class PlanoFeatures {
   final bool whiteLabel;
   final bool iaCopiloto;
   final bool iaIlimitada;
+  final int alunosAtivos;
+  final int iaUsadaMes;
 
   const PlanoFeatures({
     required this.plano,
@@ -205,6 +207,8 @@ class PlanoFeatures {
     required this.whiteLabel,
     required this.iaCopiloto,
     required this.iaIlimitada,
+    this.alunosAtivos = 0,
+    this.iaUsadaMes = 0,
   });
 
   factory PlanoFeatures.fromJson(Map<String, dynamic> j) {
@@ -224,6 +228,8 @@ class PlanoFeatures {
       whiteLabel: f['whiteLabel'] as bool? ?? false,
       iaCopiloto: f['iaCopiloto'] as bool? ?? false,
       iaIlimitada: f['iaIlimitada'] as bool? ?? false,
+      alunosAtivos: (j['alunosAtivos'] as num?)?.toInt() ?? 0,
+      iaUsadaMes: (j['iaUsadaMes'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -266,13 +272,16 @@ class PlanoFeatures {
       whiteLabel: whiteLabel,
       iaCopiloto: iaCopiloto,
       iaIlimitada: iaIlimitada,
+      alunosAtivos: alunosAtivos,
+      iaUsadaMes: iaUsadaMes,
     );
   }
 
   static const free = PlanoFeatures(
     plano: SubscriptionPlan.FREE,
+    limiteAlunos: 5,
     financeiro: false,
-    agenda: false,
+    agenda: true,
     relatorios: false,
     whiteLabel: false,
     iaCopiloto: false,
@@ -284,6 +293,7 @@ class PlanoFeatures {
     fromCache: true,
     syncWarning:
         'Nao foi possivel confirmar o plano agora. Acesso liberado em modo seguro enquanto sincroniza.',
+    limiteAlunos: null,
     financeiro: true,
     agenda: true,
     relatorios: true,

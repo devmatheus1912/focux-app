@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 import '../../features/subscription/models/subscription_plan.dart';
 import '../../features/planos/providers/plano_features_provider.dart';
 import '../../features/planos/data/planos_repository.dart';
+import '../../features/subscription/plan_entitlements.dart';
 import '../analytics/analytics_service.dart';
 import '../router/role_home.dart';
 import '../router/safe_navigation.dart';
+import 'fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 
 class FeatureGate extends ConsumerWidget {
@@ -15,10 +17,8 @@ class FeatureGate extends ConsumerWidget {
   final Widget? lockedBuilder;
   final String featureName;
 
-  /// Capability flag específica (ex.: "iaCopiloto", "whiteLabel"). Quando
-  /// passado, o gate consulta a flag no backend (via `/api/planos/me`)
-  /// e ignora `requiredPlan`. Use isto para evitar inferir features a
-  /// partir do nome do plano.
+  /// Capability flag específica (ex.: "financeiro", "iaCopiloto"). Quando
+  /// passado, o gate consulta a flag no backend (via `/api/planos/me`).
   final String? capability;
 
   const FeatureGate({
@@ -34,14 +34,10 @@ class FeatureGate extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final featuresAsync = ref.watch(planoFeaturesProvider);
 
-    // BUG-01: em estado de loading, mostra indicador mas não bloqueia.
     if (featuresAsync.isLoading) {
       return const Center(child: FxLoading());
     }
 
-    // BUG-01: em estado de erro, NÃO colapsar para FREE.
-    // Usuário pagante não pode ser bloqueado por falha de rede.
-    // Mostra tela de retry em vez de "Acesso Restrito".
     if (featuresAsync.hasError) {
       return _PlanSyncBannerShell(
         features: PlanoFeatures.optimisticEnterprise,
@@ -51,8 +47,6 @@ class FeatureGate extends ConsumerWidget {
     }
 
     final features = featuresAsync.value;
-    // Se value for null aqui (não deveria após hasError check), libera acesso
-    // conservadoramente — melhor falhar aberto do que bloquear pagante.
     if (features == null) {
       return child;
     }
@@ -94,6 +88,7 @@ class FeatureGate extends ConsumerWidget {
         ProductEvents.featureGateBlocked,
         props: {
           'feature': featureName,
+          'capability': capability,
           'requiredPlan': requiredPlan.name,
           'currentPlan': currentPlan.name,
           'allowedByStaleCache': false,
@@ -101,8 +96,11 @@ class FeatureGate extends ConsumerWidget {
       ),
     );
 
-    // BUG-02+11: Default Locked UI com Scaffold (back button) + CTA → /planos
-    return _LockedScreen(featureName: featureName, requiredPlan: requiredPlan);
+    return _LockedScreen(
+      featureName: featureName,
+      capability: capability,
+      requiredPlan: requiredPlan,
+    );
   }
 
   bool _resolveCapability(PlanoFeatures f, String cap) {
@@ -205,21 +203,27 @@ class _PlanSyncBannerShell extends StatelessWidget {
   }
 }
 
-// ── Tela de acesso restrito ─────────────────────────────────────────────────
-
 class _LockedScreen extends ConsumerWidget {
   final String featureName;
+  final String? capability;
   final SubscriptionPlan requiredPlan;
 
-  const _LockedScreen({required this.featureName, required this.requiredPlan});
+  const _LockedScreen({
+    required this.featureName,
+    this.capability,
+    required this.requiredPlan,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final planLabel =
-        requiredPlan == SubscriptionPlan.ENTERPRISE ? 'Enterprise' : 'Premium';
+    final offer = PlanEntitlements.lockedOffer(
+      featureName: featureName,
+      capability: capability,
+      requiredPlan: requiredPlan,
+    );
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      // BUG-02: AppBar com botão de voltar
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -228,57 +232,58 @@ class _LockedScreen extends ConsumerWidget {
         ),
       ),
       body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.lock_outline, size: 64, color: Colors.grey),
-                const SizedBox(height: 16),
-                Text(
-                  'Acesso Restrito',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              const Spacer(),
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(18),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  '"$featureName" requer o plano $planLabel.',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.grey),
+                child: Icon(Icons.lock_open_rounded, size: 32, color: primary),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                offer.headline,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  height: 1.15,
                 ),
-                const SizedBox(height: 24),
-                // BUG-11: CTA → /planos (não /paywall)
-                ElevatedButton(
-                  onPressed: () => context.push('/planos'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 12,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                offer.body,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 14,
+                  height: 1.45,
+                ),
+              ),
+              const Spacer(),
+              FxLiquidPrimaryButton(
+                label: offer.ctaLabel,
+                icon: Icons.workspace_premium_rounded,
+                onPressed:
+                    () => context.push(
+                      '/assinatura',
+                      extra: offer.targetPlan.apiName,
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'Ver planos',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextButton(
-                  onPressed:
-                      () =>
-                          safePopOr(context, () => goToRoleHome(context, ref)),
-                  child: const Text('Voltar'),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed:
+                    () =>
+                        safePopOr(context, () => goToRoleHome(context, ref)),
+                child: const Text('Agora não'),
+              ),
+              const SizedBox(height: 8),
+            ],
           ),
         ),
       ),

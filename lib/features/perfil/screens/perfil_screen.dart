@@ -745,7 +745,7 @@ class _PerfilBody extends StatelessWidget {
                             actionInk: actionInk,
                             mute: mute,
                             line: line,
-                            onTap: () => context.push('/planos'),
+                            onTap: () => context.push('/assinatura'),
                           ),
                           _ActionTile(
                             icon: Icons.groups_2_outlined,

@@ -148,6 +148,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     return FeatureGate(
       featureName: 'Migração Mágica IA',
       requiredPlan: SubscriptionPlan.PREMIUM,
+      capability: 'iaCopiloto',
       child: _buildContent(context),
     );
   }

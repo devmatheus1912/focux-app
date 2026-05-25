@@ -1,15 +1,18 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../features/auth/providers/auth_provider.dart';
-import '../../../features/perfil/providers/perfil_provider.dart';
-import '../data/planos_repository.dart';
-import 'package:focux_app/core/widgets/feedback_helper.dart';
-import 'package:focux_app/core/widgets/fx_motion.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../features/perfil/providers/perfil_provider.dart';
+import '../../../features/auth/providers/auth_provider.dart';
+import '../../../features/subscription/models/subscription_plan.dart';
+import '../../../features/subscription/store_subscription_policy.dart';
+import '../data/planos_repository.dart';
 
 class EnterprisePromoScreen extends ConsumerStatefulWidget {
   const EnterprisePromoScreen({super.key});
@@ -21,43 +24,6 @@ class EnterprisePromoScreen extends ConsumerStatefulWidget {
 
 class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
   bool _starting = false;
-
-  Future<void> _startTrial() async {
-    if (_starting) return;
-
-    setState(() => _starting = true);
-    try {
-      await PlanosRepository(ref.read(apiClientProvider)).startTrial(
-        payload:
-            buildLocalSubscriptionMetadata(
-              productId: 'focux_enterprise_trial',
-            ).toTrialPayload(),
-      );
-      ref.invalidate(perfilProvider);
-      await _markPromoAsSeen();
-      if (!mounted) return;
-
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(
-          content: Text(
-            'Trial Enterprise ativado. Aproveite os proximos 5 dias.',
-          ),
-        ),
-      );
-      context.go('/dashboard/personal');
-    } catch (error) {
-      if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(content: Text('Erro ao ativar trial: $error')),
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _starting = false);
-      }
-    }
-  }
 
   Future<void> _markPromoAsSeen() async {
     final prefs = await SharedPreferences.getInstance();
@@ -74,9 +40,55 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
     }
   }
 
+  Future<void> _continueToCheckout() async {
+    if (_starting) return;
+    setState(() => _starting = true);
+
+    try {
+      await _markPromoAsSeen();
+      if (!mounted) return;
+
+      if (subscriptionUsesNativeStore) {
+        await context.push(
+          '/assinatura',
+          extra: SubscriptionPlan.ENTERPRISE.apiName,
+        );
+        return;
+      }
+
+      await PlanosRepository(ref.read(apiClientProvider)).startTrial(
+        payload:
+            buildLocalSubscriptionMetadata(
+              productId: 'focux_enterprise_trial',
+            ).toTrialPayload(),
+      );
+      ref.invalidate(perfilProvider);
+      if (!mounted) return;
+
+      FeedbackHelper.showSnackBar(
+        context,
+        const SnackBar(
+          content: Text(
+            'Trial Enterprise ativado. Aproveite os próximos 5 dias.',
+          ),
+        ),
+      );
+      context.go('/dashboard/personal');
+    } catch (error) {
+      if (!mounted) return;
+      FeedbackHelper.showSnackBar(
+        context,
+        SnackBar(content: Text('Erro ao ativar trial: $error')),
+      );
+    } finally {
+      if (mounted) setState(() => _starting = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final useStore = subscriptionUsesNativeStore;
     final trialEndDate = DateTime.now().add(const Duration(days: 5));
     final dateStr =
         '${trialEndDate.day.toString().padLeft(2, '0')}/${trialEndDate.month.toString().padLeft(2, '0')}/${trialEndDate.year}';
@@ -103,7 +115,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  'Transforme seu negocio.\nExperimente o Enterprise.',
+                  'Transforme seu negócio.\nExperimente o Enterprise.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white,
@@ -118,7 +130,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                   'IA completa + RAG',
                   'White-label com sua marca',
                   'Identidade visual premium',
-                  'Dominio customizado',
+                  'Domínio customizado',
                 ].map(
                   (feature) => Padding(
                     padding: EdgeInsets.only(bottom: 10),
@@ -154,16 +166,20 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
+                        children: [
                           Icon(
-                            Icons.card_giftcard,
-                            color: Color(0xFFF59E0B),
+                            useStore
+                                ? Icons.storefront_outlined
+                                : Icons.card_giftcard,
+                            color: const Color(0xFFF59E0B),
                             size: 22,
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Text(
-                            '5 dias gratis',
-                            style: TextStyle(
+                            useStore
+                                ? 'Assinatura pela loja'
+                                : '5 dias grátis',
+                            style: const TextStyle(
                               color: Color(0xFFF59E0B),
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
@@ -173,32 +189,39 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Cancele antes de $dateStr para evitar cobranca.',
+                        useStore
+                            ? 'Ofertas introdutórias são aplicadas pela '
+                                '${subscriptionChannelLabel()} ao concluir a compra.'
+                            : 'Cancele antes de $dateStr para evitar cobrança.',
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           color: Colors.white70,
                           fontSize: 13,
                         ),
                       ),
-                      const Text(
-                        'Depois disso: R\$149,90/mes',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.white54, fontSize: 12),
-                      ),
+                      if (!useStore)
+                        const Text(
+                          'Depois disso: R\$149,90/mês',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white54, fontSize: 12),
+                        ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 20),
                 FxLiquidPrimaryButton(
-                  label: 'Experimentar 5 dias gratis',
+                  label:
+                      useStore
+                          ? 'Continuar na loja'
+                          : 'Experimentar 5 dias grátis',
                   loading: _starting,
-                  onPressed: _starting ? null : _startTrial,
+                  onPressed: _starting ? null : _continueToCheckout,
                 ),
                 const SizedBox(height: 12),
                 TextButton(
                   onPressed: _dismiss,
                   child: const Text(
-                    'Agora nao',
+                    'Agora não',
                     style: TextStyle(color: Colors.white54, fontSize: 14),
                   ),
                 ),

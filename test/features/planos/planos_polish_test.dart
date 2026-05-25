@@ -3,17 +3,21 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('planos usa polish 10/10: assinatura, a11y e erro de trial', () {
+  test('planos legado redireciona para assinatura', () {
     final screen = File(
       'lib/features/planos/screens/planos_screen.dart',
     ).readAsStringSync();
 
-    expect(screen, contains("subtitle: 'ASSINATURA'"));
-    expect(screen, contains('FeedbackHelper.showError'));
-    expect(screen, isNot(contains('showSuccess(context, \'Erro')));
-    expect(screen, contains('Semantics('));
-    expect(screen, contains('Não inclui'));
-    expect(screen, contains('loadingLabel: \'Ativando…\''));
-    expect(screen, isNot(contains('google_fonts')));
+    expect(screen, contains("context.go('/assinatura')"));
+    expect(screen, isNot(contains('startTrial')));
+  });
+
+  test('enterprise promo usa loja no app nativo', () {
+    final promo = File(
+      'lib/features/planos/screens/enterprise_promo_screen.dart',
+    ).readAsStringSync();
+
+    expect(promo, contains('subscriptionUsesNativeStore'));
+    expect(promo, contains("'/assinatura'"));
   });
 }

@@ -26,6 +26,7 @@ import '../../chat/screens/chat_inbox_screen.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../subscription/widgets/plan_usage_banner.dart';
 
 class PersonalDashboardScreen extends ConsumerStatefulWidget {
   const PersonalDashboardScreen({super.key});
@@ -364,6 +365,7 @@ class _PersonalDashboardScreenState
                 child: CustomScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   slivers: [
+                    const SliverToBoxAdapter(child: PlanUsageBanner()),
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(

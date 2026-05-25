@@ -1,0 +1,42 @@
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  test('planos redireciona para assinatura unificada', () {
+    final router = File('lib/core/router/app_router.dart').readAsStringSync();
+    expect(router, contains("path: '/planos'"));
+    expect(router, contains("return '/assinatura'"));
+  });
+
+  test('SKUs anuais configurados no app e backend', () {
+    final products = File(
+      'lib/features/subscription/subscription_products.dart',
+    ).readAsStringSync();
+    expect(products, contains('focux_premium_yearly'));
+    expect(products, contains('focux_enterprise_yearly'));
+    expect(products, contains('annualDiscountRate'));
+  });
+
+  test('matriz de vendas: entitlements, banner e gate contextual', () {
+    final entitlements = File(
+      'lib/features/subscription/plan_entitlements.dart',
+    ).readAsStringSync();
+    final banner = File(
+      'lib/features/subscription/widgets/plan_usage_banner.dart',
+    ).readAsStringSync();
+    final gate = File('lib/core/widgets/feature_gate.dart').readAsStringSync();
+    final repo = File(
+      'lib/features/planos/data/planos_repository.dart',
+    ).readAsStringSync();
+
+    expect(entitlements, contains('LockedOffer'));
+    expect(entitlements, contains('softGateMessage'));
+    expect(banner, contains("'/assinatura'"));
+    expect(gate, contains('PlanEntitlements.lockedOffer'));
+    expect(gate, contains("'/assinatura'"));
+    expect(repo, contains('alunosAtivos'));
+    expect(repo, contains('agenda: true'));
+    expect(repo, contains('limiteAlunos: 5'));
+  });
+}

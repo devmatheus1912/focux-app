@@ -2,13 +2,16 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
@@ -16,6 +19,8 @@ import '../../../features/planos/data/planos_repository.dart';
 import '../../../features/planos/providers/plano_features_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../../../features/subscription/services/iap_service.dart';
+import '../../../features/subscription/store_subscription_policy.dart';
+import '../../../features/subscription/subscription_products.dart';
 
 import '../data/assinatura_repository.dart';
 import '../providers/assinatura_provider.dart';
@@ -33,11 +38,6 @@ class AssinaturaScreen extends ConsumerStatefulWidget {
 }
 
 class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
-  static const Map<SubscriptionPlan, String> _productIds = {
-    SubscriptionPlan.PREMIUM: 'focux_premium_monthly',
-    SubscriptionPlan.ENTERPRISE: 'focux_enterprise_monthly',
-  };
-
   final Set<String> _handledPurchases = <String>{};
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
 
@@ -51,6 +51,95 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   // Trial
   TrialStatus? _trialStatus;
   bool _loadingTrial = false;
+  bool _restoringPurchases = false;
+  SubscriptionBillingPeriod _billingPeriod = SubscriptionBillingPeriod.yearly;
+
+  Color _planAccent(SubscriptionPlan plan, Color primary, bool isDark) {
+    return switch (plan) {
+      SubscriptionPlan.FREE =>
+        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+      SubscriptionPlan.PREMIUM => primary,
+      SubscriptionPlan.ENTERPRISE => const Color(0xFFC49A2A),
+    };
+  }
+
+  String _planTag(SubscriptionPlan plan) {
+    return switch (plan) {
+      SubscriptionPlan.PREMIUM => 'MAIS ESCOLHIDO',
+      SubscriptionPlan.ENTERPRISE => 'MÁXIMO PODER',
+      _ => '',
+    };
+  }
+
+  String _planSubtitle(SubscriptionPlan plan) {
+    return switch (plan) {
+      SubscriptionPlan.PREMIUM =>
+        'IA, financeiro e identidade visual para escalar com previsibilidade.',
+      SubscriptionPlan.ENTERPRISE =>
+        'Operação ilimitada, white-label e automações para times que crescem rápido.',
+      _ => 'Recursos essenciais para começar.',
+    };
+  }
+
+  Future<void> _restorePurchases() async {
+    if (_restoringPurchases || !subscriptionUsesNativeStore) return;
+
+    setState(() => _restoringPurchases = true);
+    FeedbackHelper.showSnackBar(
+      context,
+      const SnackBar(content: Text('Verificando compras anteriores...')),
+    );
+
+    try {
+      final result = await ref.read(iapServiceProvider).restoreAndVerifyPurchases(
+        onVerified: (_, __) async {
+          ref.invalidate(perfilProvider);
+          ref.invalidate(planoFeaturesProvider);
+        },
+      );
+      ref.invalidate(perfilProvider);
+      ref.invalidate(planoFeaturesProvider);
+
+      if (!mounted) return;
+
+      if (!result.storeAvailable) {
+        FeedbackHelper.showSnackBar(
+          context,
+          const SnackBar(content: Text('A loja do dispositivo não está disponível.')),
+        );
+        return;
+      }
+
+      if (result.hasVerifiedPurchases) {
+        FeedbackHelper.showSnackBar(
+          context,
+          const SnackBar(content: Text('Compras restauradas com sucesso.')),
+        );
+        return;
+      }
+
+      if (result.errors.isNotEmpty) {
+        FeedbackHelper.showSnackBar(
+          context,
+          SnackBar(content: Text(result.errors.first.message)),
+        );
+        return;
+      }
+
+      FeedbackHelper.showSnackBar(
+        context,
+        const SnackBar(content: Text('Nenhuma compra anterior encontrada.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      FeedbackHelper.showSnackBar(
+        context,
+        SnackBar(content: Text('Erro ao restaurar compras: $error')),
+      );
+    } finally {
+      if (mounted) setState(() => _restoringPurchases = false);
+    }
+  }
 
   @override
   void initState() {
@@ -104,7 +193,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     if (!available) return;
 
     final response = await InAppPurchase.instance.queryProductDetails(
-      _productIds.values.toSet(),
+      SubscriptionProducts.allStoreProductIds,
     );
 
     if (!mounted) return;
@@ -194,7 +283,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         ),
       );
 
-      if (mounted) safePopOrGo(context, '/planos');
+      if (mounted) safePopOrGo(context, '/dashboard/personal');
     } catch (error) {
       _handledPurchases.remove(purchaseKey);
       _finishPurchaseFlowWithError(
@@ -210,12 +299,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     }
   }
 
-  SubscriptionPlan? _planForProductId(String productId) {
-    for (final entry in _productIds.entries) {
-      if (entry.value == productId) return entry.key;
-    }
-    return null;
-  }
+  SubscriptionPlan? _planForProductId(String productId) =>
+      SubscriptionProducts.planForProductId(productId);
 
   Future<void> _selectPlan(SubscriptionPlan plan) async {
     if (_selectedPlanName == plan.apiName) return;
@@ -266,8 +351,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       return;
     }
 
-    final productId = _productIds[plan];
-    if (productId == null) {
+    final productId = SubscriptionProducts.productIdFor(plan, _billingPeriod);
+    if (productId.isEmpty) {
       _finishPurchaseFlowWithError(
         'Plano selecionado não possui produto válido.',
       );
@@ -328,260 +413,1079 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     _selectedPlanName ??=
         widget.initialPlan?.trim().toUpperCase() ?? currentPlan.apiName;
 
+    final heroPrimary = BrandPalette.softened(primary, amount: 0.10);
+    final heroSecondary = BrandPalette.deep(primary);
+    final planos = planosAsync.valueOrNull;
+
+    SubscriptionPlan selectedPlan = currentPlan;
+    Plano? selectedBackendPlan;
+    var isCurrentPlan = false;
+    var isDowngrade = false;
+    var ctaEnabled = false;
+    var ctaLabel = 'Assinar';
+    String footnote = '';
+
+    if (planos != null && planos.isNotEmpty) {
+      selectedPlan = subscriptionPlanFromApi(_selectedPlanName);
+      selectedBackendPlan = planos.firstWhere(
+        (plan) => subscriptionPlanFromApi(plan.nome) == selectedPlan,
+        orElse: () => planos.first,
+      );
+      isCurrentPlan = selectedPlan == currentPlan;
+      isDowngrade = selectedPlan.level < currentPlan.level;
+      ctaEnabled =
+          selectedPlan != SubscriptionPlan.FREE &&
+          !isCurrentPlan &&
+          !isDowngrade &&
+          !_loadingCheckout &&
+          !_syncingPurchase;
+      ctaLabel =
+          _syncingPurchase
+              ? 'Sincronizando assinatura...'
+              : selectedPlan == SubscriptionPlan.ENTERPRISE &&
+                  (_trialStatus?.trialUsed == false)
+              ? 'Começar 7 dias grátis'
+              : selectedPlan == SubscriptionPlan.ENTERPRISE
+              ? 'Assinar Enterprise'
+              : 'Assinar Premium';
+      footnote =
+          isCurrentPlan
+              ? 'Este plano já está ativo na sua conta.'
+              : isDowngrade
+              ? 'Selecione um plano superior ao atual para continuar.'
+              : selectedPlan == SubscriptionPlan.FREE
+              ? 'O plano gratuito não requer assinatura.'
+              : subscriptionUsesNativeStore
+              ? (_billingPeriod == SubscriptionBillingPeriod.yearly
+                  ? 'Plano anual com renovação automática pela loja. Cancele quando quiser.'
+                  : 'Renovação automática mensal pela loja. Cancele quando quiser.')
+              : 'Checkout seguro via Mercado Pago.';
+    }
+
+    final trialOffer =
+        selectedPlan == SubscriptionPlan.ENTERPRISE &&
+        (_trialStatus?.trialUsed == false);
+    final brandDeep = BrandPalette.deep(primary);
+
     return FxShellScaffold(
       useMesh: true,
       appBar: FxShellAppBar(
         title: 'Assinatura',
-        onBack: () => safePopOrGo(context, '/planos'),
+        subtitle: subscriptionUsesNativeStore ? 'LOJA' : 'CHECKOUT',
+        onBack: () => safePopOrGo(context, '/dashboard/personal'),
       ),
+      bottomNavigationBar:
+          selectedBackendPlan == null
+              ? null
+              : SafeArea(
+                minimum: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (trialOffer) ...[
+                      Text(
+                        subscriptionUsesNativeStore
+                            ? 'Oferta introdutória aplicada pela loja ao concluir a assinatura.'
+                            : 'Cancele antes do fim do período gratuito para evitar cobrança.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: mute,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                          height: 1.35,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    FxLiquidPrimaryButton(
+                      label: ctaLabel,
+                      icon:
+                          trialOffer
+                              ? Icons.card_giftcard_rounded
+                              : Icons.workspace_premium_rounded,
+                      loading: _loadingCheckout || _syncingPurchase,
+                      onPressed:
+                          ctaEnabled
+                              ? () => _startCheckout(
+                                selectedPlan,
+                                selectedBackendPlan!.id,
+                              )
+                              : null,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      footnote,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: mute,
+                        fontSize: 11.5,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
       body: planosAsync.when(
         loading: () => const FxLoading(),
         error: (error, _) => Center(child: Text('Erro: $error')),
-        data: (planos) {
-          final sortedPlans = [...planos]..sort(
+        data: (planosList) {
+          final sortedPlans = [...planosList]..sort(
             (a, b) => subscriptionPlanFromApi(
               a.nome,
             ).level.compareTo(subscriptionPlanFromApi(b.nome).level),
           );
+          final paid =
+              sortedPlans
+                  .where(
+                    (p) =>
+                        subscriptionPlanFromApi(p.nome) !=
+                        SubscriptionPlan.FREE,
+                  )
+                  .toList();
 
-          final selectedPlan = subscriptionPlanFromApi(_selectedPlanName);
-          final selectedBackendPlan = sortedPlans.firstWhere(
-            (plan) => subscriptionPlanFromApi(plan.nome) == selectedPlan,
-            orElse: () => sortedPlans.first,
+          if (paid.isEmpty) {
+            return Center(
+              child: Text(
+                'Nenhum plano pago disponível no momento.',
+                style: TextStyle(color: mute),
+              ),
+            );
+          }
+
+          var selPlan = subscriptionPlanFromApi(_selectedPlanName);
+          if (selPlan == SubscriptionPlan.FREE) {
+            selPlan = subscriptionPlanFromApi(paid.last.nome);
+          }
+
+          final selBackend = sortedPlans.firstWhere(
+            (plan) => subscriptionPlanFromApi(plan.nome) == selPlan,
+            orElse: () => paid.last,
           );
+          final selProductId = SubscriptionProducts.productIdFor(
+            selPlan,
+            _billingPeriod,
+          );
+          final selProduct = _productDetails[selProductId];
+          final monthlyProduct =
+              _productDetails[SubscriptionProducts.productIdFor(
+                selPlan,
+                SubscriptionBillingPeriod.monthly,
+              )];
+          final accent = _planAccent(selPlan, primary, isDark);
+          final selDowngrade = selPlan.level < currentPlan.level;
 
-          final isCurrentPlan = selectedPlan == currentPlan;
-          final isDowngrade = selectedPlan.level < currentPlan.level;
-          final ctaEnabled =
-              selectedPlan != SubscriptionPlan.FREE &&
-              !isCurrentPlan &&
-              !isDowngrade &&
-              !_loadingCheckout &&
-              !_syncingPurchase;
-
-          final ctaLabel =
-              _syncingPurchase
-                  ? 'Sincronizando assinatura...'
-                  : selectedPlan == SubscriptionPlan.ENTERPRISE &&
-                      (_trialStatus?.trialUsed == false)
-                  ? 'Começar 7 dias grátis'
-                  : selectedPlan == SubscriptionPlan.ENTERPRISE
-                  ? 'Assinar Enterprise'
-                  : (_trialStatus?.trialUsed == false)
-                  ? 'Assinar Premium'
-                  : 'Assinar Premium';
-
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 12, 16, 28),
-            children: [
-              // ── Header ────────────────────────────────────────────────
-              Text(
-                'Escolha como você quer escalar o Focux.',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+          return FxPremiumEntrance(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                TokensStrip.s5,
+                6,
+                TokensStrip.s5,
+                140,
               ),
-              const SizedBox(height: 6),
-              Text(
-                kIsWeb
-                    ? 'No app, as compras são processadas pela App Store ou Google Play. No plano Enterprise, a ativação sincroniza automaticamente com o backend.'
-                    : 'As compras são iniciadas pela loja do dispositivo e o plano Enterprise sincroniza automaticamente com o backend.',
-                style: TextStyle(color: mute, height: 1.45),
-              ),
-              const SizedBox(height: 18),
-
-              // ── Plano cards ───────────────────────────────────────────
-              ...sortedPlans.map(
-                (plan) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _PlanoCard(
-                    plano: plan,
-                    currentPlan: currentPlan,
-                    selectedPlan: selectedPlan,
-                    productDetails:
-                        _productDetails[_productIds[subscriptionPlanFromApi(
-                          plan.nome,
-                        )]],
-                    trialStatus: _trialStatus,
-                    onTap:
-                        () => _selectPlan(subscriptionPlanFromApi(plan.nome)),
-                    isDark: isDark,
-                  ),
-                ),
-              ),
-
-              // ── Trial card (ENTERPRISE selecionado) ───────────────────
-              if (selectedPlan == SubscriptionPlan.ENTERPRISE) ...[
-                const SizedBox(height: 4),
-                _TrialInfoCard(
-                  trialStatus: _trialStatus,
-                  loading: _loadingTrial,
+              children: [
+                _AssinaturaHero(
                   isDark: isDark,
+                  heroPrimary: heroPrimary,
+                  heroSecondary: heroSecondary,
                   ink: ink,
                   mute: mute,
-                  line: line,
+                  currentPlan: currentPlan,
                 ),
-              ],
-
-              // ── Enterprise preview ─────────────────────────────────────
-              if (selectedPlan == SubscriptionPlan.ENTERPRISE &&
-                  _enterprisePreview != null) ...[
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(TokensStrip.s4),
-                  decoration: fxListCardDecoration(
-                    context,
-                    accent: primary,
+                const SizedBox(height: 18),
+                if (!kIsWeb && subscriptionUsesNativeStore) ...[
+                  _BillingPeriodToggle(
+                    period: _billingPeriod,
+                    primary: primary,
+                    isDark: isDark,
+                    ink: ink,
+                    mute: mute,
+                    line: line,
+                    onChanged: (period) {
+                      HapticFeedback.selectionClick();
+                      setState(() => _billingPeriod = period);
+                    },
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.receipt_long_outlined,
-                            color: primary,
-                            size: 18,
+                  const SizedBox(height: 14),
+                ],
+                if (paid.length > 1) ...[
+                  _PlanSegmentBar(
+                    plans: paid,
+                    selected: selPlan,
+                    currentPlan: currentPlan,
+                    primary: primary,
+                    isDark: isDark,
+                    ink: ink,
+                    mute: mute,
+                    line: line,
+                    onSelect: (plan) {
+                      HapticFeedback.selectionClick();
+                      _selectPlan(plan);
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                ],
+                FxStaggerItem(
+                  index: 0,
+                  child: _PremiumPlanShowcase(
+                    plano: selBackend,
+                    plan: selPlan,
+                    currentPlan: currentPlan,
+                    accent: accent,
+                    brandDeep: brandDeep,
+                    tag: _planTag(selPlan),
+                    subtitle: _planSubtitle(selPlan),
+                    priceLabel: _formatPrice(
+                      selBackend,
+                      selProduct,
+                      _billingPeriod,
+                    ),
+                    billingPeriod: _billingPeriod,
+                    monthlyPriceLabel: _formatPrice(
+                      selBackend,
+                      monthlyProduct,
+                      SubscriptionBillingPeriod.monthly,
+                    ),
+                    trialStatus: _trialStatus,
+                    isDark: isDark,
+                    ink: ink,
+                    mute: mute,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                const FxStaggerItem(
+                  index: 1,
+                  child: _TrustStrip(),
+                ),
+                if (selPlan == SubscriptionPlan.ENTERPRISE) ...[
+                  const SizedBox(height: 12),
+                  _TrialInfoCard(
+                    trialStatus: _trialStatus,
+                    loading: _loadingTrial,
+                    isDark: isDark,
+                    ink: ink,
+                    mute: mute,
+                    line: line,
+                  ),
+                ],
+                if (selPlan == SubscriptionPlan.ENTERPRISE &&
+                    _enterprisePreview != null) ...[
+                  const SizedBox(height: 12),
+                  _EnterprisePreviewCard(
+                    preview: _enterprisePreview!,
+                    primary: primary,
+                    ink: ink,
+                    mute: mute,
+                    isDark: isDark,
+                  ),
+                ],
+                if (selDowngrade) ...[
+                  const SizedBox(height: 12),
+                  _InfoBanner(
+                    icon: Icons.info_outline,
+                    text:
+                        'Downgrade não está disponível aqui. Entre em contato com o suporte.',
+                    color: EagleTokens.warn,
+                    softColor: EagleTokens.warnSoft,
+                    isDark: isDark,
+                  ),
+                ],
+                if (!_storeAvailable && !kIsWeb) ...[
+                  const SizedBox(height: 12),
+                  _InfoBanner(
+                    icon: Icons.store_outlined,
+                    text:
+                        'A loja do dispositivo não está disponível nesta sessão.',
+                    color: mute,
+                    softColor:
+                        isDark
+                            ? EagleTokens.darkCardHi
+                            : TokensStrip.borderDefault,
+                    isDark: isDark,
+                  ),
+                ],
+                if (kIsWeb) ...[
+                  const SizedBox(height: 12),
+                  _InfoBanner(
+                    icon: Icons.smartphone_outlined,
+                    text:
+                        'Na web, use o checkout seguro. No celular, assine pela App Store ou Google Play.',
+                    color: mute,
+                    softColor:
+                        isDark
+                            ? EagleTokens.darkCardHi
+                            : TokensStrip.borderDefault,
+                    isDark: isDark,
+                  ),
+                ],
+                if (subscriptionUsesNativeStore) ...[
+                  const SizedBox(height: 18),
+                  Semantics(
+                    button: true,
+                    label: 'Restaurar compras anteriores',
+                    child: TextButton.icon(
+                      onPressed: _restoringPurchases ? null : _restorePurchases,
+                      icon:
+                          _restoringPurchases
+                              ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : const Icon(Icons.restore_rounded, size: 18),
+                      label: Text(
+                        _restoringPurchases
+                            ? 'Restaurando…'
+                            : 'Restaurar compras',
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ─── Premium layout (referência: paywalls ChatGPT / Claude) ─────────────────
+
+class _BillingPeriodToggle extends StatelessWidget {
+  final SubscriptionBillingPeriod period;
+  final Color primary;
+  final Color ink;
+  final Color mute;
+  final Color line;
+  final bool isDark;
+  final ValueChanged<SubscriptionBillingPeriod> onChanged;
+
+  const _BillingPeriodToggle({
+    required this.period,
+    required this.primary,
+    required this.ink,
+    required this.mute,
+    required this.line,
+    required this.isDark,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Widget chip(SubscriptionBillingPeriod value, String label, {String? badge}) {
+      final selected = period == value;
+      return Expanded(
+        child: Semantics(
+          button: true,
+          selected: selected,
+          label: label,
+          child: GestureDetector(
+            onTap: () => onChanged(value),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color:
+                    selected
+                        ? primary
+                        : (isDark
+                            ? Colors.white.withValues(alpha: 0.06)
+                            : Colors.white),
+                borderRadius: BorderRadius.circular(14),
+                border: selected ? null : Border.all(color: line),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                      color: selected ? Colors.white : ink,
+                    ),
+                  ),
+                  if (badge != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      badge,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color:
+                            selected
+                                ? Colors.white.withValues(alpha: 0.85)
+                                : EagleTokens.good,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Row(
+      children: [
+        chip(SubscriptionBillingPeriod.yearly, 'Anual', badge: '−20%'),
+        const SizedBox(width: 8),
+        chip(SubscriptionBillingPeriod.monthly, 'Mensal'),
+      ],
+    );
+  }
+}
+
+class _AssinaturaHero extends StatelessWidget {
+  final bool isDark;
+  final Color heroPrimary;
+  final Color heroSecondary;
+  final Color ink;
+  final Color mute;
+  final SubscriptionPlan currentPlan;
+
+  const _AssinaturaHero({
+    required this.isDark,
+    required this.heroPrimary,
+    required this.heroSecondary,
+    required this.ink,
+    required this.mute,
+    required this.currentPlan,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      header: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [heroPrimary, heroSecondary],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: heroSecondary.withValues(alpha: 0.35),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.workspace_premium_rounded,
+                color: Colors.white,
+                size: 30,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'FOCUX PREMIUM',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 10,
+              letterSpacing: 1.2,
+              fontWeight: FontWeight.w800,
+              color: heroSecondary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Desbloqueie o Focux\nno nível certo para você',
+            textAlign: TextAlign.center,
+            style: AppTypography.inter(
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+              height: 1.12,
+              color: ink,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Plano atual: ${currentPlan.apiName}. '
+            'Compare benefícios e finalize em um fluxo seguro, no padrão dos apps líderes de IA.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: mute, fontSize: 13.5, height: 1.45),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlanSegmentBar extends StatelessWidget {
+  final List<Plano> plans;
+  final SubscriptionPlan selected;
+  final SubscriptionPlan currentPlan;
+  final Color primary;
+  final Color ink;
+  final Color mute;
+  final Color line;
+  final bool isDark;
+  final ValueChanged<SubscriptionPlan> onSelect;
+
+  const _PlanSegmentBar({
+    required this.plans,
+    required this.selected,
+    required this.currentPlan,
+    required this.primary,
+    required this.ink,
+    required this.mute,
+    required this.line,
+    required this.isDark,
+    required this.onSelect,
+  });
+
+  Color _accent(SubscriptionPlan plan) => switch (plan) {
+    SubscriptionPlan.PREMIUM => primary,
+    SubscriptionPlan.ENTERPRISE => const Color(0xFFC49A2A),
+    _ => mute,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children:
+          plans.map((plano) {
+            final plan = subscriptionPlanFromApi(plano.nome);
+            final isSelected = plan == selected;
+            final accent = _accent(plan);
+            final isCurrent = plan == currentPlan;
+            return Expanded(
+              child: Semantics(
+                button: true,
+                selected: isSelected,
+                label: 'Plano ${plan.apiName}',
+                child: GestureDetector(
+                  onTap: () => onSelect(plan),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOutCubic,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color:
+                          isSelected
+                              ? accent
+                              : (isDark
+                                  ? Colors.white.withValues(alpha: 0.06)
+                                  : Colors.white),
+                      borderRadius: BorderRadius.circular(16),
+                      border: isSelected ? null : Border.all(color: line),
+                      boxShadow:
+                          isSelected
+                              ? [
+                                BoxShadow(
+                                  color: accent.withValues(alpha: 0.28),
+                                  blurRadius: 14,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ]
+                              : null,
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          plan.apiName,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
+                            color: isSelected ? Colors.white : ink,
                           ),
-                          const SizedBox(width: 8),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          plano.precoMensal == 0
+                              ? 'Grátis'
+                              : 'R\$ ${plano.precoMensal.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color:
+                                isSelected
+                                    ? Colors.white.withValues(alpha: 0.78)
+                                    : mute,
+                          ),
+                        ),
+                        if (isCurrent) ...[
+                          const SizedBox(height: 4),
                           Text(
-                            'Preview da cobrança Enterprise',
-                            style: theme.textTheme.titleMedium?.copyWith(
+                            'ATUAL',
+                            style: TextStyle(
+                              fontSize: 9,
                               fontWeight: FontWeight.w700,
+                              letterSpacing: 0.8,
+                              color:
+                                  isSelected
+                                      ? Colors.white.withValues(alpha: 0.85)
+                                      : accent,
                             ),
                           ),
                         ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+    );
+  }
+}
+
+class _PremiumPlanShowcase extends StatelessWidget {
+  final Plano plano;
+  final SubscriptionPlan plan;
+  final SubscriptionPlan currentPlan;
+  final Color accent;
+  final Color brandDeep;
+  final String tag;
+  final String subtitle;
+  final String priceLabel;
+  final SubscriptionBillingPeriod billingPeriod;
+  final String? monthlyPriceLabel;
+  final TrialStatus? trialStatus;
+  final bool isDark;
+  final Color ink;
+  final Color mute;
+
+  const _PremiumPlanShowcase({
+    required this.plano,
+    required this.plan,
+    required this.currentPlan,
+    required this.accent,
+    required this.brandDeep,
+    required this.tag,
+    required this.subtitle,
+    required this.priceLabel,
+    required this.billingPeriod,
+    this.monthlyPriceLabel,
+    required this.trialStatus,
+    required this.isDark,
+    required this.ink,
+    required this.mute,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isCurrent = plan == currentPlan;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final showTrial =
+        plan == SubscriptionPlan.ENTERPRISE &&
+        (trialStatus == null || !trialStatus!.trialUsed);
+    final hasGradient = plan != SubscriptionPlan.FREE;
+
+    return FxGlowSurface(
+      color: accent,
+      enabled: !isCurrent,
+      child: Container(
+        decoration: fxListCardDecoration(
+          context,
+          accent: accent,
+          radius: 22,
+        ).copyWith(
+          border: Border.all(
+            color: isCurrent ? accent : line,
+            width: isCurrent ? 2 : 1,
+          ),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+              decoration: BoxDecoration(
+                gradient:
+                    hasGradient
+                        ? LinearGradient(
+                          colors: [
+                            accent.withValues(alpha: 0.95),
+                            plan == SubscriptionPlan.ENTERPRISE
+                                ? const Color(0xFF3A2600)
+                                : brandDeep,
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                        : null,
+              ),
+              child: Stack(
+                children: [
+                  if (hasGradient)
+                    Positioned(
+                      right: -24,
+                      top: -24,
+                      child: Opacity(
+                        opacity: 0.1,
+                        child: Icon(Icons.auto_awesome, size: 120, color: Colors.white),
                       ),
-                      const SizedBox(height: 10),
+                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (tag.isNotEmpty) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.bolt, color: Colors.white, size: 12),
+                              const SizedBox(width: 4),
+                              Text(
+                                tag,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                  letterSpacing: 0.9,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
                       Text(
-                        _enterprisePreview!.cobrancaImediata
-                            ? 'Cobrança proporcional imediata: R\$ ${_enterprisePreview!.valorProporcional.toStringAsFixed(2)}.'
-                            : 'Sem cobrança proporcional imediata para este upgrade.',
-                        style: TextStyle(color: ink, height: 1.45),
+                        'Plano ${plan.apiName}',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          color: hasGradient ? Colors.white : ink,
+                        ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       Text(
-                        'Dias restantes considerados: ${_enterprisePreview!.diasRestantes}  |  Diferença diária: R\$ ${_enterprisePreview!.diferencaDiaria.toStringAsFixed(2)}',
-                        style: TextStyle(color: mute, fontSize: 12.5),
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          height: 1.4,
+                          color:
+                              hasGradient
+                                  ? Colors.white.withValues(alpha: 0.78)
+                                  : mute,
+                        ),
+                      ),
+                      if (plano.precoMensal > 0) ...[
+                        const SizedBox(height: 14),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(
+                              priceLabel
+                                  .replaceAll('/mês', '')
+                                  .replaceAll('/ano', ''),
+                              style: TextStyle(
+                                fontSize: 34,
+                                fontWeight: FontWeight.w800,
+                                color: hasGradient ? Colors.white : accent,
+                                height: 1,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              billingPeriod == SubscriptionBillingPeriod.yearly
+                                  ? '/ano'
+                                  : '/mês',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color:
+                                    hasGradient
+                                        ? Colors.white.withValues(alpha: 0.75)
+                                        : mute,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (billingPeriod == SubscriptionBillingPeriod.yearly) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            SubscriptionProducts.savingsLabel(),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color:
+                                  hasGradient
+                                      ? const Color(0xFFFFE08A)
+                                      : EagleTokens.good,
+                            ),
+                          ),
+                          if (monthlyPriceLabel != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              'vs $monthlyPriceLabel no mensal',
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                color:
+                                    hasGradient
+                                        ? Colors.white.withValues(alpha: 0.7)
+                                        : mute,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ],
+                      if (showTrial) ...[
+                        const SizedBox(height: 10),
+                        Text(
+                          subscriptionUsesNativeStore
+                              ? 'Período de teste via ${subscriptionChannelLabel()}'
+                              : '7 dias grátis incluídos',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color:
+                                hasGradient
+                                    ? const Color(0xFFFFE08A)
+                                    : EagleTokens.good,
+                          ),
+                        ),
+                      ],
+                      if (isCurrent) ...[
+                        const SizedBox(height: 10),
+                        _Badge(
+                          label: 'Plano ativo',
+                          background: Colors.white.withValues(alpha: 0.22),
+                          foreground: Colors.white,
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+              child: Column(
+                children: [
+                  _ShowcaseFeatureRow(
+                    label:
+                        plano.limiteAlunos == null
+                            ? 'Alunos ilimitados'
+                            : 'Até ${plano.limiteAlunos} alunos',
+                    active: true,
+                    accent: accent,
+                    mute: mute,
+                  ),
+                  _ShowcaseFeatureRow(
+                    label: 'IA Copiloto avançada',
+                    active: plan != SubscriptionPlan.FREE,
+                    accent: accent,
+                    mute: mute,
+                  ),
+                  _ShowcaseFeatureRow(
+                    label: 'Financeiro e CRM',
+                    active: plano.temFinanceiro,
+                    accent: accent,
+                    mute: mute,
+                  ),
+                  _ShowcaseFeatureRow(
+                    label: 'White-label e domínio',
+                    active: plano.temWhiteLabel,
+                    accent: accent,
+                    mute: mute,
+                  ),
+                  _ShowcaseFeatureRow(
+                    label: 'Agenda e relatórios',
+                    active: plano.temAgenda && plano.temRelatorios,
+                    accent: accent,
+                    mute: mute,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ShowcaseFeatureRow extends StatelessWidget {
+  final String label;
+  final bool active;
+  final Color accent;
+  final Color mute;
+
+  const _ShowcaseFeatureRow({
+    required this.label,
+    required this.active,
+    required this.accent,
+    required this.mute,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color:
+                  active
+                      ? accent.withValues(alpha: 0.12)
+                      : mute.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              active ? Icons.check_rounded : Icons.close_rounded,
+              size: 16,
+              color: active ? accent : mute,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+                color: active ? null : mute,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TrustStrip extends StatelessWidget {
+  const _TrustStrip();
+
+  @override
+  Widget build(BuildContext context) {
+    final mute =
+        Theme.of(context).brightness == Brightness.dark
+            ? EagleTokens.darkInkMute
+            : TokensStrip.textSecondary;
+
+    final storeIcon =
+        subscriptionUsesNativeStore
+            ? Icons.storefront_outlined
+            : Icons.verified_user_outlined;
+    final storeLabel =
+        subscriptionUsesNativeStore ? 'Loja oficial' : 'Checkout web';
+
+    final items = <MapEntry<IconData, String>>[
+      MapEntry(Icons.lock_outline, 'Pagamento seguro'),
+      MapEntry(Icons.autorenew, 'Cancele quando quiser'),
+      MapEntry(storeIcon, storeLabel),
+    ];
+
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 8,
+      runSpacing: 8,
+      children:
+          items
+              .map(
+                (item) => Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: mute.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: mute.withValues(alpha: 0.18)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(item.key, size: 14, color: mute),
+                      const SizedBox(width: 6),
+                      Text(
+                        item.value,
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                          color: mute,
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ],
+              )
+              .toList(),
+    );
+  }
+}
 
-              // ── Resumo ─────────────────────────────────────────────────
-              const SizedBox(height: 18),
-              Container(
-                padding: const EdgeInsets.all(18),
-                decoration: fxListCardDecoration(
-                  context,
-                  accent: primary,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Resumo do plano',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    _ResumoRow(
-                      label: 'Plano atual',
-                      value: currentPlan.apiName,
-                      ink: ink,
-                      mute: mute,
-                    ),
-                    const SizedBox(height: 4),
-                    _ResumoRow(
-                      label: 'Selecionado',
-                      value: selectedPlan.apiName,
-                      ink: ink,
-                      mute: mute,
-                    ),
-                    const SizedBox(height: 4),
-                    _ResumoRow(
-                      label: 'Preço',
-                      value: _formatPrice(
-                        selectedBackendPlan,
-                        _productDetails[_productIds[selectedPlan]],
-                      ),
-                      ink: primary,
-                      mute: mute,
-                      valueBold: true,
-                    ),
-                    if (isDowngrade) ...[
-                      const SizedBox(height: 10),
-                      _InfoBanner(
-                        icon: Icons.info_outline,
-                        text:
-                            'Downgrade não está disponível aqui. Entre em contato com o suporte.',
-                        color: EagleTokens.warn,
-                        softColor: EagleTokens.warnSoft,
-                        isDark: isDark,
-                      ),
-                    ],
-                    if (!_storeAvailable && !kIsWeb) ...[
-                      const SizedBox(height: 10),
-                      _InfoBanner(
-                        icon: Icons.store_outlined,
-                        text:
-                            'A loja do dispositivo não está disponível nesta sessão. O fluxo de compra real exige App Store ou Google Play.',
-                        color: mute,
-                        softColor:
-                            isDark
-                                ? EagleTokens.darkCardHi
-                                : TokensStrip.borderDefault,
-                        isDark: isDark,
-                      ),
-                    ],
-                    if (kIsWeb) ...[
-                      const SizedBox(height: 10),
-                      _InfoBanner(
-                        icon: Icons.smartphone_outlined,
-                        text:
-                            'A loja do dispositivo não está disponível na versão web. Para assinar, acesse o app no seu celular.',
-                        color: mute,
-                        softColor:
-                            isDark
-                                ? EagleTokens.darkCardHi
-                                : TokensStrip.borderDefault,
-                        isDark: isDark,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
+class _EnterprisePreviewCard extends StatelessWidget {
+  final EnterpriseUpgradePreview preview;
+  final Color primary;
+  final Color ink;
+  final Color mute;
+  final bool isDark;
 
-              // ── CTA ────────────────────────────────────────────────────
-              const SizedBox(height: 18),
-              FxLiquidPrimaryButton(
-                label: ctaLabel,
-                loading: _loadingCheckout || _syncingPurchase,
-                onPressed:
-                    ctaEnabled
-                        ? () => _startCheckout(
-                          selectedPlan,
-                          selectedBackendPlan.id,
-                        )
-                        : null,
-              ),
-              const SizedBox(height: 8),
+  const _EnterprisePreviewCard({
+    required this.preview,
+    required this.primary,
+    required this.ink,
+    required this.mute,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: fxListCardDecoration(context, accent: primary),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.receipt_long_outlined, color: primary, size: 18),
+              const SizedBox(width: 8),
               Text(
-                isCurrentPlan
-                    ? 'Este plano já está ativo na sua conta.'
-                    : isDowngrade
-                    ? 'Selecione um plano superior ao atual para continuar.'
-                    : selectedPlan == SubscriptionPlan.FREE
-                    ? 'O plano gratuito não requer assinatura.'
-                    : 'O fechamento da compra acontece pela loja do dispositivo.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: mute, fontSize: 12.5),
+                'Estimativa de upgrade',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: ink,
+                  fontSize: 14,
+                ),
               ),
             ],
-          );
-        },
+          ),
+          const SizedBox(height: 8),
+          Text(
+            preview.cobrancaImediata
+                ? 'Cobrança proporcional: R\$ ${preview.valorProporcional.toStringAsFixed(2)}.'
+                : 'Sem cobrança proporcional imediata neste upgrade.',
+            style: TextStyle(color: ink, height: 1.45, fontSize: 13),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${preview.diasRestantes} dias restantes · diferença diária R\$ ${preview.diferencaDiaria.toStringAsFixed(2)}',
+            style: TextStyle(color: mute, fontSize: 12),
+          ),
+        ],
       ),
     );
   }
@@ -666,21 +1570,31 @@ class _TrialInfoCard extends StatelessWidget {
           if (!trialUsed) ...[
             _TrialRow(
               icon: Icons.calendar_today_outlined,
-              text: '7 dias grátis incluídos neste plano.',
+              text:
+                  subscriptionUsesNativeStore
+                      ? 'Oferta introdutória (ex.: 7 dias) configurada na ${subscriptionChannelLabel()}.'
+                      : '7 dias grátis incluídos neste plano.',
               accentColor: accentColor,
             ),
             const SizedBox(height: 8),
             _TrialRow(
-              icon: Icons.credit_card_outlined,
+              icon:
+                  subscriptionUsesNativeStore
+                      ? Icons.storefront_outlined
+                      : Icons.credit_card_outlined,
               text:
-                  'É obrigatório cadastrar um cartão de crédito para ativar o período gratuito.',
+                  subscriptionUsesNativeStore
+                      ? 'O período de teste é ativado ao concluir a assinatura na loja do dispositivo.'
+                      : 'É obrigatório cadastrar um cartão de crédito para ativar o período gratuito.',
               accentColor: accentColor,
             ),
             const SizedBox(height: 8),
             _TrialRow(
               icon: Icons.lock_outline,
               text:
-                  'Não haverá nenhuma cobrança até o encerramento dos 7 dias. Cancele a qualquer momento antes disso sem custo.',
+                  subscriptionUsesNativeStore
+                      ? 'Cancele nas configurações da loja antes do fim do período introdutório, se não quiser continuar.'
+                      : 'Não haverá cobrança até o encerramento dos 7 dias. Cancele antes sem custo.',
               accentColor: accentColor,
             ),
           ] else if (trialAtivo) ...[
@@ -746,200 +1660,6 @@ class _TrialRow extends StatelessWidget {
   }
 }
 
-// ─── Plano Card ───────────────────────────────────────────────────────────────
-
-class _PlanoCard extends StatelessWidget {
-  final Plano plano;
-  final SubscriptionPlan currentPlan;
-  final SubscriptionPlan selectedPlan;
-  final ProductDetails? productDetails;
-  final TrialStatus? trialStatus;
-  final VoidCallback onTap;
-  final bool isDark;
-
-  const _PlanoCard({
-    required this.plano,
-    required this.currentPlan,
-    required this.selectedPlan,
-    required this.productDetails,
-    required this.trialStatus,
-    required this.onTap,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final plan = subscriptionPlanFromApi(plano.nome);
-    final isSelected = plan == selectedPlan;
-    final isCurrent = plan == currentPlan;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final primary = Theme.of(context).colorScheme.primary;
-    final accent = switch (plan) {
-      SubscriptionPlan.FREE =>
-        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
-      SubscriptionPlan.PREMIUM => primary,
-      SubscriptionPlan.ENTERPRISE => const Color(0xFFC49A2A),
-    };
-
-    // Trial badge ENTERPRISE
-    final showTrialBadge =
-        plan == SubscriptionPlan.ENTERPRISE &&
-        (trialStatus == null || !trialStatus!.trialUsed);
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.all(18),
-        decoration: fxListCardDecoration(
-          context,
-          accent: isSelected || isCurrent ? accent : null,
-        ).copyWith(
-          border: Border.all(
-            color: isSelected || isCurrent ? accent : line,
-            width: isSelected || isCurrent ? 2 : 1,
-          ),
-          boxShadow:
-              isSelected
-                  ? [
-                    BoxShadow(
-                      color: accent.withValues(alpha: 0.18),
-                      blurRadius: 22,
-                      offset: const Offset(0, 8),
-                    ),
-                  ]
-                  : null,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    plan.apiName,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: isSelected || isCurrent ? accent : ink,
-                    ),
-                  ),
-                ),
-                if (showTrialBadge)
-                  _Badge(
-                    label: '7 dias grátis',
-                    background: EagleTokens.goodSoft,
-                    foreground: EagleTokens.good,
-                  ),
-                if (showTrialBadge && (isCurrent || isSelected))
-                  const SizedBox(width: 6),
-                if (isCurrent)
-                  _Badge(
-                    label: 'Atual',
-                    background: accent.withValues(alpha: 0.14),
-                    foreground: accent,
-                  )
-                else if (isSelected)
-                  _Badge(
-                    label: 'Selecionado',
-                    background: accent.withValues(alpha: 0.14),
-                    foreground: accent,
-                  ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              _formatPrice(plano, productDetails),
-              style: TextStyle(
-                color: accent,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 14),
-            _FeatureRow(
-              label:
-                  plano.limiteAlunos == null
-                      ? 'Alunos ilimitados'
-                      : 'Até ${plano.limiteAlunos} alunos',
-              active: true,
-              accent: accent,
-              mute: mute,
-            ),
-            _FeatureRow(
-              label: 'White-label',
-              active: plano.temWhiteLabel,
-              accent: accent,
-              mute: mute,
-            ),
-            _FeatureRow(
-              label: 'Financeiro',
-              active: plano.temFinanceiro,
-              accent: accent,
-              mute: mute,
-            ),
-            _FeatureRow(
-              label: 'Agenda',
-              active: plano.temAgenda,
-              accent: accent,
-              mute: mute,
-            ),
-            _FeatureRow(
-              label: 'Relatórios',
-              active: plano.temRelatorios,
-              accent: accent,
-              mute: mute,
-            ),
-            _FeatureRow(
-              label: 'IA Copiloto',
-              active: plan != SubscriptionPlan.FREE,
-              accent: accent,
-              mute: mute,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Helper widgets ───────────────────────────────────────────────────────────
-
-class _FeatureRow extends StatelessWidget {
-  final String label;
-  final bool active;
-  final Color accent, mute;
-
-  const _FeatureRow({
-    required this.label,
-    required this.active,
-    required this.accent,
-    required this.mute,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Icon(
-            active ? Icons.check_circle : Icons.remove_circle_outline,
-            size: 16,
-            color: active ? accent : mute,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(label, style: TextStyle(color: active ? null : mute)),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _Badge extends StatelessWidget {
   final String label;
   final Color background, foreground;
@@ -966,38 +1686,6 @@ class _Badge extends StatelessWidget {
           color: foreground,
         ),
       ),
-    );
-  }
-}
-
-class _ResumoRow extends StatelessWidget {
-  final String label, value;
-  final Color ink, mute;
-  final bool valueBold;
-
-  const _ResumoRow({
-    required this.label,
-    required this.value,
-    required this.ink,
-    required this.mute,
-    this.valueBold = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: TextStyle(color: mute, fontSize: 13)),
-        Text(
-          value,
-          style: TextStyle(
-            color: ink,
-            fontSize: 13,
-            fontWeight: valueBold ? FontWeight.w700 : FontWeight.w600,
-          ),
-        ),
-      ],
     );
   }
 }
@@ -1043,8 +1731,18 @@ class _InfoBanner extends StatelessWidget {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-String _formatPrice(Plano plano, ProductDetails? productDetails) {
+String _formatPrice(
+  Plano plano,
+  ProductDetails? productDetails,
+  SubscriptionBillingPeriod period,
+) {
   if (plano.precoMensal == 0) return 'Grátis';
-  if (productDetails != null) return '${productDetails.price}/mês';
-  return 'R\$ ${plano.precoMensal.toStringAsFixed(2)}/mês';
+  final suffix =
+      period == SubscriptionBillingPeriod.yearly ? '/ano' : '/mês';
+  if (productDetails != null) return '${productDetails.price}$suffix';
+  if (period == SubscriptionBillingPeriod.yearly) {
+    final annual = SubscriptionProducts.referenceAnnualPrice(plano.precoMensal);
+    return 'R\$ ${annual.toStringAsFixed(2)}$suffix';
+  }
+  return 'R\$ ${plano.precoMensal.toStringAsFixed(2)}$suffix';
 }

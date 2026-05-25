@@ -9,6 +9,8 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/relatorio_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/feature_gate.dart';
+import '../../subscription/models/subscription_plan.dart';
 
 class RelatorioGlobalScreen extends ConsumerStatefulWidget {
   const RelatorioGlobalScreen({super.key});
@@ -53,27 +55,32 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Relatorio global',
-        onBack: () => safePopOrGo(context, '/dashboard/personal'),
-        actions: [
-          IconButton(
-            tooltip: 'Atualizar',
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: _load,
-          ),
-        ],
+    return FeatureGate(
+      featureName: 'Relatório global',
+      requiredPlan: SubscriptionPlan.PREMIUM,
+      capability: 'relatorios',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Relatorio global',
+          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+          actions: [
+            IconButton(
+              tooltip: 'Atualizar',
+              icon: const Icon(Icons.refresh_rounded),
+              onPressed: _load,
+            ),
+          ],
+        ),
+        body:
+            _loading
+                ? const FxLoading()
+                : _erro != null
+                ? _ErrorState(message: _erro!, onRetry: _load)
+                : _dados == null
+                ? const SizedBox.shrink()
+                : _ReportContent(dados: _dados!, onRefresh: _load),
       ),
-      body:
-          _loading
-              ? const FxLoading()
-              : _erro != null
-              ? _ErrorState(message: _erro!, onRetry: _load)
-              : _dados == null
-              ? const SizedBox.shrink()
-              : _ReportContent(dados: _dados!, onRefresh: _load),
     );
   }
 }

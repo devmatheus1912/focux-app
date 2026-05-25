@@ -18,6 +18,8 @@ import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import '../../../core/widgets/feature_gate.dart';
+import '../../subscription/models/subscription_plan.dart';
 
 // ─── Providers ───────────────────────────────────────────────────────────────
 
@@ -996,7 +998,11 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
     final line = chrome.line;
     final brand = dark ? primaryAccent : primary;
 
-    return FxShellScaffold(
+    return FeatureGate(
+      featureName: 'Copiloto IA',
+      requiredPlan: SubscriptionPlan.PREMIUM,
+      capability: 'iaCopiloto',
+      child: FxShellScaffold(
       useMesh: true,
       safeArea: false,
       appBar: FxShellAppBar(
@@ -1478,6 +1484,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
         ),
       ),
       ),
+    ),
     );
   }
 }

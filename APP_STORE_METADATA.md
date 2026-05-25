@@ -73,10 +73,13 @@ Demo Account for Review:
 - The app requires an internet connection to load data from the API.
 
 In-App Purchases:
-- The app uses RevenueCat for subscription management.
-- Free tier includes up to 3 students.
-- Premium and Enterprise tiers unlock unlimited students, AI features, white-label, and more.
-- "Restore Purchases" button is available on the Paywall screen.
+- Subscriptions use Flutter `in_app_purchase` (StoreKit / Google Play Billing).
+- Product IDs (auto-renewing): `focux_premium_monthly`, `focux_premium_yearly`, `focux_enterprise_monthly`, `focux_enterprise_yearly`. Annual is the default offer in-app (−20% vs 12× monthly).
+- Server validates receipts via `POST /api/iap/verify`.
+- Free tier includes up to 5 students.
+- Premium and Enterprise unlock more students, AI, finance, white-label, etc.
+- "Restore Purchases" is on the Paywall and Planos screens.
+- No external payment links for digital subscriptions inside the iOS/Android app (Guideline 3.1.1).
 
 Account Deletion:
 - Available in Profile → Settings → "Excluir Conta"

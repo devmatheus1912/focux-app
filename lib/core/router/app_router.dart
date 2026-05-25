@@ -739,6 +739,16 @@ class AppRouter {
           ),
           GoRoute(
             path: '/planos',
+            redirect: (context, state) {
+              final plano = state.uri.queryParameters['plano'];
+              if (plano != null && plano.trim().isNotEmpty) {
+                return '/assinatura?plano=${Uri.encodeComponent(plano.trim())}';
+              }
+              return '/assinatura';
+            },
+          ),
+          GoRoute(
+            path: '/planos-legado',
             builder: (context, state) => const PlanosScreen(),
           ),
           GoRoute(
