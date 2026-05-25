@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/subscription/subscription_products.dart';
 
 void main() {
   test('planos redireciona para assinatura unificada', () {
@@ -30,6 +31,13 @@ void main() {
     expect(products, contains('focux_enterprise_yearly'));
     expect(products, contains('annualDiscountRate'));
     expect(products, contains('annualSavingsCompactLabel'));
+  });
+
+  test('segmento anual sem hifen duplo no subtexto', () {
+    final label = SubscriptionProducts.annualSavingsCompactLabel(150);
+    expect(label, '−20% · R\$ 360/ano');
+    expect(label, isNot(contains('− −')));
+    expect(label, isNot(contains('- -')));
   });
 
   test('matriz de vendas: entitlements, banner e gate contextual', () {

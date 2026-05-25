@@ -598,10 +598,64 @@ class _ClaudeInlineNote extends StatelessWidget {
   }
 }
 
+class _ClaudeLegalConsentLine extends StatelessWidget {
+  final Color mute;
+  final Color primary;
+
+  const _ClaudeLegalConsentLine({
+    required this.mute,
+    required this.primary,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    TextStyle linkStyle() => TextStyle(
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
+      color: primary,
+      decoration: TextDecoration.underline,
+      decorationColor: primary.withValues(alpha: 0.45),
+      height: 1.35,
+    );
+    final body = TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 11);
+
+    return Semantics(
+      label:
+          'Ao assinar, você concorda com os Termos de uso e a Política de privacidade',
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 0,
+        runSpacing: 2,
+        children: [
+          Text('Ao assinar, concorda com os ', style: body),
+          Semantics(
+            button: true,
+            label: 'Abrir termos de uso',
+            child: GestureDetector(
+              onTap: () => FocuxLegal.openTerms(),
+              child: Text('Termos', style: linkStyle()),
+            ),
+          ),
+          Text(' e a ', style: body),
+          Semantics(
+            button: true,
+            label: 'Abrir política de privacidade',
+            child: GestureDetector(
+              onTap: () => FocuxLegal.openPrivacy(),
+              child: Text('Privacidade', style: linkStyle()),
+            ),
+          ),
+          Text('.', style: body),
+        ],
+      ),
+    );
+  }
+}
+
 class _ClaudeLegalFooter extends StatelessWidget {
   final Color ink;
   final Color mute;
-  final Color primary;
   final bool showStoreBillingNote;
   final bool restoring;
   final VoidCallback? onRestore;
@@ -609,7 +663,6 @@ class _ClaudeLegalFooter extends StatelessWidget {
   const _ClaudeLegalFooter({
     required this.ink,
     required this.mute,
-    required this.primary,
     required this.showStoreBillingNote,
     required this.restoring,
     this.onRestore,
@@ -617,14 +670,6 @@ class _ClaudeLegalFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle linkStyle({bool underline = true}) => TextStyle(
-      fontSize: 12,
-      fontWeight: FontWeight.w600,
-      color: primary,
-      decoration: underline ? TextDecoration.underline : null,
-      decorationColor: primary.withValues(alpha: 0.5),
-    );
-
     return Column(
       children: [
         if (onRestore != null)
@@ -639,38 +684,7 @@ class _ClaudeLegalFooter extends StatelessWidget {
               ),
             ),
           ),
-        Wrap(
-          alignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 4,
-          children: [
-            Semantics(
-              button: true,
-              label: 'Abrir termos de uso',
-              child: GestureDetector(
-                onTap: () => FocuxLegal.openTerms(),
-                child: Text('Termos de uso', style: linkStyle()),
-              ),
-            ),
-            Text('·', style: TextStyle(color: mute, fontSize: 12)),
-            Semantics(
-              button: true,
-              label: 'Abrir política de privacidade',
-              child: GestureDetector(
-                onTap: () => FocuxLegal.openPrivacy(),
-                child: Text('Política de privacidade', style: linkStyle()),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Text(
-          'Ao assinar, você concorda com os Termos de uso e a Política de privacidade.',
-          textAlign: TextAlign.center,
-          style: TokensStrip.bodyMuted(color: mute),
-        ),
         if (showStoreBillingNote) ...[
-          const SizedBox(height: 8),
           Text(
             'Cobrança e renovação automática pela ${subscriptionChannelLabel()}. Cancele quando quiser nas configurações do dispositivo.',
             textAlign: TextAlign.center,

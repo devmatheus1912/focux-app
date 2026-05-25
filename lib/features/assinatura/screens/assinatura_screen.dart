@@ -1,4 +1,5 @@
 ﻿import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -572,25 +573,30 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       bottomNavigationBar:
           selectedBackendPlan == null
               ? null
-              : SafeArea(
-                minimum: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-                child: _AssinaturaStickyFooter(
-                  mode: ctaMode,
-                  label: ctaLabel,
-                  footnote: footnote,
-                  enabled: ctaEnabled,
-                  loading: _loadingCheckout || _syncingPurchase,
-                  trialHint: trialOffer,
-                  ink: ink,
-                  mute: mute,
-                  line: line,
-                  primary: primary,
-                  onSubscribe:
-                      () => _startCheckout(
-                        selectedPlan,
-                        selectedBackendPlan!.id,
-                      ),
-                  onManage: _openSubscriptionManagement,
+              : _AssinaturaStickyGlassBar(
+                isDark: isDark,
+                line: line,
+                child: SafeArea(
+                  minimum: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+                  child: _AssinaturaStickyFooter(
+                    mode: ctaMode,
+                    label: ctaLabel,
+                    footnote: footnote,
+                    enabled: ctaEnabled,
+                    loading: _loadingCheckout || _syncingPurchase,
+                    trialHint: trialOffer,
+                    showLegalConsent: ctaMode == _AssinaturaCtaMode.subscribe,
+                    ink: ink,
+                    mute: mute,
+                    line: line,
+                    primary: primary,
+                    onSubscribe:
+                        () => _startCheckout(
+                          selectedPlan,
+                          selectedBackendPlan!.id,
+                        ),
+                    onManage: _openSubscriptionManagement,
+                  ),
                 ),
               ),
       body: planosAsync.when(
@@ -729,7 +735,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   const SizedBox(height: 16),
                   _ClaudeUpgradeNudge(primary: primary, ink: ink, isDark: isDark),
                 ],
-                const SizedBox(height: 20),
+                const SizedBox(height: 28),
                 _ClaudeFeaturePanel(
                   plano: selBackend,
                   plan: selPlan,
@@ -799,7 +805,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 _ClaudeLegalFooter(
                   ink: ink,
                   mute: mute,
-                  primary: primary,
                   showStoreBillingNote: subscriptionUsesNativeStore,
                   restoring: _restoringPurchases,
                   onRestore:
@@ -846,6 +851,55 @@ class _EnterprisePreviewCard extends StatelessWidget {
 
 enum _AssinaturaCtaMode { subscribe, manageStore, currentPlan, blocked, syncing }
 
+class _AssinaturaStickyGlassBar extends StatelessWidget {
+  final bool isDark;
+  final Color line;
+  final Widget child;
+
+  const _AssinaturaStickyGlassBar({
+    required this.isDark,
+    required this.line,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: line.withValues(alpha: isDark ? 0.42 : 0.55),
+          ),
+        ),
+      ),
+      child: ClipRect(
+        child: BackdropFilter(
+          filter: TokensStrip.blurFilter(
+            isDark ? TokensStrip.blurMedium : TokensStrip.blurLight,
+          ),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: TokensStrip.glassFill(
+                dark: isDark,
+                opacity: isDark ? 0.86 : 0.91,
+              ),
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.white.withValues(alpha: isDark ? 0.06 : 0.42),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _AssinaturaStickyFooter extends StatelessWidget {
   final _AssinaturaCtaMode mode;
   final String label;
@@ -853,6 +907,7 @@ class _AssinaturaStickyFooter extends StatelessWidget {
   final bool enabled;
   final bool loading;
   final bool trialHint;
+  final bool showLegalConsent;
   final Color ink;
   final Color mute;
   final Color line;
@@ -867,6 +922,7 @@ class _AssinaturaStickyFooter extends StatelessWidget {
     required this.enabled,
     required this.loading,
     required this.trialHint,
+    required this.showLegalConsent,
     required this.ink,
     required this.mute,
     required this.line,
@@ -937,6 +993,10 @@ class _AssinaturaStickyFooter extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TokensStrip.bodyMuted(color: mute),
           ),
+        ],
+        if (showLegalConsent) ...[
+          const SizedBox(height: 10),
+          _ClaudeLegalConsentLine(mute: mute, primary: primary),
         ],
       ],
     );
