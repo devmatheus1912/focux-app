@@ -109,14 +109,25 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
     }
   }
 
+  String get _readinessHeadline {
+    switch (_mode) {
+      case 'Dieta':
+        return 'Recomendações · Dieta';
+      case 'Progressão':
+        return 'Recomendações · Progresso';
+      default:
+        return 'Recomendações · Treino';
+    }
+  }
+
   String get _modePromise {
     switch (_mode) {
       case 'Dieta':
-        return 'Organiza um rascunho alimentar com objetivo, rotina e pontos de atenção para revisão profissional.';
+        return 'Analisa objetivo e rotina do aluno e sugere pontos de atenção. O plano alimentar continua sendo montado por você.';
       case 'Progressão':
-        return 'Lê histórico, check-ins e aderência para sugerir ajuste de carga, volume ou frequência.';
+        return 'Lê histórico, check-ins e aderência para sugerir ajuste de carga, volume ou frequência — você decide o que aplicar.';
       default:
-        return 'Monta um rascunho de treino coerente com objetivo, nível, equipamentos e histórico do aluno.';
+        return 'Analisa objetivo, nível, equipamentos e histórico do aluno. Você monta e edita os treinos na aba Treinos.';
     }
   }
 
@@ -133,20 +144,31 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
       default:
         return [
           'Objetivo e nível',
-          'Volume sugerido',
-          'Observações de execução',
+          'Foco de volume',
+          'Próxima ação sugerida',
         ];
+    }
+  }
+
+  String get _howItWorksPreview {
+    switch (_mode) {
+      case 'Dieta':
+        return 'O Copiloto não cria plano alimentar no app. Ele gera recomendações em texto para você revisar e montar a prescrição com autonomia.';
+      case 'Progressão':
+        return 'O Copiloto sugere ajustes com base em dados do aluno. Nada altera treino ou carga automaticamente — você revisa e aplica no atendimento.';
+      default:
+        return 'O Copiloto não monta fichas de treino. Ele gera recomendações em texto (riscos, volume, foco). Você cria e edita os treinos em Treinos, com total autonomia.';
     }
   }
 
   String get _resultNote {
     switch (_mode) {
       case 'Dieta':
-        return 'Dieta gerada como rascunho para revisão profissional, com pontos de atenção antes de aplicar ao aluno.';
+        return 'Recomendações de dieta para revisão. Monte o plano no fluxo que você já usa — nada é aplicado ao aluno automaticamente.';
       case 'Progressão':
-        return 'Progressão gerada com base no histórico de check-ins e recordes pessoais do aluno.';
+        return 'Recomendações de progressão com base em check-ins e histórico. Revise antes de ajustar carga ou volume na prática.';
       default:
-        return 'Treino gerado como rascunho editável, com volume, objetivo e observações para revisão do personal.';
+        return 'Recomendações para prescrever o treino. Use como apoio à decisão; monte e publique o treino manualmente em Treinos.';
     }
   }
 
@@ -250,7 +272,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'Escolha quem receberá o rascunho da IA.',
+                                    'Escolha o aluno para analisar.',
                                     style: TextStyle(
                                       color: mute,
                                       fontSize: 12.2,
@@ -1074,6 +1096,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
             Padding(
               padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 14),
               child: _CopilotReadinessCard(
+                headline: _readinessHeadline,
                 modeDisplay: _modeDisplay,
                 icon: _modeIcon,
                 promise: _modePromise,
@@ -1122,7 +1145,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
               Padding(
                 padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 18),
                 child: _CopilotPreviewCard(
-                  mode: _mode,
+                  howItWorks: _howItWorksPreview,
                   brand: brand,
                   ink: ink,
                   mute: mute,
@@ -1649,7 +1672,7 @@ class _CopilotStudentSelector extends StatelessWidget {
                   Text(
                     selected
                         ? 'Aluno ativo para esta análise'
-                        : 'Escolha para personalizar o rascunho',
+                        : 'Escolha o aluno para ver recomendações',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -2056,6 +2079,7 @@ class _CopilotTinyTypeChip extends StatelessWidget {
 
 class _CopilotReadinessCard extends StatelessWidget {
   const _CopilotReadinessCard({
+    required this.headline,
     required this.modeDisplay,
     required this.icon,
     required this.promise,
@@ -2064,6 +2088,7 @@ class _CopilotReadinessCard extends StatelessWidget {
     this.recoveryAsync,
   });
 
+  final String headline;
   final String modeDisplay;
   final IconData icon;
   final String promise;
@@ -2105,7 +2130,7 @@ class _CopilotReadinessCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Rascunho de $modeDisplay',
+                      headline,
                       style: TextStyle(
                         color: ink,
                         fontSize: 15,
@@ -2116,7 +2141,7 @@ class _CopilotReadinessCard extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       alunoNome == null
-                          ? 'Escolha um aluno para personalizar.'
+                          ? 'Escolha um aluno para analisar.'
                           : 'Personalizado para $alunoNome.',
                       style: TextStyle(
                         color: mute,
@@ -2342,7 +2367,7 @@ class _CopilotInsightsLoading extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      'Organizando os achados antes de mostrar o rascunho.',
+                      'Organizando as recomendações...',
                       style: TextStyle(
                         color: mute,
                         fontSize: 11.5,
@@ -2524,7 +2549,9 @@ class _CopilotGenerationStatus extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    gerando ? 'Gerando rascunho...' : 'Rascunho gerado',
+                    gerando
+                        ? 'Gerando recomendações...'
+                        : 'Recomendações prontas',
                     style: TextStyle(
                       color: ink,
                       fontSize: 12.5,
@@ -2562,8 +2589,8 @@ class _CopilotGenerationStatus extends StatelessWidget {
               children:
                   [
                     'Histórico analisado',
-                    'Carga calibrada',
-                    '$mode pronto para revisão',
+                    'Sinais priorizados',
+                    'Pronto para sua revisão',
                   ].map((s) {
                     return Row(
                       mainAxisSize: MainAxisSize.min,
@@ -2595,14 +2622,14 @@ class _CopilotGenerationStatus extends StatelessWidget {
 
 class _CopilotPreviewCard extends StatelessWidget {
   const _CopilotPreviewCard({
-    required this.mode,
+    required this.howItWorks,
     required this.brand,
     required this.ink,
     required this.mute,
     required this.checks,
   });
 
-  final String mode;
+  final String howItWorks;
   final Color brand;
   final Color ink;
   final Color mute;
@@ -2620,10 +2647,10 @@ class _CopilotPreviewCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.fact_check_outlined, color: brand, size: 18),
+              Icon(Icons.info_outline_rounded, color: brand, size: 18),
               const SizedBox(width: 8),
               Text(
-                'Antes de gerar',
+                'Como funciona',
                 style: TextStyle(
                   color: ink,
                   fontSize: 13.5,
@@ -2634,8 +2661,8 @@ class _CopilotPreviewCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'O Copiloto entrega um rascunho de $mode. O personal revisa, edita e só depois aplica no atendimento.',
-            style: TextStyle(color: mute, fontSize: 12.2, height: 1.4),
+            howItWorks,
+            style: TextStyle(color: mute, fontSize: 12.2, height: 1.45),
           ),
           const SizedBox(height: 12),
           for (final check in checks)
