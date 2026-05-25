@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../theme/design_tokens.dart';
 import '../theme/brand_palette.dart';
 import '../theme/tokens_strip.dart';
 

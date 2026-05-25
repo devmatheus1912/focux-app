@@ -3,13 +3,12 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('planos legado redireciona para assinatura', () {
-    final screen = File(
-      'lib/features/planos/screens/planos_screen.dart',
-    ).readAsStringSync();
+  test('/planos redireciona para assinatura no router', () {
+    final router = File('lib/core/router/app_router.dart').readAsStringSync();
 
-    expect(screen, contains("context.go('/assinatura')"));
-    expect(screen, isNot(contains('startTrial')));
+    expect(router, contains("path: '/planos'"));
+    expect(router, contains("return '/assinatura'"));
+    expect(router, isNot(contains('/planos-legado')));
   });
 
   test('enterprise promo usa loja no app nativo', () {

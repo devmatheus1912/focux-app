@@ -660,8 +660,6 @@ class _ClaudeInlineNote extends StatelessWidget {
   final Color ink;
   final Color mute;
   final bool isDark;
-  final VoidCallback? onTap;
-  final String? actionLabel;
 
   const _ClaudeInlineNote({
     required this.icon,
@@ -669,8 +667,6 @@ class _ClaudeInlineNote extends StatelessWidget {
     required this.ink,
     required this.mute,
     required this.isDark,
-    this.onTap,
-    this.actionLabel,
   });
 
   @override
@@ -694,16 +690,6 @@ class _ClaudeInlineNote extends StatelessWidget {
               ),
             ),
           ),
-          if (onTap != null && actionLabel != null)
-            TextButton(
-              onPressed: onTap,
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(actionLabel!),
-            ),
         ],
       ),
     );

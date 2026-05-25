@@ -201,7 +201,6 @@ class _PerfilLoadingScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkBg : TokensStrip.pageBg;
     final surface = isDark ? EagleTokens.darkCard : TokensStrip.cardBg;
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
 
@@ -252,7 +251,6 @@ class _PerfilErrorScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final bg = isDark ? EagleTokens.darkBg : TokensStrip.pageBg;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 

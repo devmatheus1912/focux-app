@@ -1,6 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'conversation_screen.dart';
-import '../../../core/theme/tokens_strip.dart';
 
 class ChatScreen extends StatelessWidget {
   final int alunoId;

@@ -164,7 +164,7 @@ void main() {
     expect(financeiro, contains("safePopOrGo(context, '/dashboard/personal')"));
     expect(leadsKanban, contains("safePopOrGo(context, '/leads')"));
     expect(leadDetail, contains("safePopOrGo(context, '/leads')"));
-    expect(assinatura, contains("safePopOrGo(context, '/planos')"));
+    expect(assinatura, contains("safePopOrGo(context, '/dashboard/personal')"));
     expect(
       avaliacao,
       contains("safePopOrGo(context, '/alunos/\${widget.alunoId}')"),

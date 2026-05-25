@@ -45,33 +45,3 @@ class ShimmerListLoading extends StatelessWidget {
     );
   }
 }
-
-class ShimmerCardLoading extends StatelessWidget {
-  final double height;
-
-  const ShimmerCardLoading({super.key, this.height = 120});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor =
-        isDark
-            ? EagleTokens.surfaceDark.withValues(alpha: 0.8)
-            : const Color(0xFFE0E0E0);
-    final highlightColor =
-        isDark ? const Color(0xFF252540) : const Color(0xFFF5F5F5);
-
-    return Shimmer.fromColors(
-      baseColor: baseColor,
-      highlightColor: highlightColor,
-      child: Container(
-        height: height,
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          color: isDark ? EagleTokens.surfaceDark : Colors.white,
-          borderRadius: BorderRadius.circular(20.0),
-        ),
-      ),
-    );
-  }
-}

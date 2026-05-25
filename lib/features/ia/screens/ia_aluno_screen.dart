@@ -1,5 +1,4 @@
-﻿import 'package:flutter/material.dart';
-import '../../../core/theme/design_tokens.dart';
+import 'package:flutter/material.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';

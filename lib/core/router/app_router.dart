@@ -78,7 +78,6 @@ import '../../features/admin/screens/rbac_screen.dart';
 import '../../features/depoimentos/screens/depoimento_aluno_screen.dart';
 import '../../features/depoimentos/screens/depoimentos_personal_screen.dart';
 import '../../features/galeria/screens/galeria_screen.dart';
-import '../../features/planos/screens/planos_screen.dart';
 import '../../features/planos/screens/enterprise_promo_screen.dart';
 import '../../features/subscription/screens/paywall_screen.dart';
 import '../../features/growth/screens/migracao_magica_screen.dart';
@@ -746,10 +745,6 @@ class AppRouter {
               }
               return '/assinatura';
             },
-          ),
-          GoRoute(
-            path: '/planos-legado',
-            builder: (context, state) => const PlanosScreen(),
           ),
           GoRoute(
             path: '/paywall',

@@ -1607,7 +1607,6 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   }
 
   void _showImageViewer(String url) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog<void>(
       context: context,
       barrierColor: Colors.black.withValues(alpha: 0.92),

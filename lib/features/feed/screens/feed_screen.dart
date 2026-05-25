@@ -742,50 +742,6 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   }
 }
 
-class _EmptyFeed extends StatelessWidget {
-  final Color primary;
-
-  const _EmptyFeed({required this.primary});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: primary.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.article_outlined, color: primary, size: 28),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            'Nenhuma publicação',
-            style: TextStyle(
-              color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Crie a primeira publicação!',
-            style: TextStyle(
-              color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _TypeBadge extends StatelessWidget {
   final String? tipo;
   final Color color;

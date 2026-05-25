@@ -28,7 +28,7 @@ import '../../ia/screens/ia_copiloto_screen.dart';
 import '../../notificacoes/screens/notificacoes_screen.dart';
 import '../../onboarding/screens/onboarding_screen.dart';
 import '../../perfil/screens/perfil_screen.dart';
-import '../../planos/screens/planos_screen.dart';
+import '../../assinatura/screens/assinatura_screen.dart';
 import '../../suporte/screens/suporte_screen.dart';
 import '../../treinos/screens/treinos_list_screen.dart';
 import 'qa_preview_session.dart';
@@ -73,7 +73,7 @@ Widget _buildQaRouteScreen(Uri uri) {
     '/agenda' => const AgendaScreen(),
     '/gamificacao' => const GamificacaoScreen(),
     '/dashboard/qualidade' => const QualidadeOperacionalScreen(),
-    '/planos' => const PlanosScreen(),
+    '/planos' => const AssinaturaScreen(),
     '/kanban' => const AcoesMassaScreen(),
     '/alertas' => const AlertasScreen(),
     '/dashboard/aluno' => const AlunoDashboardScreen(),

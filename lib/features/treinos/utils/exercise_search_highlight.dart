@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/design_tokens.dart';
 
 /// Destaca o termo buscado no nome do exercício.
 Widget highlightedExerciseName({
