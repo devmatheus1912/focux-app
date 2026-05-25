@@ -9,6 +9,15 @@ void main() {
     expect(router, contains("return '/assinatura'"));
   });
 
+  test('paywall assinatura com CTA contextual e gerenciar loja', () {
+    final assinatura = File(
+      'lib/features/assinatura/screens/assinatura_screen.dart',
+    ).readAsStringSync();
+    expect(assinatura, contains('Gerenciar assinatura'));
+    expect(assinatura, contains('_shouldShowEnterpriseTrialCard'));
+    expect(assinatura, contains('openNativeSubscriptionManagement'));
+  });
+
   test('SKUs anuais configurados no app e backend', () {
     final products = File(
       'lib/features/subscription/subscription_products.dart',

@@ -28,6 +28,33 @@ import '../../../core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
 
+/// Preview de upgrade só quando há dados úteis para quem ainda não é Enterprise.
+bool _enterprisePreviewIsInformative(
+  EnterpriseUpgradePreview preview,
+  SubscriptionPlan currentPlan,
+  SubscriptionPlan selectedPlan,
+) {
+  if (currentPlan == SubscriptionPlan.ENTERPRISE) return false;
+  if (selectedPlan != SubscriptionPlan.ENTERPRISE) return false;
+  if (preview.planoDestino != SubscriptionPlan.ENTERPRISE) return false;
+  return preview.cobrancaImediata ||
+      preview.diasRestantes > 0 ||
+      preview.valorProporcional > 0 ||
+      preview.diferencaDiaria > 0;
+}
+
+/// Trial só para quem ainda pode assinar Enterprise (não assinante atual).
+bool _shouldShowEnterpriseTrialCard(
+  SubscriptionPlan selectedPlan,
+  SubscriptionPlan currentPlan,
+  TrialStatus? trialStatus,
+) {
+  if (selectedPlan != SubscriptionPlan.ENTERPRISE) return false;
+  if (currentPlan == SubscriptionPlan.ENTERPRISE) return false;
+  if (trialStatus?.trialAtivo == true) return true;
+  return trialStatus?.trialUsed != true;
+}
+
 class AssinaturaScreen extends ConsumerStatefulWidget {
   final String? initialPlan;
 
@@ -47,6 +74,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   bool _storeAvailable = false;
   Map<String, ProductDetails> _productDetails = const {};
   EnterpriseUpgradePreview? _enterprisePreview;
+  bool _enterprisePreviewRequested = false;
 
   // Trial
   TrialStatus? _trialStatus;
@@ -155,6 +183,36 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     }
     _initializeStore();
     _loadTrialStatus();
+    if (widget.initialPlan?.trim().toUpperCase() == 'ENTERPRISE') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _loadEnterprisePreview();
+      });
+    }
+  }
+
+  Future<void> _openSubscriptionManagement() async {
+    HapticFeedback.lightImpact();
+    if (subscriptionUsesNativeStore) {
+      final ok = await openNativeSubscriptionManagement();
+      if (!mounted) return;
+      if (!ok) {
+        FeedbackHelper.showSnackBar(
+          context,
+          const SnackBar(
+            content: Text(
+              'Não foi possível abrir as assinaturas do dispositivo.',
+            ),
+          ),
+        );
+      }
+      return;
+    }
+    FeedbackHelper.showSnackBar(
+      context,
+      const SnackBar(
+        content: Text('Gerencie sua assinatura na área de cobrança da web.'),
+      ),
+    );
   }
 
   @override
@@ -307,7 +365,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
 
     setState(() {
       _selectedPlanName = plan.apiName;
-      if (plan != SubscriptionPlan.ENTERPRISE) _enterprisePreview = null;
+      if (plan != SubscriptionPlan.ENTERPRISE) {
+        _enterprisePreview = null;
+        _enterprisePreviewRequested = false;
+      }
     });
 
     if (plan == SubscriptionPlan.ENTERPRISE) await _loadEnterprisePreview();
@@ -423,6 +484,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     var isDowngrade = false;
     var ctaEnabled = false;
     var ctaLabel = 'Assinar';
+    var ctaMode = _AssinaturaCtaMode.subscribe;
     String footnote = '';
 
     if (planos != null && planos.isNotEmpty) {
@@ -433,37 +495,69 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       );
       isCurrentPlan = selectedPlan == currentPlan;
       isDowngrade = selectedPlan.level < currentPlan.level;
-      ctaEnabled =
-          selectedPlan != SubscriptionPlan.FREE &&
-          !isCurrentPlan &&
-          !isDowngrade &&
-          !_loadingCheckout &&
-          !_syncingPurchase;
-      ctaLabel =
-          _syncingPurchase
-              ? 'Sincronizando assinatura...'
-              : selectedPlan == SubscriptionPlan.ENTERPRISE &&
-                  (_trialStatus?.trialUsed == false)
-              ? 'Começar 7 dias grátis'
-              : selectedPlan == SubscriptionPlan.ENTERPRISE
-              ? 'Assinar Enterprise'
-              : 'Assinar Premium';
-      footnote =
-          isCurrentPlan
-              ? 'Este plano já está ativo na sua conta.'
-              : isDowngrade
-              ? 'Selecione um plano superior ao atual para continuar.'
-              : selectedPlan == SubscriptionPlan.FREE
-              ? 'O plano gratuito não requer assinatura.'
-              : subscriptionUsesNativeStore
-              ? (_billingPeriod == SubscriptionBillingPeriod.yearly
-                  ? 'Plano anual com renovação automática pela loja. Cancele quando quiser.'
-                  : 'Renovação automática mensal pela loja. Cancele quando quiser.')
-              : 'Checkout seguro via Mercado Pago.';
+
+      if (_syncingPurchase) {
+        ctaMode = _AssinaturaCtaMode.syncing;
+        ctaLabel = 'Sincronizando assinatura...';
+        ctaEnabled = false;
+        footnote = 'Aguarde a confirmação da loja.';
+      } else if (isCurrentPlan) {
+        ctaMode =
+            subscriptionUsesNativeStore
+                ? _AssinaturaCtaMode.manageStore
+                : _AssinaturaCtaMode.currentPlan;
+        ctaLabel =
+            subscriptionUsesNativeStore
+                ? 'Gerenciar assinatura'
+                : 'Plano atual';
+        ctaEnabled = subscriptionUsesNativeStore && !_loadingCheckout;
+        footnote =
+            subscriptionUsesNativeStore
+                ? 'Renovação, cancelamento e troca de período (mensal/anual) são feitos na ${subscriptionChannelLabel()}.'
+                : 'Este plano já está ativo na sua conta.';
+      } else if (isDowngrade) {
+        ctaMode =
+            subscriptionUsesNativeStore
+                ? _AssinaturaCtaMode.manageStore
+                : _AssinaturaCtaMode.blocked;
+        ctaLabel =
+            subscriptionUsesNativeStore
+                ? 'Gerenciar na loja'
+                : 'Plano superior necessário';
+        ctaEnabled = subscriptionUsesNativeStore;
+        footnote =
+            subscriptionUsesNativeStore
+                ? 'Para reduzir o plano ou cancelar, use as configurações de assinatura do seu dispositivo.'
+                : 'Selecione um plano superior ao atual para continuar.';
+      } else if (selectedPlan == SubscriptionPlan.FREE) {
+        ctaMode = _AssinaturaCtaMode.blocked;
+        ctaLabel = 'Plano gratuito';
+        ctaEnabled = false;
+        footnote = 'O plano gratuito não requer assinatura.';
+      } else {
+        ctaMode = _AssinaturaCtaMode.subscribe;
+        ctaEnabled = !_loadingCheckout;
+        final trialOffer =
+            selectedPlan == SubscriptionPlan.ENTERPRISE &&
+            (_trialStatus?.trialUsed == false);
+        ctaLabel =
+            trialOffer
+                ? 'Começar 7 dias grátis'
+                : selectedPlan == SubscriptionPlan.ENTERPRISE
+                ? 'Assinar Enterprise'
+                : 'Assinar Premium';
+        footnote =
+            subscriptionUsesNativeStore
+                ? (_billingPeriod == SubscriptionBillingPeriod.yearly
+                    ? 'Plano anual com renovação automática pela loja. Cancele quando quiser.'
+                    : 'Renovação automática mensal pela loja. Cancele quando quiser.')
+                : 'Checkout seguro via Mercado Pago.';
+      }
     }
 
     final trialOffer =
         selectedPlan == SubscriptionPlan.ENTERPRISE &&
+        !isCurrentPlan &&
         (_trialStatus?.trialUsed == false);
     final brandDeep = BrandPalette.deep(primary);
 
@@ -479,51 +573,23 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
               ? null
               : SafeArea(
                 minimum: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (trialOffer) ...[
-                      Text(
-                        subscriptionUsesNativeStore
-                            ? 'Oferta introdutória aplicada pela loja ao concluir a assinatura.'
-                            : 'Cancele antes do fim do período gratuito para evitar cobrança.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: mute,
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w600,
-                          height: 1.35,
-                        ),
+                child: _AssinaturaStickyFooter(
+                  mode: ctaMode,
+                  label: ctaLabel,
+                  footnote: footnote,
+                  enabled: ctaEnabled,
+                  loading: _loadingCheckout || _syncingPurchase,
+                  trialHint: trialOffer,
+                  ink: ink,
+                  mute: mute,
+                  line: line,
+                  primary: primary,
+                  onSubscribe:
+                      () => _startCheckout(
+                        selectedPlan,
+                        selectedBackendPlan!.id,
                       ),
-                      const SizedBox(height: 8),
-                    ],
-                    FxLiquidPrimaryButton(
-                      label: ctaLabel,
-                      icon:
-                          trialOffer
-                              ? Icons.card_giftcard_rounded
-                              : Icons.workspace_premium_rounded,
-                      loading: _loadingCheckout || _syncingPurchase,
-                      onPressed:
-                          ctaEnabled
-                              ? () => _startCheckout(
-                                selectedPlan,
-                                selectedBackendPlan!.id,
-                              )
-                              : null,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      footnote,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: mute,
-                        fontSize: 11.5,
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
+                  onManage: _openSubscriptionManagement,
                 ),
               ),
       body: planosAsync.when(
@@ -575,6 +641,15 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
           final accent = _planAccent(selPlan, primary, isDark);
           final selDowngrade = selPlan.level < currentPlan.level;
 
+          if (selPlan == SubscriptionPlan.ENTERPRISE &&
+              currentPlan != SubscriptionPlan.ENTERPRISE &&
+              !_enterprisePreviewRequested) {
+            _enterprisePreviewRequested = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) _loadEnterprisePreview();
+            });
+          }
+
           return FxPremiumEntrance(
             child: ListView(
               padding: const EdgeInsets.fromLTRB(
@@ -591,7 +666,20 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   ink: ink,
                   mute: mute,
                   currentPlan: currentPlan,
+                  billingPeriod: _billingPeriod,
                 ),
+                if (currentPlan != SubscriptionPlan.FREE) ...[
+                  const SizedBox(height: 12),
+                  _ActivePlanStatusChip(
+                    plan: currentPlan,
+                    billingPeriod: _billingPeriod,
+                    primary: primary,
+                    ink: ink,
+                    mute: mute,
+                    line: line,
+                    isDark: isDark,
+                  ),
+                ],
                 const SizedBox(height: 18),
                 if (!kIsWeb && subscriptionUsesNativeStore) ...[
                   _BillingPeriodToggle(
@@ -657,7 +745,11 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   index: 1,
                   child: _TrustStrip(),
                 ),
-                if (selPlan == SubscriptionPlan.ENTERPRISE) ...[
+                if (_shouldShowEnterpriseTrialCard(
+                  selPlan,
+                  currentPlan,
+                  _trialStatus,
+                )) ...[
                   const SizedBox(height: 12),
                   _TrialInfoCard(
                     trialStatus: _trialStatus,
@@ -668,8 +760,22 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     line: line,
                   ),
                 ],
-                if (selPlan == SubscriptionPlan.ENTERPRISE &&
-                    _enterprisePreview != null) ...[
+                if (isCurrentPlan && currentPlan != SubscriptionPlan.FREE) ...[
+                  const SizedBox(height: 12),
+                  _ManageSubscriptionCard(
+                    primary: primary,
+                    ink: ink,
+                    mute: mute,
+                    isDark: isDark,
+                    onManage: _openSubscriptionManagement,
+                  ),
+                ],
+                if (_enterprisePreview != null &&
+                    _enterprisePreviewIsInformative(
+                      _enterprisePreview!,
+                      currentPlan,
+                      selPlan,
+                    )) ...[
                   const SizedBox(height: 12),
                   _EnterprisePreviewCard(
                     preview: _enterprisePreview!,
@@ -684,7 +790,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   _InfoBanner(
                     icon: Icons.info_outline,
                     text:
-                        'Downgrade não está disponível aqui. Entre em contato com o suporte.',
+                        subscriptionUsesNativeStore
+                            ? 'Para mudar para um plano menor ou cancelar, use as assinaturas do seu dispositivo.'
+                            : 'Downgrade não está disponível aqui. Entre em contato com o suporte.',
                     color: EagleTokens.warn,
                     softColor: EagleTokens.warnSoft,
                     isDark: isDark,
@@ -782,10 +890,11 @@ class _BillingPeriodToggle extends StatelessWidget {
           button: true,
           selected: selected,
           label: label,
-          child: GestureDetector(
+            child: GestureDetector(
             onTap: () => onChanged(value),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
                 color:
@@ -846,6 +955,7 @@ class _AssinaturaHero extends StatelessWidget {
   final Color ink;
   final Color mute;
   final SubscriptionPlan currentPlan;
+  final SubscriptionBillingPeriod billingPeriod;
 
   const _AssinaturaHero({
     required this.isDark,
@@ -854,7 +964,28 @@ class _AssinaturaHero extends StatelessWidget {
     required this.ink,
     required this.mute,
     required this.currentPlan,
+    required this.billingPeriod,
   });
+
+  String _headline() => switch (currentPlan) {
+    SubscriptionPlan.ENTERPRISE =>
+      'Sua operação no\nnível máximo',
+    SubscriptionPlan.PREMIUM => 'Escale com IA,\nfinanceiro e CRM',
+    _ => 'Desbloqueie o Focux\nno nível certo para você',
+  };
+
+  String _subtitle() {
+    final period =
+        billingPeriod == SubscriptionBillingPeriod.yearly ? 'anual' : 'mensal';
+    return switch (currentPlan) {
+      SubscriptionPlan.ENTERPRISE =>
+        'Plano ${currentPlan.apiName} ativo. Compare períodos ($period) ou gerencie renovação na ${subscriptionChannelLabel()}.',
+      SubscriptionPlan.PREMIUM =>
+        'Plano ${currentPlan.apiName} ativo. Veja o Enterprise para alunos ilimitados e white-label.',
+      _ =>
+        'Treinos, IA Copiloto e financeiro em um fluxo seguro pela ${subscriptionChannelLabel()}.',
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -902,7 +1033,7 @@ class _AssinaturaHero extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Desbloqueie o Focux\nno nível certo para você',
+            _headline(),
             textAlign: TextAlign.center,
             style: AppTypography.inter(
               fontSize: 26,
@@ -914,10 +1045,14 @@ class _AssinaturaHero extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'Plano atual: ${currentPlan.apiName}. '
-            'Compare benefícios e finalize em um fluxo seguro, no padrão dos apps líderes de IA.',
+            _subtitle(),
             textAlign: TextAlign.center,
-            style: TextStyle(color: mute, fontSize: 13.5, height: 1.45),
+            style: TextStyle(
+              color: ink.withValues(alpha: 0.72),
+              fontSize: 13.5,
+              height: 1.45,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
@@ -1114,7 +1249,7 @@ class _PremiumPlanShowcase extends StatelessWidget {
                           colors: [
                             accent.withValues(alpha: 0.95),
                             plan == SubscriptionPlan.ENTERPRISE
-                                ? const Color(0xFF3A2600)
+                                ? const Color(0xFF2A1A00)
                                 : brandDeep,
                           ],
                           begin: Alignment.topLeft,
@@ -1181,7 +1316,7 @@ class _PremiumPlanShowcase extends StatelessWidget {
                           height: 1.4,
                           color:
                               hasGradient
-                                  ? Colors.white.withValues(alpha: 0.78)
+                                  ? Colors.white.withValues(alpha: 0.92)
                                   : mute,
                         ),
                       ),
@@ -1260,14 +1395,6 @@ class _PremiumPlanShowcase extends StatelessWidget {
                                     ? const Color(0xFFFFE08A)
                                     : EagleTokens.good,
                           ),
-                        ),
-                      ],
-                      if (isCurrent) ...[
-                        const SizedBox(height: 10),
-                        _Badge(
-                          label: 'Plano ativo',
-                          background: Colors.white.withValues(alpha: 0.22),
-                          foreground: Colors.white,
                         ),
                       ],
                     ],
@@ -1379,10 +1506,8 @@ class _TrustStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mute =
-        Theme.of(context).brightness == Brightness.dark
-            ? EagleTokens.darkInkMute
-            : TokensStrip.textSecondary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
 
     final storeIcon =
         subscriptionUsesNativeStore
@@ -1410,21 +1535,21 @@ class _TrustStrip extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: mute.withValues(alpha: 0.08),
+                    color: ink.withValues(alpha: isDark ? 0.08 : 0.05),
                     borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: mute.withValues(alpha: 0.18)),
+                    border: Border.all(color: ink.withValues(alpha: 0.14)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(item.key, size: 14, color: mute),
+                      Icon(item.key, size: 14, color: ink.withValues(alpha: 0.85)),
                       const SizedBox(width: 6),
                       Text(
                         item.value,
                         style: TextStyle(
                           fontSize: 11.5,
                           fontWeight: FontWeight.w600,
-                          color: mute,
+                          color: ink.withValues(alpha: 0.88),
                         ),
                       ),
                     ],
@@ -1660,31 +1785,228 @@ class _TrialRow extends StatelessWidget {
   }
 }
 
-class _Badge extends StatelessWidget {
-  final String label;
-  final Color background, foreground;
+enum _AssinaturaCtaMode { subscribe, manageStore, currentPlan, blocked, syncing }
 
-  const _Badge({
+class _AssinaturaStickyFooter extends StatelessWidget {
+  final _AssinaturaCtaMode mode;
+  final String label;
+  final String footnote;
+  final bool enabled;
+  final bool loading;
+  final bool trialHint;
+  final Color ink;
+  final Color mute;
+  final Color line;
+  final Color primary;
+  final VoidCallback onSubscribe;
+  final VoidCallback onManage;
+
+  const _AssinaturaStickyFooter({
+    required this.mode,
     required this.label,
-    required this.background,
-    required this.foreground,
+    required this.footnote,
+    required this.enabled,
+    required this.loading,
+    required this.trialHint,
+    required this.ink,
+    required this.mute,
+    required this.line,
+    required this.primary,
+    required this.onSubscribe,
+    required this.onManage,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final usePrimary =
+        mode == _AssinaturaCtaMode.subscribe ||
+        mode == _AssinaturaCtaMode.syncing;
+    final useManage =
+        mode == _AssinaturaCtaMode.manageStore ||
+        (mode == _AssinaturaCtaMode.blocked && subscriptionUsesNativeStore);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (trialHint) ...[
+          Text(
+            subscriptionUsesNativeStore
+                ? 'Oferta introdutória aplicada pela loja ao concluir a assinatura.'
+                : 'Cancele antes do fim do período gratuito para evitar cobrança.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: mute,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w600,
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+        Semantics(
+          button: true,
+          enabled: enabled && !loading,
+          label: label,
+          child:
+              usePrimary
+                  ? FxLiquidPrimaryButton(
+                    label: label,
+                    icon:
+                        mode == _AssinaturaCtaMode.syncing
+                            ? Icons.sync_rounded
+                            : trialHint
+                            ? Icons.card_giftcard_rounded
+                            : Icons.workspace_premium_rounded,
+                    loading: loading || mode == _AssinaturaCtaMode.syncing,
+                    onPressed:
+                        mode == _AssinaturaCtaMode.syncing
+                            ? null
+                            : (enabled ? onSubscribe : null),
+                  )
+                  : SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: enabled && !loading ? onManage : null,
+                      icon: Icon(
+                        useManage
+                            ? Icons.settings_outlined
+                            : Icons.check_circle_outline,
+                        size: 20,
+                      ),
+                      label: Text(label),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                        foregroundColor: ink,
+                        side: BorderSide(
+                          color: enabled ? primary.withValues(alpha: 0.45) : line,
+                          width: 1.5,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(TokensStrip.rButton),
+                        ),
+                      ),
+                    ),
+                  ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          footnote,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: mute, fontSize: 11.5, height: 1.4),
+        ),
+      ],
+    );
+  }
+}
+
+class _ActivePlanStatusChip extends StatelessWidget {
+  final SubscriptionPlan plan;
+  final SubscriptionBillingPeriod billingPeriod;
+  final Color primary;
+  final Color ink;
+  final Color mute;
+  final Color line;
+  final bool isDark;
+
+  const _ActivePlanStatusChip({
+    required this.plan,
+    required this.billingPeriod,
+    required this.primary,
+    required this.ink,
+    required this.mute,
+    required this.line,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final periodLabel =
+        billingPeriod == SubscriptionBillingPeriod.yearly ? 'Anual' : 'Mensal';
+    return Semantics(
+      label: 'Plano ativo ${plan.apiName}, período $periodLabel',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: primary.withValues(alpha: isDark ? 0.12 : 0.08),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: primary.withValues(alpha: 0.25)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.verified_rounded, size: 18, color: primary),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Plano ${plan.apiName} ativo · visualizando oferta $periodLabel',
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: ink,
+                  height: 1.35,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ManageSubscriptionCard extends StatelessWidget {
+  final Color primary;
+  final Color ink;
+  final Color mute;
+  final bool isDark;
+  final VoidCallback onManage;
+
+  const _ManageSubscriptionCard({
+    required this.primary,
+    required this.ink,
+    required this.mute,
+    required this.isDark,
+    required this.onManage,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: foreground,
-        ),
+      padding: const EdgeInsets.all(16),
+      decoration: fxListCardDecoration(context, accent: primary),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.verified_user_outlined, color: primary, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Assinatura ativa',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: ink,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            subscriptionUsesNativeStore
+                ? 'Altere renovação, cancele ou troque mensal/anual direto na ${subscriptionChannelLabel()}.'
+                : 'Gerencie cobrança e renovação na área de assinatura da web.',
+            style: TextStyle(color: ink.withValues(alpha: 0.8), height: 1.45, fontSize: 13),
+          ),
+          if (subscriptionUsesNativeStore) ...[
+            const SizedBox(height: 12),
+            TextButton.icon(
+              onPressed: onManage,
+              icon: const Icon(Icons.open_in_new_rounded, size: 18),
+              label: const Text('Abrir assinaturas do dispositivo'),
+            ),
+          ],
+        ],
       ),
     );
   }
