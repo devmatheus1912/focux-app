@@ -66,3 +66,16 @@ ios/Runner/GoogleService-Info.plist
 *.zip
 temp_design/
 scripts/node_modules/
+
+# Agent / IDE (workstation-specific)
+.claude/
+.agents/
+.kiro/
+skills-lock.json
+.fvm/
+devtools_options.yaml
+focux_app.iml
+.cursor/
+
+# Android local SDK path (per machine)
+android/local.properties

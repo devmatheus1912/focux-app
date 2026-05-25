@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/design_tokens.dart';
+import '../theme/brand_palette.dart';
 import '../theme/tokens_strip.dart';
 
 /// Shared cinematic mesh — TOKENS STRIP Liquid Glass backdrop.
@@ -23,6 +24,7 @@ class CinematicMeshBackground extends StatelessWidget {
     final isLight =
         !forceDark && Theme.of(context).brightness == Brightness.light;
     final primary = Theme.of(context).colorScheme.primary;
+    final cornerGlow = isLight ? BrandPalette.accent(primary) : TokensStrip.neonGlow;
 
     return Stack(
       fit: StackFit.expand,
@@ -64,8 +66,7 @@ class CinematicMeshBackground extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      (isLight ? EagleTokens.brandAccent : TokensStrip.neonGlow)
-                          .withValues(alpha: isLight ? 0.10 : 0.16),
+                      cornerGlow.withValues(alpha: isLight ? 0.10 : 0.16),
                       Colors.transparent,
                     ],
                     stops: const [0.0, 0.72],

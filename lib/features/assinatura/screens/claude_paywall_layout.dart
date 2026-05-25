@@ -105,57 +105,87 @@ class _ClaudeBillingSegment extends StatelessWidget {
     required this.onChanged,
   });
 
+  static const double _segmentHeight = 52;
+  static const double _subtextSlotHeight = 14;
+  static const double _trackRadius = 14;
+  static const double _trackInset = 4;
+  static const double _thumbInset = 3;
+
+  BorderRadius _thumbBorderRadius(SubscriptionBillingPeriod value) {
+    const inner = Radius.circular(9);
+    const outer = Radius.circular(_trackRadius - _trackInset - _thumbInset);
+    if (value == SubscriptionBillingPeriod.yearly) {
+      return BorderRadius.only(
+        topLeft: outer,
+        bottomLeft: outer,
+        topRight: inner,
+        bottomRight: inner,
+      );
+    }
+    return BorderRadius.only(
+      topRight: outer,
+      bottomRight: outer,
+      topLeft: inner,
+      bottomLeft: inner,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
+    final clipRadius = _trackRadius - _trackInset;
 
-    Widget segment(SubscriptionBillingPeriod value, String label) {
+    Widget segmentTap({
+      required SubscriptionBillingPeriod value,
+      required String label,
+      String? subtitle,
+    }) {
       final selected = period == value;
+      final subtitleColor =
+          selected
+              ? primary
+              : mute.withValues(alpha: isDark ? 0.55 : 0.65);
+
       return Expanded(
         child: Semantics(
           button: true,
           selected: selected,
-          label: label,
+          label: subtitle == null ? label : '$label, $subtitle',
           child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: () => onChanged(value),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeOutCubic,
-              margin: const EdgeInsets.all(3),
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              decoration: BoxDecoration(
-                color:
-                    selected
-                        ? chrome.cardFill
-                        : Colors.transparent,
-                borderRadius: BorderRadius.circular(10),
-                border:
-                    selected
-                        ? Border.all(color: line.withValues(alpha: 0.35))
-                        : null,
-              ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     label,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
+                      height: 1.1,
                       color: selected ? ink : mute,
                     ),
                   ),
-                  if (value == SubscriptionBillingPeriod.yearly) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      annualSavingsLabel,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w700,
-                        color: selected ? primary : EagleTokens.good,
+                  const SizedBox(height: 2),
+                  SizedBox(
+                    height: _subtextSlotHeight,
+                    child: Center(
+                      child: Text(
+                        subtitle ?? '',
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          height: 1.1,
+                          color: subtitle == null ? Colors.transparent : subtitleColor,
+                        ),
                       ),
                     ),
-                  ],
+                  ),
                 ],
               ),
             ),
@@ -164,18 +194,100 @@ class _ClaudeBillingSegment extends StatelessWidget {
       );
     }
 
+    final thumbFill =
+        isDark
+            ? Color.alphaBlend(
+              primary.withValues(alpha: 0.18),
+              TokensStrip.cinematicElevated,
+            )
+            : Colors.white;
+    final thumbBorder =
+        isDark
+            ? primary.withValues(alpha: 0.62)
+            : primary.withValues(alpha: 0.38);
+    final thumbShadow =
+        isDark
+            ? TokensStrip.interactiveGlow(primary, intensity: 0.5, dark: true)
+            : [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.07),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+              BoxShadow(
+                color: primary.withValues(alpha: 0.12),
+                blurRadius: 6,
+              ),
+            ];
+
+    final trackDecoration =
+        isDark
+            ? BoxDecoration(
+              color: EagleTokens.darkLine.withValues(alpha: 0.72),
+              borderRadius: BorderRadius.circular(_trackRadius),
+              border: Border.all(
+                color: primary.withValues(alpha: 0.30),
+              ),
+            )
+            : chrome.panel(
+              radius: _trackRadius,
+              accent: primary.withValues(alpha: 0.35),
+              elevationLevel: 1,
+            );
+
     return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: chrome.panel(
-        radius: TokensStrip.rButton,
-        accent: primary.withValues(alpha: 0.35),
-        elevationLevel: 1,
-      ),
-      child: Row(
-        children: [
-          segment(SubscriptionBillingPeriod.yearly, 'Anual'),
-          segment(SubscriptionBillingPeriod.monthly, 'Mensal'),
-        ],
+      decoration: trackDecoration,
+      padding: const EdgeInsets.all(_trackInset),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(clipRadius),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final trackW = constraints.maxWidth;
+            final thumbW = (trackW - _thumbInset * 2) / 2;
+            final thumbLeft =
+                period == SubscriptionBillingPeriod.yearly
+                    ? _thumbInset
+                    : _thumbInset + thumbW;
+
+            return SizedBox(
+              height: _segmentHeight,
+              child: Stack(
+                clipBehavior: Clip.hardEdge,
+                children: [
+                  AnimatedPositioned(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeOutCubic,
+                    left: thumbLeft,
+                    top: _thumbInset,
+                    bottom: _thumbInset,
+                    width: thumbW,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: thumbFill,
+                        borderRadius: _thumbBorderRadius(period),
+                        border: Border.all(color: thumbBorder, width: 1.2),
+                        boxShadow: thumbShadow,
+                      ),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      segmentTap(
+                        value: SubscriptionBillingPeriod.yearly,
+                        label: 'Anual',
+                        subtitle: annualSavingsLabel,
+                      ),
+                      segmentTap(
+                        value: SubscriptionBillingPeriod.monthly,
+                        label: 'Mensal',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
