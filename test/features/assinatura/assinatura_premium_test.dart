@@ -22,7 +22,10 @@ void main() {
 
     expect(layout, contains('_ClaudePlanOptionTile'));
     expect(layout, contains('_ClaudeBillingSegment'));
-    expect(layout, contains('_ClaudeRadio'));
+    expect(layout, contains('_ClaudeUpgradeNudge'));
     expect(layout, contains('_ClaudeFeaturePanel'));
+    expect(screen, contains('_resolveInitialPlanSelection'));
+    expect(screen, contains('Fazer upgrade para Enterprise'));
+    expect(screen, contains('Gerenciar assinatura na loja'));
   });
 }

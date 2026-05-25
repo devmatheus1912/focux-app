@@ -42,6 +42,23 @@ bool _enterprisePreviewIsInformative(
       preview.diferencaDiaria > 0;
 }
 
+/// Plano pré-selecionado: atual por padrão; deep link só se for upgrade válido.
+String _resolveInitialPlanSelection({
+  required SubscriptionPlan currentPlan,
+  String? deepLinkPlan,
+}) {
+  final deep = deepLinkPlan?.trim().toUpperCase();
+  if (deep != null && deep.isNotEmpty) {
+    final target = subscriptionPlanFromApi(deep);
+    if (currentPlan == SubscriptionPlan.FREE ||
+        target.level > currentPlan.level) {
+      return target.apiName;
+    }
+  }
+  if (currentPlan != SubscriptionPlan.FREE) return currentPlan.apiName;
+  return deep ?? SubscriptionPlan.PREMIUM.apiName;
+}
+
 /// Trial só para quem ainda pode assinar Enterprise (não assinante atual).
 bool _shouldShowEnterpriseTrialCard(
   SubscriptionPlan selectedPlan,
@@ -74,6 +91,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   Map<String, ProductDetails> _productDetails = const {};
   EnterpriseUpgradePreview? _enterprisePreview;
   bool _enterprisePreviewRequested = false;
+  bool _initialSelectionApplied = false;
 
   // Trial
   TrialStatus? _trialStatus;
@@ -154,7 +172,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedPlanName = widget.initialPlan?.trim().toUpperCase();
+    _selectedPlanName = null;
     if (!kIsWeb) {
       _purchaseSubscription = InAppPurchase.instance.purchaseStream.listen(
         _handlePurchaseUpdates,
@@ -453,10 +471,15 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     final currentPlan = subscriptionPlanFromApi(perfil?.plano);
     final planosAsync = ref.watch(planosProvider);
 
-    _selectedPlanName ??=
-        widget.initialPlan?.trim().toUpperCase() ?? currentPlan.apiName;
-
     final planos = planosAsync.valueOrNull;
+
+    if (!_initialSelectionApplied && planos != null) {
+      _selectedPlanName = _resolveInitialPlanSelection(
+        currentPlan: currentPlan,
+        deepLinkPlan: widget.initialPlan,
+      );
+      _initialSelectionApplied = true;
+    }
 
     SubscriptionPlan selectedPlan = currentPlan;
     Plano? selectedBackendPlan;
@@ -468,7 +491,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     String footnote = '';
 
     if (planos != null && planos.isNotEmpty) {
-      selectedPlan = subscriptionPlanFromApi(_selectedPlanName);
+      selectedPlan = subscriptionPlanFromApi(
+        _selectedPlanName ?? currentPlan.apiName,
+      );
       selectedBackendPlan = planos.firstWhere(
         (plan) => subscriptionPlanFromApi(plan.nome) == selectedPlan,
         orElse: () => planos.first,
@@ -488,12 +513,12 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 : _AssinaturaCtaMode.currentPlan;
         ctaLabel =
             subscriptionUsesNativeStore
-                ? 'Gerenciar assinatura'
+                ? 'Gerenciar assinatura na loja'
                 : 'Plano atual';
         ctaEnabled = subscriptionUsesNativeStore && !_loadingCheckout;
         footnote =
             subscriptionUsesNativeStore
-                ? 'Renovação, cancelamento e troca de período (mensal/anual) são feitos na ${subscriptionChannelLabel()}.'
+                ? 'Renovação, período (mensal/anual) e cancelamento na ${subscriptionChannelLabel()}.'
                 : 'Este plano já está ativo na sua conta.';
       } else if (isDowngrade) {
         ctaMode =
@@ -502,13 +527,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 : _AssinaturaCtaMode.blocked;
         ctaLabel =
             subscriptionUsesNativeStore
-                ? 'Gerenciar na loja'
+                ? 'Abrir assinaturas do dispositivo'
                 : 'Plano superior necessário';
         ctaEnabled = subscriptionUsesNativeStore;
-        footnote =
-            subscriptionUsesNativeStore
-                ? 'Para reduzir o plano ou cancelar, use as configurações de assinatura do seu dispositivo.'
-                : 'Selecione um plano superior ao atual para continuar.';
+        footnote = '';
       } else if (selectedPlan == SubscriptionPlan.FREE) {
         ctaMode = _AssinaturaCtaMode.blocked;
         ctaLabel = 'Plano gratuito';
@@ -520,12 +542,14 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         final trialOffer =
             selectedPlan == SubscriptionPlan.ENTERPRISE &&
             (_trialStatus?.trialUsed == false);
-        ctaLabel =
-            trialOffer
-                ? 'Começar 7 dias grátis'
-                : selectedPlan == SubscriptionPlan.ENTERPRISE
-                ? 'Assinar Enterprise'
-                : 'Assinar Premium';
+        final isUpgrade = selectedPlan.level > currentPlan.level;
+        ctaLabel = trialOffer
+            ? 'Começar 7 dias grátis — Enterprise'
+            : isUpgrade && selectedPlan == SubscriptionPlan.ENTERPRISE
+            ? 'Fazer upgrade para Enterprise'
+            : selectedPlan == SubscriptionPlan.ENTERPRISE
+            ? 'Continuar com Enterprise'
+            : 'Continuar com Premium';
         footnote =
             subscriptionUsesNativeStore
                 ? (_billingPeriod == SubscriptionBillingPeriod.yearly
@@ -599,7 +623,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
             );
           }
 
-          var selPlan = subscriptionPlanFromApi(_selectedPlanName);
+          var selPlan = subscriptionPlanFromApi(
+            _selectedPlanName ?? currentPlan.apiName,
+          );
           if (selPlan == SubscriptionPlan.FREE) {
             selPlan = subscriptionPlanFromApi(paid.last.nome);
           }
@@ -608,7 +634,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
             (plan) => subscriptionPlanFromApi(plan.nome) == selPlan,
             orElse: () => paid.last,
           );
-          final selDowngrade = selPlan.level < currentPlan.level;
           final isCurrentPlanSelected = selPlan == currentPlan;
 
           if (selPlan == SubscriptionPlan.ENTERPRISE &&
@@ -628,7 +653,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 _ClaudePaywallHeader(
                   ink: ink,
                   mute: mute,
+                  primary: primary,
                   currentPlan: currentPlan,
+                  selectedPlan: selPlan,
                 ),
                 if (!kIsWeb && subscriptionUsesNativeStore) ...[
                   const SizedBox(height: 28),
@@ -637,6 +664,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     ink: ink,
                     mute: mute,
                     line: line,
+                    primary: primary,
                     isDark: isDark,
                     onChanged: (period) {
                       HapticFeedback.selectionClick();
@@ -675,6 +703,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                       ink: ink,
                       mute: mute,
                       line: line,
+                      primary: primary,
                       isDark: isDark,
                       onTap: () {
                         HapticFeedback.selectionClick();
@@ -683,13 +712,21 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     ),
                   );
                 }),
-                const SizedBox(height: 8),
+                if (currentPlan == SubscriptionPlan.PREMIUM &&
+                    selPlan == SubscriptionPlan.ENTERPRISE &&
+                    !isCurrentPlanSelected) ...[
+                  const SizedBox(height: 16),
+                  _ClaudeUpgradeNudge(primary: primary, ink: ink, isDark: isDark),
+                ],
+                const SizedBox(height: 20),
                 _ClaudeFeaturePanel(
                   plano: selBackend,
                   plan: selPlan,
+                  currentPlan: currentPlan,
                   ink: ink,
                   mute: mute,
                   line: line,
+                  primary: primary,
                   isDark: isDark,
                 ),
                 if (_shouldShowEnterpriseTrialCard(
@@ -701,30 +738,14 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   _ClaudeInlineNote(
                     icon: Icons.card_giftcard_outlined,
                     text:
-                        subscriptionUsesNativeStore
+                        _loadingTrial
+                            ? 'Carregando oferta de teste…'
+                            : subscriptionUsesNativeStore
                             ? 'Teste introdutório configurado na ${subscriptionChannelLabel()}.'
-                            : '7 dias grátis neste plano.',
+                            : '7 dias grátis neste plano Enterprise.',
                     ink: ink,
                     mute: mute,
                     isDark: isDark,
-                  ),
-                ],
-                if (isCurrentPlanSelected &&
-                    currentPlan != SubscriptionPlan.FREE) ...[
-                  const SizedBox(height: 16),
-                  _ClaudeInlineNote(
-                    icon: Icons.verified_outlined,
-                    text:
-                        'Plano ${currentPlan.apiName} ativo. Renovação e cancelamento na ${subscriptionChannelLabel()}.',
-                    ink: ink,
-                    mute: mute,
-                    isDark: isDark,
-                    onTap:
-                        subscriptionUsesNativeStore
-                            ? _openSubscriptionManagement
-                            : null,
-                    actionLabel:
-                        subscriptionUsesNativeStore ? 'Abrir loja' : null,
                   ),
                 ],
                 if (_enterprisePreview != null &&
@@ -737,19 +758,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   _EnterprisePreviewCard(
                     preview: _enterprisePreview!,
                     primary: primary,
-                    ink: ink,
-                    mute: mute,
-                    isDark: isDark,
-                  ),
-                ],
-                if (selDowngrade) ...[
-                  const SizedBox(height: 12),
-                  _ClaudeInlineNote(
-                    icon: Icons.info_outline,
-                    text:
-                        subscriptionUsesNativeStore
-                            ? 'Para um plano menor ou cancelamento, use as assinaturas do dispositivo.'
-                            : 'Downgrade disponível apenas via suporte.',
                     ink: ink,
                     mute: mute,
                     isDark: isDark,
@@ -862,9 +870,12 @@ class _AssinaturaStickyFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final usePrimary =
+    final useFilledCta =
         mode == _AssinaturaCtaMode.subscribe ||
-        mode == _AssinaturaCtaMode.syncing;
+        mode == _AssinaturaCtaMode.syncing ||
+        mode == _AssinaturaCtaMode.manageStore;
+    final buttonColor =
+        mode == _AssinaturaCtaMode.manageStore ? ink : primary;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -889,7 +900,7 @@ class _AssinaturaStickyFooter extends StatelessWidget {
           enabled: enabled && !loading,
           label: label,
           child:
-              usePrimary
+              useFilledCta
                   ? SizedBox(
                     width: double.infinity,
                     height: 52,
@@ -897,11 +908,16 @@ class _AssinaturaStickyFooter extends StatelessWidget {
                       onPressed:
                           mode == _AssinaturaCtaMode.syncing
                               ? null
-                              : (enabled ? onSubscribe : null),
+                              : enabled
+                              ? (mode == _AssinaturaCtaMode.subscribe
+                                  ? onSubscribe
+                                  : onManage)
+                              : null,
                       style: FilledButton.styleFrom(
-                        backgroundColor: ink,
+                        backgroundColor: buttonColor,
                         foregroundColor: Colors.white,
                         disabledBackgroundColor: mute.withValues(alpha: 0.25),
+                        elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -928,13 +944,11 @@ class _AssinaturaStickyFooter extends StatelessWidget {
                   : SizedBox(
                     width: double.infinity,
                     height: 52,
-                    child: OutlinedButton(
-                      onPressed: enabled && !loading ? onManage : null,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: ink,
-                        side: BorderSide(
-                          color: enabled ? ink.withValues(alpha: 0.35) : line,
-                        ),
+                    child: FilledButton(
+                      onPressed: null,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: mute.withValues(alpha: 0.2),
+                        foregroundColor: mute,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -949,12 +963,24 @@ class _AssinaturaStickyFooter extends StatelessWidget {
                     ),
                   ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          footnote,
-          textAlign: TextAlign.center,
-          style: TextStyle(color: mute, fontSize: 11.5, height: 1.4),
-        ),
+        if (footnote.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(
+            footnote,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: mute, fontSize: 11.5, height: 1.4),
+          ),
+        ],
+        if (mode == _AssinaturaCtaMode.manageStore &&
+            footnote.isEmpty &&
+            subscriptionUsesNativeStore) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Para mudar ou cancelar o plano, use as configurações de assinatura do dispositivo.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: mute, fontSize: 11.5, height: 1.4),
+          ),
+        ],
       ],
     );
   }
