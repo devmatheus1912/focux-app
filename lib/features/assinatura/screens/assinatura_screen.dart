@@ -10,6 +10,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/legal/focux_legal.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
@@ -561,11 +563,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         selectedPlan == SubscriptionPlan.ENTERPRISE &&
         !isCurrentPlan &&
         (_trialStatus?.trialUsed == false);
-    final surface =
-        isDark ? EagleTokens.darkBg : Theme.of(context).colorScheme.surface;
-
     return FxShellScaffold(
-      useMesh: false,
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Planos',
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
@@ -643,10 +642,13 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
             });
           }
 
-          return ColoredBox(
-            color: surface,
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 4, 20, 140),
+          return ListView(
+              padding: const EdgeInsets.fromLTRB(
+                TokensStrip.s5,
+                4,
+                TokensStrip.s5,
+                140,
+              ),
               children: [
                 _ClaudePaywallHeader(
                   ink: ink,
@@ -804,7 +806,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                       subscriptionUsesNativeStore ? _restorePurchases : null,
                 ),
               ],
-            ),
           );
         },
       ),
@@ -829,21 +830,15 @@ class _EnterprisePreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = isDark ? EagleTokens.darkCardHi : EagleTokens.paper;
+    final chrome = ShellChrome.of(context);
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
-        ),
-      ),
+      decoration: chrome.panel(radius: TokensStrip.rCard, elevationLevel: 1),
       child: Text(
         preview.cobrancaImediata
             ? 'Upgrade: cobrança proporcional de R\$ ${preview.valorProporcional.toStringAsFixed(2)} (${preview.diasRestantes} dias restantes no ciclo).'
             : 'Upgrade sem cobrança proporcional imediata neste ciclo.',
-        style: TextStyle(color: ink.withValues(alpha: 0.85), height: 1.45, fontSize: 13),
+        style: TokensStrip.body(color: ink),
       ),
     );
   }
@@ -882,12 +877,29 @@ class _AssinaturaStickyFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final useFilledCta =
+    final isActionable =
         mode == _AssinaturaCtaMode.subscribe ||
         mode == _AssinaturaCtaMode.syncing ||
         mode == _AssinaturaCtaMode.manageStore;
-    final buttonColor =
-        mode == _AssinaturaCtaMode.manageStore ? ink : primary;
+    final onPressed =
+        !enabled || loading || mode == _AssinaturaCtaMode.syncing
+            ? null
+            : mode == _AssinaturaCtaMode.subscribe
+            ? onSubscribe
+            : mode == _AssinaturaCtaMode.manageStore
+            ? onManage
+            : null;
+
+    IconData? icon;
+    if (mode == _AssinaturaCtaMode.manageStore) {
+      icon = Icons.open_in_new_rounded;
+    } else if (mode == _AssinaturaCtaMode.subscribe) {
+      icon =
+          trialHint
+              ? Icons.card_giftcard_rounded
+              : Icons.workspace_premium_rounded;
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -898,93 +910,32 @@ class _AssinaturaStickyFooter extends StatelessWidget {
                 ? 'Oferta introdutória aplicada pela loja ao concluir a assinatura.'
                 : 'Cancele antes do fim do período gratuito para evitar cobrança.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: mute,
-              fontSize: 11.5,
-              fontWeight: FontWeight.w600,
-              height: 1.35,
-            ),
+            style: TokensStrip.bodyMuted(color: mute),
           ),
           const SizedBox(height: 8),
         ],
-        Semantics(
-          button: true,
-          enabled: enabled && !loading,
-          label: label,
-          child:
-              useFilledCta
-                  ? SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: FilledButton(
-                      onPressed:
-                          mode == _AssinaturaCtaMode.syncing
-                              ? null
-                              : enabled
-                              ? (mode == _AssinaturaCtaMode.subscribe
-                                  ? onSubscribe
-                                  : onManage)
-                              : null,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: buttonColor,
-                        foregroundColor: Colors.white,
-                        disabledBackgroundColor: mute.withValues(alpha: 0.25),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      child:
-                          loading || mode == _AssinaturaCtaMode.syncing
-                              ? const SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                              : Text(
-                                label,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                    ),
-                  )
-                  : SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: FilledButton(
-                      onPressed: null,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: mute.withValues(alpha: 0.2),
-                        foregroundColor: mute,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      child: Text(
-                        label,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-        ),
+        if (isActionable)
+          FxLiquidPrimaryButton(
+            label: label,
+            icon: icon,
+            loading: loading || mode == _AssinaturaCtaMode.syncing,
+            loadingLabel:
+                mode == _AssinaturaCtaMode.syncing
+                    ? 'Sincronizando…'
+                    : null,
+            onPressed: onPressed,
+          )
+        else
+          FxLiquidPrimaryButton(
+            label: label,
+            onPressed: null,
+          ),
         if (footnote.isNotEmpty) ...[
           const SizedBox(height: 8),
           Text(
             footnote,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: ink.withValues(alpha: 0.55),
-              fontSize: 12,
-              height: 1.45,
-            ),
+            style: TokensStrip.bodyMuted(color: mute),
           ),
         ],
       ],

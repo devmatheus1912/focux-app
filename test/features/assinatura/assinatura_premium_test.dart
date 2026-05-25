@@ -14,7 +14,8 @@ void main() {
 
     expect(screen, contains("part 'claude_paywall_layout.dart'"));
     expect(screen, contains('focux_legal.dart'));
-    expect(screen, contains('useMesh: false'));
+    expect(screen, contains('useMesh: true'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('Gerenciar assinatura na loja'));
     expect(screen, contains('Fazer upgrade para Enterprise'));
 

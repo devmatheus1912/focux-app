@@ -65,22 +65,17 @@ class _ClaudePaywallHeader extends StatelessWidget {
           ],
           Text(
             title,
-            style: AppTypography.inter(
-              fontSize: 28,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.6,
-              height: 1.15,
+            style: TokensStrip.h2(
               color: ink,
+              fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             subtitle,
-            style: TextStyle(
-              fontSize: 15,
-              height: 1.5,
-              color: ink.withValues(alpha: 0.68),
-              fontWeight: FontWeight.w400,
+            style: TokensStrip.bodyMuted(
+              color: mute,
+              fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
             ),
           ),
         ],
@@ -112,8 +107,7 @@ class _ClaudeBillingSegment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final track =
-        isDark ? EagleTokens.darkCardHi : const Color(0xFFEBEBEB);
+    final chrome = ShellChrome.of(context);
 
     Widget segment(SubscriptionBillingPeriod value, String label) {
       final selected = period == value;
@@ -132,18 +126,12 @@ class _ClaudeBillingSegment extends StatelessWidget {
               decoration: BoxDecoration(
                 color:
                     selected
-                        ? (isDark ? EagleTokens.darkCard : Colors.white)
+                        ? chrome.cardFill
                         : Colors.transparent,
                 borderRadius: BorderRadius.circular(10),
-                boxShadow:
-                    selected && !isDark
-                        ? [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.06),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
+                border:
+                    selected
+                        ? Border.all(color: line.withValues(alpha: 0.35))
                         : null,
               ),
               child: Column(
@@ -178,9 +166,10 @@ class _ClaudeBillingSegment extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: track,
-        borderRadius: BorderRadius.circular(14),
+      decoration: chrome.panel(
+        radius: TokensStrip.rButton,
+        accent: primary.withValues(alpha: 0.35),
+        elevationLevel: 1,
       ),
       child: Row(
         children: [
@@ -229,10 +218,15 @@ class _ClaudePlanOptionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final card = isDark ? EagleTokens.darkCard : Colors.white;
+    final chrome = ShellChrome.of(context);
     final priceOnly = priceLabel.replaceAll('/mês', '').replaceAll('/ano', '');
     final suffix =
         billingPeriod == SubscriptionBillingPeriod.yearly ? '/ano' : '/mês';
+    final cardDecoration = chrome.listCard(
+      selected: isSelected,
+      primary: primary,
+      radius: TokensStrip.rCard,
+    );
 
     return Semantics(
       button: true,
@@ -245,32 +239,12 @@ class _ClaudePlanOptionTile extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOutCubic,
-          decoration: BoxDecoration(
-            color:
-                isSelected
-                    ? primary.withValues(alpha: isDark ? 0.14 : 0.06)
-                    : card,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isSelected ? primary : line,
-              width: isSelected ? 1.5 : 1,
-            ),
-            boxShadow:
-                isSelected && !isDark
-                    ? [
-                      BoxShadow(
-                        color: primary.withValues(alpha: 0.12),
-                        blurRadius: 16,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
-                    : null,
-          ),
+          decoration: cardDecoration,
           child: Material(
             color: Colors.transparent,
             child: InkWell(
               onTap: onTap,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(TokensStrip.rCard),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                 child: Row(
@@ -288,15 +262,14 @@ class _ClaudePlanOptionTile extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              Text(
-                                plan.apiName,
-                                style: TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w600,
-                                  color: ink,
-                                  letterSpacing: -0.2,
-                                ),
-                              ),
+                          Text(
+                            plan.apiName,
+                            style: TokensStrip.h2(
+                              color: ink,
+                              fontFamily:
+                                  Theme.of(context).textTheme.bodyLarge?.fontFamily,
+                            ).copyWith(fontSize: 18),
+                          ),
                               if (isCurrent) ...[
                                 const SizedBox(width: 8),
                                 Container(
@@ -321,14 +294,10 @@ class _ClaudePlanOptionTile extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 4),
-                          Text(
-                            subtitle,
-                            style: TextStyle(
-                              fontSize: 13,
-                              height: 1.4,
-                              color: ink.withValues(alpha: 0.62),
-                            ),
-                          ),
+                      Text(
+                        subtitle,
+                        style: TokensStrip.bodyMuted(color: mute),
+                      ),
                         ],
                       ),
                     ),
@@ -336,22 +305,14 @@ class _ClaudePlanOptionTile extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
-                          priceOnly,
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
-                            color: ink,
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                        Text(
-                          suffix,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: ink.withValues(alpha: 0.55),
-                          ),
-                        ),
+                    Text(
+                      priceOnly,
+                      style: TokensStrip.h2(color: ink).copyWith(fontSize: 18),
+                    ),
+                    Text(
+                      suffix,
+                      style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 12),
+                    ),
                         if (billingPeriod ==
                             SubscriptionBillingPeriod.yearly) ...[
                           if (yearlySavingsNote != null) ...[
@@ -443,17 +404,13 @@ class _ClaudeUpgradeNudge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            primary.withValues(alpha: 0.14),
-            primary.withValues(alpha: 0.06),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: primary.withValues(alpha: 0.28)),
+      decoration: chrome.panel(
+        radius: TokensStrip.rCard,
+        accent: primary,
+        elevationLevel: 2,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -463,12 +420,7 @@ class _ClaudeUpgradeNudge extends StatelessWidget {
           Expanded(
             child: Text(
               'Upgrade recomendado: alunos ilimitados, white-label e domínio próprio no Enterprise.',
-              style: TextStyle(
-                fontSize: 13,
-                height: 1.45,
-                fontWeight: FontWeight.w500,
-                color: ink.withValues(alpha: 0.88),
-              ),
+              style: TokensStrip.body(color: ink),
             ),
           ),
         ],
@@ -524,20 +476,18 @@ class _ClaudeFeaturePanel extends StatelessWidget {
         key: ValueKey(plan.apiName),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'O que inclui ${plan.apiName}',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: ink,
-              letterSpacing: -0.2,
-            ),
-          ),
+        Text(
+          'O que inclui ${plan.apiName}',
+          style: TokensStrip.h2(
+            color: ink,
+            fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
+          ).copyWith(fontSize: 17),
+        ),
           if (comparing) ...[
             const SizedBox(height: 6),
             Text(
-              'Comparando com o ${currentPlan.apiName} que você usa hoje.',
-              style: TextStyle(fontSize: 13, color: mute, height: 1.4),
+            'Comparando com o ${currentPlan.apiName} que você usa hoje.',
+            style: TokensStrip.bodyMuted(color: mute),
             ),
           ],
           const SizedBox(height: 14),
@@ -559,17 +509,12 @@ class _ClaudeFeaturePanel extends StatelessWidget {
                   Expanded(
                     child: Text(
                       row.label,
-                      style: TextStyle(
-                        fontSize: 15,
-                        height: 1.35,
-                        color:
-                            row.included
-                                ? ink
-                                : mute.withValues(alpha: 0.5),
-                        fontWeight: FontWeight.w400,
-                        decoration:
-                            row.included ? null : TextDecoration.lineThrough,
-                      ),
+                    style: TokensStrip.body(
+                      color: row.included ? ink : mute.withValues(alpha: 0.5),
+                    ).copyWith(
+                      decoration:
+                          row.included ? null : TextDecoration.lineThrough,
+                    ),
                     ),
                   ),
                 ],
@@ -586,11 +531,7 @@ class _ClaudeFeaturePanel extends StatelessWidget {
                   subscriptionUsesNativeStore
                       ? 'Pagamento seguro · Cancele quando quiser · ${subscriptionChannelLabel()}'
                       : 'Checkout seguro via Mercado Pago',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: ink.withValues(alpha: 0.55),
-                    height: 1.4,
-                  ),
+                style: TokensStrip.bodyMuted(color: mute),
                 ),
               ),
             ],
@@ -622,16 +563,10 @@ class _ClaudeInlineNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = isDark ? EagleTokens.darkCardHi : EagleTokens.paper;
+    final chrome = ShellChrome.of(context);
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark ? EagleTokens.darkLine : EagleTokens.lineSoft,
-        ),
-      ),
+      decoration: chrome.panel(radius: TokensStrip.rCard, elevationLevel: 1),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -732,22 +667,14 @@ class _ClaudeLegalFooter extends StatelessWidget {
         Text(
           'Ao assinar, você concorda com os Termos de uso e a Política de privacidade.',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 12,
-            height: 1.45,
-            color: ink.withValues(alpha: 0.55),
-          ),
+          style: TokensStrip.bodyMuted(color: mute),
         ),
         if (showStoreBillingNote) ...[
           const SizedBox(height: 8),
           Text(
             'Cobrança e renovação automática pela ${subscriptionChannelLabel()}. Cancele quando quiser nas configurações do dispositivo.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              height: 1.45,
-              color: ink.withValues(alpha: 0.55),
-            ),
+            style: TokensStrip.bodyMuted(color: mute),
           ),
         ],
       ],
