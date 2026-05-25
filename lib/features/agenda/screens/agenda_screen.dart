@@ -735,6 +735,7 @@ class _AgendaEventSheet extends StatelessWidget {
     return Semantics(
       scopesRoute: true,
       namesRoute: true,
+      explicitChildNodes: true,
       label: 'Detalhes do atendimento, $title, ${agendamento.alunoNome}',
       child: Container(
         padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 10, 20, 20),
@@ -1273,6 +1274,7 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
     return Semantics(
       scopesRoute: true,
       namesRoute: true,
+      explicitChildNodes: true,
       label: 'Selecionar aluno, ${alunos.length} de ${widget.alunos.length}',
       child: DraggableScrollableSheet(
         initialChildSize: 0.78,
@@ -1473,6 +1475,7 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
     return Semantics(
       scopesRoute: true,
       namesRoute: true,
+      explicitChildNodes: true,
       label: 'Selecionar ${widget.title.toLowerCase()}',
       child: Container(
         padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 10, 20, 20),

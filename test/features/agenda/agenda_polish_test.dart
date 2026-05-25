@@ -16,6 +16,7 @@ void main() {
     expect(screen, contains('chrome.sheetFill'));
     expect(screen, contains('useSafeArea: true'));
     expect(screen, contains('Semantics('));
+    expect(screen, contains('explicitChildNodes: true'));
     expect(screen, isNot(contains('ListTile(')));
     expect(screen, isNot(contains('MaterialPageRoute')));
     expect(screen, isNot(contains('quem sera atendido')));
