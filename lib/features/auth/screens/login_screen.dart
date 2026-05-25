@@ -536,6 +536,7 @@ bool _isPersonalPath(String path) {
       path == '/alunos' ||
       path == '/treinos' ||
       path == '/agenda' ||
+      path == '/agenda/novo' ||
       path == '/financeiro' ||
       path == '/feed' ||
       path == '/broadcasts' ||

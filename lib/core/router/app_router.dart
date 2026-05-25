@@ -595,7 +595,11 @@ class AppRouter {
             builder: (context, state) => const HistoricoCheckinScreen(),
           ),
 
-          // Agenda aluno sub-route (agenda tab is now in shell)
+          // Agenda sub-routes (tab stays in shell)
+          GoRoute(
+            path: '/agenda/novo',
+            builder: (context, state) => const NovoAgendamentoScreen(),
+          ),
           GoRoute(
             path: '/agenda/aluno',
             builder: (context, state) => const AgendaAlunoScreen(),
@@ -908,6 +912,7 @@ bool _isPersonalOnlyLocation(String path) {
     '/alunos',
     '/treinos',
     '/agenda',
+    '/agenda/novo',
     '/financeiro',
     '/feed',
     '/broadcasts',
