@@ -6,10 +6,12 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/notificacoes_repository.dart';
+import '../notificacao_display.dart';
 import '../../../core/theme/tokens_strip.dart';
 
 class NotificacoesScreen extends ConsumerWidget {
@@ -21,6 +23,8 @@ class NotificacoesScreen extends ConsumerWidget {
     final async = ref.watch(notificacoesProvider);
     final repo = ref.read(notificacoesRepositoryProvider);
     final primary = Theme.of(context).colorScheme.primary;
+    final actionInk =
+        isDark ? primary : BrandPalette.deep(primary);
 
     Future<void> reload() async {
       ref.invalidate(notificacoesProvider);
@@ -42,14 +46,27 @@ class NotificacoesScreen extends ConsumerWidget {
       useMesh: true,
       appBar: FxShellAppBar(
         title: 'Notificações',
+        subtitle: 'INBOX',
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
         actions: [
-          TextButton(
-            onPressed: () async {
-              await repo.marcarTodasLidas();
-              await reload();
-            },
-            child: const Text('Ler todas'),
+          Semantics(
+            button: true,
+            label: 'Marcar todas as notificações como lidas',
+            child: TextButton(
+              style: TextButton.styleFrom(foregroundColor: actionInk),
+              onPressed: () async {
+                await repo.marcarTodasLidas();
+                await reload();
+                if (!context.mounted) return;
+                FeedbackHelper.showSnackBar(
+                  context,
+                  const SnackBar(
+                    content: Text('Todas marcadas como lidas.'),
+                  ),
+                );
+              },
+              child: const Text('Ler todas'),
+            ),
           ),
         ],
       ),
@@ -65,6 +82,7 @@ class NotificacoesScreen extends ConsumerWidget {
               (_, __) => _NotificationsStateCard(
                 isDark: isDark,
                 primary: primary,
+                actionInk: actionInk,
                 icon: 'bell',
                 title: 'Não foi possível carregar',
                 subtitle: 'Puxe para atualizar ou tente novamente.',
@@ -75,6 +93,7 @@ class NotificacoesScreen extends ConsumerWidget {
               return _NotificationsStateCard(
                 isDark: isDark,
                 primary: primary,
+                actionInk: actionInk,
                 icon: 'circle-check',
                 title: 'Tudo em ordem',
                 subtitle:
@@ -89,7 +108,11 @@ class NotificacoesScreen extends ConsumerWidget {
               separatorBuilder: (_, __) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
                 if (index == entries.length) {
-                  return _QuietFooter(isDark: isDark, primary: primary);
+                  return _QuietFooter(
+                    isDark: isDark,
+                    primary: primary,
+                    actionInk: actionInk,
+                  );
                 }
 
                 final entry = entries[index];
@@ -102,18 +125,22 @@ class NotificacoesScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (index == 0 || group != previousGroup)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(2, 8, 0, 8),
-                        child: Text(
-                          group.toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w900,
-                            color:
-                                isDark
-                                    ? EagleTokens.darkInkMute
-                                    : TokensStrip.textSecondary,
-                            letterSpacing: 0.9,
+                      Semantics(
+                        header: true,
+                        label: 'Notificações de $group',
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(2, 8, 0, 8),
+                          child: Text(
+                            group.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w900,
+                              color:
+                                  isDark
+                                      ? EagleTokens.darkInkMute
+                                      : TokensStrip.textSecondary,
+                              letterSpacing: 0.9,
+                            ),
                           ),
                         ),
                       ),
@@ -123,6 +150,7 @@ class NotificacoesScreen extends ConsumerWidget {
                           item: item,
                           isDark: isDark,
                           primary: primary,
+                          actionInk: actionInk,
                           onTap: () => openItem(item),
                         ),
                       _RadarNotificationEntry(:final items) =>
@@ -130,6 +158,7 @@ class NotificacoesScreen extends ConsumerWidget {
                           items: items,
                           isDark: isDark,
                           primary: primary,
+                          actionInk: actionInk,
                           onOpen: openItem,
                         ),
                     },
@@ -238,9 +267,11 @@ bool _isRadar(NotificacaoApp item) {
 String _radarName(NotificacaoApp item) {
   final title = item.titulo.trim();
   if (title.toLowerCase().startsWith('radar focux:')) {
-    return title.split(':').skip(1).join(':').trim();
+    return formatDisplayName(title.split(':').skip(1).join(':').trim());
   }
-  return _humanTitle(item).replaceAll(' precisa de ação', '').trim();
+  return formatDisplayName(
+    _humanTitle(item).replaceAll(' precisa de ação', '').trim(),
+  );
 }
 
 String _groupLabel(DateTime? date) {
@@ -312,7 +343,7 @@ String _humanTitle(NotificacaoApp item) {
   final title = item.titulo.trim();
   final msg = item.mensagem.trim();
   if (title.toLowerCase().startsWith('radar focux:')) {
-    final name = title.split(':').skip(1).join(':').trim();
+    final name = formatDisplayName(title.split(':').skip(1).join(':').trim());
     return name.isEmpty ? 'Aluno precisa de ação' : '$name precisa de ação';
   }
   if (title.isNotEmpty) return title;
@@ -345,12 +376,14 @@ class _RadarNotificationGroup extends StatelessWidget {
     required this.items,
     required this.isDark,
     required this.primary,
+    required this.actionInk,
     required this.onOpen,
   });
 
   final List<NotificacaoApp> items;
   final bool isDark;
   final Color primary;
+  final Color actionInk;
   final Future<void> Function(NotificacaoApp item) onOpen;
 
   @override
@@ -362,7 +395,11 @@ class _RadarNotificationGroup extends StatelessWidget {
     final time = _timeLabel(items.first.criadaEm);
     final label = items.length == 1 ? 'sinal' : 'sinais';
 
-    return AnimatedOpacity(
+    return Semantics(
+      container: true,
+      label:
+          '${items.length} $label Radar Focux. Alunos com próxima ação pendente.',
+      child: AnimatedOpacity(
       duration: const Duration(milliseconds: 180),
       opacity: unread ? 1 : 0.78,
       child: Container(
@@ -426,6 +463,7 @@ class _RadarNotificationGroup extends StatelessWidget {
                 item: items[i],
                 isDark: isDark,
                 primary: primary,
+                actionInk: actionInk,
                 onOpen: onOpen,
               ),
               if (i != items.length - 1)
@@ -433,43 +471,47 @@ class _RadarNotificationGroup extends StatelessWidget {
             ],
             if (items.length > 1) ...[
               const SizedBox(height: 10),
-              InkWell(
-                onTap:
-                    () => onOpen(
-                      items.firstWhere(
-                        (item) => !item.lida,
-                        orElse: () => items.first,
-                      ),
-                    ),
-                borderRadius: BorderRadius.circular(14),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: primary.withValues(alpha: isDark ? 0.14 : 0.07),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Abrir sinais',
-                        style: TextStyle(
-                          color: primary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w900,
+              Semantics(
+                button: true,
+                label: 'Abrir sinais do Radar Focux',
+                child: InkWell(
+                  onTap:
+                      () => onOpen(
+                        items.firstWhere(
+                          (item) => !item.lida,
+                          orElse: () => items.first,
                         ),
                       ),
-                      const SizedBox(width: 6),
-                      Icon(
-                        Icons.arrow_forward_rounded,
-                        color: primary,
-                        size: 15,
-                      ),
-                    ],
+                  borderRadius: BorderRadius.circular(14),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: primary.withValues(alpha: isDark ? 0.14 : 0.07),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Abrir sinais',
+                          style: TextStyle(
+                            color: actionInk,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          color: actionInk,
+                          size: 15,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -477,6 +519,7 @@ class _RadarNotificationGroup extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -486,12 +529,14 @@ class _RadarRow extends StatelessWidget {
     required this.item,
     required this.isDark,
     required this.primary,
+    required this.actionInk,
     required this.onOpen,
   });
 
   final NotificacaoApp item;
   final bool isDark;
   final Color primary;
+  final Color actionInk;
   final Future<void> Function(NotificacaoApp item) onOpen;
 
   @override
@@ -499,8 +544,13 @@ class _RadarRow extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final name = _radarName(item);
+    final summary = _radarSummary(item);
+    final displayName = name.isEmpty ? 'Aluno' : name;
 
-    return InkWell(
+    return Semantics(
+      button: true,
+      label: '$displayName. $summary',
+      child: InkWell(
       onTap: () => onOpen(item),
       borderRadius: BorderRadius.circular(14),
       child: Padding(
@@ -523,7 +573,7 @@ class _RadarRow extends StatelessWidget {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    _radarSummary(item),
+                    summary,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -536,26 +586,36 @@ class _RadarRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Icon(Icons.chevron_right_rounded, color: primary, size: 20),
+            Icon(Icons.chevron_right_rounded, color: actionInk, size: 20),
           ],
         ),
       ),
+    ),
     );
   }
 }
 
 class _QuietFooter extends StatelessWidget {
-  const _QuietFooter({required this.isDark, required this.primary});
+  const _QuietFooter({
+    required this.isDark,
+    required this.primary,
+    required this.actionInk,
+  });
 
   final bool isDark;
   final Color primary;
+  final Color actionInk;
 
   @override
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
-    return Container(
+    return Semantics(
+      container: true,
+      label:
+          'Inbox sob controle. Fora destes sinais, nada crítico pendente agora.',
+      child: Container(
       margin: const EdgeInsets.only(top: 4),
       padding: const EdgeInsets.all(14),
       decoration: fxListCardDecoration(context, radius: 20),
@@ -599,9 +659,10 @@ class _QuietFooter extends StatelessWidget {
               ],
             ),
           ),
-          _TinyBadge(label: 'ok', color: primary, isDark: isDark),
+          _TinyBadge(label: 'ok', color: actionInk, isDark: isDark),
         ],
       ),
+    ),
     );
   }
 }
@@ -610,12 +671,14 @@ class _NotificationTile extends StatelessWidget {
   final NotificacaoApp item;
   final bool isDark;
   final Color primary;
+  final Color actionInk;
   final VoidCallback onTap;
 
   const _NotificationTile({
     required this.item,
     required this.isDark,
     required this.primary,
+    required this.actionInk,
     required this.onTap,
   });
 
@@ -627,8 +690,16 @@ class _NotificationTile extends StatelessWidget {
     final unread = !item.lida;
     final time = _timeLabel(item.criadaEm);
     final hasRoute = item.route?.startsWith('/') == true;
+    final title = _humanTitle(item);
+    final a11yLabel =
+        unread
+            ? 'Não lida. $title. ${item.mensagem}'
+            : '$title. ${item.mensagem}';
 
-    return AnimatedOpacity(
+    return Semantics(
+      button: true,
+      label: a11yLabel,
+      child: AnimatedOpacity(
       duration: const Duration(milliseconds: 180),
       opacity: item.lida ? 0.76 : 1,
       child: InkWell(
@@ -689,7 +760,7 @@ class _NotificationTile extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            _humanTitle(item),
+                            title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -737,7 +808,7 @@ class _NotificationTile extends StatelessWidget {
                         if (hasRoute)
                           Icon(
                             Icons.chevron_right_rounded,
-                            color: tipoColor,
+                            color: actionInk,
                             size: 20,
                           ),
                       ],
@@ -749,6 +820,7 @@ class _NotificationTile extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 
@@ -806,6 +878,7 @@ class _NotificationsStateCard extends StatelessWidget {
   const _NotificationsStateCard({
     required this.isDark,
     required this.primary,
+    required this.actionInk,
     required this.icon,
     required this.title,
     required this.subtitle,
@@ -813,6 +886,7 @@ class _NotificationsStateCard extends StatelessWidget {
 
   final bool isDark;
   final Color primary;
+  final Color actionInk;
   final String icon;
   final String title;
   final String subtitle;
@@ -824,11 +898,14 @@ class _NotificationsStateCard extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 24, 16, 120),
       children: [
-        Container(
+        Semantics(
+          container: true,
+          label: '$title. $subtitle',
+          child: Container(
           padding: const EdgeInsets.all(18),
           decoration: fxListCardDecoration(
             context,
-            accent: primary,
+            accent: actionInk,
             radius: 22,
           ),
           child: Row(
@@ -862,6 +939,7 @@ class _NotificationsStateCard extends StatelessWidget {
               ),
             ],
           ),
+        ),
         ),
       ],
     );
