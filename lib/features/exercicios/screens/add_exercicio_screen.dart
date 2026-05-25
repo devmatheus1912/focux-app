@@ -92,7 +92,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
       ref.invalidate(exerciciosFilteredProvider);
       if (mounted) context.pop(true);
     } catch (_) {
-      setState(() => _error = 'Erro ao cadastrar exercicio.');
+      setState(() => _error = 'Erro ao cadastrar exercício.');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -359,10 +359,15 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
           top: false,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 10, 20, 12),
-            child: FxLiquidPrimaryButton(
+            child: Semantics(
+              button: true,
               label: 'Cadastrar exercício',
-              onPressed: _loading ? null : _submit,
-              loading: _loading,
+              enabled: !_loading,
+              child: FxLiquidPrimaryButton(
+                label: 'Cadastrar exercício',
+                onPressed: _loading ? null : _submit,
+                loading: _loading,
+              ),
             ),
           ),
         ),
@@ -490,7 +495,11 @@ class _QuickSetupStrip extends StatelessWidget {
           runSpacing: 8,
           children: [
             for (final setup in _quickSetups)
-              FilterChip(
+              Semantics(
+                button: true,
+                selected: selectedLabel == setup.label,
+                label: 'Perfil rápido ${setup.label}',
+                child: FilterChip(
                 avatar: Icon(
                   setup.icon,
                   color: selectedLabel == setup.label ? Colors.white : primary,
@@ -514,6 +523,7 @@ class _QuickSetupStrip extends StatelessWidget {
                     isDark
                         ? Colors.white.withValues(alpha: 0.04)
                         : primary.withValues(alpha: 0.06),
+              ),
               ),
           ],
         ),
@@ -607,12 +617,20 @@ class _SectionCard extends StatelessWidget {
           if (onToggle == null)
             header
           else
-            InkWell(
-              onTap: onToggle,
-              borderRadius: BorderRadius.circular(14),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2),
-                child: header,
+            Semantics(
+              button: true,
+              expanded: expanded,
+              label:
+                  expanded
+                      ? 'Recolher $title'
+                      : 'Expandir $title. $subtitle',
+              child: InkWell(
+                onTap: onToggle,
+                borderRadius: BorderRadius.circular(14),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: header,
+                ),
               ),
             ),
           AnimatedSize(
@@ -728,18 +746,26 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
             effectiveValue == null
                 ? ''
                 : labels[effectiveValue] ?? effectiveValue.backendName;
-        return InkWell(
+        return Semantics(
+          button: true,
+          label:
+              effectiveValue == null
+                  ? '$label, não selecionado'
+                  : '$label, ${labels[effectiveValue] ?? effectiveValue.backendName}',
+          child: InkWell(
           onTap: () async {
             final useCompactPicker = values.length <= 4;
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            final pageBg = isDark ? EagleTokens.darkBg : TokensStrip.pageBg;
             final picked = await showGeneralDialog<T>(
               context: context,
               barrierDismissible: true,
-              barrierLabel: 'Fechar seletor',
+              barrierLabel: 'Fechar seletor de $label',
               barrierColor: Colors.black.withValues(alpha: 0.68),
               transitionDuration: const Duration(milliseconds: 180),
               pageBuilder:
                   (context, _, __) => Material(
-                    type: MaterialType.transparency,
+                    color: useCompactPicker ? Colors.transparent : pageBg,
                     child:
                         useCompactPicker
                             ? _EnumPickerCompact<T>(
@@ -832,6 +858,7 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
               ],
             ),
           ),
+        ),
         );
       },
     );
@@ -874,15 +901,30 @@ class _EnumPickerCompact<T extends Enum> extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: Text(
-                          title,
-                          style: TextStyle(
-                            color: ink,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w900,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Novo exercício',
+                              style: TextStyle(
+                                color: mute,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              title,
+                              style: TextStyle(
+                                color: ink,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       Container(
@@ -914,7 +956,12 @@ class _EnumPickerCompact<T extends Enum> extends StatelessWidget {
                   const SizedBox(height: 8),
                   ...values.map((item) {
                     final isSelected = item == selected;
-                    return Material(
+                    final itemLabel = labels[item] ?? item.backendName;
+                    return Semantics(
+                      button: true,
+                      selected: isSelected,
+                      label: itemLabel,
+                      child: Material(
                       color:
                           isSelected
                               ? primary.withValues(alpha: 0.08)
@@ -940,7 +987,7 @@ class _EnumPickerCompact<T extends Enum> extends StatelessWidget {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  labels[item] ?? item.backendName,
+                                  itemLabel,
                                   style: TextStyle(
                                     color: ink,
                                     fontSize: 14,
@@ -955,6 +1002,7 @@ class _EnumPickerCompact<T extends Enum> extends StatelessWidget {
                           ),
                         ),
                       ),
+                    ),
                     );
                   }),
                 ],
@@ -1024,23 +1072,54 @@ class _EnumPickerFullScreenState<T extends Enum>
         }).toList();
 
     return ColoredBox(
-      color: Colors.transparent,
+      color: isDark ? EagleTokens.darkBg : TokensStrip.pageBg,
       child: SafeArea(
         child: Padding(
-          padding: EdgeInsets.fromLTRB(TokensStrip.s5, 14, 20, 12 + bottom),
+          padding: EdgeInsets.fromLTRB(TokensStrip.s5, 8, 20, 12 + bottom),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color:
+                        isDark
+                            ? Colors.white.withValues(alpha: 0.16)
+                            : TokensStrip.borderDefault,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Text(
-                      widget.title,
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Novo exercício',
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.35,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          widget.title,
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            height: 1.15,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   Container(
@@ -1061,16 +1140,23 @@ class _EnumPickerFullScreenState<T extends Enum>
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: Icon(Icons.close_rounded, color: mute),
+                  const SizedBox(width: 4),
+                  Semantics(
+                    button: true,
+                    label: 'Fechar seletor',
+                    child: IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: Icon(Icons.close_rounded, color: mute),
+                    ),
                   ),
                 ],
               ),
               if (widget.values.length > 8) ...[
                 const SizedBox(height: 14),
-                TextField(
+                Semantics(
+                  textField: true,
+                  label: 'Buscar ${widget.title.toLowerCase()}',
+                  child: TextField(
                   onChanged: (value) => setState(() => _query = value),
                   decoration: InputDecoration(
                     hintText: 'Buscar opção',
@@ -1096,6 +1182,7 @@ class _EnumPickerFullScreenState<T extends Enum>
                     ),
                   ),
                 ),
+                ),
               ],
               const SizedBox(height: 12),
               Expanded(
@@ -1114,7 +1201,12 @@ class _EnumPickerFullScreenState<T extends Enum>
                   itemBuilder: (context, index) {
                     final item = filtered[index];
                     final selected = item == widget.selected;
-                    return ListTile(
+                    final itemLabel = widget.labels[item] ?? item.backendName;
+                    return Semantics(
+                      button: true,
+                      selected: selected,
+                      label: itemLabel,
+                      child: ListTile(
                       contentPadding: EdgeInsets.zero,
                       minLeadingWidth: 28,
                       leading: Icon(
@@ -1125,7 +1217,7 @@ class _EnumPickerFullScreenState<T extends Enum>
                         size: 21,
                       ),
                       title: Text(
-                        widget.labels[item] ?? item.backendName,
+                        itemLabel,
                         style: TextStyle(
                           color: ink,
                           fontSize: 14,
@@ -1134,6 +1226,7 @@ class _EnumPickerFullScreenState<T extends Enum>
                         ),
                       ),
                       onTap: () => Navigator.of(context).pop(item),
+                    ),
                     );
                   },
                 ),
@@ -1259,7 +1352,12 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
                   itemBuilder: (context, index) {
                     final item = filtered[index];
                     final selected = item == widget.selected;
-                    return ListTile(
+                    final itemLabel = widget.labels[item] ?? item.backendName;
+                    return Semantics(
+                      button: true,
+                      selected: selected,
+                      label: itemLabel,
+                      child: ListTile(
                       contentPadding: EdgeInsets.zero,
                       minLeadingWidth: 28,
                       leading: Icon(
@@ -1270,7 +1368,7 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
                         size: 21,
                       ),
                       title: Text(
-                        widget.labels[item] ?? item.backendName,
+                        itemLabel,
                         style: TextStyle(
                           color: ink,
                           fontSize: 14,
@@ -1279,6 +1377,7 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
                         ),
                       ),
                       onTap: () => Navigator.of(context).pop(item),
+                    ),
                     );
                   },
                 ),
@@ -1315,12 +1414,17 @@ class _ChoiceGroup<T extends Enum> extends StatelessWidget {
         values.where((value) => !selected.contains(value)).toList();
 
     Widget chipFor(T value, {required bool isSelected}) {
-      return ChoiceChip(
-        label: Text(labels[value] ?? value.backendName),
+      final label = labels[value] ?? value.backendName;
+      return Semantics(
+        button: true,
+        selected: isSelected,
+        label: label,
+        child: ChoiceChip(
+        label: Text(label),
         selected: isSelected,
         onSelected: (_) => onToggle(value),
         showCheckmark: isSelected,
-        checkmarkColor: primary,
+        checkmarkColor: Colors.white,
         visualDensity: VisualDensity.compact,
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         padding: EdgeInsets.symmetric(
@@ -1330,22 +1434,23 @@ class _ChoiceGroup<T extends Enum> extends StatelessWidget {
         labelStyle: TextStyle(
           color:
               isSelected
-                  ? primary
+                  ? Colors.white
                   : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary),
           fontSize: isSelected ? 12 : 11.5,
           fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
         ),
-        selectedColor: primary.withValues(alpha: 0.1),
+        selectedColor: primary,
         backgroundColor:
             isDark ? Colors.white.withValues(alpha: 0.035) : TokensStrip.pageBg,
         side: BorderSide(
           color:
               isSelected
-                  ? primary.withValues(alpha: 0.22)
+                  ? primary
                   : (isDark
                       ? EagleTokens.darkLine
                       : TokensStrip.borderDefault.withValues(alpha: 0.72)),
         ),
+      ),
       );
     }
 
