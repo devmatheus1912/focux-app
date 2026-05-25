@@ -74,7 +74,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
           content: Text(
             friendlyError(
               error,
-              fallback: 'Nao foi possivel enviar a foto agora.',
+              fallback: 'Não foi possível enviar a foto agora.',
             ),
           ),
         ),
@@ -280,7 +280,7 @@ class _PerfilErrorScaffold extends StatelessWidget {
                 ),
                 const SizedBox(height: TokensStrip.s4),
                 Text(
-                  'Perfil indisponivel',
+                  'Perfil indisponível',
                   style: theme.textTheme.titleLarge?.copyWith(
                     color: ink,
                     fontWeight: FontWeight.w900,
@@ -290,7 +290,7 @@ class _PerfilErrorScaffold extends StatelessWidget {
                 Text(
                   friendlyError(
                     error,
-                    fallback: 'Nao foi possivel carregar seus dados agora.',
+                    fallback: 'Não foi possível carregar seus dados agora.',
                   ),
                   textAlign: TextAlign.center,
                   style: TextStyle(color: mute, height: 1.35),
@@ -348,6 +348,7 @@ class _PerfilBody extends StatelessWidget {
       fallback: BrandPalette.deep(themePrimary),
     );
     final accent = BrandPalette.softened(primaryColor);
+    final actionInk = isDark ? primaryColor : BrandPalette.deep(primaryColor);
     final heroPrimary = BrandPalette.softened(primaryColor, amount: 0.10);
     final heroSecondary = BrandPalette.softened(secondaryColor, amount: 0.14);
     final readiness = PerfilReadinessView.from(
@@ -393,6 +394,7 @@ class _PerfilBody extends StatelessWidget {
           profileComplete
               ? _PerfilStickyBar(
                 accent: accent,
+                actionInk: actionInk,
                 isDark: isDark,
               )
               : null,
@@ -442,18 +444,23 @@ class _PerfilBody extends StatelessWidget {
                               children: [
                                 _HeroAction(
                                   icon: Icons.arrow_back_ios_new,
+                                  semanticsLabel: 'Voltar',
                                   onTap:
                                       () => safePopOrGo(
                                         context,
                                         '/dashboard/personal',
                                       ),
                                 ),
-                                Text(
-                                  'Perfil',
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 0.1,
+                                Semantics(
+                                  header: true,
+                                  label: 'Perfil',
+                                  child: Text(
+                                    'Perfil',
+                                    style: theme.textTheme.titleMedium?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.1,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 6),
@@ -467,6 +474,10 @@ class _PerfilBody extends StatelessWidget {
                                           themeDark
                                               ? Icons.wb_sunny_outlined
                                               : Icons.dark_mode_outlined,
+                                      semanticsLabel:
+                                          themeDark
+                                              ? 'Ativar tema claro'
+                                              : 'Ativar tema escuro',
                                       onTap:
                                           () => ref
                                               .read(themeModeProvider.notifier)
@@ -477,6 +488,7 @@ class _PerfilBody extends StatelessWidget {
                                 const SizedBox(width: 6),
                                 _HeroAction(
                                   icon: Icons.edit_outlined,
+                                  semanticsLabel: 'Editar perfil',
                                   onTap: onEditPerfil,
                                 ),
                               ],
@@ -494,6 +506,10 @@ class _PerfilBody extends StatelessWidget {
                                   primaryColor: primaryColor,
                                   onTap: onPickPhoto,
                                   loading: uploadingPhoto,
+                                  semanticsLabel:
+                                      uploadingPhoto
+                                          ? 'Enviando foto do perfil'
+                                          : 'Alterar foto do perfil',
                                 ),
                                 const SizedBox(width: 14),
                                 Expanded(
@@ -565,55 +581,58 @@ class _PerfilBody extends StatelessWidget {
                               children: List.generate(stats.length, (index) {
                                 final item = stats[index];
                                 return Expanded(
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 10,
-                                      horizontal: 8,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      border:
-                                          index < stats.length - 1
-                                              ? Border(
-                                                right: BorderSide(
-                                                  color: Colors.white
-                                                      .withValues(alpha: 0.10),
-                                                ),
-                                              )
-                                              : null,
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        Icon(
-                                          item.icon,
-                                          size: 15,
-                                          color: Colors.white.withValues(
-                                            alpha: 0.78,
+                                  child: Semantics(
+                                    label: '${item.label}: ${item.value}',
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 10,
+                                        horizontal: 8,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        border:
+                                            index < stats.length - 1
+                                                ? Border(
+                                                  right: BorderSide(
+                                                    color: Colors.white
+                                                        .withValues(alpha: 0.10),
+                                                  ),
+                                                )
+                                                : null,
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Icon(
+                                            item.icon,
+                                            size: 15,
+                                            color: Colors.white.withValues(
+                                              alpha: 0.78,
+                                            ),
                                           ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          item.value,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 17,
-                                            fontWeight: FontWeight.w900,
-                                            letterSpacing: 0,
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            item.value,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 17,
+                                              fontWeight: FontWeight.w900,
+                                              letterSpacing: 0,
+                                            ),
                                           ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          item.label,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            color: Colors.white70,
-                                            fontSize: 10.5,
-                                            fontWeight: FontWeight.w500,
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            item.label,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              color: Colors.white70,
+                                              fontSize: 10.5,
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 );
@@ -641,7 +660,11 @@ class _PerfilBody extends StatelessWidget {
                       },
                       isDark: isDark,
                       accent: accent,
-                      child: Material(
+                      actionInk: actionInk,
+                      child: Semantics(
+                        button: true,
+                        label: 'Abrir identidade visual da marca',
+                        child: Material(
                         color: Colors.transparent,
                         child: InkWell(
                           onTap: () {
@@ -671,6 +694,7 @@ class _PerfilBody extends StatelessWidget {
                           ),
                         ),
                       ),
+                      ),
                     ),
                     const SizedBox(height: 14),
                     _CompletenessCard(
@@ -687,6 +711,7 @@ class _PerfilBody extends StatelessWidget {
                       dashboard: dashboard,
                       bioText: bioText,
                       accent: accent,
+                      actionInk: actionInk,
                       mute: mute,
                       line: line,
                       isDark: isDark,
@@ -695,9 +720,10 @@ class _PerfilBody extends StatelessWidget {
                     const SizedBox(height: 14),
                     _CardSection(
                       title: 'Conta e plano',
-                      subtitle: 'Acesso, billing, IA, documentos e seguranca.',
+                      subtitle: 'Acesso, billing, IA, documentos e segurança.',
                       isDark: isDark,
                       accent: accent,
+                      actionInk: actionInk,
                       child: Column(
                         children: [
                           _ActionTile(
@@ -705,6 +731,7 @@ class _PerfilBody extends StatelessWidget {
                             label: 'Copiloto IA',
                             value: '${_formatPlanLabel(perfil.plano)} ativo',
                             accent: accent,
+                            actionInk: actionInk,
                             mute: mute,
                             line: line,
                             onTap:
@@ -715,6 +742,7 @@ class _PerfilBody extends StatelessWidget {
                             label: 'Planos e assinatura',
                             value: 'Gerenciar',
                             accent: accent,
+                            actionInk: actionInk,
                             mute: mute,
                             line: line,
                             onTap: () => context.push('/planos'),
@@ -727,6 +755,7 @@ class _PerfilBody extends StatelessWidget {
                                     ? '--'
                                     : '${dashboard.totalAlunos} cadastrados',
                             accent: accent,
+                            actionInk: actionInk,
                             mute: mute,
                             line: line,
                             onTap: () => goPersonalShellTab(context, '/alunos'),
@@ -737,15 +766,17 @@ class _PerfilBody extends StatelessWidget {
                             value:
                                 _hasWallet(perfil) ? 'Completa' : 'Configurar',
                             accent: accent,
+                            actionInk: actionInk,
                             mute: mute,
                             line: line,
                             onTap: () => context.push('/perfil/wallet'),
                           ),
                           _ActionTile(
                             icon: Icons.bolt_outlined,
-                            label: 'Migracao Magica',
+                            label: 'Migração Mágica',
                             value: 'Abrir ferramenta',
                             accent: accent,
+                            actionInk: actionInk,
                             mute: mute,
                             line: line,
                             onTap: () => context.push('/migracao-magica'),
@@ -755,6 +786,7 @@ class _PerfilBody extends StatelessWidget {
                             label: 'Termos de uso',
                             value: '',
                             accent: accent,
+                            actionInk: actionInk,
                             mute: mute,
                             line: line,
                             onTap:
@@ -767,9 +799,10 @@ class _PerfilBody extends StatelessWidget {
                           ),
                           _ActionTile(
                             icon: Icons.privacy_tip_outlined,
-                            label: 'Politica de privacidade',
+                            label: 'Política de privacidade',
                             value: '',
                             accent: accent,
+                            actionInk: actionInk,
                             mute: mute,
                             line: line,
                             onTap:
@@ -918,7 +951,10 @@ class _HeroQuickActions extends StatelessWidget {
                 (item) => Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 3),
-                    child: InkWell(
+                    child: Semantics(
+                      button: true,
+                      label: item.$2,
+                      child: InkWell(
                       onTap: () {
                         HapticFeedback.selectionClick();
                         item.$3();
@@ -952,6 +988,7 @@ class _HeroQuickActions extends StatelessWidget {
                         ),
                       ),
                     ),
+                    ),
                   ),
                 ),
               )
@@ -963,12 +1000,20 @@ class _HeroQuickActions extends StatelessWidget {
 class _HeroAction extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
+  final String semanticsLabel;
 
-  const _HeroAction({required this.icon, required this.onTap});
+  const _HeroAction({
+    required this.icon,
+    required this.onTap,
+    required this.semanticsLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    return Semantics(
+      button: true,
+      label: semanticsLabel,
+      child: Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
@@ -984,6 +1029,7 @@ class _HeroAction extends StatelessWidget {
           child: Icon(icon, color: Colors.white, size: 18),
         ),
       ),
+    ),
     );
   }
 }
@@ -994,6 +1040,7 @@ class _Avatar extends StatelessWidget {
   final Color primaryColor;
   final VoidCallback onTap;
   final bool loading;
+  final String semanticsLabel;
 
   const _Avatar({
     required this.nome,
@@ -1001,11 +1048,16 @@ class _Avatar extends StatelessWidget {
     required this.primaryColor,
     required this.onTap,
     required this.loading,
+    required this.semanticsLabel,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return Semantics(
+      button: true,
+      label: semanticsLabel,
+      enabled: !loading,
+      child: Stack(
       clipBehavior: Clip.none,
       children: [
         Container(
@@ -1067,6 +1119,7 @@ class _Avatar extends StatelessWidget {
           ),
         ),
       ],
+    ),
     );
   }
 }
@@ -1078,6 +1131,7 @@ class _CardSection extends StatelessWidget {
   final VoidCallback? onTrailingTap;
   final bool isDark;
   final Color accent;
+  final Color actionInk;
   final Widget child;
 
   const _CardSection({
@@ -1088,6 +1142,7 @@ class _CardSection extends StatelessWidget {
     this.trailingLabel,
     this.onTrailingTap,
     required this.accent,
+    required this.actionInk,
   });
 
   @override
@@ -1095,8 +1150,12 @@ class _CardSection extends StatelessWidget {
     final chrome = ShellChrome.forDark(isDark);
     final ink = chrome.ink;
     final mute = chrome.mute;
+    final a11yTitle = subtitle == null ? title : '$title. $subtitle';
 
-    return Container(
+    return Semantics(
+      container: true,
+      label: a11yTitle,
+      child: Container(
       decoration: chrome.panel(radius: 20),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 16),
@@ -1129,7 +1188,10 @@ class _CardSection extends StatelessWidget {
                   ),
                 ),
                 if (trailingLabel != null && onTrailingTap != null)
-                  Material(
+                  Semantics(
+                    button: true,
+                    label: '$trailingLabel $title',
+                    child: Material(
                     color: Colors.transparent,
                     child: InkWell(
                       onTap: onTrailingTap,
@@ -1152,17 +1214,18 @@ class _CardSection extends StatelessWidget {
                             Text(
                               trailingLabel!,
                               style: TextStyle(
-                                color: accent,
+                                color: actionInk,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
                             const SizedBox(width: 2),
-                            Icon(Icons.north_east, size: 13, color: accent),
+                            Icon(Icons.north_east, size: 13, color: actionInk),
                           ],
                         ),
                       ),
                     ),
+                  ),
                   ),
               ],
             ),
@@ -1171,6 +1234,7 @@ class _CardSection extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -1245,9 +1309,14 @@ class _PaletteDot extends StatelessWidget {
 }
 
 class _PerfilStickyBar extends StatelessWidget {
-  const _PerfilStickyBar({required this.accent, required this.isDark});
+  const _PerfilStickyBar({
+    required this.accent,
+    required this.actionInk,
+    required this.isDark,
+  });
 
   final Color accent;
+  final Color actionInk;
   final bool isDark;
 
   @override
@@ -1276,25 +1345,36 @@ class _PerfilStickyBar extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      HapticFeedback.selectionClick();
-                      goPersonalShellTab(context, '/alunos');
-                    },
-                    icon: const Icon(Icons.groups_2_outlined, size: 18),
-                    label: const Text('Meus alunos'),
+                  child: Semantics(
+                    button: true,
+                    label: 'Meus alunos',
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: actionInk,
+                      ),
+                      onPressed: () {
+                        HapticFeedback.selectionClick();
+                        goPersonalShellTab(context, '/alunos');
+                      },
+                      icon: const Icon(Icons.groups_2_outlined, size: 18),
+                      label: const Text('Meus alunos'),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: FxLiquidPrimaryButton(
-                    expand: true,
-                    icon: Icons.auto_awesome_outlined,
+                  child: Semantics(
+                    button: true,
                     label: 'Copiloto IA',
-                    onPressed: () {
-                      HapticFeedback.selectionClick();
-                      goPersonalShellTab(context, '/ia/copiloto');
-                    },
+                    child: FxLiquidPrimaryButton(
+                      expand: true,
+                      icon: Icons.auto_awesome_outlined,
+                      label: 'Copiloto IA',
+                      onPressed: () {
+                        HapticFeedback.selectionClick();
+                        goPersonalShellTab(context, '/ia/copiloto');
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -1532,7 +1612,13 @@ class _CompletenessCard extends StatelessWidget {
     final mute = chrome.mute;
     final complete = score >= 100;
 
-    return Container(
+    return Semantics(
+      container: true,
+      label:
+          complete
+              ? 'Perfil pronto. $score por cento de prontidão comercial.'
+              : 'Prontidão comercial. $score por cento.',
+      child: Container(
       padding: const EdgeInsets.all(TokensStrip.s4),
       decoration: chrome.panel(radius: 20),
       child: Column(
@@ -1651,6 +1737,7 @@ class _CompletenessCard extends StatelessWidget {
           ],
         ],
       ),
+    ),
     );
   }
 }
@@ -1799,6 +1886,7 @@ class _ProfessionalDataPanel extends StatelessWidget {
   final DashboardData dashboard;
   final String bioText;
   final Color accent;
+  final Color actionInk;
   final Color mute;
   final Color line;
   final bool isDark;
@@ -1809,6 +1897,7 @@ class _ProfessionalDataPanel extends StatelessWidget {
     required this.dashboard,
     required this.bioText,
     required this.accent,
+    required this.actionInk,
     required this.mute,
     required this.line,
     required this.isDark,
@@ -1821,11 +1910,12 @@ class _ProfessionalDataPanel extends StatelessWidget {
 
     return _CardSection(
       title: 'Dados profissionais',
-      subtitle: 'Contrato, canais publicos e prova de autoridade.',
+      subtitle: 'Contrato, canais públicos e prova de autoridade.',
       trailingLabel: 'Editar',
       onTrailingTap: onEdit,
       isDark: isDark,
       accent: accent,
+      actionInk: actionInk,
       child: Column(
         children: [
           _InfoTile(
@@ -1839,7 +1929,7 @@ class _ProfessionalDataPanel extends StatelessWidget {
           _InfoTile(
             icon: Icons.badge_outlined,
             label: 'CREF',
-            value: perfil.cref ?? 'Nao informado',
+            value: perfil.cref ?? 'Não informado',
             accent: accent,
             mute: mute,
             line: line,
@@ -1851,7 +1941,7 @@ class _ProfessionalDataPanel extends StatelessWidget {
             value:
                 perfil.especialidades ??
                 perfil.especialidade ??
-                'Nao informada',
+                'Não informada',
             accent: accent,
             mute: mute,
             line: line,
@@ -1997,11 +2087,17 @@ class _InfoTile extends StatelessWidget {
       ),
     );
 
-    if (onTap == null) return content;
+    if (onTap == null) {
+      return Semantics(label: '$label. $value', child: content);
+    }
 
-    return Material(
+    return Semantics(
+      button: true,
+      label: '$label. $value',
+      child: Material(
       color: Colors.transparent,
       child: InkWell(onTap: onTap, child: content),
+    ),
     );
   }
 }
@@ -2011,6 +2107,7 @@ class _ActionTile extends StatelessWidget {
   final String label;
   final String value;
   final Color accent;
+  final Color? actionInk;
   final Color mute;
   final Color line;
   final bool danger;
@@ -2022,6 +2119,7 @@ class _ActionTile extends StatelessWidget {
     required this.label,
     required this.value,
     required this.accent,
+    this.actionInk,
     required this.mute,
     required this.line,
     required this.onTap,
@@ -2037,7 +2135,16 @@ class _ActionTile extends StatelessWidget {
             ? (isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad)
             : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
 
-    return InkWell(
+    final link = actionInk ?? accent;
+    final a11y =
+        danger
+            ? label
+            : (value.isEmpty ? label : '$label. $value');
+
+    return Semantics(
+      button: true,
+      label: a11y,
+      child: InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 15),
@@ -2074,18 +2181,19 @@ class _ActionTile extends StatelessWidget {
               Text(
                 value,
                 style: TextStyle(
-                  color: danger ? ink : mute,
+                  color: danger ? ink : link,
                   fontSize: 12,
-                  fontWeight: danger ? FontWeight.w600 : FontWeight.w500,
+                  fontWeight: danger ? FontWeight.w600 : FontWeight.w800,
                 ),
               ),
             if (!danger) ...[
               const SizedBox(width: 8),
-              Icon(Icons.chevron_right, size: 18, color: mute),
+              Icon(Icons.chevron_right, size: 18, color: link),
             ],
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -2218,7 +2326,7 @@ String _formatProfilePlan(String value) {
 
 String _formatInstagram(String? value) {
   if (value == null || value.trim().isEmpty) {
-    return 'Nao informado';
+    return 'Não informado';
   }
   final normalized = value.trim();
   return normalized.startsWith('@') ? normalized : '@$normalized';
