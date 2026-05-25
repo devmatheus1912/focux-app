@@ -102,6 +102,7 @@ class FxLiquidPrimaryButton extends StatelessWidget {
     this.onPressed,
     this.icon,
     this.loading = false,
+    this.loadingLabel,
     this.expand = true,
   });
 
@@ -109,6 +110,8 @@ class FxLiquidPrimaryButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final IconData? icon;
   final bool loading;
+  /// Shown beside the spinner while [loading] is true (e.g. "Agendando…").
+  final String? loadingLabel;
   final bool expand;
 
   @override
@@ -141,10 +144,29 @@ class FxLiquidPrimaryButton extends StatelessWidget {
             child: Center(
               child:
                   loading
-                      ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: FxLoading(strokeWidth: 2, color: Colors.white),
+                      ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: FxLoading(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          ),
+                          if (loadingLabel != null) ...[
+                            const SizedBox(width: 10),
+                            Text(
+                              loadingLabel!,
+                              style: TextStyle(
+                                color: onPrimary,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ],
+                        ],
                       )
                       : Row(
                         mainAxisSize: MainAxisSize.min,

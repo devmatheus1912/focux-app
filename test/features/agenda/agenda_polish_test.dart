@@ -11,7 +11,10 @@ void main() {
     expect(screen, contains('NovoAgendamentoScreen'));
     expect(screen, contains("context.push('/agenda/novo')"));
     expect(screen, contains('Selecione quem será atendido'));
-    expect(screen, contains('_AgendaDateTimeField'));
+    expect(screen, contains('_AgendaHorarioCard'));
+    expect(screen, contains('FxShellScaffold'));
+    expect(screen, contains('loadingLabel: \'Agendando…\''));
+    expect(screen, contains('FxInputDeco.outlineBorder'));
     expect(screen, contains('_agendaSheetDecoration'));
     expect(screen, contains('chrome.sheetFill'));
     expect(screen, contains('useSafeArea: true'));

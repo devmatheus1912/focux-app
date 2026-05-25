@@ -1005,77 +1005,154 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
           : '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')} · ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: Colors.transparent,
-    appBar: AppBar(
-      title: const Text('Novo agendamento'),
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => safePopOrGo(context, '/agenda'),
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
+    final line = chrome.lineStrong;
+    final enabled = _canSave && !_saving;
+
+    return FxShellScaffold(
+      useMesh: true,
+      safeArea: false,
+      appBar: FxShellAppBar(
+        title: 'Novo agendamento',
+        subtitle: 'AGENDA',
+        onBack: () => safePopOrGo(context, '/agenda'),
       ),
-    ),
-    body: SingleChildScrollView(
-      padding: const EdgeInsets.all(TokensStrip.s4),
-      child: Column(
-        children: [
-          ref
-              .watch(alunosProvider)
-              .when(
-                loading: () => const LinearProgressIndicator(),
-                error:
-                    (e, _) => Text(
-                      'Não foi possível carregar alunos.',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                data:
-                    (alunos) => _AgendaAlunoButton(
-                      aluno: _alunoSelecionado,
-                      onTap: () => _showAlunoSheet(alunos),
-                    ),
-              ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _titulo,
-            decoration: const InputDecoration(labelText: 'Título (opcional)'),
-          ),
-          const SizedBox(height: TokensStrip.s4),
-          _AgendaDateTimeField(
-            label: 'Início',
-            value: _fmtDt(_inicio),
-            isPlaceholder: _inicio == null,
-            onTap: () => _pickDateTime(true),
-          ),
-          const SizedBox(height: 8),
-          _AgendaDateTimeField(
-            label: 'Fim',
-            value: _fmtDt(_fim),
-            isPlaceholder: _fim == null,
-            onTap: () => _pickDateTime(false),
-          ),
-          const SizedBox(height: TokensStrip.s4),
-          Semantics(
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(22, 10, 22, 12),
+          child: Semantics(
             button: true,
-            enabled: _canSave && !_saving,
-            label: 'Agendar atendimento',
+            enabled: enabled,
+            label: _saving ? 'Agendando atendimento' : 'Agendar atendimento',
             child: FxLiquidPrimaryButton(
               label: 'Agendar',
+              loadingLabel: 'Agendando…',
               loading: _saving,
-              onPressed: _saving || !_canSave ? null : _salvar,
+              onPressed: enabled ? _salvar : null,
             ),
           ),
-        ],
+        ),
       ),
-    ),
-  );
+      body: SafeArea(
+        bottom: false,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(22, 8, 22, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: chrome.panel(radius: TokensStrip.rCard),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ref
+                        .watch(alunosProvider)
+                        .when(
+                          loading:
+                              () => const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 8),
+                                child: LinearProgressIndicator(),
+                              ),
+                          error:
+                              (e, _) => Text(
+                                'Não foi possível carregar alunos.',
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                              ),
+                          data:
+                              (alunos) => _AgendaAlunoButton(
+                                aluno: _alunoSelecionado,
+                                onTap: () => _showAlunoSheet(alunos),
+                                embedded: true,
+                              ),
+                        ),
+                    Divider(height: 20, thickness: 1, color: line),
+                    Semantics(
+                      textField: true,
+                      label: 'Título opcional do atendimento',
+                      child: TextFormField(
+                        controller: _titulo,
+                        style: TextStyle(
+                          color: ink,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        cursorColor: primary,
+                        decoration: InputDecoration(
+                          hintText: 'Título (opcional)',
+                          filled: true,
+                          fillColor: chrome.cardFill,
+                          hintStyle: TextStyle(
+                            color: mute.withValues(alpha: 0.72),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          border: FxInputDeco.outlineBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(color: line),
+                          ),
+                          enabledBorder: FxInputDeco.outlineBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(color: line),
+                          ),
+                          focusedBorder: FxInputDeco.outlineBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(
+                              color: primary.withValues(alpha: 0.68),
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _AgendaHorarioCard(
+                      inicioLabel: _fmtDt(_inicio),
+                      fimLabel: _fmtDt(_fim),
+                      inicioPlaceholder: _inicio == null,
+                      fimPlaceholder: _fim == null,
+                      onInicio: () => _pickDateTime(true),
+                      onFim: () => _pickDateTime(false),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Ao confirmar início, o fim é sugerido com +1 hora. Você pode ajustar depois.',
+                style: AppTypography.inter(
+                  fontSize: 11.5,
+                  height: 1.35,
+                  color: mute,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _AgendaAlunoButton extends StatelessWidget {
   final Aluno? aluno;
   final VoidCallback onTap;
+  final bool embedded;
 
-  const _AgendaAlunoButton({required this.aluno, required this.onTap});
+  const _AgendaAlunoButton({
+    required this.aluno,
+    required this.onTap,
+    this.embedded = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1089,61 +1166,108 @@ class _AgendaAlunoButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(TokensStrip.rCard),
         child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: fxListCardDecoration(
-          context,
-          accent: aluno != null ? primary : null,
-        ),
-        child: Row(
-          children: [
-            _AgendaAlunoAvatar(aluno: aluno),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    aluno?.nome ?? 'Aluno',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: aluno == null ? chrome.mute : chrome.ink,
-                    ),
+          padding: EdgeInsets.all(embedded ? 4 : 12),
+          decoration:
+              embedded
+                  ? null
+                  : fxListCardDecoration(
+                    context,
+                    accent: aluno != null ? primary : null,
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    aluno?.email ?? 'Selecione quem será atendido',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.inter(
-                      fontSize: 11,
-                      color: chrome.mute,
+          child: Row(
+            children: [
+              _AgendaAlunoAvatar(aluno: aluno),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      aluno?.nome ?? 'Aluno',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: aluno == null ? chrome.mute : chrome.ink,
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 3),
+                    Text(
+                      aluno?.email ?? 'Selecione quem será atendido',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.inter(
+                        fontSize: 11,
+                        color: chrome.mute,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const Icon(
-              Icons.keyboard_arrow_down_rounded,
-              color: TokensStrip.textSecondary,
-            ),
-          ],
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: chrome.mute,
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
 }
 
-class _AgendaDateTimeField extends StatelessWidget {
+class _AgendaHorarioCard extends StatelessWidget {
+  final String inicioLabel;
+  final String fimLabel;
+  final bool inicioPlaceholder;
+  final bool fimPlaceholder;
+  final VoidCallback onInicio;
+  final VoidCallback onFim;
+
+  const _AgendaHorarioCard({
+    required this.inicioLabel,
+    required this.fimLabel,
+    required this.inicioPlaceholder,
+    required this.fimPlaceholder,
+    required this.onInicio,
+    required this.onFim,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    return Container(
+      decoration: fxListCardDecoration(context, accent: primary),
+      child: Column(
+        children: [
+          _AgendaDateTimeRow(
+            label: 'Início',
+            value: inicioLabel,
+            isPlaceholder: inicioPlaceholder,
+            onTap: onInicio,
+          ),
+          Divider(height: 1, thickness: 1, color: chrome.lineStrong),
+          _AgendaDateTimeRow(
+            label: 'Fim',
+            value: fimLabel,
+            isPlaceholder: fimPlaceholder,
+            onTap: onFim,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AgendaDateTimeRow extends StatelessWidget {
   final String label;
   final String value;
   final bool isPlaceholder;
   final VoidCallback onTap;
 
-  const _AgendaDateTimeField({
+  const _AgendaDateTimeRow({
     required this.label,
     required this.value,
     required this.isPlaceholder,
@@ -1160,9 +1284,8 @@ class _AgendaDateTimeField extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(TokensStrip.rCard),
-        child: Container(
+        child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          decoration: fxListCardDecoration(context, accent: primary),
           child: Row(
             children: [
               Expanded(
