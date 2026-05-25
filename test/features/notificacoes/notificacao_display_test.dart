@@ -7,4 +7,18 @@ void main() {
     expect(formatDisplayName('  nathalia costa  '), 'Nathalia Costa');
     expect(formatDisplayName('maria da silva'), 'Maria da Silva');
   });
+
+  test('radarSignalDedupeKey ignora casing e espacos duplicados', () {
+    final a = radarSignalDedupeKey(
+      displayName: 'Thales',
+      summary: 'Retomar treino com mensagem curta',
+      route: '/alunos/1',
+    );
+    final b = radarSignalDedupeKey(
+      displayName: 'thales',
+      summary: '  Retomar   treino com mensagem curta ',
+      route: '/alunos/1',
+    );
+    expect(a, b);
+  });
 }

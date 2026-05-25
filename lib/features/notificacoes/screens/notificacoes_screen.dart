@@ -213,7 +213,11 @@ List<_NotificationEntry> _buildNotificationEntries(
     if (_isRadar(item)) {
       final group = _groupLabel(item.criadaEm);
       if (emittedRadarGroups.add(group)) {
-        entries.add(_RadarNotificationEntry(radarByGroup[group] ?? [item]));
+        entries.add(
+          _RadarNotificationEntry(
+            _dedupeRadarGroup(radarByGroup[group] ?? [item]),
+          ),
+        );
       }
     } else {
       entries.add(_SingleNotificationEntry(item));
@@ -248,15 +252,32 @@ DateTime _dateValue(DateTime? date) =>
 
 String _dedupeKey(NotificacaoApp item) {
   final route = item.route?.trim().toLowerCase() ?? '';
-  final message = _normalize(item.mensagem);
   if (_isRadar(item)) {
-    return 'radar|${_radarName(item).toLowerCase()}|$message|$route';
+    return 'radar|${_radarRowKey(item)}';
   }
-  return '${item.tipo.toLowerCase()}|${_normalize(item.titulo)}|$message|$route';
+  final message = normalizeNotificationText(item.mensagem);
+  return '${item.tipo.toLowerCase()}|${normalizeNotificationText(item.titulo)}|$message|$route';
 }
 
-String _normalize(String text) =>
-    text.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+String _radarRowKey(NotificacaoApp item) => radarSignalDedupeKey(
+  displayName: _radarName(item),
+  summary: _radarSummary(item),
+  route: item.route ?? '',
+);
+
+List<NotificacaoApp> _dedupeRadarGroup(List<NotificacaoApp> items) {
+  final byKey = <String, NotificacaoApp>{};
+  for (final item in items) {
+    final key = _radarRowKey(item);
+    final current = byKey[key];
+    byKey[key] = current == null ? item : _pickNotification(current, item);
+  }
+  final result = byKey.values.toList();
+  result.sort(
+    (a, b) => _dateValue(b.criadaEm).compareTo(_dateValue(a.criadaEm)),
+  );
+  return result;
+}
 
 bool _isRadar(NotificacaoApp item) {
   final title = item.titulo.toLowerCase();

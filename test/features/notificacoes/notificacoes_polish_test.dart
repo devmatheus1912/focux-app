@@ -15,5 +15,7 @@ void main() {
     expect(screen, contains('Semantics('));
     expect(screen, contains('Marcar todas as notificações como lidas'));
     expect(screen, contains('Abrir sinais do Radar Focux'));
+    expect(screen, contains('_dedupeRadarGroup'));
+    expect(screen, contains('radarSignalDedupeKey'));
   });
 }

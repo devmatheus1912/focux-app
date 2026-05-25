@@ -16,3 +16,19 @@ String formatDisplayName(String raw) {
       })
       .join(' ');
 }
+
+String normalizeNotificationText(String text) =>
+    text.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+
+/// Collapses duplicate Radar rows (same aluno + mesma ação + mesma rota).
+String radarSignalDedupeKey({
+  required String displayName,
+  required String summary,
+  String route = '',
+}) {
+  return [
+    normalizeNotificationText(displayName),
+    normalizeNotificationText(summary),
+    normalizeNotificationText(route),
+  ].join('|');
+}
