@@ -117,7 +117,9 @@ class FxLiquidPrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    // Saturated brand teals use light onPrimary in theme; labels stay white
+    // (same rule as FilledButtonTheme in app_theme.dart).
+    const labelColor = Colors.white;
     final enabled = onPressed != null && !loading;
 
     final button = FxInteractiveGlow(
@@ -159,8 +161,8 @@ class FxLiquidPrimaryButton extends StatelessWidget {
                             const SizedBox(width: 10),
                             Text(
                               loadingLabel!,
-                              style: TextStyle(
-                                color: onPrimary,
+                              style: const TextStyle(
+                                color: labelColor,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 15,
                               ),
@@ -172,13 +174,13 @@ class FxLiquidPrimaryButton extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (icon != null) ...[
-                            Icon(icon, size: 18, color: onPrimary),
+                            Icon(icon, size: 18, color: labelColor),
                             const SizedBox(width: TokensStrip.s2),
                           ],
                           Text(
                             label,
-                            style: TextStyle(
-                              color: onPrimary,
+                            style: const TextStyle(
+                              color: labelColor,
                               fontWeight: FontWeight.w700,
                               fontSize: 15,
                             ),

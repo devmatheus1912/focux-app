@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/api/media_upload_service.dart';
@@ -153,6 +152,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
       useMesh: true,
       appBar: FxShellAppBar(
         title: 'Editar Perfil',
+        subtitle: 'PERFIL',
         onBack: () => safePopOrGo(context, '/perfil'),
       ),
       bottomNavigationBar: Material(
@@ -163,13 +163,22 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                 .withValues(alpha: 0.96),
             border: Border(top: BorderSide(color: chrome.line)),
           ),
-          padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 12, 20, 12),
+          padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 12, TokensStrip.s5, 12),
           child: SafeArea(
             top: false,
-            child: FxLiquidPrimaryButton(
-              label: 'Salvar alterações',
-              loading: _loading,
-              onPressed: _loading ? null : _submit,
+            child: Semantics(
+              button: true,
+              enabled: !_loading,
+              label:
+                  _loading
+                      ? 'Salvando alterações do perfil'
+                      : 'Salvar alterações do perfil',
+              child: FxLiquidPrimaryButton(
+                label: 'Salvar alterações',
+                loadingLabel: 'Salvando…',
+                loading: _loading,
+                onPressed: _loading ? null : _submit,
+              ),
             ),
           ),
         ),
@@ -178,73 +187,84 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
         child: SafeArea(
           bottom: false,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 8, 20, 24),
+            padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 8, TokensStrip.s5, 24),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Center(
-                    child: FxGlowSurface(
-                      color: primary,
-                      enabled: true,
-                      intensity: 0.7,
-                      borderRadius: 999,
-                      child: Stack(
-                        alignment: Alignment.bottomRight,
-                        children: [
-                          CircleAvatar(
-                            radius: 54,
-                            backgroundColor: primary.withValues(alpha: 0.12),
-                            backgroundImage:
-                                _logoUrl != null ? NetworkImage(_logoUrl!) : null,
-                            child:
-                                _logoUrl == null
-                                    ? Text(
-                                      widget.perfil.nome.isNotEmpty
-                                          ? widget.perfil.nome[0].toUpperCase()
-                                          : '?',
-                                      style: AppTypography.inter(
-                                        fontSize: 36,
-                                        fontWeight: FontWeight.w800,
-                                        color: primary,
-                                      ),
-                                    )
-                                    : null,
-                          ),
-                          GestureDetector(
-                            onTap: _uploadingPhoto ? null : _pickAndUploadPhoto,
-                            child: Container(
-                              width: 34,
-                              height: 34,
-                              decoration: BoxDecoration(
-                                color: primary,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color:
-                                      isDark
-                                          ? EagleTokens.darkBg
-                                          : TokensStrip.pageBg,
-                                  width: 2,
-                                ),
-                              ),
+                  Semantics(
+                    button: true,
+                    enabled: !_uploadingPhoto,
+                    label:
+                        _uploadingPhoto
+                            ? 'Enviando foto do perfil'
+                            : 'Foto do perfil. Toque no ícone da câmera para trocar a foto',
+                    child: Center(
+                      child: FxGlowSurface(
+                        color: primary,
+                        enabled: true,
+                        intensity: 0.7,
+                        borderRadius: 999,
+                        child: Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            CircleAvatar(
+                              radius: 54,
+                              backgroundColor: primary.withValues(alpha: 0.12),
+                              backgroundImage:
+                                  _logoUrl != null
+                                      ? NetworkImage(_logoUrl!)
+                                      : null,
                               child:
-                                  _uploadingPhoto
-                                      ? const Padding(
-                                        padding: EdgeInsets.all(7),
-                                        child: FxLoading(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
+                                  _logoUrl == null
+                                      ? Text(
+                                        widget.perfil.nome.isNotEmpty
+                                            ? widget.perfil.nome[0].toUpperCase()
+                                            : '?',
+                                        style: AppTypography.inter(
+                                          fontSize: 36,
+                                          fontWeight: FontWeight.w800,
+                                          color: primary,
                                         ),
                                       )
-                                      : const Icon(
-                                        Icons.camera_alt_rounded,
-                                        size: 16,
-                                        color: Colors.white,
-                                      ),
+                                      : null,
                             ),
-                          ),
-                        ],
+                            GestureDetector(
+                              onTap:
+                                  _uploadingPhoto ? null : _pickAndUploadPhoto,
+                              child: Container(
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: primary,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color:
+                                        isDark
+                                            ? EagleTokens.darkBg
+                                            : TokensStrip.pageBg,
+                                    width: 2,
+                                  ),
+                                ),
+                                child:
+                                    _uploadingPhoto
+                                        ? const Padding(
+                                          padding: EdgeInsets.all(7),
+                                          child: FxLoading(
+                                            strokeWidth: 2,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                        : const Icon(
+                                          Icons.camera_alt_rounded,
+                                          size: 16,
+                                          color: Colors.white,
+                                        ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -260,16 +280,22 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                     index: 0,
                     child: _SectionCard(
                       title: 'Dados pessoais',
-                      child: TextFormField(
-                        controller: _nomeCtrl,
-                        decoration: FxInputDeco.build(
-                          context,
-                          'Nome completo',
-                          icon: Icons.person_outline_rounded,
+                      showHint: true,
+                      child: Semantics(
+                        label: 'Nome completo',
+                        child: TextFormField(
+                          controller: _nomeCtrl,
+                          decoration: FxInputDeco.build(
+                            context,
+                            'Nome completo',
+                            icon: Icons.person_outline_rounded,
+                          ),
+                          validator:
+                              (v) =>
+                                  v == null || v.isEmpty
+                                      ? 'Informe o nome'
+                                      : null,
                         ),
-                        validator:
-                            (v) =>
-                                v == null || v.isEmpty ? 'Informe o nome' : null,
                       ),
                     ),
                   ),
@@ -280,43 +306,55 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                       title: 'Dados profissionais',
                       child: Column(
                         children: [
-                          TextFormField(
-                            controller: _crefCtrl,
-                            decoration: FxInputDeco.build(
-                              context,
-                              'CREF (opcional)',
-                              icon: Icons.badge_outlined,
-                              hint: 'Ex: 012345-G/SP',
+                          Semantics(
+                            label: 'CREF opcional',
+                            child: TextFormField(
+                              controller: _crefCtrl,
+                              decoration: FxInputDeco.build(
+                                context,
+                                'CREF (opcional)',
+                                icon: Icons.badge_outlined,
+                                hint: 'Ex: 012345-G/SP',
+                              ),
                             ),
                           ),
                           const SizedBox(height: 12),
-                          TextFormField(
-                            controller: _especialidadeCtrl,
-                            decoration: FxInputDeco.build(
-                              context,
-                              'Especialidade principal',
-                              icon: Icons.fitness_center_outlined,
-                              hint: 'Ex: Musculação',
+                          Semantics(
+                            label: 'Especialidade principal',
+                            child: TextFormField(
+                              controller: _especialidadeCtrl,
+                              decoration: FxInputDeco.build(
+                                context,
+                                'Especialidade principal',
+                                icon: Icons.fitness_center_outlined,
+                                hint: 'Ex: Musculação',
+                              ),
                             ),
                           ),
                           const SizedBox(height: 12),
-                          TextFormField(
-                            controller: _especialidadesCtrl,
-                            decoration: FxInputDeco.build(
-                              context,
-                              'Áreas de atuação (opcional)',
-                              icon: Icons.category_outlined,
-                              hint: 'Ex: Funcional, Hipertrofia',
+                          Semantics(
+                            label: 'Áreas de atuação opcional',
+                            child: TextFormField(
+                              controller: _especialidadesCtrl,
+                              decoration: FxInputDeco.build(
+                                context,
+                                'Áreas de atuação (opcional)',
+                                icon: Icons.category_outlined,
+                                hint: 'Ex: Funcional, Hipertrofia',
+                              ),
                             ),
                           ),
                           const SizedBox(height: 12),
-                          TextFormField(
-                            controller: _instagramCtrl,
-                            decoration: FxInputDeco.build(
-                              context,
-                              'Instagram (opcional)',
-                              icon: Icons.alternate_email_rounded,
-                              hint: 'seuusuario',
+                          Semantics(
+                            label: 'Instagram opcional',
+                            child: TextFormField(
+                              controller: _instagramCtrl,
+                              decoration: FxInputDeco.build(
+                                context,
+                                'Instagram (opcional)',
+                                icon: Icons.alternate_email_rounded,
+                                hint: 'seuusuario',
+                              ),
                             ),
                           ),
                         ],
@@ -328,22 +366,33 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                     index: 2,
                     child: _SectionCard(
                       title: 'Bio / Apresentação',
-                      child: TextFormField(
-                        controller: _bioCtrl,
-                        maxLines: 4,
-                        maxLength: 500,
-                        decoration: FxInputDeco.build(
-                          context,
-                          'Sobre você (opcional)',
-                          icon: Icons.notes_rounded,
-                          hint: 'Conte sua história, metodologia e diferenciais...',
+                      child: Semantics(
+                        label: 'Sobre você, até 500 caracteres',
+                        child: TextFormField(
+                          controller: _bioCtrl,
+                          maxLines: 4,
+                          maxLength: 500,
+                          decoration: FxInputDeco.build(
+                            context,
+                            'Sobre você (opcional)',
+                            icon: Icons.notes_rounded,
+                            hint:
+                                'Conte sua história, metodologia e diferenciais...',
+                          ),
                         ),
                       ),
                     ),
                   ),
                   if (_error != null) ...[
                     const SizedBox(height: 12),
-                    Text(_error!, style: const TextStyle(color: EagleTokens.bad)),
+                    Semantics(
+                      liveRegion: true,
+                      label: _error!,
+                      child: Text(
+                        _error!,
+                        style: const TextStyle(color: EagleTokens.bad),
+                      ),
+                    ),
                   ],
                 ],
               ),
@@ -356,39 +405,55 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
 }
 
 class _SectionCard extends StatelessWidget {
-  const _SectionCard({required this.title, required this.child});
+  const _SectionCard({
+    required this.title,
+    required this.child,
+    this.showHint = false,
+  });
 
   final String title;
   final Widget child;
+  final bool showHint;
+
+  static const _hintCopy =
+      'Campos usados no perfil comercial e na experiência do aluno.';
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final a11y =
+        showHint ? '$title. $_hintCopy' : title;
 
-    return Container(
-      padding: const EdgeInsets.all(TokensStrip.s4),
-      decoration: fxListCardDecoration(context),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: AppTypography.inter(
-              color: ink,
-              fontWeight: FontWeight.w800,
-              fontSize: 14,
+    return Semantics(
+      container: true,
+      label: a11y,
+      child: Container(
+        padding: const EdgeInsets.all(TokensStrip.s4),
+        decoration: fxListCardDecoration(context),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: AppTypography.inter(
+                color: ink,
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Campos usados no perfil comercial e na experiência do aluno.',
-            style: TextStyle(color: mute, fontSize: 11.5, height: 1.3),
-          ),
-          const SizedBox(height: 14),
-          child,
-        ],
+            if (showHint) ...[
+              const SizedBox(height: 4),
+              Text(
+                _hintCopy,
+                style: TextStyle(color: mute, fontSize: 11.5, height: 1.3),
+              ),
+            ],
+            const SizedBox(height: 14),
+            child,
+          ],
+        ),
       ),
     );
   }
