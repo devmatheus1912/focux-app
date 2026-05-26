@@ -120,21 +120,46 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     final discard = await showDialog<bool>(
       context: context,
       builder: (ctx) {
-        return AlertDialog(
-          title: const Text('Descartar alterações?'),
-          content: const Text(
-            'Você alterou dados da carteira. Se sair agora, as mudanças não serão salvas.',
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(TokensStrip.rCard),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Continuar editando'),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Descartar alterações?',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Você alterou dados da carteira. Se sair agora, as mudanças não serão salvas.',
+                  style: TextStyle(
+                    height: 1.45,
+                    color: Theme.of(ctx).brightness == Brightness.dark
+                        ? EagleTokens.darkInkMute
+                        : TokensStrip.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                FilledButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Text('Continuar editando'),
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: EagleTokens.bad,
+                  ),
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: const Text('Descartar'),
+                ),
+              ],
             ),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Descartar'),
-            ),
-          ],
+          ),
         );
       },
     );
