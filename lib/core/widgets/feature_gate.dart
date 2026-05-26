@@ -270,10 +270,12 @@ class _LockedScreen extends ConsumerWidget {
                 label: offer.ctaLabel,
                 icon: Icons.workspace_premium_rounded,
                 onPressed:
-                    () => context.push(
-                      '/assinatura',
-                      extra: offer.targetPlan.apiName,
-                    ),
+                    offer.targetPlan == null
+                        ? null
+                        : () => context.push(
+                          '/assinatura',
+                          extra: offer.targetPlan!.apiName,
+                        ),
               ),
               const SizedBox(height: 12),
               TextButton(

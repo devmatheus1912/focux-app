@@ -77,6 +77,38 @@ class PlanEntitlements {
     );
   }
 
+  static LockedOffer iaQuotaUpgradeOffer({
+    required SubscriptionPlan currentPlan,
+    SubscriptionPlan? targetPlan,
+    int? limiteAtual,
+  }) {
+    if (currentPlan == SubscriptionPlan.FREE || targetPlan == SubscriptionPlan.PREMIUM) {
+      return lockedOffer(
+        featureName: 'IA Copiloto',
+        capability: 'iaCopiloto',
+        requiredPlan: SubscriptionPlan.PREMIUM,
+      );
+    }
+    if (currentPlan == SubscriptionPlan.ENTERPRISE && targetPlan == null) {
+      return LockedOffer(
+        headline: 'Cota de IA esgotada este mês',
+        body:
+            'Você usou todas as ${limiteAtual ?? PlanoIaLimits.enterprise} interações do Enterprise. '
+            'A cota renova no próximo ciclo mensal.',
+        ctaLabel: 'Entendi',
+        targetPlan: null,
+      );
+    }
+    return LockedOffer(
+      headline: 'Cota de IA esgotada este mês',
+      body:
+          'Você usou todas as ${limiteAtual ?? PlanoIaLimits.premium} interações do Premium. '
+          'No Enterprise são ${PlanoIaLimits.enterprise} interações/mês — mais espaço para Copiloto, treinos e chat.',
+      ctaLabel: 'Ver plano Enterprise',
+      targetPlan: targetPlan ?? SubscriptionPlan.ENTERPRISE,
+    );
+  }
+
   static PlanoUsageSnapshot snapshotFrom({
     required SubscriptionPlan plano,
     required int alunosAtivos,
@@ -129,13 +161,13 @@ class LockedOffer {
   final String headline;
   final String body;
   final String ctaLabel;
-  final SubscriptionPlan targetPlan;
+  final SubscriptionPlan? targetPlan;
 
   const LockedOffer({
     required this.headline,
     required this.body,
     required this.ctaLabel,
-    required this.targetPlan,
+    this.targetPlan,
   });
 }
 

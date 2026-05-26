@@ -3,7 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../ia/data/ia_repository.dart';
+import '../../ia/widgets/ia_quota_upgrade.dart';
 import '../data/alimentar_repository.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -160,6 +163,7 @@ class _PlanoAlimentarDetailScreenState
     );
 
     if (confirm != true) return;
+    if (!await IaQuotaUpgrade.guardBeforeRequest(context, ref)) return;
 
     setState(() => _loading = true);
     try {
@@ -181,7 +185,13 @@ class _PlanoAlimentarDetailScreenState
     } catch (e) {
       if (mounted) {
         setState(() => _loading = false);
-        FeedbackHelper.showSuccess(context, 'Erro na IA: $e');
+        FeedbackHelper.showSnackBar(
+          context,
+          SnackBar(content: Text(friendlyError(e))),
+        );
+        final mapped =
+            e is DioException ? IaOperationalException.fromDio(e) : e;
+        await IaQuotaUpgrade.handleError(context, ref, mapped);
       }
     }
   }

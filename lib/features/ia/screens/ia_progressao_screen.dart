@@ -11,6 +11,7 @@ import 'package:printing/printing.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/ia_repository.dart';
+import '../widgets/ia_quota_upgrade.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class IaProgressaoScreen extends ConsumerStatefulWidget {
@@ -80,6 +81,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
   }
 
   Future<void> _gerar() async {
+    if (!await IaQuotaUpgrade.guardBeforeRequest(context, ref)) return;
     setState(() {
       _loading = true;
       _resultado = null;
@@ -95,11 +97,11 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
       setState(() => _resultado = r);
     } catch (e) {
       if (mounted) {
-        setState(
-          () =>
-              _erro =
-                  'Nao consegui falar com a IA agora. O servidor pode estar iniciando; tente novamente em alguns segundos.',
-        );
+        final message = e is IaOperationalException
+            ? e.message
+            : 'Nao consegui falar com a IA agora. Tente novamente em alguns segundos.';
+        setState(() => _erro = message);
+        await IaQuotaUpgrade.handleError(context, ref, e);
       }
     }
     if (mounted) setState(() => _loading = false);

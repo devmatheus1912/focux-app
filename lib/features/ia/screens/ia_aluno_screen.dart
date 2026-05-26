@@ -7,6 +7,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
 import '../../../features/chat/data/chat_repository.dart';
 import '../data/ia_repository.dart';
+import '../widgets/ia_quota_upgrade.dart';
 import '../../../core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
@@ -132,6 +133,7 @@ class _ChatTabState extends ConsumerState<_ChatTab> {
         setState(
           () => _msgs.add(_IaMsg(texto: friendlyError(e), isUser: false)),
         );
+        await IaQuotaUpgrade.handleError(context, ref, e);
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -280,6 +282,7 @@ class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
           context,
           SnackBar(content: Text(friendlyError(e))),
         );
+        await IaQuotaUpgrade.handleError(context, ref, e);
       }
     }
     if (mounted) setState(() => _loading = false);

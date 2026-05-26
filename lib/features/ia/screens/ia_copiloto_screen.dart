@@ -19,6 +19,8 @@ import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/widgets/feature_gate.dart';
+import '../widgets/ia_quota_upgrade.dart';
+import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 
 // ─── Providers ───────────────────────────────────────────────────────────────
@@ -497,6 +499,8 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
       await _selecionarAluno();
       if (_selectedAlunoId == null) return;
     }
+    if (!await IaQuotaUpgrade.guardBeforeRequest(context, ref)) return;
+
     setState(() {
       _gerando = true;
       _gerado = false;
@@ -543,7 +547,21 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
           _gerando = false;
           _erro = e;
         });
+        await IaQuotaUpgrade.handleError(context, ref, e);
       }
+    }
+  }
+
+  bool _erroSugereUpgrade(Object erro) =>
+      erro is IaOperationalException && erro.suggestsUpgrade;
+
+  Future<void> _mostrarUpgradePorErro() async {
+    if (_erro is IaOperationalException) {
+      await IaQuotaUpgrade.showUpgradeDialog(
+        context,
+        error: _erro! as IaOperationalException,
+        features: ref.read(planoFeaturesProvider).valueOrNull,
+      );
     }
   }
 
@@ -1152,8 +1170,13 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                         ),
                       ),
                       TextButton(
-                        onPressed: _gerar,
-                        child: const Text('Tentar'),
+                        onPressed:
+                            _erroSugereUpgrade(_erro!)
+                                ? _mostrarUpgradePorErro
+                                : _gerar,
+                        child: Text(
+                          _erroSugereUpgrade(_erro!) ? 'Fazer upgrade' : 'Tentar',
+                        ),
                       ),
                     ],
                   ),

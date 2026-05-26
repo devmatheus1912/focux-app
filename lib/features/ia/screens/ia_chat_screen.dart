@@ -5,8 +5,10 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../features/auth/providers/auth_provider.dart';
-import '../../../core/widgets/fx_loading.dart';
+import '../data/ia_repository.dart';
+import '../widgets/ia_quota_upgrade.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
 
 class _IaMsg {
   final String texto;
@@ -30,6 +32,7 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
   Future<void> _enviar() async {
     final text = _ctrl.text.trim();
     if (text.isEmpty || _loading) return;
+    if (!await IaQuotaUpgrade.guardBeforeRequest(context, ref)) return;
     _ctrl.clear();
     setState(() {
       _msgs.add(_IaMsg(texto: text, isUser: true));
@@ -37,17 +40,21 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
     });
     _scrollToBottom();
     try {
-      final r = await ref
-          .read(apiClientProvider)
-          .dio
-          .post('/api/ia/chat', data: {'mensagem': text});
-      final resposta = r.data['resposta'] as String? ?? r.data.toString();
+      final resposta = await IaRepository(ref.read(apiClientProvider)).chat(text);
       if (mounted) {
         setState(() => _msgs.add(_IaMsg(texto: resposta, isUser: false)));
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _msgs.add(_IaMsg(texto: 'Erro: $e', isUser: false)));
+        setState(
+          () => _msgs.add(
+            _IaMsg(
+              texto: e is IaOperationalException ? e.message : 'Erro: $e',
+              isUser: false,
+            ),
+          ),
+        );
+        await IaQuotaUpgrade.handleError(context, ref, e);
       }
     } finally {
       if (mounted) setState(() => _loading = false);

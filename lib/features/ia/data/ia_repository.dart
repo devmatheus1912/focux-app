@@ -1,18 +1,33 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../subscription/models/subscription_plan.dart';
 
 class IaOperationalException implements Exception {
   final String message;
   final String? reference;
   final int? statusCode;
   final bool retryable;
+  final String? codigo;
+  final String? upgradePlano;
 
   const IaOperationalException({
     required this.message,
     this.reference,
     this.statusCode,
     required this.retryable,
+    this.codigo,
+    this.upgradePlano,
   });
+
+  bool get quotaExhausted => codigo == 'IA_QUOTA_ESGOTADA';
+  bool get planUpgradeRequired => codigo == 'IA_PLANO_INSUFICIENTE';
+  bool get suggestsUpgrade =>
+      upgradePlano != null && upgradePlano!.trim().isNotEmpty;
+
+  SubscriptionPlan? get suggestedUpgradePlan {
+    if (!suggestsUpgrade) return null;
+    return subscriptionPlanFromApi(upgradePlano);
+  }
 
   factory IaOperationalException.fromDio(DioException error) {
     final status = error.response?.statusCode;
@@ -21,6 +36,10 @@ class IaOperationalException implements Exception {
         payload is Map
             ? (payload['erro'] ?? payload['message'])?.toString()
             : null;
+    final codigo =
+        payload is Map ? payload['codigo']?.toString() : null;
+    final upgradePlano =
+        payload is Map ? payload['upgradePlano']?.toString() : null;
     final fullMessage =
         rawMessage?.trim().isNotEmpty == true
             ? rawMessage!.trim()
@@ -30,7 +49,6 @@ class IaOperationalException implements Exception {
             ? 'Sem conexao com a IA agora.'
             : 'IA temporariamente indisponivel.';
     final reference = _extractReference(fullMessage);
-    // Strip "Ref: <id>" from message body so UI layer can render it once.
     final message =
         reference == null
             ? fullMessage
@@ -38,12 +56,15 @@ class IaOperationalException implements Exception {
                 .replaceAll(RegExp(r'\s*Ref:\s*[a-zA-Z0-9-]+\.?'), '')
                 .trim();
     final retryable =
-        status == null || status == 408 || status == 429 || status >= 500;
+        !(codigo == 'IA_QUOTA_ESGOTADA' || codigo == 'IA_PLANO_INSUFICIENTE') &&
+        (status == null || status == 408 || status == 429 || status >= 500);
     return IaOperationalException(
       message: message,
       reference: reference,
       statusCode: status,
       retryable: retryable,
+      codigo: codigo,
+      upgradePlano: upgradePlano,
     );
   }
 
@@ -64,22 +85,24 @@ class IaRepository {
     int diasPorSemana = 3,
     String? equipamentos,
   }) async {
-    final r = await _dio.post(
-      '/api/ia/gerar-treino',
-      options: _iaOpts,
-      data: {
-        'alunoId': alunoId,
-        if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
-        if (nivelAtividade != null && nivelAtividade.isNotEmpty)
-          'nivelAtividade': nivelAtividade,
-        if (restricoes != null && restricoes.isNotEmpty)
-          'restricoes': restricoes,
-        'diasPorSemana': diasPorSemana,
-        if (equipamentos != null && equipamentos.isNotEmpty)
-          'equipamentosDisponiveis': equipamentos,
-      },
-    );
-    return r.data['resposta'] as String;
+    return _withIaErrorContext(() async {
+      final r = await _dio.post(
+        '/api/ia/gerar-treino',
+        options: _iaOpts,
+        data: {
+          'alunoId': alunoId,
+          if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
+          if (nivelAtividade != null && nivelAtividade.isNotEmpty)
+            'nivelAtividade': nivelAtividade,
+          if (restricoes != null && restricoes.isNotEmpty)
+            'restricoes': restricoes,
+          'diasPorSemana': diasPorSemana,
+          if (equipamentos != null && equipamentos.isNotEmpty)
+            'equipamentosDisponiveis': equipamentos,
+        },
+      );
+      return r.data['resposta'] as String;
+    });
   }
 
   Future<String> gerarDieta(
@@ -90,29 +113,33 @@ class IaRepository {
     String? restricoes,
     int? caloriasAlvo,
   }) async {
-    final r = await _dio.post(
-      '/api/ia/gerar-dieta',
-      options: _iaOpts,
-      data: {
-        'alunoId': alunoId,
-        if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
-        if (pesoKg != null) 'pesoKg': pesoKg,
-        if (alturaCm != null) 'alturaCm': alturaCm,
-        if (restricoes != null && restricoes.isNotEmpty)
-          'restricoesAlimentares': restricoes,
-        if (caloriasAlvo != null) 'caloriasAlvo': caloriasAlvo,
-      },
-    );
-    return r.data['resposta'] as String;
+    return _withIaErrorContext(() async {
+      final r = await _dio.post(
+        '/api/ia/gerar-dieta',
+        options: _iaOpts,
+        data: {
+          'alunoId': alunoId,
+          if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
+          if (pesoKg != null) 'pesoKg': pesoKg,
+          if (alturaCm != null) 'alturaCm': alturaCm,
+          if (restricoes != null && restricoes.isNotEmpty)
+            'restricoesAlimentares': restricoes,
+          if (caloriasAlvo != null) 'caloriasAlvo': caloriasAlvo,
+        },
+      );
+      return r.data['resposta'] as String;
+    });
   }
 
   Future<String> chat(String mensagem, {int? alunoId}) async {
-    final r = await _dio.post(
-      '/api/ia/chat',
-      options: _iaOpts,
-      data: {'mensagem': mensagem, if (alunoId != null) 'alunoId': alunoId},
-    );
-    return r.data['resposta'] as String;
+    return _withIaErrorContext(() async {
+      final r = await _dio.post(
+        '/api/ia/chat',
+        options: _iaOpts,
+        data: {'mensagem': mensagem, if (alunoId != null) 'alunoId': alunoId},
+      );
+      return r.data['resposta'] as String;
+    });
   }
 
   Future<String> progressaoCarga(
@@ -120,17 +147,19 @@ class IaRepository {
     String? objetivo,
     String? historicoTreinos,
   }) async {
-    final r = await _dio.post(
-      '/api/ia/progressao-carga',
-      options: _iaOpts,
-      data: {
-        'alunoId': alunoId,
-        if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
-        if (historicoTreinos != null && historicoTreinos.isNotEmpty)
-          'historicoTreinos': historicoTreinos,
-      },
-    );
-    return r.data['resposta'] as String;
+    return _withIaErrorContext(() async {
+      final r = await _dio.post(
+        '/api/ia/progressao-carga',
+        options: _iaOpts,
+        data: {
+          'alunoId': alunoId,
+          if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
+          if (historicoTreinos != null && historicoTreinos.isNotEmpty)
+            'historicoTreinos': historicoTreinos,
+        },
+      );
+      return r.data['resposta'] as String;
+    });
   }
 
   // ── Copiloto ──────────────────────────────────────────────────────────────

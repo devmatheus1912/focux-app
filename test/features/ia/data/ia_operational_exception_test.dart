@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/ia/data/ia_repository.dart';
+import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 
 void main() {
   test('IaOperationalException extracts backend reference and retryable status', () {
@@ -26,19 +27,25 @@ void main() {
     expect(mapped.message, isNot(contains('abc-123')));
   });
 
-  test('IaOperationalException keeps message unchanged when no Ref present', () {
+  test('IaOperationalException maps IA quota exhausted with upgrade plan', () {
     final error = DioException(
       requestOptions: RequestOptions(path: '/api/ia/copiloto/insights'),
       response: Response(
         requestOptions: RequestOptions(path: '/api/ia/copiloto/insights'),
-        statusCode: 429,
-        data: {'erro': 'Limite de IA atingido agora.'},
+        statusCode: 403,
+        data: {
+          'erro': 'Cota mensal de IA esgotada (120 requisicoes/mes). Faca upgrade para ENTERPRISE.',
+          'codigo': 'IA_QUOTA_ESGOTADA',
+          'upgradePlano': 'ENTERPRISE',
+        },
       ),
     );
 
     final mapped = IaOperationalException.fromDio(error);
 
-    expect(mapped.reference, isNull);
-    expect(mapped.message, 'Limite de IA atingido agora.');
+    expect(mapped.quotaExhausted, isTrue);
+    expect(mapped.suggestsUpgrade, isTrue);
+    expect(mapped.retryable, isFalse);
+    expect(mapped.suggestedUpgradePlan?.apiName, 'ENTERPRISE');
   });
 }
