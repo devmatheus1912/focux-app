@@ -18,9 +18,9 @@ void main() {
     ).readAsStringSync();
     expect(assinatura, contains('Gerenciar assinatura'));
     expect(
-      File('lib/features/assinatura/screens/claude_paywall_layout.dart')
+      File('lib/features/assinatura/screens/paywall_layout.dart')
           .readAsStringSync(),
-      contains('_ClaudePlanOptionTile'),
+      contains('_PaywallPlanOptionTile'),
     );
     expect(assinatura, contains('openNativeSubscriptionManagement'));
   });

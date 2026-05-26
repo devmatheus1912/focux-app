@@ -30,7 +30,7 @@ import '../../../core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
 
-part 'claude_paywall_layout.dart';
+part 'paywall_layout.dart';
 
 /// Preview de upgrade só quando há dados úteis para quem ainda não é Enterprise.
 bool _enterprisePreviewIsInformative(
@@ -658,7 +658,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 140,
               ),
               children: [
-                _ClaudePaywallHeader(
+                _PaywallHeader(
                   ink: ink,
                   mute: mute,
                   primary: primary,
@@ -667,7 +667,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 ),
                 if (!kIsWeb && subscriptionUsesNativeStore) ...[
                   const SizedBox(height: 28),
-                  _ClaudeBillingSegment(
+                  _PaywallBillingSegment(
                     period: _billingPeriod,
                     ink: ink,
                     mute: mute,
@@ -697,7 +697,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     )];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: _ClaudePlanOptionTile(
+                    child: _PaywallPlanOptionTile(
                       plano: plano,
                       plan: plan,
                       isSelected: plan == selPlan,
@@ -735,10 +735,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     selPlan == SubscriptionPlan.ENTERPRISE &&
                     !isCurrentPlanSelected) ...[
                   const SizedBox(height: 16),
-                  _ClaudeUpgradeNudge(primary: primary, ink: ink, isDark: isDark),
+                  _PaywallUpgradeNudge(primary: primary, ink: ink, isDark: isDark),
                 ],
                 const SizedBox(height: 28),
-                _ClaudeFeaturePanel(
+                _PaywallFeaturePanel(
                   plano: selBackend,
                   plan: selPlan,
                   currentPlan: currentPlan,
@@ -754,7 +754,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   _trialStatus,
                 )) ...[
                   const SizedBox(height: 16),
-                  _ClaudeInlineNote(
+                  _PaywallInlineNote(
                     icon: Icons.card_giftcard_outlined,
                     text:
                         _loadingTrial
@@ -784,7 +784,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 ],
                 if (!_storeAvailable && !kIsWeb) ...[
                   const SizedBox(height: 12),
-                  _ClaudeInlineNote(
+                  _PaywallInlineNote(
                     icon: Icons.store_outlined,
                     text: 'Loja do dispositivo indisponível nesta sessão.',
                     ink: ink,
@@ -794,7 +794,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 ],
                 if (kIsWeb) ...[
                   const SizedBox(height: 12),
-                  _ClaudeInlineNote(
+                  _PaywallInlineNote(
                     icon: Icons.smartphone_outlined,
                     text:
                         'No celular, assine pela App Store ou Google Play.',
@@ -804,7 +804,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   ),
                 ],
                 const SizedBox(height: 20),
-                _ClaudeLegalFooter(
+                _PaywallLegalFooter(
                   ink: ink,
                   mute: mute,
                   showStoreBillingNote: subscriptionUsesNativeStore,
@@ -1000,7 +1000,7 @@ class _AssinaturaStickyFooter extends StatelessWidget {
         ],
         if (showLegalConsent) ...[
           const SizedBox(height: 10),
-          _ClaudeLegalConsentLine(mute: mute, primary: primary),
+          _PaywallLegalConsentLine(mute: mute, primary: primary),
         ],
       ],
     );

@@ -10,14 +10,14 @@ Duration _paywallMotion(BuildContext context) =>
         ? Duration.zero
         : const Duration(milliseconds: 220);
 
-class _ClaudePaywallHeader extends StatelessWidget {
+class _PaywallHeader extends StatelessWidget {
   final Color ink;
   final Color mute;
   final Color primary;
   final SubscriptionPlan currentPlan;
   final SubscriptionPlan selectedPlan;
 
-  const _ClaudePaywallHeader({
+  const _PaywallHeader({
     required this.ink,
     required this.mute,
     required this.primary,
@@ -92,7 +92,7 @@ class _ClaudePaywallHeader extends StatelessWidget {
   }
 }
 
-class _ClaudeBillingSegment extends StatelessWidget {
+class _PaywallBillingSegment extends StatelessWidget {
   final SubscriptionBillingPeriod period;
   final Color ink;
   final Color mute;
@@ -102,7 +102,7 @@ class _ClaudeBillingSegment extends StatelessWidget {
   final String annualSavingsLabel;
   final ValueChanged<SubscriptionBillingPeriod> onChanged;
 
-  const _ClaudeBillingSegment({
+  const _PaywallBillingSegment({
     required this.period,
     required this.ink,
     required this.mute,
@@ -300,7 +300,7 @@ class _ClaudeBillingSegment extends StatelessWidget {
   }
 }
 
-class _ClaudePlanOptionTile extends StatelessWidget {
+class _PaywallPlanOptionTile extends StatelessWidget {
   final Plano plano;
   final SubscriptionPlan plan;
   final bool isSelected;
@@ -317,7 +317,7 @@ class _ClaudePlanOptionTile extends StatelessWidget {
   final bool isDark;
   final VoidCallback onTap;
 
-  const _ClaudePlanOptionTile({
+  const _PaywallPlanOptionTile({
     required this.plano,
     required this.plan,
     required this.isSelected,
@@ -385,7 +385,7 @@ class _ClaudePlanOptionTile extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _ClaudeRadio(
+                    _PaywallRadio(
                       selected: isSelected,
                       primary: primary,
                       line: line,
@@ -487,12 +487,12 @@ class _ClaudePlanOptionTile extends StatelessWidget {
   }
 }
 
-class _ClaudeRadio extends StatelessWidget {
+class _PaywallRadio extends StatelessWidget {
   final bool selected;
   final Color primary;
   final Color line;
 
-  const _ClaudeRadio({
+  const _PaywallRadio({
     required this.selected,
     required this.primary,
     required this.line,
@@ -528,12 +528,12 @@ class _ClaudeRadio extends StatelessWidget {
   }
 }
 
-class _ClaudeUpgradeNudge extends StatelessWidget {
+class _PaywallUpgradeNudge extends StatelessWidget {
   final Color primary;
   final Color ink;
   final bool isDark;
 
-  const _ClaudeUpgradeNudge({
+  const _PaywallUpgradeNudge({
     required this.primary,
     required this.ink,
     required this.isDark,
@@ -566,7 +566,7 @@ class _ClaudeUpgradeNudge extends StatelessWidget {
   }
 }
 
-class _ClaudeFeaturePanel extends StatelessWidget {
+class _PaywallFeaturePanel extends StatelessWidget {
   final Plano plano;
   final SubscriptionPlan plan;
   final SubscriptionPlan currentPlan;
@@ -576,7 +576,7 @@ class _ClaudeFeaturePanel extends StatelessWidget {
   final Color primary;
   final bool isDark;
 
-  const _ClaudeFeaturePanel({
+  const _PaywallFeaturePanel({
     required this.plano,
     required this.plan,
     required this.currentPlan,
@@ -695,14 +695,14 @@ class _ClaudeFeaturePanel extends StatelessWidget {
   }
 }
 
-class _ClaudeInlineNote extends StatelessWidget {
+class _PaywallInlineNote extends StatelessWidget {
   final IconData icon;
   final String text;
   final Color ink;
   final Color mute;
   final bool isDark;
 
-  const _ClaudeInlineNote({
+  const _PaywallInlineNote({
     required this.icon,
     required this.text,
     required this.ink,
@@ -737,11 +737,11 @@ class _ClaudeInlineNote extends StatelessWidget {
   }
 }
 
-class _ClaudeLegalConsentLine extends StatelessWidget {
+class _PaywallLegalConsentLine extends StatelessWidget {
   final Color mute;
   final Color primary;
 
-  const _ClaudeLegalConsentLine({
+  const _PaywallLegalConsentLine({
     required this.mute,
     required this.primary,
   });
@@ -795,14 +795,14 @@ class _ClaudeLegalConsentLine extends StatelessWidget {
   }
 }
 
-class _ClaudeLegalFooter extends StatelessWidget {
+class _PaywallLegalFooter extends StatelessWidget {
   final Color ink;
   final Color mute;
   final bool showStoreBillingNote;
   final bool restoring;
   final VoidCallback? onRestore;
 
-  const _ClaudeLegalFooter({
+  const _PaywallLegalFooter({
     required this.ink,
     required this.mute,
     required this.showStoreBillingNote,
