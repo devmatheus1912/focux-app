@@ -13,7 +13,7 @@ void main() {
     expect(screen, contains('semanticsLabel:'));
     expect(screen, contains('Não informado'));
     expect(screen, contains('Política de privacidade'));
-    expect(screen, contains('Migração Mágica'));
+    expect(screen, contains('Migração Focux'));
     expect(screen, contains('segurança'));
     expect(screen, isNot(contains('Nao informado')));
     expect(screen, isNot(contains('Politica de privacidade')));

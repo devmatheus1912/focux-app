@@ -771,8 +771,8 @@ class _PerfilBody extends StatelessWidget {
                           ),
                           _ActionTile(
                             icon: Icons.bolt_outlined,
-                            label: 'Migração Mágica',
-                            value: 'Abrir ferramenta',
+                            label: 'Migração Focux',
+                            value: 'Importar alunos com IA',
                             accent: accent,
                             actionInk: actionInk,
                             mute: mute,
