@@ -51,6 +51,36 @@ class WalletPixValidation {
     };
   }
 
+  /// Formata valor vindo da API para exibição mascarada no campo.
+  static String formatDisplay(String? tipo, String raw) {
+    if (raw.trim().isEmpty) return raw;
+
+    final formatter = switch (tipo) {
+      'CPF' => _CpfInputFormatter(),
+      'CNPJ' => _CnpjInputFormatter(),
+      'TELEFONE' => _PhoneInputFormatter(),
+      _ => null,
+    };
+    if (formatter == null) return raw.trim();
+
+    final digits = raw.replaceAll(RegExp(r'\D'), '');
+    if (digits.isEmpty) return raw.trim();
+
+    return formatter
+        .formatEditUpdate(
+          const TextEditingValue(),
+          TextEditingValue(text: digits),
+        )
+        .text;
+  }
+
+  static List<TextInputFormatter> formattersForConta() {
+    return [
+      FilteringTextInputFormatter.allow(RegExp(r'[\d-]')),
+      LengthLimitingTextInputFormatter(14),
+    ];
+  }
+
   static String? validateTipo(String? tipo) {
     if (tipo == null || tipo.isEmpty) {
       return 'Selecione o tipo de chave PIX';

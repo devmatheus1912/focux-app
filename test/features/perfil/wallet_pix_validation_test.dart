@@ -34,6 +34,17 @@ void main() {
       );
     });
 
+    test('formata chave salva para exibição', () {
+      expect(
+        WalletPixValidation.formatDisplay('CPF', '12345678909'),
+        '123.456.789-09',
+      );
+      expect(
+        WalletPixValidation.formatDisplay('TELEFONE', '11999998888'),
+        '(11) 99999-8888',
+      );
+    });
+
     test('normaliza chave numérica para API', () {
       expect(
         WalletPixValidation.normalizeForApi('CPF', '123.456.789-09'),

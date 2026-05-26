@@ -38,7 +38,12 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   String? _tipoChavePix;
   bool _carregando = false;
   bool _inicializado = false;
-  bool _chavePixDirty = false;
+
+  String? _snapshotTipo;
+  String _snapshotChave = '';
+  String _snapshotBanco = '';
+  String _snapshotAgencia = '';
+  String _snapshotConta = '';
 
   static const List<String> _tiposChavePix = [
     'CPF',
@@ -51,36 +56,98 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   @override
   void initState() {
     super.initState();
-    _chavePixCtrl.addListener(_onChavePixChanged);
+    for (final ctrl in [
+      _chavePixCtrl,
+      _bancoCtrl,
+      _agenciaCtrl,
+      _contaCtrl,
+    ]) {
+      ctrl.addListener(_onFormChanged);
+    }
   }
 
-  void _onChavePixChanged() {
-    if (!_chavePixDirty && _chavePixCtrl.text.isNotEmpty) {
-      setState(() => _chavePixDirty = true);
-    } else if (_chavePixDirty) {
-      setState(() {});
-    }
+  void _onFormChanged() {
+    if (_inicializado) setState(() {});
   }
 
   @override
   void dispose() {
-    _chavePixCtrl
-      ..removeListener(_onChavePixChanged)
-      ..dispose();
-    _bancoCtrl.dispose();
-    _agenciaCtrl.dispose();
-    _contaCtrl.dispose();
+    for (final ctrl in [
+      _chavePixCtrl,
+      _bancoCtrl,
+      _agenciaCtrl,
+      _contaCtrl,
+    ]) {
+      ctrl
+        ..removeListener(_onFormChanged)
+        ..dispose();
+    }
     super.dispose();
+  }
+
+  bool get _hasUnsavedChanges {
+    if (!_inicializado) return false;
+    return _tipoChavePix != _snapshotTipo ||
+        _chavePixCtrl.text != _snapshotChave ||
+        _bancoCtrl.text != _snapshotBanco ||
+        _agenciaCtrl.text != _snapshotAgencia ||
+        _contaCtrl.text != _snapshotConta;
+  }
+
+  void _captureSnapshot() {
+    _snapshotTipo = _tipoChavePix;
+    _snapshotChave = _chavePixCtrl.text;
+    _snapshotBanco = _bancoCtrl.text;
+    _snapshotAgencia = _agenciaCtrl.text;
+    _snapshotConta = _contaCtrl.text;
   }
 
   void _preencherDadosAtuais(PerfilPersonal perfil) {
     if (_inicializado) return;
     _inicializado = true;
-    _chavePixCtrl.text = perfil.chavePix ?? '';
     _tipoChavePix = perfil.tipoChavePix;
+    _chavePixCtrl.text = WalletPixValidation.formatDisplay(
+      _tipoChavePix,
+      perfil.chavePix ?? '',
+    );
     _bancoCtrl.text = perfil.banco ?? '';
     _agenciaCtrl.text = perfil.agencia ?? '';
     _contaCtrl.text = perfil.conta ?? '';
+    _captureSnapshot();
+  }
+
+  Future<bool> _confirmDiscard() async {
+    final discard = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Descartar alterações?'),
+          content: const Text(
+            'Você alterou dados da carteira. Se sair agora, as mudanças não serão salvas.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Continuar editando'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Descartar'),
+            ),
+          ],
+        );
+      },
+    );
+    return discard ?? false;
+  }
+
+  Future<void> _handleBack() async {
+    if (!_hasUnsavedChanges) {
+      if (mounted) context.pop();
+      return;
+    }
+    final discard = await _confirmDiscard();
+    if (discard && mounted) context.pop();
   }
 
   Future<void> _salvar() async {
@@ -105,6 +172,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
       });
       ref.invalidate(perfilProvider);
       if (mounted) {
+        _captureSnapshot();
         FeedbackHelper.showSnackBar(
           context,
           const SnackBar(content: Text('Carteira atualizada com sucesso.')),
@@ -144,7 +212,19 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
       ),
     );
     if (selected == null || !mounted) return;
-    setState(() => _tipoChavePix = selected);
+    final normalized = WalletPixValidation.normalizeForApi(
+      _tipoChavePix,
+      _chavePixCtrl.text,
+    );
+    setState(() {
+      _tipoChavePix = selected;
+      if (normalized.isNotEmpty) {
+        _chavePixCtrl.text = WalletPixValidation.formatDisplay(
+          selected,
+          normalized,
+        );
+      }
+    });
     field.didChange(selected);
   }
 
@@ -153,11 +233,17 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     final perfilAsync = ref.watch(perfilProvider);
     final primary = Theme.of(context).colorScheme.primary;
 
-    return FxShellScaffold(
+    return PopScope(
+      canPop: !_hasUnsavedChanges,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        await _handleBack();
+      },
+      child: FxShellScaffold(
       useMesh: true,
       appBar: FxShellAppBar(
         title: 'Carteira e PIX',
-        onBack: () => context.pop(),
+        onBack: _handleBack,
       ),
       body: perfilAsync.when(
         loading: () => const FxLoading(),
@@ -171,7 +257,9 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Semantics(
+                  FxStaggerItem(
+                    index: 0,
+                    child: Semantics(
                     container: true,
                     label:
                         'Configure PIX e dados bancários para receber dos alunos.',
@@ -199,10 +287,16 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                       ),
                     ),
                   ),
+                  ),
                   const SizedBox(height: TokensStrip.s4),
-                  const _ResumoMensalCard(),
+                  const FxStaggerItem(
+                    index: 1,
+                    child: _ResumoMensalCard(),
+                  ),
                   const SizedBox(height: TokensStrip.s4),
-                  _WalletSectionCard(
+                  FxStaggerItem(
+                    index: 2,
+                    child: _WalletSectionCard(
                     title: 'Dados PIX',
                     child: Column(
                       children: [
@@ -298,8 +392,11 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                       ],
                     ),
                   ),
+                  ),
                   const SizedBox(height: TokensStrip.s4),
-                  _WalletSectionCard(
+                  FxStaggerItem(
+                    index: 3,
+                    child: _WalletSectionCard(
                     title: 'Dados bancários',
                     subtitle: 'Opcional — complementa o PIX para transferências.',
                     child: Column(
@@ -345,11 +442,9 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                                   'Conta',
                                   icon: Icons.numbers_rounded,
                                 ),
-                                keyboardType: TextInputType.number,
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly,
-                                  LengthLimitingTextInputFormatter(12),
-                                ],
+                                keyboardType: TextInputType.text,
+                                inputFormatters:
+                                    WalletPixValidation.formattersForConta(),
                               ),
                             );
 
@@ -375,12 +470,16 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                       ],
                     ),
                   ),
+                  ),
                   const SizedBox(height: TokensStrip.s5),
-                  FxLiquidPrimaryButton(
+                  FxStaggerItem(
+                    index: 4,
+                    child: FxLiquidPrimaryButton(
                     label: 'Salvar dados',
                     icon: Icons.save_rounded,
                     loading: _carregando,
                     onPressed: _carregando ? null : _salvar,
+                  ),
                   ),
                 ],
               ),
@@ -388,6 +487,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
           );
         },
       ),
+    ),
     );
   }
 }
@@ -649,13 +749,17 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
                 ),
                 if (resumo.totalPrevisto > 0) ...[
                   const SizedBox(height: TokensStrip.s3),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(999),
-                    child: LinearProgressIndicator(
-                      value: percentRecebido,
-                      minHeight: 6,
-                      backgroundColor: line,
-                      color: primary,
+                  Semantics(
+                    label:
+                        '${(percentRecebido * 100).round()} por cento do previsto recebido',
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(999),
+                      child: LinearProgressIndicator(
+                        value: percentRecebido,
+                        minHeight: 6,
+                        backgroundColor: line,
+                        color: primary,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -782,7 +886,7 @@ class _Stat extends StatelessWidget {
           child: Text(
             valor,
             style: TextStyle(
-              fontSize: 15,
+              fontSize: 16,
               fontWeight: FontWeight.w800,
               color: color,
             ),
