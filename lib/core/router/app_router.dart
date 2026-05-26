@@ -769,6 +769,10 @@ class AppRouter {
             builder: (context, state) => const MigracaoMagicaScreen(),
           ),
           GoRoute(
+            path: '/migracao-focux',
+            redirect: (context, state) => '/migracao-magica',
+          ),
+          GoRoute(
             path: '/growth/migracao',
             redirect: (context, state) => '/migracao-magica',
           ),

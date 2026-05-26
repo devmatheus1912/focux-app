@@ -1,6 +1,13 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/api/api_client.dart';
+import 'package:focux_app/core/widgets/mesh_scope.dart';
+import 'package:focux_app/features/growth/screens/migracao_magica_screen.dart';
+import 'package:focux_app/features/planos/data/planos_repository.dart';
+import 'package:focux_app/features/planos/providers/plano_features_provider.dart';
 
 void main() {
   test('migracao focux usa polish 10/10 e copy alinhada', () {
@@ -9,14 +16,51 @@ void main() {
     ).readAsStringSync();
 
     expect(screen, contains('Migração Focux'));
+    expect(screen, contains('Importe alunos com IA'));
     expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('FxStaggerItem'));
+    expect(screen, contains('prefersReducedMotion'));
     expect(screen, contains('PopScope'));
     expect(screen, contains('Semantics('));
     expect(screen, contains('friendlyError'));
     expect(screen, contains('Colar da área de transferência'));
     expect(screen, contains('Nenhum aluno identificado'));
+    expect(screen, contains('/api/v1/migracao/preview'));
+    expect(screen, contains('Já cadastrado'));
+    expect(screen, contains('Sem upload de arquivo'));
     expect(screen, isNot(contains('Migração Mágica')));
     expect(screen, isNot(contains('Cole PDF, Excel')));
+  });
+
+  testWidgets('migracao focux pump sem titulo duplicado no hero', (tester) async {
+    tester.view.physicalSize = const Size(430, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          planoFeaturesProvider.overrideWith(
+            (ref) =>
+                PlanoFeaturesNotifier(PlanosRepository(ApiClient()))
+                  ..state = const AsyncData(PlanoFeatures.optimisticEnterprise),
+          ),
+        ],
+        child: const MaterialApp(
+          home: MeshScope(
+            active: true,
+            child: MigracaoMagicaScreen(),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('Migração Focux'), findsOneWidget);
+    expect(find.text('Importe alunos com IA'), findsOneWidget);
+    expect(find.text('Iniciar migração'), findsOneWidget);
+    expect(find.text('Colar da área de transferência'), findsOneWidget);
+    expect(find.textContaining('Sem upload de arquivo'), findsOneWidget);
   });
 }

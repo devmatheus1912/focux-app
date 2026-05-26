@@ -33,9 +33,9 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
   bool _emptyResult = false;
 
   static const _passos = [
-    'Cole texto exportado, print ou planilha copiada de outro app',
-    'A IA extrai nome, e-mail, telefone e objetivo',
-    'Revise a lista, remova o que não quiser e confirme no Focux',
+    'Copie o texto de planilha, exportação ou print — não há upload de PDF',
+    'Toque Iniciar migração: a IA extrai nome, e-mail, telefone e objetivo',
+    'Revise a lista, remova duplicados ou erros e confirme para salvar',
   ];
 
   @override
@@ -95,13 +95,14 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
       );
 
       if (!mounted) return;
-      final parsed = _parsarResultado(response.data['resultadoEstruturado']);
+      var parsed = _parsarResultado(response.data['resultadoEstruturado']);
+      parsed = await _enriquecerComPreview(parsed);
       setState(() {
         _alunosEncontrados = parsed;
         _emptyResult = parsed == null || parsed.isEmpty;
       });
 
-      if (parsed != null && parsed.isNotEmpty) {
+      if (parsed != null && parsed.isNotEmpty && mounted) {
         FeedbackHelper.showSuccess(
           context,
           '${parsed.length} aluno(s) identificado(s) pela IA.',
@@ -157,6 +158,29 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
       alunos.removeAt(index);
       if (alunos.isEmpty) _alunosEncontrados = null;
     });
+  }
+
+  Future<List<Map<String, dynamic>>?> _enriquecerComPreview(
+    List<Map<String, dynamic>>? alunos,
+  ) async {
+    if (alunos == null || alunos.isEmpty) return alunos;
+    try {
+      final api = ref.read(apiClientProvider);
+      final response = await api.dio.post(
+        '/api/v1/migracao/preview',
+        data: {'alunos': alunos},
+      );
+      final preview = response.data['alunos'];
+      if (preview is List) {
+        return preview
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList();
+      }
+    } catch (_) {
+      // Preview é enriquecimento; fallback mantém lista da IA.
+    }
+    return alunos;
   }
 
   List<Map<String, dynamic>>? _parsarResultado(dynamic data) {
@@ -254,6 +278,29 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     );
   }
 
+  Duration _motionDuration(BuildContext context) =>
+      TokensStrip.prefersReducedMotion(context)
+          ? Duration.zero
+          : const Duration(milliseconds: 280);
+
+  Widget _stagger(
+    BuildContext context, {
+    required int index,
+    required Widget child,
+    Key? key,
+  }) {
+    final reduce = TokensStrip.prefersReducedMotion(context);
+    return FxStaggerItem(
+      key: key,
+      index: index,
+      staggerDelay:
+          reduce ? Duration.zero : const Duration(milliseconds: 60),
+      duration: reduce ? Duration.zero : const Duration(milliseconds: 400),
+      slideOffset: reduce ? 0 : 20,
+      child: child,
+    );
+  }
+
   Widget _buildContent(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
@@ -286,12 +333,13 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              FxStaggerItem(
+              _stagger(
+                context,
                 index: 0,
                 child: Semantics(
                   header: true,
                   label:
-                      'Migração Focux. Traga alunos de outro app colando texto desestruturado.',
+                      'Importe alunos com IA colando texto desestruturado. Sem upload de PDF.',
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -328,7 +376,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       ),
                       const SizedBox(height: TokensStrip.s2),
                       Text(
-                        'Migração Focux',
+                        'Importe alunos com IA',
                         style: AppTypography.inter(
                           fontSize: 28,
                           fontWeight: FontWeight.w800,
@@ -339,7 +387,8 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Traga seus alunos de qualquer app. Cole o texto e a IA extrai tudo automaticamente.',
+                        'Copie o texto de planilha, exportação ou print e cole abaixo. '
+                        'A IA estrutura os dados — você confirma antes de salvar.',
                         style: TextStyle(fontSize: 14, color: mute, height: 1.55),
                       ),
                     ],
@@ -347,9 +396,12 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                 ),
               ),
               const SizedBox(height: TokensStrip.s4),
-              FxStaggerItem(
+              _stagger(
+                context,
                 index: 1,
-                child: Container(
+                child: Semantics(
+                  label: 'Como funciona em três passos',
+                  child: Container(
                   padding: const EdgeInsets.fromLTRB(
                     TokensStrip.s5,
                     20,
@@ -378,7 +430,9 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       ),
                       const SizedBox(height: 10),
                       ..._passos.asMap().entries.map((entry) {
-                        return Padding(
+                        return Semantics(
+                          label: 'Passo ${entry.key + 1}. ${entry.value}',
+                          child: Padding(
                           padding: const EdgeInsets.only(bottom: 10),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -413,14 +467,17 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                               ),
                             ],
                           ),
+                        ),
                         );
                       }),
                     ],
                   ),
                 ),
               ),
+              ),
               const SizedBox(height: TokensStrip.s4),
-              FxStaggerItem(
+              _stagger(
+                context,
                 index: 2,
                 child: Container(
                   padding: const EdgeInsets.all(TokensStrip.s4),
@@ -438,7 +495,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Cole linhas soltas, exportações ou prints transcritos.',
+                        'Sem upload de arquivo — cole o texto copiado do PDF ou planilha.',
                         style: TextStyle(fontSize: 12, color: mute, height: 1.35),
                       ),
                       const SizedBox(height: TokensStrip.s3),
@@ -500,7 +557,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                 ),
               ),
               AnimatedSwitcher(
-                duration: const Duration(milliseconds: 280),
+                duration: _motionDuration(context),
                 switchInCurve: Curves.easeOutCubic,
                 switchOutCurve: Curves.easeInCubic,
                 child: _buildResultsSection(
@@ -532,7 +589,8 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     required List<Map<String, dynamic>>? alunos,
   }) {
     if (_emptyResult) {
-      return FxStaggerItem(
+      return _stagger(
+        context,
         key: key,
         index: 3,
         child: Padding(
@@ -569,7 +627,8 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
       return SizedBox(key: key);
     }
 
-    return FxStaggerItem(
+    return _stagger(
+      context,
       key: key,
       index: 3,
       child: Padding(
@@ -598,6 +657,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
               final email = (aluno['email'] ?? '').toString();
               final telefone = (aluno['telefone'] ?? '').toString();
               final objetivo = (aluno['objetivo'] ?? '').toString();
+              final duplicado = aluno['duplicado'] == true;
               final meta = [
                 if (email.isNotEmpty) email,
                 if (telefone.isNotEmpty) telefone,
@@ -607,7 +667,10 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
               return Padding(
                 padding: const EdgeInsets.only(bottom: TokensStrip.s2),
                 child: Semantics(
-                  label: 'Aluno $nome. $meta',
+                  label:
+                      duplicado
+                          ? 'Aluno $nome duplicado. $meta'
+                          : 'Aluno $nome. $meta',
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
@@ -659,6 +722,27 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                                   ),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                              if (duplicado) ...[
+                                const SizedBox(height: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: EagleTokens.warnSoft,
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  child: Text(
+                                    'Já cadastrado',
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: EagleTokens.warn,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ],
