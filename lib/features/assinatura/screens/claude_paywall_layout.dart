@@ -41,7 +41,7 @@ class _ClaudePaywallHeader extends StatelessWidget {
       SubscriptionPlan.PREMIUM =>
         comparing
             ? 'Plano ${currentPlan.apiName} ativo. Veja o que muda ao evoluir para Enterprise.'
-            : 'Desbloqueie alunos ilimitados, IA avançada e white-label no Enterprise.',
+            : 'Desbloqueie mais IA, alunos ilimitados e white-label no Enterprise.',
       _ =>
         'IA Copiloto, financeiro e treinos em um fluxo seguro pela ${subscriptionChannelLabel()}.',
     };
@@ -556,7 +556,7 @@ class _ClaudeUpgradeNudge extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Upgrade recomendado: IA ilimitada, white-label e operação sem teto no Enterprise.',
+              'Upgrade recomendado: ${PlanoIaLimits.enterprise} IA/mês, white-label e alunos ilimitados no Enterprise.',
               style: TokensStrip.body(color: ink),
             ),
           ),
@@ -595,6 +595,20 @@ class _ClaudeFeaturePanel extends StatelessWidget {
               : 'Até ${plano.limiteAlunos} alunos',
       included: true,
     ),
+    if (plan != SubscriptionPlan.FREE)
+      (
+        label: plan == SubscriptionPlan.ENTERPRISE
+            ? '${PlanoIaLimits.enterprise} interações de IA/mês'
+            : '${PlanoIaLimits.premium} interações de IA/mês',
+        included: true,
+      ),
+    if (plan != SubscriptionPlan.FREE)
+      (
+        label: plan == SubscriptionPlan.ENTERPRISE
+            ? '${MigracaoFotoLimits.enterprise} fotos de migração/mês'
+            : '${MigracaoFotoLimits.premium} fotos de migração/mês',
+        included: true,
+      ),
     (label: 'IA Copiloto avançada', included: plan != SubscriptionPlan.FREE),
     (label: 'Financeiro e CRM', included: plano.temFinanceiro),
     (label: 'Agenda e relatórios', included: plano.temAgenda && plano.temRelatorios),

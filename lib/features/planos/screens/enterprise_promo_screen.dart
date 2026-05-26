@@ -10,6 +10,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
+import '../../../features/subscription/utils/plano_ia_limits.dart';
 import '../../../features/subscription/store_subscription_policy.dart';
 import '../data/planos_repository.dart';
 
@@ -124,9 +125,9 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-                ...const [
+                ...[
                   'Alunos ilimitados',
-                  'IA completa + RAG',
+                  '${PlanoIaLimits.enterprise} interações de IA/mês',
                   'White-label com sua marca',
                   'Identidade visual premium',
                   'Automações para escalar a operação',

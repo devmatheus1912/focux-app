@@ -2,6 +2,6 @@
 class MigracaoFotoLimits {
   MigracaoFotoLimits._();
 
-  static const premium = 10;
+  static const premium = 15;
   static const enterprise = 50;
 }

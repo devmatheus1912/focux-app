@@ -16,7 +16,6 @@ void main() {
         'relatorios': false,
         'whiteLabel': true,
         'iaCopiloto': true,
-        'iaIlimitada': false,
         'migracaoFoto': true,
       },
     });
@@ -26,7 +25,6 @@ void main() {
     expect(features.cacheSavedAt, cachedAt);
     expect(features.syncWarning, 'Usando plano salvo.');
     expect(features.financeiro, isTrue);
-    expect(features.iaIlimitada, isFalse);
   });
 
   test('PlanoFeatures can mark stale refresh without changing entitlements', () {
@@ -37,8 +35,8 @@ void main() {
       relatorios: true,
       whiteLabel: true,
       iaCopiloto: true,
-      iaIlimitada: true,
       migracaoFoto: true,
+      limiteIaMensal: 400,
     );
 
     final stale = fresh.copyWithOperationalState(

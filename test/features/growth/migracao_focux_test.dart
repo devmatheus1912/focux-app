@@ -48,7 +48,6 @@ void main() {
                       relatorios: true,
                       whiteLabel: false,
                       iaCopiloto: true,
-                      iaIlimitada: false,
                       migracaoFoto: true,
                       limiteMigracaoFotoMensal: MigracaoFotoLimits.premium,
                       migracaoFotosUsadasMes: 2,

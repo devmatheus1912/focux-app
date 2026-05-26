@@ -18,7 +18,8 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/planos/data/planos_repository.dart';
 import '../../../features/planos/providers/plano_features_provider.dart';
-import '../../../features/subscription/models/subscription_plan.dart';
+import '../../../features/subscription/utils/plano_ia_limits.dart';
+import '../../../features/growth/utils/migracao_foto_limits.dart';
 import '../../../features/subscription/services/iap_service.dart';
 import '../../../features/subscription/store_subscription_policy.dart';
 import '../../../features/subscription/subscription_products.dart';
@@ -106,9 +107,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   String _planSubtitle(SubscriptionPlan plan) {
     return switch (plan) {
       SubscriptionPlan.PREMIUM =>
-        'IA, financeiro e identidade visual para escalar com previsibilidade.',
+        'IA (${PlanoIaLimits.premium}/mês), financeiro e relatórios para escalar com previsibilidade.',
       SubscriptionPlan.ENTERPRISE =>
-        'Alunos e IA ilimitados, white-label e automações para escalar sua operação.',
+        'Até ${PlanoIaLimits.enterprise} IA/mês, alunos ilimitados, white-label e automações.',
       _ => 'Recursos essenciais para começar.',
     };
   }

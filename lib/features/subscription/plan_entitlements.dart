@@ -1,5 +1,6 @@
-import '../subscription/models/subscription_plan.dart';
 import '../growth/utils/migracao_foto_limits.dart';
+import '../subscription/models/subscription_plan.dart';
+import '../subscription/utils/plano_ia_limits.dart';
 
 /// Copy e plano-alvo para paywalls contextuais (fonte única no app).
 class PlanEntitlements {
@@ -11,7 +12,6 @@ class PlanEntitlements {
   }) {
     switch (capability) {
       case 'whiteLabel':
-      case 'iaIlimitada':
         return SubscriptionPlan.ENTERPRISE;
       case 'financeiro':
       case 'relatorios':
@@ -38,7 +38,6 @@ class PlanEntitlements {
     final headline = switch (capability) {
       'financeiro' => 'Cobre seus alunos com controle total',
       'iaCopiloto' => 'IA Copiloto para escalar sem perder qualidade',
-      'iaIlimitada' => 'IA ilimitada para operação em alto volume',
       'whiteLabel' => 'Sua marca em cada touchpoint',
       'relatorios' => 'Relatórios que mostram onde está o dinheiro',
       'migracaoFoto' => 'Importe alunos por foto ou print',
@@ -51,13 +50,12 @@ class PlanEntitlements {
         'Mensalidades, inadimplência e resumo financeiro fazem parte do plano $planLabel. '
             'Personal trainers que cobram no app convertem mais e perdem menos alunos.',
       'iaCopiloto' =>
-        'Gere treinos, insights e respostas com IA no plano $planLabel. '
-            'No Enterprise, a cota de IA é ilimitada.',
+        'Gere treinos, insights e respostas com IA no plano $planLabel '
+            '(${PlanoIaLimits.premium} interações/mês). '
+            'Enterprise: ${PlanoIaLimits.enterprise}/mês.',
       'migracaoFoto' =>
         'Importar alunos por foto/print (OCR gratuito) está no $planLabel '
             '— ${MigracaoFotoLimits.premium}/mês. Enterprise: ${MigracaoFotoLimits.enterprise}/mês.',
-      'iaIlimitada' =>
-        'Você atingiu o limite de IA do Premium. No Enterprise, Copiloto e RAG não têm teto mensal.',
       'whiteLabel' =>
         'Cores, logo e identidade visual premium exigem Enterprise — '
             'sua marca em cada tela do app, não um visual genérico.',
@@ -101,9 +99,13 @@ class PlanEntitlements {
       return 'Você usa $left de ${usage.limiteAlunos} vagas no ${usage.planoLabel}. '
           'Premium libera até 20 alunos.';
     }
+    if (usage.iaAtLimit) {
+      return 'Cota de IA esgotada (${usage.limiteIaMensal}/mês). '
+          '${usage.plano == SubscriptionPlan.PREMIUM ? 'Enterprise libera até ${PlanoIaLimits.enterprise} interações/mês.' : 'Renova no próximo ciclo.'}';
+    }
     if (usage.iaNearLimit) {
       return 'Você usou ${usage.iaUsadaMes} de ${usage.limiteIaMensal} interações de IA este mês. '
-          'Enterprise remove o teto.';
+          '${usage.plano == SubscriptionPlan.PREMIUM ? 'Enterprise sobe para ${PlanoIaLimits.enterprise}/mês.' : 'Use com parcimônia até renovar.'}';
     }
     return null;
   }
@@ -114,7 +116,11 @@ class PlanEntitlements {
           ? SubscriptionPlan.PREMIUM
           : SubscriptionPlan.ENTERPRISE;
     }
-    if (usage.iaNearLimit) return SubscriptionPlan.ENTERPRISE;
+    if (usage.iaNearLimit || usage.iaAtLimit) {
+      return usage.plano == SubscriptionPlan.PREMIUM
+          ? SubscriptionPlan.ENTERPRISE
+          : null;
+    }
     return null;
   }
 }
@@ -162,9 +168,13 @@ class PlanoUsageSnapshot {
   }
 
   bool get iaNearLimit {
-    if (limiteIaMensal <= 0 || plano == SubscriptionPlan.ENTERPRISE) {
-      return false;
-    }
+    if (limiteIaMensal <= 0) return false;
+    if (iaAtLimit) return false;
     return iaUsadaMes >= (limiteIaMensal * 0.8).ceil();
+  }
+
+  bool get iaAtLimit {
+    if (limiteIaMensal <= 0) return false;
+    return iaUsadaMes >= limiteIaMensal;
   }
 }

@@ -55,6 +55,8 @@ class PlanUsageBanner extends ConsumerWidget {
                       Text(
                         usage.alunosAtLimit
                             ? 'Limite de alunos atingido'
+                            : usage.iaAtLimit
+                            ? 'Cota de IA esgotada'
                             : 'Você está perto do limite do plano',
                         style: TextStyle(
                           fontWeight: FontWeight.w800,

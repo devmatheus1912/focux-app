@@ -188,7 +188,6 @@ class PlanoFeatures {
   final bool relatorios;
   final bool whiteLabel;
   final bool iaCopiloto;
-  final bool iaIlimitada;
   final bool migracaoFoto;
   final int alunosAtivos;
   final int iaUsadaMes;
@@ -209,7 +208,6 @@ class PlanoFeatures {
     required this.relatorios,
     required this.whiteLabel,
     required this.iaCopiloto,
-    required this.iaIlimitada,
     required this.migracaoFoto,
     this.alunosAtivos = 0,
     this.iaUsadaMes = 0,
@@ -225,6 +223,22 @@ class PlanoFeatures {
   int get migracaoFotosRestantes {
     final limite = limiteMigracaoFotoMensal ?? 0;
     return (limite - migracaoFotosUsadasMes).clamp(0, limite);
+  }
+
+  int get iaRestantes {
+    final limite = limiteIaMensal ?? 0;
+    return (limite - iaUsadaMes).clamp(0, limite);
+  }
+
+  bool get iaQuotaEsgotada =>
+      iaCopiloto &&
+      (limiteIaMensal ?? 0) > 0 &&
+      iaUsadaMes >= (limiteIaMensal ?? 0);
+
+  bool get iaNearLimit {
+    final limite = limiteIaMensal ?? 0;
+    if (limite <= 0) return false;
+    return iaUsadaMes >= (limite * 0.8).ceil();
   }
 
   factory PlanoFeatures.fromJson(Map<String, dynamic> j) {
@@ -243,7 +257,6 @@ class PlanoFeatures {
       relatorios: f['relatorios'] as bool? ?? false,
       whiteLabel: f['whiteLabel'] as bool? ?? false,
       iaCopiloto: f['iaCopiloto'] as bool? ?? false,
-      iaIlimitada: f['iaIlimitada'] as bool? ?? false,
       migracaoFoto: f['migracaoFoto'] as bool? ?? false,
       alunosAtivos: (j['alunosAtivos'] as num?)?.toInt() ?? 0,
       iaUsadaMes: (j['iaUsadaMes'] as num?)?.toInt() ?? 0,
@@ -270,7 +283,6 @@ class PlanoFeatures {
       'relatorios': relatorios,
       'whiteLabel': whiteLabel,
       'iaCopiloto': iaCopiloto,
-      'iaIlimitada': iaIlimitada,
       'migracaoFoto': migracaoFoto,
     },
   };
@@ -294,7 +306,6 @@ class PlanoFeatures {
       relatorios: relatorios,
       whiteLabel: whiteLabel,
       iaCopiloto: iaCopiloto,
-      iaIlimitada: iaIlimitada,
       migracaoFoto: migracaoFoto,
       alunosAtivos: alunosAtivos,
       iaUsadaMes: iaUsadaMes,
@@ -311,7 +322,6 @@ class PlanoFeatures {
     relatorios: false,
     whiteLabel: false,
     iaCopiloto: false,
-    iaIlimitada: false,
     migracaoFoto: false,
     limiteMigracaoFotoMensal: 0,
   );
@@ -322,12 +332,12 @@ class PlanoFeatures {
     syncWarning:
         'Nao foi possivel confirmar o plano agora. Acesso liberado em modo seguro enquanto sincroniza.',
     limiteAlunos: null,
+    limiteIaMensal: 400,
     financeiro: true,
     agenda: true,
     relatorios: true,
     whiteLabel: true,
     iaCopiloto: true,
-    iaIlimitada: true,
     migracaoFoto: true,
     limiteMigracaoFotoMensal: 50,
   );
