@@ -2,6 +2,14 @@ part of 'assinatura_screen.dart';
 
 // ─── Paywall Claude + conversão Focux (10/10) ─────────────────────────────
 
+Color _paywallSecondaryText(Color mute, {required bool isDark}) =>
+    mute.withValues(alpha: isDark ? 0.78 : 0.72);
+
+Duration _paywallMotion(BuildContext context) =>
+    TokensStrip.prefersReducedMotion(context)
+        ? Duration.zero
+        : const Duration(milliseconds: 220);
+
 class _ClaudePaywallHeader extends StatelessWidget {
   final Color ink;
   final Color mute;
@@ -33,7 +41,7 @@ class _ClaudePaywallHeader extends StatelessWidget {
       SubscriptionPlan.PREMIUM =>
         comparing
             ? 'Plano ${currentPlan.apiName} ativo. Veja o que muda ao evoluir para Enterprise.'
-            : 'Desbloqueie mais alunos, white-label e automações com Enterprise.',
+            : 'Desbloqueie alunos ilimitados, IA avançada e white-label no Enterprise.',
       _ =>
         'IA Copiloto, financeiro e treinos em um fluxo seguro pela ${subscriptionChannelLabel()}.',
     };
@@ -134,6 +142,8 @@ class _ClaudeBillingSegment extends StatelessWidget {
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final clipRadius = _trackRadius - _trackInset;
+    final motion = _paywallMotion(context);
+    final secondary = _paywallSecondaryText(mute, isDark: isDark);
 
     Widget segmentTap({
       required SubscriptionBillingPeriod value,
@@ -141,10 +151,7 @@ class _ClaudeBillingSegment extends StatelessWidget {
       String? subtitle,
     }) {
       final selected = period == value;
-      final subtitleColor =
-          selected
-              ? primary
-              : mute.withValues(alpha: isDark ? 0.55 : 0.65);
+      final subtitleColor = selected ? primary : secondary;
 
       return Expanded(
         child: Semantics(
@@ -178,9 +185,9 @@ class _ClaudeBillingSegment extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 10.5,
+                          fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          height: 1.1,
+                          height: 1.15,
                           color: subtitle == null ? Colors.transparent : subtitleColor,
                         ),
                       ),
@@ -255,7 +262,7 @@ class _ClaudeBillingSegment extends StatelessWidget {
                 clipBehavior: Clip.hardEdge,
                 children: [
                   AnimatedPositioned(
-                    duration: const Duration(milliseconds: 220),
+                    duration: motion,
                     curve: Curves.easeOutCubic,
                     left: thumbLeft,
                     top: _thumbInset,
@@ -331,6 +338,9 @@ class _ClaudePlanOptionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
+    final motion = _paywallMotion(context);
+    final reduceMotion = motion == Duration.zero;
+    final secondary = _paywallSecondaryText(mute, isDark: isDark);
     final priceOnly = priceLabel.replaceAll('/mês', '').replaceAll('/ano', '');
     final suffix =
         billingPeriod == SubscriptionBillingPeriod.yearly ? '/ano' : '/mês';
@@ -339,17 +349,30 @@ class _ClaudePlanOptionTile extends StatelessWidget {
       primary: primary,
       radius: TokensStrip.rCard,
     );
+    final priceStyle = TokensStrip.h2(color: ink).copyWith(fontSize: 18);
+    final suffixStyle = TokensStrip.bodyMuted(color: secondary).copyWith(
+      fontSize: 13,
+      fontWeight: FontWeight.w600,
+    );
+    final semanticsPrice = [
+      priceLabel,
+      if (yearlySavingsNote != null && yearlySavingsNote!.isNotEmpty)
+        yearlySavingsNote,
+      if (monthlyEquiv != null) 'comparado com $monthlyEquiv',
+    ].join(', ');
 
     return Semantics(
       button: true,
       selected: isSelected,
-      label: 'Plano ${plan.apiName}, $priceLabel',
+      label:
+          'Plano ${plan.apiName}${isCurrent ? ', plano atual' : ''}, '
+          '$semanticsPrice. $subtitle',
       child: AnimatedScale(
-        scale: isSelected ? 1 : 0.985,
-        duration: const Duration(milliseconds: 200),
+        scale: isSelected || reduceMotion ? 1 : 0.985,
+        duration: motion,
         curve: Curves.easeOutCubic,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
+          duration: motion,
           curve: Curves.easeOutCubic,
           decoration: cardDecoration,
           child: Material(
@@ -372,18 +395,20 @@ class _ClaudePlanOptionTile extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
-                          Text(
-                            plan.apiName,
-                            style: TokensStrip.h2(
-                              color: ink,
-                              fontFamily:
-                                  Theme.of(context).textTheme.bodyLarge?.fontFamily,
-                            ).copyWith(fontSize: 18),
-                          ),
-                              if (isCurrent) ...[
-                                const SizedBox(width: 8),
+                              Text(
+                                plan.apiName,
+                                style: TokensStrip.h2(
+                                  color: ink,
+                                  fontFamily:
+                                      Theme.of(context).textTheme.bodyLarge?.fontFamily,
+                                ).copyWith(fontSize: 18),
+                              ),
+                              if (isCurrent)
                                 Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 8,
@@ -402,54 +427,54 @@ class _ClaudePlanOptionTile extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                              ],
                             ],
                           ),
                           const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: TokensStrip.bodyMuted(color: mute),
-                      ),
+                          Text(
+                            subtitle,
+                            style: TokensStrip.bodyMuted(color: mute),
+                          ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                    Text(
-                      priceOnly,
-                      style: TokensStrip.h2(color: ink).copyWith(fontSize: 18),
-                    ),
-                    Text(
-                      suffix,
-                      style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 12),
-                    ),
-                        if (billingPeriod ==
-                            SubscriptionBillingPeriod.yearly) ...[
-                          if (yearlySavingsNote != null) ...[
+                    const SizedBox(width: 8),
+                    Flexible(
+                      fit: FlexFit.loose,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerRight,
+                            child: Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(text: priceOnly, style: priceStyle),
+                                  TextSpan(text: suffix, style: suffixStyle),
+                                ],
+                              ),
+                              textAlign: TextAlign.end,
+                            ),
+                          ),
+                          if (yearlySavingsNote != null &&
+                              yearlySavingsNote!.isNotEmpty) ...[
                             const SizedBox(height: 4),
                             Text(
                               yearlySavingsNote!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              softWrap: false,
+                              textAlign: TextAlign.end,
                               style: TextStyle(
-                                fontSize: 10,
+                                fontSize: 11.5,
                                 color: primary,
                                 fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                          if (monthlyEquiv != null) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              'vs $monthlyEquiv',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: ink.withValues(alpha: 0.5),
+                                height: 1.2,
                               ),
                             ),
                           ],
                         ],
-                      ],
+                      ),
                     ),
                   ],
                 ),
@@ -531,7 +556,7 @@ class _ClaudeUpgradeNudge extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Upgrade recomendado: alunos ilimitados, white-label e domínio próprio no Enterprise.',
+              'Upgrade recomendado: IA ilimitada, white-label e operação sem teto no Enterprise.',
               style: TokensStrip.body(color: ink),
             ),
           ),
@@ -573,15 +598,17 @@ class _ClaudeFeaturePanel extends StatelessWidget {
     (label: 'IA Copiloto avançada', included: plan != SubscriptionPlan.FREE),
     (label: 'Financeiro e CRM', included: plano.temFinanceiro),
     (label: 'Agenda e relatórios', included: plano.temAgenda && plano.temRelatorios),
-    (label: 'White-label e domínio', included: plano.temWhiteLabel),
+    (label: 'White-label e identidade visual', included: plano.temWhiteLabel),
   ];
 
   @override
   Widget build(BuildContext context) {
     final comparing = plan != currentPlan && currentPlan != SubscriptionPlan.FREE;
+    final motion = _paywallMotion(context);
+    final secondary = _paywallSecondaryText(mute, isDark: isDark);
 
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 220),
+      duration: motion,
       switchInCurve: Curves.easeOutCubic,
       switchOutCurve: Curves.easeInCubic,
       child: Column(
@@ -599,7 +626,7 @@ class _ClaudeFeaturePanel extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
             'Comparando com o ${currentPlan.apiName} que você usa hoje.',
-            style: TokensStrip.bodyMuted(color: mute),
+            style: TokensStrip.bodyMuted(color: secondary),
             ),
           ],
           const SizedBox(height: 14),
@@ -643,7 +670,7 @@ class _ClaudeFeaturePanel extends StatelessWidget {
                   subscriptionUsesNativeStore
                       ? 'Pagamento seguro · Cancele quando quiser · ${subscriptionChannelLabel()}'
                       : 'Checkout seguro via Mercado Pago',
-                style: TokensStrip.bodyMuted(color: mute),
+                style: TokensStrip.bodyMuted(color: secondary),
                 ),
               ),
             ],
@@ -707,6 +734,7 @@ class _ClaudeLegalConsentLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     TextStyle linkStyle() => TextStyle(
       fontSize: 11,
       fontWeight: FontWeight.w600,
@@ -715,7 +743,9 @@ class _ClaudeLegalConsentLine extends StatelessWidget {
       decorationColor: primary.withValues(alpha: 0.45),
       height: 1.35,
     );
-    final body = TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 11);
+    final body = TokensStrip.bodyMuted(
+      color: _paywallSecondaryText(mute, isDark: isDark),
+    ).copyWith(fontSize: 11);
 
     return Semantics(
       label:
@@ -768,6 +798,9 @@ class _ClaudeLegalFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondary = _paywallSecondaryText(mute, isDark: isDark);
+
     return Column(
       children: [
         if (onRestore != null)
@@ -777,7 +810,7 @@ class _ClaudeLegalFooter extends StatelessWidget {
               restoring ? 'Restaurando compras…' : 'Restaurar compras',
               style: TextStyle(
                 fontSize: 14,
-                color: ink.withValues(alpha: 0.7),
+                color: ink.withValues(alpha: 0.82),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -786,7 +819,7 @@ class _ClaudeLegalFooter extends StatelessWidget {
           Text(
             'Cobrança e renovação automática pela ${subscriptionChannelLabel()}. Cancele quando quiser nas configurações do dispositivo.',
             textAlign: TextAlign.center,
-            style: TokensStrip.bodyMuted(color: mute),
+            style: TokensStrip.bodyMuted(color: secondary),
           ),
         ],
       ],

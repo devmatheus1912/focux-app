@@ -42,6 +42,12 @@ void main() {
     expect(label, isNot(contains('- -')));
   });
 
+  test('card anual usa copy distinta do segmento', () {
+    final card = SubscriptionProducts.annualSavingsCardLabel(149.90);
+    expect(card, 'Economize R\$ 360/ano');
+    expect(card, isNot(contains('−20%')));
+  });
+
   test('matriz de vendas: entitlements, banner e gate contextual', () {
     final entitlements = File(
       'lib/features/subscription/plan_entitlements.dart',

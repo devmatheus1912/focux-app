@@ -20,7 +20,7 @@ O Focux Personal é a plataforma completa para Personal Trainers que querem prof
 • IA Copiloto: gere treinos, dietas e insights automáticos baseados no histórico
 • Progressão de carga inteligente com detecção automática de evolução
 • Chat direto com alunos para comunicação rápida
-• Link na Bio profissional com landing page personalizada
+• Perfil profissional público compartilhável na bio
 • Agenda integrada com horários e compromissos
 • Ranking de personais e gamificação para engajamento
 • White-label: personalize cores e logo do seu negócio

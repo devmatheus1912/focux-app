@@ -53,8 +53,8 @@ class PlanEntitlements {
       'iaIlimitada' =>
         'Você atingiu o limite de IA do Premium. No Enterprise, Copiloto e RAG não têm teto mensal.',
       'whiteLabel' =>
-        'Domínio, cores e identidade visual premium exigem Enterprise — '
-            'para parecer um produto seu, não um app genérico.',
+        'Cores, logo e identidade visual premium exigem Enterprise — '
+            'sua marca em cada tela do app, não um visual genérico.',
       'relatorios' =>
         'Analytics de aderência e visão global do negócio estão no $planLabel.',
       'agenda' =>

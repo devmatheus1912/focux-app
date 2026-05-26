@@ -108,7 +108,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       SubscriptionPlan.PREMIUM =>
         'IA, financeiro e identidade visual para escalar com previsibilidade.',
       SubscriptionPlan.ENTERPRISE =>
-        'Operação ilimitada, white-label e automações para times que crescem rápido.',
+        'Alunos e IA ilimitados, white-label e automações para escalar sua operação.',
       _ => 'Recursos essenciais para começar.',
     };
   }
@@ -713,7 +713,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                               : null,
                       yearlySavingsNote:
                           _billingPeriod == SubscriptionBillingPeriod.yearly
-                              ? SubscriptionProducts.annualSavingsCompactLabel(
+                              ? SubscriptionProducts.annualSavingsCardLabel(
                                 plano.precoMensal,
                               )
                               : null,
@@ -934,6 +934,8 @@ class _AssinaturaStickyFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondary = mute.withValues(alpha: isDark ? 0.78 : 0.72);
     final isActionable =
         mode == _AssinaturaCtaMode.subscribe ||
         mode == _AssinaturaCtaMode.syncing ||
@@ -967,7 +969,7 @@ class _AssinaturaStickyFooter extends StatelessWidget {
                 ? 'Oferta introdutória aplicada pela loja ao concluir a assinatura.'
                 : 'Cancele antes do fim do período gratuito para evitar cobrança.',
             textAlign: TextAlign.center,
-            style: TokensStrip.bodyMuted(color: mute),
+            style: TokensStrip.bodyMuted(color: secondary),
           ),
           const SizedBox(height: 8),
         ],
@@ -992,7 +994,7 @@ class _AssinaturaStickyFooter extends StatelessWidget {
           Text(
             footnote,
             textAlign: TextAlign.center,
-            style: TokensStrip.bodyMuted(color: mute),
+            style: TokensStrip.bodyMuted(color: secondary),
           ),
         ],
         if (showLegalConsent) ...[

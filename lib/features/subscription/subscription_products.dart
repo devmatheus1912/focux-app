@@ -66,14 +66,24 @@ class SubscriptionProducts {
   static String savingsLabel() =>
       'Economize ${(annualDiscountRate * 100).round()}% no plano anual';
 
+  static double annualSavingsAmount(double monthlyPrice) =>
+      monthlyPrice * 12 * annualDiscountRate;
+
   /// Texto curto para o segmento Anual (ex.: −20% · R$ 192/ano).
   static String annualSavingsCompactLabel(double monthlyPrice) {
     if (monthlyPrice <= 0) {
       return 'Economize ${(annualDiscountRate * 100).round()}%';
     }
-    final saved = monthlyPrice * 12 * annualDiscountRate;
+    final saved = annualSavingsAmount(monthlyPrice);
     final pct = (annualDiscountRate * 100).round();
     return '−$pct% · R\$ ${saved.toStringAsFixed(0)}/ano';
+  }
+
+  /// Subtexto do card anual — sem repetir o −20% do segmento.
+  static String annualSavingsCardLabel(double monthlyPrice) {
+    if (monthlyPrice <= 0) return '';
+    final saved = annualSavingsAmount(monthlyPrice);
+    return 'Economize R\$ ${saved.toStringAsFixed(0)}/ano';
   }
 
   static String periodLabel(SubscriptionBillingPeriod period) =>

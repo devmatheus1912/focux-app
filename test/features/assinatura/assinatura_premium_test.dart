@@ -26,9 +26,9 @@ void main() {
     expect(layout, contains('_ClaudeLegalConsentLine'));
     expect(layout, contains('FocuxLegal.openTerms'));
     expect(layout, contains('FocuxLegal.openPrivacy'));
-    expect(layout, contains('AnimatedPositioned'));
-    expect(layout, contains('ClipRRect'));
-    expect(layout, contains('_thumbBorderRadius'));
+    expect(screen, contains('annualSavingsCardLabel'));
+    expect(layout, contains('_paywallMotion'));
+    expect(layout, contains('_paywallSecondaryText'));
     expect(layout, contains('_subtextSlotHeight'));
     expect(layout, contains('AnimatedSwitcher'));
     expect(layout, contains('annualSavingsLabel'));
