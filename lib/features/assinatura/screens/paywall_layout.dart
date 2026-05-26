@@ -1,6 +1,6 @@
 part of 'assinatura_screen.dart';
 
-// ─── Paywall Claude + conversão Focux (10/10) ─────────────────────────────
+// ─── Paywall Focux — conversão (10/10) ─────────────────────────────────────
 
 Color _paywallSecondaryText(Color mute, {required bool isDark}) =>
     mute.withValues(alpha: isDark ? 0.78 : 0.72);
