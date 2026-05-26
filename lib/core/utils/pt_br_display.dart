@@ -122,3 +122,43 @@ String displayMetaToken(String value) {
       .join(' ');
   return displayPtBr(titled);
 }
+
+/// Formata valor monetário no padrão brasileiro (ex.: R\$ 2.000,00).
+String formatBrlCurrency(num value, {bool showDecimals = true}) {
+  final amount = value.toDouble();
+  final negative = amount < 0;
+  final abs = amount.abs();
+  final fixed = abs.toStringAsFixed(showDecimals ? 2 : 0);
+  final parts = fixed.split('.');
+  final intPart = parts[0];
+  final buffer = StringBuffer();
+  for (var i = 0; i < intPart.length; i++) {
+    if (i > 0 && (intPart.length - i) % 3 == 0) {
+      buffer.write('.');
+    }
+    buffer.write(intPart[i]);
+  }
+  final decimals =
+      showDecimals && parts.length > 1 ? ',${parts[1]}' : '';
+  final prefix = negative ? '-' : '';
+  return '$prefix R\$ ${buffer.toString()}$decimals'.replaceFirst(' ', '');
+}
+
+/// Rótulo de mês/ano em português (ex.: Maio 2026).
+String monthYearLabelPtBr(DateTime date) {
+  const months = [
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro',
+  ];
+  return '${months[date.month - 1]} ${date.year}';
+}
