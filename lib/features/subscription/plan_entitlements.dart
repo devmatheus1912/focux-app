@@ -1,4 +1,5 @@
 import '../subscription/models/subscription_plan.dart';
+import '../growth/utils/migracao_foto_limits.dart';
 
 /// Copy e plano-alvo para paywalls contextuais (fonte única no app).
 class PlanEntitlements {
@@ -15,6 +16,7 @@ class PlanEntitlements {
       case 'financeiro':
       case 'relatorios':
       case 'iaCopiloto':
+      case 'migracaoFoto':
       case 'agenda':
         return SubscriptionPlan.PREMIUM;
       default:
@@ -39,6 +41,7 @@ class PlanEntitlements {
       'iaIlimitada' => 'IA ilimitada para operação em alto volume',
       'whiteLabel' => 'Sua marca em cada touchpoint',
       'relatorios' => 'Relatórios que mostram onde está o dinheiro',
+      'migracaoFoto' => 'Importe alunos por foto ou print',
       'agenda' => 'Agenda completa para sua operação',
       _ => 'Desbloqueie $featureName',
     };
@@ -50,6 +53,9 @@ class PlanEntitlements {
       'iaCopiloto' =>
         'Gere treinos, insights e respostas com IA no plano $planLabel. '
             'No Enterprise, a cota de IA é ilimitada.',
+      'migracaoFoto' =>
+        'Importar alunos por foto/print (OCR gratuito) está no $planLabel '
+            '— ${MigracaoFotoLimits.premium}/mês. Enterprise: ${MigracaoFotoLimits.enterprise}/mês.',
       'iaIlimitada' =>
         'Você atingiu o limite de IA do Premium. No Enterprise, Copiloto e RAG não têm teto mensal.',
       'whiteLabel' =>

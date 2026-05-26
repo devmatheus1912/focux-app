@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/router/safe_navigation.dart';
@@ -18,8 +19,13 @@ import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../planos/data/planos_repository.dart';
+import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
+import '../../subscription/plan_entitlements.dart';
 import '../utils/migracao_file_parser.dart';
+import '../utils/migracao_foto_limits.dart';
+import '../utils/migracao_ocr_service.dart';
 
 class MigracaoMagicaScreen extends ConsumerStatefulWidget {
   const MigracaoMagicaScreen({super.key});
@@ -41,7 +47,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
   bool _emptyResult = false;
 
   static const _passos = [
-    'Importe planilha, foto/print de app concorrente ou cole texto',
+    'Importe planilha, foto/print (OCR no celular) ou cole texto',
     'Revise, edite ou remova linhas antes de confirmar',
     'Confirme e salve: duplicados são ignorados automaticamente',
   ];
@@ -70,6 +76,8 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
       _importedPhotoBytes != null ||
       (_alunosEncontrados != null && _alunosEncontrados!.isNotEmpty);
 
+  PlanoFeatures? get _plano => ref.read(planoFeaturesProvider).value;
+
   bool _isImageFilename(String filename) {
     final lower = filename.toLowerCase();
     return lower.endsWith('.jpg') ||
@@ -78,11 +86,78 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
         lower.endsWith('.webp');
   }
 
-  String _mimeFromPath(String path) {
-    final lower = path.toLowerCase();
-    if (lower.endsWith('.png')) return 'image/png';
-    if (lower.endsWith('.webp')) return 'image/webp';
-    return 'image/jpeg';
+  Future<bool> _verificarAcessoFoto() async {
+    final plano = _plano;
+    if (plano == null) {
+      await ref.read(planoFeaturesProvider.notifier).refresh();
+    }
+    final atual = ref.read(planoFeaturesProvider).value;
+    if (atual == null) return true;
+
+    if (!atual.migracaoFoto) {
+      await _mostrarPaywallFoto(atual);
+      return false;
+    }
+
+    if (!atual.migracaoFotoPermitida) {
+      final limite = atual.limiteMigracaoFotoMensal ?? 0;
+      FeedbackHelper.showError(
+        context,
+        'Limite mensal de fotos atingido ($limite). '
+        '${atual.plano == SubscriptionPlan.PREMIUM ? 'Upgrade para Enterprise (${MigracaoFotoLimits.enterprise}/mês) ou use planilha/texto.' : 'Tente no próximo mês ou use planilha/texto.'}',
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  Future<void> _mostrarPaywallFoto(PlanoFeatures plano) async {
+    final offer = PlanEntitlements.lockedOffer(
+      featureName: 'Foto na migração',
+      capability: 'migracaoFoto',
+    );
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                offer.headline,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 10),
+              Text(offer.body, style: const TextStyle(height: 1.45)),
+              const SizedBox(height: 20),
+              FilledButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  context.push('/assinatura', extra: offer.targetPlan.apiName);
+                },
+                child: Text(offer.ctaLabel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Agora não'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _registrarUsoFoto() async {
+    final api = ref.read(apiClientProvider);
+    await api.dio.post('/api/v1/migracao/foto/registrar');
+    await ref.read(planoFeaturesProvider.notifier).refresh();
   }
 
   void _limparImportacaoVisual() {
@@ -90,9 +165,9 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     _importedPhotoBytes = null;
   }
 
-  Future<void> _finalizarProcessamentoIa(
+  Future<void> _finalizarProcessamento(
     List<Map<String, dynamic>>? parsed, {
-    String successSuffix = ' pela IA',
+    String successSuffix = '',
   }) async {
     parsed = await _enriquecerComPreview(parsed);
     if (!mounted) return;
@@ -109,11 +184,17 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     }
   }
 
-  Future<void> _processarImagem(
-    Uint8List bytes,
-    String mimeType,
-    String label,
-  ) async {
+  Future<void> _processarImagem(Uint8List bytes, String label) async {
+    if (!MigracaoOcrService.disponivel) {
+      FeedbackHelper.showError(
+        context,
+        'Leitura de foto disponível no app mobile. Cole o texto ou use planilha.',
+      );
+      return;
+    }
+
+    if (!await _verificarAcessoFoto()) return;
+
     setState(() {
       _isLoading = true;
       _emptyResult = false;
@@ -124,18 +205,29 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     });
 
     try {
-      final api = ref.read(apiClientProvider);
-      final response = await api.dio.post(
-        '/api/v1/migracao/imagem',
-        data: {
-          'imagemBase64': base64Encode(bytes),
-          'mimeType': mimeType,
-        },
+      final texto = await MigracaoOcrService.extrairTextoDeBytes(
+        bytes,
+        filename: label,
       );
 
+      if (texto.length < 8) {
+        if (!mounted) return;
+        FeedbackHelper.showError(
+          context,
+          'Pouco texto legível no print. Tente foto mais nítida ou cole o texto.',
+        );
+        setState(() {
+          _emptyResult = false;
+          _limparImportacaoVisual();
+        });
+        return;
+      }
+
+      await _registrarUsoFoto();
+
       if (!mounted) return;
-      final parsed = _parsarResultado(response.data['resultadoEstruturado']);
-      await _finalizarProcessamentoIa(parsed, successSuffix: ' no print');
+      setState(() => _controller.text = texto);
+      await _processarTextoMigracao(texto, successSuffix: ' no print');
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
@@ -151,6 +243,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
 
   Future<void> _subirFoto() async {
     if (_isLoading || _isImportingFile) return;
+    if (!await _verificarAcessoFoto()) return;
 
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
@@ -216,7 +309,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
 
       final bytes = await file.readAsBytes();
       final label = file.name.isNotEmpty ? file.name : 'print.jpg';
-      await _processarImagem(bytes, _mimeFromPath(file.path), label);
+      await _processarImagem(bytes, label);
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     } finally {
@@ -254,7 +347,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
       );
 
       if (_isImageFilename(file.name)) {
-        await _processarImagem(bytes, _mimeFromPath(file.name), file.name);
+        await _processarImagem(bytes, file.name);
         return;
       }
 
@@ -318,8 +411,12 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     });
   }
 
-  Future<void> _processarMigracao() async {
-    if (_controller.text.trim().isEmpty) {
+  Future<void> _processarTextoMigracao(
+    String texto, {
+    String successSuffix = '',
+  }) async {
+    final trimmed = texto.trim();
+    if (trimmed.isEmpty) {
       FeedbackHelper.showError(context, 'Cole os dados dos alunos primeiro.');
       return;
     }
@@ -334,12 +431,12 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
       final api = ref.read(apiClientProvider);
       final response = await api.dio.post(
         '/api/v1/migracao/texto',
-        data: {'conteudo': _controller.text.trim()},
+        data: {'conteudo': trimmed},
       );
 
       if (!mounted) return;
       final parsed = _parsarResultado(response.data['resultadoEstruturado']);
-      await _finalizarProcessamentoIa(parsed);
+      await _finalizarProcessamento(parsed, successSuffix: successSuffix);
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
@@ -348,6 +445,10 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  Future<void> _processarMigracao() async {
+    await _processarTextoMigracao(_controller.text);
   }
 
   Future<void> _salvarAlunos() async {
@@ -902,7 +1003,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       ),
                       const SizedBox(height: TokensStrip.s2),
                       Text(
-                        'Importe alunos com IA',
+                        'Importe alunos',
                         style: AppTypography.inter(
                           fontSize: 28,
                           fontWeight: FontWeight.w800,
@@ -914,7 +1015,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       const SizedBox(height: 6),
                       Text(
                         'Planilha (.csv, .xlsx), print de app concorrente ou texto — '
-                        'a IA estrutura. Você revisa antes de salvar.',
+                        'análise automática no app. Você revisa antes de salvar.',
                         style: TextStyle(fontSize: 14, color: mute, height: 1.55),
                       ),
                     ],
@@ -957,7 +1058,9 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                               const SizedBox(height: 4),
                               Text(
                                 'Suba um print da lista de alunos (MFIT, Trainerize, Excel, WhatsApp). '
-                                'A IA lê a tela — sem redigitar.',
+                                'OCR no celular lê a tela — sem redigitar. Premium: '
+                                '${MigracaoFotoLimits.premium} fotos/mês · Enterprise: '
+                                '${MigracaoFotoLimits.enterprise}/mês.',
                                 style: TextStyle(
                                   fontSize: 12.5,
                                   color: mute,
@@ -1072,8 +1175,40 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Planilha estruturada vai direto para revisão. Foto e texto livre usam IA.',
+                        'Planilha estruturada vai direto para revisão. Foto usa OCR gratuito no app.',
                         style: TextStyle(fontSize: 12, color: mute, height: 1.35),
+                      ),
+                      Builder(
+                        builder: (context) {
+                          final plano = ref.watch(planoFeaturesProvider).value;
+                          if (plano == null || !plano.migracaoFoto) {
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Text(
+                                'Foto/print: Premium (${MigracaoFotoLimits.premium}/mês) ou Enterprise (${MigracaoFotoLimits.enterprise}/mês).',
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  color: mute,
+                                  height: 1.35,
+                                ),
+                              ),
+                            );
+                          }
+                          final limite = plano.limiteMigracaoFotoMensal ?? 0;
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              'Fotos este mês: ${plano.migracaoFotosUsadasMes}/$limite · '
+                              '${plano.migracaoFotosRestantes} restante(s)',
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                                color: brand,
+                                height: 1.35,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                       if (_importedFileLabel != null) ...[
                         const SizedBox(height: 10),
@@ -1183,7 +1318,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                                   : const Icon(Icons.add_a_photo_outlined, size: 18),
                           label: Text(
                             _isLoading && _importedPhotoBytes != null
-                                ? 'Lendo print com IA...'
+                                ? 'Lendo print (OCR)...'
                                 : 'Subir foto ou print',
                           ),
                         ),
@@ -1231,7 +1366,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                           label: 'Iniciar migração',
                           icon: Icons.auto_awesome,
                           loading: _isLoading && _importedPhotoBytes == null,
-                          loadingLabel: 'Conectando à IA...',
+                          loadingLabel: 'Analisando texto...',
                           onPressed:
                               (_isLoading && _importedPhotoBytes == null)
                                   ? null

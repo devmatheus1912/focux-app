@@ -115,6 +115,8 @@ class FeatureGate extends ConsumerWidget {
         return f.whiteLabel;
       case 'iaCopiloto':
         return f.iaCopiloto;
+      case 'migracaoFoto':
+        return f.migracaoFoto;
       case 'iaIlimitada':
         return f.iaIlimitada;
       default:

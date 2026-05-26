@@ -17,6 +17,7 @@ void main() {
         'whiteLabel': true,
         'iaCopiloto': true,
         'iaIlimitada': false,
+        'migracaoFoto': true,
       },
     });
 
@@ -37,6 +38,7 @@ void main() {
       whiteLabel: true,
       iaCopiloto: true,
       iaIlimitada: true,
+      migracaoFoto: true,
     );
 
     final stale = fresh.copyWithOperationalState(
