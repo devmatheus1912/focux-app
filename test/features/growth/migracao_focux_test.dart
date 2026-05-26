@@ -22,16 +22,19 @@ void main() {
     expect(screen, contains('PopScope'));
     expect(screen, contains('Semantics('));
     expect(screen, contains('friendlyError'));
-    expect(screen, contains('Colar da área de transferência'));
+    expect(screen, contains('Importar arquivo'));
+    expect(screen, contains('MigracaoFileParser'));
+    expect(screen, contains('_editarAluno'));
+    expect(screen, contains('_mostrarResumoImportacao'));
     expect(screen, contains('Nenhum aluno identificado'));
     expect(screen, contains('/api/v1/migracao/preview'));
     expect(screen, contains('Já cadastrado'));
-    expect(screen, contains('Sem upload de arquivo'));
+    expect(screen, contains('Planilha estruturada'));
     expect(screen, isNot(contains('Migração Mágica')));
-    expect(screen, isNot(contains('Cole PDF, Excel')));
+    expect(screen, isNot(contains('Sem upload de arquivo')));
   });
 
-  testWidgets('migracao focux pump sem titulo duplicado no hero', (tester) async {
+  testWidgets('migracao focux pump com import e revisao', (tester) async {
     tester.view.physicalSize = const Size(430, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -60,7 +63,8 @@ void main() {
     expect(find.text('Migração Focux'), findsOneWidget);
     expect(find.text('Importe alunos com IA'), findsOneWidget);
     expect(find.text('Iniciar migração'), findsOneWidget);
-    expect(find.text('Colar da área de transferência'), findsOneWidget);
-    expect(find.textContaining('Sem upload de arquivo'), findsOneWidget);
+    expect(find.text('Importar arquivo'), findsOneWidget);
+    expect(find.text('Colar texto'), findsOneWidget);
+    expect(find.textContaining('Planilha estruturada'), findsOneWidget);
   });
 }

@@ -1,5 +1,6 @@
 ﻿import 'dart:convert';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,10 +12,12 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
+import '../utils/migracao_file_parser.dart';
 
 class MigracaoMagicaScreen extends ConsumerStatefulWidget {
   const MigracaoMagicaScreen({super.key});
@@ -29,13 +32,15 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
 
   bool _isLoading = false;
   bool _isSaving = false;
+  bool _isImportingFile = false;
+  String? _importedFileLabel;
   List<Map<String, dynamic>>? _alunosEncontrados;
   bool _emptyResult = false;
 
   static const _passos = [
-    'Copie o texto de planilha, exportação ou print — não há upload de PDF',
-    'Toque Iniciar migração: a IA extrai nome, e-mail, telefone e objetivo',
-    'Revise a lista, remova duplicados ou erros e confirme para salvar',
+    'Importe .csv/.xlsx/.txt ou cole texto — planilha estruturada não precisa de IA',
+    'Revise, edite ou remova linhas antes de confirmar',
+    'Confirme e salve: duplicados são ignorados automaticamente',
   ];
 
   @override
@@ -58,7 +63,79 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
 
   bool get _hasUnsavedWork =>
       _controller.text.trim().isNotEmpty ||
+      _importedFileLabel != null ||
       (_alunosEncontrados != null && _alunosEncontrados!.isNotEmpty);
+
+  Future<void> _importarArquivo() async {
+    if (_isLoading || _isImportingFile) return;
+
+    setState(() => _isImportingFile = true);
+
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['csv', 'xlsx', 'txt'],
+        withData: true,
+      );
+      if (result == null || result.files.isEmpty) return;
+
+      final file = result.files.first;
+      final bytes = file.bytes;
+      if (bytes == null || bytes.isEmpty) {
+        if (!mounted) return;
+        FeedbackHelper.showError(
+          context,
+          'Não foi possível ler o arquivo selecionado.',
+        );
+        return;
+      }
+
+      final parsed = MigracaoFileParser.parse(
+        bytes: bytes,
+        filename: file.name,
+      );
+
+      if (parsed.usesDirectParse) {
+        var alunos = parsed.directAlunos!;
+        alunos = await _enriquecerComPreview(alunos) ?? alunos;
+        if (!mounted) return;
+        setState(() {
+          _importedFileLabel = parsed.sourceLabel;
+          _controller.clear();
+          _alunosEncontrados = alunos;
+          _emptyResult = alunos.isEmpty;
+        });
+        if (alunos.isNotEmpty) {
+          FeedbackHelper.showSuccess(
+            context,
+            '${alunos.length} aluno(s) lidos de ${file.name}.',
+          );
+        }
+        return;
+      }
+
+      final text = parsed.textForIa?.trim() ?? '';
+      if (!mounted) return;
+      setState(() {
+        _importedFileLabel = parsed.sourceLabel;
+        _controller.text = text;
+        _alunosEncontrados = null;
+        _emptyResult = false;
+      });
+      if (text.isEmpty) {
+        FeedbackHelper.showError(context, 'Arquivo vazio ou ilegível.');
+      } else {
+        FeedbackHelper.showSuccess(
+          context,
+          'Texto carregado de ${file.name}. Toque Iniciar migração.',
+        );
+      }
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    } finally {
+      if (mounted) setState(() => _isImportingFile = false);
+    }
+  }
 
   Future<void> _colarClipboard() async {
     final data = await Clipboard.getData('text/plain');
@@ -70,6 +147,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     }
     setState(() {
       _controller.text = text;
+      _importedFileLabel = null;
       _emptyResult = false;
       _alunosEncontrados = null;
     });
@@ -122,24 +200,33 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     final alunos = _alunosEncontrados;
     if (alunos == null || alunos.isEmpty) return;
 
+    final toSave =
+        alunos.where((a) => a['duplicado'] != true).toList(growable: false);
+    if (toSave.isEmpty) {
+      FeedbackHelper.showError(
+        context,
+        'Todos os alunos já estão cadastrados. Remova duplicados ou edite e-mails.',
+      );
+      return;
+    }
+
     setState(() => _isSaving = true);
 
     try {
       final api = ref.read(apiClientProvider);
       final response = await api.dio.post(
         '/api/v1/migracao/confirmar',
-        data: {'alunos': alunos},
+        data: {'alunos': toSave},
       );
 
       if (!mounted) return;
-      final importados = response.data['importados'] ?? alunos.length;
-      FeedbackHelper.showSuccess(
-        context,
-        '$importados aluno(s) importado(s) com sucesso.',
+      await _mostrarResumoImportacao(
+        Map<String, dynamic>.from(response.data as Map),
       );
       setState(() {
         _alunosEncontrados = null;
         _emptyResult = false;
+        _importedFileLabel = null;
         _controller.clear();
       });
     } catch (e) {
@@ -151,12 +238,297 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     }
   }
 
+  Future<void> _mostrarResumoImportacao(Map<String, dynamic> data) async {
+    final importados = data['importados'] ?? 0;
+    final duplicados = data['duplicados'] ?? 0;
+    final erros = data['erros'] ?? 0;
+    final mensagem = (data['mensagem'] ?? '').toString();
+    final detalhesRaw = data['detalhes'];
+    final detalhes =
+        detalhesRaw is List
+            ? detalhesRaw.whereType<Map>().toList(growable: false)
+            : const <Map>[];
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+        final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+        final brand = Theme.of(ctx).colorScheme.primary;
+
+        Widget stat(String label, int value, Color color) {
+          return Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: isDark ? 0.15 : 0.1),
+                borderRadius: BorderRadius.circular(TokensStrip.rSm),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    '$value',
+                    style: AppTypography.inter(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: color,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 11, color: mute, height: 1.3),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(TokensStrip.rCard),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.check_circle_rounded, color: brand, size: 28),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Importação concluída',
+                        style: AppTypography.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: ink,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (mensagem.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Text(mensagem, style: TextStyle(color: mute, height: 1.45)),
+                ],
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    stat('Importados', importados is int ? importados : int.tryParse('$importados') ?? 0, brand),
+                    const SizedBox(width: 8),
+                    stat(
+                      'Duplicados',
+                      duplicados is int ? duplicados : int.tryParse('$duplicados') ?? 0,
+                      EagleTokens.warn,
+                    ),
+                    const SizedBox(width: 8),
+                    stat(
+                      'Erros',
+                      erros is int ? erros : int.tryParse('$erros') ?? 0,
+                      EagleTokens.bad,
+                    ),
+                  ],
+                ),
+                if (detalhes.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 180),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: detalhes.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 6),
+                      itemBuilder: (_, i) {
+                        final item = Map<String, dynamic>.from(detalhes[i]);
+                        final nome = (item['nome'] ?? 'Aluno').toString();
+                        final status = (item['status'] ?? '').toString();
+                        final motivo = (item['motivo'] ?? '').toString();
+                        Color badgeColor;
+                        switch (status) {
+                          case 'IMPORTADO':
+                            badgeColor = brand;
+                          case 'DUPLICADO':
+                            badgeColor = EagleTokens.warn;
+                          default:
+                            badgeColor = EagleTokens.bad;
+                        }
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.only(top: 4),
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: badgeColor,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    nome,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      color: ink,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                  if (motivo.isNotEmpty)
+                                    Text(
+                                      motivo,
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        color: mute,
+                                        height: 1.35,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 20),
+                FilledButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Fechar'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _removerAluno(int index) {
     final alunos = _alunosEncontrados;
     if (alunos == null) return;
     setState(() {
       alunos.removeAt(index);
       if (alunos.isEmpty) _alunosEncontrados = null;
+    });
+  }
+
+  Future<void> _editarAluno(int index) async {
+    final alunos = _alunosEncontrados;
+    if (alunos == null || index < 0 || index >= alunos.length) return;
+
+    final aluno = alunos[index];
+    final nomeCtrl = TextEditingController(
+      text: (aluno['nome'] ?? '').toString(),
+    );
+    final emailCtrl = TextEditingController(
+      text: (aluno['email'] ?? '').toString(),
+    );
+    final telCtrl = TextEditingController(
+      text: (aluno['telefone'] ?? '').toString(),
+    );
+    final objCtrl = TextEditingController(
+      text: (aluno['objetivo'] ?? '').toString(),
+    );
+
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) {
+        final bottom = MediaQuery.viewInsetsOf(ctx).bottom;
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+
+        return Padding(
+          padding: EdgeInsets.fromLTRB(20, 8, 20, 20 + bottom),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Editar aluno',
+                style: AppTypography.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: ink,
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: nomeCtrl,
+                textCapitalization: TextCapitalization.words,
+                decoration: FxInputDeco.build(ctx, 'Nome'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: emailCtrl,
+                keyboardType: TextInputType.emailAddress,
+                decoration: FxInputDeco.build(ctx, 'E-mail (opcional)'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: telCtrl,
+                keyboardType: TextInputType.phone,
+                decoration: FxInputDeco.build(ctx, 'Telefone (opcional)'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: objCtrl,
+                decoration: FxInputDeco.build(ctx, 'Objetivo (opcional)'),
+              ),
+              const SizedBox(height: 20),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Salvar alterações'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (saved != true || !mounted) {
+      nomeCtrl.dispose();
+      emailCtrl.dispose();
+      telCtrl.dispose();
+      objCtrl.dispose();
+      return;
+    }
+
+    final updated = <String, dynamic>{
+      'nome':
+          nomeCtrl.text.trim().isEmpty
+              ? 'Aluno importado'
+              : nomeCtrl.text.trim(),
+    };
+    if (emailCtrl.text.trim().isNotEmpty) {
+      updated['email'] = emailCtrl.text.trim();
+    }
+    if (telCtrl.text.trim().isNotEmpty) {
+      updated['telefone'] = telCtrl.text.trim();
+    }
+    if (objCtrl.text.trim().isNotEmpty) {
+      updated['objetivo'] = objCtrl.text.trim();
+    }
+
+    nomeCtrl.dispose();
+    emailCtrl.dispose();
+    telCtrl.dispose();
+    objCtrl.dispose();
+
+    final enriched = await _enriquecerComPreview([updated]);
+    setState(() {
+      alunos[index] = enriched?.first ?? updated;
     });
   }
 
@@ -339,7 +711,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                 child: Semantics(
                   header: true,
                   label:
-                      'Importe alunos com IA colando texto desestruturado. Sem upload de PDF.',
+                      'Importe alunos com IA usando planilha ou texto colado.',
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -387,8 +759,8 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Copie o texto de planilha, exportação ou print e cole abaixo. '
-                        'A IA estrutura os dados — você confirma antes de salvar.',
+                        'Importe planilha (.csv, .xlsx) ou cole texto — a IA estrutura o resto. '
+                        'Você revisa e confirma antes de salvar.',
                         style: TextStyle(fontSize: 14, color: mute, height: 1.55),
                       ),
                     ],
@@ -486,7 +858,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Dados desestruturados',
+                        'Importar dados',
                         style: AppTypography.inter(
                           fontSize: 13,
                           color: ink,
@@ -495,17 +867,75 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Sem upload de arquivo — cole o texto copiado do PDF ou planilha.',
+                        'Planilha estruturada vai direto para revisão. Texto livre usa IA.',
                         style: TextStyle(fontSize: 12, color: mute, height: 1.35),
                       ),
-                      const SizedBox(height: TokensStrip.s3),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton.icon(
-                          onPressed: _isLoading ? null : _colarClipboard,
-                          icon: const Icon(Icons.content_paste_go_rounded, size: 18),
-                          label: const Text('Colar da área de transferência'),
+                      if (_importedFileLabel != null) ...[
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: brandSoft,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.insert_drive_file_rounded, size: 14, color: brand),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  _importedFileLabel!,
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: brand,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
+                      ],
+                      const SizedBox(height: TokensStrip.s3),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed:
+                                  (_isLoading || _isImportingFile)
+                                      ? null
+                                      : _importarArquivo,
+                              icon:
+                                  _isImportingFile
+                                      ? SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: brand,
+                                        ),
+                                      )
+                                      : const Icon(Icons.upload_file_rounded, size: 18),
+                              label: Text(
+                                _isImportingFile ? 'Lendo...' : 'Importar arquivo',
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextButton.icon(
+                              onPressed: _isLoading ? null : _colarClipboard,
+                              icon: const Icon(Icons.content_paste_go_rounded, size: 18),
+                              label: const Text('Colar texto'),
+                            ),
+                          ),
+                        ],
                       ),
                       Semantics(
                         label: 'Campo para colar dados desestruturados dos alunos',
@@ -638,15 +1068,25 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
           children: [
             Semantics(
               header: true,
-              label: '${alunos.length} alunos encontrados para revisão',
-              child: Text(
-                '${alunos.length} alunos encontrados',
-                style: AppTypography.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: ink,
-                  letterSpacing: -0.3,
-                ),
+              label: '${alunos.length} alunos encontrados para revisão. Toque para editar.',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${alunos.length} alunos encontrados',
+                    style: AppTypography.inter(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: ink,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Toque para editar · remova duplicados antes de salvar',
+                    style: TextStyle(fontSize: 12, color: mute, height: 1.35),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: TokensStrip.s3),
@@ -669,9 +1109,15 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                 child: Semantics(
                   label:
                       duplicado
-                          ? 'Aluno $nome duplicado. $meta'
-                          : 'Aluno $nome. $meta',
-                  child: Container(
+                          ? 'Aluno $nome duplicado. $meta. Toque para editar.'
+                          : 'Aluno $nome. $meta. Toque para editar.',
+                  button: true,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => _editarAluno(index),
+                      borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                      child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
                       vertical: 13,
@@ -759,13 +1205,15 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                         ),
                       ],
                     ),
+                      ),
+                    ),
                   ),
                 ),
               );
             }),
             const SizedBox(height: TokensStrip.s3),
             FxLiquidPrimaryButton(
-              label: 'Confirmar e salvar ${alunos.length} alunos',
+              label: 'Confirmar e salvar ${alunos.where((a) => a['duplicado'] != true).length} alunos',
               icon: Icons.check_rounded,
               loading: _isSaving,
               loadingLabel: 'Salvando alunos...',

@@ -67,6 +67,9 @@ dependencies:
   rive: ^0.13.20
   health: ^11.1.0
   home_widget: ^0.7.0
+  file_picker: ^8.1.7
+  csv: ^6.0.0
+  excel: ^4.0.6
 
 dev_dependencies:
   flutter_test:
