@@ -1,9 +1,11 @@
 ﻿import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
@@ -34,11 +36,12 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
   bool _isSaving = false;
   bool _isImportingFile = false;
   String? _importedFileLabel;
+  Uint8List? _importedPhotoBytes;
   List<Map<String, dynamic>>? _alunosEncontrados;
   bool _emptyResult = false;
 
   static const _passos = [
-    'Importe .csv/.xlsx/.txt ou cole texto — planilha estruturada não precisa de IA',
+    'Importe planilha, foto/print de app concorrente ou cole texto',
     'Revise, edite ou remova linhas antes de confirmar',
     'Confirme e salve: duplicados são ignorados automaticamente',
   ];
@@ -64,7 +67,162 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
   bool get _hasUnsavedWork =>
       _controller.text.trim().isNotEmpty ||
       _importedFileLabel != null ||
+      _importedPhotoBytes != null ||
       (_alunosEncontrados != null && _alunosEncontrados!.isNotEmpty);
+
+  bool _isImageFilename(String filename) {
+    final lower = filename.toLowerCase();
+    return lower.endsWith('.jpg') ||
+        lower.endsWith('.jpeg') ||
+        lower.endsWith('.png') ||
+        lower.endsWith('.webp');
+  }
+
+  String _mimeFromPath(String path) {
+    final lower = path.toLowerCase();
+    if (lower.endsWith('.png')) return 'image/png';
+    if (lower.endsWith('.webp')) return 'image/webp';
+    return 'image/jpeg';
+  }
+
+  void _limparImportacaoVisual() {
+    _importedFileLabel = null;
+    _importedPhotoBytes = null;
+  }
+
+  Future<void> _finalizarProcessamentoIa(
+    List<Map<String, dynamic>>? parsed, {
+    String successSuffix = ' pela IA',
+  }) async {
+    parsed = await _enriquecerComPreview(parsed);
+    if (!mounted) return;
+    setState(() {
+      _alunosEncontrados = parsed;
+      _emptyResult = parsed == null || parsed.isEmpty;
+    });
+
+    if (parsed != null && parsed.isNotEmpty && mounted) {
+      FeedbackHelper.showSuccess(
+        context,
+        '${parsed.length} aluno(s) identificado(s)$successSuffix.',
+      );
+    }
+  }
+
+  Future<void> _processarImagem(
+    Uint8List bytes,
+    String mimeType,
+    String label,
+  ) async {
+    setState(() {
+      _isLoading = true;
+      _emptyResult = false;
+      _alunosEncontrados = null;
+      _importedPhotoBytes = bytes;
+      _importedFileLabel = label;
+      _controller.clear();
+    });
+
+    try {
+      final api = ref.read(apiClientProvider);
+      final response = await api.dio.post(
+        '/api/v1/migracao/imagem',
+        data: {
+          'imagemBase64': base64Encode(bytes),
+          'mimeType': mimeType,
+        },
+      );
+
+      if (!mounted) return;
+      final parsed = _parsarResultado(response.data['resultadoEstruturado']);
+      await _finalizarProcessamentoIa(parsed, successSuffix: ' no print');
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+        setState(() {
+          _emptyResult = false;
+          _limparImportacaoVisual();
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _subirFoto() async {
+    if (_isLoading || _isImportingFile) return;
+
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Subir foto ou print',
+                  style: AppTypography.inter(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: Theme.of(ctx).brightness == Brightness.dark
+                        ? EagleTokens.darkInk
+                        : TokensStrip.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Screenshot de MFIT, Trainerize, planilha ou lista no WhatsApp.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.4,
+                    color: Theme.of(ctx).brightness == Brightness.dark
+                        ? EagleTokens.darkInkMute
+                        : TokensStrip.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  leading: const Icon(Icons.photo_library_outlined),
+                  title: const Text('Escolher da galeria'),
+                  onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.photo_camera_outlined),
+                  title: const Text('Tirar foto agora'),
+                  onTap: () => Navigator.pop(ctx, ImageSource.camera),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (source == null || !mounted) return;
+
+    setState(() => _isImportingFile = true);
+
+    try {
+      final file = await ImagePicker().pickImage(
+        source: source,
+        maxWidth: 1920,
+        imageQuality: 85,
+      );
+      if (file == null || !mounted) return;
+
+      final bytes = await file.readAsBytes();
+      final label = file.name.isNotEmpty ? file.name : 'print.jpg';
+      await _processarImagem(bytes, _mimeFromPath(file.path), label);
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    } finally {
+      if (mounted) setState(() => _isImportingFile = false);
+    }
+  }
 
   Future<void> _importarArquivo() async {
     if (_isLoading || _isImportingFile) return;
@@ -74,7 +232,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['csv', 'xlsx', 'txt'],
+        allowedExtensions: ['csv', 'xlsx', 'txt', 'jpg', 'jpeg', 'png', 'webp'],
         withData: true,
       );
       if (result == null || result.files.isEmpty) return;
@@ -95,12 +253,18 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
         filename: file.name,
       );
 
+      if (_isImageFilename(file.name)) {
+        await _processarImagem(bytes, _mimeFromPath(file.name), file.name);
+        return;
+      }
+
       if (parsed.usesDirectParse) {
         var alunos = parsed.directAlunos!;
         alunos = await _enriquecerComPreview(alunos) ?? alunos;
         if (!mounted) return;
         setState(() {
           _importedFileLabel = parsed.sourceLabel;
+          _importedPhotoBytes = null;
           _controller.clear();
           _alunosEncontrados = alunos;
           _emptyResult = alunos.isEmpty;
@@ -118,6 +282,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
       if (!mounted) return;
       setState(() {
         _importedFileLabel = parsed.sourceLabel;
+        _importedPhotoBytes = null;
         _controller.text = text;
         _alunosEncontrados = null;
         _emptyResult = false;
@@ -147,7 +312,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     }
     setState(() {
       _controller.text = text;
-      _importedFileLabel = null;
+      _limparImportacaoVisual();
       _emptyResult = false;
       _alunosEncontrados = null;
     });
@@ -173,19 +338,8 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
       );
 
       if (!mounted) return;
-      var parsed = _parsarResultado(response.data['resultadoEstruturado']);
-      parsed = await _enriquecerComPreview(parsed);
-      setState(() {
-        _alunosEncontrados = parsed;
-        _emptyResult = parsed == null || parsed.isEmpty;
-      });
-
-      if (parsed != null && parsed.isNotEmpty && mounted) {
-        FeedbackHelper.showSuccess(
-          context,
-          '${parsed.length} aluno(s) identificado(s) pela IA.',
-        );
-      }
+      final parsed = _parsarResultado(response.data['resultadoEstruturado']);
+      await _finalizarProcessamentoIa(parsed);
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
@@ -226,7 +380,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
       setState(() {
         _alunosEncontrados = null;
         _emptyResult = false;
-        _importedFileLabel = null;
+        _limparImportacaoVisual();
         _controller.clear();
       });
     } catch (e) {
@@ -711,7 +865,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                 child: Semantics(
                   header: true,
                   label:
-                      'Importe alunos com IA usando planilha ou texto colado.',
+                      'Importe alunos com planilha, foto de app concorrente ou texto colado.',
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -759,18 +913,69 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Importe planilha (.csv, .xlsx) ou cole texto — a IA estrutura o resto. '
-                        'Você revisa e confirma antes de salvar.',
+                        'Planilha (.csv, .xlsx), print de app concorrente ou texto — '
+                        'a IA estrutura. Você revisa antes de salvar.',
                         style: TextStyle(fontSize: 14, color: mute, height: 1.55),
                       ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: TokensStrip.s4),
+              const SizedBox(height: TokensStrip.s3),
               _stagger(
                 context,
                 index: 1,
+                child: Semantics(
+                  label:
+                      'Dica: prints de apps concorrentes como MFIT e Trainerize podem ser importados por foto.',
+                  child: Container(
+                    padding: const EdgeInsets.all(TokensStrip.s3),
+                    decoration: BoxDecoration(
+                      color: brandSofter,
+                      borderRadius: BorderRadius.circular(TokensStrip.rSm),
+                      border: Border.all(
+                        color: brand.withValues(alpha: isDark ? 0.35 : 0.22),
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.screenshot_monitor_rounded, color: brand, size: 22),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Veio de outro app?',
+                                style: AppTypography.inter(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  color: ink,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Suba um print da lista de alunos (MFIT, Trainerize, Excel, WhatsApp). '
+                                'A IA lê a tela — sem redigitar.',
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  color: mute,
+                                  height: 1.45,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: TokensStrip.s4),
+              _stagger(
+                context,
+                index: 2,
                 child: Semantics(
                   label: 'Como funciona em três passos',
                   child: Container(
@@ -850,7 +1055,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
               const SizedBox(height: TokensStrip.s4),
               _stagger(
                 context,
-                index: 2,
+                index: 3,
                 child: Container(
                   padding: const EdgeInsets.all(TokensStrip.s4),
                   decoration: fxListCardDecoration(context, accent: brand),
@@ -867,7 +1072,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Planilha estruturada vai direto para revisão. Texto livre usa IA.',
+                        'Planilha estruturada vai direto para revisão. Foto e texto livre usam IA.',
                         style: TextStyle(fontSize: 12, color: mute, height: 1.35),
                       ),
                       if (_importedFileLabel != null) ...[
@@ -884,7 +1089,13 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.insert_drive_file_rounded, size: 14, color: brand),
+                              Icon(
+                                _importedPhotoBytes != null
+                                    ? Icons.image_rounded
+                                    : Icons.insert_drive_file_rounded,
+                                size: 14,
+                                color: brand,
+                              ),
                               const SizedBox(width: 6),
                               Flexible(
                                 child: Text(
@@ -899,6 +1110,21 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                                 ),
                               ),
                             ],
+                          ),
+                        ),
+                      ],
+                      if (_importedPhotoBytes != null) ...[
+                        const SizedBox(height: TokensStrip.s3),
+                        Semantics(
+                          label: 'Preview do print enviado',
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(TokensStrip.rSm),
+                            child: Image.memory(
+                              _importedPhotoBytes!,
+                              height: 120,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                       ],
@@ -923,7 +1149,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                                       )
                                       : const Icon(Icons.upload_file_rounded, size: 18),
                               label: Text(
-                                _isImportingFile ? 'Lendo...' : 'Importar arquivo',
+                                _isImportingFile ? 'Lendo...' : 'Planilha',
                               ),
                             ),
                           ),
@@ -936,6 +1162,31 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 8),
+                      Semantics(
+                        button: true,
+                        label: 'Subir foto ou print de app concorrente',
+                        child: OutlinedButton.icon(
+                          onPressed:
+                              (_isLoading || _isImportingFile) ? null : _subirFoto,
+                          icon:
+                              _isLoading && _importedPhotoBytes != null
+                                  ? SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: brand,
+                                    ),
+                                  )
+                                  : const Icon(Icons.add_a_photo_outlined, size: 18),
+                          label: Text(
+                            _isLoading && _importedPhotoBytes != null
+                                ? 'Lendo print com IA...'
+                                : 'Subir foto ou print',
+                          ),
+                        ),
                       ),
                       Semantics(
                         label: 'Campo para colar dados desestruturados dos alunos',
@@ -965,8 +1216,8 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                             ),
                             decoration: InputDecoration.collapsed(
                               hintText:
-                                  'Beatriz Carvalho — 28 anos — (11)99999-1111 — bia@gmail.com — objetivo: hipertrofia\n'
-                                  'Lucas Andrade, 34, lucas@gmail.com, emagrecimento\n...',
+                                  'Beatriz Carvalho — 28 anos — (11)99999-1111 — bia@gmail.com — hipertrofia\n'
+                                  'Ou cole texto copiado de print/PDF…',
                               hintStyle: TextStyle(
                                 color: mute.withValues(alpha: 0.72),
                               ),
@@ -974,14 +1225,19 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: TokensStrip.s3),
-                      FxLiquidPrimaryButton(
-                        label: 'Iniciar migração',
-                        icon: Icons.auto_awesome,
-                        loading: _isLoading,
-                        loadingLabel: 'Conectando à IA...',
-                        onPressed: _isLoading ? null : _processarMigracao,
-                      ),
+                      if (_controller.text.trim().isNotEmpty) ...[
+                        const SizedBox(height: TokensStrip.s3),
+                        FxLiquidPrimaryButton(
+                          label: 'Iniciar migração',
+                          icon: Icons.auto_awesome,
+                          loading: _isLoading && _importedPhotoBytes == null,
+                          loadingLabel: 'Conectando à IA...',
+                          onPressed:
+                              (_isLoading && _importedPhotoBytes == null)
+                                  ? null
+                                  : _processarMigracao,
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -1022,7 +1278,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
       return _stagger(
         context,
         key: key,
-        index: 3,
+        index: 4,
         child: Padding(
           padding: const EdgeInsets.only(top: TokensStrip.s4),
           child: Container(
@@ -1060,7 +1316,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     return _stagger(
       context,
       key: key,
-      index: 3,
+      index: 4,
       child: Padding(
         padding: const EdgeInsets.only(top: TokensStrip.s4),
         child: Column(

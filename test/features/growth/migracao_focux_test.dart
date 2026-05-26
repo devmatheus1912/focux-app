@@ -22,19 +22,22 @@ void main() {
     expect(screen, contains('PopScope'));
     expect(screen, contains('Semantics('));
     expect(screen, contains('friendlyError'));
-    expect(screen, contains('Importar arquivo'));
+    expect(screen, contains('Subir foto ou print'));
+    expect(screen, contains('/api/v1/migracao/imagem'));
+    expect(screen, contains('_subirFoto'));
+    expect(screen, contains('MFIT'));
+    expect(screen, contains('Trainerize'));
     expect(screen, contains('MigracaoFileParser'));
     expect(screen, contains('_editarAluno'));
     expect(screen, contains('_mostrarResumoImportacao'));
     expect(screen, contains('Nenhum aluno identificado'));
     expect(screen, contains('/api/v1/migracao/preview'));
     expect(screen, contains('Já cadastrado'));
-    expect(screen, contains('Planilha estruturada'));
+    expect(screen, contains('app concorrente'));
     expect(screen, isNot(contains('Migração Mágica')));
-    expect(screen, isNot(contains('Sem upload de arquivo')));
   });
 
-  testWidgets('migracao focux pump com import e revisao', (tester) async {
+  testWidgets('migracao focux pump com foto print e planilha', (tester) async {
     tester.view.physicalSize = const Size(430, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -62,9 +65,10 @@ void main() {
 
     expect(find.text('Migração Focux'), findsOneWidget);
     expect(find.text('Importe alunos com IA'), findsOneWidget);
-    expect(find.text('Iniciar migração'), findsOneWidget);
-    expect(find.text('Importar arquivo'), findsOneWidget);
+    expect(find.text('Subir foto ou print'), findsOneWidget);
+    expect(find.text('Planilha'), findsOneWidget);
     expect(find.text('Colar texto'), findsOneWidget);
-    expect(find.textContaining('Planilha estruturada'), findsOneWidget);
+    expect(find.textContaining('Veio de outro app'), findsOneWidget);
+    expect(find.textContaining('MFIT'), findsOneWidget);
   });
 }
