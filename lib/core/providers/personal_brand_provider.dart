@@ -10,6 +10,13 @@ class PersonalBrand {
   final String? descricaoProfissional;
   final String? instagram;
   final String plano;
+  final String? appDisplayName;
+  final bool hideFocuxBranding;
+  final bool whiteLabelActive;
+  final String? customDomain;
+  final bool customDomainVerified;
+  final String? publicLandingUrl;
+  final String? capturaUrl;
 
   PersonalBrand({
     required this.nomePersonal,
@@ -20,6 +27,13 @@ class PersonalBrand {
     this.descricaoProfissional,
     this.instagram,
     required this.plano,
+    this.appDisplayName,
+    this.hideFocuxBranding = false,
+    this.whiteLabelActive = false,
+    this.customDomain,
+    this.customDomainVerified = false,
+    this.publicLandingUrl,
+    this.capturaUrl,
   });
 
   factory PersonalBrand.fromJson(Map<String, dynamic> j) => PersonalBrand(
@@ -31,6 +45,13 @@ class PersonalBrand {
     descricaoProfissional: j['descricaoProfissional'] as String?,
     instagram: j['instagram'] as String?,
     plano: j['plano'] as String? ?? 'FREE',
+    appDisplayName: j['appDisplayName'] as String?,
+    hideFocuxBranding: j['hideFocuxBranding'] as bool? ?? false,
+    whiteLabelActive: j['whiteLabelActive'] as bool? ?? false,
+    customDomain: j['customDomain'] as String?,
+    customDomainVerified: j['customDomainVerified'] as bool? ?? false,
+    publicLandingUrl: j['publicLandingUrl'] as String?,
+    capturaUrl: j['capturaUrl'] as String?,
   );
 
   bool get isEnterprise => plano == 'ENTERPRISE';

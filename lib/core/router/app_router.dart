@@ -56,6 +56,7 @@ import '../../features/auth/screens/definir_senha_aluno_screen.dart';
 import '../../features/auth/screens/resetar_senha_screen.dart';
 import '../../features/ranking/screens/ranking_screen.dart';
 import '../../features/perfil/screens/identidade_visual_screen.dart';
+import '../../features/perfil/screens/white_label_settings_screen.dart';
 import '../../features/perfil/screens/landing_editor_screen.dart';
 import '../../features/dunning/screens/dunning_ops_screen.dart';
 import '../../features/winback/screens/winback_screen.dart';
@@ -687,7 +688,15 @@ class AppRouter {
           ),
           GoRoute(
             path: '/white-label',
-            redirect: (context, state) => '/identidade-visual',
+            pageBuilder:
+                (context, state) => fxTransitionPage(
+                  state: state,
+                  child: const WhiteLabelSettingsScreen(),
+                ),
+          ),
+          GoRoute(
+            path: '/perfil/white-label',
+            redirect: (context, state) => '/white-label',
           ),
           GoRoute(
             path: '/setup/identidade',

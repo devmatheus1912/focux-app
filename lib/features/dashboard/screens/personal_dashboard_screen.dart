@@ -1717,6 +1717,7 @@ class _RoiQuickLinksRow extends StatelessWidget {
     final items = [
       ('Pacotes', '/pacotes'),
       ('Captura', '/leads-publicos'),
+      ('White-label', '/white-label'),
       ('Smart Pricing', '/financeiro'),
       ('Landing', '/perfil/landing-editor'),
     ];

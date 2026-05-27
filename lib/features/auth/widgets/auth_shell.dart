@@ -91,7 +91,7 @@ class _AuthLogoMarkState extends ConsumerState<AuthLogoMark>
   }
 }
 
-class AuthWordmark extends StatelessWidget {
+class AuthWordmark extends ConsumerWidget {
   const AuthWordmark({
     super.key,
     this.center = true,
@@ -108,11 +108,51 @@ class AuthWordmark extends StatelessWidget {
   final bool showDivider;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hideFocux = ref.watch(hideFocuxBrandingProvider);
+    final appName = ref.watch(appDisplayNameProvider);
+    final personalName = ref.watch(personalNameProvider);
     final primary = Theme.of(context).colorScheme.primary;
     final align = center ? TextAlign.center : TextAlign.left;
     final crossAxis =
         center ? CrossAxisAlignment.center : CrossAxisAlignment.start;
+
+    if (hideFocux) {
+      final displayName = (appName != null && appName.trim().isNotEmpty)
+          ? appName.trim()
+          : (personalName != null && personalName.trim().isNotEmpty)
+              ? personalName.trim()
+              : 'Meu Personal';
+      return Column(
+        crossAxisAlignment: crossAxis,
+        children: [
+          Text(
+            displayName,
+            textAlign: align,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: titleSize * 0.85,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.6,
+              height: 1.1,
+            ),
+          ),
+          if (showDivider) ...[
+            const SizedBox(height: 14),
+            Container(
+              width: center ? 48 : 36,
+              height: 2,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [primary.withValues(alpha: 0.2), primary, primary.withValues(alpha: 0.2)],
+                ),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ],
+        ],
+      );
+    }
 
     return Column(
       crossAxisAlignment: crossAxis,

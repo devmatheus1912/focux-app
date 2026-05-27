@@ -9,6 +9,15 @@ void main() {
     expect(router, contains("path: '/dunning'"));
     expect(router, contains("path: '/winback'"));
     expect(router, contains("path: '/perfil/landing-editor'"));
+    expect(router, contains("path: '/white-label'"));
+  });
+
+  test('White-label repository declares expected API paths', () {
+    final whiteLabel =
+        File('lib/features/perfil/data/white_label_repository.dart')
+            .readAsStringSync();
+    expect(whiteLabel, contains('/api/personal/white-label'));
+    expect(whiteLabel, contains('/verificar-dominio'));
   });
 
   test('ROI repositories declare expected API paths', () {

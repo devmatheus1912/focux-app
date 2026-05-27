@@ -1,0 +1,253 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/feature_gate.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../subscription/models/subscription_plan.dart';
+import '../data/white_label_repository.dart';
+
+class WhiteLabelSettingsScreen extends ConsumerStatefulWidget {
+  const WhiteLabelSettingsScreen({super.key});
+
+  @override
+  ConsumerState<WhiteLabelSettingsScreen> createState() =>
+      _WhiteLabelSettingsScreenState();
+}
+
+class _WhiteLabelSettingsScreenState extends ConsumerState<WhiteLabelSettingsScreen> {
+  final _appNameCtrl = TextEditingController();
+  final _domainCtrl = TextEditingController();
+  bool _ocultarFocux = false;
+  String _landingModo = 'CAPTURA';
+  bool _salvando = false;
+  bool _verificando = false;
+  bool _loaded = false;
+
+  @override
+  void dispose() {
+    _appNameCtrl.dispose();
+    _domainCtrl.dispose();
+    super.dispose();
+  }
+
+  void _apply(WhiteLabelConfig config) {
+    if (_loaded) return;
+    _appNameCtrl.text = config.appDisplayName ?? '';
+    _domainCtrl.text = config.dominioCustomizado ?? '';
+    _ocultarFocux = config.ocultarMarcaFocux;
+    _landingModo = config.landingModo;
+    _loaded = true;
+  }
+
+  Future<void> _salvar() async {
+    setState(() => _salvando = true);
+    try {
+      await ref.read(whiteLabelRepositoryProvider).save(
+        appDisplayName: _appNameCtrl.text.trim(),
+        ocultarMarcaFocux: _ocultarFocux,
+        dominioCustomizado: _domainCtrl.text.trim(),
+        landingModo: _landingModo,
+      );
+      ref.invalidate(whiteLabelConfigProvider);
+      if (mounted) FeedbackHelper.showSuccess(context, 'White-label atualizado');
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, 'Não foi possível salvar');
+    } finally {
+      if (mounted) setState(() => _salvando = false);
+    }
+  }
+
+  Future<void> _verificarDominio() async {
+    setState(() => _verificando = true);
+    try {
+      await ref.read(whiteLabelRepositoryProvider).verifyDomain();
+      ref.invalidate(whiteLabelConfigProvider);
+      if (mounted) FeedbackHelper.showSuccess(context, 'Domínio marcado como verificado');
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, 'Verifique o DNS antes de confirmar');
+    } finally {
+      if (mounted) setState(() => _verificando = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final configAsync = ref.watch(whiteLabelConfigProvider);
+
+    return FeatureGate(
+      featureName: 'White-label',
+      requiredPlan: SubscriptionPlan.ENTERPRISE,
+      capability: 'whiteLabel',
+      child: FxShellScaffold(
+        appBar: FxShellAppBar(
+          title: 'White-label',
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_rounded),
+            onPressed: () => context.pop(),
+          ),
+        ),
+        body: configAsync.when(
+          loading: () => const Center(child: FxLoading()),
+          error: (_, __) => Center(
+            child: Text(
+              'Recurso disponível no plano Enterprise',
+              style: TextStyle(color: EagleTokens.inkMute),
+            ),
+          ),
+          data: (config) {
+            _apply(config);
+            final chrome = ShellChrome.of(context);
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+              children: [
+                _sectionTitle('App do aluno'),
+                SwitchListTile(
+                  value: _ocultarFocux,
+                  onChanged: (v) => setState(() => _ocultarFocux = v),
+                  title: const Text('Ocultar marca Focux'),
+                  subtitle: const Text(
+                    'Login, splash e cards sociais usam só a sua marca.',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _appNameCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Nome do app (aluno)',
+                    hintText: 'Ex: Studio João Silva',
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _sectionTitle('Domínio customizado'),
+                TextField(
+                  controller: _domainCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Domínio',
+                    hintText: 'treino.seudominio.com.br',
+                  ),
+                  autocorrect: false,
+                  keyboardType: TextInputType.url,
+                ),
+                if (config.dominioVerificado)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Row(
+                      children: [
+                        Icon(Icons.verified_rounded, color: EagleTokens.success, size: 18),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Domínio verificado',
+                          style: TextStyle(color: EagleTokens.success, fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: chrome.cardFill,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: chrome.line),
+                  ),
+                  child: Text(
+                    config.dnsInstrucoes,
+                    style: TextStyle(
+                      color: chrome.mute,
+                      fontSize: 12,
+                      height: 1.45,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: _verificando ? null : _verificarDominio,
+                  icon: _verificando
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: FxLoading(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.dns_outlined),
+                  label: const Text('Verificar domínio'),
+                ),
+                const SizedBox(height: 24),
+                _sectionTitle('Modo de vendas'),
+                SegmentedButton<String>(
+                  segments: const [
+                    ButtonSegment(value: 'CAPTURA', label: Text('Captura')),
+                    ButtonSegment(value: 'SITE', label: Text('Site completo')),
+                  ],
+                  selected: {_landingModo},
+                  onSelectionChanged: (s) => setState(() => _landingModo = s.first),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _landingModo == 'CAPTURA'
+                      ? 'Priorize o link curto de captura de leads no dashboard.'
+                      : 'Landing HTML completa em /p/{slug} ou domínio custom.',
+                  style: TextStyle(color: chrome.mute, fontSize: 13),
+                ),
+                const SizedBox(height: 16),
+                _linkTile('Link Captura', config.publicCapturaUrl),
+                _linkTile('Link Landing', config.publicLandingUrl),
+                const SizedBox(height: 24),
+                _sectionTitle('Checklist máquina de vendas (${config.checklistScore}/${config.checklist.length})'),
+                ...config.checklist.map(
+                  (item) => CheckboxListTile(
+                    value: item.done,
+                    onChanged: null,
+                    controlAffinity: ListTileControlAffinity.leading,
+                    title: Text(item.label, style: const TextStyle(fontSize: 14)),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                FilledButton(
+                  onPressed: _salvando ? null : _salvar,
+                  child: _salvando
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: FxLoading(strokeWidth: 2),
+                        )
+                      : const Text('Salvar white-label'),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _sectionTitle(String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Text(
+      text,
+      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+    ),
+  );
+
+  Widget _linkTile(String label, String url) {
+    if (url.isEmpty) return const SizedBox.shrink();
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(label, style: const TextStyle(fontSize: 14)),
+      subtitle: Text(url, style: TextStyle(color: EagleTokens.inkMute, fontSize: 12)),
+      trailing: IconButton(
+        icon: const Icon(Icons.copy_rounded, size: 20),
+        onPressed: () {
+          Clipboard.setData(ClipboardData(text: url));
+          FeedbackHelper.showSuccess(context, 'Link copiado');
+        },
+      ),
+    );
+  }
+}

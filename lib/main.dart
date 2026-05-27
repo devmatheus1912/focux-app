@@ -188,6 +188,14 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
       if (logoUrl != null && logoUrl.isNotEmpty) {
         ref.read(logoUrlProvider.notifier).state = logoUrl;
       }
+      final nomePersonal = data['nomePersonal'] as String?;
+      if (nomePersonal != null && nomePersonal.isNotEmpty) {
+        ref.read(personalNameProvider.notifier).state = nomePersonal;
+      }
+      ref.read(hideFocuxBrandingProvider.notifier).state =
+          data['hideFocuxBranding'] as bool? ?? false;
+      ref.read(appDisplayNameProvider.notifier).state =
+          data['appDisplayName'] as String?;
     } catch (_) {}
   }
 
@@ -195,6 +203,8 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
     ref.read(primaryColorProvider.notifier).state = EagleTokens.brand;
     ref.read(logoUrlProvider.notifier).state = null;
     ref.read(personalNameProvider.notifier).state = null;
+    ref.read(hideFocuxBrandingProvider.notifier).state = false;
+    ref.read(appDisplayNameProvider.notifier).state = null;
   }
 
   Color _safePrimaryColor(String? raw) {
@@ -225,9 +235,17 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
 
     final themeMode = ref.watch(themeModeProvider);
     final primaryColor = ref.watch(primaryColorProvider);
+    final hideFocux = ref.watch(hideFocuxBrandingProvider);
+    final appDisplayName = ref.watch(appDisplayNameProvider);
+    final personalName = ref.watch(personalNameProvider);
+    final appTitle = hideFocux
+        ? ((appDisplayName != null && appDisplayName.trim().isNotEmpty)
+            ? appDisplayName.trim()
+            : (personalName ?? 'Meu Personal'))
+        : 'Focux';
 
     return MaterialApp.router(
-      title: 'Focux',
+      title: appTitle,
       theme: AppTheme.buildTheme(primaryColor),
       darkTheme: AppTheme.buildDarkTheme(primaryColor),
       themeMode: themeMode,

@@ -16,6 +16,10 @@ final logoUrlProvider = StateProvider<String?>((ref) => null);
 
 final personalNameProvider = StateProvider<String?>((ref) => null);
 
+final hideFocuxBrandingProvider = StateProvider<bool>((ref) => false);
+
+final appDisplayNameProvider = StateProvider<String?>((ref) => null);
+
 /// Persists light/dark choice. Defaults to dark to match login/cinematic chrome.
 class ThemeModeController extends StateNotifier<ThemeMode> {
   ThemeModeController() : super(ThemeMode.dark) {
