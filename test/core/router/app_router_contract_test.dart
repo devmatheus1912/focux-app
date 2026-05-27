@@ -2,9 +2,19 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+String _routerSources() {
+  final router = File('lib/core/router/app_router.dart').readAsStringSync();
+  final redirect =
+      File('lib/core/router/app_router_redirect.dart').readAsStringSync();
+  return '$router\n$redirect';
+}
+
 void main() {
   test('router keeps logged route aliases and fallback registered', () {
     final router = File('lib/core/router/app_router.dart').readAsStringSync();
+    final authRouter =
+        File('lib/core/router/app_router_auth_routes.dart').readAsStringSync();
+    final routes = '$router\n$authRouter';
 
     for (final path in [
       '/',
@@ -18,7 +28,7 @@ void main() {
       '/ia',
       '/ia/copiloto',
     ]) {
-      expect(router, contains("path: '$path'"));
+      expect(routes, contains("path: '$path'"));
     }
 
     expect(
@@ -28,49 +38,51 @@ void main() {
   });
 
   test('router protects direct opens that miss required extra payloads', () {
-    final router = File('lib/core/router/app_router.dart').readAsStringSync();
+    final sources = _routerSources();
 
-    expect(router, contains("path: '/alunos/:id/editar'"));
-    expect(router, contains("state.extra is Aluno"));
-    expect(router, contains("path: '/perfil/editar'"));
-    expect(router, contains("state.extra is PerfilPersonal"));
-    expect(router, contains("path: '/checkin/executar'"));
-    expect(router, contains("_treinoIdFromState(state) == null"));
-    expect(router, contains("state.uri.queryParameters['treinoId']"));
-    expect(router, contains("_stringExtra(state)"));
+    expect(sources, contains("path: '/alunos/:id/editar'"));
+    expect(sources, contains("state.extra is Aluno"));
+    expect(sources, contains("path: '/perfil/editar'"));
+    expect(sources, contains("state.extra is PerfilPersonal"));
+    expect(sources, contains("path: '/checkin/executar'"));
+    expect(sources, contains('treinoIdFromState(state) == null'));
+    expect(sources, contains("state.uri.queryParameters['treinoId']"));
+    expect(sources, contains('stringRouteExtra(state)'));
 
-    expect(router, isNot(contains('state.extra as int')));
-    expect(router, isNot(contains('state.extra as String?')));
+    expect(sources, isNot(contains('state.extra as int')));
+    expect(sources, isNot(contains('state.extra as String?')));
   });
 
   test('router protects dynamic id paths from invalid ids', () {
-    final router = File('lib/core/router/app_router.dart').readAsStringSync();
+    final sources = _routerSources();
 
-    expect(router, contains('int? _intPathParam'));
-    expect(router, contains("_intPathParam(state, 'id') == null"));
-    expect(router, contains("int.tryParse(value ?? '')"));
+    expect(sources, contains('int? intPathParam'));
+    expect(sources, contains("intPathParam(state, 'id') == null"));
+    expect(sources, contains("int.tryParse(value ?? '')"));
 
-    expect(router, isNot(contains("int.parse(state.pathParameters['id']!")));
+    expect(sources, isNot(contains("int.parse(state.pathParameters['id']!")));
   });
 
   test('router guards private deep links without a stored session', () {
     final router = File('lib/core/router/app_router.dart').readAsStringSync();
+    final redirect =
+        File('lib/core/router/app_router_redirect.dart').readAsStringSync();
 
     expect(
       router,
-      contains('redirect: (context, state) async => _authRedirect(state)'),
+      contains('redirect: (context, state) async => authRedirect(state)'),
     );
     expect(
       router,
       contains('refreshListenable: SessionInvalidator.listenable'),
     );
-    expect(router, contains('Future<String?> _authRedirect'));
-    expect(router, contains('SecureStorage.getToken()'));
+    expect(redirect, contains('Future<String?> authRedirect'));
+    expect(redirect, contains('SecureStorage.getToken()'));
     expect(
-      router,
+      redirect,
       contains("return from.isEmpty ? '/login' : '/login?from=\$from'"),
     );
-    expect(router, contains('bool _isPublicLocation'));
+    expect(redirect, contains('bool isPublicLocation'));
 
     for (final publicPath in [
       '/',
@@ -84,10 +96,10 @@ void main() {
       '/esqueci-senha',
       '/resetar-senha',
     ]) {
-      expect(router, contains("path == '$publicPath'"));
+      expect(redirect, contains("path == '$publicPath'"));
     }
 
-    expect(router, isNot(contains("path.startsWith('/p/')")));
+    expect(redirect, isNot(contains("path.startsWith('/p/')")));
     expect(router, isNot(contains("path == '/ia'")));
     expect(router, isNot(contains("path == '/aluno'")));
     expect(router, isNot(contains("path == '/personal'")));

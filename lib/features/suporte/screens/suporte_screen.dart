@@ -170,14 +170,24 @@ class _SuporteScreenState extends ConsumerState<SuporteScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            _SupportHeader(
-              ticket: _ticketCriado,
-              onTicketsTap: _abrirTicketsSheet,
-            ),
-            _QuickActions(
-              onPromptTap: _enviarMensagem,
-              onOpenTicketTap: _abrirTicketSheet,
-              onTicketsTap: _abrirTicketsSheet,
+            Flexible(
+              fit: FlexFit.loose,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _SupportHeader(
+                      ticket: _ticketCriado,
+                      onTicketsTap: _abrirTicketsSheet,
+                    ),
+                    _QuickActions(
+                      onPromptTap: _enviarMensagem,
+                      onOpenTicketTap: _abrirTicketSheet,
+                      onTicketsTap: _abrirTicketsSheet,
+                    ),
+                  ],
+                ),
+              ),
             ),
             Expanded(
               child: ListView.builder(
@@ -276,23 +286,28 @@ class _SupportHeader extends StatelessWidget {
                 const SizedBox(height: 2),
                 Row(
                   children: [
-                    const Text(
-                      'online · resposta imediata',
-                      style: TextStyle(
-                        color: EagleTokens.good,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    if (ticket != null) ...[
-                      Text(
-                        '  /  Ticket #${ticket!.id}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: TokensStrip.textSecondary,
+                    const Flexible(
+                      child: Text(
+                        'online · resposta imediata',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: EagleTokens.good,
+                          fontSize: 12,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                    ],
+                    ),
+                    if (ticket != null)
+                      Flexible(
+                        child: Text(
+                          '  /  Ticket #${ticket!.id}',
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: TokensStrip.textSecondary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ],
@@ -308,7 +323,7 @@ class _SupportHeader extends StatelessWidget {
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Text(
-                'Central de Ajuda',
+                'Ajuda',
                 style: TextStyle(
                   color: primary,
                   fontSize: 11,

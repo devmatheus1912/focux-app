@@ -152,18 +152,18 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
       child: Scaffold(
         body: AuthShell(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(22, 60, 22, 40),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: MediaQuery.of(context).size.height - 100,
-              ),
-              child: Form(
+            padding: EdgeInsets.fromLTRB(
+              22,
+              48,
+              22,
+              24 + MediaQuery.viewPaddingOf(context).bottom,
+            ),
+            child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     AuthBackButton(
-                      showLabel: true,
                       onTap: () => context.go('/login'),
                     ),
                     const SizedBox(height: 28),
@@ -370,7 +370,6 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
             ),
           ),
         ),
-      ),
     );
   }
 }

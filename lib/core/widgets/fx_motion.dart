@@ -177,12 +177,17 @@ class FxLiquidPrimaryButton extends StatelessWidget {
                             Icon(icon, size: 18, color: labelColor),
                             const SizedBox(width: TokensStrip.s2),
                           ],
-                          Text(
-                            label,
-                            style: const TextStyle(
-                              color: labelColor,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15,
+                          Flexible(
+                            child: Text(
+                              label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: labelColor,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15,
+                              ),
                             ),
                           ),
                         ],

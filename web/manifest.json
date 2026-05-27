@@ -1,11 +1,11 @@
 {
-    "name": "focux_app",
-    "short_name": "focux_app",
+    "name": "Focux Personal",
+    "short_name": "Focux",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#12343C",
+    "theme_color": "#13C2C2",
+    "description": "Plataforma para personal trainers gerirem alunos, treinos e captacao de leads.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

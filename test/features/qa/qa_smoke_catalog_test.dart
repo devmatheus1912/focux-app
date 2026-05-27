@@ -39,30 +39,37 @@ void main() {
 
   test('QA smoke catalog routes stay registered in GoRouter', () {
     final router = File('lib/core/router/app_router.dart').readAsStringSync();
+    final authRouter =
+        File('lib/core/router/app_router_auth_routes.dart').readAsStringSync();
+    final routes = '$router\n$authRouter';
+
+    final redirect =
+        File('lib/core/router/app_router_redirect.dart').readAsStringSync();
 
     for (final route in qaSmokeRoutes) {
       final cleanPath = route.path.split('?').first;
       expect(
-        router,
+        routes,
         contains("path: '$cleanPath'"),
         reason: '${route.id} precisa continuar registrado no router.',
       );
     }
 
-    expect(router, contains('Future<String?> _authRedirect'));
+    expect(redirect, contains('Future<String?> authRedirect'));
     expect(
-      router,
+      redirect,
       contains("return from.isEmpty ? '/login' : '/login?from=\$from'"),
     );
   });
 
   test('QA smoke catalog keeps public and private route boundaries explicit', () {
-    final router = File('lib/core/router/app_router.dart').readAsStringSync();
+    final redirect =
+        File('lib/core/router/app_router_redirect.dart').readAsStringSync();
 
     for (final route in qaPublicRoutes) {
       final cleanPath = route.path.split('?').first;
       expect(
-        router,
+        redirect,
         contains("path == '$cleanPath'"),
         reason: '${route.id} precisa permanecer publico para smoke sem token.',
       );
@@ -70,7 +77,7 @@ void main() {
 
     for (final route in qaPrivateRoutes) {
       expect(
-        router,
+        redirect,
         isNot(contains("path == '${route.path.split('?').first}'")),
         reason: '${route.id} nao pode entrar na lista publica sem token.',
       );

@@ -7,12 +7,10 @@ import 'package:focux_app/features/qa/widgets/qa_route_preview.dart';
 /// Rotas com overflow conhecido em viewport estreito (430px) — bug de layout real.
 const _knownLayoutFragileRoutes = {
   '/register',
-  '/esqueci-senha',
   '/onboarding',
   '/ia/copiloto',
   '/ia/checkin',
   '/broadcasts',
-  '/suporte',
   '/agenda',
   '/gamificacao',
 };

@@ -163,7 +163,9 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
       }
       ref.read(personalNameProvider.notifier).state = perfil.nome;
       return;
-    } catch (_) {}
+    } catch (error) {
+      debugPrint('[Focux] personal theme load failed: $error');
+    }
 
     if (role == 'PERSONAL') return;
     await _loadAlunoTheme();
@@ -196,7 +198,9 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
           data['hideFocuxBranding'] as bool? ?? false;
       ref.read(appDisplayNameProvider.notifier).state =
           data['appDisplayName'] as String?;
-    } catch (_) {}
+    } catch (error) {
+      debugPrint('[Focux] aluno theme load failed: $error');
+    }
   }
 
   void _resetCustomTheme() {
