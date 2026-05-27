@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../core/config/env.dart';
 import '../../../core/utils/friendly_error.dart';
 
 import '../../../core/api/api_client.dart';
@@ -699,7 +700,7 @@ class _PerfilBody extends StatelessWidget {
                                   icon: const Icon(Icons.language_outlined),
                                   label: Text(
                                     perfil.slug != null
-                                        ? 'Editor landing · focux.app/p/${perfil.slug}'
+                                        ? 'Editor landing · ${Env.landingPageLabel(perfil.slug!)}'
                                         : 'Editor da landing pública',
                                   ),
                                 ),

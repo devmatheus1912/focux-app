@@ -58,4 +58,23 @@ class Env {
       apiUrl.contains('focux-backend.onrender.com') ||
       apiUrl.contains('up.railway.app') ||
       apiUrl.contains('api.focux.app');
+
+  static String get _webBase {
+    final base = publicWebUrl.endsWith('/')
+        ? publicWebUrl.substring(0, publicWebUrl.length - 1)
+        : publicWebUrl;
+    return base;
+  }
+
+  /// Landing HTML pública servida pelo backend (`/p/{slug}`).
+  static String landingPageUrl(String slug) => '$_webBase/p/$slug';
+
+  /// Página de captura de leads (`/c/{slug}`).
+  static String capturaPageUrl(String slug) => '$_webBase/c/$slug';
+
+  /// Label curto para UI (host + path).
+  static String landingPageLabel(String slug) {
+    final uri = Uri.parse(landingPageUrl(slug));
+    return '${uri.host}/p/$slug';
+  }
 }

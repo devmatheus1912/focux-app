@@ -29,8 +29,16 @@ Get-Content $envFile | ForEach-Object {
 }
 
 if (-not $env:GOOGLE_WEB_CLIENT_ID) {
-    Write-Error "GOOGLE_WEB_CLIENT_ID missing in .env.local"
+    Write-Error 'GOOGLE_WEB_CLIENT_ID missing in .env.local'
     exit 1
+}
+
+function Invoke-FlutterRun {
+    param([string[]]$DartDefines)
+    & flutter run -d emulator-5554 @DartDefines
+    if ($LASTEXITCODE -ne 0) {
+        throw "flutter run failed with exit code $LASTEXITCODE"
+    }
 }
 
 $fixScript = Join-Path $PSScriptRoot 'fix-android-build.ps1'
@@ -38,27 +46,30 @@ $fixScript = Join-Path $PSScriptRoot 'fix-android-build.ps1'
 Push-Location $root
 try {
     if ($OptionalClean) {
-        Write-Host "OptionalClean: executando fix-android-build.ps1..." -ForegroundColor Yellow
+        Write-Host 'OptionalClean: running fix-android-build.ps1...' -ForegroundColor Yellow
         & $fixScript
     }
 
     $defines = @(
         "--dart-define=GOOGLE_WEB_CLIENT_ID=$env:GOOGLE_WEB_CLIENT_ID"
     )
-    if ($env:API_URL) { $defines += "--dart-define=API_URL=$env:API_URL" }
+    if ($env:API_URL) {
+        $defines += "--dart-define=API_URL=$env:API_URL"
+    }
 
-    Write-Host "Running on Android emulator..." -ForegroundColor Cyan
-    Write-Host "GOOGLE_WEB_CLIENT_ID: $($env:GOOGLE_WEB_CLIENT_ID.Substring(0, [Math]::Min(20, $env:GOOGLE_WEB_CLIENT_ID.Length)))..." -ForegroundColor DarkGray
+    Write-Host 'Running on Android emulator...' -ForegroundColor Cyan
+    $idPreview = $env:GOOGLE_WEB_CLIENT_ID.Substring(0, [Math]::Min(20, $env:GOOGLE_WEB_CLIENT_ID.Length))
+    Write-Host "GOOGLE_WEB_CLIENT_ID: ${idPreview}..." -ForegroundColor DarkGray
 
     try {
-        & flutter run -d emulator-5554 @defines
-        if ($LASTEXITCODE -ne 0) { throw "flutter run exit $LASTEXITCODE" }
-    } catch {
-        Write-Host "flutter run falhou — executando fix-android-build.ps1 e tentando novamente..." -ForegroundColor Yellow
-        & $fixScript
-        & flutter run -d emulator-5554 @defines
-        if ($LASTEXITCODE -ne 0) { throw "flutter run exit $LASTEXITCODE" }
+        Invoke-FlutterRun -DartDefines $defines
     }
-} finally {
+    catch {
+        Write-Host 'flutter run failed - running fix-android-build.ps1 and retrying...' -ForegroundColor Yellow
+        & $fixScript
+        Invoke-FlutterRun -DartDefines $defines
+    }
+}
+finally {
     Pop-Location
 }

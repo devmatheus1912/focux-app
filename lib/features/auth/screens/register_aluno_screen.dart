@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_logo.dart';
+import '../../../core/widgets/branded_app_identity.dart';
 import '../../../core/widgets/fx_motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -186,11 +186,9 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const FxLogo(
-                              iconSize: 42,
+                            const BrandedAppIdentity(
+                              size: 42,
                               showLabel: true,
-                              horizontal: true,
-                              light: true,
                             ),
                             GestureDetector(
                               onTap: () => context.go('/login'),

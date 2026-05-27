@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/config/env.dart';
 import '../../../core/api/media_upload_service.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -11,6 +12,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../data/landing_growth_repository.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 
@@ -63,6 +65,28 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
   bool _saving = false;
   bool _uploadingHero = false;
   bool _uploadingBio = false;
+  bool _generatingHero = false;
+  List<LandingNichePreset> _presets = [];
+  List<LandingChecklistItem> _checklist = [];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadGrowth());
+  }
+
+  Future<void> _loadGrowth() async {
+    try {
+      final repo = ref.read(landingGrowthRepositoryProvider);
+      final presets = await repo.presets();
+      final checklist = await repo.checklist();
+      if (!mounted) return;
+      setState(() {
+        _presets = presets;
+        _checklist = checklist;
+      });
+    } catch (_) {}
+  }
 
   @override
   void dispose() {
@@ -245,7 +269,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       );
       return;
     }
-    final url = 'https://focux.app/p/$_slug';
+    final url = Env.landingPageUrl(_slug!);
     Clipboard.setData(ClipboardData(text: url));
     FeedbackHelper.showSnackBar(
       context,
@@ -352,8 +376,11 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
         }
         final preview =
             _slug != null && _slug!.isNotEmpty
-                ? 'https://focux.app/p/$_slug'
+                ? Env.landingPageUrl(_slug!)
                 : 'Defina slug no perfil';
+        final capturaLink = _slug != null && _slug!.isNotEmpty
+            ? Env.capturaPageUrl(_slug!)
+            : null;
 
         return FxShellScaffold(
           appBar: FxShellAppBar(
@@ -367,17 +394,121 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                 child: ListTile(
                   leading: const Icon(Icons.public),
                   title: Text(preview),
-                  subtitle: const Text('Preview do link público'),
+                  subtitle: const Text('Preview do link público (site)'),
                   trailing: IconButton(
                     icon: const Icon(Icons.copy),
                     onPressed: _copiarPreview,
                   ),
                 ),
               ),
+              if (capturaLink != null)
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.bolt_outlined),
+                    title: Text(capturaLink),
+                    subtitle: const Text('Link Captura — priorize para vender'),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.copy),
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: capturaLink));
+                        FeedbackHelper.showSnackBar(
+                          context,
+                          SnackBar(content: Text('Link captura copiado')),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              if (_presets.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                const Text(
+                  'Preset de nicho',
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _presets
+                      .map(
+                        (p) => ActionChip(
+                          label: Text(p.label),
+                          onPressed: _saving
+                              ? null
+                              : () async {
+                                  try {
+                                    await ref
+                                        .read(landingGrowthRepositoryProvider)
+                                        .applyPreset(p.id);
+                                    ref.invalidate(perfilProvider);
+                                    if (!context.mounted) return;
+                                    FeedbackHelper.showSuccess(
+                                      context,
+                                      'Preset ${p.label} aplicado',
+                                    );
+                                    await _loadGrowth();
+                                  } catch (e) {
+                                    if (!context.mounted) return;
+                                    FeedbackHelper.showError(
+                                      context,
+                                      friendlyError(e),
+                                    );
+                                  }
+                                },
+                        ),
+                      )
+                      .toList(),
+                ),
+              ],
+              if (_checklist.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text(
+                  'Checklist vendas (${_checklist.where((c) => c.done).length}/${_checklist.length})',
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                ),
+                ..._checklist.map(
+                  (item) => CheckboxListTile(
+                    value: item.done,
+                    onChanged: null,
+                    title: Text(item.label, style: const TextStyle(fontSize: 14)),
+                    controlAffinity: ListTileControlAffinity.leading,
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
               const Text(
                 'Hero',
                 style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: _generatingHero
+                    ? null
+                    : () async {
+                        setState(() => _generatingHero = true);
+                        try {
+                          final copy = await ref
+                              .read(landingGrowthRepositoryProvider)
+                              .generateHero();
+                          _heroTitle.text = copy.heroTitle;
+                          _heroSubtitle.text = copy.heroSubtitle;
+                          _primaryCta.text = copy.primaryCta;
+                          if (!context.mounted) return;
+                          FeedbackHelper.showSuccess(
+                            context,
+                            'Copy gerada com IA',
+                          );
+                        } catch (e) {
+                          if (!context.mounted) return;
+                          FeedbackHelper.showError(context, friendlyError(e));
+                        } finally {
+                          if (mounted) setState(() => _generatingHero = false);
+                        }
+                      },
+                icon: _generatingHero
+                    ? const FxLoading(size: 16, strokeWidth: 2)
+                    : const Icon(Icons.auto_awesome_outlined),
+                label: const Text('Gerar hero com IA'),
               ),
               const SizedBox(height: 8),
               TextField(

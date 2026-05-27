@@ -20,6 +20,26 @@ void main() {
     expect(whiteLabel, contains('/verificar-dominio'));
   });
 
+  test('Landing growth repository declares expected API paths', () {
+    final landing =
+        File('lib/features/perfil/data/landing_growth_repository.dart')
+            .readAsStringSync();
+    expect(landing, contains('/api/personal/landing/presets'));
+    expect(landing, contains('/api/personal/landing/gerar-hero'));
+    expect(landing, contains('/api/personal/landing/checklist'));
+  });
+
+  test('Env uses dynamic public URLs not hardcoded focux.app in screens', () {
+    final landingEditor =
+        File('lib/features/perfil/screens/landing_editor_screen.dart')
+            .readAsStringSync();
+    final pacotes =
+        File('lib/features/pacotes/screens/pacotes_screen.dart').readAsStringSync();
+    expect(landingEditor, contains('Env.landingPageUrl'));
+    expect(landingEditor, contains('Env.capturaPageUrl'));
+    expect(pacotes, isNot(contains('https://focux.app/p/')));
+  });
+
   test('ROI repositories declare expected API paths', () {
     final winback =
         File('lib/features/winback/data/winback_repository.dart')

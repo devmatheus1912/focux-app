@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/config/env.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -172,7 +173,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
       );
       return;
     }
-    final url = 'https://focux.app/p/${_slug!}';
+    final url = Env.landingPageUrl(_slug!);
     Clipboard.setData(ClipboardData(text: url));
     FeedbackHelper.showSnackBar(
       context,
@@ -213,7 +214,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
                           .withValues(alpha: .4),
                       child: ListTile(
                         leading: const Icon(Icons.public),
-                        title: Text('focux.app/p/$_slug'),
+                        title: Text(Env.landingPageLabel(_slug!)),
                         subtitle: const Text(
                             'Compartilhe este link para captar leads diretos.'),
                         trailing: TextButton(

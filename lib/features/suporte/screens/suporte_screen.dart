@@ -4,7 +4,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/widgets/fx_logo.dart';
+import '../../../core/widgets/branded_app_identity.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/suporte_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -241,7 +241,7 @@ class _SupportHeader extends StatelessWidget {
               CircleAvatar(
                 radius: 24,
                 backgroundColor: primary,
-                child: const FxLogoIcon(size: 34),
+                child: const BrandedAppIcon(size: 34),
               ),
               Positioned(
                 right: 1,
