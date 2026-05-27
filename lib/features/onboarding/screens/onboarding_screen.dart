@@ -27,6 +27,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   int _current = 0;
   OnboardingPersona _persona = OnboardingPersona.personal;
 
+  PageController get _activePage => _page;
+
   late AnimationController _entryCtrl;
   late Animation<double> _iconScale;
   late Animation<double> _titleSlide;
@@ -157,10 +159,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     await prefs.remove('onboarding_done');
   }
 
-  Future<void> _skip() async {
-    await _markDone();
-    if (mounted) _goLogin();
-  }
+  Future<void> _skip() => _goLogin();
 
   Future<void> _finish() async {
     await _markDone();
@@ -172,23 +171,34 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     }
   }
 
-  void _goLogin() => context.go('/login');
+  Future<void> _goLogin() async {
+    await _markDone();
+    if (!mounted) return;
+    final role =
+        _persona == OnboardingPersona.aluno ? 'aluno' : 'personal';
+    context.go('/login?role=$role');
+  }
 
   void _setPersona(OnboardingPersona persona) {
     if (_persona == persona) return;
     HapticFeedback.selectionClick();
+
+    final currentIndex =
+        _page.hasClients ? (_page.page?.round() ?? _current) : _current;
+    final targetIndex =
+        currentIndex.clamp(0, _pagesFor(persona).length - 1);
+
     setState(() {
       _persona = persona;
-      _current = 0;
+      _current = targetIndex;
     });
-    _page.jumpToPage(0);
     _entryCtrl.forward(from: 0);
   }
 
   void _next() {
     HapticFeedback.selectionClick();
     if (_current < _pages.length - 1) {
-      _page.nextPage(
+      _activePage.nextPage(
         duration: const Duration(milliseconds: 400),
         curve: Curves.easeOutCubic,
       );
@@ -300,11 +310,13 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     child: Semantics(
                       label: 'Slide ${_current + 1} de ${pages.length}',
                       child: PageView.builder(
-                        controller: _page,
+                        clipBehavior: Clip.none,
+                        controller: _activePage,
                         itemCount: pages.length,
                         onPageChanged: _onPageChanged,
                         itemBuilder:
                             (_, i) => _OBPageWidget(
+                              key: ValueKey('${_persona.name}-$i'),
                               pageIndex: i,
                               persona: _persona,
                               data: pages[i],
@@ -341,7 +353,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                             child: Center(
                               child: GestureDetector(
                                 onTap:
-                                    () => _page.animateToPage(
+                                    () => _activePage.animateToPage(
                                       i,
                                       duration: const Duration(
                                         milliseconds: 400,
@@ -388,27 +400,42 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         Semantics(
                           button: true,
                           label: FocuxBrandCopy.onboardingLoginAction,
-                          child: GestureDetector(
-                            onTap: _goLogin,
-                            child: RichText(
-                              textAlign: TextAlign.center,
-                              text: TextSpan(
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.70),
-                                  fontSize: 13,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text: FocuxBrandCopy.onboardingLoginLead,
-                                  ),
-                                  TextSpan(
-                                    text: FocuxBrandCopy.onboardingLoginAction,
-                                    style: TextStyle(
-                                      color: primary,
-                                      fontWeight: FontWeight.w600,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: _goLogin,
+                              borderRadius: BorderRadius.circular(8),
+                              child: SizedBox(
+                                width: double.infinity,
+                                height: 48,
+                                child: Center(
+                                  child: RichText(
+                                    textAlign: TextAlign.center,
+                                    text: TextSpan(
+                                      style: TextStyle(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.70,
+                                        ),
+                                        fontSize: 13,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text:
+                                              FocuxBrandCopy.onboardingLoginLead,
+                                        ),
+                                        TextSpan(
+                                          text:
+                                              FocuxBrandCopy
+                                                  .onboardingLoginAction,
+                                          style: TextStyle(
+                                            color: primary,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
@@ -494,6 +521,7 @@ class _OBPageWidget extends StatelessWidget {
   final Animation<double> fade;
 
   const _OBPageWidget({
+    super.key,
     required this.pageIndex,
     required this.persona,
     required this.data,
@@ -506,9 +534,17 @@ class _OBPageWidget extends StatelessWidget {
 
   Widget _buildHero() {
     if (pageIndex == 0) {
-      return FocuxOfficialLogo.full(width: persona == OnboardingPersona.aluno ? 142 : 148);
+      return FocuxOfficialLogo.full(
+        width: persona == OnboardingPersona.aluno ? 136 : 142,
+      );
     }
-    return FocuxOfficialLogo.icon(size: 88);
+    return SizedBox(
+      width: 100,
+      height: 100,
+      child: Center(
+        child: FocuxOfficialLogo.icon(size: 84),
+      ),
+    );
   }
 
   @override
@@ -521,12 +557,13 @@ class _OBPageWidget extends StatelessWidget {
       builder:
           (_, __) => SingleChildScrollView(
             physics: const ClampingScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(20, 2, 20, 12),
+            padding: EdgeInsets.fromLTRB(20, pageIndex == 0 ? 2 : 10, 20, 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Transform.scale(
                   scale: iconScale.value,
+                  alignment: Alignment.center,
                   child: _buildHero(),
                 ),
 

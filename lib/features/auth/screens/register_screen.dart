@@ -202,7 +202,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  AuthBackButton(onTap: () => context.go('/login')),
+                  AuthBackButton(onTap: () => context.go('/login?role=personal')),
                   const SizedBox(height: TokensStrip.s4),
                   Row(
                     children: [
@@ -345,6 +345,31 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     label: 'Cadastrar com Google',
                     isLoading: _loadingGoogle,
                     onPressed: _loadingGoogle ? null : _submitGoogle,
+                  ),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: GestureDetector(
+                      onTap: () => context.go('/login?role=personal'),
+                      child: RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.65),
+                            fontSize: 14,
+                          ),
+                          children: [
+                            const TextSpan(text: 'Já tem conta? '),
+                            TextSpan(
+                              text: 'Entrar',
+                              style: TextStyle(
+                                color: primary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Center(

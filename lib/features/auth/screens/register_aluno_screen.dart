@@ -191,7 +191,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                               showLabel: true,
                             ),
                             GestureDetector(
-                              onTap: () => context.go('/login'),
+                              onTap: () => context.go('/login?role=aluno'),
                               child: Container(
                                 width: 42,
                                 height: 42,
@@ -519,7 +519,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
                                 ),
                               ),
                               GestureDetector(
-                                onTap: () => context.go('/login'),
+                                onTap: () => context.go('/login?role=aluno'),
                                 child: Text(
                                   'Entrar',
                                   style: TextStyle(

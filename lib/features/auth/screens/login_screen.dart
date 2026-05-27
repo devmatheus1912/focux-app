@@ -39,11 +39,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   String? _error;
   // BUG-39: role toggle — personal or aluno
   bool _isAluno = false;
+  bool _roleFromQueryApplied = false;
 
   @override
   void initState() {
     super.initState();
     _loadCapabilities();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_roleFromQueryApplied) return;
+    _roleFromQueryApplied = true;
+    final role =
+        GoRouterState.of(context).uri.queryParameters['role']?.trim().toLowerCase();
+    if (role == 'aluno') {
+      _isAluno = true;
+    } else if (role == 'personal') {
+      _isAluno = false;
+    }
   }
 
   Future<void> _loadCapabilities() async {

@@ -53,15 +53,19 @@ class FocuxOfficialLogo extends StatelessWidget {
 
     if (variant == FocuxLogoVariant.icon) {
       final side = width ?? height ?? 40;
+      final inset = side * 0.08;
       return SizedBox(
         width: side,
         height: side,
-        child: Image.asset(
-          iconAsset,
-          fit: BoxFit.contain,
-          filterQuality: FilterQuality.high,
-          gaplessPlayback: true,
-          isAntiAlias: true,
+        child: Padding(
+          padding: EdgeInsets.all(inset),
+          child: Image.asset(
+            iconAsset,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.high,
+            gaplessPlayback: true,
+            isAntiAlias: true,
+          ),
         ),
       );
     }

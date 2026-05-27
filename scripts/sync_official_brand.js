@@ -333,30 +333,33 @@ async function writeSymbolIcon(sharp, officialPath, outputPath) {
   }
 
   const cropped = cropToSymbolContent(extracted, info.width, extractH);
-  const pad = Math.max(8, Math.round(Math.max(cropped.width, cropped.height) * 0.04));
+  const pad = Math.max(20, Math.round(Math.max(cropped.width, cropped.height) * 0.14));
   const paddedW = cropped.width + pad * 2;
   const paddedH = cropped.height + pad * 2;
-  const padded = Buffer.alloc(paddedW * paddedH * 4);
+  const side = Math.max(paddedW, paddedH);
+  const square = Buffer.alloc(side * side * 4);
+  const offsetX = Math.floor((side - paddedW) / 2);
+  const offsetY = Math.floor((side - paddedH) / 2);
 
   for (let y = 0; y < cropped.height; y++) {
     for (let x = 0; x < cropped.width; x++) {
       const si = (y * cropped.width + x) * 4;
-      const di = ((y + pad) * paddedW + (x + pad)) * 4;
-      padded[di] = cropped.data[si];
-      padded[di + 1] = cropped.data[si + 1];
-      padded[di + 2] = cropped.data[si + 2];
-      padded[di + 3] = cropped.data[si + 3];
+      const di = ((y + pad + offsetY) * side + (x + pad + offsetX)) * 4;
+      square[di] = cropped.data[si];
+      square[di + 1] = cropped.data[si + 1];
+      square[di + 2] = cropped.data[si + 2];
+      square[di + 3] = cropped.data[si + 3];
     }
   }
 
-  await sharp(padded, {
-    raw: { width: paddedW, height: paddedH, channels: 4 },
+  await sharp(square, {
+    raw: { width: side, height: side, channels: 4 },
   })
     .png()
     .toFile(outputPath);
 
   console.log(
-    `✓ logo_icon.png (${paddedW}x${paddedH}, symbol rows 0-${symbolBottom})`,
+    `✓ logo_icon.png (${side}x${side}, symbol rows 0-${symbolBottom}, pad ${pad}px)`,
   );
 }
 
@@ -430,29 +433,24 @@ async function main() {
 
   // Splash Flutter / Android clássico — lockup completo com margem transparente.
   await sharp(OUT_OFFICIAL)
-    .resize(520, null, { fit: 'inside' })
+    .resize(480, null, { fit: 'inside' })
     .extend({
-      top: 48,
-      bottom: 48,
-      left: 64,
-      right: 64,
+      top: 64,
+      bottom: 64,
+      left: 80,
+      right: 80,
       background: { r: 0, g: 0, b: 0, alpha: 0 },
     })
     .png()
     .toFile(path.join(assets, 'logo_splash.png'));
   console.log('✓ logo_splash.png');
 
-  // Android 12 — símbolo cabe na máscara circular (~62% do canvas).
+  // Android 12 — símbolo dentro da máscara circular (~66% útil do canvas 512).
   const splashCanvas = 512;
-  const safeCircle = splashCanvas * 0.62;
-  const iconMeta = await sharp(path.join(assets, 'logo_icon.png')).metadata();
-  const iconDiag = Math.hypot(iconMeta.width, iconMeta.height);
+  const safeCircle = splashCanvas * 0.58;
   const splashIconInner = Math.max(
-    180,
-    Math.min(
-      260,
-      Math.round((safeCircle * Math.min(iconMeta.width, iconMeta.height)) / iconDiag),
-    ),
+    168,
+    Math.min(210, Math.round(safeCircle * 0.88)),
   );
   const iconOnly = await sharp(path.join(assets, 'logo_icon.png'))
     .resize(splashIconInner, splashIconInner, {

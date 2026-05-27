@@ -111,7 +111,8 @@ class _SplashHeroMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const logoWidth = 200.0;
+    const logoWidth = 184.0;
+    const logoAspect = 925 / 1024;
     final floatY = reduceMotion ? 0.0 : math.sin(phase * math.pi * 2) * 4;
     final scale =
         reduceMotion
@@ -123,7 +124,14 @@ class _SplashHeroMark extends StatelessWidget {
       offset: Offset(0, floatY),
       child: Transform.scale(
         scale: scale,
-        child: const FocuxOfficialLogo.full(width: logoWidth),
+        alignment: Alignment.center,
+        child: SizedBox(
+          width: logoWidth,
+          height: logoWidth * logoAspect + 12,
+          child: Center(
+            child: FocuxOfficialLogo.full(width: logoWidth),
+          ),
+        ),
       ),
     );
   }

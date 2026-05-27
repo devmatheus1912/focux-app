@@ -100,30 +100,11 @@ function patchAndroid12Styles(root) {
   }
 }
 
-async function removeSplashDrawables(sharp, resDir) {
+async function removeLegacySplashLayers(resDir) {
   for (const entry of fs.readdirSync(resDir, { withFileTypes: true })) {
     if (!entry.isDirectory() || !entry.name.startsWith('drawable')) continue;
     const splash = path.join(resDir, entry.name, 'splash.png');
     if (fs.existsSync(splash)) fs.unlinkSync(splash);
-    const android12 = path.join(resDir, entry.name, 'android12splash.png');
-    if (fs.existsSync(android12)) fs.unlinkSync(android12);
-  }
-
-  const blankIcon = await sharp({
-    create: {
-      width: 1,
-      height: 1,
-      channels: 4,
-      background: { r: 18, g: 52, b: 60, alpha: 1 },
-    },
-  })
-    .png()
-    .toBuffer();
-
-  for (const entry of fs.readdirSync(resDir, { withFileTypes: true })) {
-    if (!entry.isDirectory() || !entry.name.startsWith('drawable')) continue;
-    const android12 = path.join(resDir, entry.name, 'android12splash.png');
-    await sharp(blankIcon).toFile(android12);
   }
 }
 
@@ -148,10 +129,10 @@ async function main() {
 
   patchLaunchBackground(root);
   patchAndroid12Styles(root);
-  await removeSplashDrawables(sharp, resDir);
+  removeLegacySplashLayers(resDir);
 
   console.log(`✓ patched ${targets.length} android background drawables with mesh`);
-  console.log('✓ removed native splash logo layers');
+  console.log('✓ removed legacy splash.png layers (kept android12splash icon)');
 }
 
 main().catch((err) => {
