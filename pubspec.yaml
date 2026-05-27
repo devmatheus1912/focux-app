@@ -91,9 +91,11 @@ flutter_launcher_icons:
 
 flutter_native_splash:
   color: "#12343C"
-  background_image: "assets/images/splash_mesh_bg.png"
+  image: assets/images/logo_splash.png
+  android_gravity: center
   android_12:
     color: "#12343C"
+    image: assets/images/logo_splash_icon.png
     icon_background_color: "#12343C"
   android: true
   ios: true
@@ -114,23 +116,11 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/images/logo_focux_v2.png
-    - assets/images/focuxlogopremium.png
-    - assets/images/focux_logo_transparent.png
-    - assets/images/logo_icon_transparent.png
-    - assets/images/logo_horizontal_transparent.png
-    - assets/images/logo_icon.png
-    - assets/images/logo_icon_padded.png
-    - assets/images/logo_splash.png
-    - assets/images/logo_splash_f_only.png
-    - assets/images/logo_splash_f_padded.png
-    - assets/images/logo_splash_mark.png
-    - assets/images/splash_portrait.png
-    - assets/images/splash_mesh_bg.png
-    - assets/images/logo_mark_transparent.png
     - assets/images/logo_official.png
-    - assets/images/splash_background.png
-    - assets/images/logo_full.png
+    - assets/images/logo_official_raw.png
+    - assets/images/logo_icon.png
+    - assets/images/logo_splash.png
+    - assets/images/logo_splash_icon.png
     - assets/animations/confetti_success.riv
     - assets/animations/confetti_burst.riv
     - assets/animations/cdn_heart.riv

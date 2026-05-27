@@ -6,7 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/brand_glass_mark.dart';
+import '../../../core/widgets/focux_official_logo.dart';
+import '../../../core/widgets/focux_brand_tagline.dart';
 import '../../../core/widgets/fx_motion.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -327,6 +328,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       onPageChanged: _onPageChanged,
                       itemBuilder:
                           (_, i) => _OBPageWidget(
+                            pageIndex: i,
                             data: _pages[i],
                             iconScale: _iconScale,
                             titleSlide: _titleSlide,
@@ -466,6 +468,7 @@ class _SlideDot extends StatelessWidget {
 // ═══════════════════════════════════════════════════════════════════════════
 
 class _OBPageWidget extends StatelessWidget {
+  final int pageIndex;
   final _OBData data;
   final Animation<double> iconScale;
   final Animation<double> titleSlide;
@@ -474,6 +477,7 @@ class _OBPageWidget extends StatelessWidget {
   final Animation<double> fade;
 
   const _OBPageWidget({
+    required this.pageIndex,
     required this.data,
     required this.iconScale,
     required this.titleSlide,
@@ -481,6 +485,53 @@ class _OBPageWidget extends StatelessWidget {
     required this.metricsSlide,
     required this.fade,
   });
+
+  Widget _buildHero(Color primary) {
+    if (pageIndex == 0) {
+      return SizedBox(
+        width: 168,
+        child: Stack(
+          alignment: Alignment.center,
+          clipBehavior: Clip.none,
+          children: [
+            IgnorePointer(
+              child: Container(
+                width: 168,
+                height: 128,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      primary.withValues(alpha: 0.16),
+                      primary.withValues(alpha: 0.05),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.55, 1.0],
+                  ),
+                ),
+              ),
+            ),
+            const FocuxOfficialLogo.full(width: 168),
+          ],
+        ),
+      );
+    }
+
+    return SizedBox(
+      width: 188,
+      height: 188,
+      child: CustomPaint(
+        painter: _OrbitLinksPainter(),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            ..._buildOrbitIcons(data, primary),
+            FocuxOfficialLogo.icon(size: 96),
+          ],
+        ),
+      ),
+    );
+  }
 
   List<Widget> _buildOrbitIcons(_OBData d, Color primary) {
     const positions = [
@@ -530,29 +581,21 @@ class _OBPageWidget extends StatelessWidget {
               children: [
                 Transform.scale(
                   scale: iconScale.value,
-                  child: SizedBox(
-                    width: 188,
-                    height: 188,
-                    child: CustomPaint(
-                      painter: _OrbitLinksPainter(),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          ..._buildOrbitIcons(data, primary),
-                          BrandGlassMark(
-                            size: 118,
-                            tone: BrandGlassTone.dark,
-                            glowColor: primary,
-                            shimmerAlpha: 0.38,
-                            enableBackdropBlur: false,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  child: _buildHero(primary),
                 ),
 
-                const SizedBox(height: 18),
+                if (pageIndex == 0) ...[
+                  const SizedBox(height: 12),
+                  Transform.translate(
+                    offset: Offset(0, subtitleSlide.value * 0.5),
+                    child: Opacity(
+                      opacity: fade.value.clamp(0.0, 1.0),
+                      child: const FocuxBrandTagline(fontSize: 13),
+                    ),
+                  ),
+                ],
+
+                SizedBox(height: pageIndex == 0 ? 16 : 18),
 
                 Transform.translate(
                   offset: Offset(0, titleSlide.value),
@@ -592,7 +635,7 @@ class _OBPageWidget extends StatelessWidget {
                         data.subtitle,
                         textAlign: TextAlign.center,
                         style: AppTypography.inter(
-                          color: Colors.white.withValues(alpha: 0.62),
+                          color: Colors.white.withValues(alpha: 0.78),
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
                           height: 1.55,

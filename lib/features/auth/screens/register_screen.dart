@@ -206,7 +206,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   const SizedBox(height: TokensStrip.s4),
                   Row(
                     children: [
-                      const AuthLogoMark(size: 40),
+                      const AuthLogoMark(width: 160),
                       const SizedBox(width: 10),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

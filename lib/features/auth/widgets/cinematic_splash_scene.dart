@@ -2,8 +2,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/widgets/brand_glass_mark.dart';
+import 'auth_shell.dart';
+import '../../../core/widgets/focux_official_logo.dart';
 
 /// Cinematic splash foreground — same mesh as login, glass F mark,
 /// subtle motion, divider flare, loading rail.
@@ -62,15 +64,12 @@ class CinematicSplashScene extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
                       Opacity(
                         opacity: Curves.easeOut.transform(
                           (entry.value - 0.12).clamp(0.0, 1.0),
                         ),
-                        child: _PremiumSplashWordmark(
-                          phase: phase,
-                          primary: primary,
-                        ),
+                        child: const AuthWordmark(center: true, taglineSize: 14),
                       ),
                       const Spacer(),
                       Opacity(
@@ -106,120 +105,44 @@ class _SplashHeroMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const markSize = 200.0;
+    const logoWidth = 200.0;
     final floatY = math.sin(phase * math.pi * 2) * 5;
     final scale =
         0.90 + Curves.elasticOut.transform(entry.clamp(0.0, 1.0)) * 0.10;
     final primary = Theme.of(context).colorScheme.primary;
-    final glow = 0.55 + math.sin(phase * math.pi * 2) * 0.18;
 
     return Transform.translate(
       offset: Offset(0, floatY),
       child: Transform.scale(
         scale: scale,
-        child: BrandGlassMark(
-          size: markSize,
-          glowColor: primary,
-          shimmerAlpha: glow,
-          enableBackdropBlur: false,
-        ),
-      ),
-    );
-  }
-}
-
-class _PremiumSplashWordmark extends StatelessWidget {
-  const _PremiumSplashWordmark({
-    required this.phase,
-    required this.primary,
-  });
-
-  final double phase;
-  final Color primary;
-
-  @override
-  Widget build(BuildContext context) {
-    final flarePulse = 0.65 + math.sin(phase * math.pi * 2) * 0.35;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          'FOCUX',
-          textAlign: TextAlign.center,
-          style: AppTypography.inter(
-            color: Colors.white,
-            fontSize: 38,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.8,
-            height: 1,
-          ),
-        ),
-        const SizedBox(height: 7),
-        Text(
-          'PERSONAL',
-          textAlign: TextAlign.center,
-          style: AppTypography.inter(
-            color: primary,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 4.8,
-            height: 1,
-          ),
-        ),
-        const SizedBox(height: 18),
-        SizedBox(
-          width: 196,
-          height: 18,
+        child: SizedBox(
+          width: logoWidth,
           child: Stack(
             alignment: Alignment.center,
+            clipBehavior: Clip.none,
             children: [
-              Container(
-                height: 1,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.transparent,
-                      primary.withValues(alpha: 0.20),
-                      primary.withValues(alpha: 0.55 * flarePulse),
-                      primary.withValues(alpha: 0.20),
-                      Colors.transparent,
-                    ],
-                    stops: const [0.0, 0.28, 0.5, 0.72, 1.0],
+              IgnorePointer(
+                child: Container(
+                  width: logoWidth * 1.08,
+                  height: logoWidth * 0.8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        primary.withValues(alpha: 0.16),
+                        primary.withValues(alpha: 0.05),
+                        Colors.transparent,
+                      ],
+                      stops: const [0.0, 0.55, 1.0],
+                    ),
                   ),
                 ),
               ),
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.9 * flarePulse),
-                  boxShadow: [
-                    BoxShadow(
-                      color: primary.withValues(alpha: 0.65 * flarePulse),
-                      blurRadius: 14,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-              ),
+              const FocuxOfficialLogo.full(width: logoWidth),
             ],
           ),
         ),
-        const SizedBox(height: 12),
-        Text(
-          'Treine com dados. Evolua com inteligência.',
-          textAlign: TextAlign.center,
-          style: AppTypography.inter(
-            color: Colors.white.withValues(alpha: 0.48),
-            fontSize: 13.5,
-            fontStyle: FontStyle.italic,
-            fontWeight: FontWeight.w400,
-            height: 1.3,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -244,7 +167,7 @@ class _PremiumLoadingRail extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'CARREGANDO',
+          FocuxBrandCopy.splashLoading.toUpperCase(),
           style: AppTypography.inter(
             color: primary.withValues(alpha: 0.88),
             fontSize: 10.5,

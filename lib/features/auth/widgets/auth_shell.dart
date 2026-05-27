@@ -8,7 +8,8 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
-import '../../../core/widgets/brand_glass_mark.dart';
+import '../../../core/widgets/focux_official_logo.dart';
+import '../../../core/widgets/focux_brand_tagline.dart';
 import '../../../core/widgets/cinematic_mesh_background.dart';
 
 class AuthShell extends StatelessWidget {
@@ -40,53 +41,43 @@ class AuthShell extends StatelessWidget {
   }
 }
 
-class AuthLogoMark extends ConsumerStatefulWidget {
-  const AuthLogoMark({super.key, this.size = 96});
+class AuthLogoMark extends ConsumerWidget {
+  const AuthLogoMark({super.key, this.width = 188});
 
-  final double size;
-
-  @override
-  ConsumerState<AuthLogoMark> createState() => _AuthLogoMarkState();
-}
-
-class _AuthLogoMarkState extends ConsumerState<AuthLogoMark>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _shimmerCtrl;
-  late Animation<double> _shimmerAnim;
+  final double width;
 
   @override
-  void initState() {
-    super.initState();
-    _shimmerCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 3000),
-    )..repeat(reverse: true);
-    _shimmerAnim = Tween<double>(begin: 0.3, end: 0.6).animate(
-      CurvedAnimation(parent: _shimmerCtrl, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _shimmerCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final primary = Theme.of(context).colorScheme.primary;
     final logoUrl = ref.watch(logoUrlProvider);
 
-    return AnimatedBuilder(
-      animation: _shimmerAnim,
-      builder: (_, __) {
-        return BrandGlassMark(
-          size: widget.size,
-          logoUrl: logoUrl,
-          glowColor: primary,
-          shimmerAlpha: _shimmerAnim.value,
-        );
-      },
+    return Semantics(
+      label: 'Focux Personal',
+      image: true,
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          IgnorePointer(
+            child: Container(
+              width: width * 0.92,
+              height: width * 0.72,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    primary.withValues(alpha: 0.18),
+                    primary.withValues(alpha: 0.06),
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 0.52, 1.0],
+                ),
+              ),
+            ),
+          ),
+          FocuxOfficialLogo.full(width: width, logoUrl: logoUrl),
+        ],
+      ),
     );
   }
 }
@@ -95,24 +86,19 @@ class AuthWordmark extends ConsumerWidget {
   const AuthWordmark({
     super.key,
     this.center = true,
-    this.titleSize = 36,
-    this.subtitleSize = 13,
-    this.taglineSize = 12,
-    this.showDivider = true,
+    this.taglineSize = 14,
+    this.showTagline = true,
   });
 
   final bool center;
-  final double titleSize;
-  final double subtitleSize;
   final double taglineSize;
-  final bool showDivider;
+  final bool showTagline;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hideFocux = ref.watch(hideFocuxBrandingProvider);
     final appName = ref.watch(appDisplayNameProvider);
     final personalName = ref.watch(personalNameProvider);
-    final primary = Theme.of(context).colorScheme.primary;
     final align = center ? TextAlign.center : TextAlign.left;
     final crossAxis =
         center ? CrossAxisAlignment.center : CrossAxisAlignment.start;
@@ -129,111 +115,30 @@ class AuthWordmark extends ConsumerWidget {
           Text(
             displayName,
             textAlign: align,
-            style: TextStyle(
+            style: AppTypography.inter(
               color: Colors.white,
-              fontSize: titleSize * 0.85,
+              fontSize: taglineSize * 1.65,
               fontWeight: FontWeight.w700,
-              letterSpacing: -0.6,
-              height: 1.1,
+              letterSpacing: -0.4,
+              height: 1.15,
             ),
           ),
-          if (showDivider) ...[
-            const SizedBox(height: 14),
-            Container(
-              width: center ? 48 : 36,
-              height: 2,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [primary.withValues(alpha: 0.2), primary, primary.withValues(alpha: 0.2)],
-                ),
-                borderRadius: BorderRadius.circular(2),
-              ),
+          if (showTagline) ...[
+            const SizedBox(height: 10),
+            FocuxBrandTagline(
+              center: center,
+              fontSize: taglineSize,
             ),
           ],
         ],
       );
     }
 
-    return Column(
-      crossAxisAlignment: crossAxis,
-      children: [
-        Text(
-          'FOCUX',
-          textAlign: align,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: titleSize,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -1.2,
-            height: 1,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          'PERSONAL',
-          textAlign: align,
-          style: TextStyle(
-            color: primary,
-            fontSize: subtitleSize,
-            fontWeight: FontWeight.w600,
-            letterSpacing: subtitleSize * 0.32,
-            height: 1,
-          ),
-        ),
-        if (showDivider) ...[
-          const SizedBox(height: 16),
-          SizedBox(
-            width: titleSize * 5.4,
-            height: 16,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  height: 1,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.transparent,
-                        primary.withValues(alpha: 0.18),
-                        primary.withValues(alpha: 0.48),
-                        primary.withValues(alpha: 0.18),
-                        Colors.transparent,
-                      ],
-                      stops: const [0.0, 0.28, 0.5, 0.72, 1.0],
-                    ),
-                  ),
-                ),
-                Container(
-                  width: 7,
-                  height: 7,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.88),
-                    boxShadow: [
-                      BoxShadow(
-                        color: primary.withValues(alpha: 0.55),
-                        blurRadius: 12,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-        SizedBox(height: showDivider ? 12 : 14),
-        Text(
-          'Treine com dados. Evolua com inteligência.',
-          textAlign: align,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.46),
-            fontSize: taglineSize,
-            fontStyle: FontStyle.italic,
-            height: 1.25,
-          ),
-        ),
-      ],
+    if (!showTagline) return const SizedBox.shrink();
+
+    return FocuxBrandTagline(
+      center: center,
+      fontSize: taglineSize,
     );
   }
 }
@@ -399,7 +304,7 @@ class AuthField extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+            color: Colors.white.withValues(alpha: 0.78),
             fontSize: 12.5,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.5,
@@ -417,7 +322,7 @@ class AuthField extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.4),
+              color: Colors.white.withValues(alpha: 0.52),
               fontSize: 15,
             ),
             prefixIcon:
@@ -672,7 +577,7 @@ class AuthBackButton extends StatelessWidget {
         Text(
           'Voltar',
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+            color: Colors.white.withValues(alpha: 0.78),
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),

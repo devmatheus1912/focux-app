@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../theme/design_tokens.dart';
 import '../theme/theme_provider.dart';
-import 'brand_glass_mark.dart';
+import 'focux_official_logo.dart';
 
 /// Logo/wordmark que respeita white-label do aluno (Enterprise).
 class BrandedAppIdentity extends ConsumerWidget {
@@ -24,7 +24,6 @@ class BrandedAppIdentity extends ConsumerWidget {
     final appName = ref.watch(appDisplayNameProvider);
     final personalName = ref.watch(personalNameProvider);
     final logoUrl = ref.watch(logoUrlProvider);
-    final primary = Theme.of(context).colorScheme.primary;
 
     final displayName = (appName != null && appName.trim().isNotEmpty)
         ? appName.trim()
@@ -32,17 +31,33 @@ class BrandedAppIdentity extends ConsumerWidget {
             ? personalName.trim()
             : 'Meu Personal';
 
-    final mark = BrandGlassMark(
-      size: size,
-      logoUrl: logoUrl,
-      tone: light ? BrandGlassTone.dark : BrandGlassTone.light,
-      glowColor: light ? primary : null,
-      shimmerAlpha: light ? 0.34 : null,
-    );
-
-    if (!showLabel) return mark;
-
     if (hideFocux) {
+      Widget mark;
+      if (logoUrl != null && logoUrl.trim().isNotEmpty) {
+        mark = ClipOval(
+          child: Image.network(
+            logoUrl,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) =>
+                FocuxOfficialLogo.icon(size: size),
+          ),
+        );
+      } else {
+        mark = CircleAvatar(
+          radius: size / 2,
+          backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+          child: Icon(
+            Icons.fitness_center_rounded,
+            size: size * 0.48,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        );
+      }
+
+      if (!showLabel) return mark;
+
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -65,48 +80,13 @@ class BrandedAppIdentity extends ConsumerWidget {
       );
     }
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        mark,
-        SizedBox(width: size * 0.30),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: 'FOCUX',
-                    style: AppTypography.inter(
-                      fontSize: size * 0.55,
-                      fontWeight: FontWeight.w700,
-                      color: light ? Colors.white : EagleTokens.ink,
-                      letterSpacing: -0.2,
-                      height: 1,
-                    ),
-                  ),
-                  WidgetSpan(child: SizedBox(width: size * 0.14)),
-                  TextSpan(
-                    text: 'PERSONAL',
-                    style: AppTypography.inter(
-                      fontSize: size * 0.55,
-                      fontWeight: FontWeight.w400,
-                      color: light
-                          ? Colors.white.withValues(alpha: 0.60)
-                          : EagleTokens.ink.withValues(alpha: 0.50),
-                      letterSpacing: 0.3,
-                      height: 1,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ],
+    if (!showLabel) {
+      return FocuxOfficialLogo.icon(size: size, logoUrl: logoUrl);
+    }
+
+    return FocuxOfficialLogo.compact(
+      height: size,
+      logoUrl: logoUrl,
     );
   }
 }
@@ -120,13 +100,6 @@ class BrandedAppIcon extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final logoUrl = ref.watch(logoUrlProvider);
-    final primary = Theme.of(context).colorScheme.primary;
-    return BrandGlassMark(
-      size: size,
-      logoUrl: logoUrl,
-      tone: light ? BrandGlassTone.dark : BrandGlassTone.light,
-      glowColor: light ? primary : null,
-      shimmerAlpha: light ? 0.34 : null,
-    );
+    return FocuxOfficialLogo.icon(size: size, logoUrl: logoUrl);
   }
 }

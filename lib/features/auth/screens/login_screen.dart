@@ -284,14 +284,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Column(
                   children: [
                     const SizedBox(height: 4),
-                    AuthLogoMark(size: 108),
-                    const SizedBox(height: 14),
-                    const AuthWordmark(
-                      titleSize: 32,
-                      subtitleSize: 13,
-                      taglineSize: 13,
-                    ),
-                    const SizedBox(height: 32),
+                    const AuthLogoMark(width: 188),
+                    const SizedBox(height: 16),
+                    const AuthWordmark(taglineSize: 14.5),
+                    const SizedBox(height: 26),
                     AuthGlassCard(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
