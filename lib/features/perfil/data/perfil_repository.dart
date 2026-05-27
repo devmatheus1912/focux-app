@@ -272,12 +272,19 @@ class PerfilRepository {
     return response.data as Map<String, dynamic>;
   }
 
-  /// Atualiza copy e ordem de seções da landing pública.
+  /// Atualiza copy, mídia e ordem de seções da landing pública.
   Future<void> atualizarLanding({
     String? heroTitle,
     String? heroSubtitle,
     String? primaryCta,
     List<String>? sectionOrder,
+    List<LandingServiceItem>? servicos,
+    List<LandingFaqItem>? faq,
+    String? heroImageUrl,
+    String? bioImageUrl,
+    String? offerCta,
+    String? finalCta,
+    String? contactCta,
   }) async {
     await _dio.put(
       '/api/personal/identidade',
@@ -286,6 +293,13 @@ class PerfilRepository {
         if (heroSubtitle != null) 'heroSubtitle': heroSubtitle,
         if (primaryCta != null) 'primaryCta': primaryCta,
         if (sectionOrder != null) 'sectionOrder': sectionOrder,
+        if (servicos != null) 'servicos': servicos.map((e) => e.toJson()).toList(),
+        if (faq != null) 'faq': faq.map((e) => e.toJson()).toList(),
+        if (heroImageUrl != null) 'heroImageUrl': heroImageUrl,
+        if (bioImageUrl != null) 'bioImageUrl': bioImageUrl,
+        if (offerCta != null) 'offerCta': offerCta,
+        if (finalCta != null) 'finalCta': finalCta,
+        if (contactCta != null) 'contactCta': contactCta,
       },
     );
   }

@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
+import '../../../core/api/media_upload_service.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 
@@ -47,16 +50,28 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
   final _heroTitle = TextEditingController();
   final _heroSubtitle = TextEditingController();
   final _primaryCta = TextEditingController();
+  final _offerCta = TextEditingController();
+  final _finalCta = TextEditingController();
+  final _contactCta = TextEditingController();
   List<String> _sectionOrder = List<String>.from(_defaultSections);
+  List<LandingServiceItem> _servicos = [];
+  List<LandingFaqItem> _faq = [];
   String? _slug;
+  String? _heroImageUrl;
+  String? _bioImageUrl;
   bool _loaded = false;
   bool _saving = false;
+  bool _uploadingHero = false;
+  bool _uploadingBio = false;
 
   @override
   void dispose() {
     _heroTitle.dispose();
     _heroSubtitle.dispose();
     _primaryCta.dispose();
+    _offerCta.dispose();
+    _finalCta.dispose();
+    _contactCta.dispose();
     super.dispose();
   }
 
@@ -64,7 +79,20 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
     _heroTitle.text = p.heroTitle ?? '';
     _heroSubtitle.text = p.heroSubtitle ?? '';
     _primaryCta.text = p.primaryCta ?? '';
+    _offerCta.text = p.offerCta ?? '';
+    _finalCta.text = p.finalCta ?? '';
+    _contactCta.text = p.contactCta ?? '';
     _slug = p.slug;
+    _heroImageUrl = p.heroImageUrl;
+    _bioImageUrl = p.bioImageUrl;
+    _servicos = p.servicos.map((e) => LandingServiceItem(
+      titulo: e.titulo,
+      descricao: e.descricao,
+    )).toList();
+    _faq = p.faq.map((e) => LandingFaqItem(
+      pergunta: e.pergunta,
+      resposta: e.resposta,
+    )).toList();
     if (p.sectionOrder.isNotEmpty) {
       _sectionOrder = List<String>.from(p.sectionOrder);
       for (final s in _defaultSections) {
@@ -83,6 +111,102 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
     });
   }
 
+  void _addServico() {
+    setState(() {
+      _servicos = [
+        ..._servicos,
+        const LandingServiceItem(titulo: '', descricao: ''),
+      ];
+    });
+  }
+
+  void _removeServico(int index) {
+    setState(() => _servicos = [..._servicos]..removeAt(index));
+  }
+
+  void _updateServico(int index, {String? titulo, String? descricao}) {
+    final current = _servicos[index];
+    setState(() {
+      _servicos[index] = LandingServiceItem(
+        titulo: titulo ?? current.titulo,
+        descricao: descricao ?? current.descricao,
+      );
+    });
+  }
+
+  void _addFaq() {
+    setState(() {
+      _faq = [
+        ..._faq,
+        const LandingFaqItem(pergunta: '', resposta: ''),
+      ];
+    });
+  }
+
+  void _removeFaq(int index) {
+    setState(() => _faq = [..._faq]..removeAt(index));
+  }
+
+  void _updateFaq(int index, {String? pergunta, String? resposta}) {
+    final current = _faq[index];
+    setState(() {
+      _faq[index] = LandingFaqItem(
+        pergunta: pergunta ?? current.pergunta,
+        resposta: resposta ?? current.resposta,
+      );
+    });
+  }
+
+  Future<void> _uploadImage({required bool hero}) async {
+    final file = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 88,
+      maxWidth: 1920,
+    );
+    if (file == null || !mounted) return;
+    setState(() {
+      if (hero) {
+        _uploadingHero = true;
+      } else {
+        _uploadingBio = true;
+      }
+    });
+    try {
+      final url = await MediaUploadService(
+        ref.read(apiClientProvider),
+      ).uploadBytes(
+        bytes: await file.readAsBytes(),
+        filename: file.name,
+        folder: hero ? 'landing/hero' : 'landing/bio',
+        resourceType: 'image',
+      );
+      if (!mounted) return;
+      setState(() {
+        if (hero) {
+          _heroImageUrl = url;
+        } else {
+          _bioImageUrl = url;
+        }
+      });
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showSnackBar(
+        context,
+        SnackBar(content: Text(friendlyError(e))),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          if (hero) {
+            _uploadingHero = false;
+          } else {
+            _uploadingBio = false;
+          }
+        });
+      }
+    }
+  }
+
   Future<void> _salvar() async {
     setState(() => _saving = true);
     try {
@@ -91,6 +215,13 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
         heroSubtitle: _heroSubtitle.text.trim(),
         primaryCta: _primaryCta.text.trim(),
         sectionOrder: _sectionOrder,
+        servicos: _servicos,
+        faq: _faq,
+        heroImageUrl: _heroImageUrl,
+        bioImageUrl: _bioImageUrl,
+        offerCta: _offerCta.text.trim(),
+        finalCta: _finalCta.text.trim(),
+        contactCta: _contactCta.text.trim(),
       );
       ref.invalidate(perfilProvider);
       if (!mounted) return;
@@ -122,6 +253,81 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
     );
   }
 
+  Widget _imageUploadCard({
+    required String title,
+    required String? imageUrl,
+    required bool uploading,
+    required VoidCallback onUpload,
+  }) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 8),
+            if (imageUrl != null && imageUrl.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  imageUrl,
+                  height: 120,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const SizedBox(
+                    height: 120,
+                    child: Center(child: Icon(Icons.broken_image_outlined)),
+                  ),
+                ),
+              )
+            else
+              Container(
+                height: 120,
+                width: double.infinity,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surfaceContainerHighest
+                      .withValues(alpha: 0.5),
+                ),
+                child: const Icon(Icons.image_outlined, size: 36),
+              ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: uploading ? null : onUpload,
+              icon: uploading
+                  ? const FxLoading(size: 18, strokeWidth: 2)
+                  : const Icon(Icons.upload_outlined),
+              label: Text(uploading ? 'Enviando…' : 'Enviar imagem'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _sectionHeader(String title, {VoidCallback? onAdd}) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
+        if (onAdd != null)
+          TextButton.icon(
+            onPressed: onAdd,
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('Adicionar'),
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final perfilAsync = ref.watch(perfilProvider);
@@ -131,14 +337,13 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
         appBar: FxShellAppBar(title: 'Editor da landing'),
         body: Center(child: FxLoading()),
       ),
-      error:
-          (e, _) => FxShellScaffold(
-            appBar: FxShellAppBar(
-              title: 'Editor da landing',
-              onBack: () => context.pop(),
-            ),
-            body: Center(child: Text(friendlyError(e))),
-          ),
+      error: (e, _) => FxShellScaffold(
+        appBar: FxShellAppBar(
+          title: 'Editor da landing',
+          onBack: () => context.pop(),
+        ),
+        body: Center(child: Text(friendlyError(e))),
+      ),
       data: (perfil) {
         if (!_loaded) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -170,6 +375,11 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                 ),
               ),
               const SizedBox(height: 16),
+              const Text(
+                'Hero',
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+              ),
+              const SizedBox(height: 8),
               TextField(
                 controller: _heroTitle,
                 decoration: const InputDecoration(labelText: 'Título do hero'),
@@ -188,47 +398,183 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                 controller: _primaryCta,
                 decoration: const InputDecoration(labelText: 'CTA principal'),
               ),
+              const SizedBox(height: 12),
+              _imageUploadCard(
+                title: 'Imagem do hero',
+                imageUrl: _heroImageUrl,
+                uploading: _uploadingHero,
+                onUpload: () => _uploadImage(hero: true),
+              ),
+              const SizedBox(height: 12),
+              _imageUploadCard(
+                title: 'Imagem da bio',
+                imageUrl: _bioImageUrl,
+                uploading: _uploadingBio,
+                onUpload: () => _uploadImage(hero: false),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'CTAs adicionais',
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _offerCta,
+                decoration: const InputDecoration(labelText: 'CTA ofertas'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _finalCta,
+                decoration: const InputDecoration(labelText: 'CTA final'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _contactCta,
+                decoration: const InputDecoration(labelText: 'CTA contato'),
+              ),
+              const SizedBox(height: 20),
+              _sectionHeader('Serviços', onAdd: _addServico),
+              const SizedBox(height: 8),
+              if (_servicos.isEmpty)
+                Text(
+                  'Nenhum serviço cadastrado.',
+                  style: TextStyle(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.6),
+                  ),
+                ),
+              for (var i = 0; i < _servicos.length; i++) ...[
+                Card(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'Serviço ${i + 1}',
+                              style: const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline),
+                              onPressed: () => _removeServico(i),
+                              tooltip: 'Remover serviço',
+                            ),
+                          ],
+                        ),
+                        TextFormField(
+                          key: ValueKey('servico-titulo-$i'),
+                          initialValue: _servicos[i].titulo,
+                          decoration: const InputDecoration(labelText: 'Título'),
+                          onChanged: (v) => _updateServico(i, titulo: v),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          key: ValueKey('servico-desc-$i'),
+                          initialValue: _servicos[i].descricao,
+                          decoration: const InputDecoration(labelText: 'Descrição'),
+                          maxLines: 3,
+                          onChanged: (v) => _updateServico(i, descricao: v),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 20),
+              _sectionHeader('FAQ', onAdd: _addFaq),
+              const SizedBox(height: 8),
+              if (_faq.isEmpty)
+                Text(
+                  'Nenhuma pergunta cadastrada.',
+                  style: TextStyle(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.6),
+                  ),
+                ),
+              for (var i = 0; i < _faq.length; i++) ...[
+                Card(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'FAQ ${i + 1}',
+                              style: const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline),
+                              onPressed: () => _removeFaq(i),
+                              tooltip: 'Remover FAQ',
+                            ),
+                          ],
+                        ),
+                        TextFormField(
+                          key: ValueKey('faq-pergunta-$i'),
+                          initialValue: _faq[i].pergunta,
+                          decoration: const InputDecoration(labelText: 'Pergunta'),
+                          onChanged: (v) => _updateFaq(i, pergunta: v),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          key: ValueKey('faq-resposta-$i'),
+                          initialValue: _faq[i].resposta,
+                          decoration: const InputDecoration(labelText: 'Resposta'),
+                          maxLines: 3,
+                          onChanged: (v) => _updateFaq(i, resposta: v),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 20),
               const Text(
                 'Ordem das seções',
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
-              ...[
-                for (var i = 0; i < _sectionOrder.length; i++)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Row(
-                      children: [
-                        Chip(
-                          label: Text(
-                            _sectionLabels[_sectionOrder[i]] ??
-                                _sectionOrder[i],
-                          ),
+              for (var i = 0; i < _sectionOrder.length; i++)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    children: [
+                      Chip(
+                        label: Text(
+                          _sectionLabels[_sectionOrder[i]] ?? _sectionOrder[i],
                         ),
-                        const Spacer(),
-                        IconButton(
-                          icon: const Icon(Icons.arrow_upward),
-                          onPressed: i > 0 ? () => _moveSection(i, -1) : null,
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.arrow_downward),
-                          onPressed:
-                              i < _sectionOrder.length - 1
-                                  ? () => _moveSection(i, 1)
-                                  : null,
-                        ),
-                      ],
-                    ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_upward),
+                        onPressed: i > 0 ? () => _moveSection(i, -1) : null,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_downward),
+                        onPressed:
+                            i < _sectionOrder.length - 1
+                                ? () => _moveSection(i, 1)
+                                : null,
+                      ),
+                    ],
                   ),
-              ],
+                ),
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: _saving ? null : _salvar,
-                child:
-                    _saving
-                        ? const FxLoading(size: 22, strokeWidth: 2)
-                        : const Text('Salvar landing'),
+                child: _saving
+                    ? const FxLoading(size: 22, strokeWidth: 2)
+                    : const Text('Salvar landing'),
               ),
             ],
           ),

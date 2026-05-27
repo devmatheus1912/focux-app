@@ -33,12 +33,16 @@ class NpsItem {
   final int score;
   final String? comentario;
   final String criadoEm;
+  final int? alunoId;
+  final String? alunoNome;
 
   NpsItem({
     required this.id,
     required this.score,
     required this.criadoEm,
     this.comentario,
+    this.alunoId,
+    this.alunoNome,
   });
 
   factory NpsItem.fromJson(Map<String, dynamic> j) => NpsItem(
@@ -46,6 +50,8 @@ class NpsItem {
     score: (j['score'] as num).toInt(),
     comentario: j['comentario'] as String?,
     criadoEm: j['criadoEm'] as String? ?? '',
+    alunoId: (j['alunoId'] as num?)?.toInt(),
+    alunoNome: j['alunoNome'] as String?,
   );
 }
 

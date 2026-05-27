@@ -31,9 +31,26 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
       final repo = NpsRepository(ref.read(apiClientProvider));
       final resumo = await repo.resumo();
       final recentes = await repo.recentes();
-      if (mounted) setState(() { _resumo = resumo; _recentes = recentes; _loading = false; });
+      if (mounted) {
+        setState(() {
+          _resumo = resumo;
+          _recentes = recentes;
+          _loading = false;
+        });
+      }
     } catch (e) {
       if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  void _contatarDetrator(NpsItem item) {
+    final alunoId = item.alunoId;
+    if (alunoId == null) return;
+    final nome = item.alunoNome;
+    if (nome != null && nome.isNotEmpty) {
+      context.push('/alunos/$alunoId/chat', extra: nome);
+    } else {
+      context.push('/alunos/$alunoId');
     }
   }
 
@@ -87,18 +104,89 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
                   const SizedBox(height: 16),
                   const Text('Feedback recente', style: TextStyle(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
-                  ..._recentes.map((n) => ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: _scoreColor(n.score),
-                      foregroundColor: Colors.white,
-                      child: Text('${n.score}'),
-                    ),
-                    title: Text(n.comentario?.isNotEmpty == true ? n.comentario! : 'Sem comentário'),
-                    subtitle: Text('${_classify(n.score)} · ${n.criadoEm}'),
-                  )),
+                  ..._recentes.map((n) {
+                    if (n.score <= 6) {
+                      return _detratorCard(n);
+                    }
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: _scoreColor(n.score),
+                        foregroundColor: Colors.white,
+                        child: Text('${n.score}'),
+                      ),
+                      title: Text(n.comentario?.isNotEmpty == true ? n.comentario! : 'Sem comentário'),
+                      subtitle: Text('${_classify(n.score)} · ${n.criadoEm}'),
+                    );
+                  }),
                 ],
               ),
             ),
+    );
+  }
+
+  Widget _detratorCard(NpsItem n) {
+    final detractorColor = const Color(0xFFC62828);
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      color: detractorColor.withValues(alpha: 0.06),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: detractorColor,
+                  foregroundColor: Colors.white,
+                  radius: 18,
+                  child: Text('${n.score}', style: const TextStyle(fontSize: 13)),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        n.alunoNome?.isNotEmpty == true ? n.alunoNome! : 'Detrator',
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      Text(
+                        'Detrator · ${n.criadoEm}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.65),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (n.comentario?.isNotEmpty == true) ...[
+              const SizedBox(height: 10),
+              Text(
+                n.comentario!,
+                style: const TextStyle(height: 1.4),
+              ),
+            ],
+            const SizedBox(height: 12),
+            const Text(
+              'Playbook: entre em contato para entender o problema e recuperar a confiança.',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 10),
+            FilledButton.icon(
+              onPressed: n.alunoId != null ? () => _contatarDetrator(n) : null,
+              icon: const Icon(Icons.chat_bubble_outline, size: 18),
+              label: const Text('Entrar em contato'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
