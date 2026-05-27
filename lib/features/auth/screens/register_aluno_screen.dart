@@ -1,18 +1,19 @@
-﻿import 'dart:math';
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/branded_app_identity.dart';
-import '../../../core/widgets/fx_motion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../core/brand/focux_brand_copy.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/auth_shell.dart';
 import '../widgets/password_strength_meter.dart';
-import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 class RegisterAlunoScreen extends ConsumerStatefulWidget {
   final String? personalSlug;
+
   const RegisterAlunoScreen({super.key, this.personalSlug});
 
   @override
@@ -20,8 +21,7 @@ class RegisterAlunoScreen extends ConsumerStatefulWidget {
       _RegisterAlunoScreenState();
 }
 
-class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
-    with TickerProviderStateMixin {
+class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nomeCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
@@ -31,37 +31,11 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
   String? _error;
   bool _senhaVisivel = false;
 
-  late final AnimationController _bgCtrl;
-  late final AnimationController _formCtrl;
-  late final Animation<double> _formSlide;
-  late final Animation<double> _formFade;
-
   @override
   void initState() {
     super.initState();
-    _bgCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 12),
-    )..repeat();
-    _formCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    );
     _senhaCtrl.addListener(() {
       if (mounted) setState(() {});
-    });
-    _formSlide = Tween<double>(
-      begin: 50,
-      end: 0,
-    ).animate(CurvedAnimation(parent: _formCtrl, curve: Curves.easeOutCubic));
-    _formFade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _formCtrl,
-        curve: const Interval(0.1, 1.0, curve: Curves.easeOut),
-      ),
-    );
-    Future.delayed(const Duration(milliseconds: 200), () {
-      if (mounted) _formCtrl.forward();
     });
   }
 
@@ -71,8 +45,6 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
     _emailCtrl.dispose();
     _senhaCtrl.dispose();
     _conviteCtrl.dispose();
-    _bgCtrl.dispose();
-    _formCtrl.dispose();
     super.dispose();
   }
 
@@ -85,9 +57,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
     HapticFeedback.mediumImpact();
 
     try {
-      await ref
-          .read(authProvider.notifier)
-          .registerAluno(
+      await ref.read(authProvider.notifier).registerAluno(
             _nomeCtrl.text.trim(),
             _emailCtrl.text.trim(),
             _senhaCtrl.text,
@@ -105,19 +75,13 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
       });
     } finally {
       if (mounted) {
-        setState(() {
-          _loading = false;
-        });
+        setState(() => _loading = false);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final mq = MediaQuery.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final inkColor = isDark ? EagleTokens.darkInk : TokensStrip.cardBg;
-    final inkMuteColor = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = Theme.of(context).colorScheme.primary;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -127,531 +91,310 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen>
         statusBarBrightness: Brightness.dark,
       ),
       child: Scaffold(
-        body: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Animated gradient background
-            AnimatedBuilder(
-              animation: _bgCtrl,
-              builder: (context, _) {
-                final t = _bgCtrl.value;
-                final gradientColors = EagleTokens.heroGradientDark;
-                return Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment(
-                        -1.0 + sin(t * 2 * pi) * 0.3,
-                        -1.0 + cos(t * 2 * pi) * 0.3,
-                      ),
-                      end: Alignment(
-                        1.0 + cos(t * 2 * pi) * 0.3,
-                        1.0 + sin(t * 2 * pi) * 0.3,
-                      ),
-                      colors: [
-                        gradientColors[0],
-                        gradientColors[1],
-                        gradientColors[1],
-                        gradientColors[1],
-                        gradientColors[0],
-                      ],
-                    ),
+        body: AuthShell(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(22, 54, 22, 30),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AuthBackButton(
+                    onTap: () => context.go('/login?role=aluno'),
                   ),
-                );
-              },
-            ),
-
-            CustomPaint(painter: _AuthGridPainter(), size: Size.infinite),
-
-            SafeArea(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.only(
-                  left: 28,
-                  right: 28,
-                  top: mq.size.height * 0.04,
-                  bottom: 32,
-                ),
-                child: AnimatedBuilder(
-                  animation: _formCtrl,
-                  builder:
-                      (context, child) => Transform.translate(
-                        offset: Offset(0, _formSlide.value),
-                        child: Opacity(opacity: _formFade.value, child: child),
-                      ),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Logo & Back button
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const BrandedAppIdentity(
-                              size: 42,
-                              showLabel: true,
-                            ),
-                            GestureDetector(
-                              onTap: () => context.go('/login?role=aluno'),
-                              child: Container(
-                                width: 42,
-                                height: 42,
-                                decoration: BoxDecoration(
-                                  color: EagleTokens.darkInk.withValues(
-                                    alpha: 0.08,
-                                  ),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: EagleTokens.darkInk.withValues(
-                                      alpha: 0.08,
-                                    ),
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.arrow_back,
-                                  color: EagleTokens.darkInk.withValues(
-                                    alpha: 0.7,
-                                  ),
-                                  size: 20,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        // Hero invite badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: primary.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(999),
-                            border: Border.all(
-                              color: primary.withValues(alpha: 0.25),
+                  const SizedBox(height: TokensStrip.s4),
+                  Row(
+                    children: [
+                      const AuthLogoMark(width: 160),
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'FOCUX',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.3,
                             ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.mail_outline,
-                                color: primary,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Convite do seu Personal',
-                                style: TextStyle(
-                                  color: primary,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        Text(
-                          'Bem-vindo\nao Focux.',
-                          style: TextStyle(
-                            color: inkColor,
-                            fontSize: 36,
-                            fontWeight: FontWeight.w600,
-                            height: 1.15,
-                            letterSpacing: -1,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          'Insira o código que seu personal enviou e configure sua conta.',
-                          style: TextStyle(
-                            color: inkMuteColor,
-                            fontSize: 15,
-                            height: 1.4,
-                          ),
-                        ),
-
-                        const SizedBox(height: 36),
-
-                        // Personal trainer linking banner
-                        if (widget.personalSlug != null)
-                          Container(
-                            padding: const EdgeInsets.all(14),
-                            margin: const EdgeInsets.only(bottom: 16),
-                            decoration: BoxDecoration(
-                              color: primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: primary.withValues(alpha: 0.3),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.fitness_center,
-                                  color: primary,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    'Você está se cadastrando no app de seu personal trainer',
-                                    style: TextStyle(
-                                      color: primary,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                        // Invite code field (special highlight)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'CÓDIGO DO CONVITE',
-                              style: TextStyle(
-                                color: primary.withValues(alpha: 0.8),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            TextFormField(
-                              controller: _conviteCtrl,
-                              textCapitalization: TextCapitalization.characters,
-                              style: TextStyle(
-                                color: inkColor,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 4,
-                              ),
-                              textAlign: TextAlign.center,
-                              cursorColor: primary,
-                              validator:
-                                  (v) =>
-                                      v == null || v.isEmpty
-                                          ? 'Informe o código'
-                                          : null,
-                              decoration: InputDecoration(
-                                hintText: '• • • • • •',
-                                hintStyle: TextStyle(
-                                  color: inkColor.withValues(alpha: 0.15),
-                                  letterSpacing: 6,
-                                ),
-                                filled: true,
-                                fillColor: primary.withValues(alpha: 0.08),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 18,
-                                ),
-                                border: FxInputDeco.outlineBorder(
-                                  borderRadius:
-                                    BorderRadius.circular(TokensStrip.rInput),
-                                  borderSide: BorderSide(
-                                    color: primary.withValues(alpha: 0.25),
-                                  ),
-                                ),
-                                enabledBorder: FxInputDeco.outlineBorder(
-                                  borderRadius:
-                                    BorderRadius.circular(TokensStrip.rInput),
-                                  borderSide: BorderSide(
-                                    color: primary.withValues(alpha: 0.25),
-                                  ),
-                                ),
-                                focusedBorder: FxInputDeco.outlineBorder(
-                                  borderRadius:
-                                    BorderRadius.circular(TokensStrip.rInput),
-                                  borderSide: BorderSide(
-                                    color: primary,
-                                    width: 1.5,
-                                  ),
-                                ),
-                                errorBorder: FxInputDeco.outlineBorder(
-                                  borderRadius:
-                                    BorderRadius.circular(TokensStrip.rInput),
-                                  borderSide: BorderSide(
-                                    color: EagleTokens.bad,
-                                  ),
-                                ),
-                                errorStyle: TextStyle(
-                                  color: EagleTokens.bad,
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: TokensStrip.s5),
-
-                        // Standard fields
-                        _FxTextField(
-                          controller: _nomeCtrl,
-                          label: 'Nome completo',
-                          hint: 'Maria Souza',
-                          icon: Icons.person_outline,
-                          textCapitalization: TextCapitalization.words,
-                          validator:
-                              (v) =>
-                                  v == null || v.isEmpty
-                                      ? 'Informe seu nome'
-                                      : null,
-                        ),
-                        const SizedBox(height: 18),
-
-                        _FxTextField(
-                          controller: _emailCtrl,
-                          label: 'E-mail',
-                          hint: 'aluno@exemplo.com',
-                          icon: Icons.alternate_email,
-                          keyboardType: TextInputType.emailAddress,
-                          validator:
-                              (v) =>
-                                  v == null || v.isEmpty
-                                      ? 'Informe o e-mail'
-                                      : null,
-                        ),
-                        const SizedBox(height: 18),
-
-                        _FxTextField(
-                          controller: _senhaCtrl,
-                          label: 'Senha',
-                          hint: 'Mínimo 6 caracteres',
-                          icon: Icons.lock_outline,
-                          obscureText: !_senhaVisivel,
-                          validator: (v) {
-                            if (v == null || v.isEmpty) {
-                              return 'Informe a senha';
-                            }
-                            if (v.length < 6) return 'Mínimo de 6 caracteres';
-                            return null;
-                          },
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _senhaVisivel
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                              color: inkColor.withValues(alpha: 0.4),
-                              size: 20,
-                            ),
-                            onPressed:
-                                () => setState(
-                                  () => _senhaVisivel = !_senhaVisivel,
-                                ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        PasswordStrengthMeter(
-                          password: _senhaCtrl.text,
-                          minLength: 6,
-                        ),
-
-                        // Error
-                        if (_error != null) ...[
-                          const SizedBox(height: TokensStrip.s4),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: EagleTokens.badSoft.withValues(
-                                alpha: 0.15,
-                              ),
-                              borderRadius:
-                                  BorderRadius.circular(TokensStrip.rCard),
-                              border: Border.all(
-                                color: EagleTokens.bad.withValues(alpha: 0.3),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.error_outline,
-                                  color: EagleTokens.bad,
-                                  size: 18,
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    _error!,
-                                    style: TextStyle(
-                                      color: EagleTokens.bad,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                          Text(
+                            'ALUNO',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.5),
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 2.1,
                             ),
                           ),
                         ],
-
-                        const SizedBox(height: TokensStrip.s8),
-
-                        // Submit
-                        FxLiquidPrimaryButton(
-                          label: 'Criar conta',
-                          loading: _loading,
-                          onPressed: _loading ? null : _submit,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: primary.withValues(alpha: 0.28),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.mail_outline_rounded,
+                          color: primary,
+                          size: 16,
                         ),
-
-                        const SizedBox(height: TokensStrip.s5),
-
-                        Center(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'Já tem conta? ',
-                                style: TextStyle(
-                                  color: inkColor.withValues(alpha: 0.45),
-                                  fontSize: 14,
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () => context.go('/login?role=aluno'),
-                                child: Text(
-                                  'Entrar',
-                                  style: TextStyle(
-                                    color: primary,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
+                        const SizedBox(width: 8),
+                        Text(
+                          'Convite do seu personal',
+                          style: TextStyle(
+                            color: primary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Ativar conta',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.7,
+                      height: 1.15,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Use o código que seu personal enviou e crie sua senha.',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.5),
+                      fontSize: 13.5,
+                    ),
+                  ),
+                  if (widget.personalSlug != null) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: primary.withValues(alpha: 0.25),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.fitness_center_rounded,
+                            color: primary,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Cadastro vinculado ao app do seu personal',
+                              style: TextStyle(
+                                color: primary,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  _InviteCodeField(
+                    controller: _conviteCtrl,
+                    primary: primary,
+                  ),
+                  const SizedBox(height: TokensStrip.s5),
+                  AuthField(
+                    label: 'Nome completo',
+                    controller: _nomeCtrl,
+                    hintText: 'Maria Souza',
+                    icon: Icons.person_outline_rounded,
+                    textInputAction: TextInputAction.next,
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) {
+                        return 'Informe seu nome.';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: TokensStrip.s4),
+                  AuthField(
+                    label: 'E-mail',
+                    controller: _emailCtrl,
+                    hintText: 'aluno@exemplo.com',
+                    icon: Icons.alternate_email_rounded,
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) {
+                        return 'Informe o e-mail.';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: TokensStrip.s4),
+                  AuthField(
+                    label: 'Senha',
+                    controller: _senhaCtrl,
+                    hintText: 'Mínimo 6 caracteres',
+                    icon: Icons.lock_outline_rounded,
+                    obscureText: !_senhaVisivel,
+                    textInputAction: TextInputAction.done,
+                    onFieldSubmitted: (_) => _submit(),
+                    validator: (v) {
+                      if (v == null || v.isEmpty) {
+                        return 'Informe a senha.';
+                      }
+                      if (v.length < 6) return 'Mínimo de 6 caracteres.';
+                      return null;
+                    },
+                    suffix: IconButton(
+                      onPressed: () {
+                        setState(() => _senhaVisivel = !_senhaVisivel);
+                      },
+                      icon: Icon(
+                        _senhaVisivel
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                        color: Colors.white.withValues(alpha: 0.6),
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  PasswordStrengthMeter(
+                    password: _senhaCtrl.text,
+                    minLength: 6,
+                  ),
+                  if (_error != null) ...[
+                    const SizedBox(height: TokensStrip.s4),
+                    Text(
+                      _error!,
+                      style: const TextStyle(
+                        color: Color(0xFFFFB6B6),
+                        fontSize: 12.5,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 28),
+                  FxLiquidSecondaryButton(
+                    label: FocuxBrandCopy.authInviteExistingAccountCta,
+                    icon: Icons.login_rounded,
+                    onPressed:
+                        _loading
+                            ? null
+                            : () => context.go('/login?role=aluno'),
+                  ),
+                  const SizedBox(height: 10),
+                  FxLiquidPrimaryButton(
+                    label: 'Criar conta',
+                    loading: _loading,
+                    onPressed: _loading ? null : _submit,
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-// Reusable text field
-class _FxTextField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final String hint;
-  final IconData icon;
-  final bool obscureText;
-  final TextInputType? keyboardType;
-  final TextCapitalization textCapitalization;
-  final String? Function(String?)? validator;
-  final Widget? suffixIcon;
-
-  const _FxTextField({
+class _InviteCodeField extends StatelessWidget {
+  const _InviteCodeField({
     required this.controller,
-    required this.label,
-    required this.hint,
-    required this.icon,
-    this.obscureText = false,
-    this.keyboardType,
-    this.textCapitalization = TextCapitalization.none,
-    this.validator,
-    this.suffixIcon,
+    required this.primary,
   });
+
+  final TextEditingController controller;
+  final Color primary;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final inkColor = isDark ? EagleTokens.darkInk : TokensStrip.cardBg;
-    final inkMuteColor = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final primary = Theme.of(context).colorScheme.primary;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label.toUpperCase(),
+          'Código do convite',
           style: TextStyle(
-            color: inkMuteColor,
-            fontSize: 11,
+            color: Colors.white.withValues(alpha: 0.78),
+            fontSize: 12.5,
             fontWeight: FontWeight.w600,
-            letterSpacing: 1.2,
+            letterSpacing: 0.5,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 7),
         TextFormField(
           controller: controller,
-          obscureText: obscureText,
-          keyboardType: keyboardType,
-          textCapitalization: textCapitalization,
-          validator: validator,
-          style: TextStyle(color: inkColor, fontSize: 15),
+          textCapitalization: TextCapitalization.characters,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 4,
+          ),
           cursorColor: primary,
+          validator:
+              (v) => v == null || v.trim().isEmpty ? 'Informe o código.' : null,
           decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(color: inkColor.withValues(alpha: 0.2)),
-            prefixIcon: Icon(
-              icon,
-              color: inkColor.withValues(alpha: 0.35),
-              size: 20,
+            hintText: '• • • • • •',
+            hintStyle: TextStyle(
+              color: Colors.white.withValues(alpha: 0.2),
+              letterSpacing: 6,
             ),
-            suffixIcon: suffixIcon,
             filled: true,
-            fillColor: inkColor.withValues(alpha: 0.06),
+            fillColor: primary.withValues(alpha: 0.08),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 16,
             ),
-            border: FxInputDeco.outlineBorder(
-              borderRadius: BorderRadius.circular(TokensStrip.rInput),
-              borderSide: BorderSide(color: inkColor.withValues(alpha: 0.08)),
-            ),
             enabledBorder: FxInputDeco.outlineBorder(
-              borderRadius: BorderRadius.circular(TokensStrip.rInput),
-              borderSide: BorderSide(color: inkColor.withValues(alpha: 0.08)),
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(
+                color: primary.withValues(alpha: 0.28),
+              ),
             ),
             focusedBorder: FxInputDeco.outlineBorder(
-              borderRadius: BorderRadius.circular(TokensStrip.rInput),
+              borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(color: primary, width: 1.5),
             ),
             errorBorder: FxInputDeco.outlineBorder(
-              borderRadius: BorderRadius.circular(TokensStrip.rInput),
-              borderSide: BorderSide(color: EagleTokens.bad),
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: Color(0xFFFF8B8B)),
             ),
-            errorStyle: TextStyle(color: EagleTokens.bad, fontSize: 11),
+            focusedErrorBorder: FxInputDeco.outlineBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: Color(0xFFFF8B8B)),
+            ),
+            errorStyle: const TextStyle(
+              color: Color(0xFFFFB6B6),
+              fontSize: 11.5,
+            ),
           ),
         ),
       ],
     );
   }
-}
-
-class _AuthGridPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = EagleTokens.darkInk.withValues(alpha: 0.025)
-          ..strokeWidth = 0.5
-          ..style = PaintingStyle.stroke;
-    const spacing = 50.0;
-    for (double x = 0; x < size.width; x += spacing) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-    for (double y = 0; y < size.height; y += spacing) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

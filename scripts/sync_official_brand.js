@@ -445,12 +445,12 @@ async function main() {
     .toFile(path.join(assets, 'logo_splash.png'));
   console.log('✓ logo_splash.png');
 
-  // Android 12 — símbolo dentro da máscara circular (~66% útil do canvas 512).
+  // Android 12 — ícone grande dentro da máscara circular (66% ≈ 338px).
   const splashCanvas = 512;
-  const safeCircle = splashCanvas * 0.58;
+  const safeDiameter = splashCanvas * 0.66;
   const splashIconInner = Math.max(
-    168,
-    Math.min(210, Math.round(safeCircle * 0.88)),
+    228,
+    Math.min(252, Math.round(safeDiameter * 0.74)),
   );
   const iconOnly = await sharp(path.join(assets, 'logo_icon.png'))
     .resize(splashIconInner, splashIconInner, {

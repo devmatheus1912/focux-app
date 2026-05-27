@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/config/env.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
@@ -333,6 +334,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                     const SizedBox(height: 14),
                   ],
+                  FxLiquidSecondaryButton(
+                    label: FocuxBrandCopy.onboardingExistingAccountCta,
+                    icon: Icons.login_rounded,
+                    onPressed: _loading ? null : () => context.go('/login?role=personal'),
+                  ),
+                  const SizedBox(height: 10),
                   FxLiquidPrimaryButton(
                     label: 'Criar minha conta',
                     loading: _loading,
@@ -345,31 +352,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     label: 'Cadastrar com Google',
                     isLoading: _loadingGoogle,
                     onPressed: _loadingGoogle ? null : _submitGoogle,
-                  ),
-                  const SizedBox(height: 20),
-                  Center(
-                    child: GestureDetector(
-                      onTap: () => context.go('/login?role=personal'),
-                      child: RichText(
-                        textAlign: TextAlign.center,
-                        text: TextSpan(
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.65),
-                            fontSize: 14,
-                          ),
-                          children: [
-                            const TextSpan(text: 'Já tem conta? '),
-                            TextSpan(
-                              text: 'Entrar',
-                              style: TextStyle(
-                                color: primary,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
                   ),
                   const SizedBox(height: 12),
                   Center(

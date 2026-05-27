@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/physics.dart';
 
 import '../theme/tokens_strip.dart';
@@ -209,7 +210,96 @@ class FxLiquidPrimaryButton extends StatelessWidget {
   }
 }
 
-/// Tactile spring button — scales down on press, bounces back on release.
+/// Outline secondary CTA — login / conta existente.
+class FxLiquidSecondaryButton extends StatelessWidget {
+  const FxLiquidSecondaryButton({
+    super.key,
+    required this.label,
+    this.onPressed,
+    this.icon,
+    this.expand = true,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final IconData? icon;
+  final bool expand;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final enabled = onPressed != null;
+
+    void handleTap() {
+      if (!enabled) return;
+      HapticFeedback.lightImpact();
+      onPressed!();
+    }
+
+    final button = Semantics(
+      button: true,
+      enabled: enabled,
+      label: label,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: enabled ? handleTap : null,
+          borderRadius: BorderRadius.circular(TokensStrip.rButton),
+          child: Ink(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(TokensStrip.rButton),
+              color: Colors.white.withValues(alpha: enabled ? 0.05 : 0.03),
+              border: Border.all(
+                color: primary.withValues(alpha: enabled ? 0.55 : 0.28),
+                width: 1.4,
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: TokensStrip.s5,
+              vertical: TokensStrip.s4,
+            ),
+            child: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (icon != null) ...[
+                    Icon(icon, size: 18, color: primary),
+                    const SizedBox(width: TokensStrip.s2),
+                  ],
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color:
+                            enabled ? primary : primary.withValues(alpha: 0.45),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    if (!expand) return button;
+    return SizedBox(
+      width: double.infinity,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 48, maxHeight: 52),
+        child: button,
+      ),
+    );
+  }
+}
+
+/// Tactile spring button
 /// Uses real spring physics for premium, weighty feel instead of linear curves.
 /// Use this wrapper around any CTA, card, or interactive element for
 /// premium tactile feedback without managing AnimationControllers manually.

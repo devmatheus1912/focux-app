@@ -28,6 +28,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   late final Animation<double> _fadeOut;
 
+  bool _compactSplash = false;
+
   @override
   void initState() {
     super.initState();
@@ -55,9 +57,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeInCubic),
     );
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final compact = await _resolveQuickSplash();
+      if (!mounted) return;
+      if (compact) {
+        setState(() => _compactSplash = true);
+        _entryCtrl.duration = const Duration(milliseconds: 650);
+        _progressCtrl.duration = const Duration(milliseconds: 1400);
+        _fadeCtrl.duration = const Duration(milliseconds: 360);
+      }
       _entryCtrl.forward();
-      _bootstrap();
+      _bootstrap(compact: compact);
     });
   }
 
@@ -70,13 +80,23 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     super.dispose();
   }
 
-  Future<void> _bootstrap() async {
-    final bootstrapFuture = _resolveNavigationTarget();
+  Future<bool> _resolveQuickSplash() async {
+    if (ref.read(authProvider) == AuthStatus.authenticated) {
+      return true;
+    }
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('onboarding_done_v3') ?? false;
+  }
+
+  Future<void> _bootstrap({required bool compact}) async {
+    final bootstrapFuture = _resolveNavigationTarget(quick: compact);
     final progressFuture = _progressCtrl.animateTo(
       0.92,
       curve: Curves.easeOutCubic,
     );
-    final minDelay = Future<void>.delayed(const Duration(milliseconds: 1500));
+    final minDelay = Future<void>.delayed(
+      Duration(milliseconds: compact ? 550 : 1200),
+    );
 
     final target = await bootstrapFuture;
     await Future.wait([progressFuture, minDelay]);
@@ -84,7 +104,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     await _progressCtrl.animateTo(
       1,
-      duration: const Duration(milliseconds: 480),
+      duration: Duration(milliseconds: compact ? 280 : 480),
       curve: Curves.easeOut,
     );
     if (!mounted) return;
@@ -95,8 +115,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     context.go(target);
   }
 
-  Future<String> _resolveNavigationTarget() async {
-    await Future<void>.delayed(const Duration(milliseconds: 900));
+  Future<String> _resolveNavigationTarget({bool quick = false}) async {
+    await Future<void>.delayed(
+      Duration(milliseconds: quick ? 180 : 750),
+    );
 
     final authStatus = ref.read(authProvider);
     if (authStatus == AuthStatus.authenticated) {
@@ -175,6 +197,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   ambient: _ambientCtrl,
                   entry: _entryCtrl,
                   fadeOut: _fadeOut,
+                  compact: _compactSplash,
                 ),
           ),
         ),

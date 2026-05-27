@@ -24,8 +24,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1000));
 
-    expect(find.text('Personal'), findsOneWidget);
-    expect(find.text('Aluno'), findsOneWidget);
+    expect(find.text(FocuxBrandCopy.onboardingExistingAccountCta), findsOneWidget);
     expect(find.text(FocuxBrandCopy.onboardingCtaNext), findsOneWidget);
 
     await tester.tap(find.text('Aluno'));
@@ -51,20 +50,64 @@ void main() {
 
     expect(find.textContaining('Command Center'), findsOneWidget);
 
-    await tester.drag(find.byType(PageView), const Offset(-380, 0));
+    await tester.tap(find.text(FocuxBrandCopy.onboardingCtaNext));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 450));
+    await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.textContaining('Copiloto'), findsOneWidget);
+    expect(
+      find.textContaining('Mensalidades com PIX'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text('Aluno'));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.textContaining('Form check'), findsOneWidget);
+    expect(find.textContaining('Mensalidades com PIX'), findsNothing);
+    expect(find.textContaining('Command Center'), findsNothing);
+  });
+
+  testWidgets('Já tenho conta marca onboarding e navega para login', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    await tester.binding.setSurfaceSize(const Size(430, 932));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final router = GoRouter(
+      initialLocation: '/onboarding',
+      routes: [
+        GoRoute(
+          path: '/onboarding',
+          builder: (context, state) => const OnboardingScreen(),
+        ),
+        GoRoute(
+          path: '/login',
+          builder: (context, state) => const Scaffold(
+            body: Center(child: Text('LOGIN_SCREEN')),
+          ),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp.router(
+        theme: AppTheme.buildDarkTheme(TokensStrip.neonGlow),
+        routerConfig: router,
+      ),
+    );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1000));
 
-    expect(find.textContaining('IA com contexto do seu treino'), findsOneWidget);
-    expect(find.textContaining('Copiloto'), findsNothing);
-    expect(find.textContaining('Command Center'), findsNothing);
+    await tester.tap(find.text(FocuxBrandCopy.onboardingExistingAccountCta));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('LOGIN_SCREEN'), findsOneWidget);
+
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getBool('onboarding_done_v3'), isTrue);
   });
 
   testWidgets('Pular marca onboarding e navega para login', (tester) async {

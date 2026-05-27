@@ -8,7 +8,7 @@ import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/focux_brand_tagline.dart';
 import '../../../core/widgets/focux_official_logo.dart';
 
-/// Splash Flutter — logo, hook unificado e barra de progresso limpa.
+/// Splash Flutter — continuidade com nativo (ícone → lockup) + barra limpa.
 class CinematicSplashScene extends StatelessWidget {
   const CinematicSplashScene({
     super.key,
@@ -16,12 +16,14 @@ class CinematicSplashScene extends StatelessWidget {
     required this.ambient,
     required this.entry,
     required this.fadeOut,
+    this.compact = false,
   });
 
   final double progress;
   final Animation<double> ambient;
   final Animation<double> entry;
   final Animation<double> fadeOut;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +39,15 @@ class CinematicSplashScene extends StatelessWidget {
             reduceMotion
                 ? 1.0
                 : Curves.easeOutCubic.transform(entry.value.clamp(0.0, 1.0));
+        final lockupT =
+            compact
+                ? 0.0
+                : reduceMotion
+                ? 1.0
+                : Curves.easeOutCubic.transform(
+                  (entry.value - 0.32).clamp(0.0, 1.0),
+                );
+        final iconOnlyT = compact ? 1.0 : (1 - lockupT).clamp(0.0, 1.0);
 
         return Opacity(
           opacity: fadeOut.value.clamp(0.0, 1.0),
@@ -45,34 +56,38 @@ class CinematicSplashScene extends StatelessWidget {
             children: [
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 36),
+                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 36),
                   child: Column(
                     children: [
-                      SizedBox(height: size.height * 0.06),
+                      SizedBox(height: size.height * (compact ? 0.26 : 0.22)),
                       Opacity(
                         opacity: entryT,
                         child: Transform.translate(
                           offset: Offset(
                             0,
-                            reduceMotion ? 0 : (1 - entryT) * 24,
+                            reduceMotion ? 0 : (1 - entryT) * (compact ? 10 : 16),
                           ),
                           child: _SplashHeroMark(
                             phase: phase,
                             entry: entry.value,
                             reduceMotion: reduceMotion,
+                            iconOnlyT: iconOnlyT,
+                            lockupT: lockupT,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      Opacity(
-                        opacity:
-                            reduceMotion
-                                ? 1
-                                : Curves.easeOut.transform(
-                                  (entry.value - 0.12).clamp(0.0, 1.0),
-                                ),
-                        child: const FocuxBrandTagline(center: true, fontSize: 14),
-                      ),
+                      if (!compact) ...[
+                        const SizedBox(height: 18),
+                        Opacity(
+                          opacity:
+                              reduceMotion
+                                  ? 1
+                                  : Curves.easeOut.transform(
+                                    (entry.value - 0.42).clamp(0.0, 1.0),
+                                  ),
+                          child: const FocuxBrandTagline(center: true, fontSize: 14),
+                        ),
+                      ],
                       const Spacer(),
                       Opacity(
                         opacity:
@@ -103,22 +118,28 @@ class _SplashHeroMark extends StatelessWidget {
     required this.phase,
     required this.entry,
     required this.reduceMotion,
+    required this.iconOnlyT,
+    required this.lockupT,
   });
 
   final double phase;
   final double entry;
   final bool reduceMotion;
+  final double iconOnlyT;
+  final double lockupT;
+
+  static const _logoWidth = 184.0;
+  static const _logoAspect = 925 / 1024;
+  static const _nativeIconSize = 128.0;
 
   @override
   Widget build(BuildContext context) {
-    const logoWidth = 184.0;
-    const logoAspect = 925 / 1024;
-    final floatY = reduceMotion ? 0.0 : math.sin(phase * math.pi * 2) * 4;
+    final floatY = reduceMotion ? 0.0 : math.sin(phase * math.pi * 2) * 3;
     final scale =
         reduceMotion
             ? 1.0
-            : 0.92 +
-                Curves.easeOutCubic.transform(entry.clamp(0.0, 1.0)) * 0.08;
+            : 0.94 +
+                Curves.easeOutCubic.transform(entry.clamp(0.0, 1.0)) * 0.06;
 
     return Transform.translate(
       offset: Offset(0, floatY),
@@ -126,10 +147,20 @@ class _SplashHeroMark extends StatelessWidget {
         scale: scale,
         alignment: Alignment.center,
         child: SizedBox(
-          width: logoWidth,
-          height: logoWidth * logoAspect + 12,
-          child: Center(
-            child: FocuxOfficialLogo.full(width: logoWidth),
+          width: _logoWidth,
+          height: _logoWidth * _logoAspect + 12,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Opacity(
+                opacity: iconOnlyT,
+                child: FocuxOfficialLogo.icon(size: _nativeIconSize),
+              ),
+              Opacity(
+                opacity: lockupT,
+                child: FocuxOfficialLogo.full(width: _logoWidth),
+              ),
+            ],
           ),
         ),
       ),

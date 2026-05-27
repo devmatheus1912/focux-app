@@ -31,6 +31,15 @@ abstract final class FocuxBrandCopy {
 
   static const onboardingLoginAction = 'Entrar';
 
+  static const onboardingExistingAccountCta = 'Já tenho conta';
+
+  static const authExistingAccountLead = 'Já tem conta? ';
+
+  static const authExistingAccountAction = 'Entrar';
+
+  /// Convite aluno — quem já tem conta não precisa de código.
+  static const authInviteExistingAccountCta = 'Entrar na minha conta';
+
   static const onboardingPersonaPersonal = 'Personal';
 
   static const onboardingPersonaAluno = 'Aluno';
@@ -69,37 +78,20 @@ abstract final class FocuxBrandCopy {
       ],
     ),
     OnboardingSlideCopy(
-      title: 'Copiloto que analisa. ',
-      titleHighlight: 'Você aplica.',
+      title: 'Copiloto, PIX e fila do dia. ',
+      titleHighlight: 'Você no comando.',
       subtitle:
-          'Treino, dieta e progressão com contexto real de cada aluno — '
-          'sugestões prontas na hora, decisão sempre sua.',
+          'IA com contexto real de cada aluno, cobranças no painel e '
+          'próxima ação em um toque — você decide.',
       metrics: [
         OnboardingMetricCopy(value: '3', label: 'Modos IA'),
-        OnboardingMetricCopy(value: '1 toque', label: 'Próxima ação'),
+        OnboardingMetricCopy(value: 'PIX', label: 'Cobrar fácil'),
         OnboardingMetricCopy(value: 'Fila', label: 'Do dia'),
       ],
       features: [
         'Modos Treino, Dieta e Progressão por aluno',
-        'Sugestões de carga para aceitar ou ajustar',
+        'Mensalidades com PIX, QR e alerta de inadimplência',
         'Ações do Copiloto caem direto na sua fila do dia',
-      ],
-    ),
-    OnboardingSlideCopy(
-      title: 'Receba sem perseguir. ',
-      titleHighlight: 'Treine em paz.',
-      subtitle:
-          'PIX, mensalidades e alertas de inadimplência no painel — '
-          'seu aluno paga, você volta pro que importa: resultado.',
-      metrics: [
-        OnboardingMetricCopy(value: 'PIX', label: 'Cobrar fácil'),
-        OnboardingMetricCopy(value: 'Hoje', label: 'Quem atrasou'),
-        OnboardingMetricCopy(value: 'Meta', label: 'Receita do mês'),
-      ],
-      features: [
-        'Mensalidades com PIX, QR e cobrar direto no chat',
-        'Inadimplentes no dashboard antes de virar problema',
-        'Panorama financeiro: receita vs meta do mês',
       ],
     ),
   ];
@@ -123,37 +115,20 @@ abstract final class FocuxBrandCopy {
       ],
     ),
     OnboardingSlideCopy(
-      title: 'Assistente que te guia. ',
-      titleHighlight: 'Você executa.',
+      title: 'IA, form check e mensalidade. ',
+      titleHighlight: 'Sem surpresa.',
       subtitle:
-          'IA com contexto do seu treino e progressão — '
-          'recomendações claras, você decide o ritmo.',
+          'Assistente com contexto do seu treino, feedback em vídeo e '
+          'status de pagamento claro — tudo no mesmo app.',
       metrics: [
         OnboardingMetricCopy(value: 'Chat', label: 'Assistente IA'),
-        OnboardingMetricCopy(value: 'IA', label: 'Progressão'),
         OnboardingMetricCopy(value: 'Form', label: 'Check vídeo'),
+        OnboardingMetricCopy(value: 'Status', label: 'Mensalidade'),
       ],
       features: [
         'Assistente IA para dúvidas de treino e execução',
-        'Sugestões de progressão alinhadas ao seu histórico',
         'Form check para feedback do personal com vídeo',
-      ],
-    ),
-    OnboardingSlideCopy(
-      title: 'Mensalidade clara. ',
-      titleHighlight: 'Treino liberado.',
-      subtitle:
-          'Veja status de pagamento, evite bloqueios e foque no que importa: '
-          'resultado na academia.',
-      metrics: [
-        OnboardingMetricCopy(value: 'Status', label: 'Mensalidade'),
-        OnboardingMetricCopy(value: 'PIX', label: 'Pagamento'),
-        OnboardingMetricCopy(value: 'App', label: 'Tudo junto'),
-      ],
-      features: [
         'Minhas mensalidades com status claro por mês',
-        'Sem surpresa: saiba se está em dia antes do treino',
-        'Treino, chat e financeiro no mesmo lugar',
       ],
     ),
   ];
