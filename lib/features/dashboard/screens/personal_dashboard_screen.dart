@@ -22,6 +22,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../../notificacoes/data/notificacoes_repository.dart';
 import '../../onboarding/screens/setup_onboarding_widget.dart';
+import '../../onboarding/data/onboarding_repository.dart';
 import '../../chat/screens/chat_inbox_screen.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -217,7 +218,17 @@ class _PersonalDashboardScreenState
     _loadFin();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _entryCtrl.forward(from: 0);
+      _maybeShowOnboardingWizard();
     });
+  }
+
+  Future<void> _maybeShowOnboardingWizard() async {
+    try {
+      final w = await OnboardingRepository(ref.read(apiClientProvider)).wizard();
+      if (!mounted || w.wizardCompleto) return;
+      if (w.progressPercent >= 100) return;
+      context.push('/onboarding/wizard');
+    } catch (_) {}
   }
 
   @override
@@ -1859,6 +1870,30 @@ class _CollapsibleToolsSectionState extends State<_CollapsibleToolsSection> {
                     label: 'NDR / MRR',
                     isDark: widget.isDark,
                     onTap: () => context.push('/relatorio/business'),
+                  ),
+                  _ShortcutBtn(
+                    icon: 'spark',
+                    label: 'Recorrência',
+                    isDark: widget.isDark,
+                    onTap: () => context.push('/recorrencia'),
+                  ),
+                  _ShortcutBtn(
+                    icon: 'trend',
+                    label: 'NPS',
+                    isDark: widget.isDark,
+                    onTap: () => context.push('/nps'),
+                  ),
+                  _ShortcutBtn(
+                    icon: 'dumbbell',
+                    label: 'Grupo',
+                    isDark: widget.isDark,
+                    onTap: () => context.push('/grupo-aulas'),
+                  ),
+                  _ShortcutBtn(
+                    icon: 'spark',
+                    label: 'Setup D0',
+                    isDark: widget.isDark,
+                    onTap: () => context.push('/onboarding/wizard'),
                   ),
                   _ShortcutBtn(
                     icon: 'spark',

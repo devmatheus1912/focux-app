@@ -168,6 +168,14 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                         children: [
                           const SizedBox(height: 4),
                           Text('Comentário: ${f.comentario}'),
+                          if (f.aiScore != null) ...[
+                            const SizedBox(height: 4),
+                            Text('Score IA: ${f.aiScore}/100 · ${f.statusAnalise ?? ''}'),
+                          ],
+                          if (f.aiAnalise != null && f.aiAnalise!.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(f.aiAnalise!, maxLines: 2, overflow: TextOverflow.ellipsis),
+                          ],
                           const SizedBox(height: 4),
                           Text(
                             'Data: ${fxDateShort(f.criadoEm)}',

@@ -86,6 +86,13 @@ import '../../features/monetizacao/screens/cancel_save_screen.dart';
 import '../../features/habitos/screens/habitos_personal_screen.dart';
 import '../../features/habitos/screens/habitos_aluno_screen.dart';
 import '../../features/pacotes/screens/pacotes_screen.dart';
+import '../../features/recorrencia/screens/recorrencia_screen.dart';
+import '../../features/recorrencia/screens/recorrencia_aluno_screen.dart';
+import '../../features/nps/screens/nps_dashboard_screen.dart';
+import '../../features/grupos/screens/grupo_aulas_personal_screen.dart';
+import '../../features/grupos/screens/grupo_aulas_aluno_screen.dart';
+import '../../features/onboarding/screens/onboarding_wizard_screen.dart';
+import '../../features/feedback/screens/feedback_aluno_screen.dart';
 import '../../features/captura/screens/leads_publicos_screen.dart';
 import '../../features/relatorio/screens/business_reports_screen.dart';
 import '../../features/growth/screens/migracao_magica_screen.dart';
@@ -214,6 +221,18 @@ class AppRouter {
         builder:
             (context, state) =>
                 const FxRouteChrome(child: HabitosAlunoScreen()),
+      ),
+      GoRoute(
+        path: '/aluno/recorrencia',
+        builder: (context, state) => const FxRouteChrome(child: RecorrenciaAlunoScreen()),
+      ),
+      GoRoute(
+        path: '/aluno/grupo-aulas',
+        builder: (context, state) => const FxRouteChrome(child: GrupoAulasAlunoScreen()),
+      ),
+      GoRoute(
+        path: '/aluno/form-check',
+        builder: (context, state) => const FxRouteChrome(child: FeedbackAlunoScreen()),
       ),
       GoRoute(
         path: '/notificacoes',
@@ -812,6 +831,22 @@ class AppRouter {
           GoRoute(
             path: '/relatorio/business',
             builder: (context, state) => const BusinessReportsScreen(),
+          ),
+          GoRoute(
+            path: '/recorrencia',
+            builder: (context, state) => const RecorrenciaScreen(),
+          ),
+          GoRoute(
+            path: '/nps',
+            builder: (context, state) => const NpsDashboardScreen(),
+          ),
+          GoRoute(
+            path: '/grupo-aulas',
+            builder: (context, state) => const GrupoAulasPersonalScreen(),
+          ),
+          GoRoute(
+            path: '/onboarding/wizard',
+            builder: (context, state) => const OnboardingWizardScreen(),
           ),
           GoRoute(
             path: '/migracao-magica',

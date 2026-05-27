@@ -100,4 +100,21 @@ class AgendaRepository {
     final r = await _dio.post('/api/agenda/$id/confirmar');
     return Agendamento.fromJson(r.data as Map<String, dynamic>);
   }
+
+  Future<IcalTokenInfo> icalToken() async {
+    final r = await _dio.get('/api/agenda/ical/me');
+    return IcalTokenInfo.fromJson(r.data as Map<String, dynamic>);
+  }
+}
+
+class IcalTokenInfo {
+  final String token;
+  final String url;
+
+  IcalTokenInfo({required this.token, required this.url});
+
+  factory IcalTokenInfo.fromJson(Map<String, dynamic> j) => IcalTokenInfo(
+    token: j['token'] as String? ?? '',
+    url: j['url'] as String? ?? '',
+  );
 }

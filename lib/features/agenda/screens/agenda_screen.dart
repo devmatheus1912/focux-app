@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/config/env.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -86,6 +88,24 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
       _weekStart = _weekStart.add(Duration(days: delta * 7));
       _selectedIdx = 0;
     });
+  }
+
+  Future<void> _copyIcalLink() async {
+    try {
+      final info = await AgendaRepository(ref.read(apiClientProvider)).icalToken();
+      final fullUrl = info.url.startsWith('http') ? info.url : '${Env.apiUrl}${info.url}';
+      await Clipboard.setData(ClipboardData(text: fullUrl));
+      if (mounted) {
+        FeedbackHelper.showSnackBar(
+          context,
+          const SnackBar(content: Text('Link iCal copiado — cole no Google Calendar ou Apple Calendar.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showSnackBar(context, SnackBar(content: Text('Erro ao gerar link iCal: $e')));
+      }
+    }
   }
 
   Future<void> _openAgendamentoDetails(Agendamento ag) async {
@@ -201,6 +221,11 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      IconButton(
+                        tooltip: 'Exportar iCal',
+                        icon: Icon(Icons.calendar_month_outlined, color: mute, size: 22),
+                        onPressed: _copyIcalLink,
+                      ),
                       const ShellThemeToggle(size: 36),
                       const SizedBox(width: 8),
                       Container(

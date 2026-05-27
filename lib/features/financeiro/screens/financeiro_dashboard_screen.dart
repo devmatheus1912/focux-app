@@ -7,6 +7,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
+import '../../pricing/widgets/smart_pricing_card.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
 
@@ -132,6 +133,10 @@ class _FinanceiroDashboardScreenState
       child: ListView(
         padding: const EdgeInsets.only(bottom: 110),
         children: [
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: SmartPricingCard(),
+          ),
           const SizedBox(height: TokensStrip.s4),
           // Hero — ring with received amount
           _HeroRing(data: d, isDark: isDark),

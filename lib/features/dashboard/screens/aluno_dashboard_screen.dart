@@ -19,6 +19,8 @@ import '../data/aluno_autonomy_plan.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import '../../health/widgets/aluno_recovery_card.dart';
+import '../../coach/widgets/coach_proativo_card.dart';
+import '../../nps/widgets/nps_prompt_dialog.dart';
 import '../../monetizacao/widgets/aluno_upsell_carousel.dart';
 import 'progresso_semanal_widget.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -36,11 +38,26 @@ final chatAlunoDashboardProvider = FutureProvider<List<ChatMsg>>((ref) async {
   return repo.historicoAluno();
 });
 
-class AlunoDashboardScreen extends ConsumerWidget {
+class AlunoDashboardScreen extends ConsumerStatefulWidget {
   const AlunoDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AlunoDashboardScreen> createState() => _AlunoDashboardScreenState();
+}
+
+class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      showNpsPromptIfNeeded(context, ref);
+      ref.invalidate(alunoRecoveryProvider);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final alunoAsync = ref.watch(alunoMeProvider);
     final brandAsync = ref.watch(personalBrandProvider);
@@ -103,6 +120,8 @@ class AlunoDashboardScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             AlunoRecoveryCard(isDark: isDark),
+            const SizedBox(height: 12),
+            CoachProativoCard(isDark: isDark),
             const SizedBox(height: 12),
             const AlunoUpsellCarousel(),
             const SizedBox(height: 12),
@@ -1647,6 +1666,24 @@ class _StudentToolsSection extends StatelessWidget {
         title: 'Historico',
         subtitle: 'Medidas e treinos',
         route: '/checkin/historico',
+      ),
+      _StudentToolAction(
+        icon: Icons.groups_outlined,
+        title: 'Aulas grupo',
+        subtitle: 'Inscreva-se',
+        route: '/aluno/grupo-aulas',
+      ),
+      _StudentToolAction(
+        icon: Icons.videocam_outlined,
+        title: 'Form check',
+        subtitle: 'Análise IA',
+        route: '/aluno/form-check',
+      ),
+      _StudentToolAction(
+        icon: Icons.autorenew,
+        title: 'Assinatura',
+        subtitle: 'Recorrência',
+        route: '/aluno/recorrencia',
       ),
       _StudentToolAction(
         icon: Icons.smart_toy_outlined,
