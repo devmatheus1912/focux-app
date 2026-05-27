@@ -12,6 +12,7 @@ class CinematicMeshBackground extends StatelessWidget {
     this.showCornerGlow = true,
     this.forceDark = false,
     this.flatBackground = false,
+    this.showGrid = true,
   });
 
   final Widget child;
@@ -19,6 +20,7 @@ class CinematicMeshBackground extends StatelessWidget {
   final bool showCornerGlow;
   final bool forceDark;
   final bool flatBackground;
+  final bool showGrid;
 
   @override
   Widget build(BuildContext context) {
@@ -58,10 +60,11 @@ class CinematicMeshBackground extends StatelessWidget {
                       ),
                     ),
         ),
-        CustomPaint(
-          painter: CinematicGridPainter(light: isLight),
-          size: Size.infinite,
-        ),
+        if (showGrid)
+          CustomPaint(
+            painter: CinematicGridPainter(light: isLight),
+            size: Size.infinite,
+          ),
         if (showCornerGlow) ...[
           Positioned(
             top: -100,

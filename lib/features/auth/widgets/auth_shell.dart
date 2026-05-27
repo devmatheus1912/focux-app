@@ -21,6 +21,7 @@ class AuthShell extends StatelessWidget {
     this.showCornerGlow = false,
     this.forceDark = true,
     this.flatBackground = true,
+    this.showGrid = true,
   });
 
   final Widget child;
@@ -28,6 +29,7 @@ class AuthShell extends StatelessWidget {
   final bool showCenterGlow;
   final bool showCornerGlow;
   final bool flatBackground;
+  final bool showGrid;
 
   /// Auth/splash UI is authored for the dark cinematic mesh (white type).
   final bool forceDark;
@@ -39,6 +41,7 @@ class AuthShell extends StatelessWidget {
       showCenterGlow: showCenterGlow,
       showCornerGlow: showCornerGlow,
       flatBackground: flatBackground,
+      showGrid: showGrid,
       child: SafeArea(child: child),
     );
   }
@@ -57,6 +60,49 @@ class AuthLogoMark extends ConsumerWidget {
       label: 'Focux Personal',
       image: true,
       child: FocuxOfficialLogo.full(width: width, logoUrl: logoUrl),
+    );
+  }
+}
+
+/// Cabeçalho compacto para cadastro — ícone + FOCUX / papel (sem lockup duplicado).
+class AuthRoleHeader extends StatelessWidget {
+  const AuthRoleHeader({super.key, required this.roleLabel});
+
+  final String roleLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'Focux $roleLabel',
+      child: Row(
+        children: [
+          const FocuxOfficialLogo.icon(size: 52),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'FOCUX',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.3,
+                ),
+              ),
+              Text(
+                roleLabel,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 2.1,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

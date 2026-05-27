@@ -205,35 +205,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 children: [
                   AuthBackButton(onTap: () => context.go('/login?role=personal')),
                   const SizedBox(height: TokensStrip.s4),
-                  Row(
-                    children: [
-                      const AuthLogoMark(width: 160),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'FOCUX',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                          Text(
-                            'PERSONAL',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.5),
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 2.1,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                  const AuthRoleHeader(roleLabel: 'PERSONAL'),
                   const SizedBox(height: 22),
                   const Text(
                     'Criar conta',

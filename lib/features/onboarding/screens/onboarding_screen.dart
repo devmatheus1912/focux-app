@@ -493,22 +493,16 @@ class _OBPageWidget extends StatelessWidget {
   Widget _buildHero() {
     if (pageIndex == 0) {
       return FocuxOfficialLogo.full(
-        width: persona == OnboardingPersona.aluno ? 136 : 142,
+        width: persona == OnboardingPersona.aluno ? 128 : 132,
       );
     }
-    return SizedBox(
-      width: 100,
-      height: 100,
-      child: Center(
-        child: FocuxOfficialLogo.icon(size: 84),
-      ),
-    );
+    return FocuxOfficialLogo.full(width: 118);
   }
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final titleSize = pageIndex == 0 ? 27.0 : 28.0;
+    final titleSize = pageIndex == 0 ? 26.0 : 27.0;
 
     return AnimatedBuilder(
       animation: fade,
@@ -526,7 +520,7 @@ class _OBPageWidget extends StatelessWidget {
                 ),
 
                 if (pageIndex == 0) ...[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
                   Transform.translate(
                     offset: Offset(0, subtitleSlide.value * 0.5),
                     child: Opacity(
@@ -539,7 +533,7 @@ class _OBPageWidget extends StatelessWidget {
                   ),
                 ],
 
-                SizedBox(height: pageIndex == 0 ? 14 : 16),
+                SizedBox(height: pageIndex == 0 ? 12 : 14),
 
                 Transform.translate(
                   offset: Offset(0, titleSlide.value),
@@ -589,7 +583,7 @@ class _OBPageWidget extends StatelessWidget {
                   ),
                 ),
 
-                SizedBox(height: pageIndex == 0 ? 18 : 14),
+                SizedBox(height: pageIndex == 0 ? 14 : 12),
 
                 if (pageIndex == 0)
                   Transform.translate(
@@ -612,16 +606,16 @@ class _OBPageWidget extends StatelessWidget {
                     ),
                   ),
 
-                if (pageIndex == 0) const SizedBox(height: 12),
+                if (pageIndex == 0) const SizedBox(height: 10),
 
                 Transform.translate(
                   offset: Offset(0, metricsSlide.value * 0.7),
                   child: Opacity(
                     opacity: fade.value.clamp(0.0, 1.0),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
+                      padding: EdgeInsets.symmetric(
                         horizontal: 14,
-                        vertical: 12,
+                        vertical: pageIndex == 0 ? 10 : 12,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.04),
@@ -751,9 +745,9 @@ class _OnboardingHook extends StatelessWidget {
           text: TextSpan(
             style: AppTypography.inter(
               color: Colors.white.withValues(alpha: 0.88),
-              fontSize: 13.5,
+              fontSize: 13,
               fontWeight: FontWeight.w500,
-              height: 1.5,
+              height: 1.45,
               letterSpacing: 0.06,
             ),
             children: [
@@ -786,7 +780,7 @@ class _MetricChipWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 3),
-      padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 4),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(14),
