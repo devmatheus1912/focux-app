@@ -229,6 +229,137 @@ function cropToOpaqueContent(data, width, height) {
   return { data: out, width: outW, height: outH, cropped: true };
 }
 
+function isSymbolPixel(r, g, b, a) {
+  if (a < 48) return false;
+  const max = Math.max(r, g, b);
+  const spread = max - Math.min(r, g, b);
+  return b > 95 && g > 75 && spread > 24;
+}
+
+function cropToSymbolContent(data, width, height) {
+  let minX = width;
+  let minY = height;
+  let maxX = 0;
+  let maxY = 0;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = idx(x, y, width);
+      if (!isSymbolPixel(data[i], data[i + 1], data[i + 2], data[i + 3])) continue;
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+    }
+  }
+
+  if (maxX <= minX || maxY <= minY) {
+    return { data, width, height, cropped: false };
+  }
+
+  const pad = 2;
+  minX = Math.max(0, minX - pad);
+  minY = Math.max(0, minY - pad);
+  maxX = Math.min(width - 1, maxX + pad);
+  maxY = Math.min(height - 1, maxY + pad);
+  const outW = maxX - minX + 1;
+  const outH = maxY - minY + 1;
+  const out = Buffer.alloc(outW * outH * 4);
+
+  for (let y = 0; y < outH; y++) {
+    for (let x = 0; x < outW; x++) {
+      const si = idx(x + minX, y + minY, width);
+      const di = (y * outW + x) * 4;
+      out[di] = data[si];
+      out[di + 1] = data[si + 1];
+      out[di + 2] = data[si + 2];
+      out[di + 3] = data[si + 3];
+    }
+  }
+
+  return { data: out, width: outW, height: outH, cropped: true };
+}
+
+function findSymbolBottomY(data, width, height) {
+  const rows = [];
+  for (let y = 0; y < height; y++) {
+    let cyan = 0;
+    for (let x = 0; x < width; x++) {
+      const i = idx(x, y, width);
+      if (!isSymbolPixel(data[i], data[i + 1], data[i + 2], data[i + 3])) continue;
+      cyan++;
+    }
+    rows.push({ y, cyan });
+  }
+
+  const searchStart = Math.round(height * 0.34);
+  const searchEnd = Math.round(height * 0.58);
+  let bestGap = { start: -1, size: 0 };
+
+  for (let y = searchStart; y < searchEnd; y++) {
+    let gapLen = 0;
+    while (y + gapLen < searchEnd && rows[y + gapLen].cyan < 8) {
+      gapLen++;
+    }
+    if (gapLen >= 12 && gapLen > bestGap.size) {
+      bestGap = { start: y, size: gapLen };
+    }
+    if (gapLen > 0) y += gapLen - 1;
+  }
+
+  if (bestGap.start > 0) {
+    for (let y = bestGap.start - 1; y >= 0; y--) {
+      if (rows[y].cyan > 24) return y + 12;
+    }
+  }
+
+  return Math.round(height * 0.48);
+}
+
+async function writeSymbolIcon(sharp, officialPath, outputPath) {
+  const { data, info } = await sharp(officialPath)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  const symbolBottom = findSymbolBottomY(data, info.width, info.height);
+  const extractH = Math.max(1, Math.min(info.height - 1, symbolBottom));
+
+  const extracted = Buffer.alloc(info.width * extractH * 4);
+  for (let y = 0; y < extractH; y++) {
+    const src = y * info.width * 4;
+    const dst = y * info.width * 4;
+    data.copy(extracted, dst, src, src + info.width * 4);
+  }
+
+  const cropped = cropToSymbolContent(extracted, info.width, extractH);
+  const pad = Math.max(8, Math.round(Math.max(cropped.width, cropped.height) * 0.04));
+  const paddedW = cropped.width + pad * 2;
+  const paddedH = cropped.height + pad * 2;
+  const padded = Buffer.alloc(paddedW * paddedH * 4);
+
+  for (let y = 0; y < cropped.height; y++) {
+    for (let x = 0; x < cropped.width; x++) {
+      const si = (y * cropped.width + x) * 4;
+      const di = ((y + pad) * paddedW + (x + pad)) * 4;
+      padded[di] = cropped.data[si];
+      padded[di + 1] = cropped.data[si + 1];
+      padded[di + 2] = cropped.data[si + 2];
+      padded[di + 3] = cropped.data[si + 3];
+    }
+  }
+
+  await sharp(padded, {
+    raw: { width: paddedW, height: paddedH, channels: 4 },
+  })
+    .png()
+    .toFile(outputPath);
+
+  console.log(
+    `✓ logo_icon.png (${paddedW}x${paddedH}, symbol rows 0-${symbolBottom})`,
+  );
+}
+
 async function processTransparentLogo(inputPath, outputPath, sharp) {
   const { data, info } = await sharp(inputPath)
     .ensureAlpha()
@@ -290,17 +421,12 @@ async function main() {
     fs.mkdirSync(dir, { recursive: true });
   }
 
-  const meta = await processTransparentLogo(RAW, OUT_OFFICIAL, sharp);
-  const info = await sharp(OUT_OFFICIAL).metadata();
-  const w = info.width;
-  const h = info.height;
-  const iconH = Math.max(1, Math.min(h - 1, Math.round(h * 0.48)));
-
-  await sharp(OUT_OFFICIAL)
-    .extract({ left: 0, top: 0, width: w, height: iconH })
-    .png()
-    .toFile(path.join(assets, 'logo_icon.png'));
-  console.log('✓ logo_icon.png');
+  await processTransparentLogo(RAW, OUT_OFFICIAL, sharp);
+  await writeSymbolIcon(
+    sharp,
+    OUT_OFFICIAL,
+    path.join(assets, 'logo_icon.png'),
+  );
 
   // Splash Flutter / Android clássico — lockup completo com margem transparente.
   await sharp(OUT_OFFICIAL)
@@ -316,9 +442,10 @@ async function main() {
     .toFile(path.join(assets, 'logo_splash.png'));
   console.log('✓ logo_splash.png');
 
-  // Android 12 — só símbolo (máscara circular corta texto).
+  // Android 12 — símbolo completo com margem para máscara circular (~60%).
+  const splashIconInner = 300;
   const iconOnly = await sharp(path.join(assets, 'logo_icon.png'))
-    .resize(420, 420, {
+    .resize(splashIconInner, splashIconInner, {
       fit: 'contain',
       background: { r: 0, g: 0, b: 0, alpha: 0 },
     })

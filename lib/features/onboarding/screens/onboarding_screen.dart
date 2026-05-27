@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -487,84 +485,33 @@ class _OBPageWidget extends StatelessWidget {
   });
 
   Widget _buildHero(Color primary) {
-    if (pageIndex == 0) {
-      return SizedBox(
-        width: 168,
-        child: Stack(
-          alignment: Alignment.center,
-          clipBehavior: Clip.none,
-          children: [
-            IgnorePointer(
-              child: Container(
-                width: 168,
-                height: 128,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      primary.withValues(alpha: 0.16),
-                      primary.withValues(alpha: 0.05),
-                      Colors.transparent,
-                    ],
-                    stops: const [0.0, 0.55, 1.0],
-                  ),
+    return SizedBox(
+      width: 168,
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          IgnorePointer(
+            child: Container(
+              width: 168,
+              height: 128,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    primary.withValues(alpha: 0.16),
+                    primary.withValues(alpha: 0.05),
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 0.55, 1.0],
                 ),
               ),
             ),
-            const FocuxOfficialLogo.full(width: 168),
-          ],
-        ),
-      );
-    }
-
-    return SizedBox(
-      width: 188,
-      height: 188,
-      child: CustomPaint(
-        painter: _OrbitLinksPainter(),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            ..._buildOrbitIcons(data, primary),
-            FocuxOfficialLogo.icon(size: 96),
-          ],
-        ),
+          ),
+          const FocuxOfficialLogo.full(width: 168),
+        ],
       ),
     );
-  }
-
-  List<Widget> _buildOrbitIcons(_OBData d, Color primary) {
-    const positions = [
-      Alignment(-0.92, -0.72),
-      Alignment(0.92, -0.28),
-      Alignment(-0.78, 0.88),
-    ];
-    return List.generate(d.orbitIcons.length, (i) {
-      return Align(
-        alignment: positions[i],
-        child: Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(13),
-            color: const Color(0xFF0B1518),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
-            boxShadow: [
-              BoxShadow(
-                color: primary.withValues(alpha: 0.12),
-                blurRadius: 12,
-                spreadRadius: -4,
-              ),
-            ],
-          ),
-          child: Icon(
-            d.orbitIcons[i],
-            size: 18,
-            color: primary,
-          ),
-        ),
-      );
-    });
   }
 
   @override
@@ -853,43 +800,3 @@ class _AuthGridPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter old) => false;
 }
 
-class _OrbitLinksPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width * 0.5, size.height * 0.5);
-    final nodes = [
-      Offset(size.width * 0.14, size.height * 0.20),
-      Offset(size.width * 0.86, size.height * 0.34),
-      Offset(size.width * 0.20, size.height * 0.84),
-    ];
-    final paint =
-        Paint()
-          ..color = Colors.white.withValues(alpha: 0.14)
-          ..strokeWidth = 1
-          ..style = PaintingStyle.stroke;
-
-    for (final node in nodes) {
-      _drawDotted(canvas, center, node, paint);
-    }
-  }
-
-  void _drawDotted(Canvas canvas, Offset from, Offset to, Paint paint) {
-    const dash = 4.0;
-    const gap = 5.0;
-    final delta = to - from;
-    final distance = delta.distance;
-    if (distance <= 0) return;
-    final direction = Offset(delta.dx / distance, delta.dy / distance);
-    var drawn = 0.0;
-    while (drawn < distance) {
-      final start = from + direction * drawn;
-      final endDist = math.min(drawn + dash, distance);
-      final end = from + direction * endDist;
-      canvas.drawLine(start, end, paint);
-      drawn += dash + gap;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
