@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/smart_pricing_repository.dart';
@@ -75,6 +76,33 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
                   style: const TextStyle(fontSize: 12)),
             )),
           ],
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () => context.push('/pacotes'),
+                  icon: const Icon(Icons.add_box_outlined, size: 18),
+                  label: const Text('Criar pacote'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: primary,
+                    minimumSize: const Size.fromHeight(40),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => context.push('/financeiro'),
+                  icon: const Icon(Icons.update, size: 18),
+                  label: const Text('Atualizar plano'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(40),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

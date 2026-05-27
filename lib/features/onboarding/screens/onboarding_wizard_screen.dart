@@ -39,6 +39,12 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
     if (mounted) context.go('/dashboard/personal');
   }
 
+  /// Empurra a rota e recarrega o wizard quando o usuário voltar.
+  Future<void> _abrirStep(String route) async {
+    await context.push<dynamic>(route);
+    if (mounted) await _load();
+  }
+
   IconData _iconFor(String name) {
     switch (name) {
       case 'person': return Icons.person_outline;
@@ -65,55 +71,59 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
           ? const Center(child: FxLoading())
           : _wizard == null
               ? const Center(child: Text('Não foi possível carregar o wizard.'))
-              : Column(
-                  children: [
-                    LinearProgressIndicator(
-                      value: _wizard!.totalCount > 0 ? _wizard!.completedCount / _wizard!.totalCount : 0,
-                      backgroundColor: primary.withValues(alpha: 0.15),
-                      color: primary,
-                    ),
-                    Expanded(
-                      child: ListView(
-                        padding: const EdgeInsets.all(TokensStrip.s4),
-                        children: [
-                          Text(
-                            '${_wizard!.progressPercent}% concluído',
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-                          ),
-                          const SizedBox(height: 4),
-                          Text('Próximo: ${_wizard!.nextActionLabel}'),
-                          const SizedBox(height: 16),
-                          ..._wizard!.steps.map((s) => Card(
-                            child: ListTile(
-                              leading: Icon(_iconFor(s.icon), color: s.completed ? Colors.green : primary),
-                              title: Text(s.title),
-                              subtitle: Text('${s.description}\n~${s.estimatedMinutes} min'),
-                              isThreeLine: true,
-                              trailing: s.completed
-                                  ? const Icon(Icons.check_circle, color: Colors.green)
-                                  : Icon(Icons.arrow_forward_ios, size: 16, color: primary),
-                              onTap: s.completed ? null : () => context.push(s.actionRoute),
-                            ),
-                          )),
-                        ],
+              : RefreshIndicator(
+                  onRefresh: _load,
+                  child: Column(
+                    children: [
+                      LinearProgressIndicator(
+                        value: _wizard!.totalCount > 0 ? _wizard!.completedCount / _wizard!.totalCount : 0,
+                        backgroundColor: primary.withValues(alpha: 0.15),
+                        color: primary,
                       ),
-                    ),
-                    SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.all(TokensStrip.s4),
-                        child: FilledButton(
-                          onPressed: _wizard!.allStepsDone || _wizard!.wizardCompleto ? _concluir : () {
-                            context.push(_wizard!.nextActionRoute);
-                          },
-                          style: FilledButton.styleFrom(
-                            minimumSize: const Size.fromHeight(48),
-                            backgroundColor: primary,
-                          ),
-                          child: Text(_wizard!.allStepsDone ? 'Concluir setup' : 'Continuar setup'),
+                      Expanded(
+                        child: ListView(
+                          padding: const EdgeInsets.all(TokensStrip.s4),
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            Text(
+                              '${_wizard!.progressPercent}% concluído',
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                            ),
+                            const SizedBox(height: 4),
+                            Text('Próximo: ${_wizard!.nextActionLabel}'),
+                            const SizedBox(height: 16),
+                            ..._wizard!.steps.map((s) => Card(
+                              child: ListTile(
+                                leading: Icon(_iconFor(s.icon), color: s.completed ? Colors.green : primary),
+                                title: Text(s.title),
+                                subtitle: Text('${s.description}\n~${s.estimatedMinutes} min'),
+                                isThreeLine: true,
+                                trailing: s.completed
+                                    ? const Icon(Icons.check_circle, color: Colors.green)
+                                    : Icon(Icons.arrow_forward_ios, size: 16, color: primary),
+                                onTap: s.completed ? null : () => _abrirStep(s.actionRoute),
+                              ),
+                            )),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
+                      SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.all(TokensStrip.s4),
+                          child: FilledButton(
+                            onPressed: _wizard!.allStepsDone || _wizard!.wizardCompleto
+                                ? _concluir
+                                : () => _abrirStep(_wizard!.nextActionRoute),
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size.fromHeight(48),
+                              backgroundColor: primary,
+                            ),
+                            child: Text(_wizard!.allStepsDone ? 'Concluir setup' : 'Continuar setup'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
     );
   }

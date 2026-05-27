@@ -18,6 +18,7 @@ class FeedbackAlunoScreen extends ConsumerStatefulWidget {
 
 class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
   List<FeedbackVideo> _items = [];
+  List<ExercicioOpcao> _exercicios = [];
   bool _loading = true;
 
   @override
@@ -29,46 +30,49 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final items = await FeedbackVideoRepository(ref.read(apiClientProvider)).meus();
-      if (mounted) setState(() { _items = items; _loading = false; });
+      final repo = FeedbackVideoRepository(ref.read(apiClientProvider));
+      final items = await repo.meus();
+      List<ExercicioOpcao> exs = [];
+      try {
+        exs = await repo.exerciciosDisponiveis();
+      } catch (_) {}
+      if (mounted) setState(() { _items = items; _exercicios = exs; _loading = false; });
     } catch (e) {
       if (mounted) setState(() => _loading = false);
     }
   }
 
   Future<void> _enviar() async {
-    final urlCtrl = TextEditingController();
-    final comentCtrl = TextEditingController();
-    final exCtrl = TextEditingController(text: '0');
+    if (_exercicios.isEmpty) {
+      FeedbackHelper.showSnackBar(
+        context,
+        const SnackBar(content: Text('Você precisa de um treino atribuído pelo personal antes de enviar form-check.')),
+      );
+      return;
+    }
 
-    final ok = await showDialog<bool>(
+    final result = await showModalBottomSheet<_FormResult>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Enviar form check'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: urlCtrl, decoration: const InputDecoration(labelText: 'URL do vídeo')),
-            TextField(controller: exCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'ID exercício')),
-            TextField(controller: comentCtrl, decoration: const InputDecoration(labelText: 'Comentário')),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Enviar')),
-        ],
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
+      builder: (_) => _EnviarFormSheet(exercicios: _exercicios),
     );
-    if (ok != true || urlCtrl.text.trim().isEmpty) return;
+    if (result == null) return;
 
     try {
       await FeedbackVideoRepository(ref.read(apiClientProvider)).enviarMeu(
-        videoUrl: urlCtrl.text.trim(),
-        exercicioId: int.tryParse(exCtrl.text) ?? 0,
-        comentario: comentCtrl.text.trim(),
+        videoUrl: result.videoUrl,
+        exercicioId: result.exercicioId,
+        comentario: result.comentario,
       );
       if (mounted) {
-        FeedbackHelper.showSnackBar(context, const SnackBar(content: Text('Vídeo enviado! Análise IA em andamento.')));
+        FeedbackHelper.showSnackBar(
+          context,
+          const SnackBar(content: Text('Vídeo enviado! Análise IA em andamento — atualize em alguns segundos.')),
+        );
         _load();
       }
     } catch (e) {
@@ -76,11 +80,17 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
     }
   }
 
+  Color _scoreColor(int? score) {
+    if (score == null) return Colors.grey;
+    if (score >= 80) return Colors.green;
+    if (score >= 60) return Colors.amber.shade700;
+    return Colors.red;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
     return FxShellScaffold(
-      appBar: FxShellAppBar(title: 'Form check', onBack: () => context.pop()),
+      appBar: FxShellAppBar(title: 'Form check', subtitle: 'Análise IA da sua execução', onBack: () => context.pop()),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _enviar,
         icon: const Icon(Icons.videocam_outlined),
@@ -88,32 +98,167 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
       ),
       body: _loading
           ? const Center(child: FxLoading())
-          : ListView.separated(
-              padding: const EdgeInsets.all(TokensStrip.s4),
-              itemCount: _items.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 8),
-              itemBuilder: (_, i) {
-                final f = _items[i];
-                return Card(
-                  child: ExpansionTile(
-                    title: Text('Exercício #${f.exercicioId}'),
-                    subtitle: Text(f.statusAnalise ?? 'PENDENTE'),
-                    children: [
-                      if (f.aiScore != null)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text('Score IA: ${f.aiScore}/100', style: TextStyle(color: primary, fontWeight: FontWeight.w600)),
-                        ),
-                      if (f.aiAnalise != null)
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Text(f.aiAnalise!),
-                        ),
-                    ],
-                  ),
-                );
-              },
+          : RefreshIndicator(
+              onRefresh: _load,
+              child: _items.isEmpty
+                  ? ListView(children: const [
+                      SizedBox(height: 120),
+                      Center(child: Text('Nenhum vídeo enviado ainda. Toque em "Enviar vídeo".')),
+                    ])
+                  : ListView.separated(
+                      padding: const EdgeInsets.all(TokensStrip.s4),
+                      itemCount: _items.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemBuilder: (_, i) {
+                        final f = _items[i];
+                        final exNome = _exercicios
+                            .where((e) => e.id == f.exercicioId)
+                            .map((e) => e.nome)
+                            .firstOrNull ?? 'Exercício #${f.exercicioId}';
+                        return Card(
+                          child: ExpansionTile(
+                            title: Text(exNome),
+                            subtitle: Text('${f.statusAnalise ?? 'PENDENTE'} · ${f.criadoEm.toLocal().toString().substring(0, 16)}'),
+                            leading: f.aiScore != null
+                                ? CircleAvatar(
+                                    backgroundColor: _scoreColor(f.aiScore),
+                                    foregroundColor: Colors.white,
+                                    child: Text('${f.aiScore}'),
+                                  )
+                                : const CircleAvatar(child: Icon(Icons.hourglass_empty)),
+                            children: [
+                              if (f.aiAnalise != null && f.aiAnalise!.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Text(f.aiAnalise!, style: const TextStyle(height: 1.4)),
+                                ),
+                              if (f.comentario.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                  child: Text('Sua nota: ${f.comentario}',
+                                      style: TextStyle(color: Theme.of(context).hintColor)),
+                                ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
             ),
+    );
+  }
+}
+
+class _FormResult {
+  final int exercicioId;
+  final String videoUrl;
+  final String? comentario;
+  _FormResult({required this.exercicioId, required this.videoUrl, this.comentario});
+}
+
+class _EnviarFormSheet extends StatefulWidget {
+  final List<ExercicioOpcao> exercicios;
+  const _EnviarFormSheet({required this.exercicios});
+
+  @override
+  State<_EnviarFormSheet> createState() => _EnviarFormSheetState();
+}
+
+class _EnviarFormSheetState extends State<_EnviarFormSheet> {
+  int? _exercicioId;
+  final _videoUrl = TextEditingController();
+  final _comentario = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _exercicioId = widget.exercicios.first.id;
+  }
+
+  @override
+  void dispose() {
+    _videoUrl.dispose();
+    _comentario.dispose();
+    super.dispose();
+  }
+
+  void _salvar() {
+    final url = _videoUrl.text.trim();
+    if (_exercicioId == null) return;
+    if (url.isEmpty || !(url.startsWith('http://') || url.startsWith('https://'))) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cole uma URL válida (https://) do vídeo no YouTube ou Drive.')),
+      );
+      return;
+    }
+    Navigator.pop(context, _FormResult(
+      exercicioId: _exercicioId!,
+      videoUrl: url,
+      comentario: _comentario.text.trim().isEmpty ? null : _comentario.text.trim(),
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).hintColor.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const Text('Enviar vídeo para análise',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+            Text('A IA da Focux retorna pontos positivos, correções e score em segundos.',
+                style: TextStyle(color: Theme.of(context).hintColor, fontSize: 13)),
+            const SizedBox(height: 20),
+            DropdownButtonFormField<int>(
+              value: _exercicioId,
+              isExpanded: true,
+              decoration: const InputDecoration(labelText: 'Exercício *'),
+              items: widget.exercicios
+                  .map((e) => DropdownMenuItem(value: e.id, child: Text(e.nome)))
+                  .toList(),
+              onChanged: (v) => setState(() => _exercicioId = v),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _videoUrl,
+              keyboardType: TextInputType.url,
+              decoration: const InputDecoration(
+                labelText: 'URL do vídeo *',
+                hintText: 'https://youtube.com/...',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _comentario,
+              maxLines: 2,
+              decoration: const InputDecoration(
+                labelText: 'O que você quer que a IA observe? (opcional)',
+                hintText: 'Ex: amplitude do agachamento, joelho passando do pé',
+              ),
+            ),
+            const SizedBox(height: 20),
+            FilledButton.icon(
+              onPressed: _salvar,
+              icon: const Icon(Icons.send),
+              label: const Text('Enviar para análise'),
+              style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -94,4 +94,21 @@ class FeedbackVideoRepository {
   Future<void> deletar(int id) async {
     await _dio.delete('/api/feedback-videos/$id');
   }
+
+  Future<List<ExercicioOpcao>> exerciciosDisponiveis() async {
+    final r = await _dio.get('/api/feedback-videos/me/exercicios-disponiveis');
+    return (r.data as List)
+        .map((e) => ExercicioOpcao.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+}
+
+class ExercicioOpcao {
+  final int id;
+  final String nome;
+
+  ExercicioOpcao({required this.id, required this.nome});
+
+  factory ExercicioOpcao.fromJson(Map<String, dynamic> j) =>
+      ExercicioOpcao(id: (j['id'] as num).toInt(), nome: j['nome'] as String? ?? '');
 }

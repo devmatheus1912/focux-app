@@ -49,7 +49,7 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(TokensStrip.s4),
                 children: [
-                  if (_resumo != null)
+                  if (_resumo != null) ...[
                     Card(
                       color: primary.withValues(alpha: 0.08),
                       child: Padding(
@@ -64,13 +64,37 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _segmento('Promotores', _resumo!.promotores, _resumo!.total,
+                              const Color(0xFF2E7D32), Icons.sentiment_very_satisfied),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _segmento('Neutros', _resumo!.neutros, _resumo!.total,
+                              const Color(0xFFF9A825), Icons.sentiment_neutral),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _segmento('Detratores', _resumo!.detratores, _resumo!.total,
+                              const Color(0xFFC62828), Icons.sentiment_very_dissatisfied),
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   const Text('Feedback recente', style: TextStyle(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
                   ..._recentes.map((n) => ListTile(
-                    leading: CircleAvatar(child: Text('${n.score}')),
+                    leading: CircleAvatar(
+                      backgroundColor: _scoreColor(n.score),
+                      foregroundColor: Colors.white,
+                      child: Text('${n.score}'),
+                    ),
                     title: Text(n.comentario?.isNotEmpty == true ? n.comentario! : 'Sem comentário'),
-                    subtitle: Text(n.criadoEm),
+                    subtitle: Text('${_classify(n.score)} · ${n.criadoEm}'),
                   )),
                 ],
               ),
@@ -84,4 +108,35 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
       Text(label, style: const TextStyle(fontSize: 12)),
     ],
   );
+
+  Widget _segmento(String label, int valor, int total, Color color, IconData icon) {
+    final pct = total > 0 ? (valor * 100 / total).round() : 0;
+    return Card(
+      color: color.withValues(alpha: 0.08),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(height: 4),
+            Text('$valor', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: color)),
+            Text('$pct% · $label',
+                style: const TextStyle(fontSize: 11), textAlign: TextAlign.center),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _classify(int score) {
+    if (score >= 9) return 'Promotor';
+    if (score >= 7) return 'Neutro';
+    return 'Detrator';
+  }
+
+  Color _scoreColor(int score) {
+    if (score >= 9) return const Color(0xFF2E7D32);
+    if (score >= 7) return const Color(0xFFF9A825);
+    return const Color(0xFFC62828);
+  }
 }

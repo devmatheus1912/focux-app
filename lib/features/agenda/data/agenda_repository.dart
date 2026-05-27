@@ -105,6 +105,11 @@ class AgendaRepository {
     final r = await _dio.get('/api/agenda/ical/me');
     return IcalTokenInfo.fromJson(r.data as Map<String, dynamic>);
   }
+
+  Future<IcalTokenInfo> icalTokenAluno() async {
+    final r = await _dio.get('/api/agenda/aluno/ical/me');
+    return IcalTokenInfo.fromJson(r.data as Map<String, dynamic>);
+  }
 }
 
 class IcalTokenInfo {

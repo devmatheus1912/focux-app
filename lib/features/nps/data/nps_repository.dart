@@ -6,12 +6,16 @@ class NpsResumo {
   final double npsScore;
   final double media;
   final int promotores;
+  final int detratores;
+  final int neutros;
 
   NpsResumo({
     required this.total,
     required this.npsScore,
     required this.media,
     required this.promotores,
+    required this.detratores,
+    required this.neutros,
   });
 
   factory NpsResumo.fromJson(Map<String, dynamic> j) => NpsResumo(
@@ -19,6 +23,8 @@ class NpsResumo {
     npsScore: (j['npsScore'] as num?)?.toDouble() ?? 0,
     media: (j['media'] as num?)?.toDouble() ?? 0,
     promotores: (j['promotores'] as num?)?.toInt() ?? 0,
+    detratores: (j['detratores'] as num?)?.toInt() ?? 0,
+    neutros: (j['neutros'] as num?)?.toInt() ?? 0,
   );
 }
 

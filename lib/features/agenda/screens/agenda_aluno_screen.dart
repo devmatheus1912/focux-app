@@ -1,4 +1,6 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../../../core/config/env.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,6 +47,36 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
     }
   }
 
+  String _resolveAbsoluteApiUrl(String pathOrUrl) {
+    if (pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://')) {
+      return pathOrUrl;
+    }
+    var base = Env.apiUrl;
+    while (base.endsWith('/')) {
+      base = base.substring(0, base.length - 1);
+    }
+    final path = pathOrUrl.startsWith('/') ? pathOrUrl : '/$pathOrUrl';
+    if (base.endsWith('/api') && path.startsWith('/api/')) {
+      base = base.substring(0, base.length - 4);
+    }
+    return '$base$path';
+  }
+
+  Future<void> _copyIcalLink() async {
+    try {
+      final info = await AgendaRepository(ref.read(apiClientProvider)).icalTokenAluno();
+      final fullUrl = _resolveAbsoluteApiUrl(info.url);
+      await Clipboard.setData(ClipboardData(text: fullUrl));
+      if (mounted) {
+        FeedbackHelper.showSuccess(context, 'Link iCal copiado — cole no Google Calendar ou Apple Calendar.');
+      }
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showSnackBar(context, SnackBar(content: Text(friendlyError(e))));
+      }
+    }
+  }
+
   Future<void> _confirmar(Agendamento ag) async {
     try {
       await AgendaRepository(
@@ -72,6 +104,13 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
       backgroundColor: Colors.transparent,
       elevation: 0,
       title: const Text('Minha Agenda'),
+      actions: [
+        IconButton(
+          tooltip: 'Exportar iCal',
+          icon: const Icon(Icons.calendar_month_outlined),
+          onPressed: _copyIcalLink,
+        ),
+      ],
     ),
     body: RefreshIndicator(
       onRefresh: _load,

@@ -90,10 +90,27 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     });
   }
 
+  /// Combina `Env.apiUrl` (https://host[/api]) com um path relativo (/api/...) sem
+  /// duplicar segmentos. Aceita também URL já absoluta vinda do backend.
+  String _resolveAbsoluteApiUrl(String pathOrUrl) {
+    if (pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://')) {
+      return pathOrUrl;
+    }
+    var base = Env.apiUrl;
+    while (base.endsWith('/')) {
+      base = base.substring(0, base.length - 1);
+    }
+    final path = pathOrUrl.startsWith('/') ? pathOrUrl : '/$pathOrUrl';
+    if (base.endsWith('/api') && path.startsWith('/api/')) {
+      base = base.substring(0, base.length - 4);
+    }
+    return '$base$path';
+  }
+
   Future<void> _copyIcalLink() async {
     try {
       final info = await AgendaRepository(ref.read(apiClientProvider)).icalToken();
-      final fullUrl = info.url.startsWith('http') ? info.url : '${Env.apiUrl}${info.url}';
+      final fullUrl = _resolveAbsoluteApiUrl(info.url);
       await Clipboard.setData(ClipboardData(text: fullUrl));
       if (mounted) {
         FeedbackHelper.showSnackBar(
