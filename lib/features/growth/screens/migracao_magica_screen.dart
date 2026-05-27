@@ -139,7 +139,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
               FilledButton(
                 onPressed: () {
                   Navigator.pop(ctx);
-                  context.push('/assinatura', extra: offer.targetPlan.apiName);
+                  context.push('/assinatura', extra: offer.targetPlan?.apiName);
                 },
                 child: Text(offer.ctaLabel),
               ),

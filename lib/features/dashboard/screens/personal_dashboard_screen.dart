@@ -29,6 +29,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../subscription/widgets/plan_usage_banner.dart';
 import '../../subscription/widgets/trial_countdown_banner.dart';
 import '../../subscription/widgets/dashboard_activation_cta.dart';
+import '../../pql/widgets/pql_progress_card.dart';
 
 class PersonalDashboardScreen extends ConsumerStatefulWidget {
   const PersonalDashboardScreen({super.key});
@@ -369,6 +370,7 @@ class _PersonalDashboardScreenState
                   slivers: [
                     const SliverToBoxAdapter(child: TrialCountdownBanner()),
                     const SliverToBoxAdapter(child: PlanUsageBanner()),
+                    const SliverToBoxAdapter(child: PqlProgressCard()),
                     SliverToBoxAdapter(
                       child: DashboardActivationCta(
                         alunosAtivos: alunosAtivos,
@@ -1833,6 +1835,30 @@ class _CollapsibleToolsSectionState extends State<_CollapsibleToolsSection> {
                     label: 'Ofertas',
                     isDark: widget.isDark,
                     onTap: () => context.push('/ofertas-upsell'),
+                  ),
+                  _ShortcutBtn(
+                    icon: 'dumbbell',
+                    label: 'Hábitos',
+                    isDark: widget.isDark,
+                    onTap: () => context.push('/habitos'),
+                  ),
+                  _ShortcutBtn(
+                    icon: 'spark',
+                    label: 'Pacotes',
+                    isDark: widget.isDark,
+                    onTap: () => context.push('/pacotes'),
+                  ),
+                  _ShortcutBtn(
+                    icon: 'trend',
+                    label: 'Lead Público',
+                    isDark: widget.isDark,
+                    onTap: () => context.push('/leads-publicos'),
+                  ),
+                  _ShortcutBtn(
+                    icon: 'trend',
+                    label: 'NDR / MRR',
+                    isDark: widget.isDark,
+                    onTap: () => context.push('/relatorio/business'),
                   ),
                   _ShortcutBtn(
                     icon: 'spark',

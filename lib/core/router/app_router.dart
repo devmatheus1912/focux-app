@@ -82,6 +82,13 @@ import '../../features/planos/screens/enterprise_promo_screen.dart';
 import '../../features/referral/screens/referral_screen.dart';
 import '../../features/retencao/screens/churn_dashboard_screen.dart';
 import '../../features/monetizacao/screens/ofertas_upsell_screen.dart';
+import '../../features/monetizacao/screens/cancel_save_screen.dart';
+import '../../features/habitos/screens/habitos_personal_screen.dart';
+import '../../features/habitos/screens/habitos_aluno_screen.dart';
+import '../../features/pacotes/screens/pacotes_screen.dart';
+import '../../features/captura/screens/leads_publicos_screen.dart';
+import '../../features/relatorio/screens/business_reports_screen.dart';
+import '../../features/growth/screens/migracao_magica_screen.dart';
 import '../../features/gamificacao/screens/gamificacao_screen.dart';
 import '../../features/anamnese/screens/anamnese_screen.dart';
 import '../../features/alimentar/screens/alimentar_screen.dart';
@@ -201,6 +208,12 @@ class AppRouter {
         builder:
             (context, state) =>
                 const FxRouteChrome(child: AlunoActivationScreen()),
+      ),
+      GoRoute(
+        path: '/aluno/habitos',
+        builder:
+            (context, state) =>
+                const FxRouteChrome(child: HabitosAlunoScreen()),
       ),
       GoRoute(
         path: '/notificacoes',
@@ -779,6 +792,26 @@ class AppRouter {
           GoRoute(
             path: '/ofertas-upsell',
             builder: (context, state) => const OfertasUpsellScreen(),
+          ),
+          GoRoute(
+            path: '/cancel-save',
+            builder: (context, state) => const CancelSaveScreen(),
+          ),
+          GoRoute(
+            path: '/habitos',
+            builder: (context, state) => const HabitosPersonalScreen(),
+          ),
+          GoRoute(
+            path: '/pacotes',
+            builder: (context, state) => const PacotesScreen(),
+          ),
+          GoRoute(
+            path: '/leads-publicos',
+            builder: (context, state) => const LeadsPublicosScreen(),
+          ),
+          GoRoute(
+            path: '/relatorio/business',
+            builder: (context, state) => const BusinessReportsScreen(),
           ),
           GoRoute(
             path: '/migracao-magica',

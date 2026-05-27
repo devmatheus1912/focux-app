@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -572,6 +573,13 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       appBar: FxShellAppBar(
         title: 'Planos',
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.exit_to_app_outlined),
+            tooltip: 'Cancelar assinatura',
+            onPressed: () => context.push('/cancel-save'),
+          ),
+        ],
       ),
       bottomNavigationBar:
           selectedBackendPlan == null

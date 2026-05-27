@@ -1,0 +1,81 @@
+import 'package:dio/dio.dart';
+import '../../../core/api/api_client.dart';
+
+class CancelSaveOferta {
+  final String tipo;
+  final String titulo;
+  final String descricao;
+  final String ctaLabel;
+
+  CancelSaveOferta({
+    required this.tipo,
+    required this.titulo,
+    required this.descricao,
+    required this.ctaLabel,
+  });
+
+  factory CancelSaveOferta.fromJson(Map<String, dynamic> j) => CancelSaveOferta(
+    tipo: j['tipo'] as String? ?? '',
+    titulo: j['titulo'] as String? ?? '',
+    descricao: j['descricao'] as String? ?? '',
+    ctaLabel: j['ctaLabel'] as String? ?? 'Aceitar',
+  );
+}
+
+class CancelSaveResposta {
+  final int id;
+  final bool aceita;
+  final DateTime? pausaAte;
+  final int? descontoPct;
+  final String mensagem;
+
+  CancelSaveResposta({
+    required this.id,
+    required this.aceita,
+    required this.mensagem,
+    this.pausaAte,
+    this.descontoPct,
+  });
+
+  factory CancelSaveResposta.fromJson(Map<String, dynamic> j) =>
+      CancelSaveResposta(
+        id: (j['id'] as num).toInt(),
+        aceita: j['aceita'] as bool? ?? false,
+        pausaAte: j['pausaAte'] != null
+            ? DateTime.tryParse(j['pausaAte'] as String)
+            : null,
+        descontoPct: (j['descontoPct'] as num?)?.toInt(),
+        mensagem: j['mensagem'] as String? ?? '',
+      );
+}
+
+class CancelSaveRepository {
+  final Dio _dio;
+  CancelSaveRepository(ApiClient c) : _dio = c.dio;
+
+  Future<CancelSaveOferta> oferta(String motivo) async {
+    final r = await _dio.get(
+      '/api/cancel-save/oferta',
+      queryParameters: {'motivo': motivo},
+    );
+    return CancelSaveOferta.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<CancelSaveResposta> responder({
+    required String motivo,
+    required String ofertaApresentada,
+    required bool aceitar,
+    String? feedback,
+  }) async {
+    final r = await _dio.post(
+      '/api/cancel-save/responder',
+      data: {
+        'motivo': motivo,
+        'ofertaApresentada': ofertaApresentada,
+        'aceitar': aceitar ? 'SIM' : 'NAO',
+        'feedback': feedback,
+      },
+    );
+    return CancelSaveResposta.fromJson(r.data as Map<String, dynamic>);
+  }
+}
