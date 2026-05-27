@@ -185,8 +185,13 @@ class _EnviarFormSheetState extends State<_EnviarFormSheet> {
     final url = _videoUrl.text.trim();
     if (_exercicioId == null) return;
     if (url.isEmpty || !(url.startsWith('http://') || url.startsWith('https://'))) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cole uma URL válida (https://) do vídeo no YouTube ou Drive.')),
+      FeedbackHelper.showSnackBar(
+        context,
+        const SnackBar(
+          content: Text(
+            'Cole uma URL válida (https://) do vídeo no YouTube ou Drive.',
+          ),
+        ),
       );
       return;
     }

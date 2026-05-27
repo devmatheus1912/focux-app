@@ -235,6 +235,12 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
                           logoUrl: _logoUrl,
                           paletteName: _palette.name,
                         ),
+                        const SizedBox(height: 12),
+                        OutlinedButton.icon(
+                          onPressed: () => context.push('/perfil/landing-editor'),
+                          icon: const Icon(Icons.language_outlined),
+                          label: const Text('Editor da landing pública'),
+                        ),
                         const SizedBox(height: TokensStrip.s4),
                         ShellSurface(
                           accent: _corPrimaria,

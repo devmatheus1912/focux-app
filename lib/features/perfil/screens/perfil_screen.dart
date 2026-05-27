@@ -688,6 +688,22 @@ class _PerfilBody extends StatelessWidget {
                                 mute: mute,
                                 usingDefault: usingDefaultBrand,
                               ),
+                              const SizedBox(height: 12),
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: TextButton.icon(
+                                  onPressed: () {
+                                    HapticFeedback.selectionClick();
+                                    context.push('/perfil/landing-editor');
+                                  },
+                                  icon: const Icon(Icons.language_outlined),
+                                  label: Text(
+                                    perfil.slug != null
+                                        ? 'Editor landing · focux.app/p/${perfil.slug}'
+                                        : 'Editor da landing pública',
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -2164,12 +2180,16 @@ class _ActionTile extends StatelessWidget {
               ),
             ),
             if (value.isNotEmpty)
-              Text(
-                value,
-                style: TextStyle(
-                  color: danger ? ink : link,
-                  fontSize: 12,
-                  fontWeight: danger ? FontWeight.w600 : FontWeight.w800,
+              Flexible(
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: danger ? ink : link,
+                    fontSize: 12,
+                    fontWeight: danger ? FontWeight.w600 : FontWeight.w800,
+                  ),
                 ),
               ),
             if (!danger) ...[

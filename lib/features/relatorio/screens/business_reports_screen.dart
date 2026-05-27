@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/fx_loading.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/business_repository.dart';
 
@@ -45,7 +47,7 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Relatório de Negócio')),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: FxLoading())
           : _snapshot == null
               ? Center(
                   child: TextButton(
@@ -139,6 +141,7 @@ class _Body extends StatelessWidget {
               '${snapshot.dunningAbertas} falhas em aberto. Benchmark global: 55-70%.',
           icon: Icons.replay_circle_filled_outlined,
           color: Colors.indigo,
+          onTap: () => context.push('/dunning'),
         ),
         _MetricCard(
           titulo: 'Ativação Focux (PQL)',
@@ -181,17 +184,22 @@ class _MetricCard extends StatelessWidget {
     required this.delta,
     required this.icon,
     required this.color,
+    this.onTap,
   });
   final String titulo;
   final String valor;
   final String delta;
   final IconData icon;
   final Color color;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: Padding(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
@@ -221,6 +229,7 @@ class _MetricCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
         ),
       ),
     );

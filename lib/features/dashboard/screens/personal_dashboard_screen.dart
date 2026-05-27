@@ -381,6 +381,9 @@ class _PersonalDashboardScreenState
                   slivers: [
                     const SliverToBoxAdapter(child: TrialCountdownBanner()),
                     const SliverToBoxAdapter(child: PlanUsageBanner()),
+                    SliverToBoxAdapter(
+                      child: _RoiQuickLinksRow(isDark: themeDark),
+                    ),
                     const SliverToBoxAdapter(child: PqlProgressCard()),
                     SliverToBoxAdapter(
                       child: DashboardActivationCta(
@@ -1702,6 +1705,63 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
+class _RoiQuickLinksRow extends StatelessWidget {
+  const _RoiQuickLinksRow({required this.isDark});
+
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final link = BrandPalette.sectionLink(primary, dark: isDark);
+    final items = [
+      ('Pacotes', '/pacotes'),
+      ('Captura', '/leads-publicos'),
+      ('Smart Pricing', '/financeiro'),
+      ('Landing', '/perfil/landing-editor'),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        TokensStrip.s4,
+        4,
+        TokensStrip.s4,
+        TokensStrip.s3,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'ROI rápido',
+            style: _dashboardSectionKickerStyle(context, isDark: isDark),
+          ),
+          const SizedBox(height: 8),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (final item in items) ...[
+                  ActionChip(
+                    label: Text(item.$1),
+                    onPressed: () => context.push(item.$2),
+                    backgroundColor: BrandPalette.soft(primary, dark: isDark),
+                    labelStyle: TextStyle(
+                      color: link,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _CollapsibleToolsSection extends StatefulWidget {
   const _CollapsibleToolsSection({
     required this.isDark,
@@ -1870,6 +1930,24 @@ class _CollapsibleToolsSectionState extends State<_CollapsibleToolsSection> {
                     label: 'NDR / MRR',
                     isDark: widget.isDark,
                     onTap: () => context.push('/relatorio/business'),
+                  ),
+                  _ShortcutBtn(
+                    icon: 'bell',
+                    label: 'Dunning',
+                    isDark: widget.isDark,
+                    onTap: () => context.push('/dunning'),
+                  ),
+                  _ShortcutBtn(
+                    icon: 'spark',
+                    label: 'Win-back',
+                    isDark: widget.isDark,
+                    onTap: () => context.push('/winback'),
+                  ),
+                  _ShortcutBtn(
+                    icon: 'article',
+                    label: 'Landing',
+                    isDark: widget.isDark,
+                    onTap: () => context.push('/perfil/landing-editor'),
                   ),
                   _ShortcutBtn(
                     icon: 'spark',

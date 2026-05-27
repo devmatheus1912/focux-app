@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -89,14 +90,17 @@ class _RecorrenciaAlunoScreenState extends ConsumerState<RecorrenciaAlunoScreen>
                             if (_assinatura!.initPoint != null && _assinatura!.status == 'PENDENTE')
                               FilledButton.icon(
                                 onPressed: () async {
-                                  final messenger = ScaffoldMessenger.of(context);
                                   try {
                                     final uri = Uri.parse(_assinatura!.initPoint!);
                                     if (await canLaunchUrl(uri)) {
                                       await launchUrl(uri, mode: LaunchMode.externalApplication);
                                     }
                                   } catch (e) {
-                                    messenger.showSnackBar(SnackBar(content: Text(friendlyError(e))));
+                                    if (!context.mounted) return;
+                                    FeedbackHelper.showSnackBar(
+                                      context,
+                                      SnackBar(content: Text(friendlyError(e))),
+                                    );
                                   }
                                 },
                                 icon: const Icon(Icons.payment),

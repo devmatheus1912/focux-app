@@ -6,6 +6,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/referral_repository.dart';
 
@@ -65,7 +66,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
     return FxShellScaffold(
       appBar: FxShellAppBar(title: 'Indique e ganhe'),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: FxLoading())
           : Padding(
               padding: const EdgeInsets.all(TokensStrip.s5),
               child: Column(

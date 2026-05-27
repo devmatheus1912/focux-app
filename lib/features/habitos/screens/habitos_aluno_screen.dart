@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/habito_repository.dart';
 
@@ -61,7 +63,8 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         SnackBar(content: Text('Erro: $e')),
       );
     }
@@ -72,7 +75,7 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Meus hábitos')),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: FxLoading())
           : RefreshIndicator(
               onRefresh: _carregar,
               child: _habitos.isEmpty

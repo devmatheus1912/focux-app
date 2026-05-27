@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -39,10 +40,13 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
   }
 
   Future<void> _criar() async {
-    final messenger = ScaffoldMessenger.of(context);
     final alunos = await AlunoRepository(ref.read(apiClientProvider)).listar();
     if (alunos.isEmpty) {
-      messenger.showSnackBar(const SnackBar(content: Text('Cadastre um aluno primeiro.')));
+      if (!mounted) return;
+      FeedbackHelper.showSnackBar(
+        context,
+        const SnackBar(content: Text('Cadastre um aluno primeiro.')),
+      );
       return;
     }
     int? alunoId = alunos.first.id;
@@ -84,13 +88,21 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
       );
       if (r.initPoint != null && r.initPoint!.isNotEmpty) {
         await Clipboard.setData(ClipboardData(text: r.initPoint!));
-        messenger.showSnackBar(const SnackBar(
-          content: Text('Link de assinatura copiado — envie ao aluno.'),
-        ));
+        if (!mounted) return;
+        FeedbackHelper.showSnackBar(
+          context,
+          const SnackBar(
+            content: Text('Link de assinatura copiado — envie ao aluno.'),
+          ),
+        );
       }
       _load();
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text(friendlyError(e))));
+      if (!mounted) return;
+      FeedbackHelper.showSnackBar(
+        context,
+        SnackBar(content: Text(friendlyError(e))),
+      );
     }
   }
 

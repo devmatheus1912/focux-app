@@ -1644,6 +1644,12 @@ class _StudentToolsSection extends StatelessWidget {
         emphasis: true,
       ),
       _StudentToolAction(
+        icon: Icons.track_changes_outlined,
+        title: 'Hábitos',
+        subtitle: 'Metas diárias',
+        route: '/aluno/habitos',
+      ),
+      _StudentToolAction(
         icon: Icons.chat_bubble_outline,
         title: 'Personal',
         subtitle: 'Chat direto',

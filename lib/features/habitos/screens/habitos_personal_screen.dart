@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/habito_repository.dart';
 
@@ -87,7 +89,8 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
         await _carregar();
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           SnackBar(content: Text('Erro: $e')),
         );
       }
@@ -104,7 +107,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
         label: const Text('Novo hábito'),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: FxLoading())
           : RefreshIndicator(
               onRefresh: _carregar,
               child: ListView(

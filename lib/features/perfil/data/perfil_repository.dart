@@ -271,4 +271,22 @@ class PerfilRepository {
     final response = await _dio.put('/api/personal/wallet', data: data);
     return response.data as Map<String, dynamic>;
   }
+
+  /// Atualiza copy e ordem de seções da landing pública.
+  Future<void> atualizarLanding({
+    String? heroTitle,
+    String? heroSubtitle,
+    String? primaryCta,
+    List<String>? sectionOrder,
+  }) async {
+    await _dio.put(
+      '/api/personal/identidade',
+      data: {
+        if (heroTitle != null) 'heroTitle': heroTitle,
+        if (heroSubtitle != null) 'heroSubtitle': heroSubtitle,
+        if (primaryCta != null) 'primaryCta': primaryCta,
+        if (sectionOrder != null) 'sectionOrder': sectionOrder,
+      },
+    );
+  }
 }

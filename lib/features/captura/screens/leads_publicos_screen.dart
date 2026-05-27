@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/fx_loading.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/captura_repository.dart';
 
@@ -44,8 +46,15 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Leads do link público')),
+      floatingActionButton: _leads.isEmpty || _loading
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () => context.push('/alunos/novo'),
+              icon: const Icon(Icons.person_add_outlined),
+              label: const Text('Criar aluno'),
+            ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: FxLoading())
           : RefreshIndicator(
               onRefresh: _carregar,
               child: _leads.isEmpty
@@ -93,16 +102,44 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
                             trailing: l.convertido
                                 ? const Icon(Icons.check_circle,
                                     color: Colors.green)
-                                : IconButton(
-                                    icon: const Icon(
-                                        Icons.thumb_up_alt_outlined),
-                                    tooltip: 'Marcar como convertido',
-                                    onPressed: () async {
-                                      await ref
-                                          .read(_repoProvider)
-                                          .marcarConvertido(l.id);
-                                      await _carregar();
-                                    },
+                                : Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (l.email != null &&
+                                          l.email!.isNotEmpty)
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.person_add_outlined,
+                                          ),
+                                          tooltip: 'Criar aluno',
+                                          onPressed: () {
+                                            final q = <String, String>{
+                                              if (l.email != null)
+                                                'email': l.email!,
+                                              if (l.nome.isNotEmpty)
+                                                'nome': l.nome,
+                                            };
+                                            context.push(
+                                              Uri(
+                                                path: '/alunos/novo',
+                                                queryParameters: q,
+                                              ).toString(),
+                                            );
+                                          },
+                                        ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.thumb_up_alt_outlined,
+                                        ),
+                                        tooltip: 'Marcar como convertido',
+                                        onPressed: () async {
+                                          await ref
+                                              .read(_repoProvider)
+                                              .marcarConvertido(l.id);
+                                          await _carregar();
+                                        },
+                                      ),
+                                    ],
                                   ),
                           ),
                         );

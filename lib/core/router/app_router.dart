@@ -56,6 +56,9 @@ import '../../features/auth/screens/definir_senha_aluno_screen.dart';
 import '../../features/auth/screens/resetar_senha_screen.dart';
 import '../../features/ranking/screens/ranking_screen.dart';
 import '../../features/perfil/screens/identidade_visual_screen.dart';
+import '../../features/perfil/screens/landing_editor_screen.dart';
+import '../../features/dunning/screens/dunning_ops_screen.dart';
+import '../../features/winback/screens/winback_screen.dart';
 import '../../features/evolucao/screens/engajamento_screen.dart';
 import '../../features/alunos/screens/acoes_massa_screen.dart';
 import '../../features/ia/screens/ia_aluno_screen.dart';
@@ -320,7 +323,11 @@ class AppRouter {
           // Alunos sub-routes (specific before parameterized)
           GoRoute(
             path: '/alunos/novo',
-            builder: (context, state) => const AddAlunoScreen(),
+            builder:
+                (context, state) => AddAlunoScreen(
+                  initialEmail: state.uri.queryParameters['email'],
+                  initialNome: state.uri.queryParameters['nome'],
+                ),
           ),
           GoRoute(
             path: '/alunos/acoes-massa',
@@ -827,6 +834,18 @@ class AppRouter {
           GoRoute(
             path: '/leads-publicos',
             builder: (context, state) => const LeadsPublicosScreen(),
+          ),
+          GoRoute(
+            path: '/perfil/landing-editor',
+            builder: (context, state) => const LandingEditorScreen(),
+          ),
+          GoRoute(
+            path: '/dunning',
+            builder: (context, state) => const DunningOpsScreen(),
+          ),
+          GoRoute(
+            path: '/winback',
+            builder: (context, state) => const WinbackScreen(),
           ),
           GoRoute(
             path: '/relatorio/business',

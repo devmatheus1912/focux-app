@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/cancel_save_repository.dart';
 
@@ -72,7 +74,8 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
       _showResultado(resposta);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         SnackBar(content: Text('Erro: $e')),
       );
     } finally {
@@ -147,7 +150,7 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
             ),
           const SizedBox(height: 16),
           if (_carregandoOferta)
-            const Center(child: CircularProgressIndicator())
+            const Center(child: FxLoading())
           else if (_oferta != null)
             _OfertaCard(
               oferta: _oferta!,
@@ -220,7 +223,6 @@ class _OfertaCard extends StatelessWidget {
               maxLines: 2,
               decoration: const InputDecoration(
                 labelText: 'Quer deixar um feedback? (opcional)',
-                border: OutlineInputBorder(),
               ),
               onChanged: onFeedback,
             ),

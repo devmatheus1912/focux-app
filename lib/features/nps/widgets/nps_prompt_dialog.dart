@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../data/nps_repository.dart';
 import '../../auth/providers/auth_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -77,7 +78,9 @@ class _NpsDialogState extends State<_NpsDialog> {
         TextButton(onPressed: _saving ? null : () => Navigator.pop(context), child: const Text('Depois')),
         FilledButton(
           onPressed: _saving ? null : _enviar,
-          child: _saving ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Enviar'),
+          child: _saving
+              ? const FxLoading(size: 18, strokeWidth: 2)
+              : const Text('Enviar'),
         ),
       ],
     );

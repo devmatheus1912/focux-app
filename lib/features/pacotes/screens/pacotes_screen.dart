@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/data/perfil_repository.dart';
 import '../data/pacote_repository.dart';
@@ -152,7 +154,8 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
         await _carregar();
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
+        FeedbackHelper.showSnackBar(
+          context,
           SnackBar(content: Text('Erro: $e')),
         );
       }
@@ -161,14 +164,18 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
 
   void _copiarLink() {
     if (_slug == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Defina seu slug em Perfil para gerar o link público.')),
+      FeedbackHelper.showSnackBar(
+        context,
+        const SnackBar(
+          content: Text('Defina seu slug em Perfil para gerar o link público.'),
+        ),
       );
       return;
     }
     final url = 'https://focux.app/p/${_slug!}';
     Clipboard.setData(ClipboardData(text: url));
-    ScaffoldMessenger.of(context).showSnackBar(
+    FeedbackHelper.showSnackBar(
+      context,
       SnackBar(content: Text('Link copiado: $url')),
     );
   }
@@ -192,7 +199,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
         label: const Text('Novo pacote'),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: FxLoading())
           : RefreshIndicator(
               onRefresh: _carregar,
               child: ListView(

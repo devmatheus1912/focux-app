@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/upsell_repository.dart';
 
@@ -26,6 +27,7 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
   List<OfertaUpsell> _ofertas = [];
   bool _loading = true;
   bool _saving = false;
+  String _tipoGatilho = 'MANUAL';
 
   @override
   void dispose() {
@@ -65,6 +67,7 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
         titulo: _titulo.text.trim(),
         descricao: _descricao.text.trim(),
         valor: valor,
+        tipoGatilho: _tipoGatilho,
       );
       _titulo.clear();
       _descricao.clear();
@@ -93,7 +96,7 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
     return FxShellScaffold(
       appBar: FxShellAppBar(title: 'Ofertas para alunos'),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: FxLoading())
           : ListView(
               padding: const EdgeInsets.all(TokensStrip.s4),
               children: [
@@ -119,6 +122,19 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
                   controller: _valor,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(labelText: 'Valor (R\$)'),
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  value: _tipoGatilho,
+                  decoration: const InputDecoration(labelText: 'Gatilho'),
+                  items: const [
+                    DropdownMenuItem(value: 'MANUAL', child: Text('Manual')),
+                    DropdownMenuItem(value: 'CHECKIN', child: Text('Check-in')),
+                    DropdownMenuItem(value: 'TRILHA', child: Text('Trilha')),
+                  ],
+                  onChanged: (v) {
+                    if (v != null) setState(() => _tipoGatilho = v);
+                  },
                 ),
                 const SizedBox(height: 12),
                 FilledButton(

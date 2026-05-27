@@ -16,6 +16,7 @@ import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../planos/data/planos_repository.dart';
@@ -1278,7 +1279,8 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                                       ? SizedBox(
                                         width: 16,
                                         height: 16,
-                                        child: CircularProgressIndicator(
+                                        child: FxLoading(
+                                          size: 16,
                                           strokeWidth: 2,
                                           color: brand,
                                         ),
@@ -1311,7 +1313,8 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                                   ? SizedBox(
                                     width: 16,
                                     height: 16,
-                                    child: CircularProgressIndicator(
+                                    child: FxLoading(
+                                      size: 16,
                                       strokeWidth: 2,
                                       color: brand,
                                     ),

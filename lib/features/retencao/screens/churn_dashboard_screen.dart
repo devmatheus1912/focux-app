@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/retencao_repository.dart';
 
@@ -49,7 +50,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
     return FxShellScaffold(
       appBar: FxShellAppBar(title: 'Saúde da base'),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: FxLoading())
           : RefreshIndicator(
               onRefresh: _load,
               child: _scores.isEmpty

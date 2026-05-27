@@ -28,7 +28,10 @@ const _objetivosRapidos = [
 const _emailPattern = r'^[^@\s]+@[^@\s]+\.[^@\s]+$';
 
 class AddAlunoScreen extends ConsumerStatefulWidget {
-  const AddAlunoScreen({super.key});
+  const AddAlunoScreen({super.key, this.initialEmail, this.initialNome});
+
+  final String? initialEmail;
+  final String? initialNome;
 
   @override
   ConsumerState<AddAlunoScreen> createState() => _AddAlunoScreenState();
@@ -81,6 +84,15 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
     _emailCtrl.addListener(_refreshSubmitState);
     _objetivoCtrl.addListener(_refreshSubmitState);
     _whatsappCtrl.addListener(_refreshSubmitState);
+
+    final email = widget.initialEmail?.trim();
+    if (email != null && email.isNotEmpty) {
+      _emailCtrl.text = email;
+    }
+    final nome = widget.initialNome?.trim();
+    if (nome != null && nome.isNotEmpty) {
+      _nomeCtrl.text = nome;
+    }
   }
 
   void _refreshSubmitState() {

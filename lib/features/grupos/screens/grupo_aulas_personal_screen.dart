@@ -218,7 +218,8 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
 
   void _salvar() {
     if (_titulo.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      FeedbackHelper.showSnackBar(
+        context,
         const SnackBar(content: Text('Título é obrigatório.')),
       );
       return;
