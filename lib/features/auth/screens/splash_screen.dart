@@ -40,17 +40,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     _entryCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1400),
+      duration: const Duration(milliseconds: 900),
     );
 
     _progressCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3200),
+      duration: const Duration(milliseconds: 2200),
     );
 
     _fadeCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 520),
+      duration: const Duration(milliseconds: 340),
     );
 
     _fadeOut = Tween<double>(begin: 1, end: 0).animate(
@@ -62,9 +62,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       if (!mounted) return;
       if (compact) {
         setState(() => _compactSplash = true);
-        _entryCtrl.duration = const Duration(milliseconds: 650);
-        _progressCtrl.duration = const Duration(milliseconds: 1400);
-        _fadeCtrl.duration = const Duration(milliseconds: 360);
+        _entryCtrl.duration = const Duration(milliseconds: 420);
+        _progressCtrl.duration = const Duration(milliseconds: 900);
+        _fadeCtrl.duration = const Duration(milliseconds: 240);
       }
       _entryCtrl.forward();
       _bootstrap(compact: compact);
@@ -95,7 +95,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       curve: Curves.easeOutCubic,
     );
     final minDelay = Future<void>.delayed(
-      Duration(milliseconds: compact ? 550 : 1200),
+      Duration(milliseconds: compact ? 380 : 800),
     );
 
     final target = await bootstrapFuture;
@@ -104,7 +104,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     await _progressCtrl.animateTo(
       1,
-      duration: Duration(milliseconds: compact ? 280 : 480),
+      duration: Duration(milliseconds: compact ? 180 : 300),
       curve: Curves.easeOut,
     );
     if (!mounted) return;
@@ -117,7 +117,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   Future<String> _resolveNavigationTarget({bool quick = false}) async {
     await Future<void>.delayed(
-      Duration(milliseconds: quick ? 180 : 750),
+      Duration(milliseconds: quick ? 100 : 420),
     );
 
     final authStatus = ref.read(authProvider);

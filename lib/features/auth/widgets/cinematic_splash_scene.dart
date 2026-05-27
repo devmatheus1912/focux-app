@@ -45,7 +45,7 @@ class CinematicSplashScene extends StatelessWidget {
                 : reduceMotion
                 ? 1.0
                 : Curves.easeOutCubic.transform(
-                  (entry.value - 0.32).clamp(0.0, 1.0),
+                  ((entry.value - 0.10) / 0.55).clamp(0.0, 1.0),
                 );
         final iconOnlyT = compact ? 1.0 : (1 - lockupT).clamp(0.0, 1.0);
 
@@ -65,7 +65,7 @@ class CinematicSplashScene extends StatelessWidget {
                         child: Transform.translate(
                           offset: Offset(
                             0,
-                            reduceMotion ? 0 : (1 - entryT) * (compact ? 10 : 16),
+                            reduceMotion ? 0 : (1 - entryT) * (compact ? 8 : 12),
                           ),
                           child: _SplashHeroMark(
                             phase: phase,
@@ -83,7 +83,7 @@ class CinematicSplashScene extends StatelessWidget {
                               reduceMotion
                                   ? 1
                                   : Curves.easeOut.transform(
-                                    (entry.value - 0.42).clamp(0.0, 1.0),
+                                    ((entry.value - 0.20) / 0.45).clamp(0.0, 1.0),
                                   ),
                           child: const FocuxBrandTagline(center: true, fontSize: 14),
                         ),
@@ -94,7 +94,7 @@ class CinematicSplashScene extends StatelessWidget {
                             reduceMotion
                                 ? 1
                                 : Curves.easeOut.transform(
-                                  (entry.value - 0.28).clamp(0.0, 1.0),
+                                  ((entry.value - 0.12) / 0.40).clamp(0.0, 1.0),
                                 ),
                         child: _LoadingRail(
                           progress: progress,
