@@ -1,0 +1,144 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../features/auth/providers/auth_provider.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../data/upsell_repository.dart';
+
+final upsellRepositoryProvider = Provider(
+  (ref) => UpsellRepository(ref.read(apiClientProvider)),
+);
+
+class OfertasUpsellScreen extends ConsumerStatefulWidget {
+  const OfertasUpsellScreen({super.key});
+
+  @override
+  ConsumerState<OfertasUpsellScreen> createState() =>
+      _OfertasUpsellScreenState();
+}
+
+class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
+  final _titulo = TextEditingController();
+  final _descricao = TextEditingController();
+  final _valor = TextEditingController();
+  List<OfertaUpsell> _ofertas = [];
+  bool _loading = true;
+  bool _saving = false;
+
+  @override
+  void dispose() {
+    _titulo.dispose();
+    _descricao.dispose();
+    _valor.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final list = await ref.read(upsellRepositoryProvider).listarOfertas();
+      if (mounted) setState(() { _ofertas = list; _loading = false; });
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _criar() async {
+    final valor = double.tryParse(_valor.text.replaceAll(',', '.'));
+    if (_titulo.text.trim().isEmpty || valor == null || valor <= 0) {
+      FeedbackHelper.showSnackBar(
+        context,
+        const SnackBar(content: Text('Preencha título e valor válido')),
+      );
+      return;
+    }
+    setState(() => _saving = true);
+    try {
+      await ref.read(upsellRepositoryProvider).criar(
+        titulo: _titulo.text.trim(),
+        descricao: _descricao.text.trim(),
+        valor: valor,
+      );
+      _titulo.clear();
+      _descricao.clear();
+      _valor.clear();
+      await _load();
+      if (mounted) {
+        FeedbackHelper.showSnackBar(
+          context,
+          const SnackBar(content: Text('Oferta criada')),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        FeedbackHelper.showSnackBar(
+          context,
+          const SnackBar(content: Text('Erro ao criar oferta')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FxShellScaffold(
+      appBar: FxShellAppBar(title: 'Ofertas para alunos'),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              padding: const EdgeInsets.all(TokensStrip.s4),
+              children: [
+                Text(
+                  'Ofertas disparam automaticamente quando o aluno conclui uma trilha.',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _titulo,
+                  decoration: const InputDecoration(labelText: 'Título'),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _descricao,
+                  decoration: const InputDecoration(labelText: 'Descrição'),
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _valor,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Valor (R\$)'),
+                ),
+                const SizedBox(height: 12),
+                FilledButton(
+                  onPressed: _saving ? null : _criar,
+                  child: Text(_saving ? 'Salvando…' : 'Criar oferta'),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Ativas (${_ofertas.length})',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 8),
+                ..._ofertas.map(
+                  (o) => ListTile(
+                    title: Text(o.titulo),
+                    subtitle: Text('R\$ ${o.valor.toStringAsFixed(2)} · ${o.tipoGatilho}'),
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+}

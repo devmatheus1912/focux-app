@@ -20,7 +20,9 @@ import '../widgets/password_strength_meter.dart';
 import '../../../core/theme/tokens_strip.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
-  const RegisterScreen({super.key});
+  final String? referralCodigo;
+
+  const RegisterScreen({super.key, this.referralCodigo});
 
   @override
   ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
@@ -73,6 +75,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             _nameController.text.trim(),
             _emailController.text.trim(),
             _passwordController.text,
+            referralCodigo: widget.referralCodigo,
           );
 
       if (!mounted) {

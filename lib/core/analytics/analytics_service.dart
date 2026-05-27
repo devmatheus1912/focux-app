@@ -88,6 +88,12 @@ class ProductEvents {
   static const iaQuotaExhausted = 'ia_quota_exhausted';
   static const iaCopilotFailure = 'ia_copilot_failure';
 
+  static const referralLinkShared = 'referral_link_shared';
+  static const activationCtaTapped = 'activation_cta_tapped';
+  static const mensalidadeCreated = 'mensalidade_created';
+  static const paywallDismissed = 'paywall_dismissed';
+  static const trialBannerTapped = 'trial_banner_tapped';
+
   static const featureGateBlocked = 'feature_gate_blocked';
   static const planGateStaleUsed = 'plan_gate_stale_used';
   static const planGateRefreshFailed = 'plan_gate_refresh_failed';

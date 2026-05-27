@@ -1,5 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -50,7 +52,25 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
       if (mounted) safePopOrGo(context, '/leads');
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showError(context, 'Erro ao salvar lead');
+        if (e is DioException && e.response?.statusCode == 403) {
+          final msg = e.response?.data?.toString() ?? '';
+          FeedbackHelper.showSnackBar(
+            context,
+            SnackBar(
+              content: Text(
+                msg.contains('Limite')
+                    ? 'Limite de 5 leads no plano Free. Assine Premium para CRM ilimitado.'
+                    : 'Recurso disponível no Premium.',
+              ),
+              action: SnackBarAction(
+                label: 'Ver planos',
+                onPressed: () => context.push('/assinatura', extra: 'Premium'),
+              ),
+            ),
+          );
+        } else {
+          FeedbackHelper.showError(context, 'Erro ao salvar lead');
+        }
       }
     }
     if (mounted) setState(() => _saving = false);

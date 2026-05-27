@@ -79,7 +79,9 @@ import '../../features/depoimentos/screens/depoimento_aluno_screen.dart';
 import '../../features/depoimentos/screens/depoimentos_personal_screen.dart';
 import '../../features/galeria/screens/galeria_screen.dart';
 import '../../features/planos/screens/enterprise_promo_screen.dart';
-import '../../features/growth/screens/migracao_magica_screen.dart';
+import '../../features/referral/screens/referral_screen.dart';
+import '../../features/retencao/screens/churn_dashboard_screen.dart';
+import '../../features/monetizacao/screens/ofertas_upsell_screen.dart';
 import '../../features/gamificacao/screens/gamificacao_screen.dart';
 import '../../features/anamnese/screens/anamnese_screen.dart';
 import '../../features/alimentar/screens/alimentar_screen.dart';
@@ -124,7 +126,9 @@ class AppRouter {
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/register',
-        builder: (context, state) => const RegisterScreen(),
+        builder: (context, state) => RegisterScreen(
+          referralCodigo: state.uri.queryParameters['ref'],
+        ),
       ),
       GoRoute(
         path: '/register/aluno',
@@ -763,6 +767,18 @@ class AppRouter {
                       state.uri.queryParameters['plano'] ??
                       state.uri.queryParameters['plan'],
                 ),
+          ),
+          GoRoute(
+            path: '/referral',
+            builder: (context, state) => const ReferralScreen(),
+          ),
+          GoRoute(
+            path: '/retencao',
+            builder: (context, state) => const ChurnDashboardScreen(),
+          ),
+          GoRoute(
+            path: '/ofertas-upsell',
+            builder: (context, state) => const OfertasUpsellScreen(),
           ),
           GoRoute(
             path: '/migracao-magica',

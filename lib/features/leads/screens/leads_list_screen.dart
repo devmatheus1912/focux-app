@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -7,6 +8,8 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
+import '../../planos/providers/plano_features_provider.dart';
+import '../../subscription/models/subscription_plan.dart';
 import 'lead_detail_screen.dart';
 import 'add_lead_screen.dart';
 import 'leads_kanban_screen.dart';
@@ -62,6 +65,10 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
       );
       _load();
     }
+
+    final plano = ref.watch(planoFeaturesProvider).valueOrNull;
+    final showLeadsLimitBanner =
+        plano?.plano == SubscriptionPlan.FREE && _leads.length >= 4;
 
     return FxShellScaffold(
       useMesh: true,
@@ -121,7 +128,43 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
           ),
         ),
       ),
-      body:
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (showLeadsLimitBanner)
+            Material(
+              color: primary.withValues(alpha: 0.1),
+              child: InkWell(
+                onTap: () => context.push('/assinatura', extra: 'Premium'),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _leads.length >= 5
+                              ? 'Limite de 5 leads atingido no Free.'
+                              : '${_leads.length}/5 leads no plano Free.',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        'Premium →',
+                        style: TextStyle(
+                          color: primary,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          Expanded(
+            child:
           _loading
               ? Center(child: FxLoading(color: primary))
               : _leads.isEmpty
@@ -188,6 +231,9 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                   ],
                 ),
               ),
+          ),
+        ],
+      ),
     );
   }
 }

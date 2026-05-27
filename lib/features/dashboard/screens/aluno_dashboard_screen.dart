@@ -19,6 +19,7 @@ import '../data/aluno_autonomy_plan.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import '../../health/widgets/aluno_recovery_card.dart';
+import '../../monetizacao/widgets/aluno_upsell_carousel.dart';
 import 'progresso_semanal_widget.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -102,6 +103,8 @@ class AlunoDashboardScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             AlunoRecoveryCard(isDark: isDark),
+            const SizedBox(height: 12),
+            const AlunoUpsellCarousel(),
             const SizedBox(height: 12),
             brandAsync.when(
               data:

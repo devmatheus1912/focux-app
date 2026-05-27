@@ -20,6 +20,7 @@ import '../../../features/planos/data/planos_repository.dart';
 import '../../../features/planos/providers/plano_features_provider.dart';
 import '../../../features/subscription/utils/plano_ia_limits.dart';
 import '../../../features/growth/utils/migracao_foto_limits.dart';
+import '../../../features/subscription/models/subscription_plan.dart';
 import '../../../features/subscription/services/iap_service.dart';
 import '../../../features/subscription/store_subscription_policy.dart';
 import '../../../features/subscription/subscription_products.dart';
@@ -1019,7 +1020,7 @@ String _formatPrice(
       period == SubscriptionBillingPeriod.yearly ? '/ano' : '/mês';
   if (productDetails != null) return '${productDetails.price}$suffix';
   if (period == SubscriptionBillingPeriod.yearly) {
-    final annual = SubscriptionProducts.referenceAnnualPrice(plano.precoMensal);
+    final annual = plano.annualPriceOrComputed();
     return 'R\$ ${annual.toStringAsFixed(2)}$suffix';
   }
   return 'R\$ ${plano.precoMensal.toStringAsFixed(2)}$suffix';

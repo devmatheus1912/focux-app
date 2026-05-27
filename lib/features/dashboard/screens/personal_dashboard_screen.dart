@@ -27,6 +27,8 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../subscription/widgets/plan_usage_banner.dart';
+import '../../subscription/widgets/trial_countdown_banner.dart';
+import '../../subscription/widgets/dashboard_activation_cta.dart';
 
 class PersonalDashboardScreen extends ConsumerStatefulWidget {
   const PersonalDashboardScreen({super.key});
@@ -365,7 +367,17 @@ class _PersonalDashboardScreenState
                 child: CustomScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   slivers: [
+                    const SliverToBoxAdapter(child: TrialCountdownBanner()),
                     const SliverToBoxAdapter(child: PlanUsageBanner()),
+                    SliverToBoxAdapter(
+                      child: DashboardActivationCta(
+                        alunosAtivos: alunosAtivos,
+                        temTreinos: checkinsHoje > 0 || alunosAtivos == 0,
+                        temFinanceiro: _finData != null &&
+                            (_finData!.receitaMes > 0 ||
+                                _finData!.vencimentosProximos.isNotEmpty),
+                      ),
+                    ),
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(
@@ -468,6 +480,17 @@ class _PersonalDashboardScreenState
                         ),
                       ),
                     ),
+
+                    if (riscoAlto > 0)
+                      SliverToBoxAdapter(
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () => context.push('/retencao'),
+                            child: const Text('Ver saúde da base (churn)'),
+                          ),
+                        ),
+                      ),
 
                     // PRECISA DE ATENÇÃO — rostos + CTA (só quando houver sinal)
                     if (attentionVisible) ...[
@@ -1800,6 +1823,18 @@ class _CollapsibleToolsSectionState extends State<_CollapsibleToolsSection> {
                     onTap: () => context.push('/leads'),
                   ),
                   _ShortcutBtn(
+                    icon: 'trend',
+                    label: 'Indique',
+                    isDark: widget.isDark,
+                    onTap: () => context.push('/referral'),
+                  ),
+                  _ShortcutBtn(
+                    icon: 'spark',
+                    label: 'Ofertas',
+                    isDark: widget.isDark,
+                    onTap: () => context.push('/ofertas-upsell'),
+                  ),
+                  _ShortcutBtn(
                     icon: 'spark',
                     label: 'Qualidade',
                     isDark: widget.isDark,
@@ -1810,12 +1845,6 @@ class _CollapsibleToolsSectionState extends State<_CollapsibleToolsSection> {
                     label: 'Broadcasts',
                     isDark: widget.isDark,
                     onTap: () => context.push('/broadcasts'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'chat',
-                    label: 'Suporte',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/suporte'),
                   ),
                 ],
               ),

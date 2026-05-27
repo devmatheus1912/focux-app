@@ -167,11 +167,18 @@ class AuthRepository {
   Future<String> registerPersonal(
     String nome,
     String email,
-    String password,
-  ) async {
+    String password, {
+    String? referralCodigo,
+  }) async {
     final response = await _dio.post(
       '/api/auth/register/personal',
-      data: {'nome': nome, 'email': email, 'senha': password},
+      data: {
+        'nome': nome,
+        'email': email,
+        'senha': password,
+        if (referralCodigo != null && referralCodigo.isNotEmpty)
+          'referralCodigo': referralCodigo,
+      },
     );
     final token = response.data['token'] as String;
     final refreshToken = response.data['refreshToken'] as String?;

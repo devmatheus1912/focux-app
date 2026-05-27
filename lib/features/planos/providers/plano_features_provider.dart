@@ -6,9 +6,11 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/planos_repository.dart';
 
-final _planosRepositoryProvider = Provider<PlanosRepository>(
+final planosRepositoryProvider = Provider<PlanosRepository>(
   (ref) => PlanosRepository(ref.read(apiClientProvider)),
 );
+
+final _planosRepositoryProvider = planosRepositoryProvider;
 
 /// Server-side feature flags do plano atual.
 ///

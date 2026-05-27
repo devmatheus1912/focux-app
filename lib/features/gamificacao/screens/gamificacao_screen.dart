@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
@@ -312,114 +313,13 @@ class GamificacaoScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Seu amigo ganha 20% de desconto no primeiro mês!',
+                      'Indique outro personal. Quando ele assinar, você ganha 30 dias extras no plano.',
                       style: TextStyle(color: mute, fontSize: 13, height: 1.5),
                     ),
                     const SizedBox(height: 14),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color:
-                            dark ? brand.withValues(alpha: 0.14) : brandSofter,
-                        borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                        border: Border.all(
-                          color: brand.withValues(alpha: dark ? 0.26 : 0.12),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'FOCUX20',
-                            style: GoogleFonts.jetBrainsMono(
-                              color: brand,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 16 * 0.12,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Clipboard.setData(
-                                const ClipboardData(text: 'FOCUX20'),
-                              );
-                              FeedbackHelper.showSnackBar(
-                                context,
-                                const SnackBar(
-                                  content: Text('Código copiado!'),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 5,
-                              ),
-                              decoration: BoxDecoration(
-                                color: brand,
-                                borderRadius:
-                                    BorderRadius.circular(TokensStrip.rInput),
-                              ),
-                              child: const Text(
-                                'Copiar',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    GestureDetector(
-                      onTap: () {
-                        Clipboard.setData(
-                          const ClipboardData(
-                            text:
-                                'Use meu código FOCUX20 e ganhe 20% de desconto no primeiro mês do Focux Personal! https://focux.app',
-                          ),
-                        );
-                        FeedbackHelper.showSnackBar(
-                          context,
-                          const SnackBar(
-                            content: Text(
-                              'Convite copiado! Cole em qualquer app pra compartilhar.',
-                            ),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color:
-                              dark
-                                  ? const Color(0x0FFFFFFF)
-                                  : TokensStrip.borderDefault,
-                          borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                          border: Border.all(color: line),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.share_outlined, color: mute, size: 16),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Compartilhar',
-                              style: TextStyle(
-                                color: ink,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    FilledButton(
+                      onPressed: () => context.push('/referral'),
+                      child: const Text('Ver meu código de indicação'),
                     ),
                   ],
                 ),
