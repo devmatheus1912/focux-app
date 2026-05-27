@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/focux_official_logo.dart';
-import '../../../core/widgets/focux_brand_tagline.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../auth/widgets/auth_shell.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FOCUX PERSONAL — FxIntroSlides (Onboarding) — Premium V2
@@ -23,6 +25,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     with TickerProviderStateMixin {
   final _page = PageController();
   int _current = 0;
+  OnboardingPersona _persona = OnboardingPersona.personal;
 
   late AnimationController _entryCtrl;
   late Animation<double> _iconScale;
@@ -31,120 +34,78 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   late Animation<double> _metricsSlide;
   late Animation<double> _fade;
 
-  static const _pages = [
-    _OBData(
-      title: 'Seus alunos, sua ',
-      titleHighlight: 'gestão.',
-      subtitle:
-          'Cadastre alunos, monte treinos e acompanhe a evolução de cada um em tempo real.',
-      orbitIcons: [
-        Icons.people_alt_rounded,
-        Icons.show_chart_rounded,
-        Icons.calendar_month_rounded,
-      ],
-      metrics: [
-        _MetricChip(
-          label: 'Alunos ativos',
-          value: '∞',
-          icon: Icons.people_alt_rounded,
-        ),
-        _MetricChip(
-          label: 'Treinos/mês',
-          value: '500+',
-          icon: Icons.calendar_today_rounded,
-        ),
-        _MetricChip(
-          label: 'Evolução',
-          value: 'Real-time',
-          icon: Icons.trending_up_rounded,
-        ),
-      ],
-      features: [
-        'Fichas de treino ilimitadas',
-        'Acompanhamento de evolução corporal',
-        'Agenda integrada com check-in',
-      ],
-    ),
-    _OBData(
-      title: 'IA que entende ',
-      titleHighlight: 'treino.',
-      subtitle:
-          'Gere treinos e dietas personalizados em segundos. A IA aprende com o histórico de cada aluno.',
-      orbitIcons: [
-        Icons.psychology_rounded,
-        Icons.auto_graph_rounded,
-        Icons.restaurant_rounded,
-      ],
-      metrics: [
-        _MetricChip(label: 'Geração', value: '<10s', icon: Icons.bolt_rounded),
-        _MetricChip(
-          label: 'Personalização',
-          value: '100%',
-          icon: Icons.tune_rounded,
-        ),
-        _MetricChip(
-          label: 'Modelos IA',
-          value: '3+',
-          icon: Icons.psychology_rounded,
-        ),
-      ],
-      features: [
-        'Progressão automática de cargas',
-        'Substituição inteligente de exercícios',
-        'Copiloto com sugestões em tempo real',
-      ],
-    ),
-    _OBData(
-      title: 'Financeiro ',
-      titleHighlight: 'sem complicação.',
-      subtitle:
-          'Cobranças, inadimplências e relatórios automatizados. Você foca no que importa: resultados.',
-      orbitIcons: [
-        Icons.trending_up_rounded,
-        Icons.pie_chart_rounded,
-        Icons.account_balance_wallet_rounded,
-      ],
-      metrics: [
-        _MetricChip(
-          label: 'Cobranças',
-          value: 'Auto',
-          icon: Icons.receipt_long_rounded,
-        ),
-        _MetricChip(
-          label: 'Inadimplentes',
-          value: 'Alertas',
-          icon: Icons.notifications_active_rounded,
-        ),
-        _MetricChip(
-          label: 'Relatórios',
-          value: 'PDF',
-          icon: Icons.description_rounded,
-        ),
-      ],
-      features: [
-        'Controle de mensalidades por aluno',
-        'Alertas automáticos de inadimplência',
-        'Relatório financeiro exportável',
-      ],
-    ),
+  static const _pageIconsPersonal = [
+    [
+      Icons.dashboard_customize_rounded,
+      Icons.fitness_center_rounded,
+      Icons.insights_rounded,
+    ],
+    [
+      Icons.psychology_rounded,
+      Icons.bolt_rounded,
+      Icons.today_rounded,
+    ],
+    [
+      Icons.pix_rounded,
+      Icons.notifications_active_rounded,
+      Icons.flag_rounded,
+    ],
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _setupEntryAnimation();
-    _entryCtrl.forward();
+  static const _pageIconsAluno = [
+    [
+      Icons.fitness_center_rounded,
+      Icons.emoji_events_outlined,
+      Icons.insights_rounded,
+    ],
+    [
+      Icons.smart_toy_outlined,
+      Icons.trending_up_rounded,
+      Icons.videocam_outlined,
+    ],
+    [
+      Icons.receipt_long_rounded,
+      Icons.pix_rounded,
+      Icons.apps_rounded,
+    ],
+  ];
+
+  List<_OBData> _pagesFor(OnboardingPersona persona) {
+    final slides = FocuxBrandCopy.slidesFor(persona);
+    final icons =
+        persona == OnboardingPersona.aluno
+            ? _pageIconsAluno
+            : _pageIconsPersonal;
+    return List.generate(slides.length, (i) {
+      final slide = slides[i];
+      return _OBData(
+        title: slide.title,
+        titleHighlight: slide.titleHighlight,
+        subtitle: slide.subtitle,
+        metrics: List.generate(
+          slide.metrics.length,
+          (j) => _MetricChip(
+            label: slide.metrics[j].label,
+            value: slide.metrics[j].value,
+            icon: icons[i][j],
+          ),
+        ),
+        features: slide.features,
+      );
+    });
   }
 
-  void _setupEntryAnimation() {
+  void _setupEntryAnimation({required bool reduceMotion}) {
+    final iconCurve =
+        reduceMotion ? Curves.easeOutCubic : Curves.elasticOut;
     _entryCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: Duration(milliseconds: reduceMotion ? 500 : 900),
     );
-    _iconScale = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _iconScale = Tween<double>(begin: reduceMotion ? 0.94 : 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _entryCtrl,
-        curve: const Interval(0.0, 0.5, curve: Curves.elasticOut),
+        curve: Interval(0.0, 0.5, curve: iconCurve),
       ),
     );
     _titleSlide = Tween<double>(begin: 30, end: 0).animate(
@@ -174,6 +135,15 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 
   @override
+  void initState() {
+    super.initState();
+    _setupEntryAnimation(reduceMotion: false);
+    _entryCtrl.forward();
+  }
+
+  List<_OBData> get _pages => _pagesFor(_persona);
+
+  @override
   void dispose() {
     _page.dispose();
     _entryCtrl.dispose();
@@ -187,9 +157,32 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     await prefs.remove('onboarding_done');
   }
 
+  Future<void> _skip() async {
+    await _markDone();
+    if (mounted) _goLogin();
+  }
+
   Future<void> _finish() async {
     await _markDone();
-    if (mounted) context.go('/login');
+    if (!mounted) return;
+    if (_persona == OnboardingPersona.aluno) {
+      context.go('/register/aluno');
+    } else {
+      context.go('/register');
+    }
+  }
+
+  void _goLogin() => context.go('/login');
+
+  void _setPersona(OnboardingPersona persona) {
+    if (_persona == persona) return;
+    HapticFeedback.selectionClick();
+    setState(() {
+      _persona = persona;
+      _current = 0;
+    });
+    _page.jumpToPage(0);
+    _entryCtrl.forward(from: 0);
   }
 
   void _next() {
@@ -205,6 +198,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 
   void _onPageChanged(int i) {
+    HapticFeedback.selectionClick();
     setState(() => _current = i);
     _entryCtrl.forward(from: 0);
   }
@@ -212,7 +206,13 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    return AnnotatedRegion<SystemUiOverlayStyle>(
+    final pages = _pages;
+    final isLast = _current >= pages.length - 1;
+    final textScaler = clampedTextScaler(context);
+
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light,
@@ -223,94 +223,72 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           fit: StackFit.expand,
           children: [
             // ── Background ──
-            Container(
-              decoration: const BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(0, -0.18),
-                  radius: 1.1,
-                  colors: [
-                    Color(0xFF0A1F24),
-                    Color(0xFF050B0D),
-                    Color(0xFF050B0D),
-                  ],
-                  stops: [0.0, 0.55, 1.0],
-                ),
-              ),
-            ),
+            Container(color: TokensStrip.cinematicBg),
 
             // Grid pattern
             CustomPaint(painter: _AuthGridPainter(), size: Size.infinite),
-
-            // Soft hero glow — behind logo only
-            Positioned(
-              top: 108,
-              left: 0,
-              right: 0,
-              child: IgnorePointer(
-                child: Center(
-                  child: Container(
-                    width: 220,
-                    height: 220,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [
-                          primary.withValues(alpha: 0.14),
-                          primary.withValues(alpha: 0.04),
-                          Colors.transparent,
-                        ],
-                        stops: const [0.0, 0.45, 1.0],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
 
             // ── Content ──
             SafeArea(
               child: Column(
                 children: [
-                  // Skip Header
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 8,
-                    ),
+                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        GestureDetector(
-                          onTap: _finish,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.04),
+                        Expanded(
+                          child: AuthRoleToggle(
+                            isAluno: _persona == OnboardingPersona.aluno,
+                            onPersonalTap:
+                                () => _setPersona(OnboardingPersona.personal),
+                            onAlunoTap:
+                                () => _setPersona(OnboardingPersona.aluno),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Semantics(
+                          button: true,
+                          label: FocuxBrandCopy.onboardingSkip,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: _skip,
                               borderRadius: BorderRadius.circular(99),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.12),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Pular',
-                                  style: AppTypography.inter(
-                                    color: Colors.white.withValues(alpha: 0.62),
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 10,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.04),
+                                  borderRadius: BorderRadius.circular(99),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.12),
                                   ),
                                 ),
-                                Icon(
-                                  Icons.chevron_right_rounded,
-                                  size: 16,
-                                  color: Colors.white.withValues(alpha: 0.45),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      FocuxBrandCopy.onboardingSkip,
+                                      style: AppTypography.inter(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.70,
+                                        ),
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.chevron_right_rounded,
+                                      size: 16,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.55,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
                           ),
                         ),
@@ -318,42 +296,64 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     ),
                   ),
 
-                  // Pages
                   Expanded(
-                    child: PageView.builder(
-                      controller: _page,
-                      itemCount: _pages.length,
-                      onPageChanged: _onPageChanged,
-                      itemBuilder:
-                          (_, i) => _OBPageWidget(
-                            pageIndex: i,
-                            data: _pages[i],
-                            iconScale: _iconScale,
-                            titleSlide: _titleSlide,
-                            subtitleSlide: _subtitleSlide,
-                            metricsSlide: _metricsSlide,
-                            fade: _fade,
-                          ),
+                    child: Semantics(
+                      label: 'Slide ${_current + 1} de ${pages.length}',
+                      child: PageView.builder(
+                        controller: _page,
+                        itemCount: pages.length,
+                        onPageChanged: _onPageChanged,
+                        itemBuilder:
+                            (_, i) => _OBPageWidget(
+                              pageIndex: i,
+                              persona: _persona,
+                              data: pages[i],
+                              iconScale: _iconScale,
+                              titleSlide: _titleSlide,
+                              subtitleSlide: _subtitleSlide,
+                              metricsSlide: _metricsSlide,
+                              fade: _fade,
+                            ),
+                      ),
                     ),
+                  ),
+
+                  // Social proof (fixo — evita overflow nos slides)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+                    child: _OnboardingSocialProof(primary: primary),
                   ),
 
                   // Dots
                   Padding(
-                    padding: const EdgeInsets.only(top: 8, bottom: 12),
+                    padding: const EdgeInsets.only(top: 4, bottom: 10),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(
-                        _pages.length,
-                        (i) => GestureDetector(
-                          onTap:
-                              () => _page.animateToPage(
-                                i,
-                                duration: const Duration(milliseconds: 400),
-                                curve: Curves.easeOutCubic,
+                        pages.length,
+                        (i) => Semantics(
+                          button: true,
+                          selected: _current == i,
+                          label: 'Ir para slide ${i + 1}',
+                          child: SizedBox(
+                            width: 44,
+                            height: 44,
+                            child: Center(
+                              child: GestureDetector(
+                                onTap:
+                                    () => _page.animateToPage(
+                                      i,
+                                      duration: const Duration(
+                                        milliseconds: 400,
+                                      ),
+                                      curve: Curves.easeOutCubic,
+                                    ),
+                                child: _SlideDot(
+                                  active: _current == i,
+                                  primary: primary,
+                                ),
                               ),
-                          child: _SlideDot(
-                            active: _current == i,
-                            primary: primary,
+                            ),
                           ),
                         ),
                       ),
@@ -367,30 +367,49 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       children: [
                         FxLiquidPrimaryButton(
                           label:
-                              _current < 2
-                                  ? 'Próximo →'
-                                  : 'Começar agora',
+                              isLast
+                                  ? FocuxBrandCopy.onboardingCtaFinish
+                                  : FocuxBrandCopy.onboardingCtaNext,
                           onPressed: _next,
                         ),
+                        if (isLast) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            FocuxBrandCopy.onboardingCtaFinishHint,
+                            textAlign: TextAlign.center,
+                            style: AppTypography.inter(
+                              color: Colors.white.withValues(alpha: 0.70),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: TokensStrip.s2),
-                        GestureDetector(
-                          onTap: () => context.go('/login'),
-                          child: RichText(
-                            text: TextSpan(
-                              style: const TextStyle(
-                                color: Colors.white54,
-                                fontSize: 13,
-                              ),
-                              children: [
-                                const TextSpan(text: 'Já tenho uma conta · '),
-                                TextSpan(
-                                  text: 'Entrar',
-                                  style: TextStyle(
-                                    color: primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                        Semantics(
+                          button: true,
+                          label: FocuxBrandCopy.onboardingLoginAction,
+                          child: GestureDetector(
+                            onTap: _goLogin,
+                            child: RichText(
+                              textAlign: TextAlign.center,
+                              text: TextSpan(
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.70),
+                                  fontSize: 13,
                                 ),
-                              ],
+                                children: [
+                                  TextSpan(
+                                    text: FocuxBrandCopy.onboardingLoginLead,
+                                  ),
+                                  TextSpan(
+                                    text: FocuxBrandCopy.onboardingLoginAction,
+                                    style: TextStyle(
+                                      color: primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -404,6 +423,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -428,14 +448,12 @@ class _OBData {
   final String subtitle;
   final List<_MetricChip> metrics;
   final List<String> features;
-  final List<IconData> orbitIcons;
   const _OBData({
     required this.title,
     required this.titleHighlight,
     required this.subtitle,
     required this.metrics,
     required this.features,
-    required this.orbitIcons,
   });
 }
 
@@ -467,6 +485,7 @@ class _SlideDot extends StatelessWidget {
 
 class _OBPageWidget extends StatelessWidget {
   final int pageIndex;
+  final OnboardingPersona persona;
   final _OBData data;
   final Animation<double> iconScale;
   final Animation<double> titleSlide;
@@ -476,6 +495,7 @@ class _OBPageWidget extends StatelessWidget {
 
   const _OBPageWidget({
     required this.pageIndex,
+    required this.persona,
     required this.data,
     required this.iconScale,
     required this.titleSlide,
@@ -484,65 +504,47 @@ class _OBPageWidget extends StatelessWidget {
     required this.fade,
   });
 
-  Widget _buildHero(Color primary) {
-    return SizedBox(
-      width: 168,
-      child: Stack(
-        alignment: Alignment.center,
-        clipBehavior: Clip.none,
-        children: [
-          IgnorePointer(
-            child: Container(
-              width: 168,
-              height: 128,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    primary.withValues(alpha: 0.16),
-                    primary.withValues(alpha: 0.05),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 0.55, 1.0],
-                ),
-              ),
-            ),
-          ),
-          const FocuxOfficialLogo.full(width: 168),
-        ],
-      ),
-    );
+  Widget _buildHero() {
+    if (pageIndex == 0) {
+      return FocuxOfficialLogo.full(width: persona == OnboardingPersona.aluno ? 142 : 148);
+    }
+    return FocuxOfficialLogo.icon(size: 88);
   }
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final titleSize = pageIndex == 0 ? 27.0 : 28.0;
 
     return AnimatedBuilder(
       animation: fade,
       builder:
-          (_, __) => Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20, top: 4),
+          (_, __) => SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(20, 2, 20, 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Transform.scale(
                   scale: iconScale.value,
-                  child: _buildHero(primary),
+                  child: _buildHero(),
                 ),
 
                 if (pageIndex == 0) ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   Transform.translate(
                     offset: Offset(0, subtitleSlide.value * 0.5),
                     child: Opacity(
                       opacity: fade.value.clamp(0.0, 1.0),
-                      child: const FocuxBrandTagline(fontSize: 13),
+                      child: _OnboardingHook(
+                        primary: primary,
+                        aluno: persona == OnboardingPersona.aluno,
+                      ),
                     ),
                   ),
                 ],
 
-                SizedBox(height: pageIndex == 0 ? 16 : 18),
+                SizedBox(height: pageIndex == 0 ? 14 : 16),
 
                 Transform.translate(
                   offset: Offset(0, titleSlide.value),
@@ -553,10 +555,10 @@ class _OBPageWidget extends StatelessWidget {
                       text: TextSpan(
                         style: AppTypography.inter(
                           color: Colors.white,
-                          fontSize: 30,
+                          fontSize: titleSize,
                           fontWeight: FontWeight.w700,
                           letterSpacing: -0.7,
-                          height: 1.12,
+                          height: 1.14,
                         ),
                         children: [
                           TextSpan(text: data.title),
@@ -570,7 +572,7 @@ class _OBPageWidget extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
 
                 Transform.translate(
                   offset: Offset(0, subtitleSlide.value),
@@ -582,17 +584,17 @@ class _OBPageWidget extends StatelessWidget {
                         data.subtitle,
                         textAlign: TextAlign.center,
                         style: AppTypography.inter(
-                          color: Colors.white.withValues(alpha: 0.78),
+                          color: Colors.white.withValues(alpha: 0.86),
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
-                          height: 1.55,
+                          height: 1.48,
                         ),
                       ),
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 22),
+                const SizedBox(height: 18),
 
                 Transform.translate(
                   offset: Offset(0, metricsSlide.value),
@@ -613,7 +615,7 @@ class _OBPageWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 12),
 
                 Transform.translate(
                   offset: Offset(0, metricsSlide.value * 0.7),
@@ -622,13 +624,13 @@ class _OBPageWidget extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14,
-                        vertical: 14,
+                        vertical: 12,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.04),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.08),
+                          color: Colors.white.withValues(alpha: 0.10),
                         ),
                       ),
                       child: Column(
@@ -637,9 +639,10 @@ class _OBPageWidget extends StatelessWidget {
                               final isLast = e.key == data.features.length - 1;
                               return Padding(
                                 padding: EdgeInsets.only(
-                                  bottom: isLast ? 0 : 11,
+                                  bottom: isLast ? 0 : 9,
                                 ),
                                 child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Container(
                                       width: 22,
@@ -654,17 +657,17 @@ class _OBPageWidget extends StatelessWidget {
                                         color: primary,
                                       ),
                                     ),
-                                    const SizedBox(width: 12),
+                                    const SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
                                         e.value,
                                         style: AppTypography.inter(
                                           color: Colors.white.withValues(
-                                            alpha: 0.72,
+                                            alpha: 0.82,
                                           ),
                                           fontSize: 13,
                                           fontWeight: FontWeight.w500,
-                                          height: 1.3,
+                                          height: 1.38,
                                         ),
                                       ),
                                     ),
@@ -676,52 +679,99 @@ class _OBPageWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                const Spacer(),
-
-                Transform.translate(
-                  offset: Offset(0, metricsSlide.value * 0.5),
-                  child: Opacity(
-                    opacity: (fade.value * 0.95).clamp(0.0, 1.0),
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 6),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 9,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.04),
-                        borderRadius: BorderRadius.circular(99),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.08),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.verified_rounded,
-                            size: 14,
-                            color: primary,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Usado por +200 personal trainers',
-                            style: AppTypography.inter(
-                              color: Colors.white.withValues(alpha: 0.48),
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
+    );
+  }
+}
+
+class _OnboardingSocialProof extends StatelessWidget {
+  const _OnboardingSocialProof({required this.primary});
+
+  final Color primary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: FocuxBrandCopy.onboardingSocialProof,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(99),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.verified_rounded, size: 14, color: primary),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                FocuxBrandCopy.onboardingSocialProof,
+                textAlign: TextAlign.center,
+                style: AppTypography.inter(
+                  color: Colors.white.withValues(alpha: 0.62),
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.15,
+                  height: 1.25,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _OnboardingHook extends StatelessWidget {
+  const _OnboardingHook({required this.primary, this.aluno = false});
+
+  final Color primary;
+  final bool aluno;
+
+  @override
+  Widget build(BuildContext context) {
+    final hook =
+        aluno ? FocuxBrandCopy.onboardingHookAluno : FocuxBrandCopy.onboardingHook;
+    final highlight =
+        aluno
+            ? FocuxBrandCopy.onboardingHookAlunoHighlight
+            : FocuxBrandCopy.onboardingHookHighlight;
+    final prefix = hook.substring(0, hook.length - highlight.length);
+
+    return Semantics(
+      label: hook,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 320),
+        child: RichText(
+          textAlign: TextAlign.center,
+          text: TextSpan(
+            style: AppTypography.inter(
+              color: Colors.white.withValues(alpha: 0.88),
+              fontSize: 13.5,
+              fontWeight: FontWeight.w500,
+              height: 1.5,
+              letterSpacing: 0.06,
+            ),
+            children: [
+              TextSpan(text: prefix),
+              TextSpan(
+                text: highlight,
+                style: TextStyle(
+                  color: primary.withValues(alpha: 0.95),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -738,8 +788,8 @@ class _MetricChipWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 3),
+      padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 4),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(14),
@@ -764,8 +814,8 @@ class _MetricChipWidget extends StatelessWidget {
             textAlign: TextAlign.center,
             maxLines: 2,
             style: AppTypography.inter(
-              color: Colors.white.withValues(alpha: 0.42),
-              fontSize: 10,
+              color: Colors.white.withValues(alpha: 0.70),
+              fontSize: 10.5,
               fontWeight: FontWeight.w500,
               height: 1.2,
             ),

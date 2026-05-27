@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/design_tokens.dart';
-import 'auth_shell.dart';
+import '../../../core/utils/motion_preferences.dart';
+import '../../../core/widgets/focux_brand_tagline.dart';
 import '../../../core/widgets/focux_official_logo.dart';
 
-/// Cinematic splash foreground — same mesh as login, glass F mark,
-/// subtle motion, divider flare, loading rail.
+/// Splash Flutter — logo, hook unificado e barra de progresso limpa.
 class CinematicSplashScene extends StatelessWidget {
   const CinematicSplashScene({
     super.key,
@@ -27,27 +27,22 @@ class CinematicSplashScene extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final size = MediaQuery.sizeOf(context);
+    final reduceMotion = reduceMotionOf(context);
 
     return AnimatedBuilder(
       animation: Listenable.merge([ambient, entry, fadeOut]),
       builder: (context, _) {
         final phase = ambient.value;
-        final entryT = Curves.easeOutCubic.transform(entry.value.clamp(0.0, 1.0));
+        final entryT =
+            reduceMotion
+                ? 1.0
+                : Curves.easeOutCubic.transform(entry.value.clamp(0.0, 1.0));
 
         return Opacity(
           opacity: fadeOut.value.clamp(0.0, 1.0),
           child: Stack(
             fit: StackFit.expand,
             children: [
-              CustomPaint(
-                painter: _RadialTargetsPainter(
-                  centerY: size.height * 0.34,
-                  rotation: phase * math.pi * 2,
-                  pulse: 0.5 + math.sin(phase * math.pi * 2) * 0.5,
-                  primary: primary,
-                ),
-                size: Size.infinite,
-              ),
               SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(24, 16, 24, 36),
@@ -57,28 +52,37 @@ class CinematicSplashScene extends StatelessWidget {
                       Opacity(
                         opacity: entryT,
                         child: Transform.translate(
-                          offset: Offset(0, (1 - entryT) * 24),
+                          offset: Offset(
+                            0,
+                            reduceMotion ? 0 : (1 - entryT) * 24,
+                          ),
                           child: _SplashHeroMark(
                             phase: phase,
                             entry: entry.value,
+                            reduceMotion: reduceMotion,
                           ),
                         ),
                       ),
                       const SizedBox(height: 16),
                       Opacity(
-                        opacity: Curves.easeOut.transform(
-                          (entry.value - 0.12).clamp(0.0, 1.0),
-                        ),
-                        child: const AuthWordmark(center: true, taglineSize: 14),
+                        opacity:
+                            reduceMotion
+                                ? 1
+                                : Curves.easeOut.transform(
+                                  (entry.value - 0.12).clamp(0.0, 1.0),
+                                ),
+                        child: const FocuxBrandTagline(center: true, fontSize: 14),
                       ),
                       const Spacer(),
                       Opacity(
-                        opacity: Curves.easeOut.transform(
-                          (entry.value - 0.28).clamp(0.0, 1.0),
-                        ),
-                        child: _PremiumLoadingRail(
+                        opacity:
+                            reduceMotion
+                                ? 1
+                                : Curves.easeOut.transform(
+                                  (entry.value - 0.28).clamp(0.0, 1.0),
+                                ),
+                        child: _LoadingRail(
                           progress: progress,
-                          phase: phase,
                           primary: primary,
                         ),
                       ),
@@ -98,207 +102,98 @@ class _SplashHeroMark extends StatelessWidget {
   const _SplashHeroMark({
     required this.phase,
     required this.entry,
+    required this.reduceMotion,
   });
 
   final double phase;
   final double entry;
+  final bool reduceMotion;
 
   @override
   Widget build(BuildContext context) {
     const logoWidth = 200.0;
-    final floatY = math.sin(phase * math.pi * 2) * 5;
+    final floatY = reduceMotion ? 0.0 : math.sin(phase * math.pi * 2) * 4;
     final scale =
-        0.90 + Curves.elasticOut.transform(entry.clamp(0.0, 1.0)) * 0.10;
-    final primary = Theme.of(context).colorScheme.primary;
+        reduceMotion
+            ? 1.0
+            : 0.92 +
+                Curves.easeOutCubic.transform(entry.clamp(0.0, 1.0)) * 0.08;
 
     return Transform.translate(
       offset: Offset(0, floatY),
       child: Transform.scale(
         scale: scale,
-        child: SizedBox(
-          width: logoWidth,
-          child: Stack(
-            alignment: Alignment.center,
-            clipBehavior: Clip.none,
-            children: [
-              IgnorePointer(
-                child: Container(
-                  width: logoWidth * 1.08,
-                  height: logoWidth * 0.8,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        primary.withValues(alpha: 0.16),
-                        primary.withValues(alpha: 0.05),
-                        Colors.transparent,
-                      ],
-                      stops: const [0.0, 0.55, 1.0],
-                    ),
-                  ),
-                ),
-              ),
-              const FocuxOfficialLogo.full(width: logoWidth),
-            ],
-          ),
-        ),
+        child: const FocuxOfficialLogo.full(width: logoWidth),
       ),
     );
   }
 }
 
-class _PremiumLoadingRail extends StatelessWidget {
-  const _PremiumLoadingRail({
-    required this.progress,
-    required this.phase,
-    required this.primary,
-  });
+class _LoadingRail extends StatelessWidget {
+  const _LoadingRail({required this.progress, required this.primary});
 
   final double progress;
-  final double phase;
   final Color primary;
 
   @override
   Widget build(BuildContext context) {
     final clamped = progress.clamp(0.0, 1.0);
-    final pulse = 0.7 + math.sin(phase * math.pi * 2) * 0.3;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          FocuxBrandCopy.splashLoading.toUpperCase(),
-          style: AppTypography.inter(
-            color: primary.withValues(alpha: 0.88),
-            fontSize: 10.5,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 4.6,
+    return Semantics(
+      label: 'Carregando ${(clamped * 100).round()} por cento',
+      value: '${(clamped * 100).round()}%',
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            FocuxBrandCopy.splashLoading.toUpperCase(),
+            style: AppTypography.inter(
+              color: primary.withValues(alpha: 0.88),
+              fontSize: 10.5,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 4.6,
+            ),
           ),
-        ),
-        const SizedBox(height: 14),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final width = math.min(constraints.maxWidth, 280.0);
-            final fillWidth = width * clamped;
+          const SizedBox(height: 14),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final width = math.min(constraints.maxWidth, 280.0);
+              final fillWidth = width * clamped;
 
-            return SizedBox(
-              width: width,
-              height: 22,
-              child: Stack(
-                clipBehavior: Clip.none,
-                alignment: Alignment.centerLeft,
-                children: [
-                  Container(
-                    height: 4,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(99),
-                      color: Colors.white.withValues(alpha: 0.06),
-                      border: Border.all(
-                        color: primary.withValues(alpha: 0.20),
+              return SizedBox(
+                width: width,
+                height: 4,
+                child: Stack(
+                  alignment: Alignment.centerLeft,
+                  children: [
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(99),
+                        color: Colors.white.withValues(alpha: 0.08),
+                        border: Border.all(
+                          color: primary.withValues(alpha: 0.22),
+                        ),
                       ),
+                      child: const SizedBox.expand(),
                     ),
-                  ),
-                  if (fillWidth > 2)
-                    Positioned(
-                      left: 0,
-                      width: fillWidth,
-                      height: 4,
-                      child: DecoratedBox(
+                    if (fillWidth > 1)
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 120),
+                        curve: Curves.easeOut,
+                        width: fillWidth,
+                        height: 4,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(99),
-                          gradient: LinearGradient(
-                            colors: [
-                              primary.withValues(alpha: 0.45),
-                              primary,
-                              EagleTokens.brandAccent,
-                            ],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: primary.withValues(alpha: 0.50),
-                              blurRadius: 12,
-                              spreadRadius: -1,
-                            ),
-                          ],
+                          color: primary,
                         ),
                       ),
-                    ),
-                  if (fillWidth > 8)
-                    Positioned(
-                      left: fillWidth - 10,
-                      child: Container(
-                        width: 22,
-                        height: 22,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            colors: [
-                              Colors.white.withValues(alpha: 0.95),
-                              primary.withValues(alpha: 0.75 * pulse),
-                              Colors.transparent,
-                            ],
-                            stops: const [0.0, 0.35, 1.0],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: primary.withValues(alpha: 0.70 * pulse),
-                              blurRadius: 16,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            );
-          },
-        ),
-      ],
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
-  }
-}
-
-class _RadialTargetsPainter extends CustomPainter {
-  _RadialTargetsPainter({
-    required this.centerY,
-    required this.rotation,
-    required this.pulse,
-    required this.primary,
-  });
-
-  final double centerY;
-  final double rotation;
-  final double pulse;
-  final Color primary;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width * 0.5, centerY);
-    canvas.save();
-    canvas.translate(center.dx, center.dy);
-    canvas.rotate(rotation * 0.05);
-
-    for (var i = 0; i < 5; i++) {
-      final radius = 52.0 + i * 34.0;
-      final alpha = (0.16 - i * 0.024) * (0.62 + pulse * 0.38);
-      final paint =
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 0.75
-            ..color = EagleTokens.brandAccent.withValues(
-              alpha: alpha.clamp(0.03, 0.16),
-            );
-      canvas.drawCircle(Offset.zero, radius, paint);
-    }
-
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(covariant _RadialTargetsPainter oldDelegate) {
-    return oldDelegate.rotation != rotation ||
-        oldDelegate.pulse != pulse ||
-        oldDelegate.centerY != centerY;
   }
 }

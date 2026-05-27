@@ -11,12 +11,14 @@ class CinematicMeshBackground extends StatelessWidget {
     this.showCenterGlow = true,
     this.showCornerGlow = true,
     this.forceDark = false,
+    this.flatBackground = false,
   });
 
   final Widget child;
   final bool showCenterGlow;
   final bool showCornerGlow;
   final bool forceDark;
+  final bool flatBackground;
 
   @override
   Widget build(BuildContext context) {
@@ -29,25 +31,32 @@ class CinematicMeshBackground extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         Container(
-          decoration: BoxDecoration(
-            gradient: RadialGradient(
-              center: const Alignment(-0.35, -0.85),
-              radius: 1.45,
-              colors:
-                  isLight
-                      ? const [
-                        TokensStrip.lightMeshA,
-                        TokensStrip.lightMeshB,
-                        TokensStrip.lightMeshC,
-                      ]
-                      : const [
-                        Color(0xFF0D2830),
-                        Color(0xFF0B0E14),
-                        TokensStrip.cinematicBg,
-                      ],
-              stops: const [0.0, 0.52, 1.0],
-            ),
-          ),
+          color:
+              flatBackground
+                  ? (isLight ? TokensStrip.lightMeshC : TokensStrip.cinematicBg)
+                  : null,
+          decoration:
+              flatBackground
+                  ? null
+                  : BoxDecoration(
+                      gradient: RadialGradient(
+                        center: const Alignment(-0.35, -0.85),
+                        radius: 1.45,
+                        colors:
+                            isLight
+                                ? const [
+                                  TokensStrip.lightMeshA,
+                                  TokensStrip.lightMeshB,
+                                  TokensStrip.lightMeshC,
+                                ]
+                                : const [
+                                  Color(0xFF0D2830),
+                                  Color(0xFF0B0E14),
+                                  TokensStrip.cinematicBg,
+                                ],
+                        stops: const [0.0, 0.52, 1.0],
+                      ),
+                    ),
         ),
         CustomPaint(
           painter: CinematicGridPainter(light: isLight),

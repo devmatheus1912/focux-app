@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -214,7 +215,7 @@ class AlunoActivationScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Vamos organizar seu app para o personal acompanhar melhor seu progresso desde o primeiro dia.',
+                        FocuxBrandCopy.alunoActivationHeroSubtitle,
                         style: TextStyle(color: Colors.white70, height: 1.45),
                       ),
                       const SizedBox(height: 18),
@@ -285,7 +286,7 @@ class AlunoActivationScreen extends ConsumerWidget {
                     children: [
                       Text(
                         doneCount == steps.length
-                            ? 'Tudo pronto para comecar'
+                            ? FocuxBrandCopy.alunoActivationReadyTitle
                             : 'Proximo melhor passo',
                         style: TextStyle(
                           color:
@@ -299,7 +300,7 @@ class AlunoActivationScreen extends ConsumerWidget {
                       const SizedBox(height: 6),
                       Text(
                         doneCount == steps.length
-                            ? 'Sua base inicial esta fechada. Agora o app consegue te acompanhar melhor.'
+                            ? FocuxBrandCopy.alunoActivationReadyBody
                             : nextStep.title,
                         style: TextStyle(
                           color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,

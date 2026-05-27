@@ -442,8 +442,18 @@ async function main() {
     .toFile(path.join(assets, 'logo_splash.png'));
   console.log('✓ logo_splash.png');
 
-  // Android 12 — símbolo completo com margem para máscara circular (~60%).
-  const splashIconInner = 300;
+  // Android 12 — símbolo cabe na máscara circular (~62% do canvas).
+  const splashCanvas = 512;
+  const safeCircle = splashCanvas * 0.62;
+  const iconMeta = await sharp(path.join(assets, 'logo_icon.png')).metadata();
+  const iconDiag = Math.hypot(iconMeta.width, iconMeta.height);
+  const splashIconInner = Math.max(
+    180,
+    Math.min(
+      260,
+      Math.round((safeCircle * Math.min(iconMeta.width, iconMeta.height)) / iconDiag),
+    ),
+  );
   const iconOnly = await sharp(path.join(assets, 'logo_icon.png'))
     .resize(splashIconInner, splashIconInner, {
       fit: 'contain',
@@ -463,7 +473,7 @@ async function main() {
     .composite([{ input: iconOnly, gravity: 'centre' }])
     .png()
     .toFile(path.join(assets, 'logo_splash_icon.png'));
-  console.log('✓ logo_splash_icon.png');
+  console.log(`✓ logo_splash_icon.png (inner ${splashIconInner}px)`);
 
   const iconBuf = await sharp(path.join(assets, 'logo_icon.png'))
     .resize(680, 680, {

@@ -76,7 +76,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       0.92,
       curve: Curves.easeOutCubic,
     );
-    final minDelay = Future<void>.delayed(const Duration(milliseconds: 3000));
+    final minDelay = Future<void>.delayed(const Duration(milliseconds: 1500));
 
     final target = await bootstrapFuture;
     await Future.wait([progressFuture, minDelay]);
@@ -162,8 +162,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         backgroundColor: TokensStrip.cinematicBg,
         body: AuthShell(
           forceDark: true,
-          showCenterGlow: false,
-          showCornerGlow: false,
           child: AnimatedBuilder(
             animation: Listenable.merge([
               _ambientCtrl,

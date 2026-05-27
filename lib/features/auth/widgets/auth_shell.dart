@@ -17,15 +17,17 @@ class AuthShell extends StatelessWidget {
     super.key,
     required this.child,
     this.dark = false,
-    this.showCenterGlow = true,
-    this.showCornerGlow = true,
+    this.showCenterGlow = false,
+    this.showCornerGlow = false,
     this.forceDark = true,
+    this.flatBackground = true,
   });
 
   final Widget child;
   final bool dark;
   final bool showCenterGlow;
   final bool showCornerGlow;
+  final bool flatBackground;
 
   /// Auth/splash UI is authored for the dark cinematic mesh (white type).
   final bool forceDark;
@@ -36,6 +38,7 @@ class AuthShell extends StatelessWidget {
       forceDark: forceDark,
       showCenterGlow: showCenterGlow,
       showCornerGlow: showCornerGlow,
+      flatBackground: flatBackground,
       child: SafeArea(child: child),
     );
   }
@@ -48,36 +51,12 @@ class AuthLogoMark extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final primary = Theme.of(context).colorScheme.primary;
     final logoUrl = ref.watch(logoUrlProvider);
 
     return Semantics(
       label: 'Focux Personal',
       image: true,
-      child: Stack(
-        alignment: Alignment.center,
-        clipBehavior: Clip.none,
-        children: [
-          IgnorePointer(
-            child: Container(
-              width: width * 0.92,
-              height: width * 0.72,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    primary.withValues(alpha: 0.18),
-                    primary.withValues(alpha: 0.06),
-                    Colors.transparent,
-                  ],
-                  stops: const [0.0, 0.52, 1.0],
-                ),
-              ),
-            ),
-          ),
-          FocuxOfficialLogo.full(width: width, logoUrl: logoUrl),
-        ],
-      ),
+      child: FocuxOfficialLogo.full(width: width, logoUrl: logoUrl),
     );
   }
 }

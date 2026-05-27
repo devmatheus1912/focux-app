@@ -3,26 +3,35 @@ import 'package:flutter/material.dart';
 import '../brand/focux_brand_copy.dart';
 import '../theme/design_tokens.dart';
 
-/// Tagline de marca — mesma tipografia em login, splash e onboarding.
+/// Tagline de marca — hook unificado em splash, login e onboarding.
 class FocuxBrandTagline extends StatelessWidget {
   const FocuxBrandTagline({
     super.key,
     this.center = true,
     this.fontSize = 14,
     this.maxWidth = 320,
+    this.aluno = false,
   });
 
   final bool center;
   final double fontSize;
   final double maxWidth;
+  final bool aluno;
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final align = center ? TextAlign.center : TextAlign.left;
+    final hook =
+        aluno ? FocuxBrandCopy.onboardingHookAluno : FocuxBrandCopy.onboardingHook;
+    final highlight =
+        aluno
+            ? FocuxBrandCopy.onboardingHookAlunoHighlight
+            : FocuxBrandCopy.onboardingHookHighlight;
+    final prefix = hook.substring(0, hook.length - highlight.length);
 
     return Semantics(
-      label: FocuxBrandCopy.tagline,
+      label: hook,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: RichText(
@@ -33,18 +42,17 @@ class FocuxBrandTagline extends StatelessWidget {
               fontSize: fontSize,
               fontWeight: FontWeight.w500,
               height: 1.5,
-              letterSpacing: 0.08,
+              letterSpacing: 0.06,
             ),
             children: [
-              const TextSpan(text: 'Gestão '),
+              TextSpan(text: prefix),
               TextSpan(
-                text: 'inteligente',
+                text: highlight,
                 style: TextStyle(
                   color: primary.withValues(alpha: 0.95),
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              const TextSpan(text: ' para personal trainers.'),
             ],
           ),
         ),
