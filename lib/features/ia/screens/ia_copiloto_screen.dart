@@ -499,6 +499,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
       await _selecionarAluno();
       if (_selectedAlunoId == null) return;
     }
+    if (!mounted) return;
     if (!await IaQuotaUpgrade.guardBeforeRequest(context, ref)) return;
 
     setState(() {

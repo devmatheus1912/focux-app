@@ -47,10 +47,10 @@ class _Body extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       elevation: 0,
-      color: color.withOpacity(.08),
+      color: color.withValues(alpha: .08),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: color.withOpacity(.25)),
+        side: BorderSide(color: color.withValues(alpha: .25)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -85,7 +85,7 @@ class _Body extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: pct,
                 minHeight: 8,
-                backgroundColor: color.withOpacity(.15),
+                backgroundColor: color.withValues(alpha: .15),
                 valueColor: AlwaysStoppedAnimation(color),
               ),
             ),

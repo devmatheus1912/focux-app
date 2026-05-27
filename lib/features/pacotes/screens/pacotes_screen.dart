@@ -203,7 +203,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
                       color: Theme.of(context)
                           .colorScheme
                           .primaryContainer
-                          .withOpacity(.4),
+                          .withValues(alpha: .4),
                       child: ListTile(
                         leading: const Icon(Icons.public),
                         title: Text('focux.app/p/$_slug'),

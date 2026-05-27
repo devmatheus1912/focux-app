@@ -1,5 +1,4 @@
 ﻿import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -101,6 +100,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
 
     if (!atual.migracaoFotoPermitida) {
       final limite = atual.limiteMigracaoFotoMensal ?? 0;
+      if (!mounted) return false;
       FeedbackHelper.showError(
         context,
         'Limite mensal de fotos atingido ($limite). '
@@ -244,6 +244,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
   Future<void> _subirFoto() async {
     if (_isLoading || _isImportingFile) return;
     if (!await _verificarAcessoFoto()) return;
+    if (!mounted) return;
 
     final source = await showModalBottomSheet<ImageSource>(
       context: context,

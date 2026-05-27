@@ -2349,10 +2349,11 @@ Color _parseColor(String? value, {required Color fallback}) {
 }
 
 bool _usesDefaultPalette(Color primary, Color secondary) {
+  int channel(double v) => (v * 255).round();
   bool close(Color a, Color b) =>
-      (a.red - b.red).abs() <= 8 &&
-      (a.green - b.green).abs() <= 8 &&
-      (a.blue - b.blue).abs() <= 8;
+      (channel(a.r) - channel(b.r)).abs() <= 8 &&
+      (channel(a.g) - channel(b.g)).abs() <= 8 &&
+      (channel(a.b) - channel(b.b)).abs() <= 8;
 
   return close(primary, BrandPalette.defaultPrimary) &&
       close(secondary, BrandPalette.defaultSecondary);

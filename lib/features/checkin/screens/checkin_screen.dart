@@ -305,6 +305,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
           icon: Icons.check_circle_rounded,
         );
       }
+      if (!mounted) return;
       safePopOrGo(context, '/checkin/treinos');
     } catch (e) {
       if (mounted) {

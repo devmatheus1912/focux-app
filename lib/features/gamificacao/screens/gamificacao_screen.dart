@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter/services.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/gamificacao_repository.dart';
-import 'package:focux_app/core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_rive_player.dart';
 
 final _gamificacaoRepoProvider = Provider<GamificacaoRepository>(
@@ -67,9 +64,7 @@ class GamificacaoScreen extends ConsumerWidget {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final line = dark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final brand = Theme.of(context).colorScheme.primary;
-    final brandSofter = BrandPalette.softer(brand, dark: dark);
 
     final async = ref.watch(gamificacaoProvider);
     final badges = async.maybeWhen(

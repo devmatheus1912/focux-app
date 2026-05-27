@@ -951,7 +951,7 @@ class _TreinoExerciseReorderListState extends State<_TreinoExerciseReorderList> 
               widget.ref.invalidate(treinoProvider(widget.treinoId));
             } catch (error) {
               if (mounted) {
-                FeedbackHelper.showError(context, 'Erro ao duplicar: $error');
+                FeedbackHelper.showError(this.context, 'Erro ao duplicar: $error');
               }
             }
           },
@@ -981,7 +981,7 @@ class _TreinoExerciseReorderListState extends State<_TreinoExerciseReorderList> 
                       } catch (error) {
                         if (mounted) {
                           FeedbackHelper.showError(
-                            context,
+                            this.context,
                             'Erro ao substituir: $error',
                           );
                         }

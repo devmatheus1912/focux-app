@@ -188,8 +188,8 @@ class MigracaoFileParser {
             email = part;
           } else if (telefone == null && _looksLikePhone(part)) {
             telefone = part;
-          } else if (objetivo == null) {
-            objetivo = part;
+          } else {
+            objetivo ??= part;
           }
         }
       }

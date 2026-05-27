@@ -184,10 +184,10 @@ class _OfertaCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: theme.colorScheme.primary.withOpacity(.3),
+          color: theme.colorScheme.primary.withValues(alpha: .3),
         ),
       ),
-      color: theme.colorScheme.primary.withOpacity(.05),
+      color: theme.colorScheme.primary.withValues(alpha: .05),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -198,7 +198,7 @@ class _OfertaCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withOpacity(.15),
+                    color: theme.colorScheme.primary.withValues(alpha: .15),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(Icons.local_offer_outlined,

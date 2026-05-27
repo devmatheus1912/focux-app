@@ -163,6 +163,7 @@ class _PlanoAlimentarDetailScreenState
     );
 
     if (confirm != true) return;
+    if (!mounted) return;
     if (!await IaQuotaUpgrade.guardBeforeRequest(context, ref)) return;
 
     setState(() => _loading = true);

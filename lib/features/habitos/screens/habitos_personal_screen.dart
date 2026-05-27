@@ -221,7 +221,7 @@ class _ComplianceTile extends StatelessWidget {
     return Card(
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: color.withOpacity(.15),
+          backgroundColor: color.withValues(alpha: .15),
           child: Text('${item.compliancePct}%',
               style: TextStyle(
                   color: color, fontSize: 12, fontWeight: FontWeight.w800)),
