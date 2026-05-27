@@ -4,6 +4,8 @@ class OnboardingStatusData {
   final bool primeiroTreinoCriado;
   final bool pagamentoConfigurado;
   final bool primeiroPagamentoRecebido;
+  final bool pacoteCriado;
+  final bool habitoConfigurado;
   final int progressoPercentual;
 
   OnboardingStatusData({
@@ -12,8 +14,32 @@ class OnboardingStatusData {
     required this.primeiroTreinoCriado,
     required this.pagamentoConfigurado,
     required this.primeiroPagamentoRecebido,
+    required this.pacoteCriado,
+    required this.habitoConfigurado,
     required this.progressoPercentual,
   });
+
+  /// Etapas visíveis no card "Sua ativação" — espelha o backend.
+  List<bool> get etapasConcluidas => [
+        perfilCompleto,
+        primeiroAlunoAdicionado,
+        primeiroTreinoCriado,
+        pacoteCriado,
+        habitoConfigurado,
+        pagamentoConfigurado,
+      ];
+
+  int get etapasTotal => etapasConcluidas.length;
+
+  int get etapasFeitas => etapasConcluidas.where((done) => done).length;
+
+  /// Progresso derivado das etapas exibidas (evita 66% com 4/4 riscados).
+  int get progressoExibido {
+    if (etapasTotal == 0) return 0;
+    return (etapasFeitas * 100 / etapasTotal).round();
+  }
+
+  bool get ativacaoCompleta => etapasFeitas >= etapasTotal;
 
   factory OnboardingStatusData.fromJson(Map<String, dynamic> json) {
     return OnboardingStatusData(
@@ -27,6 +53,8 @@ class OnboardingStatusData {
           false,
       primeiroPagamentoRecebido:
           json['primeiroPagamentoRecebido'] as bool? ?? false,
+      pacoteCriado: json['pacoteCriado'] as bool? ?? false,
+      habitoConfigurado: json['habitoConfigurado'] as bool? ?? false,
       progressoPercentual: json['progressoPercentual'] as int? ?? 0,
     );
   }

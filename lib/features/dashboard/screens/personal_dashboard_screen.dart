@@ -30,7 +30,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../subscription/widgets/plan_usage_banner.dart';
 import '../../subscription/widgets/trial_countdown_banner.dart';
 import '../../subscription/widgets/dashboard_activation_cta.dart';
-import '../../pql/widgets/pql_progress_card.dart';
+import '../../onboarding/providers/onboarding_provider.dart';
 
 class PersonalDashboardScreen extends ConsumerStatefulWidget {
   const PersonalDashboardScreen({super.key});
@@ -104,10 +104,14 @@ String _financeInadimplLabel(double width) =>
     width < 360 ? 'Inadimpl.' : 'Inadimplentes';
 
 String _financePercentLabel(double progressRaw, {required bool exceeded}) {
-  final pct = (progressRaw * 100).round();
   if (exceeded) {
-    return '$pct% da meta · barra no teto';
+    final extra = ((progressRaw - 1) * 100).round();
+    if (extra > 0) {
+      return 'Meta batida · +$extra% acima do previsto';
+    }
+    return 'Meta batida';
   }
+  final pct = (progressRaw * 100).round().clamp(0, 100);
   return '$pct% da meta';
 }
 
@@ -362,6 +366,11 @@ class _PersonalDashboardScreenState
               final attentionVisible = alunosEmRisco.isNotEmpty ||
                   (_finData != null &&
                       _finData!.vencimentosProximos.isNotEmpty);
+              final onboardingAsync = ref.watch(onboardingStatusProvider);
+              final onboardingIncomplete = onboardingAsync.maybeWhen(
+                data: (s) => !s.ativacaoCompleta,
+                orElse: () => false,
+              );
               final riskDominante =
                   alunosAtivos > 0 &&
                   riscoAlto >= math.max(2, (alunosAtivos * 0.5).ceil());
@@ -374,6 +383,7 @@ class _PersonalDashboardScreenState
                   ref.invalidate(historicoCheckinProvider);
                   ref.invalidate(notificacoesProvider);
                   ref.invalidate(notificacoesNaoLidasProvider);
+                  ref.invalidate(onboardingStatusProvider);
                   await _loadFin();
                 },
                 child: CustomScrollView(
@@ -382,18 +392,29 @@ class _PersonalDashboardScreenState
                     const SliverToBoxAdapter(child: TrialCountdownBanner()),
                     const SliverToBoxAdapter(child: PlanUsageBanner()),
                     SliverToBoxAdapter(
-                      child: _RoiQuickLinksRow(isDark: themeDark),
-                    ),
-                    const SliverToBoxAdapter(child: PqlProgressCard()),
-                    SliverToBoxAdapter(
-                      child: DashboardActivationCta(
-                        alunosAtivos: alunosAtivos,
-                        temTreinos: checkinsHoje > 0 || alunosAtivos == 0,
-                        temFinanceiro: _finData != null &&
-                            (_finData!.receitaMes > 0 ||
-                                _finData!.vencimentosProximos.isNotEmpty),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          4,
+                          TokensStrip.s4,
+                          0,
+                        ),
+                        child: SetupOnboardingWidget(),
                       ),
                     ),
+                    SliverToBoxAdapter(
+                      child: _RoiQuickLinksRow(isDark: themeDark),
+                    ),
+                    if (!onboardingIncomplete)
+                      SliverToBoxAdapter(
+                        child: DashboardActivationCta(
+                          alunosAtivos: alunosAtivos,
+                          temTreinos: checkinsHoje > 0 || alunosAtivos == 0,
+                          temFinanceiro: _finData != null &&
+                              (_finData!.receitaMes > 0 ||
+                                  _finData!.vencimentosProximos.isNotEmpty),
+                        ),
+                      ),
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(
@@ -436,7 +457,7 @@ class _PersonalDashboardScreenState
                                       color:
                                           themeDark
                                               ? EagleTokens.darkInkMute
-                                              : TokensStrip.textSecondary,
+                                              : EagleTokens.inkSoft,
                                     ),
                                   ),
                                 ],
@@ -744,7 +765,7 @@ class _PersonalDashboardScreenState
                                       const SizedBox(height: 4),
                                       Text(
                                         metaSuperada
-                                            ? 'Meta superada · ${(progressRaw * 100).round()}% do objetivo.'
+                                            ? 'Meta superada · receita acima do previsto.'
                                             : pendente > 0
                                             ? 'Recebido agora. Faltam R\$ ${pendente.toInt()} para a meta.'
                                             : 'Recebido agora. Meta do mês sob controle.',
@@ -937,18 +958,6 @@ class _PersonalDashboardScreenState
                       ),
                     ),
 
-
-                    const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          TokensStrip.s4,
-                          0,
-                          TokensStrip.s4,
-                          0,
-                        ),
-                        child: SetupOnboardingWidget(),
-                      ),
-                    ),
                     SliverToBoxAdapter(
                       child: SizedBox(
                         height: MediaQuery.of(context).padding.bottom + 88,
@@ -1785,7 +1794,7 @@ class _CollapsibleToolsSectionState extends State<_CollapsibleToolsSection> {
     final primary = Theme.of(context).colorScheme.primary;
     final heading = BrandPalette.sectionHeading(primary, dark: widget.isDark);
     final mute =
-        widget.isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+        widget.isDark ? EagleTokens.darkInkMute : EagleTokens.inkSoft;
     final link = BrandPalette.sectionLink(primary, dark: widget.isDark);
 
     return Padding(
@@ -3193,9 +3202,9 @@ class _AderenciaSemanaWidget extends StatelessWidget {
                 isDark: isDark,
                 primary: primary,
                 mute: mute,
-                title: 'Semana ainda parada',
+                title: 'Treinos parados na semana',
                 body:
-                    'Nenhum check-in registrado. Acione sua base antes do fim da semana.',
+                    'Nenhum check-in de treino ainda. A receita pode estar ok — acione a base para retomar os treinos.',
                 primaryAction: 'Ver agenda',
                 secondaryAction: 'Plano retomada',
                 onPrimary: () => context.go('/agenda'),

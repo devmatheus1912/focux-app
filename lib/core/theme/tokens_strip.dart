@@ -14,7 +14,7 @@ abstract class TokensStrip {
   static const Color pageBg = Color(0xFFF4F6F8);
   static const Color cardBg = Color(0xFFFFFFFF);
   static const Color textPrimary = Color(0xFF1A1A2E);
-  static const Color textSecondary = Color(0xFF6B7280);
+  static const Color textSecondary = Color(0xFF4B5563);
   static const Color textH2 = primaryHover;
   static const Color borderDefault = Color(0xFFE5E7EB);
 

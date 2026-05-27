@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../providers/onboarding_provider.dart';
 import '../../perfil/providers/perfil_provider.dart';
@@ -18,17 +18,20 @@ class SetupOnboardingWidget extends ConsumerWidget {
     final statusAsync = ref.watch(onboardingStatusProvider);
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final mute =
-        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkSoft;
 
     return statusAsync.when(
-      loading: () => const FxLoading(),
+      loading: () => _ActivationSkeleton(isDark: isDark, primary: primary),
       error: (e, _) => const SizedBox.shrink(),
       data: (data) {
-        if (data.progressoPercentual == 100) return const SizedBox.shrink();
+        if (data.ativacaoCompleta) return const SizedBox.shrink();
+
+        final progress = data.progressoExibido;
+        final feitos = data.etapasFeitas;
+        final total = data.etapasTotal;
 
         return Container(
-          margin: const EdgeInsets.only(bottom: TokensStrip.s5),
+          margin: const EdgeInsets.only(bottom: TokensStrip.s4),
           padding: const EdgeInsets.all(TokensStrip.s4),
           decoration: fxStripCardDecoration(
             context,
@@ -50,7 +53,7 @@ class SetupOnboardingWidget extends ConsumerWidget {
                     ),
                   ),
                   Text(
-                    '${data.progressoPercentual}%',
+                    '$progress%',
                     style: TokensStrip.body(
                       color: primary,
                       fontFamily:
@@ -61,14 +64,14 @@ class SetupOnboardingWidget extends ConsumerWidget {
               ),
               const SizedBox(height: TokensStrip.s2),
               Text(
-                'Complete os passos para liberar todo o fluxo do app.',
+                '$feitos de $total passos · complete para liberar todo o fluxo.',
                 style: TokensStrip.bodyMuted(color: mute),
               ),
               const SizedBox(height: TokensStrip.s3),
               ClipRRect(
                 borderRadius: BorderRadius.circular(TokensStrip.rInput),
                 child: LinearProgressIndicator(
-                  value: data.progressoPercentual / 100,
+                  value: progress / 100,
                   backgroundColor: primary.withValues(alpha: 0.12),
                   color: primary,
                   minHeight: 8,
@@ -100,6 +103,16 @@ class SetupOnboardingWidget extends ConsumerWidget {
                 onTap: () => context.push('/treinos/novo'),
               ),
               _StepTile(
+                title: 'Monte seu primeiro pacote',
+                isDone: data.pacoteCriado,
+                onTap: () => context.push('/pacotes'),
+              ),
+              _StepTile(
+                title: 'Configure hábitos',
+                isDone: data.habitoConfigurado,
+                onTap: () => context.push('/habitos'),
+              ),
+              _StepTile(
                 title: 'Configure pagamentos',
                 isDone: data.pagamentoConfigurado,
                 onTap: () => context.push('/perfil/wallet'),
@@ -108,6 +121,80 @@ class SetupOnboardingWidget extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _ActivationSkeleton extends StatelessWidget {
+  const _ActivationSkeleton({required this.isDark, required this.primary});
+
+  final bool isDark;
+  final Color primary;
+
+  @override
+  Widget build(BuildContext context) {
+    final base = isDark ? EagleTokens.darkCard : TokensStrip.borderDefault;
+    final highlight = isDark ? EagleTokens.darkCardHi : TokensStrip.pageBg;
+
+    return Shimmer.fromColors(
+      baseColor: base,
+      highlightColor: highlight,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: TokensStrip.s4),
+        padding: const EdgeInsets.all(TokensStrip.s4),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 140,
+              height: 18,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              height: 8,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            const SizedBox(height: 16),
+            for (var i = 0; i < 3; i++) ...[
+              Row(
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Container(
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
@@ -128,8 +215,10 @@ class _StepTile extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute =
-        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkSoft;
+    final doneColor = isDark
+        ? TokensStrip.badgeSuccess.withValues(alpha: 0.85)
+        : TokensStrip.badgeSuccess;
 
     return Material(
       color: Colors.transparent,
@@ -162,7 +251,7 @@ class _StepTile extends StatelessWidget {
                           ? Icon(
                             Icons.check_rounded,
                             size: 16,
-                            color: TokensStrip.badgeSuccess,
+                            color: doneColor,
                           )
                           : Container(
                             width: 10,
@@ -179,9 +268,8 @@ class _StepTile extends StatelessWidget {
                 child: Text(
                   title,
                   style: TextStyle(
-                    decoration: isDone ? TextDecoration.lineThrough : null,
-                    color: isDone ? mute : ink,
-                    fontWeight: isDone ? FontWeight.w500 : FontWeight.w600,
+                    color: isDone ? doneColor : ink,
+                    fontWeight: isDone ? FontWeight.w600 : FontWeight.w600,
                     fontSize: 14,
                   ),
                 ),
