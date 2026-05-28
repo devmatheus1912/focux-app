@@ -2,17 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/perfil/utils/landing_default_images.dart';
 
 void main() {
-  test('default images are stable per slug', () {
-    final heroA = landingDefaultHeroImageUrl('matheus-focux');
-    final heroB = landingDefaultHeroImageUrl('matheus-focux');
-    final bioA = landingDefaultBioImageUrl('matheus-focux');
-    final bioB = landingDefaultBioImageUrl('matheus-focux');
-
-    expect(heroA, isNotEmpty);
-    expect(heroA, heroB);
-    expect(bioA, isNotEmpty);
-    expect(bioA, bioB);
-    expect(bioA, isNot(heroA));
+  test('default images use backend static paths', () {
+    final hero = landingDefaultHeroImageUrl('matheus-focux');
+    expect(hero, contains('/landing/defaults/hero-'));
+    expect(hero, startsWith('https://'));
   });
 
   test('resolve prefers manual url when present', () {

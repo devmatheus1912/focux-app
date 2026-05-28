@@ -1,29 +1,16 @@
-/// Fotos padrão de academia — mesma lógica do backend, estáveis por slug.
+/// Fotos padrão de academia — mesma lógica do backend, servidas pelo backend.
 library;
 
-const _heroGymUrls = [
-  'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200&h=800&q=80',
-  'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&w=1200&h=800&q=80',
-  'https://images.unsplash.com/photo-1517836357463-d06dfbcf1320?auto=format&fit=crop&w=1200&h=800&q=80',
-  'https://images.unsplash.com/photo-1540497077202-7be8ccc4f1ee?auto=format&fit=crop&w=1200&h=800&q=80',
-  'https://images.unsplash.com/photo-1583454110551-21f2f2b7bd1c?auto=format&fit=crop&w=1200&h=800&q=80',
-  'https://images.unsplash.com/photo-1599058945522-28d584b6f35f?auto=format&fit=crop&w=1200&h=800&q=80',
-];
+import '../../../core/config/env.dart';
 
-const _bioGymUrls = [
-  'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=600&h=720&q=80',
-  'https://images.unsplash.com/photo-1594381898411-8e15a7c96fde?auto=format&fit=crop&w=600&h=720&q=80',
-  'https://images.unsplash.com/photo-1581009146145-b5ef050c1499?auto=format&fit=crop&w=600&h=720&q=80',
-  'https://images.unsplash.com/photo-1549060275-4a3c0a3a7a7b?auto=format&fit=crop&w=600&h=720&q=80',
-  'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&h=720&q=80',
-  'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=600&h=720&q=80',
-];
+const _heroCount = 6;
+const _bioCount = 6;
 
 String landingDefaultHeroImageUrl(String? slug) =>
-    _pick(_heroGymUrls, slug, 'hero');
+    '${Env.apiUrl}${_defaultHeroPath(slug)}';
 
 String landingDefaultBioImageUrl(String? slug) =>
-    _pick(_bioGymUrls, slug, 'bio');
+    '${Env.apiUrl}${_defaultBioPath(slug)}';
 
 String landingResolvedHeroImageUrl(String? slug, String? manualUrl) {
   if (manualUrl != null && manualUrl.trim().isNotEmpty) {
@@ -45,11 +32,15 @@ bool landingUsesDefaultHeroImage(String? manualUrl) =>
 bool landingUsesDefaultBioImage(String? manualUrl) =>
     manualUrl == null || manualUrl.isEmpty;
 
-String _pick(List<String> pool, String? slug, String salt) {
-  if (pool.isEmpty) return '';
+String _defaultHeroPath(String? slug) =>
+    '/landing/defaults/hero-${_pickIndex(slug, 'hero', _heroCount)}.jpg';
+
+String _defaultBioPath(String? slug) =>
+    '/landing/defaults/bio-${_pickIndex(slug, 'bio', _bioCount)}.jpg';
+
+int _pickIndex(String? slug, String salt, int poolSize) {
   final key = (slug != null && slug.trim().isNotEmpty)
       ? slug.trim().toLowerCase()
       : 'focux';
-  final index = ('$key:$salt').hashCode.abs() % pool.length;
-  return pool[index];
+  return ('$key:$salt').hashCode.abs() % poolSize;
 }
