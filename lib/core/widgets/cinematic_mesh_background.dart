@@ -4,7 +4,7 @@ import '../theme/brand_palette.dart';
 import '../theme/tokens_strip.dart';
 
 /// Shared cinematic mesh — TOKENS STRIP Liquid Glass backdrop.
-class CinematicMeshBackground extends StatelessWidget {
+class CinematicMeshBackground extends StatefulWidget {
   const CinematicMeshBackground({
     super.key,
     required this.child,
@@ -13,6 +13,7 @@ class CinematicMeshBackground extends StatelessWidget {
     this.forceDark = false,
     this.flatBackground = false,
     this.showGrid = true,
+    this.animateGridIn = true,
   });
 
   final Widget child;
@@ -21,24 +22,73 @@ class CinematicMeshBackground extends StatelessWidget {
   final bool forceDark;
   final bool flatBackground;
   final bool showGrid;
+  final bool animateGridIn;
+
+  @override
+  State<CinematicMeshBackground> createState() =>
+      _CinematicMeshBackgroundState();
+}
+
+class _CinematicMeshBackgroundState extends State<CinematicMeshBackground>
+    with SingleTickerProviderStateMixin {
+  AnimationController? _gridFadeCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.showGrid && widget.animateGridIn) {
+      _gridFadeCtrl = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 420),
+      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _gridFadeCtrl?.forward();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _gridFadeCtrl?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final isLight =
-        !forceDark && Theme.of(context).brightness == Brightness.light;
+        !widget.forceDark && Theme.of(context).brightness == Brightness.light;
     final primary = Theme.of(context).colorScheme.primary;
-    final cornerGlow = isLight ? BrandPalette.accent(primary) : TokensStrip.neonGlow;
+    final cornerGlow =
+        isLight ? BrandPalette.accent(primary) : TokensStrip.neonGlow;
+
+    Widget? gridLayer;
+    if (widget.showGrid) {
+      final grid = CustomPaint(
+        painter: CinematicGridPainter(light: isLight),
+        size: Size.infinite,
+      );
+      gridLayer =
+          _gridFadeCtrl != null
+              ? FadeTransition(
+                opacity: CurvedAnimation(
+                  parent: _gridFadeCtrl!,
+                  curve: Curves.easeOutCubic,
+                ),
+                child: grid,
+              )
+              : grid;
+    }
 
     return Stack(
       fit: StackFit.expand,
       children: [
         Container(
           color:
-              flatBackground
+              widget.flatBackground
                   ? (isLight ? TokensStrip.lightMeshC : TokensStrip.cinematicBg)
                   : null,
           decoration:
-              flatBackground
+              widget.flatBackground
                   ? null
                   : BoxDecoration(
                       gradient: RadialGradient(
@@ -60,12 +110,8 @@ class CinematicMeshBackground extends StatelessWidget {
                       ),
                     ),
         ),
-        if (showGrid)
-          CustomPaint(
-            painter: CinematicGridPainter(light: isLight),
-            size: Size.infinite,
-          ),
-        if (showCornerGlow) ...[
+        if (gridLayer != null) gridLayer,
+        if (widget.showCornerGlow) ...[
           Positioned(
             top: -100,
             right: -100,
@@ -106,7 +152,7 @@ class CinematicMeshBackground extends StatelessWidget {
             ),
           ),
         ],
-        if (showCenterGlow)
+        if (widget.showCenterGlow)
           Align(
             alignment: const Alignment(0, -0.20),
             child: IgnorePointer(
@@ -129,7 +175,7 @@ class CinematicMeshBackground extends StatelessWidget {
               ),
             ),
           ),
-        child,
+        widget.child,
       ],
     );
   }

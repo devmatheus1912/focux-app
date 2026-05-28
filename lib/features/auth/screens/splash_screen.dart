@@ -186,6 +186,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
           forceDark: true,
           flatBackground: true,
           showGrid: false,
+          animateGridIn: false,
           showCenterGlow: false,
           showCornerGlow: false,
           child: AnimatedBuilder(

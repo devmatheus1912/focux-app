@@ -149,4 +149,25 @@ void main() {
     final prefs = await SharedPreferences.getInstance();
     expect(prefs.getBool('onboarding_done_v3'), isTrue);
   });
+
+  testWidgets('slide 1 compacto oculta metric chips em telas baixas', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    await tester.binding.setSurfaceSize(const Size(390, 640));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.buildDarkTheme(TokensStrip.neonGlow),
+        home: const OnboardingScreen(),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1000));
+
+    expect(find.text('360°'), findsNothing);
+    expect(find.text('Ao vivo'), findsNothing);
+    expect(find.textContaining('Command Center'), findsOneWidget);
+  });
 }

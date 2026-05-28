@@ -6,11 +6,15 @@ class PasswordStrengthMeter extends StatelessWidget {
     required this.password,
     this.minLength = 8,
     this.dark = true,
+    this.showWhenEmpty = false,
   });
 
   final String password;
   final int minLength;
   final bool dark;
+
+  /// Oculta medidor e hint até o usuário começar a digitar.
+  final bool showWhenEmpty;
 
   int get _score {
     if (password.isEmpty) return 0;
@@ -56,11 +60,15 @@ class PasswordStrengthMeter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!showWhenEmpty && password.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     final strength = _strength;
     final baseColor =
         dark ? Colors.white.withValues(alpha: 0.12) : Colors.black12;
     final textColor =
-        dark ? Colors.white.withValues(alpha: 0.68) : Colors.black54;
+        dark ? Colors.white.withValues(alpha: 0.78) : Colors.black54;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

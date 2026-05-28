@@ -80,3 +80,4 @@ focux_app.iml
 # Android local SDK path (per machine)
 android/local.properties
 .vercel
+.env*

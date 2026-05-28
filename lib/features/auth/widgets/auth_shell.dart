@@ -22,6 +22,7 @@ class AuthShell extends StatelessWidget {
     this.forceDark = true,
     this.flatBackground = true,
     this.showGrid = true,
+    this.animateGridIn = true,
   });
 
   final Widget child;
@@ -30,6 +31,7 @@ class AuthShell extends StatelessWidget {
   final bool showCornerGlow;
   final bool flatBackground;
   final bool showGrid;
+  final bool animateGridIn;
 
   /// Auth/splash UI is authored for the dark cinematic mesh (white type).
   final bool forceDark;
@@ -42,6 +44,7 @@ class AuthShell extends StatelessWidget {
       showCornerGlow: showCornerGlow,
       flatBackground: flatBackground,
       showGrid: showGrid,
+      animateGridIn: animateGridIn,
       child: SafeArea(child: child),
     );
   }
@@ -66,43 +69,96 @@ class AuthLogoMark extends ConsumerWidget {
 
 /// Cabeçalho compacto para cadastro — ícone + FOCUX / papel (sem lockup duplicado).
 class AuthRoleHeader extends StatelessWidget {
-  const AuthRoleHeader({super.key, required this.roleLabel});
+  const AuthRoleHeader({
+    super.key,
+    required this.roleLabel,
+    this.center = false,
+  });
 
   final String roleLabel;
+  final bool center;
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final row = Row(
+      mainAxisSize: center ? MainAxisSize.min : MainAxisSize.max,
+      children: [
+        const FocuxOfficialLogo.icon(size: 52),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'FOCUX',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.3,
+              ),
+            ),
+            Text(
+              roleLabel,
+              style: TextStyle(
+                color: primary.withValues(alpha: 0.95),
+                fontSize: 9.5,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 2.1,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+
     return Semantics(
       label: 'Focux $roleLabel',
-      child: Row(
-        children: [
-          const FocuxOfficialLogo.icon(size: 52),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'FOCUX',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.3,
-                ),
-              ),
-              Text(
-                roleLabel,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.5),
-                  fontSize: 9.5,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 2.1,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+      child: center ? Center(child: row) : row,
+    );
+  }
+}
+
+/// Cabeçalho do login — lockup completo (Personal) ou ícone + papel (Aluno).
+class AuthLoginBrandHeader extends ConsumerWidget {
+  const AuthLoginBrandHeader({
+    super.key,
+    required this.isAluno,
+    this.taglineSize = 14.5,
+  });
+
+  final bool isAluno;
+  final double taglineSize;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hideFocux = ref.watch(hideFocuxBrandingProvider);
+
+    if (hideFocux) {
+      return AuthWordmark(taglineSize: taglineSize);
+    }
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 280),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      child: isAluno
+          ? Column(
+              key: const ValueKey('login-aluno'),
+              children: [
+                const AuthRoleHeader(roleLabel: 'ALUNO', center: true),
+                const SizedBox(height: 14),
+                AuthWordmark(taglineSize: taglineSize),
+              ],
+            )
+          : Column(
+              key: const ValueKey('login-personal'),
+              children: [
+                const AuthLogoMark(width: 188),
+                const SizedBox(height: 16),
+                AuthWordmark(taglineSize: taglineSize),
+              ],
+            ),
     );
   }
 }
@@ -307,6 +363,7 @@ class AuthField extends StatelessWidget {
     this.obscureText = false,
     this.onFieldSubmitted,
     this.suffix,
+    this.focusNode,
   });
 
   final String label;
@@ -319,6 +376,7 @@ class AuthField extends StatelessWidget {
   final bool obscureText;
   final ValueChanged<String>? onFieldSubmitted;
   final Widget? suffix;
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -338,6 +396,7 @@ class AuthField extends StatelessWidget {
         const SizedBox(height: 7),
         TextFormField(
           controller: controller,
+          focusNode: focusNode,
           keyboardType: keyboardType,
           textInputAction: textInputAction,
           validator: validator,
@@ -347,7 +406,7 @@ class AuthField extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.52),
+              color: Colors.white.withValues(alpha: 0.62),
               fontSize: 15,
             ),
             prefixIcon:

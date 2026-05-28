@@ -28,6 +28,7 @@ Get-Content $envFile | ForEach-Object {
 if (-not $env:GOOGLE_WEB_CLIENT_ID) {
     $env:GOOGLE_WEB_CLIENT_ID =
         '868715549357-kjut1ja3ab79j6pp3pquk2nha48atbcs.apps.googleusercontent.com'
+    Write-Host 'GOOGLE_WEB_CLIENT_ID ausente no .env.local — usando default de producao.' -ForegroundColor Yellow
 }
 
 if (-not $env:API_URL) {

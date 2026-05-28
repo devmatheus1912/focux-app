@@ -30,11 +30,21 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   PageController get _activePage => _page;
 
   late AnimationController _entryCtrl;
+  late AnimationController _gridFadeCtrl;
   late Animation<double> _iconScale;
   late Animation<double> _titleSlide;
   late Animation<double> _subtitleSlide;
   late Animation<double> _metricsSlide;
   late Animation<double> _fade;
+
+  bool _motionConfigured = false;
+
+  /// Telas ≤720px de altura útil — esconde metric chips no slide 1.
+  static bool _isCompactLayout(BuildContext context) {
+    final height = MediaQuery.sizeOf(context).height;
+    final padding = MediaQuery.paddingOf(context);
+    return (height - padding.top - padding.bottom) < 720;
+  }
 
   static const _pageIconsPersonal = [
     [
@@ -129,7 +139,26 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   @override
   void initState() {
     super.initState();
-    _setupEntryAnimation(reduceMotion: false);
+    _gridFadeCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 420),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _gridFadeCtrl.forward();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_motionConfigured) return;
+    _motionConfigured = true;
+    final reduce = reduceMotionOf(context);
+    _setupEntryAnimation(reduceMotion: reduce);
+    _gridFadeCtrl.duration = Duration(
+      milliseconds: reduce ? 0 : 420,
+    );
     _entryCtrl.forward();
   }
 
@@ -139,6 +168,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   void dispose() {
     _page.dispose();
     _entryCtrl.dispose();
+    _gridFadeCtrl.dispose();
     super.dispose();
   }
 
@@ -212,6 +242,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final pages = _pages;
     final isLast = _current >= pages.length - 1;
     final textScaler = clampedTextScaler(context);
+    final compact = _isCompactLayout(context);
 
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaler: textScaler),
@@ -228,8 +259,17 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             // ── Background ──
             Container(color: TokensStrip.cinematicBg),
 
-            // Grid pattern
-            CustomPaint(painter: _AuthGridPainter(), size: Size.infinite),
+            // Grid pattern — fade-in suave após splash flat
+            FadeTransition(
+              opacity: CurvedAnimation(
+                parent: _gridFadeCtrl,
+                curve: Curves.easeOutCubic,
+              ),
+              child: CustomPaint(
+                painter: _AuthGridPainter(),
+                size: Size.infinite,
+              ),
+            ),
 
             // ── Content ──
             SafeArea(
@@ -313,6 +353,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                               pageIndex: i,
                               persona: _persona,
                               data: pages[i],
+                              compact: compact,
                               iconScale: _iconScale,
                               titleSlide: _titleSlide,
                               subtitleSlide: _subtitleSlide,
@@ -472,6 +513,7 @@ class _OBPageWidget extends StatelessWidget {
   final int pageIndex;
   final OnboardingPersona persona;
   final _OBData data;
+  final bool compact;
   final Animation<double> iconScale;
   final Animation<double> titleSlide;
   final Animation<double> subtitleSlide;
@@ -483,6 +525,7 @@ class _OBPageWidget extends StatelessWidget {
     required this.pageIndex,
     required this.persona,
     required this.data,
+    required this.compact,
     required this.iconScale,
     required this.titleSlide,
     required this.subtitleSlide,
@@ -492,24 +535,33 @@ class _OBPageWidget extends StatelessWidget {
 
   Widget _buildHero() {
     if (pageIndex == 0) {
-      return FocuxOfficialLogo.full(
-        width: persona == OnboardingPersona.aluno ? 128 : 132,
-      );
+      final width =
+          compact
+              ? (persona == OnboardingPersona.aluno ? 108.0 : 112.0)
+              : (persona == OnboardingPersona.aluno ? 128.0 : 132.0);
+      return FocuxOfficialLogo.full(width: width);
     }
-    return FocuxOfficialLogo.full(width: 118);
+    return FocuxOfficialLogo.full(width: compact ? 104.0 : 118.0);
   }
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final titleSize = pageIndex == 0 ? 26.0 : 27.0;
+    final titleSize =
+        pageIndex == 0 ? (compact ? 24.0 : 26.0) : (compact ? 25.0 : 27.0);
+    final showMetrics = pageIndex == 0 && !compact;
 
     return AnimatedBuilder(
       animation: fade,
       builder:
           (_, __) => SingleChildScrollView(
             physics: const ClampingScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(20, pageIndex == 0 ? 2 : 10, 20, 12),
+            padding: EdgeInsets.fromLTRB(
+              20,
+              pageIndex == 0 ? (compact ? 0 : 2) : (compact ? 6 : 10),
+              20,
+              12,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -520,7 +572,7 @@ class _OBPageWidget extends StatelessWidget {
                 ),
 
                 if (pageIndex == 0) ...[
-                  const SizedBox(height: 8),
+                  SizedBox(height: compact ? 4 : 8),
                   Transform.translate(
                     offset: Offset(0, subtitleSlide.value * 0.5),
                     child: Opacity(
@@ -533,7 +585,7 @@ class _OBPageWidget extends StatelessWidget {
                   ),
                 ],
 
-                SizedBox(height: pageIndex == 0 ? 12 : 14),
+                SizedBox(height: pageIndex == 0 ? (compact ? 8 : 12) : 14),
 
                 Transform.translate(
                   offset: Offset(0, titleSlide.value),
@@ -583,9 +635,9 @@ class _OBPageWidget extends StatelessWidget {
                   ),
                 ),
 
-                SizedBox(height: pageIndex == 0 ? 14 : 12),
+                SizedBox(height: pageIndex == 0 ? (compact ? 10 : 14) : 12),
 
-                if (pageIndex == 0)
+                if (showMetrics)
                   Transform.translate(
                     offset: Offset(0, metricsSlide.value),
                     child: Opacity(
@@ -606,7 +658,7 @@ class _OBPageWidget extends StatelessWidget {
                     ),
                   ),
 
-                if (pageIndex == 0) const SizedBox(height: 10),
+                if (showMetrics) const SizedBox(height: 10),
 
                 Transform.translate(
                   offset: Offset(0, metricsSlide.value * 0.7),
@@ -705,11 +757,11 @@ class _OnboardingSocialProof extends StatelessWidget {
                 FocuxBrandCopy.onboardingSocialProof,
                 textAlign: TextAlign.center,
                 style: AppTypography.inter(
-                  color: Colors.white.withValues(alpha: 0.62),
-                  fontSize: 11.5,
+                  color: Colors.white.withValues(alpha: 0.78),
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  letterSpacing: 0.15,
-                  height: 1.25,
+                  letterSpacing: 0.12,
+                  height: 1.3,
                 ),
               ),
             ),
@@ -805,7 +857,7 @@ class _MetricChipWidget extends StatelessWidget {
             textAlign: TextAlign.center,
             maxLines: 2,
             style: AppTypography.inter(
-              color: Colors.white.withValues(alpha: 0.70),
+              color: Colors.white.withValues(alpha: 0.78),
               fontSize: 10.5,
               fontWeight: FontWeight.w500,
               height: 1.2,

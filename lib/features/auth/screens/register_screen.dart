@@ -35,9 +35,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _passwordFocus = FocusNode();
   bool _loading = false;
   bool _loadingGoogle = false;
   bool _showPassword = false;
+  bool _passwordFocused = false;
   String? _error;
 
   @override
@@ -45,6 +47,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.initState();
     _passwordController.addListener(() {
       if (mounted) setState(() {});
+    });
+    _passwordFocus.addListener(() {
+      if (!mounted) return;
+      setState(() => _passwordFocused = _passwordFocus.hasFocus);
     });
   }
 
@@ -54,6 +60,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _phoneController.dispose();
+    _passwordFocus.dispose();
     super.dispose();
   }
 
@@ -262,6 +269,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     icon: Icons.lock_outline_rounded,
                     obscureText: !_showPassword,
                     textInputAction: TextInputAction.next,
+                    focusNode: _passwordFocus,
                     validator: (value) {
                       if (value == null || value.length < 8) {
                         return 'A senha precisa ter no mínimo 8 caracteres.';
@@ -278,13 +286,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         _showPassword
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: Colors.white.withValues(alpha: 0.72),
                         size: 18,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  PasswordStrengthMeter(password: _passwordController.text),
+                  if (_passwordFocused || _passwordController.text.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    PasswordStrengthMeter(password: _passwordController.text),
+                  ],
                   const SizedBox(height: 12),
                   AuthField(
                     label: 'Telefone / WhatsApp',

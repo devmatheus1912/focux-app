@@ -27,15 +27,21 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
   final _emailCtrl = TextEditingController();
   final _senhaCtrl = TextEditingController();
   final _conviteCtrl = TextEditingController();
+  final _senhaFocus = FocusNode();
   bool _loading = false;
   String? _error;
   bool _senhaVisivel = false;
+  bool _senhaFocused = false;
 
   @override
   void initState() {
     super.initState();
     _senhaCtrl.addListener(() {
       if (mounted) setState(() {});
+    });
+    _senhaFocus.addListener(() {
+      if (!mounted) return;
+      setState(() => _senhaFocused = _senhaFocus.hasFocus);
     });
   }
 
@@ -45,6 +51,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
     _emailCtrl.dispose();
     _senhaCtrl.dispose();
     _conviteCtrl.dispose();
+    _senhaFocus.dispose();
     super.dispose();
   }
 
@@ -152,8 +159,9 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                   Text(
                     'Use o código que seu personal enviou e crie sua senha.',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.5),
+                      color: Colors.white.withValues(alpha: 0.78),
                       fontSize: 13.5,
+                      height: 1.4,
                     ),
                   ),
                   if (widget.personalSlug != null) ...[
@@ -233,6 +241,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                     obscureText: !_senhaVisivel,
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) => _submit(),
+                    focusNode: _senhaFocus,
                     validator: (v) {
                       if (v == null || v.isEmpty) {
                         return 'Informe a senha.';
@@ -248,16 +257,18 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                         _senhaVisivel
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: Colors.white.withValues(alpha: 0.72),
                         size: 18,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  PasswordStrengthMeter(
-                    password: _senhaCtrl.text,
-                    minLength: 6,
-                  ),
+                  if (_senhaFocused || _senhaCtrl.text.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    PasswordStrengthMeter(
+                      password: _senhaCtrl.text,
+                      minLength: 6,
+                    ),
+                  ],
                   if (_error != null) ...[
                     const SizedBox(height: TokensStrip.s4),
                     Text(
@@ -283,6 +294,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                     loading: _loading,
                     onPressed: _loading ? null : _submit,
                   ),
+                  SizedBox(height: MediaQuery.paddingOf(context).bottom + 8),
                 ],
               ),
             ),
@@ -333,7 +345,7 @@ class _InviteCodeField extends StatelessWidget {
           decoration: InputDecoration(
             hintText: '• • • • • •',
             hintStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: Colors.white.withValues(alpha: 0.52),
               letterSpacing: 6,
             ),
             filled: true,

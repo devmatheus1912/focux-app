@@ -299,9 +299,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Column(
                   children: [
                     const SizedBox(height: 4),
-                    const AuthLogoMark(width: 188),
-                    const SizedBox(height: 16),
-                    const AuthWordmark(taglineSize: 14.5),
+                    AuthLoginBrandHeader(
+                      isAluno: _isAluno,
+                      taglineSize: 14.5,
+                    ),
                     const SizedBox(height: 26),
                     AuthGlassCard(
                       child: Column(
@@ -319,8 +320,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           const SizedBox(height: 18),
                           AuthRoleToggle(
                             isAluno: _isAluno,
-                            onPersonalTap: () => setState(() => _isAluno = false),
-                            onAlunoTap: () => setState(() => _isAluno = true),
+                            onPersonalTap: () {
+                              if (_isAluno) {
+                                HapticFeedback.selectionClick();
+                                setState(() => _isAluno = false);
+                              }
+                            },
+                            onAlunoTap: () {
+                              if (!_isAluno) {
+                                HapticFeedback.selectionClick();
+                                setState(() => _isAluno = true);
+                              }
+                            },
                           ),
                           const SizedBox(height: 18),
                           AuthField(
@@ -424,7 +435,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 20),
                     GestureDetector(
-                      onTap: () => context.go('/register'),
+                      onTap:
+                          () => context.go(
+                            _isAluno ? '/register/aluno' : '/register',
+                          ),
                       child: RichText(
                         textAlign: TextAlign.center,
                         text: TextSpan(
