@@ -29,6 +29,8 @@ class LandingEditorScreen extends ConsumerStatefulWidget {
       _LandingEditorScreenState();
 }
 
+enum _LeaveChoice { stay, discard, saveAndLeave }
+
 class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
   final _conteudoScroll = ScrollController();
   final _heroSectionKey = GlobalKey();
@@ -134,16 +136,16 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
     super.dispose();
   }
 
-  List<LandingContentIssue> _contentIssues() {
-    return landingContentIssues(
+  List<LandingContentIssue> _contentIssuesForReview() {
+    return landingContentIssuesForReview(
       faq: _faqPayload(),
       primaryCta: _primaryCta.text,
       heroTitle: _heroTitle.text,
     );
   }
 
-  List<LandingContentIssue> _contentIssuesForReview() {
-    return landingContentIssuesForReview(
+  int _contentReviewCount() {
+    return landingContentReviewCount(
       faq: _faqPayload(),
       primaryCta: _primaryCta.text,
       heroTitle: _heroTitle.text,
@@ -316,26 +318,43 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
 
   Future<bool> _confirmLeave() async {
     if (!_dirty) return true;
-    final leave = await showDialog<bool>(
+
+    final scheme = Theme.of(context).colorScheme;
+    final choice = await showDialog<_LeaveChoice>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Descartar alterações?'),
+        title: const Text('Salvar antes de sair?'),
         content: const Text(
-          'Você editou a landing e ainda não salvou. Se sair agora, perde as mudanças.',
+          'Você fez alterações na landing. O que prefere fazer?',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
+            onPressed: () => Navigator.pop(ctx, _LeaveChoice.stay),
             child: const Text('Continuar editando'),
           ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
+          OutlinedButton(
+            onPressed: () => Navigator.pop(ctx, _LeaveChoice.discard),
+            style: OutlinedButton.styleFrom(foregroundColor: scheme.error),
             child: const Text('Sair sem salvar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, _LeaveChoice.saveAndLeave),
+            child: const Text('Salvar e sair'),
           ),
         ],
       ),
     );
-    return leave ?? false;
+
+    switch (choice) {
+      case _LeaveChoice.discard:
+        return true;
+      case _LeaveChoice.saveAndLeave:
+        await _salvar();
+        return !_dirty;
+      case _LeaveChoice.stay:
+      case null:
+        return false;
+    }
   }
 
   Future<bool> _confirmDelete(String label) async {
@@ -738,7 +757,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
           const SizedBox(height: 16),
           LandingChecklistCard(
             items: _checklist,
-            contentIssueCount: _contentIssuesForReview().length,
+            contentIssueCount: _contentReviewCount(),
             onReviewContent: _openContentReview,
             onItemTap: _onChecklistTap,
           ),
@@ -1169,7 +1188,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
               children: [
                 if (_loaded)
                   LandingContentWarningBanner(
-                    issues: _contentIssues(),
+                    reviewCount: _contentReviewCount(),
                     onReview: _openContentReview,
                   ),
                 LandingEditorTabBar(

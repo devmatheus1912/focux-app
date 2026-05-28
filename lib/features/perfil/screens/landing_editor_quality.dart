@@ -163,10 +163,22 @@ List<String> landingContentWarnings({
   ).map((e) => e.message).toList();
 }
 
-String landingContentIssueSummary(List<LandingContentIssue> issues) {
-  if (issues.isEmpty) return '';
-  if (issues.length == 1) return issues.first.message;
-  return '${issues.length} pontos para revisar antes de publicar.';
+String landingContentReviewBannerSummary(int reviewCount) {
+  if (reviewCount <= 0) return '';
+  if (reviewCount == 1) return '1 texto para revisar antes de publicar.';
+  return '$reviewCount textos para revisar antes de publicar.';
+}
+
+int landingContentReviewCount({
+  required List<({String pergunta, String resposta})> faq,
+  required String primaryCta,
+  required String heroTitle,
+}) {
+  return landingContentIssuesForReview(
+    faq: faq,
+    primaryCta: primaryCta,
+    heroTitle: heroTitle,
+  ).length;
 }
 
 String landingReadinessTitle({
@@ -190,9 +202,9 @@ String landingReadinessSubtitle({
     return 'Configuração e textos revisados. Toque em um item para editar.';
   }
   if (contentIssueCount == 1) {
-    return 'Falta 1 revisão de texto antes de publicar.';
+    return 'Falta 1 texto para revisar antes de publicar.';
   }
-  return 'Faltam $contentIssueCount revisões de texto antes de publicar.';
+  return 'Faltam $contentIssueCount textos para revisar antes de publicar.';
 }
 
 bool landingFaqItemHasIssue({

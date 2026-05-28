@@ -86,11 +86,27 @@ void main() {
     );
   });
 
-  test('landingContentIssueSummary stays compact for many issues', () {
-    final summary = landingContentIssueSummary([
-      const LandingContentIssue(id: 'hero', message: 'A'),
-      const LandingContentIssue(id: 'faq', message: 'B'),
-    ]);
-    expect(summary, '2 pontos para revisar antes de publicar.');
+  test('landingContentReviewBannerSummary uses unified text count', () {
+    expect(
+      landingContentReviewBannerSummary(4),
+      '4 textos para revisar antes de publicar.',
+    );
+    expect(
+      landingContentReviewBannerSummary(1),
+      '1 texto para revisar antes de publicar.',
+    );
+  });
+
+  test('landingContentReviewCount matches expanded review list', () {
+    final count = landingContentReviewCount(
+      faq: [
+        (pergunta: 'dadsdad', resposta: 'ok'),
+        (pergunta: 'teste', resposta: 'abc'),
+        (pergunta: 'real?', resposta: 'sim'),
+      ],
+      primaryCta: 'Quero minha avaliacao',
+      heroTitle: 'Transforme seu corpo',
+    );
+    expect(count, 3);
   });
 }

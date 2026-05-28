@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/config/env.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/feature_gate.dart';
@@ -55,7 +56,7 @@ class _WhiteLabelSettingsScreenState extends ConsumerState<WhiteLabelSettingsScr
         landingModo: _landingModo,
       );
       ref.invalidate(whiteLabelConfigProvider);
-      if (mounted) FeedbackHelper.showSuccess(context, 'White-label atualizado');
+      if (mounted) FeedbackHelper.showSuccess(context, 'Configurações salvas');
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, 'Não foi possível salvar');
     } finally {
@@ -179,11 +180,18 @@ class _WhiteLabelSettingsScreenState extends ConsumerState<WhiteLabelSettingsScr
                   label: const Text('Verificar domínio'),
                 ),
                 const SizedBox(height: 24),
-                _sectionTitle('Modo de vendas'),
+                _sectionTitle('Como você vende'),
                 SegmentedButton<String>(
+                  showSelectedIcon: false,
                   segments: const [
-                    ButtonSegment(value: 'CAPTURA', label: Text('Captura')),
-                    ButtonSegment(value: 'SITE', label: Text('Site completo')),
+                    ButtonSegment(
+                      value: 'CAPTURA',
+                      label: Text('Formulário rápido'),
+                    ),
+                    ButtonSegment(
+                      value: 'SITE',
+                      label: Text('Página completa'),
+                    ),
                   ],
                   selected: {_landingModo},
                   onSelectionChanged: (s) => setState(() => _landingModo = s.first),
@@ -191,13 +199,36 @@ class _WhiteLabelSettingsScreenState extends ConsumerState<WhiteLabelSettingsScr
                 const SizedBox(height: 8),
                 Text(
                   _landingModo == 'CAPTURA'
-                      ? 'Priorize o link curto de captura de leads no dashboard.'
-                      : 'Landing HTML completa em /p/{slug} ou domínio custom.',
+                      ? 'Destaque o link curto de captura no dashboard e anúncios.'
+                      : 'Destaque a página completa com foto, planos e depoimentos.',
                   style: TextStyle(color: chrome.mute, fontSize: 13),
                 ),
                 const SizedBox(height: 16),
-                _linkTile('Link Captura', config.publicCapturaUrl),
-                _linkTile('Link Landing', config.publicLandingUrl),
+                if (config.slug != null && config.slug!.isNotEmpty) ...[
+                  _linkTile(
+                    title: 'Página completa',
+                    hint: 'Ideal para Instagram, WhatsApp e bio.',
+                    displayLabel: Env.landingPageDisplayLabel(config.slug!),
+                    copyUrl: config.publicLandingUrl.isNotEmpty
+                        ? config.publicLandingUrl
+                        : Env.landingPageUrl(config.slug!),
+                  ),
+                  _linkTile(
+                    title: 'Formulário rápido',
+                    hint: 'Só nome e WhatsApp — use em anúncios.',
+                    displayLabel: Env.capturaPageDisplayLabel(config.slug!),
+                    copyUrl: config.publicCapturaUrl.isNotEmpty
+                        ? config.publicCapturaUrl
+                        : Env.capturaPageUrl(config.slug!),
+                  ),
+                ] else ...[
+                  _linkTile(
+                    title: 'Página completa',
+                    hint: 'Configure seu link público no perfil primeiro.',
+                    displayLabel: 'focux.app/p/seu-nome',
+                    copyUrl: config.publicLandingUrl,
+                  ),
+                ],
                 const SizedBox(height: 24),
                 _sectionTitle('Checklist máquina de vendas (${config.checklistScore}/${config.checklist.length})'),
                 ...config.checklist.map(
@@ -217,7 +248,7 @@ class _WhiteLabelSettingsScreenState extends ConsumerState<WhiteLabelSettingsScr
                           width: 20,
                           child: FxLoading(strokeWidth: 2),
                         )
-                      : const Text('Salvar white-label'),
+                      : const Text('Salvar configurações'),
                 ),
               ],
             );
@@ -235,18 +266,60 @@ class _WhiteLabelSettingsScreenState extends ConsumerState<WhiteLabelSettingsScr
     ),
   );
 
-  Widget _linkTile(String label, String url) {
-    if (url.isEmpty) return const SizedBox.shrink();
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      title: Text(label, style: const TextStyle(fontSize: 14)),
-      subtitle: Text(url, style: TextStyle(color: EagleTokens.inkMute, fontSize: 12)),
-      trailing: IconButton(
-        icon: const Icon(Icons.copy_rounded, size: 20),
-        onPressed: () {
-          Clipboard.setData(ClipboardData(text: url));
-          FeedbackHelper.showSuccess(context, 'Link copiado');
-        },
+  Widget _linkTile({
+    required String title,
+    required String hint,
+    required String displayLabel,
+    required String copyUrl,
+  }) {
+    if (copyUrl.isEmpty && displayLabel.isEmpty) return const SizedBox.shrink();
+    final chrome = ShellChrome.of(context);
+    final urlToCopy = copyUrl.isNotEmpty ? copyUrl : displayLabel;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: chrome.line),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+            const SizedBox(height: 2),
+            Text(hint, style: TextStyle(color: chrome.mute, fontSize: 12, height: 1.35)),
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                color: chrome.cardFill,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                displayLabel,
+                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: urlToCopy.isEmpty
+                    ? null
+                    : () {
+                        Clipboard.setData(ClipboardData(text: urlToCopy));
+                        FeedbackHelper.showSuccess(context, 'Link copiado');
+                      },
+                icon: const Icon(Icons.copy_rounded, size: 18),
+                label: const Text('Copiar link'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

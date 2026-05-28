@@ -170,47 +170,17 @@ class LandingChecklistCard extends StatelessWidget {
                   fontSize: 13,
                 ),
               ),
-              if (contentIssueCount > 0) ...[
-                const SizedBox(height: 10),
-                Material(
-                  color: const Color(0xFFFFF4D6),
-                  borderRadius: BorderRadius.circular(TokensStrip.rMd),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(TokensStrip.rMd),
-                    onTap: onReviewContent,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.rate_review_outlined,
-                            size: 18,
-                            color: Color(0xFF9A6700),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              contentIssueCount == 1
-                                  ? '1 revisão de texto pendente'
-                                  : '$contentIssueCount revisões de texto pendentes',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF7A5200),
-                              ),
-                            ),
-                          ),
-                          if (onReviewContent != null)
-                            TextButton(
-                              onPressed: onReviewContent,
-                              style: TextButton.styleFrom(
-                                visualDensity: VisualDensity.compact,
-                                padding: const EdgeInsets.symmetric(horizontal: 6),
-                              ),
-                              child: const Text('Revisar'),
-                            ),
-                        ],
-                      ),
+              if (contentIssueCount > 0 && onReviewContent != null) ...[
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: onReviewContent,
+                    icon: const Icon(Icons.rate_review_outlined, size: 18),
+                    label: Text(
+                      contentIssueCount == 1
+                          ? 'Revisar 1 texto'
+                          : 'Revisar $contentIssueCount textos',
                     ),
                   ),
                 ),
@@ -344,11 +314,11 @@ class LandingChecklistSkeleton extends StatelessWidget {
 class LandingContentWarningBanner extends StatelessWidget {
   const LandingContentWarningBanner({
     super.key,
-    required this.issues,
+    required this.reviewCount,
     this.onReview,
   });
 
-  final List<LandingContentIssue> issues;
+  final int reviewCount;
   final VoidCallback? onReview;
 
   static const _bg = Color(0xFFFFF4D6);
@@ -358,8 +328,8 @@ class LandingContentWarningBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (issues.isEmpty) return const SizedBox.shrink();
-    final summary = landingContentIssueSummary(issues);
+    if (reviewCount <= 0) return const SizedBox.shrink();
+    final summary = landingContentReviewBannerSummary(reviewCount);
 
     return Semantics(
       liveRegion: true,
