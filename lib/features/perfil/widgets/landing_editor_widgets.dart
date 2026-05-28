@@ -823,7 +823,7 @@ class _LandingEditorTabChip extends StatelessWidget {
                   fontSize: 13,
                   fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
                   color: selected
-                      ? scheme.onPrimary
+                      ? Colors.white
                       : scheme.onSurface.withValues(alpha: 0.78),
                 ),
               ),
@@ -1321,47 +1321,204 @@ Future<void> showLandingTemplatesSheet(
   required bool applying,
   required ValueChanged<LandingCompleteTemplate> onApplyTemplate,
 }) {
-  return showModalBottomSheet<void>(
+  HapticFeedback.lightImpact();
+  return showGeneralDialog<void>(
     context: context,
-    isScrollControlled: true,
-    showDragHandle: true,
-    useSafeArea: true,
-    builder: (ctx) {
-      final maxHeight = MediaQuery.sizeOf(ctx).height * 0.88;
-      return SafeArea(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: maxHeight),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-            child: LandingSectionTemplatesPanel(
-              sectionOrder: sectionOrder,
-              templates: templates,
-              applying: applying,
-              onApplyTemplate: (template) {
-                Navigator.pop(ctx);
-                onApplyTemplate(template);
-              },
-            ),
-          ),
+    barrierDismissible: true,
+    barrierLabel: 'Fechar catálogo de modelos',
+    barrierColor: Colors.black.withValues(alpha: 0.45),
+    transitionDuration: const Duration(milliseconds: 280),
+    pageBuilder: (ctx, _, __) {
+      return Align(
+        alignment: Alignment.bottomCenter,
+        child: _LandingTemplatesSheet(
+          sectionOrder: sectionOrder,
+          templates: templates,
+          applying: applying,
+          onApplyTemplate: (template) {
+            Navigator.pop(ctx);
+            onApplyTemplate(template);
+          },
+          onClose: () => Navigator.pop(ctx),
+        ),
+      );
+    },
+    transitionBuilder: (ctx, animation, _, child) {
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.easeInCubic,
+      );
+      return FadeTransition(
+        opacity: curved,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 0.12),
+            end: Offset.zero,
+          ).animate(curved),
+          child: child,
         ),
       );
     },
   );
 }
 
-class LandingSectionTemplatesPanel extends StatelessWidget {
-  const LandingSectionTemplatesPanel({
-    super.key,
+class _LandingTemplatesSheet extends StatelessWidget {
+  const _LandingTemplatesSheet({
     required this.sectionOrder,
     required this.templates,
+    required this.applying,
     required this.onApplyTemplate,
-    this.applying = false,
+    required this.onClose,
   });
 
   final List<String> sectionOrder;
   final List<LandingCompleteTemplate> templates;
-  final ValueChanged<LandingCompleteTemplate> onApplyTemplate;
   final bool applying;
+  final ValueChanged<LandingCompleteTemplate> onApplyTemplate;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final sheetHeight = MediaQuery.sizeOf(context).height * 0.88;
+    final defaultTemplate = templates.isNotEmpty ? templates.first : null;
+
+    return Material(
+      color: scheme.surface,
+      elevation: 16,
+      shadowColor: Colors.black.withValues(alpha: 0.25),
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+      clipBehavior: Clip.antiAlias,
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: sheetHeight,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 10),
+              Center(
+                child: Semantics(
+                  label: 'Arraste para fechar catálogo de modelos',
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: scheme.onSurface.withValues(alpha: 0.22),
+                      borderRadius: BorderRadius.circular(99),
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 14, 12, 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Semantics(
+                        header: true,
+                        label:
+                            'Catálogo de modelos da landing. '
+                            'Oito seções editáveis e modelos por nicho.',
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Catálogo de modelos',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 18,
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '8 seções · padrão Focux'
+                                  '${templates.length > 1 ? ' + ${templates.length - 1} nichos' : ''}',
+                              style: TextStyle(
+                                fontSize: 13,
+                                height: 1.35,
+                                color: scheme.onSurface.withValues(alpha: 0.72),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Fechar catálogo',
+                      onPressed: onClose,
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  children: [
+                    Text(
+                      'Sua página tem 8 seções editáveis. Use um modelo para preencher textos de abertura, serviços, FAQ e botões.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        height: 1.35,
+                        color: scheme.onSurface.withValues(alpha: 0.72),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    LandingTemplateCatalogSections(sectionOrder: sectionOrder),
+                    if (templates.length > 1) ...[
+                      const SizedBox(height: 8),
+                      LandingTemplateNichePicker(
+                        templates: templates,
+                        applying: applying,
+                        onApplyTemplate: onApplyTemplate,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              Material(
+                elevation: 10,
+                color: scheme.surface,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+                  child: Semantics(
+                    button: true,
+                    label: defaultTemplate == null
+                        ? 'Aplicar modelo padrão Focux'
+                        : 'Aplicar ${defaultTemplate.label}',
+                    enabled: !applying && defaultTemplate != null,
+                    child: OutlinedButton.icon(
+                      onPressed: applying || defaultTemplate == null
+                          ? null
+                          : () => onApplyTemplate(defaultTemplate),
+                      icon: applying
+                          ? const FxLoading(size: 16, strokeWidth: 2)
+                          : const Icon(Icons.auto_fix_high_outlined, size: 18),
+                      label: Text(
+                        defaultTemplate == null
+                            ? 'Aplicar modelo padrão Focux'
+                            : 'Aplicar ${defaultTemplate.label}',
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class LandingTemplateCatalogSections extends StatelessWidget {
+  const LandingTemplateCatalogSections({super.key, required this.sectionOrder});
+
+  final List<String> sectionOrder;
 
   IconData _iconFor(String name) {
     return switch (name) {
@@ -1381,6 +1538,140 @@ class LandingSectionTemplatesPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final activeKeys = sectionOrder.map(normalizeLandingSectionKey).toSet();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final section in landingSectionTemplateCatalog) ...[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                _iconFor(section.iconName),
+                size: 18,
+                color: activeKeys.contains(section.key)
+                    ? const Color(0xFF0F9D7A)
+                    : scheme.outline,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      section.title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      section.description,
+                      style: TextStyle(
+                        fontSize: 12,
+                        height: 1.3,
+                        color: scheme.onSurface.withValues(alpha: 0.68),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Ex.: ${section.example}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        height: 1.3,
+                        fontStyle: FontStyle.italic,
+                        color: scheme.onSurface.withValues(alpha: 0.58),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+        ],
+      ],
+    );
+  }
+}
+
+class LandingTemplateNichePicker extends StatelessWidget {
+  const LandingTemplateNichePicker({
+    super.key,
+    required this.templates,
+    required this.applying,
+    required this.onApplyTemplate,
+  });
+
+  final List<LandingCompleteTemplate> templates;
+  final bool applying;
+  final ValueChanged<LandingCompleteTemplate> onApplyTemplate;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Modelos por nicho',
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 13,
+            color: scheme.onSurface.withValues(alpha: 0.88),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Preenche abertura, serviços, dúvidas, botões e ordem das seções.',
+          style: TextStyle(
+            fontSize: 12,
+            height: 1.35,
+            color: scheme.onSurface.withValues(alpha: 0.68),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final template in templates.skip(1))
+              Semantics(
+                button: true,
+                label: 'Aplicar modelo ${template.label}',
+                enabled: !applying,
+                child: ActionChip(
+                  label: Text(template.label),
+                  onPressed:
+                      applying ? null : () => onApplyTemplate(template),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class LandingSectionTemplatesPanel extends StatelessWidget {
+  const LandingSectionTemplatesPanel({
+    super.key,
+    required this.sectionOrder,
+    required this.templates,
+    required this.onApplyTemplate,
+    this.applying = false,
+  });
+
+  final List<String> sectionOrder;
+  final List<LandingCompleteTemplate> templates;
+  final ValueChanged<LandingCompleteTemplate> onApplyTemplate;
+  final bool applying;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
 
     return Card(
       elevation: 0,
@@ -1403,59 +1694,11 @@ class LandingSectionTemplatesPanel extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 height: 1.35,
-                color: scheme.onSurface.withValues(alpha: 0.68),
+                color: scheme.onSurface.withValues(alpha: 0.72),
               ),
             ),
             const SizedBox(height: 12),
-            for (final section in landingSectionTemplateCatalog) ...[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    _iconFor(section.iconName),
-                    size: 18,
-                    color: activeKeys.contains(section.key)
-                        ? const Color(0xFF0F9D7A)
-                        : scheme.outline,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          section.title,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          section.description,
-                          style: TextStyle(
-                            fontSize: 12,
-                            height: 1.3,
-                            color: scheme.onSurface.withValues(alpha: 0.62),
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Ex.: ${section.example}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            height: 1.3,
-                            fontStyle: FontStyle.italic,
-                            color: scheme.onSurface.withValues(alpha: 0.58),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-            ],
+            LandingTemplateCatalogSections(sectionOrder: sectionOrder),
             OutlinedButton.icon(
               onPressed: applying || templates.isEmpty
                   ? null
@@ -1469,34 +1712,10 @@ class LandingSectionTemplatesPanel extends StatelessWidget {
             ),
             if (templates.length > 1) ...[
               const SizedBox(height: 14),
-              Text(
-                'Modelos por nicho',
-                style: TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 13,
-                  color: scheme.onSurface.withValues(alpha: 0.85),
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Preenche abertura, serviços, dúvidas, botões e ordem das seções.',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: scheme.onSurface.withValues(alpha: 0.62),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final template in templates.skip(1))
-                    ActionChip(
-                      label: Text(template.label),
-                      onPressed:
-                          applying ? null : () => onApplyTemplate(template),
-                    ),
-                ],
+              LandingTemplateNichePicker(
+                templates: templates,
+                applying: applying,
+                onApplyTemplate: onApplyTemplate,
               ),
             ],
           ],
