@@ -54,9 +54,9 @@ final setupStepCatalog = [
   ),
   SetupStepCatalogEntry(
     id: 'pacote',
-    title: 'Crie seu primeiro pacote',
+    title: 'Crie seu primeiro plano',
     description:
-        'Monte um pacote de serviços para vender online e captar leads.',
+        'Monte um plano com preço e compartilhe o link no WhatsApp — como uma página sua na internet.',
     icon: 'inventory_2',
     actionRoute: '/pacotes',
     estimatedMinutes: 2,
