@@ -9,6 +9,7 @@ import '../data/landing_growth_repository.dart';
 import '../screens/landing_editor_checklist.dart';
 import '../screens/landing_editor_quality.dart';
 import '../screens/landing_editor_sections.dart';
+import '../screens/landing_section_templates.dart';
 
 class LandingLinkCard extends StatelessWidget {
   const LandingLinkCard({
@@ -122,12 +123,16 @@ class LandingChecklistCard extends StatelessWidget {
     required this.items,
     this.onItemTap,
     this.contentIssueCount = 0,
+    this.contentReviewScope = 0,
+    this.contentReviewedCount = 0,
     this.onReviewContent,
   });
 
   final List<LandingChecklistItem> items;
   final ValueChanged<LandingChecklistItem>? onItemTap;
   final int contentIssueCount;
+  final int contentReviewScope;
+  final int contentReviewedCount;
   final VoidCallback? onReviewContent;
 
   @override
@@ -143,17 +148,28 @@ class LandingChecklistCard extends StatelessWidget {
         configTotal: items.length,
         contentIssueCount: contentIssueCount,
       ),
-      child: Card(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(TokensStrip.rLg),
-          side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.6)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 16, 12, 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+        child: Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(TokensStrip.rLg),
+            side: BorderSide(
+              color: allReady
+                  ? const Color(0xFF0F9D7A).withValues(alpha: 0.55)
+                  : scheme.outlineVariant.withValues(alpha: 0.6),
+              width: allReady ? 1.5 : 1,
+            ),
+          ),
+          color: allReady
+              ? const Color(0xFF0F9D7A).withValues(alpha: 0.06)
+              : scheme.surface,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 16, 12, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               Text(
                 landingReadinessTitle(
                   configDone: done,
@@ -164,11 +180,22 @@ class LandingChecklistCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                landingReadinessSubtitle(contentIssueCount: contentIssueCount),
+                landingReadinessSubtitle(
+                  contentIssueCount: contentIssueCount,
+                  configDone: done,
+                  configTotal: items.length,
+                ),
                 style: TextStyle(
                   color: scheme.onSurface.withValues(alpha: 0.65),
                   fontSize: 13,
                 ),
+              ),
+              const SizedBox(height: 12),
+              LandingReadinessProgressBars(
+                configDone: done,
+                configTotal: items.length,
+                textsReviewed: contentReviewedCount,
+                textsTotal: contentReviewScope,
               ),
               if (contentIssueCount > 0 && onReviewContent != null) ...[
                 const SizedBox(height: 8),
@@ -207,10 +234,11 @@ class LandingChecklistCard extends StatelessWidget {
               ],
               const SizedBox(height: 8),
               ...items.map((item) {
-              final label = landingChecklistLabel(item.id, item.label);
-              final tappable = onItemTap != null && landingChecklistTarget(item.id) != null;
+                final label = landingChecklistLabel(item.id, item.label);
+                final tappable =
+                    onItemTap != null && landingChecklistTarget(item.id) != null;
 
-              return ListTile(
+                return ListTile(
                 contentPadding: EdgeInsets.zero,
                 dense: true,
                 onTap: tappable ? () => onItemTap!(item) : null,
@@ -243,9 +271,10 @@ class LandingChecklistCard extends StatelessWidget {
                         color: scheme.onSurface.withValues(alpha: 0.35),
                       )
                     : null,
-              );
-            }),
-          ],
+                );
+              }),
+            ],
+          ),
         ),
       ),
     ),
@@ -398,6 +427,7 @@ Future<void> showLandingContentReviewSheet(
   BuildContext context, {
   required List<LandingContentIssue> issues,
   required ValueChanged<LandingContentIssue> onIssueTap,
+  VoidCallback? onFocusMode,
 }) {
   final scheme = Theme.of(context).colorScheme;
 
@@ -421,12 +451,23 @@ Future<void> showLandingContentReviewSheet(
               ),
               const SizedBox(height: 4),
               Text(
-                'Toque em um item para ir direto ao campo.',
+                'Toque em um item ou use o modo foco para ver só o pendente.',
                 style: TextStyle(
                   fontSize: 13,
                   color: scheme.onSurface.withValues(alpha: 0.65),
                 ),
               ),
+              if (onFocusMode != null) ...[
+                const SizedBox(height: 12),
+                FilledButton.tonalIcon(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    onFocusMode();
+                  },
+                  icon: const Icon(Icons.center_focus_strong_outlined, size: 18),
+                  label: const Text('Modo foco — só textos pendentes'),
+                ),
+              ],
               const SizedBox(height: 12),
               ConstrainedBox(
                 constraints: BoxConstraints(maxHeight: maxHeight),
@@ -659,16 +700,88 @@ class LandingEditorTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, TokensStrip.s4, 8),
-      child: SegmentedButton<int>(
-        showSelectedIcon: false,
-        segments: [
-          for (var i = 0; i < labels.length; i++)
-            ButtonSegment(value: i, label: Text(labels[i])),
-        ],
-        selected: {index},
-        onSelectionChanged: (value) => onChanged(value.first),
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerHighest.withValues(alpha: 0.55),
+          borderRadius: BorderRadius.circular(TokensStrip.rMd),
+          border: Border.all(
+            color: scheme.outlineVariant.withValues(alpha: 0.45),
+          ),
+        ),
+        child: Row(
+          children: [
+            for (var i = 0; i < labels.length; i++)
+              Expanded(
+                child: _LandingEditorTabChip(
+                  label: labels[i],
+                  selected: index == i,
+                  onTap: () => onChanged(i),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LandingEditorTabChip extends StatelessWidget {
+  const _LandingEditorTabChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(TokensStrip.rMd - 2),
+          onTap: onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              color: selected ? scheme.primary : Colors.transparent,
+              borderRadius: BorderRadius.circular(TokensStrip.rMd - 2),
+              boxShadow: selected
+                  ? [
+                      BoxShadow(
+                        color: scheme.primary.withValues(alpha: 0.28),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                color: selected ? scheme.onPrimary : scheme.onSurface.withValues(alpha: 0.72),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -819,6 +932,294 @@ class LandingSectionOrderTile extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class LandingReadinessProgressBars extends StatelessWidget {
+  const LandingReadinessProgressBars({
+    super.key,
+    required this.configDone,
+    required this.configTotal,
+    required this.textsReviewed,
+    required this.textsTotal,
+  });
+
+  final int configDone;
+  final int configTotal;
+  final int textsReviewed;
+  final int textsTotal;
+
+  @override
+  Widget build(BuildContext context) {
+    const ready = Color(0xFF0F9D7A);
+    final scheme = Theme.of(context).colorScheme;
+
+    return Column(
+      children: [
+        _ProgressRow(
+          label: 'Configuração',
+          value: configTotal == 0 ? 0 : configDone / configTotal,
+          caption: '$configDone/$configTotal',
+          color: ready,
+          track: scheme.surfaceContainerHighest,
+        ),
+        const SizedBox(height: 8),
+        _ProgressRow(
+          label: 'Textos revisados',
+          value: textsTotal == 0 ? 1 : textsReviewed / textsTotal,
+          caption: '$textsReviewed/$textsTotal',
+          color: ready,
+          track: scheme.surfaceContainerHighest,
+        ),
+      ],
+    );
+  }
+}
+
+class _ProgressRow extends StatelessWidget {
+  const _ProgressRow({
+    required this.label,
+    required this.value,
+    required this.caption,
+    required this.color,
+    required this.track,
+  });
+
+  final String label;
+  final double value;
+  final String caption;
+  final Color color;
+  final Color track;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: '$label $caption',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                label,
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+              ),
+              const Spacer(),
+              Text(
+                caption,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(99),
+            child: LinearProgressIndicator(
+              value: value.clamp(0, 1),
+              minHeight: 6,
+              backgroundColor: track.withValues(alpha: 0.85),
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class LandingReviewFocusBanner extends StatelessWidget {
+  const LandingReviewFocusBanner({
+    super.key,
+    required this.pendingCount,
+    required this.onExit,
+  });
+
+  final int pendingCount;
+  final VoidCallback onExit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.45),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
+        child: Row(
+          children: [
+            Icon(
+              Icons.center_focus_strong_outlined,
+              size: 20,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                pendingCount == 1
+                    ? 'Modo foco · 1 texto pendente'
+                    : 'Modo foco · $pendingCount textos pendentes',
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+              ),
+            ),
+            TextButton(onPressed: onExit, child: const Text('Ver tudo')),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class LandingSectionTemplatesPanel extends StatelessWidget {
+  const LandingSectionTemplatesPanel({
+    super.key,
+    required this.sectionOrder,
+    required this.onApplyDefault,
+    required this.onApplyPreset,
+    required this.presets,
+    this.applying = false,
+  });
+
+  final List<String> sectionOrder;
+  final VoidCallback onApplyDefault;
+  final ValueChanged<LandingNichePreset> onApplyPreset;
+  final List<LandingNichePreset> presets;
+  final bool applying;
+
+  IconData _iconFor(String name) {
+    return switch (name) {
+      'person' => Icons.person_outline_rounded,
+      'fitness' => Icons.fitness_center_outlined,
+      'route' => Icons.route_outlined,
+      'payments' => Icons.payments_outlined,
+      'reviews' => Icons.reviews_outlined,
+      'photo_library' => Icons.photo_library_outlined,
+      'help' => Icons.help_outline_rounded,
+      'chat' => Icons.chat_bubble_outline_rounded,
+      _ => Icons.view_agenda_outlined,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final activeKeys = sectionOrder.map(normalizeLandingSectionKey).toSet();
+
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(TokensStrip.rLg),
+        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.6)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 16, 14, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Modelo completo da landing',
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Sua página tem 8 seções editáveis. Use um modelo para preencher textos de abertura, serviços, FAQ e botões.',
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.35,
+                color: scheme.onSurface.withValues(alpha: 0.68),
+              ),
+            ),
+            const SizedBox(height: 12),
+            for (final section in landingSectionTemplateCatalog) ...[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    _iconFor(section.iconName),
+                    size: 18,
+                    color: activeKeys.contains(section.key)
+                        ? const Color(0xFF0F9D7A)
+                        : scheme.outline,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          section.title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          section.description,
+                          style: TextStyle(
+                            fontSize: 12,
+                            height: 1.3,
+                            color: scheme.onSurface.withValues(alpha: 0.62),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Ex.: ${section.example}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            height: 1.25,
+                            fontStyle: FontStyle.italic,
+                            color: scheme.onSurface.withValues(alpha: 0.5),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+            ],
+            OutlinedButton.icon(
+              onPressed: applying ? null : onApplyDefault,
+              icon: const Icon(Icons.auto_fix_high_outlined, size: 18),
+              label: const Text('Aplicar modelo padrão Focux'),
+            ),
+            if (presets.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              Text(
+                'Modelos por nicho',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                  color: scheme.onSurface.withValues(alpha: 0.85),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Preenche abertura, serviços, dúvidas, botões e ordem das seções.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: scheme.onSurface.withValues(alpha: 0.62),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final preset in presets)
+                    ActionChip(
+                      label: Text(preset.label),
+                      onPressed: applying ? null : () => onApplyPreset(preset),
+                    ),
+                ],
+              ),
+            ],
+          ],
         ),
       ),
     );

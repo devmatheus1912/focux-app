@@ -276,6 +276,7 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
                                 icon: Icons.format_quote_outlined,
                                 hint: 'Transformando vidas através do movimento',
                                 maxLength: 200,
+                                maxLines: 2,
                               ),
                             ],
                           ),

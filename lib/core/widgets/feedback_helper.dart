@@ -15,10 +15,6 @@ class FeedbackHelper {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  static void hideCurrentSnackBar(BuildContext context) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-  }
-
   static void showSuccess(BuildContext context, String message) {
     HapticFeedback.mediumImpact();
     _showSnackbar(

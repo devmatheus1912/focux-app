@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../auth/providers/auth_provider.dart';
+import 'perfil_repository.dart';
 
 class LandingNichePreset {
   final String id;
@@ -8,6 +9,12 @@ class LandingNichePreset {
   final String heroTitle;
   final String heroSubtitle;
   final String primaryCta;
+  final String offerCta;
+  final String finalCta;
+  final String contactCta;
+  final List<LandingServiceItem> servicos;
+  final List<LandingFaqItem> faq;
+  final List<String> sectionOrder;
 
   LandingNichePreset({
     required this.id,
@@ -15,6 +22,12 @@ class LandingNichePreset {
     required this.heroTitle,
     required this.heroSubtitle,
     required this.primaryCta,
+    this.offerCta = '',
+    this.finalCta = '',
+    this.contactCta = '',
+    this.servicos = const [],
+    this.faq = const [],
+    this.sectionOrder = const [],
   });
 
   factory LandingNichePreset.fromJson(Map<String, dynamic> j) => LandingNichePreset(
@@ -23,6 +36,16 @@ class LandingNichePreset {
     heroTitle: j['heroTitle'] as String? ?? '',
     heroSubtitle: j['heroSubtitle'] as String? ?? '',
     primaryCta: j['primaryCta'] as String? ?? '',
+    offerCta: j['offerCta'] as String? ?? '',
+    finalCta: j['finalCta'] as String? ?? '',
+    contactCta: j['contactCta'] as String? ?? '',
+    servicos: (j['servicos'] as List<dynamic>? ?? [])
+        .map((e) => LandingServiceItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    faq: (j['faq'] as List<dynamic>? ?? [])
+        .map((e) => LandingFaqItem.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    sectionOrder: (j['sectionOrder'] as List<dynamic>? ?? []).cast<String>(),
   );
 }
 

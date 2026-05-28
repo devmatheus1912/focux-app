@@ -138,6 +138,8 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   Text(
                     subtitle!,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TokensStrip.bodyMuted(
                       color: mute,
                       fontFamily:

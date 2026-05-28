@@ -102,7 +102,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
     return FxShellScaffold(
       appBar: FxShellAppBar(
         title: 'Planos & link de vendas',
-        subtitle: 'Crie planos com preço e compartilhe no WhatsApp',
+        subtitle: 'Planos com preço e link para WhatsApp',
         actions: [
           IconButton(
             icon: const Icon(Icons.link_rounded),

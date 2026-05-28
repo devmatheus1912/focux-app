@@ -75,14 +75,44 @@ void main() {
     );
   });
 
+  test('landingPolishShortText trims and capitalizes', () {
+    expect(landingPolishShortText('  agendar avaliacao  '), 'Agendar avaliacao');
+    expect(landingPolishShortText(''), '');
+  });
+
+  test('landingPolishPreviewHint suggests save-time polish', () {
+    expect(landingPolishPreviewHint('qualquer faixa etaria'), isNotNull);
+    expect(landingPolishPreviewHint('Consultoria online'), isNull);
+  });
+
   test('landingReadinessTitle reflects pending content review', () {
     expect(
       landingReadinessTitle(configDone: 7, configTotal: 7, contentIssueCount: 2),
-      'Quase pronto · 7/7 configurados',
+      'Configuração completa · faltam 2 textos',
     );
     expect(
       landingReadinessTitle(configDone: 7, configTotal: 7, contentIssueCount: 0),
-      'Pronto para vender (7/7)',
+      'Pronto para vender',
+    );
+    expect(
+      landingReadinessTitle(configDone: 5, configTotal: 7, contentIssueCount: 0),
+      'Em preparação · 5/7 itens',
+    );
+  });
+
+  test('landingContentReviewScope and reviewed counts align', () {
+    final faq = [
+      (pergunta: 'dadsdad', resposta: 'ok'),
+      (pergunta: 'real?', resposta: 'sim'),
+    ];
+    expect(landingContentReviewScopeCount(faq: faq), 4);
+    expect(
+      landingContentReviewedCount(
+        faq: faq,
+        primaryCta: 'Agendar avaliação',
+        heroTitle: 'Transforme seu corpo',
+      ),
+      3,
     );
   });
 

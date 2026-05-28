@@ -151,18 +151,6 @@ List<LandingContentIssue> landingContentIssuesForReview({
   return expanded;
 }
 
-List<String> landingContentWarnings({
-  required List<({String pergunta, String resposta})> faq,
-  required String primaryCta,
-  required String heroTitle,
-}) {
-  return landingContentIssues(
-    faq: faq,
-    primaryCta: primaryCta,
-    heroTitle: heroTitle,
-  ).map((e) => e.message).toList();
-}
-
 String landingContentReviewBannerSummary(int reviewCount) {
   if (reviewCount <= 0) return '';
   if (reviewCount == 1) return '1 texto para revisar antes de publicar.';
@@ -187,24 +175,76 @@ String landingReadinessTitle({
   required int contentIssueCount,
 }) {
   if (contentIssueCount == 0 && configDone == configTotal) {
-    return 'Pronto para vender ($configDone/$configTotal)';
+    return 'Pronto para vender';
   }
-  if (contentIssueCount > 0) {
-    return 'Quase pronto · $configDone/$configTotal configurados';
+  if (configDone == configTotal && contentIssueCount > 0) {
+    if (contentIssueCount == 1) {
+      return 'Configuração completa · falta 1 texto';
+    }
+    return 'Configuração completa · faltam $contentIssueCount textos';
   }
-  return 'Pronto para vender ($configDone/$configTotal)';
+  return 'Em preparação · $configDone/$configTotal itens';
 }
 
 String landingReadinessSubtitle({
   required int contentIssueCount,
+  required int configDone,
+  required int configTotal,
 }) {
-  if (contentIssueCount == 0) {
-    return 'Configuração e textos revisados. Toque em um item para editar.';
+  if (contentIssueCount == 0 && configDone == configTotal) {
+    return 'Tudo revisado. Toque em um item para ajustar ou publique agora.';
+  }
+  if (configDone == configTotal && contentIssueCount > 0) {
+    return 'Revise os textos destacados — depois é só publicar.';
   }
   if (contentIssueCount == 1) {
-    return 'Falta 1 texto para revisar antes de publicar.';
+    return 'Complete os itens pendentes e revise 1 texto.';
   }
-  return 'Faltam $contentIssueCount textos para revisar antes de publicar.';
+  if (contentIssueCount > 0) {
+    return 'Complete os itens pendentes e revise $contentIssueCount textos.';
+  }
+  return 'Finalize os itens do checklist para publicar com confiança.';
+}
+
+int landingContentReviewScopeCount({
+  required List<({String pergunta, String resposta})> faq,
+}) {
+  var count = 2;
+  for (final item in faq) {
+    if (item.pergunta.trim().isNotEmpty || item.resposta.trim().isNotEmpty) {
+      count++;
+    }
+  }
+  return count;
+}
+
+int landingContentReviewedCount({
+  required List<({String pergunta, String resposta})> faq,
+  required String primaryCta,
+  required String heroTitle,
+}) {
+  final scope = landingContentReviewScopeCount(faq: faq);
+  final pending = landingContentReviewCount(
+    faq: faq,
+    primaryCta: primaryCta,
+    heroTitle: heroTitle,
+  );
+  return (scope - pending).clamp(0, scope);
+}
+
+String landingPolishShortText(String text) {
+  final trimmed = text.trim();
+  if (trimmed.isEmpty) return trimmed;
+  final lower = trimmed.toLowerCase();
+  return lower[0].toUpperCase() + lower.substring(1);
+}
+
+String? landingPolishPreviewHint(String text) {
+  final trimmed = text.trim();
+  if (trimmed.isEmpty) return null;
+  final polished = landingPolishShortText(trimmed);
+  if (polished == trimmed) return null;
+  return 'Ao salvar: “$polished”';
 }
 
 bool landingFaqItemHasIssue({

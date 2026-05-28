@@ -457,26 +457,3 @@ class _FxStaggerItemState extends State<FxStaggerItem>
     );
   }
 }
-
-/// Animated scale wrapper for selection state changes.
-/// Provides subtle scale feedback when items are selected/deselected.
-class FxSelectionScale extends StatelessWidget {
-  final bool selected;
-  final Widget child;
-
-  const FxSelectionScale({
-    super.key,
-    required this.selected,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedScale(
-      scale: selected ? 0.97 : 1.0,
-      duration: const Duration(milliseconds: 180),
-      curve: Curves.easeOutCubic,
-      child: child,
-    );
-  }
-}

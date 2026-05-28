@@ -10,6 +10,7 @@ import '../../../core/config/env.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_celebration_overlay.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -20,6 +21,7 @@ import '../widgets/landing_editor_widgets.dart';
 import 'landing_editor_checklist.dart';
 import 'landing_editor_quality.dart';
 import 'landing_editor_sections.dart';
+import 'landing_section_templates.dart';
 
 class LandingEditorScreen extends ConsumerStatefulWidget {
   const LandingEditorScreen({super.key});
@@ -71,6 +73,10 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
   final _faqItemKeys = <int, GlobalKey>{};
   List<LandingNichePreset> _presets = [];
   List<LandingChecklistItem> _checklist = [];
+  int _lastReviewCount = -1;
+  bool _celebrationShownForClear = false;
+  bool _reviewFocusMode = false;
+  bool _applyingTemplate = false;
 
   static const _sectionTitleStyle = TextStyle(
     fontWeight: FontWeight.w800,
@@ -96,9 +102,72 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
 
   void _markDirty() {
     if (!_loaded || !mounted) return;
+    setState(() => _dirty = true);
+    _syncReviewCelebration();
+  }
+
+  void _syncReviewCelebration() {
+    if (!_loaded || !mounted) return;
+    final count = _contentReviewCount();
+    if (_lastReviewCount > 0 && count == 0 && !_celebrationShownForClear) {
+      _celebrationShownForClear = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        FxCelebrationOverlay.show(
+          context,
+          title: 'Landing pronta!',
+          subtitle: 'Todos os textos revisados. Pode publicar com confiança.',
+          icon: Icons.verified_rounded,
+          accent: const Color(0xFF0F9D7A),
+        );
+      });
+    }
+    if (count > 0) _celebrationShownForClear = false;
+    if (count == 0 && _reviewFocusMode) {
+      _reviewFocusMode = false;
+    }
+    _lastReviewCount = count;
+  }
+
+  int _contentReviewScope() {
+    return landingContentReviewScopeCount(faq: _faqPayload());
+  }
+
+  int _contentReviewedCount() {
+    return landingContentReviewedCount(
+      faq: _faqPayload(),
+      primaryCta: _primaryCta.text,
+      heroTitle: _heroTitle.text,
+    );
+  }
+
+  Set<int> _focusFaqIndices() {
+    return landingBadFaqIndices(faq: _faqPayload()).toSet();
+  }
+
+  bool _focusHeroIssue() {
+    return _contentIssuesForReview().any((issue) => issue.id != 'faq');
+  }
+
+  void _enterReviewFocus({LandingContentIssue? jumpTo}) {
+    final issues = _contentIssuesForReview();
+    if (issues.isEmpty) return;
     setState(() {
-      _dirty = true;
+      _reviewFocusMode = true;
+      _tabIndex = 1;
+      _heroExpanded = _focusHeroIssue();
+      _faqExpanded = _focusFaqIndices().isNotEmpty;
+      _servicosExpanded = false;
+      _ctasExpanded = false;
     });
+    final target = jumpTo ?? issues.first;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _navigateContentIssue(target);
+    });
+  }
+
+  void _exitReviewFocus() {
+    setState(() => _reviewFocusMode = false);
   }
 
   Future<void> _loadGrowth() async {
@@ -205,6 +274,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       context,
       issues: issues,
       onIssueTap: _navigateContentIssue,
+      onFocusMode: () => _enterReviewFocus(),
     );
   }
 
@@ -264,6 +334,89 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
     }
   }
 
+  Future<bool> _confirmApplyTemplate(String label) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Aplicar $label?'),
+        content: const Text(
+          'Os textos atuais da abertura, serviços, dúvidas e botões serão substituídos. '
+          'Fotos e planos da vitrine não mudam.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Aplicar modelo'),
+          ),
+        ],
+      ),
+    );
+    return ok ?? false;
+  }
+
+  void _applyLocalTemplate(LandingCompleteTemplate template) {
+    setState(() {
+      _heroTitle.text = template.heroTitle;
+      _heroSubtitle.text = template.heroSubtitle;
+      _primaryCta.text = template.primaryCta;
+      _offerCta.text = template.offerCta;
+      _finalCta.text = template.finalCta;
+      _contactCta.text = template.contactCta;
+      _servicos = List<LandingServiceItem>.from(template.servicos);
+      _faq = List<LandingFaqItem>.from(template.faq);
+      _sectionOrder = List<String>.from(template.sectionOrder);
+      _heroExpanded = true;
+      _faqExpanded = true;
+      _servicosExpanded = true;
+      _ctasExpanded = false;
+      _reviewFocusMode = false;
+      _dirty = true;
+    });
+    _syncReviewCelebration();
+  }
+
+  Future<void> _applyDefaultTemplate() async {
+    if (!await _confirmApplyTemplate(landingDefaultCompleteTemplate.label)) return;
+    _applyLocalTemplate(landingDefaultCompleteTemplate);
+    if (!mounted) return;
+    FeedbackHelper.showSuccess(context, 'Modelo padrão aplicado. Revise e salve.');
+    setState(() => _tabIndex = 1);
+  }
+
+  Future<void> _applyRemotePreset(LandingNichePreset preset) async {
+    if (!await _confirmApplyTemplate(preset.label)) return;
+    setState(() => _applyingTemplate = true);
+    try {
+      await ref.read(landingGrowthRepositoryProvider).applyPreset(preset.id);
+      ref.invalidate(perfilProvider);
+      final perfil = await ref.read(perfilRepositoryProvider).buscar();
+      if (!mounted) return;
+      setState(() {
+        _applyPerfil(perfil);
+        _reviewFocusMode = false;
+        _tabIndex = 1;
+        _heroExpanded = true;
+        _faqExpanded = true;
+        _servicosExpanded = true;
+      });
+      _syncReviewCelebration();
+      FeedbackHelper.showSuccess(
+        context,
+        'Modelo "${preset.label}" aplicado em todas as seções.',
+      );
+      await _loadGrowth();
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
+    } finally {
+      if (mounted) setState(() => _applyingTemplate = false);
+    }
+  }
+
   Future<bool> _confirmContentWarnings() async {
     final issues = _contentIssuesForReview();
     if (issues.isEmpty) return true;
@@ -288,6 +441,9 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
         ],
       ),
     );
+    if (publish == false) {
+      _openContentReview();
+    }
     return publish ?? false;
   }
 
@@ -314,6 +470,13 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
     }
     _loaded = true;
     _dirty = false;
+    _lastReviewCount = landingContentReviewCount(
+      faq: _faq
+          .map((e) => (pergunta: e.pergunta, resposta: e.resposta))
+          .toList(),
+      primaryCta: _primaryCta.text,
+      heroTitle: _heroTitle.text,
+    );
   }
 
   Future<bool> _confirmLeave() async {
@@ -324,24 +487,31 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Salvar antes de sair?'),
-        content: const Text(
-          'Você fez alterações na landing. O que prefere fazer?',
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Você fez alterações na landing. O que prefere fazer?',
+            ),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, _LeaveChoice.saveAndLeave),
+              child: const Text('Salvar e sair'),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton(
+              onPressed: () => Navigator.pop(ctx, _LeaveChoice.stay),
+              child: const Text('Continuar editando'),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton(
+              onPressed: () => Navigator.pop(ctx, _LeaveChoice.discard),
+              style: OutlinedButton.styleFrom(foregroundColor: scheme.error),
+              child: const Text('Sair sem salvar'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, _LeaveChoice.stay),
-            child: const Text('Continuar editando'),
-          ),
-          OutlinedButton(
-            onPressed: () => Navigator.pop(ctx, _LeaveChoice.discard),
-            style: OutlinedButton.styleFrom(foregroundColor: scheme.error),
-            child: const Text('Sair sem salvar'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, _LeaveChoice.saveAndLeave),
-            child: const Text('Salvar e sair'),
-          ),
-        ],
       ),
     );
 
@@ -407,6 +577,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       _servicos = [..._servicos, const LandingServiceItem(titulo: '', descricao: '')];
       _dirty = true;
     });
+    _syncReviewCelebration();
   }
 
   Future<void> _removeServico(int index) async {
@@ -415,6 +586,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       _servicos = [..._servicos]..removeAt(index);
       _dirty = true;
     });
+    _syncReviewCelebration();
   }
 
   void _updateServico(int index, {String? titulo, String? descricao}) {
@@ -426,6 +598,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       );
       _dirty = true;
     });
+    _syncReviewCelebration();
   }
 
   void _addFaq() {
@@ -433,6 +606,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       _faq = [..._faq, const LandingFaqItem(pergunta: '', resposta: '')];
       _dirty = true;
     });
+    _syncReviewCelebration();
   }
 
   Future<void> _removeFaq(int index) async {
@@ -441,6 +615,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       _faq = [..._faq]..removeAt(index);
       _dirty = true;
     });
+    _syncReviewCelebration();
   }
 
   void _updateFaq(int index, {String? pergunta, String? resposta}) {
@@ -452,13 +627,56 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       );
       _dirty = true;
     });
+    _syncReviewCelebration();
   }
 
   List<LandingFaqItem> _faqForSave() {
     return _faq
         .where((item) =>
             item.pergunta.trim().length >= 3 && item.resposta.trim().length >= 3)
+        .map(
+          (item) => LandingFaqItem(
+            pergunta: landingPolishShortText(item.pergunta),
+            resposta: landingPolishShortText(item.resposta),
+          ),
+        )
         .toList();
+  }
+
+  String _polishCta(String text) {
+    final polished = landingPolishShortText(text);
+    return landingCtaAccentSuggestion(polished) ?? polished;
+  }
+
+  List<LandingServiceItem> _servicosForSave() {
+    return _servicos
+        .where((s) =>
+            s.titulo.trim().isNotEmpty || s.descricao.trim().isNotEmpty)
+        .map(
+          (s) => LandingServiceItem(
+            titulo: landingPolishShortText(s.titulo),
+            descricao: s.descricao.trim(),
+          ),
+        )
+        .toList();
+  }
+
+  void _applyPolishToControllers({
+    required List<LandingServiceItem> servicos,
+    required List<LandingFaqItem> faq,
+    required String heroTitle,
+    required String primaryCta,
+    required String offerCta,
+    required String finalCta,
+    required String contactCta,
+  }) {
+    _heroTitle.text = heroTitle;
+    _primaryCta.text = primaryCta;
+    _offerCta.text = offerCta;
+    _finalCta.text = finalCta;
+    _contactCta.text = contactCta;
+    _servicos = servicos;
+    _faq = faq;
   }
 
   String? _validateBeforeSave() {
@@ -543,28 +761,42 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
     setState(() => _saving = true);
     try {
       final normalizedOrder = normalizeLandingSectionOrder(_sectionOrder);
+      final heroTitle = landingPolishShortText(_heroTitle.text.trim());
+      final primaryCta = _polishCta(_primaryCta.text.trim());
+      final offerCta = _polishCta(_offerCta.text.trim());
+      final finalCta = _polishCta(_finalCta.text.trim());
+      final contactCta = _polishCta(_contactCta.text.trim());
+      final servicos = _servicosForSave();
+      final faq = _faqForSave();
       await ref.read(perfilRepositoryProvider).atualizarLanding(
-            heroTitle: _heroTitle.text.trim(),
+            heroTitle: heroTitle,
             heroSubtitle: _heroSubtitle.text.trim(),
-            primaryCta: _primaryCta.text.trim(),
+            primaryCta: primaryCta,
             sectionOrder: normalizedOrder,
-            servicos: _servicos
-                .where((s) =>
-                    s.titulo.trim().isNotEmpty || s.descricao.trim().isNotEmpty)
-                .toList(),
-            faq: _faqForSave(),
+            servicos: servicos,
+            faq: faq,
             heroImageUrl: _heroImageUrl,
             bioImageUrl: _bioImageUrl,
-            offerCta: _offerCta.text.trim(),
-            finalCta: _finalCta.text.trim(),
-            contactCta: _contactCta.text.trim(),
+            offerCta: offerCta,
+            finalCta: finalCta,
+            contactCta: contactCta,
           );
       ref.invalidate(perfilProvider);
       if (!mounted) return;
       setState(() {
         _sectionOrder = normalizedOrder;
         _dirty = false;
+        _applyPolishToControllers(
+          servicos: servicos,
+          faq: faq,
+          heroTitle: heroTitle,
+          primaryCta: primaryCta,
+          offerCta: offerCta,
+          finalCta: finalCta,
+          contactCta: contactCta,
+        );
       });
+      _syncReviewCelebration();
       FeedbackHelper.showSuccess(context, 'Landing publicada com sucesso.');
       await _loadGrowth();
     } catch (e) {
@@ -758,63 +990,47 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
           LandingChecklistCard(
             items: _checklist,
             contentIssueCount: _contentReviewCount(),
-            onReviewContent: _openContentReview,
+            contentReviewScope: _contentReviewScope(),
+            contentReviewedCount: _contentReviewedCount(),
+            onReviewContent: () => _enterReviewFocus(),
             onItemTap: _onChecklistTap,
           ),
         ],
-        if (_presets.isNotEmpty) ...[
-          const SizedBox(height: 20),
-          _sectionHeader(
-            'Modelos por nicho',
-            hint: 'Preenche textos iniciais conforme seu público.',
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            height: 40,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: _presets.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
-              itemBuilder: (context, index) {
-                final preset = _presets[index];
-                return ActionChip(
-                  label: Text(preset.label),
-                  onPressed: _saving
-                      ? null
-                      : () async {
-                          try {
-                            await ref
-                                .read(landingGrowthRepositoryProvider)
-                                .applyPreset(preset.id);
-                            ref.invalidate(perfilProvider);
-                            if (!context.mounted) return;
-                            FeedbackHelper.showSuccess(
-                              context,
-                              'Modelo "${preset.label}" aplicado.',
-                            );
-                            await _loadGrowth();
-                          } catch (e) {
-                            if (!context.mounted) return;
-                            FeedbackHelper.showError(context, friendlyError(e));
-                          }
-                        },
-                );
-              },
-            ),
-          ),
-        ],
+        const SizedBox(height: 16),
+        LandingSectionTemplatesPanel(
+          sectionOrder: _sectionOrder,
+          presets: _presets,
+          applying: _applyingTemplate || _saving,
+          onApplyDefault: _applyDefaultTemplate,
+          onApplyPreset: _applyRemotePreset,
+        ),
       ],
     );
   }
 
   Widget _conteudoTab() {
+    final focusFaq = _reviewFocusMode ? _focusFaqIndices() : null;
+    final showHero = !_reviewFocusMode || _focusHeroIssue();
+    final showSecondarySections = !_reviewFocusMode;
+    final visibleFaqIndices = focusFaq == null
+        ? List<int>.generate(_faq.length, (i) => i)
+        : (focusFaq.toList()..sort());
+    final hiddenFaqCount = _faq.length - visibleFaqIndices.length;
+
     return ListView(
       controller: _conteudoScroll,
       padding: const EdgeInsets.all(TokensStrip.s4),
       children: [
-        KeyedSubtree(
-          key: _heroSectionKey,
-          child: LandingCollapsibleSection(
+        if (_reviewFocusMode)
+          LandingReviewFocusBanner(
+            pendingCount: _contentReviewCount(),
+            onExit: _exitReviewFocus,
+          ),
+        if (_reviewFocusMode) const SizedBox(height: 12),
+        if (showHero)
+          KeyedSubtree(
+            key: _heroSectionKey,
+            child: LandingCollapsibleSection(
             title: 'Abertura da página',
             hint: 'Primeira impressão — título, texto e botão principal.',
             expanded: _heroExpanded,
@@ -925,10 +1141,11 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 12),
-        KeyedSubtree(
-          key: _ctasSectionKey,
-          child: LandingCollapsibleSection(
+        if (showHero) const SizedBox(height: 12),
+        if (showSecondarySections)
+          KeyedSubtree(
+            key: _ctasSectionKey,
+            child: LandingCollapsibleSection(
             title: 'Outros botões',
             hint: 'Textos extras que aparecem em planos, rodapé e contato.',
             expanded: _ctasExpanded,
@@ -962,10 +1179,11 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 12),
-        KeyedSubtree(
-          key: _servicosSectionKey,
-          child: LandingCollapsibleSection(
+        if (showSecondarySections) const SizedBox(height: 12),
+        if (showSecondarySections)
+          KeyedSubtree(
+            key: _servicosSectionKey,
+            child: LandingCollapsibleSection(
             title: 'Serviços',
             hint: 'Formatos que você oferece — online, presencial ou híbrido.',
             expanded: _servicosExpanded,
@@ -1007,8 +1225,11 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                           TextFormField(
                             key: ValueKey('servico-titulo-$i'),
                             initialValue: _servicos[i].titulo,
-                            decoration:
-                                const InputDecoration(labelText: 'Nome do serviço'),
+                            decoration: InputDecoration(
+                              labelText: 'Nome do serviço',
+                              helperText: landingPolishPreviewHint(_servicos[i].titulo),
+                              helperMaxLines: 2,
+                            ),
                             onChanged: (v) => _updateServico(i, titulo: v),
                           ),
                           const SizedBox(height: 8),
@@ -1029,15 +1250,17 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        if (showSecondarySections) const SizedBox(height: 12),
         KeyedSubtree(
           key: _faqSectionKey,
           child: LandingCollapsibleSection(
             title: 'Dúvidas frequentes',
-            hint: 'Respostas que removem objeções antes do cliente chamar.',
+            hint: _reviewFocusMode
+                ? 'Mostrando só perguntas que precisam de revisão.'
+                : 'Respostas que removem objeções antes do cliente chamar.',
             expanded: _faqExpanded,
             onExpandedChanged: (value) => setState(() => _faqExpanded = value),
-            onAdd: _addFaq,
+            onAdd: _reviewFocusMode ? null : _addFaq,
             child: Column(
               children: [
                 if (_faq.isEmpty)
@@ -1050,7 +1273,21 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                           .withValues(alpha: 0.6),
                     ),
                   ),
-                for (var i = 0; i < _faq.length; i++) ...[
+                if (_reviewFocusMode && hiddenFaqCount > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      hiddenFaqCount == 1
+                          ? '1 pergunta ok — oculta no modo foco.'
+                          : '$hiddenFaqCount perguntas ok — ocultas no modo foco.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.85),
+                      ),
+                    ),
+                  ),
+                for (final i in visibleFaqIndices) ...[
                   KeyedSubtree(
                     key: _faqKeyFor(i),
                     child: LandingHighlightCard(
@@ -1078,14 +1315,22 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                           TextFormField(
                             key: ValueKey('faq-pergunta-$i'),
                             initialValue: _faq[i].pergunta,
-                            decoration: const InputDecoration(labelText: 'Pergunta'),
+                            decoration: InputDecoration(
+                              labelText: 'Pergunta',
+                              helperText: landingPolishPreviewHint(_faq[i].pergunta),
+                              helperMaxLines: 2,
+                            ),
                             onChanged: (v) => _updateFaq(i, pergunta: v),
                           ),
                           const SizedBox(height: 8),
                           TextFormField(
                             key: ValueKey('faq-resposta-$i'),
                             initialValue: _faq[i].resposta,
-                            decoration: const InputDecoration(labelText: 'Resposta'),
+                            decoration: InputDecoration(
+                              labelText: 'Resposta',
+                              helperText: landingPolishPreviewHint(_faq[i].resposta),
+                              helperMaxLines: 2,
+                            ),
                             maxLines: 3,
                             onChanged: (v) => _updateFaq(i, resposta: v),
                           ),
@@ -1119,6 +1364,23 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
           itemCount: _sectionOrder.length,
           onReorder: _reorderSection,
           buildDefaultDragHandles: false,
+          proxyDecorator: (child, index, animation) {
+            return AnimatedBuilder(
+              animation: animation,
+              builder: (context, child) {
+                final t = Curves.easeOutCubic.transform(animation.value);
+                final scheme = Theme.of(context).colorScheme;
+                return Material(
+                  elevation: 4 + 8 * t,
+                  shadowColor: scheme.primary.withValues(alpha: 0.32),
+                  borderRadius: BorderRadius.circular(TokensStrip.rMd),
+                  color: scheme.surface,
+                  child: child,
+                );
+              },
+              child: child,
+            );
+          },
           itemBuilder: (context, i) {
             return LandingSectionOrderTile(
               key: ValueKey('section-${_sectionOrder[i]}-$i'),
@@ -1189,7 +1451,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                 if (_loaded)
                   LandingContentWarningBanner(
                     reviewCount: _contentReviewCount(),
-                    onReview: _openContentReview,
+                    onReview: () => _enterReviewFocus(),
                   ),
                 LandingEditorTabBar(
                   index: _tabIndex,
