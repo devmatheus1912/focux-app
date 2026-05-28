@@ -74,7 +74,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
       repo: ref.read(_pacoteRepoProvider),
     );
     if (!mounted || !created) return;
-    FeedbackHelper.showSuccess(context, 'Pacote criado!');
+    FeedbackHelper.showSuccess(context, 'Plano criado!');
     await _carregar();
   }
 
@@ -85,7 +85,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
       await ref.read(_pacoteRepoProvider).desativar(pacote.id);
       if (!mounted) return;
       HapticFeedback.mediumImpact();
-      FeedbackHelper.showSuccess(context, 'Pacote desativado.');
+      FeedbackHelper.showSuccess(context, 'Plano desativado.');
       await _carregar();
     } catch (e) {
       if (!mounted) return;
@@ -101,12 +101,12 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
   Widget build(BuildContext context) {
     return FxShellScaffold(
       appBar: FxShellAppBar(
-        title: 'Pacotes & Storefront',
-        subtitle: 'Monte seus planos e venda online',
+        title: 'Planos & link de vendas',
+        subtitle: 'Crie planos com preço e compartilhe no WhatsApp',
         actions: [
           IconButton(
             icon: const Icon(Icons.link_rounded),
-            tooltip: 'Copiar link público',
+            tooltip: 'Copiar link da página de vendas',
             onPressed: _copiarLink,
           ),
         ],
@@ -117,7 +117,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
               : FloatingActionButton.extended(
                 onPressed: _novoPacote,
                 icon: const Icon(Icons.add_rounded),
-                label: const Text('Novo pacote'),
+                label: const Text('Novo plano'),
               ),
       body:
           _loading
@@ -135,6 +135,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
                   ),
                   physics: const AlwaysScrollableScrollPhysics(),
                   children: [
+                    const PacotesComoFuncionaCard(),
                     if (_slug != null && _slug!.isNotEmpty) ...[
                       StorefrontLinkCard(
                         slug: _slug!,
@@ -143,7 +144,23 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
                       ),
                       const SizedBox(height: TokensStrip.s3),
                     ],
-                    if (_pacotes.isNotEmpty) PacotesOverviewStrip(pacotes: _pacotes),
+                    if (_pacotes.isNotEmpty) ...[
+                      PacotesOverviewStrip(pacotes: _pacotes),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: 2,
+                          bottom: TokensStrip.s2,
+                        ),
+                        child: Text(
+                          'Seus planos (aparecem no link acima)',
+                          style: TextStyle(
+                            color: fxScreenMute(context),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
                     if (_pacotes.isEmpty)
                       PacotesEmptyState(onCreate: _novoPacote)
                     else ...[

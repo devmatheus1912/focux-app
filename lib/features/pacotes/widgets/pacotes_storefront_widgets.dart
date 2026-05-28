@@ -74,7 +74,7 @@ class PacotesOverviewStrip extends StatelessWidget {
 
     return Semantics(
       label:
-          '$count ${count == 1 ? 'pacote ativo' : 'pacotes ativos'}, ticket médio R\$ $ticketLabel',
+          '$count ${count == 1 ? 'plano ativo' : 'planos ativos'}, preço médio R\$ $ticketLabel',
       child: Container(
         margin: const EdgeInsets.only(bottom: TokensStrip.s3),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
@@ -89,7 +89,7 @@ class PacotesOverviewStrip extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                '$count ${count == 1 ? 'pacote ativo' : 'pacotes ativos'} · ticket médio R\$ $ticketLabel',
+                '$count ${count == 1 ? 'plano ativo' : 'planos ativos'} · preço médio R\$ $ticketLabel',
                 style: TextStyle(
                   color: ink,
                   fontWeight: FontWeight.w700,
@@ -100,6 +100,61 @@ class PacotesOverviewStrip extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Explica o fluxo em linguagem simples — sem jargão de “vitrine”.
+class PacotesComoFuncionaCard extends StatelessWidget {
+  const PacotesComoFuncionaCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: TokensStrip.s3),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        border: Border.all(color: primary.withValues(alpha: 0.14)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.lightbulb_outline_rounded, size: 20, color: primary),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Como funciona',
+                  style: TextStyle(
+                    color: ink,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Você monta planos com preço (ex.: musculação, 3 meses, R\$ 500). '
+                  'Eles ficam numa página sua na internet. Envie o link no WhatsApp ou '
+                  'Instagram — a pessoa vê seus planos e pode te contratar.',
+                  style: TokensStrip.bodyMuted(color: mute).copyWith(
+                    fontSize: 12.5,
+                    height: 1.45,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -128,7 +183,7 @@ class StorefrontLinkCard extends StatelessWidget {
 
     return Semantics(
       container: true,
-      label: 'Link público da vitrine, $label',
+      label: 'Link da sua página de vendas na internet, $label',
       child: Container(
         decoration: fxStripCardDecoration(context, accent: primary),
         padding: const EdgeInsets.fromLTRB(18, 16, 14, 16),
@@ -152,7 +207,7 @@ class StorefrontLinkCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Sua vitrine online',
+                        'Sua página na internet',
                         style: TextStyle(
                           color: ink,
                           fontWeight: FontWeight.w800,
@@ -162,10 +217,11 @@ class StorefrontLinkCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Compartilhe para captar leads diretos.',
+                        'Como um cartão de visitas online: o cliente abre o link, '
+                        'vê seus planos e valores e pode te chamar.',
                         style: TokensStrip.bodyMuted(color: mute).copyWith(
                           fontSize: 12.5,
-                          height: 1.3,
+                          height: 1.35,
                         ),
                       ),
                     ],
@@ -174,6 +230,14 @@ class StorefrontLinkCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 14),
+            Text(
+              'Link para enviar no WhatsApp ou Instagram',
+              style: TokensStrip.bodyMuted(color: mute).copyWith(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 6),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -206,7 +270,7 @@ class StorefrontLinkCard extends StatelessWidget {
                 Expanded(
                   child: Semantics(
                     button: true,
-                    label: 'Copiar link da vitrine',
+                    label: 'Copiar link da página de vendas',
                     child: FxLiquidSecondaryButton(
                       label: 'Copiar link',
                       icon: Icons.link_rounded,
@@ -218,9 +282,9 @@ class StorefrontLinkCard extends StatelessWidget {
                 Expanded(
                   child: Semantics(
                     button: true,
-                    label: 'Ver vitrine no navegador',
+                    label: 'Ver página como o cliente vê',
                     child: FxLiquidSecondaryButton(
-                      label: 'Ver vitrine',
+                      label: 'Ver como cliente',
                       icon: Icons.open_in_new_rounded,
                       onPressed: onPreview,
                     ),
@@ -263,7 +327,7 @@ class PacotesEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: TokensStrip.s4),
           Text(
-            'Crie seu primeiro pacote',
+            'Crie seu primeiro plano',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: ink,
@@ -274,13 +338,15 @@ class PacotesEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Combinar treino, nutrição e consultoria em um plano aumenta o ticket médio em 30–60%.',
+            'Um plano tem nome, preço e o que está incluso (treino, nutrição…). '
+            'Ele aparece na sua página quando alguém abrir seu link.\n\n'
+            'Ex.: Musculação · 3 meses · R\$ 500',
             textAlign: TextAlign.center,
             style: TokensStrip.bodyMuted(color: mute).copyWith(height: 1.45),
           ),
           const SizedBox(height: TokensStrip.s5),
           FxLiquidPrimaryButton(
-            label: 'Novo pacote',
+            label: 'Criar plano',
             icon: Icons.add_rounded,
             onPressed: onCreate,
           ),
@@ -331,7 +397,7 @@ class PacoteStorefrontCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: const Text(
-                    'DESTAQUE',
+                    'DESTAQUE NA PÁGINA',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 10,
@@ -452,7 +518,7 @@ class PacotesLoadErrorState extends StatelessWidget {
             Icon(Icons.cloud_off_outlined, size: 40, color: mute),
             const SizedBox(height: TokensStrip.s3),
             Text(
-              'Não foi possível carregar seus pacotes.',
+              'Não foi possível carregar seus planos.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: fxScreenInk(context),
@@ -508,7 +574,7 @@ Future<bool> confirmDesativarPacote(BuildContext context, String titulo) async {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Desativar pacote?',
+                'Desativar plano?',
                 style: TextStyle(
                   color: ink,
                   fontWeight: FontWeight.w800,
@@ -518,7 +584,9 @@ Future<bool> confirmDesativarPacote(BuildContext context, String titulo) async {
               ),
               const SizedBox(height: 10),
               Text(
-                '“$titulo” sai da vitrine. Você pode criar outro depois.',
+                '“$titulo” some da sua página na internet. '
+                'Quem abrir seu link não verá mais este plano. '
+                'Você pode criar outro depois.',
                 textAlign: TextAlign.center,
                 style: TokensStrip.bodyMuted(color: mute).copyWith(height: 1.4),
               ),
@@ -647,7 +715,7 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                   children: [
                     Expanded(
                       child: Text(
-                        'Novo pacote',
+                        'Novo plano',
                         style: TextStyle(
                           color: ink,
                           fontSize: 20,
@@ -674,7 +742,7 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Monte o plano que aparece na sua vitrine.',
+                  'Quem abrir seu link verá este plano na sua página de vendas.',
                   style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 13),
                 ),
                 const SizedBox(height: 16),
@@ -710,8 +778,9 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                   textInputAction: TextInputAction.done,
                   decoration: FxInputDeco.build(
                     context,
-                    'Valor (R\$) *',
+                    'Valor que o cliente paga (R\$) *',
                     icon: Icons.attach_money_rounded,
+                    hint: 'Ex.: 500',
                   ),
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) {
@@ -778,10 +847,10 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                   ],
                 ),
                 const SizedBox(height: 18),
-                _SheetSectionLabel('Destaque na vitrine', ink: ink),
+                _SheetSectionLabel('Mostrar em destaque', ink: ink),
                 const SizedBox(height: 10),
                 _PacoteOptionChip(
-                  label: 'Pacote em destaque',
+                  label: 'Aparecer primeiro na página',
                   selected: _destaque,
                   onTap:
                       _enviando
@@ -790,7 +859,7 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                 ),
                 const SizedBox(height: 20),
                 FxLiquidPrimaryButton(
-                  label: 'Criar pacote',
+                  label: 'Criar plano',
                   icon: Icons.check_rounded,
                   loading: _enviando,
                   loadingLabel: 'Criando…',
@@ -890,7 +959,7 @@ void copyStorefrontLink(BuildContext context, String? slug) {
   if (slug == null || slug.isEmpty) {
     FeedbackHelper.showWarn(
       context,
-      'Defina seu slug em Perfil para gerar o link público.',
+      'Complete seu perfil para gerar o link da sua página de vendas.',
     );
     return;
   }
@@ -903,7 +972,7 @@ Future<void> openStorefrontPreview(BuildContext context, String? slug) async {
   if (slug == null || slug.isEmpty) {
     FeedbackHelper.showWarn(
       context,
-      'Defina seu slug em Perfil para abrir a vitrine.',
+      'Complete seu perfil para abrir sua página de vendas.',
     );
     return;
   }
@@ -912,12 +981,12 @@ Future<void> openStorefrontPreview(BuildContext context, String? slug) async {
     final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!context.mounted) return;
     if (opened) {
-      FeedbackHelper.showInfo(context, 'Abrindo sua vitrine…');
+      FeedbackHelper.showInfo(context, 'Abrindo como seu cliente vê…');
     } else {
       FeedbackHelper.showWarn(context, 'Não foi possível abrir o link.');
     }
   } catch (_) {
     if (!context.mounted) return;
-    FeedbackHelper.showError(context, 'Não foi possível abrir a vitrine.');
+    FeedbackHelper.showError(context, 'Não foi possível abrir a página.');
   }
 }
