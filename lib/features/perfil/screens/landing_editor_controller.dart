@@ -170,6 +170,19 @@ class LandingEditorController {
     lastReviewCount = contentReviewCount();
   }
 
+  void clearHeroImage() {
+    heroImageUrl = '';
+    coverExpanded = false;
+    dirty = true;
+    onStateChanged();
+  }
+
+  void clearBioImage() {
+    bioImageUrl = '';
+    dirty = true;
+    onStateChanged();
+  }
+
   void applyTemplate(LandingCompleteTemplate template) {
     heroTitle.text = template.heroTitle;
     heroSubtitle.text = template.heroSubtitle;

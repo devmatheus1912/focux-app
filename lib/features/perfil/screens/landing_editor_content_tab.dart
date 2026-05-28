@@ -14,6 +14,10 @@ class LandingEditorContentTab extends StatelessWidget {
     required this.onGenerateHero,
     required this.onUploadHero,
     required this.onUploadBio,
+    required this.onRemoveHero,
+    required this.onRemoveBio,
+    required this.onUseDefaultHero,
+    required this.onUseDefaultBio,
     required this.onMarkDirty,
     required this.onHeroExpandedChanged,
     required this.onCoverExpandedChanged,
@@ -34,6 +38,10 @@ class LandingEditorContentTab extends StatelessWidget {
   final VoidCallback onGenerateHero;
   final VoidCallback onUploadHero;
   final VoidCallback onUploadBio;
+  final VoidCallback onRemoveHero;
+  final VoidCallback onRemoveBio;
+  final VoidCallback onUseDefaultHero;
+  final VoidCallback onUseDefaultBio;
   final VoidCallback onMarkDirty;
   final ValueChanged<bool> onHeroExpandedChanged;
   final ValueChanged<bool> onCoverExpandedChanged;
@@ -164,6 +172,14 @@ class LandingEditorContentTab extends StatelessWidget {
                     onPreview: c.bioImageUrl != null && c.bioImageUrl!.isNotEmpty
                         ? onPreviewLanding
                         : null,
+                    onRemove: c.bioImageUrl != null && c.bioImageUrl!.isNotEmpty
+                        ? onRemoveBio
+                        : null,
+                    onUseDefault: onUseDefaultBio,
+                    useDefaultLabel: 'Usar padrão',
+                    defaultActiveHint: c.bioImageUrl == null || c.bioImageUrl!.isEmpty
+                        ? 'Padrão ativo — usa logo ou iniciais no topo.'
+                        : null,
                   ),
                 ],
               ),
@@ -186,9 +202,17 @@ class LandingEditorContentTab extends StatelessWidget {
               optional: true,
               emptyHint:
                   'Sem capa — a abertura fica só com título, botões e números.',
+              defaultActiveHint: c.heroImageUrl == null || c.heroImageUrl!.isEmpty
+                  ? 'Padrão ativo — abertura sem foto de capa.'
+                  : null,
               onPreview: c.heroImageUrl != null && c.heroImageUrl!.isNotEmpty
                   ? onPreviewLanding
                   : null,
+              onRemove: c.heroImageUrl != null && c.heroImageUrl!.isNotEmpty
+                  ? onRemoveHero
+                  : null,
+              onUseDefault: onUseDefaultHero,
+              useDefaultLabel: 'Usar padrão',
             ),
           ),
         if (showHero) const SizedBox(height: 12),

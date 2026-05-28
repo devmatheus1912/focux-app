@@ -66,6 +66,10 @@ class LandingEditorImageUploadCard extends StatelessWidget {
     this.emptyHint,
     this.compact = false,
     this.onPreview,
+    this.onRemove,
+    this.onUseDefault,
+    this.useDefaultLabel,
+    this.defaultActiveHint,
   });
 
   final String? title;
@@ -77,6 +81,10 @@ class LandingEditorImageUploadCard extends StatelessWidget {
   final String? emptyHint;
   final bool compact;
   final VoidCallback? onPreview;
+  final VoidCallback? onRemove;
+  final VoidCallback? onUseDefault;
+  final String? useDefaultLabel;
+  final String? defaultActiveHint;
 
   bool get _hasImage => imageUrl != null && imageUrl!.isNotEmpty;
 
@@ -161,13 +169,29 @@ class LandingEditorImageUploadCard extends StatelessWidget {
             else if (optional)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Text(
-                  emptyHint ?? 'Sem foto — sua página abre com título e botões.',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: scheme.onSurface.withValues(alpha: 0.62),
-                    height: 1.45,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      emptyHint ?? 'Sem foto — sua página abre com título e botões.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: scheme.onSurface.withValues(alpha: 0.62),
+                        height: 1.45,
+                      ),
+                    ),
+                    if (defaultActiveHint != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        defaultActiveHint!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: scheme.primary.withValues(alpha: 0.9),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               )
             else
@@ -201,6 +225,31 @@ class LandingEditorImageUploadCard extends StatelessWidget {
                 ],
               ],
             ),
+            if ((_hasImage && onRemove != null) ||
+                (!_hasImage && onUseDefault != null && optional)) ...[
+              const SizedBox(height: 4),
+              Wrap(
+                spacing: 4,
+                runSpacing: 0,
+                children: [
+                  if (_hasImage && onRemove != null)
+                    TextButton.icon(
+                      onPressed: uploading ? null : onRemove,
+                      icon: Icon(Icons.delete_outline, size: 18, color: scheme.error),
+                      label: Text(
+                        'Remover',
+                        style: TextStyle(color: scheme.error, fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  if (onUseDefault != null && (_hasImage || optional))
+                    TextButton.icon(
+                      onPressed: uploading ? null : onUseDefault,
+                      icon: const Icon(Icons.restore_rounded, size: 18),
+                      label: Text(useDefaultLabel ?? 'Usar padrão'),
+                    ),
+                ],
+              ),
+            ],
           ],
         ),
       ),
