@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/config/env.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/data/perfil_repository.dart';
 import '../data/pacote_repository.dart';
+import '../widgets/pacotes_storefront_widgets.dart';
 
 final _pacoteRepoProvider = Provider(
   (ref) => PacoteRepository(ref.read(apiClientProvider)),
@@ -26,6 +28,7 @@ class PacotesScreen extends ConsumerStatefulWidget {
 class _PacotesScreenState extends ConsumerState<PacotesScreen> {
   List<Pacote> _pacotes = [];
   bool _loading = true;
+  bool _loadFailed = false;
   String? _slug;
 
   @override
@@ -35,7 +38,10 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
   }
 
   Future<void> _carregar() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _loadFailed = false;
+    });
     try {
       final repo = ref.read(_pacoteRepoProvider);
       final perfilRepo = ref.read(_perfilRepoProvider);
@@ -52,307 +58,105 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
         _loading = false;
       });
     } catch (_) {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  Future<void> _novoPacote() async {
-    final tituloCtrl = TextEditingController();
-    final descCtrl = TextEditingController();
-    final valorCtrl = TextEditingController();
-    int duracao = 1;
-    bool treino = true;
-    bool nutri = false;
-    bool consultoria = false;
-    bool destaque = false;
-
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setLocal) => AlertDialog(
-          title: const Text('Novo pacote'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                    controller: tituloCtrl,
-                    decoration: const InputDecoration(labelText: 'Título')),
-                TextField(
-                    controller: descCtrl,
-                    decoration: const InputDecoration(labelText: 'Descrição')),
-                TextField(
-                    controller: valorCtrl,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Valor (R\$)')),
-                Row(
-                  children: [
-                    const Text('Duração (meses):'),
-                    const SizedBox(width: 12),
-                    DropdownButton<int>(
-                      value: duracao,
-                      items: [1, 3, 6, 12]
-                          .map((m) => DropdownMenuItem(
-                                value: m,
-                                child: Text('$m'),
-                              ))
-                          .toList(),
-                      onChanged: (v) =>
-                          setLocal(() => duracao = v ?? 1),
-                    ),
-                  ],
-                ),
-                CheckboxListTile(
-                  value: treino,
-                  onChanged: (v) => setLocal(() => treino = v ?? true),
-                  title: const Text('Inclui treino'),
-                ),
-                CheckboxListTile(
-                  value: nutri,
-                  onChanged: (v) => setLocal(() => nutri = v ?? false),
-                  title: const Text('Inclui nutrição'),
-                ),
-                CheckboxListTile(
-                  value: consultoria,
-                  onChanged: (v) =>
-                      setLocal(() => consultoria = v ?? false),
-                  title: const Text('Inclui consultoria'),
-                ),
-                CheckboxListTile(
-                  value: destaque,
-                  onChanged: (v) => setLocal(() => destaque = v ?? false),
-                  title: const Text('Pacote em destaque'),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.of(ctx).pop(false),
-                child: const Text('Cancelar')),
-            FilledButton(
-                onPressed: () => Navigator.of(ctx).pop(true),
-                child: const Text('Criar')),
-          ],
-        ),
-      ),
-    );
-
-    if (ok == true && tituloCtrl.text.trim().isNotEmpty) {
-      final valor = double.tryParse(valorCtrl.text.replaceAll(',', '.')) ?? 0;
-      if (valor <= 0) return;
-      try {
-        await ref.read(_pacoteRepoProvider).criar(
-              titulo: tituloCtrl.text.trim(),
-              descricao: descCtrl.text.trim(),
-              valor: valor,
-              duracaoMeses: duracao,
-              incluiTreino: treino,
-              incluiNutri: nutri,
-              incluiConsultoria: consultoria,
-              destaque: destaque,
-            );
-        await _carregar();
-      } catch (e) {
-        if (!mounted) return;
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text('Erro: $e')),
-        );
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadFailed = true;
+        });
       }
     }
   }
 
-  void _copiarLink() {
-    if (_slug == null) {
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(
-          content: Text('Defina seu slug em Perfil para gerar o link público.'),
-        ),
-      );
-      return;
-    }
-    final url = Env.landingPageUrl(_slug!);
-    Clipboard.setData(ClipboardData(text: url));
-    FeedbackHelper.showSnackBar(
+  Future<void> _novoPacote() async {
+    HapticFeedback.selectionClick();
+    final created = await showNovoPacoteSheet(
       context,
-      SnackBar(content: Text('Link copiado: $url')),
+      repo: ref.read(_pacoteRepoProvider),
     );
+    if (!mounted || !created) return;
+    FeedbackHelper.showSuccess(context, 'Pacote criado!');
+    await _carregar();
   }
+
+  Future<void> _desativar(Pacote pacote) async {
+    final ok = await confirmDesativarPacote(context, pacote.titulo);
+    if (!ok || !mounted) return;
+    try {
+      await ref.read(_pacoteRepoProvider).desativar(pacote.id);
+      if (!mounted) return;
+      HapticFeedback.mediumImpact();
+      FeedbackHelper.showSuccess(context, 'Pacote desativado.');
+      await _carregar();
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
+  void _copiarLink() => copyStorefrontLink(context, _slug);
+
+  void _verVitrine() => openStorefrontPreview(context, _slug);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pacotes & Storefront'),
+    return FxShellScaffold(
+      appBar: FxShellAppBar(
+        title: 'Pacotes & Storefront',
+        subtitle: 'Monte seus planos e venda online',
         actions: [
           IconButton(
-            icon: const Icon(Icons.link),
+            icon: const Icon(Icons.link_rounded),
             tooltip: 'Copiar link público',
             onPressed: _copiarLink,
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _novoPacote,
-        icon: const Icon(Icons.add),
-        label: const Text('Novo pacote'),
-      ),
-      body: _loading
-          ? const Center(child: FxLoading())
-          : RefreshIndicator(
-              onRefresh: _carregar,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  if (_slug != null)
-                    Card(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primaryContainer
-                          .withValues(alpha: .4),
-                      child: ListTile(
-                        leading: const Icon(Icons.public),
-                        title: Text(Env.landingPageLabel(_slug!)),
-                        subtitle: const Text(
-                            'Compartilhe este link para captar leads diretos.'),
-                        trailing: TextButton(
-                          onPressed: _copiarLink,
-                          child: const Text('Copiar'),
-                        ),
-                      ),
-                    ),
-                  const SizedBox(height: 8),
-                  if (_pacotes.isEmpty)
-                    const Card(
-                      child: Padding(
-                        padding: EdgeInsets.all(20),
-                        child: Column(
-                          children: [
-                            Icon(Icons.inventory_2_outlined, size: 40),
-                            SizedBox(height: 8),
-                            Text(
-                              'Crie seu primeiro pacote',
-                              style: TextStyle(fontWeight: FontWeight.w800),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Combinar treino+nutri+consultoria em um SKU aumenta ARPU em 30-60% (Trainerize 2026).',
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  else
-                    ..._pacotes.map((p) => _PacoteCard(pacote: p, onDelete: () async {
-                          await ref.read(_pacoteRepoProvider).desativar(p.id);
-                          await _carregar();
-                        })),
-                  const SizedBox(height: 80),
-                ],
+      floatingActionButton:
+          _loading || _loadFailed || _pacotes.isEmpty
+              ? null
+              : FloatingActionButton.extended(
+                onPressed: _novoPacote,
+                icon: const Icon(Icons.add_rounded),
+                label: const Text('Novo pacote'),
               ),
-            ),
-    );
-  }
-}
-
-class _PacoteCard extends StatelessWidget {
-  const _PacoteCard({required this.pacote, required this.onDelete});
-  final Pacote pacote;
-  final VoidCallback onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: pacote.destaque
-            ? BorderSide(color: theme.colorScheme.primary, width: 2)
-            : BorderSide.none,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                if (pacote.destaque)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: const Text('DESTAQUE',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800)),
+      body:
+          _loading
+              ? const PacotesStorefrontSkeleton()
+              : _loadFailed
+              ? PacotesLoadErrorState(onRetry: _carregar)
+              : RefreshIndicator(
+                onRefresh: _carregar,
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s4,
+                    TokensStrip.s2,
+                    TokensStrip.s4,
+                    96,
                   ),
-                if (pacote.destaque) const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    pacote.titulo,
-                    style: theme.textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w800),
-                  ),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    if (_slug != null && _slug!.isNotEmpty) ...[
+                      StorefrontLinkCard(
+                        slug: _slug!,
+                        onCopy: _copiarLink,
+                        onPreview: _verVitrine,
+                      ),
+                      const SizedBox(height: TokensStrip.s3),
+                    ],
+                    if (_pacotes.isNotEmpty) PacotesOverviewStrip(pacotes: _pacotes),
+                    if (_pacotes.isEmpty)
+                      PacotesEmptyState(onCreate: _novoPacote)
+                    else ...[
+                      for (var i = 0; i < _pacotes.length; i++)
+                        PacoteStorefrontCard(
+                          pacote: _pacotes[i],
+                          entranceIndex: i,
+                          onDelete: () => _desativar(_pacotes[i]),
+                        ),
+                    ],
+                  ],
                 ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: onDelete,
-                ),
-              ],
-            ),
-            if (pacote.descricao != null && pacote.descricao!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(pacote.descricao!,
-                    style: theme.textTheme.bodySmall),
               ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: [
-                if (pacote.incluiTreino) const _Chip('Treino'),
-                if (pacote.incluiNutri) const _Chip('Nutrição'),
-                if (pacote.incluiConsultoria) const _Chip('Consultoria'),
-                _Chip('${pacote.duracaoMeses} ${pacote.duracaoMeses == 1 ? 'mês' : 'meses'}'),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'R\$ ${pacote.valor.toStringAsFixed(2)}',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w900,
-                color: theme.colorScheme.primary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  const _Chip(this.label);
-  final String label;
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(label,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
     );
   }
 }

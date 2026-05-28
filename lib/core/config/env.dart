@@ -72,9 +72,28 @@ class Env {
   /// Página de captura de leads (`/c/{slug}`).
   static String capturaPageUrl(String slug) => '$_webBase/c/$slug';
 
-  /// Label curto para UI (host + path).
+  /// Label curto para UI (host + path) — URL real servida hoje.
   static String landingPageLabel(String slug) {
     final uri = Uri.parse(landingPageUrl(slug));
     return '${uri.host}/p/$slug';
   }
+
+  static const String _brandWebHost = 'focux.app';
+
+  /// Host amigável para exibir links públicos (marca quando infra é Railway etc.).
+  static String get publicWebDisplayHost {
+    final host = Uri.parse(_webBase).host.toLowerCase();
+    if (host.contains('railway.app') ||
+        host.contains('onrender.com') ||
+        host.contains('vercel.app') ||
+        host == 'localhost' ||
+        host.startsWith('127.0.0.1')) {
+      return _brandWebHost;
+    }
+    return host;
+  }
+
+  /// URL legível na UI — copiar continua usando [landingPageUrl].
+  static String landingPageDisplayLabel(String slug) =>
+      '$publicWebDisplayHost/p/$slug';
 }
