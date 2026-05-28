@@ -60,6 +60,8 @@ class LandingEditorImageUploadCard extends StatelessWidget {
     required this.imageUrl,
     required this.uploading,
     required this.onUpload,
+    this.optional = false,
+    this.emptyHint,
   });
 
   final String title;
@@ -67,6 +69,8 @@ class LandingEditorImageUploadCard extends StatelessWidget {
   final String? imageUrl;
   final bool uploading;
   final VoidCallback onUpload;
+  final bool optional;
+  final String? emptyHint;
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +86,29 @@ class LandingEditorImageUploadCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
+                ),
+                if (optional)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(999),
+                      color: scheme.primaryContainer.withValues(alpha: 0.55),
+                    ),
+                    child: Text(
+                      'Opcional',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: scheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
             const SizedBox(height: 4),
             Text(
               hint,
@@ -116,6 +142,17 @@ class LandingEditorImageUploadCard extends StatelessWidget {
                   errorBuilder: (_, __, ___) => const SizedBox(
                     height: 120,
                     child: Center(child: Icon(Icons.broken_image_outlined)),
+                  ),
+                ),
+              )
+            else if (optional)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Text(
+                  emptyHint ?? 'Sem foto — sua página abre com título e botões.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: scheme.onSurface.withValues(alpha: 0.55),
                   ),
                 ),
               )

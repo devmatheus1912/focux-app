@@ -56,7 +56,7 @@ class LandingEditorLinksTab extends StatelessWidget {
           icon: Icons.public_rounded,
           title: 'Página completa na internet',
           subtitle:
-              'Site com foto, planos e depoimentos — ideal para Instagram, WhatsApp e bio.',
+              'Site com planos e depoimentos — ideal para Instagram, WhatsApp e bio.',
           displayLabel: Env.landingPageDisplayLabel(slug),
           copyUrl: landingUrl,
           onOpen: () => openLandingLink(context, url: landingUrl),

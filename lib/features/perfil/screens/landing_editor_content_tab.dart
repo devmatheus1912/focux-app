@@ -141,19 +141,24 @@ class LandingEditorContentTab extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   LandingEditorImageUploadCard(
-                    title: 'Foto de capa',
-                    hint: 'Grande imagem no topo — treino, estúdio ou você em ação.',
-                    imageUrl: c.heroImageUrl,
-                    uploading: c.uploadingHero,
-                    onUpload: onUploadHero,
-                  ),
-                  const SizedBox(height: 12),
-                  LandingEditorImageUploadCard(
                     title: 'Foto na seção sobre',
-                    hint: 'Retrato ou foto profissional na área "Sobre você".',
+                    hint:
+                        'Retrato ou foto profissional — aparece em "Sobre você" e no topo da página.',
                     imageUrl: c.bioImageUrl,
                     uploading: c.uploadingBio,
                     onUpload: onUploadBio,
+                  ),
+                  const SizedBox(height: 12),
+                  LandingEditorImageUploadCard(
+                    title: 'Foto de capa',
+                    hint:
+                        'Grande imagem abaixo do título — treino, estúdio ou você em ação.',
+                    imageUrl: c.heroImageUrl,
+                    uploading: c.uploadingHero,
+                    onUpload: onUploadHero,
+                    optional: true,
+                    emptyHint:
+                        'Sem capa — a abertura fica só com título, botões e números.',
                   ),
                 ],
               ),
