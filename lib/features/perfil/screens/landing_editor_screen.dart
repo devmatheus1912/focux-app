@@ -63,7 +63,10 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
   bool _faqExpanded = false;
   bool _checklistLoading = true;
   String? _highlightedSectionKey;
+  int? _highlightedFaqIndex;
   Timer? _highlightTimer;
+  Timer? _faqHighlightTimer;
+  final _faqItemKeys = <int, GlobalKey>{};
   List<LandingNichePreset> _presets = [];
   List<LandingChecklistItem> _checklist = [];
 
@@ -126,17 +129,80 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       c.dispose();
     }
     _highlightTimer?.cancel();
+    _faqHighlightTimer?.cancel();
     _conteudoScroll.dispose();
     super.dispose();
   }
 
-  List<String> _contentWarnings() {
-    return landingContentWarnings(
-      faq: _faq
-          .map((e) => (pergunta: e.pergunta, resposta: e.resposta))
-          .toList(),
+  List<LandingContentIssue> _contentIssues() {
+    return landingContentIssues(
+      faq: _faqPayload(),
       primaryCta: _primaryCta.text,
       heroTitle: _heroTitle.text,
+    );
+  }
+
+  List<LandingContentIssue> _contentIssuesForReview() {
+    return landingContentIssuesForReview(
+      faq: _faqPayload(),
+      primaryCta: _primaryCta.text,
+      heroTitle: _heroTitle.text,
+    );
+  }
+
+  List<({String pergunta, String resposta})> _faqPayload() {
+    return _faq
+        .map((e) => (pergunta: e.pergunta, resposta: e.resposta))
+        .toList();
+  }
+
+  GlobalKey _faqKeyFor(int index) =>
+      _faqItemKeys.putIfAbsent(index, GlobalKey.new);
+
+  void _pulseFaqHighlight(int? index) {
+    setState(() => _highlightedFaqIndex = index);
+    _faqHighlightTimer?.cancel();
+    _faqHighlightTimer = Timer(const Duration(milliseconds: 900), () {
+      if (mounted) setState(() => _highlightedFaqIndex = null);
+    });
+  }
+
+  void _navigateContentIssue(LandingContentIssue issue) {
+    switch (issue.id) {
+      case 'hero':
+      case 'cta':
+      case 'cta_accent':
+        setState(() {
+          _tabIndex = 1;
+          _heroExpanded = true;
+        });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _scrollToSection(_heroSectionKey);
+        });
+      case 'faq':
+        final index = issue.faqIndex;
+        setState(() {
+          _tabIndex = 1;
+          _faqExpanded = true;
+        });
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          if (index != null) {
+            await _scrollToSection(_faqKeyFor(index));
+            _pulseFaqHighlight(index);
+          } else {
+            await _scrollToSection(_faqSectionKey);
+          }
+        });
+    }
+  }
+
+  void _openContentReview() {
+    final issues = _contentIssuesForReview();
+    if (issues.isEmpty) return;
+    showLandingContentReviewSheet(
+      context,
+      issues: issues,
+      onIssueTap: _navigateContentIssue,
     );
   }
 
@@ -197,15 +263,16 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
   }
 
   Future<bool> _confirmContentWarnings() async {
-    final warnings = _contentWarnings();
-    if (warnings.isEmpty) return true;
+    final issues = _contentIssuesForReview();
+    if (issues.isEmpty) return true;
 
     final publish = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Publicar mesmo assim?'),
         content: Text(
-          '${warnings.join('\n\n')}\n\nSua página pode parecer incompleta para quem visita.',
+          '${issues.map((e) => '• ${e.message}').join('\n')}\n\n'
+          'Sua página pode parecer incompleta para quem visita.',
         ),
         actions: [
           TextButton(
@@ -664,44 +731,6 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
             ),
           ),
         ),
-        if (_presets.isNotEmpty) ...[
-          const SizedBox(height: 20),
-          _sectionHeader(
-            'Modelos por nicho',
-            hint: 'Preenche textos iniciais conforme seu público.',
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: _presets
-                .map(
-                  (p) => ActionChip(
-                    label: Text(p.label),
-                    onPressed: _saving
-                        ? null
-                        : () async {
-                            try {
-                              await ref
-                                  .read(landingGrowthRepositoryProvider)
-                                  .applyPreset(p.id);
-                              ref.invalidate(perfilProvider);
-                              if (!context.mounted) return;
-                              FeedbackHelper.showSuccess(
-                                context,
-                                'Modelo "${p.label}" aplicado.',
-                              );
-                              await _loadGrowth();
-                            } catch (e) {
-                              if (!context.mounted) return;
-                              FeedbackHelper.showError(context, friendlyError(e));
-                            }
-                          },
-                  ),
-                )
-                .toList(),
-          ),
-        ],
         if (_checklistLoading) ...[
           const SizedBox(height: 16),
           const LandingChecklistSkeleton(),
@@ -709,7 +738,50 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
           const SizedBox(height: 16),
           LandingChecklistCard(
             items: _checklist,
+            contentIssueCount: _contentIssuesForReview().length,
+            onReviewContent: _openContentReview,
             onItemTap: _onChecklistTap,
+          ),
+        ],
+        if (_presets.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          _sectionHeader(
+            'Modelos por nicho',
+            hint: 'Preenche textos iniciais conforme seu público.',
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 40,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: _presets.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (context, index) {
+                final preset = _presets[index];
+                return ActionChip(
+                  label: Text(preset.label),
+                  onPressed: _saving
+                      ? null
+                      : () async {
+                          try {
+                            await ref
+                                .read(landingGrowthRepositoryProvider)
+                                .applyPreset(preset.id);
+                            ref.invalidate(perfilProvider);
+                            if (!context.mounted) return;
+                            FeedbackHelper.showSuccess(
+                              context,
+                              'Modelo "${preset.label}" aplicado.',
+                            );
+                            await _loadGrowth();
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            FeedbackHelper.showError(context, friendlyError(e));
+                          }
+                        },
+                );
+              },
+            ),
           ),
         ],
       ],
@@ -780,12 +852,39 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                   maxLines: 3,
                 ),
                 const SizedBox(height: 8),
-                TextField(
-                  controller: _primaryCta,
-                  decoration: const InputDecoration(
-                    labelText: 'Texto do botão principal',
-                    helperText: 'Ex.: Quero começar · Agendar avaliação',
-                  ),
+                Builder(
+                  builder: (context) {
+                    final accentFix = landingCtaAccentSuggestion(_primaryCta.text);
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        TextField(
+                          controller: _primaryCta,
+                          decoration: const InputDecoration(
+                            labelText: 'Texto do botão principal',
+                            helperText: 'Ex.: Quero começar · Agendar avaliação',
+                          ),
+                        ),
+                        if (accentFix != null) ...[
+                          const SizedBox(height: 4),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton.icon(
+                              onPressed: () {
+                                _primaryCta.text = accentFix;
+                                _primaryCta.selection = TextSelection.collapsed(
+                                  offset: accentFix.length,
+                                );
+                                _markDirty();
+                              },
+                              icon: const Icon(Icons.spellcheck, size: 18),
+                              label: const Text('Corrigir acento em "avaliação"'),
+                            ),
+                          ),
+                        ],
+                      ],
+                    );
+                  },
                 ),
                 const SizedBox(height: 12),
                 _imageUploadCard(
@@ -933,10 +1032,14 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                     ),
                   ),
                 for (var i = 0; i < _faq.length; i++) ...[
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
+                  KeyedSubtree(
+                    key: _faqKeyFor(i),
+                    child: LandingHighlightCard(
+                      highlighted: _highlightedFaqIndex == i ||
+                          landingFaqItemHasIssue(faq: _faqPayload(), index: i),
+                      issueHint: landingFaqItemHasIssue(faq: _faqPayload(), index: i)
+                          ? 'Revise o texto desta pergunta'
+                          : null,
                       child: Column(
                         children: [
                           Row(
@@ -1066,16 +1169,8 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
               children: [
                 if (_loaded)
                   LandingContentWarningBanner(
-                    warnings: _contentWarnings(),
-                    onReview: () {
-                      setState(() {
-                        _tabIndex = 1;
-                        _faqExpanded = true;
-                      });
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        _scrollToSection(_faqSectionKey);
-                      });
-                    },
+                    issues: _contentIssues(),
+                    onReview: _openContentReview,
                   ),
                 LandingEditorTabBar(
                   index: _tabIndex,

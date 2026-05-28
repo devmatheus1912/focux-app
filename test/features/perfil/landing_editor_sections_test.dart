@@ -39,13 +39,58 @@ void main() {
     expect(landingTextLooksLikePlaceholder('Treino personalizado online'), isFalse);
   });
 
-  test('landingContentWarnings flags placeholder FAQ', () {
-    final warnings = landingContentWarnings(
-      faq: [(pergunta: 'dadsdad', resposta: 'ok')],
+  test('landingContentIssues groups multiple placeholder FAQ items', () {
+    final issues = landingContentIssues(
+      faq: [
+        (pergunta: 'dadsdad', resposta: 'ok'),
+        (pergunta: 'teste', resposta: 'abc'),
+        (pergunta: 'real?', resposta: 'sim'),
+      ],
       primaryCta: 'Agendar avaliação',
       heroTitle: 'Transforme seu corpo',
     );
-    expect(warnings, isNotEmpty);
-    expect(warnings.first, contains('Pergunta 1'));
+    expect(issues, hasLength(1));
+    expect(issues.first.message, contains('2 perguntas frequentes'));
+  });
+
+  test('landingContentIssuesForReview expands grouped FAQ issues', () {
+    final issues = landingContentIssuesForReview(
+      faq: [
+        (pergunta: 'dadsdad', resposta: 'ok'),
+        (pergunta: 'teste', resposta: 'abc'),
+        (pergunta: 'real?', resposta: 'sim'),
+      ],
+      primaryCta: 'Agendar avaliação',
+      heroTitle: 'Transforme seu corpo',
+    );
+    expect(issues, hasLength(2));
+    expect(issues[0].faqIndex, 0);
+    expect(issues[1].faqIndex, 1);
+  });
+
+  test('landingCtaAccentSuggestion fixes avaliacao', () {
+    expect(
+      landingCtaAccentSuggestion('Quero minha avaliacao'),
+      'Quero minha avaliação',
+    );
+  });
+
+  test('landingReadinessTitle reflects pending content review', () {
+    expect(
+      landingReadinessTitle(configDone: 7, configTotal: 7, contentIssueCount: 2),
+      'Quase pronto · 7/7 configurados',
+    );
+    expect(
+      landingReadinessTitle(configDone: 7, configTotal: 7, contentIssueCount: 0),
+      'Pronto para vender (7/7)',
+    );
+  });
+
+  test('landingContentIssueSummary stays compact for many issues', () {
+    final summary = landingContentIssueSummary([
+      const LandingContentIssue(id: 'hero', message: 'A'),
+      const LandingContentIssue(id: 'faq', message: 'B'),
+    ]);
+    expect(summary, '2 pontos para revisar antes de publicar.');
   });
 }
