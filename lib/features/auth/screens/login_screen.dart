@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../core/config/env.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
@@ -45,6 +46,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void initState() {
     super.initState();
     _loadCapabilities();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _resetPublicAuthBranding());
+  }
+
+  void _resetPublicAuthBranding() {
+    ref.read(logoUrlProvider.notifier).state = null;
+    ref.read(hideFocuxBrandingProvider.notifier).state = false;
+    ref.read(personalNameProvider.notifier).state = null;
+    ref.read(appDisplayNameProvider.notifier).state = null;
   }
 
   @override

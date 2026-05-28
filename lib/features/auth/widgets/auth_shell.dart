@@ -51,13 +51,17 @@ class AuthShell extends StatelessWidget {
 }
 
 class AuthLogoMark extends ConsumerWidget {
-  const AuthLogoMark({super.key, this.width = 188});
+  const AuthLogoMark({super.key, this.width = 188, this.forceOfficial = false});
 
   final double width;
 
+  /// Telas públicas de auth devem usar `true` para ignorar logo de sessão.
+  final bool forceOfficial;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final logoUrl = ref.watch(logoUrlProvider);
+    final logoUrl =
+        forceOfficial ? null : ref.watch(logoUrlProvider);
 
     return Semantics(
       label: 'Focux Personal',
@@ -119,7 +123,8 @@ class AuthRoleHeader extends StatelessWidget {
   }
 }
 
-/// Cabeçalho do login — lockup completo (Personal) ou ícone + papel (Aluno).
+/// Cabeçalho do login — lockup oficial Focux (Personal) ou ícone + papel (Aluno).
+/// Nunca usa logoUrl de sessão anterior (evita foto de perfil no login).
 class AuthLoginBrandHeader extends ConsumerWidget {
   const AuthLoginBrandHeader({
     super.key,
@@ -132,33 +137,32 @@ class AuthLoginBrandHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hideFocux = ref.watch(hideFocuxBrandingProvider);
-
-    if (hideFocux) {
-      return AuthWordmark(taglineSize: taglineSize);
-    }
-
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 280),
       switchInCurve: Curves.easeOutCubic,
       switchOutCurve: Curves.easeInCubic,
-      child: isAluno
-          ? Column(
-              key: const ValueKey('login-aluno'),
-              children: [
-                const AuthRoleHeader(roleLabel: 'ALUNO', center: true),
-                const SizedBox(height: 14),
-                AuthWordmark(taglineSize: taglineSize),
-              ],
-            )
-          : Column(
-              key: const ValueKey('login-personal'),
-              children: [
-                const AuthLogoMark(width: 188),
-                const SizedBox(height: 16),
-                AuthWordmark(taglineSize: taglineSize),
-              ],
-            ),
+      child:
+          isAluno
+              ? Column(
+                key: const ValueKey('login-aluno'),
+                children: [
+                  const AuthRoleHeader(roleLabel: 'ALUNO', center: true),
+                  const SizedBox(height: 14),
+                  AuthWordmark(taglineSize: taglineSize),
+                ],
+              )
+              : Column(
+                key: const ValueKey('login-personal'),
+                children: [
+                  Semantics(
+                    label: 'Focux Personal',
+                    image: true,
+                    child: FocuxOfficialLogo.full(width: 188),
+                  ),
+                  const SizedBox(height: 16),
+                  AuthWordmark(taglineSize: taglineSize),
+                ],
+              ),
     );
   }
 }
