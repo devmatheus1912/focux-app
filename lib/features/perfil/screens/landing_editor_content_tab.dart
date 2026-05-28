@@ -190,7 +190,7 @@ class LandingEditorContentTab extends StatelessWidget {
           LandingCollapsibleSection(
             title: 'Foto de capa',
             hint:
-                'Opcional — treino, estúdio ou você em ação. Sem foto, usamos uma capa padrão de academia.',
+                'Opcional — aparece como fundo do topo com gradiente da sua cor de marca.',
             badgeLabel: 'Opcional',
             expanded: c.coverExpanded,
             onExpandedChanged: onCoverExpandedChanged,
@@ -202,7 +202,7 @@ class LandingEditorContentTab extends StatelessWidget {
               onUpload: onUploadHero,
               optional: true,
               emptyHint:
-                  'Sem capa personalizada — a página usa uma foto padrão de academia.',
+                  'Sem capa personalizada — usamos foto padrão de academia no fundo do topo.',
               defaultActiveHint: landingUsesDefaultHeroImage(c.heroImageUrl)
                   ? 'Padrão ativo — troque quando quiser enviando a sua foto.'
                   : null,
