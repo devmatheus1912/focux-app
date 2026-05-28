@@ -64,7 +64,7 @@ class _CinematicMeshBackgroundState extends State<CinematicMeshBackground>
     Widget? gridLayer;
     if (widget.showGrid) {
       final grid = CustomPaint(
-        painter: CinematicGridPainter(light: isLight),
+        painter: _CinematicGridPainter(light: isLight),
         size: Size.infinite,
       );
       gridLayer =
@@ -181,8 +181,8 @@ class _CinematicMeshBackgroundState extends State<CinematicMeshBackground>
   }
 }
 
-class CinematicGridPainter extends CustomPainter {
-  const CinematicGridPainter({this.light = false});
+class _CinematicGridPainter extends CustomPainter {
+  const _CinematicGridPainter({this.light = false});
 
   final bool light;
 
@@ -207,6 +207,6 @@ class CinematicGridPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CinematicGridPainter oldDelegate) =>
+  bool shouldRepaint(covariant _CinematicGridPainter oldDelegate) =>
       oldDelegate.light != light;
 }

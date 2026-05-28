@@ -11,7 +11,7 @@ const _immersiveRoutePrefixes = [
   '/promo-enterprise',
 ];
 
-bool fxRouteUsesImmersiveChrome(String path) {
+bool _fxRouteUsesImmersiveChrome(String path) {
   for (final prefix in _immersiveRoutePrefixes) {
     if (path.startsWith(prefix)) return true;
   }
@@ -29,7 +29,7 @@ class FxRouteChrome extends StatelessWidget {
     if (MeshScope.of(context)) return child;
 
     final path = GoRouterState.of(context).uri.path;
-    if (fxRouteUsesImmersiveChrome(path)) return child;
+    if (_fxRouteUsesImmersiveChrome(path)) return child;
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 

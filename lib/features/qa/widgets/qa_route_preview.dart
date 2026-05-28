@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/mesh_scope.dart';
+import '../data/qa_smoke_catalog.dart';
 import '../../agenda/screens/agenda_screen.dart';
 import '../../alertas/screens/alertas_screen.dart';
 import '../../alunos/screens/acoes_massa_screen.dart';
@@ -33,13 +35,42 @@ import '../../suporte/screens/suporte_screen.dart';
 import '../../treinos/screens/treinos_list_screen.dart';
 import 'qa_preview_session.dart';
 
-/// Builds smoke-test screen previews without GoRouter push/pop.
+/// Builds smoke-test screen previews with GoRouter + mesh for QA pumps.
 Widget buildQaRoutePreview(String path) {
   final uri = Uri.parse(path.startsWith('/') ? path : '/$path');
   final screen = _buildQaRouteScreen(uri);
 
   // MeshScope evita GoRouterState em FxRouteChrome e simula shell mesh.
   return MeshScope(active: true, child: screen);
+}
+
+/// Router harness for widget tests — screens de auth leem [GoRouterState].
+GoRouter buildQaPreviewRouter(String initialLocation) {
+  final normalized =
+      initialLocation.startsWith('/') ? initialLocation : '/$initialLocation';
+  final paths = {
+    for (final route in qaSmokeRoutes) route.path.split('?').first,
+  };
+
+  return GoRouter(
+    initialLocation: normalized,
+    routes: [
+      for (final path in paths)
+        GoRoute(
+          path: path,
+          builder: (context, state) => MeshScope(
+            active: true,
+            child: _buildQaRouteScreen(state.uri),
+          ),
+        ),
+    ],
+  );
+}
+
+Widget buildQaRoutePreviewApp(String path) {
+  return MaterialApp.router(
+    routerConfig: buildQaPreviewRouter(path),
+  );
 }
 
 Widget _buildQaRouteScreen(Uri uri) {

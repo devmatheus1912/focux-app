@@ -28,9 +28,7 @@ void main() {
     for (final route in qaSmokeRoutes) {
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(body: buildQaRoutePreview(route.path)),
-          ),
+          child: buildQaRoutePreviewApp(route.path),
         ),
       );
       await tester.pump();

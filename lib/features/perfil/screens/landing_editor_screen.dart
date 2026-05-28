@@ -282,7 +282,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
     await Future<void>.delayed(const Duration(milliseconds: 120));
     if (!mounted) return;
     final ctx = key.currentContext;
-    if (ctx == null) return;
+    if (ctx == null || !ctx.mounted) return;
     await Scrollable.ensureVisible(
       ctx,
       duration: const Duration(milliseconds: 360),
@@ -415,6 +415,12 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
     } finally {
       if (mounted) setState(() => _applyingTemplate = false);
     }
+  }
+
+  Future<void> _tryPopAfterLeaveConfirm() async {
+    final router = GoRouter.of(context);
+    if (!await _confirmLeave()) return;
+    router.pop();
   }
 
   Future<bool> _confirmContentWarnings() async {
@@ -1050,14 +1056,14 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                             _heroTitle.text = copy.heroTitle;
                             _heroSubtitle.text = copy.heroSubtitle;
                             _primaryCta.text = copy.primaryCta;
-                            if (!context.mounted) return;
+                            if (!mounted) return;
                             FeedbackHelper.showSuccess(
                               context,
                               'Textos sugeridos pela IA.',
                             );
                             setState(() => _dirty = true);
                           } catch (e) {
-                            if (!context.mounted) return;
+                            if (!mounted) return;
                             FeedbackHelper.showError(context, friendlyError(e));
                           } finally {
                             if (mounted) setState(() => _generatingHero = false);
@@ -1426,19 +1432,13 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
           canPop: !_dirty,
           onPopInvokedWithResult: (didPop, _) async {
             if (didPop) return;
-            if (await _confirmLeave() && context.mounted) {
-              context.pop();
-            }
+            await _tryPopAfterLeaveConfirm();
           },
           child: FxShellScaffold(
             appBar: FxShellAppBar(
               title: 'Editor da landing',
               subtitle: _dirty ? 'Alterações pendentes' : null,
-              onBack: () async {
-                if (await _confirmLeave() && context.mounted) {
-                  context.pop();
-                }
-              },
+              onBack: _tryPopAfterLeaveConfirm,
             ),
             bottomNavigationBar: LandingStickySaveBar(
               dirty: _dirty,

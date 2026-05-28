@@ -15,7 +15,7 @@ void main() {
     expect(screen, contains("'Impacto hoje'"));
     expect(screen, contains('_financeInadimplLabel'));
     expect(screen, contains('_financePercentLabel'));
-    expect(screen, contains('barra no teto'));
+    expect(screen, contains('Meta batida'));
     expect(screen, contains('_pulseCheckinsAccent'));
     expect(screen, contains('_HorizontalScrollPeek'));
     expect(screen, contains('Deslize horizontalmente para ver mais'));
