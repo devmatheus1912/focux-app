@@ -5,6 +5,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../data/landing_growth_repository.dart';
 import '../widgets/landing_editor_widgets.dart';
 import 'landing_editor_controller.dart';
+import 'landing_section_templates.dart';
 
 class LandingEditorLinksTab extends StatelessWidget {
   const LandingEditorLinksTab({
@@ -12,15 +13,13 @@ class LandingEditorLinksTab extends StatelessWidget {
     required this.controller,
     required this.onReviewFocus,
     required this.onChecklistTap,
-    required this.onApplyDefaultTemplate,
-    required this.onApplyPreset,
+    required this.onApplyTemplate,
   });
 
   final LandingEditorController controller;
   final VoidCallback onReviewFocus;
   final ValueChanged<LandingChecklistItem> onChecklistTap;
-  final VoidCallback onApplyDefaultTemplate;
-  final ValueChanged<LandingNichePreset> onApplyPreset;
+  final ValueChanged<LandingCompleteTemplate> onApplyTemplate;
 
   @override
   Widget build(BuildContext context) {
@@ -99,10 +98,9 @@ class LandingEditorLinksTab extends StatelessWidget {
         const SizedBox(height: 16),
         LandingSectionTemplatesPanel(
           sectionOrder: controller.sectionOrder,
-          presets: controller.presets,
+          templates: controller.templateCatalog,
           applying: controller.applyingTemplate || controller.saving,
-          onApplyDefault: onApplyDefaultTemplate,
-          onApplyPreset: onApplyPreset,
+          onApplyTemplate: onApplyTemplate,
         ),
       ],
     );

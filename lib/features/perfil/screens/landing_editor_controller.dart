@@ -6,6 +6,7 @@ import '../data/landing_growth_repository.dart';
 import '../data/perfil_repository.dart';
 import 'landing_editor_quality.dart';
 import 'landing_editor_sections.dart';
+import 'landing_preset_mapper.dart';
 import 'landing_section_templates.dart';
 
 enum LandingEditorLeaveChoice { stay, discard, saveAndLeave }
@@ -54,6 +55,9 @@ class LandingEditorController {
   Timer? faqHighlightTimer;
   final faqItemKeys = <int, GlobalKey>{};
   List<LandingNichePreset> presets = [];
+
+  List<LandingCompleteTemplate> get templateCatalog =>
+      landingUnifiedTemplateCatalog(presets);
   List<LandingChecklistItem> checklist = [];
   int lastReviewCount = -1;
   bool celebrationShownForClear = false;
@@ -164,7 +168,7 @@ class LandingEditorController {
     lastReviewCount = contentReviewCount();
   }
 
-  void applyLocalTemplate(LandingCompleteTemplate template) {
+  void applyTemplate(LandingCompleteTemplate template) {
     heroTitle.text = template.heroTitle;
     heroSubtitle.text = template.heroSubtitle;
     primaryCta.text = template.primaryCta;

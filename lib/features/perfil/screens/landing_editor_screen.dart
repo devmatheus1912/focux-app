@@ -20,6 +20,7 @@ import 'landing_editor_links_tab.dart';
 import 'landing_editor_order_tab.dart';
 import 'landing_editor_quality.dart';
 import 'landing_editor_sections.dart';
+import 'landing_preset_mapper.dart';
 import 'landing_section_templates.dart';
 
 class LandingEditorScreen extends ConsumerStatefulWidget {
@@ -233,19 +234,23 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
     return ok ?? false;
   }
 
-  Future<void> _applyDefaultTemplate() async {
-    if (!await _confirmApplyTemplate(landingDefaultCompleteTemplate.label)) return;
-    setState(() => _c.applyLocalTemplate(landingDefaultCompleteTemplate));
-    if (!mounted) return;
-    FeedbackHelper.showSuccess(context, 'Modelo padrão aplicado. Revise e salve.');
-    setState(() => _c.tabIndex = 1);
-  }
+  Future<void> _applyTemplate(LandingCompleteTemplate template) async {
+    if (!await _confirmApplyTemplate(template.label)) return;
 
-  Future<void> _applyRemotePreset(LandingNichePreset preset) async {
-    if (!await _confirmApplyTemplate(preset.label)) return;
+    if (!landingTemplateIsRemote(template)) {
+      setState(() => _c.applyTemplate(template));
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(
+        context,
+        'Modelo padrão aplicado. Revise e salve.',
+      );
+      setState(() => _c.tabIndex = 1);
+      return;
+    }
+
     setState(() => _c.applyingTemplate = true);
     try {
-      await ref.read(landingGrowthRepositoryProvider).applyPreset(preset.id);
+      await ref.read(landingGrowthRepositoryProvider).applyPreset(template.id);
       ref.invalidate(perfilProvider);
       final perfil = await ref.read(perfilRepositoryProvider).buscar();
       if (!mounted) return;
@@ -259,7 +264,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       });
       FeedbackHelper.showSuccess(
         context,
-        'Modelo "${preset.label}" aplicado em todas as seções.',
+        'Modelo "${template.label}" aplicado em todas as seções.',
       );
       await _loadGrowth();
     } catch (e) {
@@ -575,8 +580,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                             controller: _c,
                             onReviewFocus: () => _enterReviewFocus(),
                             onChecklistTap: _onChecklistTap,
-                            onApplyDefaultTemplate: _applyDefaultTemplate,
-                            onApplyPreset: _applyRemotePreset,
+                            onApplyTemplate: _applyTemplate,
                           ),
                         ),
                       1 => KeyedSubtree(

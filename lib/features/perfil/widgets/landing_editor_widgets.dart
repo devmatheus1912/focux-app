@@ -1078,16 +1078,14 @@ class LandingSectionTemplatesPanel extends StatelessWidget {
   const LandingSectionTemplatesPanel({
     super.key,
     required this.sectionOrder,
-    required this.onApplyDefault,
-    required this.onApplyPreset,
-    required this.presets,
+    required this.templates,
+    required this.onApplyTemplate,
     this.applying = false,
   });
 
   final List<String> sectionOrder;
-  final VoidCallback onApplyDefault;
-  final ValueChanged<LandingNichePreset> onApplyPreset;
-  final List<LandingNichePreset> presets;
+  final List<LandingCompleteTemplate> templates;
+  final ValueChanged<LandingCompleteTemplate> onApplyTemplate;
   final bool applying;
 
   IconData _iconFor(String name) {
@@ -1184,11 +1182,17 @@ class LandingSectionTemplatesPanel extends StatelessWidget {
               const SizedBox(height: 10),
             ],
             OutlinedButton.icon(
-              onPressed: applying ? null : onApplyDefault,
+              onPressed: applying || templates.isEmpty
+                  ? null
+                  : () => onApplyTemplate(templates.first),
               icon: const Icon(Icons.auto_fix_high_outlined, size: 18),
-              label: const Text('Aplicar modelo padrão Focux'),
+              label: Text(
+                templates.isEmpty
+                    ? 'Aplicar modelo padrão Focux'
+                    : 'Aplicar ${templates.first.label}',
+              ),
             ),
-            if (presets.isNotEmpty) ...[
+            if (templates.length > 1) ...[
               const SizedBox(height: 14),
               Text(
                 'Modelos por nicho',
@@ -1211,10 +1215,11 @@ class LandingSectionTemplatesPanel extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  for (final preset in presets)
+                  for (final template in templates.skip(1))
                     ActionChip(
-                      label: Text(preset.label),
-                      onPressed: applying ? null : () => onApplyPreset(preset),
+                      label: Text(template.label),
+                      onPressed:
+                          applying ? null : () => onApplyTemplate(template),
                     ),
                 ],
               ),

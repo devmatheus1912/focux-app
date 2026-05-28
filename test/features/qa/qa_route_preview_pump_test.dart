@@ -11,7 +11,6 @@ const _knownLayoutFragileRoutes = {
   '/ia/copiloto',
   '/ia/checkin',
   '/broadcasts',
-  '/agenda',
   '/gamificacao',
 };
 

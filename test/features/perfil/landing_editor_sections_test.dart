@@ -1,7 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/perfil/data/landing_growth_repository.dart';
+import 'package:focux_app/features/perfil/data/perfil_repository.dart';
 import 'package:focux_app/features/perfil/screens/landing_editor_checklist.dart';
 import 'package:focux_app/features/perfil/screens/landing_editor_quality.dart';
 import 'package:focux_app/features/perfil/screens/landing_editor_sections.dart';
+import 'package:focux_app/features/perfil/screens/landing_preset_mapper.dart';
 
 void main() {
   test('normalizeLandingSectionOrder deduplicates legacy keys', () {
@@ -138,5 +141,44 @@ void main() {
       heroTitle: 'Transforme seu corpo',
     );
     expect(count, 3);
+  });
+
+  test('landingCompleteTemplateFromPreset normaliza ordem e copia CTAs', () {
+    final preset = LandingNichePreset(
+      id: 'TEST',
+      label: 'Teste',
+      heroTitle: 'Titulo',
+      heroSubtitle: 'Sub',
+      primaryCta: 'CTA 1',
+      offerCta: 'CTA 2',
+      finalCta: 'CTA 3',
+      contactCta: 'CTA 4',
+      servicos: const [LandingServiceItem(titulo: 'S1', descricao: 'D1')],
+      faq: const [LandingFaqItem(pergunta: 'P?', resposta: 'R.')],
+      sectionOrder: const ['faq', 'bio', 'faq'],
+    );
+
+    final template = landingCompleteTemplateFromPreset(preset);
+
+    expect(template.id, 'TEST');
+    expect(template.primaryCta, 'CTA 1');
+    expect(template.sectionOrder.take(2), ['faq', 'bio']);
+    expect(template.sectionOrder.where((k) => k == 'faq'), hasLength(1));
+  });
+
+  test('landingUnifiedTemplateCatalog inclui padrao e remotos', () {
+    final remote = LandingNichePreset(
+      id: 'ONLINE',
+      label: 'Online',
+      heroTitle: 'H',
+      heroSubtitle: 'S',
+      primaryCta: 'C',
+    );
+
+    final catalog = landingUnifiedTemplateCatalog([remote]);
+
+    expect(catalog.first.id, landingDefaultTemplateId);
+    expect(catalog, hasLength(2));
+    expect(catalog.last.id, 'ONLINE');
   });
 }

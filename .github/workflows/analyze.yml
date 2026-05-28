@@ -24,8 +24,8 @@ jobs:
 
       - run: flutter pub get
 
-      - name: Analyze without warnings
-        run: dart analyze --fatal-warnings
+      - name: Analyze without warnings or infos
+        run: dart analyze --fatal-warnings --fatal-infos
 
       - name: Unit tests
         run: flutter test

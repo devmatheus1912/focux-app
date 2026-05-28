@@ -207,88 +207,108 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 16, 20, 16),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      InkWell(
-                        onTap:
-                            () => safePopOrGo(context, '/dashboard/personal'),
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 12),
-                          child: Icon(
-                            Icons.arrow_back_ios_new,
-                            size: 24,
-                            color: ink,
+                  Expanded(
+                    child: Row(
+                      children: [
+                        InkWell(
+                          onTap:
+                              () => safePopOrGo(context, '/dashboard/personal'),
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: Icon(
+                              Icons.arrow_back_ios_new,
+                              size: 24,
+                              color: ink,
+                            ),
                           ),
                         ),
-                      ),
-                      Text(
-                        'Agenda',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w700,
-                          color: ink,
-                          letterSpacing: -0.5,
+                        Flexible(
+                          child: Text(
+                            'Agenda',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w700,
+                              color: ink,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
                         tooltip: 'Exportar iCal',
-                        icon: Icon(Icons.calendar_month_outlined, color: mute, size: 22),
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 36,
+                          minHeight: 36,
+                        ),
+                        icon: Icon(
+                          Icons.calendar_month_outlined,
+                          color: mute,
+                          size: 22,
+                        ),
                         onPressed: _copyIcalLink,
                       ),
                       const ShellThemeToggle(size: 36),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: chrome.headerAction(radius: 12),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            InkWell(
-                              onTap: () => _changeWeek(-1),
-                              borderRadius: BorderRadius.circular(999),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2),
-                                child: Icon(
-                                  Icons.chevron_left,
-                                  size: 16,
-                                  color: mute,
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerRight,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                            decoration: chrome.headerAction(radius: 12),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                InkWell(
+                                  onTap: () => _changeWeek(-1),
+                                  borderRadius: BorderRadius.circular(999),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(2),
+                                    child: Icon(
+                                      Icons.chevron_left,
+                                      size: 16,
+                                      color: mute,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              '${_weekStart.day}–${_weekStart.add(const Duration(days: 6)).day} ${monthNames[_weekStart.month]}',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: ink,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            InkWell(
-                              onTap: () => _changeWeek(1),
-                              borderRadius: BorderRadius.circular(999),
-                              child: Padding(
-                                padding: const EdgeInsets.all(2),
-                                child: Icon(
-                                  Icons.chevron_right,
-                                  size: 16,
-                                  color: mute,
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${_weekStart.day}–${_weekStart.add(const Duration(days: 6)).day} ${monthNames[_weekStart.month]}',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: ink,
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(width: 4),
+                                InkWell(
+                                  onTap: () => _changeWeek(1),
+                                  borderRadius: BorderRadius.circular(999),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(2),
+                                    child: Icon(
+                                      Icons.chevron_right,
+                                      size: 16,
+                                      color: mute,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ],
