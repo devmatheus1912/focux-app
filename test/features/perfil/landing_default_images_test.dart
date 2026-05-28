@@ -30,4 +30,15 @@ void main() {
       landingDefaultBioImageUrl('outro-slug'),
     );
   });
+
+  test('webp urls mirror jpg defaults', () {
+    expect(
+      landingDefaultHeroWebpUrl('matheus-focux'),
+      endsWith('.webp'),
+    );
+    expect(
+      landingDefaultBioWebpUrl('matheus-focux'),
+      contains('/landing/defaults/bio-'),
+    );
+  });
 }

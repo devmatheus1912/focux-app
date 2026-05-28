@@ -12,6 +12,12 @@ String landingDefaultHeroImageUrl(String? slug) =>
 String landingDefaultBioImageUrl(String? slug) =>
     '${Env.apiUrl}${_defaultBioPath(slug)}';
 
+String landingDefaultHeroWebpUrl(String? slug) =>
+    landingDefaultHeroImageUrl(slug).replaceAll(RegExp(r'\.jpe?g$'), '.webp');
+
+String landingDefaultBioWebpUrl(String? slug) =>
+    landingDefaultBioImageUrl(slug).replaceAll(RegExp(r'\.jpe?g$'), '.webp');
+
 String landingResolvedHeroImageUrl(String? slug, String? manualUrl) {
   if (manualUrl != null && manualUrl.trim().isNotEmpty) {
     return manualUrl.trim();
