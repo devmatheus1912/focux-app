@@ -96,4 +96,8 @@ class Env {
   /// URL legível na UI — copiar continua usando [landingPageUrl].
   static String landingPageDisplayLabel(String slug) =>
       '$publicWebDisplayHost/p/$slug';
+
+  /// Label curto do formulário de captura na UI.
+  static String capturaPageDisplayLabel(String slug) =>
+      '$publicWebDisplayHost/c/$slug';
 }
