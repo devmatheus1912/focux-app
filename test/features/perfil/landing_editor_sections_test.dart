@@ -91,7 +91,7 @@ void main() {
   test('landingReadinessTitle reflects pending content review', () {
     expect(
       landingReadinessTitle(configDone: 7, configTotal: 7, contentIssueCount: 2),
-      'Configuração completa · faltam 2 textos',
+      'Quase lá · faltam 2 textos',
     );
     expect(
       landingReadinessTitle(configDone: 7, configTotal: 7, contentIssueCount: 0),
@@ -99,7 +99,39 @@ void main() {
     );
     expect(
       landingReadinessTitle(configDone: 5, configTotal: 7, contentIssueCount: 0),
-      'Em preparação · 5/7 itens',
+      'Em preparação · setup 5/7',
+    );
+  });
+
+  test('landingPublicationPercent combina setup e textos', () {
+    expect(
+      landingPublicationPercent(
+        configDone: 7,
+        configTotal: 7,
+        textsReviewed: 6,
+        textsTotal: 6,
+      ),
+      100,
+    );
+    expect(
+      landingPublicationPercent(
+        configDone: 7,
+        configTotal: 7,
+        textsReviewed: 2,
+        textsTotal: 6,
+      ),
+      greaterThan(44),
+    );
+  });
+
+  test('landingContentReviewBannerSummary explica setup concluido', () {
+    expect(
+      landingContentReviewBannerSummary(4, configComplete: true),
+      'Setup concluído · faltam 4 textos para publicar.',
+    );
+    expect(
+      landingContentReviewBannerSummary(4),
+      '4 textos para revisar antes de publicar.',
     );
   });
 

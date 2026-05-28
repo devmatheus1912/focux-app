@@ -151,10 +151,47 @@ List<LandingContentIssue> landingContentIssuesForReview({
   return expanded;
 }
 
-String landingContentReviewBannerSummary(int reviewCount) {
+String landingContentReviewBannerSummary(
+  int reviewCount, {
+  bool configComplete = false,
+}) {
   if (reviewCount <= 0) return '';
+  if (configComplete) {
+    if (reviewCount == 1) {
+      return 'Setup concluído · falta revisar 1 texto para publicar.';
+    }
+    return 'Setup concluído · faltam $reviewCount textos para publicar.';
+  }
   if (reviewCount == 1) return '1 texto para revisar antes de publicar.';
   return '$reviewCount textos para revisar antes de publicar.';
+}
+
+/// Percentual 0–100 que combina setup (45%) e textos revisados (55%).
+int landingPublicationPercent({
+  required int configDone,
+  required int configTotal,
+  required int textsReviewed,
+  required int textsTotal,
+}) {
+  final configP = configTotal == 0 ? 1.0 : configDone / configTotal;
+  final textP = textsTotal == 0 ? 1.0 : textsReviewed / textsTotal;
+  return ((configP * 0.45 + textP * 0.55) * 100).round().clamp(0, 100);
+}
+
+String landingReadinessProgressHint({
+  required int configDone,
+  required int configTotal,
+  required int textsReviewed,
+  required int textsTotal,
+  required int contentIssueCount,
+}) {
+  if (configDone == configTotal && contentIssueCount == 0) {
+    return 'Setup e textos revisados — pronta para publicar.';
+  }
+  if (configDone == configTotal && contentIssueCount > 0) {
+    return 'Setup 100% · revise os textos destacados para publicar.';
+  }
+  return 'Setup $configDone/$configTotal · textos $textsReviewed/$textsTotal';
 }
 
 int landingContentReviewCount({
@@ -179,11 +216,11 @@ String landingReadinessTitle({
   }
   if (configDone == configTotal && contentIssueCount > 0) {
     if (contentIssueCount == 1) {
-      return 'Configuração completa · falta 1 texto';
+      return 'Quase lá · falta 1 texto';
     }
-    return 'Configuração completa · faltam $contentIssueCount textos';
+    return 'Quase lá · faltam $contentIssueCount textos';
   }
-  return 'Em preparação · $configDone/$configTotal itens';
+  return 'Em preparação · setup $configDone/$configTotal';
 }
 
 String landingReadinessSubtitle({
@@ -195,7 +232,7 @@ String landingReadinessSubtitle({
     return 'Tudo revisado. Toque em um item para ajustar ou publique agora.';
   }
   if (configDone == configTotal && contentIssueCount > 0) {
-    return 'Revise os textos destacados — depois é só publicar.';
+    return 'Links e vitrine ok. Revise os textos destacados e publique.';
   }
   if (contentIssueCount == 1) {
     return 'Complete os itens pendentes e revise 1 texto.';

@@ -34,7 +34,7 @@ class LandingEditorLinksTab extends StatelessWidget {
               child: Text(
                 'Defina seu slug no perfil para gerar os links da sua página.',
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
                 ),
               ),
             ),
@@ -45,6 +45,9 @@ class LandingEditorLinksTab extends StatelessWidget {
 
     final landingUrl = Env.landingPageUrl(slug);
     final capturaUrl = Env.capturaPageUrl(slug);
+    final templates = controller.templateCatalog;
+    final nicheCount = templates.length > 1 ? templates.length - 1 : 0;
+    final applying = controller.applyingTemplate || controller.saving;
 
     return ListView(
       padding: const EdgeInsets.all(TokensStrip.s4),
@@ -96,11 +99,18 @@ class LandingEditorLinksTab extends StatelessWidget {
           ),
         ],
         const SizedBox(height: 16),
-        LandingSectionTemplatesPanel(
-          sectionOrder: controller.sectionOrder,
-          templates: controller.templateCatalog,
-          applying: controller.applyingTemplate || controller.saving,
+        LandingTemplatesCompactCard(
+          templates: templates,
+          nicheCount: nicheCount,
+          applying: applying,
           onApplyTemplate: onApplyTemplate,
+          onBrowseTemplates: () => showLandingTemplatesSheet(
+            context,
+            sectionOrder: controller.sectionOrder,
+            templates: templates,
+            applying: applying,
+            onApplyTemplate: onApplyTemplate,
+          ),
         ),
       ],
     );

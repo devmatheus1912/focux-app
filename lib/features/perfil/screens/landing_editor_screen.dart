@@ -562,6 +562,8 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                 if (_c.loaded)
                   LandingContentWarningBanner(
                     reviewCount: _c.contentReviewCount(),
+                    configComplete: _c.checklist.isNotEmpty &&
+                        _c.checklist.every((item) => item.done),
                     onReview: () => _enterReviewFocus(),
                   ),
                 LandingEditorTabBar(
@@ -570,9 +572,22 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                 ),
                 Expanded(
                   child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 220),
+                    duration: const Duration(milliseconds: 260),
                     switchInCurve: Curves.easeOutCubic,
                     switchOutCurve: Curves.easeInCubic,
+                    transitionBuilder: (child, animation) {
+                      final offsetAnimation = Tween<Offset>(
+                        begin: const Offset(0.04, 0),
+                        end: Offset.zero,
+                      ).animate(animation);
+                      return FadeTransition(
+                        opacity: animation,
+                        child: SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        ),
+                      );
+                    },
                     child: switch (_c.tabIndex) {
                       0 => KeyedSubtree(
                           key: const ValueKey('tab-links'),

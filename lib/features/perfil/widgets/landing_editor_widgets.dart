@@ -34,7 +34,10 @@ class LandingLinkCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Card(
+    return Semantics(
+      container: true,
+      label: '$title. $subtitle. Link: $displayLabel',
+      child: Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(TokensStrip.rLg),
@@ -65,7 +68,7 @@ class LandingLinkCard extends StatelessWidget {
                       Text(
                         subtitle,
                         style: TextStyle(
-                          color: scheme.onSurface.withValues(alpha: 0.68),
+                          color: scheme.onSurface.withValues(alpha: 0.72),
                           height: 1.35,
                           fontSize: 13,
                         ),
@@ -103,16 +106,21 @@ class LandingLinkCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                IconButton.filledTonal(
-                  tooltip: 'Copiar link',
-                  onPressed: onCopy,
-                  icon: const Icon(Icons.copy_rounded),
+                Semantics(
+                  button: true,
+                  label: 'Copiar link $displayLabel',
+                  child: IconButton.filledTonal(
+                    tooltip: 'Copiar link',
+                    onPressed: onCopy,
+                    icon: const Icon(Icons.copy_rounded),
+                  ),
                 ),
               ],
             ),
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -186,7 +194,7 @@ class LandingChecklistCard extends StatelessWidget {
                   configTotal: items.length,
                 ),
                 style: TextStyle(
-                  color: scheme.onSurface.withValues(alpha: 0.65),
+                  color: scheme.onSurface.withValues(alpha: 0.72),
                   fontSize: 13,
                 ),
               ),
@@ -196,6 +204,22 @@ class LandingChecklistCard extends StatelessWidget {
                 configTotal: items.length,
                 textsReviewed: contentReviewedCount,
                 textsTotal: contentReviewScope,
+                contentIssueCount: contentIssueCount,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                landingReadinessProgressHint(
+                  configDone: done,
+                  configTotal: items.length,
+                  textsReviewed: contentReviewedCount,
+                  textsTotal: contentReviewScope,
+                  contentIssueCount: contentIssueCount,
+                ),
+                style: TextStyle(
+                  fontSize: 12,
+                  height: 1.35,
+                  color: scheme.onSurface.withValues(alpha: 0.72),
+                ),
               ),
               if (contentIssueCount > 0 && onReviewContent != null) ...[
                 const SizedBox(height: 8),
@@ -344,10 +368,12 @@ class LandingContentWarningBanner extends StatelessWidget {
   const LandingContentWarningBanner({
     super.key,
     required this.reviewCount,
+    this.configComplete = false,
     this.onReview,
   });
 
   final int reviewCount;
+  final bool configComplete;
   final VoidCallback? onReview;
 
   static const _bg = Color(0xFFFFF4D6);
@@ -358,7 +384,10 @@ class LandingContentWarningBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (reviewCount <= 0) return const SizedBox.shrink();
-    final summary = landingContentReviewBannerSummary(reviewCount);
+    final summary = landingContentReviewBannerSummary(
+      reviewCount,
+      configComplete: configComplete,
+    );
 
     return Semantics(
       liveRegion: true,
@@ -696,36 +725,49 @@ class LandingEditorTabBar extends StatelessWidget {
   final int index;
   final ValueChanged<int> onChanged;
 
-  static const labels = ['Links', 'Conteúdo', 'Ordem'];
+  static const _labels = ['Links', 'Conteúdo', 'Ordem'];
+  static const _compactLabels = ['Links', 'Textos', 'Ordem'];
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, TokensStrip.s4, 8),
-      child: Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: scheme.surfaceContainerHighest.withValues(alpha: 0.55),
-          borderRadius: BorderRadius.circular(TokensStrip.rMd),
-          border: Border.all(
-            color: scheme.outlineVariant.withValues(alpha: 0.45),
-          ),
-        ),
-        child: Row(
-          children: [
-            for (var i = 0; i < labels.length; i++)
-              Expanded(
-                child: _LandingEditorTabChip(
-                  label: labels[i],
-                  selected: index == i,
-                  onTap: () => onChanged(i),
-                ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 360;
+        final labels = compact ? _compactLabels : _labels;
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, TokensStrip.s4, 8),
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerHighest.withValues(alpha: 0.55),
+              borderRadius: BorderRadius.circular(TokensStrip.rMd),
+              border: Border.all(
+                color: scheme.outlineVariant.withValues(alpha: 0.45),
               ),
-          ],
-        ),
-      ),
+            ),
+            child: Row(
+              children: [
+                for (var i = 0; i < labels.length; i++)
+                  Expanded(
+                    child: _LandingEditorTabChip(
+                      label: labels[i],
+                      selected: index == i,
+                      onTap: () {
+                        if (index != i) {
+                          HapticFeedback.selectionClick();
+                        }
+                        onChanged(i);
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -771,13 +813,19 @@ class _LandingEditorTabChip extends StatelessWidget {
                     ]
                   : null,
             ),
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                color: selected ? scheme.onPrimary : scheme.onSurface.withValues(alpha: 0.72),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                maxLines: 1,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                  color: selected
+                      ? scheme.onPrimary
+                      : scheme.onSurface.withValues(alpha: 0.78),
+                ),
               ),
             ),
           ),
@@ -820,17 +868,22 @@ class LandingStickySaveBar extends StatelessWidget {
                     'Alterações não salvas',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: scheme.primary,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12,
+                      color: scheme.primary.withValues(alpha: 0.95),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12.5,
+                      letterSpacing: 0.1,
                     ),
                   ),
                 ),
-              FilledButton(
-                onPressed: saving ? null : onSave,
-                child: saving
-                    ? const FxLoading(size: 22, strokeWidth: 2)
-                    : Text(dirty ? 'Salvar alterações' : 'Salvar landing'),
+              Semantics(
+                button: true,
+                label: dirty ? 'Salvar alterações pendentes' : 'Salvar landing',
+                child: FilledButton(
+                  onPressed: saving ? null : onSave,
+                  child: saving
+                      ? const FxLoading(size: 22, strokeWidth: 2)
+                      : Text(dirty ? 'Salvar alterações' : 'Salvar landing'),
+                ),
               ),
             ],
           ),
@@ -945,36 +998,112 @@ class LandingReadinessProgressBars extends StatelessWidget {
     required this.configTotal,
     required this.textsReviewed,
     required this.textsTotal,
+    this.contentIssueCount = 0,
   });
 
   final int configDone;
   final int configTotal;
   final int textsReviewed;
   final int textsTotal;
+  final int contentIssueCount;
 
   @override
   Widget build(BuildContext context) {
     const ready = Color(0xFF0F9D7A);
     final scheme = Theme.of(context).colorScheme;
+    final percent = landingPublicationPercent(
+      configDone: configDone,
+      configTotal: configTotal,
+      textsReviewed: textsReviewed,
+      textsTotal: textsTotal,
+    );
+    final unifiedValue = percent / 100;
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _ProgressRow(
-          label: 'Configuração',
-          value: configTotal == 0 ? 0 : configDone / configTotal,
-          caption: '$configDone/$configTotal',
+          label: 'Progresso para publicar',
+          value: unifiedValue,
+          caption: '$percent%',
           color: ready,
           track: scheme.surfaceContainerHighest,
         ),
-        const SizedBox(height: 8),
-        _ProgressRow(
-          label: 'Textos revisados',
-          value: textsTotal == 0 ? 1 : textsReviewed / textsTotal,
-          caption: '$textsReviewed/$textsTotal',
-          color: ready,
-          track: scheme.surfaceContainerHighest,
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            _ProgressLegendChip(
+              label: 'Setup',
+              caption: '$configDone/$configTotal',
+              complete: configDone == configTotal,
+            ),
+            const SizedBox(width: 8),
+            _ProgressLegendChip(
+              label: 'Textos',
+              caption: '$textsReviewed/$textsTotal',
+              complete: contentIssueCount == 0 && textsTotal > 0,
+            ),
+          ],
         ),
       ],
+    );
+  }
+}
+
+class _ProgressLegendChip extends StatelessWidget {
+  const _ProgressLegendChip({
+    required this.label,
+    required this.caption,
+    required this.complete,
+  });
+
+  final String label;
+  final String caption;
+  final bool complete;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    const ready = Color(0xFF0F9D7A);
+
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: complete
+              ? ready.withValues(alpha: 0.1)
+              : scheme.surfaceContainerHighest.withValues(alpha: 0.55),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: complete
+                ? ready.withValues(alpha: 0.35)
+                : scheme.outlineVariant.withValues(alpha: 0.45),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              complete ? Icons.check_circle_rounded : Icons.radio_button_unchecked,
+              size: 14,
+              color: complete ? ready : scheme.onSurface.withValues(alpha: 0.45),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+            ),
+            const Spacer(),
+            Text(
+              caption,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: complete ? ready : scheme.onSurface.withValues(alpha: 0.72),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -1019,14 +1148,21 @@ class _ProgressRow extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 4),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(99),
-            child: LinearProgressIndicator(
-              value: value.clamp(0, 1),
-              minHeight: 6,
-              backgroundColor: track.withValues(alpha: 0.85),
-              color: color,
-            ),
+          TweenAnimationBuilder<double>(
+            tween: Tween(end: value.clamp(0, 1)),
+            duration: const Duration(milliseconds: 420),
+            curve: Curves.easeOutCubic,
+            builder: (context, animatedValue, _) {
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(99),
+                child: LinearProgressIndicator(
+                  value: animatedValue,
+                  minHeight: 7,
+                  backgroundColor: track.withValues(alpha: 0.85),
+                  color: color,
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -1046,7 +1182,12 @@ class LandingReviewFocusBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    return Semantics(
+      liveRegion: true,
+      label: pendingCount == 1
+          ? 'Modo foco. 1 texto pendente.'
+          : 'Modo foco. $pendingCount textos pendentes.',
+      child: Material(
       color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.45),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
@@ -1070,8 +1211,142 @@ class LandingReviewFocusBanner extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
+}
+
+class LandingTemplatesCompactCard extends StatelessWidget {
+  const LandingTemplatesCompactCard({
+    super.key,
+    required this.templates,
+    required this.nicheCount,
+    required this.applying,
+    required this.onApplyTemplate,
+    required this.onBrowseTemplates,
+  });
+
+  final List<LandingCompleteTemplate> templates;
+  final int nicheCount;
+  final bool applying;
+  final ValueChanged<LandingCompleteTemplate> onApplyTemplate;
+  final VoidCallback onBrowseTemplates;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final defaultTemplate = templates.isNotEmpty ? templates.first : null;
+
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(TokensStrip.rLg),
+        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.6)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 16, 14, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: scheme.primaryContainer.withValues(alpha: 0.45),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.auto_fix_high_outlined,
+                    color: scheme.primary,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Modelos prontos',
+                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '8 seções · padrão Focux'
+                            '${nicheCount > 0 ? ' + $nicheCount nichos' : ''}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          height: 1.35,
+                          color: scheme.onSurface.withValues(alpha: 0.72),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            if (defaultTemplate != null)
+              OutlinedButton.icon(
+                onPressed: applying ? null : () => onApplyTemplate(defaultTemplate),
+                icon: applying
+                    ? const FxLoading(size: 16, strokeWidth: 2)
+                    : const Icon(Icons.auto_fix_high_outlined, size: 18),
+                label: Text('Aplicar ${defaultTemplate.label}'),
+              ),
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: onBrowseTemplates,
+              icon: const Icon(Icons.view_agenda_outlined, size: 18),
+              label: Text(
+                nicheCount > 0
+                    ? 'Ver catálogo e modelos por nicho'
+                    : 'Ver catálogo completo',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> showLandingTemplatesSheet(
+  BuildContext context, {
+  required List<String> sectionOrder,
+  required List<LandingCompleteTemplate> templates,
+  required bool applying,
+  required ValueChanged<LandingCompleteTemplate> onApplyTemplate,
+}) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    useSafeArea: true,
+    builder: (ctx) {
+      final maxHeight = MediaQuery.sizeOf(ctx).height * 0.88;
+      return SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxHeight),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            child: LandingSectionTemplatesPanel(
+              sectionOrder: sectionOrder,
+              templates: templates,
+              applying: applying,
+              onApplyTemplate: (template) {
+                Navigator.pop(ctx);
+                onApplyTemplate(template);
+              },
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }
 
 class LandingSectionTemplatesPanel extends StatelessWidget {
@@ -1168,10 +1443,10 @@ class LandingSectionTemplatesPanel extends StatelessWidget {
                         Text(
                           'Ex.: ${section.example}',
                           style: TextStyle(
-                            fontSize: 11,
-                            height: 1.25,
+                            fontSize: 12,
+                            height: 1.3,
                             fontStyle: FontStyle.italic,
-                            color: scheme.onSurface.withValues(alpha: 0.5),
+                            color: scheme.onSurface.withValues(alpha: 0.58),
                           ),
                         ),
                       ],
