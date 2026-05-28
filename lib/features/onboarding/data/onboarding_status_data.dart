@@ -6,6 +6,7 @@ class OnboardingStatusData {
   final bool primeiroPagamentoRecebido;
   final bool pacoteCriado;
   final bool habitoConfigurado;
+  final bool linkBioConfigurado;
   final int progressoPercentual;
 
   OnboardingStatusData({
@@ -16,24 +17,26 @@ class OnboardingStatusData {
     required this.primeiroPagamentoRecebido,
     required this.pacoteCriado,
     required this.habitoConfigurado,
+    required this.linkBioConfigurado,
     required this.progressoPercentual,
   });
 
-  /// Etapas visíveis no card "Sua ativação" — espelha o backend.
+  /// Etapas visíveis no card "Sua ativação" — espelha o backend (7 passos).
   List<bool> get etapasConcluidas => [
-        perfilCompleto,
-        primeiroAlunoAdicionado,
-        primeiroTreinoCriado,
-        pacoteCriado,
-        habitoConfigurado,
-        pagamentoConfigurado,
-      ];
+    perfilCompleto,
+    primeiroAlunoAdicionado,
+    primeiroTreinoCriado,
+    pacoteCriado,
+    habitoConfigurado,
+    pagamentoConfigurado,
+    linkBioConfigurado,
+  ];
 
   int get etapasTotal => etapasConcluidas.length;
 
   int get etapasFeitas => etapasConcluidas.where((done) => done).length;
 
-  /// Progresso derivado das etapas exibidas (evita 66% com 4/4 riscados).
+  /// Progresso derivado das etapas exibidas (evita % divergente da UI).
   int get progressoExibido {
     if (etapasTotal == 0) return 0;
     return (etapasFeitas * 100 / etapasTotal).round();
@@ -55,6 +58,7 @@ class OnboardingStatusData {
           json['primeiroPagamentoRecebido'] as bool? ?? false,
       pacoteCriado: json['pacoteCriado'] as bool? ?? false,
       habitoConfigurado: json['habitoConfigurado'] as bool? ?? false,
+      linkBioConfigurado: json['linkBioConfigurado'] as bool? ?? false,
       progressoPercentual: json['progressoPercentual'] as int? ?? 0,
     );
   }

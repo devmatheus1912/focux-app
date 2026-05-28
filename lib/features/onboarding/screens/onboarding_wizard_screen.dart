@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/onboarding_repository.dart';
+import '../widgets/setup_step_widgets.dart';
 
 class OnboardingWizardScreen extends ConsumerStatefulWidget {
   const OnboardingWizardScreen({super.key});
 
   @override
-  ConsumerState<OnboardingWizardScreen> createState() => _OnboardingWizardScreenState();
+  ConsumerState<OnboardingWizardScreen> createState() =>
+      _OnboardingWizardScreenState();
 }
 
 class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen> {
   OnboardingWizard? _wizard;
   bool _loading = true;
+  int _previousCompleted = 0;
 
   @override
   void initState() {
@@ -28,8 +32,17 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
     setState(() => _loading = true);
     try {
       final w = await OnboardingRepository(ref.read(apiClientProvider)).wizard();
-      if (mounted) setState(() { _wizard = w; _loading = false; });
-    } catch (e) {
+      if (!mounted) return;
+      final completed = w.completedCount;
+      if (completed > _previousCompleted && _previousCompleted > 0) {
+        HapticFeedback.mediumImpact();
+      }
+      setState(() {
+        _wizard = w;
+        _loading = false;
+        _previousCompleted = completed;
+      });
+    } catch (_) {
       if (mounted) setState(() => _loading = false);
     }
   }
@@ -39,92 +52,100 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
     if (mounted) context.go('/dashboard/personal');
   }
 
-  /// Empurra a rota e recarrega o wizard quando o usuário voltar.
   Future<void> _abrirStep(String route) async {
-    await context.push<dynamic>(route);
+    await context.push<dynamic>(normalizeSetupActionRoute(route));
     if (mounted) await _load();
-  }
-
-  IconData _iconFor(String name) {
-    switch (name) {
-      case 'person': return Icons.person_outline;
-      case 'person_add': return Icons.person_add_outlined;
-      case 'fitness_center': return Icons.fitness_center;
-      case 'inventory_2': return Icons.inventory_2_outlined;
-      case 'repeat': return Icons.repeat;
-      case 'attach_money': return Icons.attach_money;
-      case 'link': return Icons.link;
-      default: return Icons.check_circle_outline;
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
+    final wizard = _wizard;
+
     return FxShellScaffold(
       appBar: FxShellAppBar(
         title: 'Setup D0',
         subtitle: 'Primeira vitória em 10 min',
         onBack: () => context.go('/dashboard/personal'),
       ),
-      body: _loading
-          ? const Center(child: FxLoading())
-          : _wizard == null
-              ? const Center(child: Text('Não foi possível carregar o wizard.'))
-              : RefreshIndicator(
-                  onRefresh: _load,
+      body:
+          _loading
+              ? const SetupWizardSkeleton()
+              : wizard == null
+              ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(TokensStrip.s5),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      LinearProgressIndicator(
-                        value: _wizard!.totalCount > 0 ? _wizard!.completedCount / _wizard!.totalCount : 0,
-                        backgroundColor: primary.withValues(alpha: 0.15),
-                        color: primary,
+                      const Text(
+                        'Não foi possível carregar o setup.',
+                        textAlign: TextAlign.center,
                       ),
-                      Expanded(
-                        child: ListView(
-                          padding: const EdgeInsets.all(TokensStrip.s4),
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          children: [
-                            Text(
-                              '${_wizard!.progressPercent}% concluído',
-                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-                            ),
-                            const SizedBox(height: 4),
-                            Text('Próximo: ${_wizard!.nextActionLabel}'),
-                            const SizedBox(height: 16),
-                            ..._wizard!.steps.map((s) => Card(
-                              child: ListTile(
-                                leading: Icon(_iconFor(s.icon), color: s.completed ? Colors.green : primary),
-                                title: Text(s.title),
-                                subtitle: Text('${s.description}\n~${s.estimatedMinutes} min'),
-                                isThreeLine: true,
-                                trailing: s.completed
-                                    ? const Icon(Icons.check_circle, color: Colors.green)
-                                    : Icon(Icons.arrow_forward_ios, size: 16, color: primary),
-                                onTap: s.completed ? null : () => _abrirStep(s.actionRoute),
-                              ),
-                            )),
-                          ],
-                        ),
-                      ),
-                      SafeArea(
-                        child: Padding(
-                          padding: const EdgeInsets.all(TokensStrip.s4),
-                          child: FilledButton(
-                            onPressed: _wizard!.allStepsDone || _wizard!.wizardCompleto
-                                ? _concluir
-                                : () => _abrirStep(_wizard!.nextActionRoute),
-                            style: FilledButton.styleFrom(
-                              minimumSize: const Size.fromHeight(48),
-                              backgroundColor: primary,
-                            ),
-                            child: Text(_wizard!.allStepsDone ? 'Concluir setup' : 'Continuar setup'),
-                          ),
-                        ),
-                      ),
+                      const SizedBox(height: TokensStrip.s4),
+                      SetupWizardCta(label: 'Tentar novamente', onPressed: _load),
                     ],
                   ),
                 ),
+              )
+              : RefreshIndicator(
+                onRefresh: _load,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        TokensStrip.s4,
+                        TokensStrip.s3,
+                        TokensStrip.s4,
+                        0,
+                      ),
+                      child: SetupProgressHeader(
+                        progressPercent: wizard.progressPercent,
+                        completedCount: wizard.completedCount,
+                        totalCount: wizard.totalCount,
+                        nextActionLabel: wizard.nextActionLabel,
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          TokensStrip.s4,
+                          TokensStrip.s4,
+                          TokensStrip.s2,
+                        ),
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children:
+                            wizard.steps.map((step) {
+                              return SetupStepCard(
+                                title: step.title,
+                                description: step.description,
+                                estimatedMinutes: step.estimatedMinutes,
+                                icon: step.icon,
+                                completed: step.completed,
+                                onTap:
+                                    () => _abrirStep(step.actionRoute),
+                              );
+                            }).toList(),
+                      ),
+                    ),
+                    SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.all(TokensStrip.s4),
+                        child: SetupWizardCta(
+                          label:
+                              wizard.allStepsDone
+                                  ? 'Concluir setup'
+                                  : 'Continuar setup',
+                          onPressed:
+                              wizard.allStepsDone || wizard.wizardCompleto
+                                  ? _concluir
+                                  : () => _abrirStep(wizard.nextActionRoute),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
     );
   }
 }
