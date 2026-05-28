@@ -21,6 +21,7 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
   OnboardingWizard? _wizard;
   bool _loading = true;
   int _previousCompleted = 0;
+  bool _celebratedAllDone = false;
 
   @override
   void initState() {
@@ -37,6 +38,10 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
       if (completed > _previousCompleted && _previousCompleted > 0) {
         HapticFeedback.mediumImpact();
       }
+      if (w.allStepsDone && !_celebratedAllDone) {
+        HapticFeedback.heavyImpact();
+        _celebratedAllDone = true;
+      }
       setState(() {
         _wizard = w;
         _loading = false;
@@ -48,6 +53,7 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
   }
 
   Future<void> _concluir() async {
+    HapticFeedback.heavyImpact();
     await OnboardingRepository(ref.read(apiClientProvider)).marcarCompleto();
     if (mounted) context.go('/dashboard/personal');
   }
@@ -82,7 +88,10 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: TokensStrip.s4),
-                      SetupWizardCta(label: 'Tentar novamente', onPressed: _load),
+                      SetupWizardCta(
+                        label: 'Tentar novamente',
+                        onPressed: _load,
+                      ),
                     ],
                   ),
                 ),
@@ -114,18 +123,7 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
                           TokensStrip.s2,
                         ),
                         physics: const AlwaysScrollableScrollPhysics(),
-                        children:
-                            wizard.steps.map((step) {
-                              return SetupStepCard(
-                                title: step.title,
-                                description: step.description,
-                                estimatedMinutes: step.estimatedMinutes,
-                                icon: step.icon,
-                                completed: step.completed,
-                                onTap:
-                                    () => _abrirStep(step.actionRoute),
-                              );
-                            }).toList(),
+                        children: _buildStepList(wizard),
                       ),
                     ),
                     SafeArea(
@@ -147,5 +145,30 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
                 ),
               ),
     );
+  }
+
+  List<Widget> _buildStepList(OnboardingWizard wizard) {
+    final pending = wizard.steps.where((s) => !s.completed).toList();
+    final completed = wizard.steps.where((s) => s.completed).toList();
+
+    return [
+      if (wizard.allStepsDone) const SetupAllDoneBanner(),
+      ...pending.asMap().entries.map(
+        (entry) => SetupStepEntrance(
+          index: entry.key,
+          child: SetupStepCard(
+            title: entry.value.title,
+            description: entry.value.description,
+            estimatedMinutes: entry.value.estimatedMinutes,
+            icon: entry.value.icon,
+            completed: false,
+            onTap: () => _abrirStep(entry.value.actionRoute),
+          ),
+        ),
+      ),
+      SetupCompletedStepsCollapse(
+        titles: completed.map((s) => s.title).toList(),
+      ),
+    ];
   }
 }

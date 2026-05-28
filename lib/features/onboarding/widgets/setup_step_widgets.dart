@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../core/theme/design_tokens.dart';
@@ -472,6 +473,180 @@ class SetupWizardSkeleton extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(TokensStrip.rCard),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Entrada escalonada dos cards — respeita reduced motion.
+class SetupStepEntrance extends StatelessWidget {
+  const SetupStepEntrance({
+    super.key,
+    required this.index,
+    required this.child,
+  });
+
+  final int index;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (reduceMotionOf(context)) return child;
+    return child
+        .animate(delay: Duration(milliseconds: index * 80))
+        .fadeIn(duration: 280.ms, curve: Curves.easeOutCubic)
+        .slideY(begin: 0.035, curve: Curves.easeOutCubic, duration: 300.ms);
+  }
+}
+
+/// Banner de conclusão quando todos os passos estão feitos.
+class SetupAllDoneBanner extends StatelessWidget {
+  const SetupAllDoneBanner({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final success = TokensStrip.badgeSuccess;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+
+    return Semantics(
+      liveRegion: true,
+      label: 'Tudo configurado. Toque em Concluir setup.',
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: TokensStrip.s3),
+        padding: const EdgeInsets.symmetric(
+          horizontal: TokensStrip.s4,
+          vertical: TokensStrip.s3,
+        ),
+        decoration: BoxDecoration(
+          color: success.withValues(alpha: isDark ? 0.16 : 0.10),
+          borderRadius: BorderRadius.circular(TokensStrip.rCard),
+          border: Border.all(color: success.withValues(alpha: 0.35)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.celebration_rounded, color: success, size: 22),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Tudo configurado! Toque em Concluir setup.',
+                style: TextStyle(
+                  color: ink,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13.5,
+                  height: 1.35,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Passos concluídos colapsados — reduz densidade no wizard.
+class SetupCompletedStepsCollapse extends StatefulWidget {
+  const SetupCompletedStepsCollapse({
+    super.key,
+    required this.titles,
+  });
+
+  final List<String> titles;
+
+  @override
+  State<SetupCompletedStepsCollapse> createState() =>
+      _SetupCompletedStepsCollapseState();
+}
+
+class _SetupCompletedStepsCollapseState extends State<SetupCompletedStepsCollapse> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.titles.isEmpty) return const SizedBox.shrink();
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final doneColor =
+        isDark
+            ? TokensStrip.badgeSuccess.withValues(alpha: 0.92)
+            : TokensStrip.badgeSuccess;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: TokensStrip.s2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            button: true,
+            label:
+                _expanded
+                    ? 'Ocultar passos concluídos'
+                    : '${widget.titles.length} passos concluídos, expandir',
+            child: InkWell(
+              onTap: () => setState(() => _expanded = !_expanded),
+              borderRadius: BorderRadius.circular(TokensStrip.rInput),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: TokensStrip.s2,
+                  horizontal: 4,
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.check_circle_rounded, color: doneColor, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '${widget.titles.length} passos concluídos',
+                        style: TextStyle(
+                          color: mute,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      _expanded
+                          ? Icons.expand_less_rounded
+                          : Icons.expand_more_rounded,
+                      color: mute,
+                      size: 20,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          if (_expanded) ...[
+            const SizedBox(height: 4),
+            ...widget.titles.map(
+              (title) => Padding(
+                padding: const EdgeInsets.only(
+                  left: 8,
+                  bottom: TokensStrip.s2,
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.check_rounded, size: 14, color: doneColor),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                          color: doneColor,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
