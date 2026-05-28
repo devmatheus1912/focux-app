@@ -86,6 +86,7 @@ class LandingCompleteTemplate {
     required this.label,
     required this.heroTitle,
     required this.heroSubtitle,
+    required this.bioText,
     required this.primaryCta,
     required this.offerCta,
     required this.finalCta,
@@ -99,6 +100,7 @@ class LandingCompleteTemplate {
   final String label;
   final String heroTitle;
   final String heroSubtitle;
+  final String bioText;
   final String primaryCta;
   final String offerCta;
   final String finalCta;
@@ -114,6 +116,8 @@ const landingDefaultCompleteTemplate = LandingCompleteTemplate(
   heroTitle: 'Treino personalizado com acompanhamento de verdade',
   heroSubtitle:
       'Plano sob medida, ajustes semanais e suporte próximo — online ou presencial.',
+  bioText:
+      'Personal dedicado a transformar rotina em resultado com método claro, técnica segura e acompanhamento que não some após a primeira semana. CREF ativo · atendimento online e presencial · planos sob medida para quem quer consistência, não promessa milagrosa.',
   primaryCta: 'Agendar avaliação',
   offerCta: 'Escolher este plano',
   finalCta: 'Quero começar agora',
@@ -121,11 +125,18 @@ const landingDefaultCompleteTemplate = LandingCompleteTemplate(
   servicos: [
     LandingServiceItem(
       titulo: 'Consultoria online',
-      descricao: 'Treinos no app, vídeos e feedback rápido onde você estiver.',
+      descricao:
+          'Treinos no app, vídeos demonstrativos e feedback rápido onde você estiver.',
     ),
     LandingServiceItem(
       titulo: 'Treino presencial',
-      descricao: 'Acompanhamento ao vivo com correção de técnica e intensidade.',
+      descricao:
+          'Acompanhamento ao vivo com correção de técnica, amplitude e intensidade.',
+    ),
+    LandingServiceItem(
+      titulo: 'Avaliação física',
+      descricao:
+          'Diagnóstico de postura, mobilidade e objetivos antes de montar seu plano.',
     ),
   ],
   faq: [
@@ -143,6 +154,11 @@ const landingDefaultCompleteTemplate = LandingCompleteTemplate(
       pergunta: 'Serve para iniciantes?',
       resposta:
           'Sim. Adaptamos carga, exercícios e progressão ao seu nível atual.',
+    ),
+    LandingFaqItem(
+      pergunta: 'Quanto tempo até ver resultados?',
+      resposta:
+          'Com constância, a maioria percebe evolução entre 4 e 8 semanas — depende do ponto de partida e da rotina.',
     ),
   ],
   sectionOrder: landingEditorCanonicalSections,

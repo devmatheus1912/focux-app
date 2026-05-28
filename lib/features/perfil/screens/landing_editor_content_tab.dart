@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../utils/landing_default_images.dart';
 import '../widgets/landing_editor_widgets.dart';
 import 'landing_editor_controller.dart';
 import 'landing_editor_quality.dart';
@@ -165,20 +166,19 @@ class LandingEditorContentTab extends StatelessWidget {
                   LandingEditorImageUploadCard(
                     title: 'Foto na seção sobre',
                     hint:
-                        'Retrato ou foto profissional — aparece em "Sobre você" e no topo da página.',
+                        'Retrato ou foto profissional — aparece em "Sobre você". Se não enviar, usamos uma foto padrão de academia.',
                     imageUrl: c.bioImageUrl,
+                    defaultPreviewUrl: landingDefaultBioImageUrl(c.slug),
                     uploading: c.uploadingBio,
                     onUpload: onUploadBio,
-                    onPreview: c.bioImageUrl != null && c.bioImageUrl!.isNotEmpty
-                        ? onPreviewLanding
-                        : null,
+                    onPreview: onPreviewLanding,
                     onRemove: c.bioImageUrl != null && c.bioImageUrl!.isNotEmpty
                         ? onRemoveBio
                         : null,
                     onUseDefault: onUseDefaultBio,
                     useDefaultLabel: 'Usar padrão',
-                    defaultActiveHint: c.bioImageUrl == null || c.bioImageUrl!.isEmpty
-                        ? 'Padrão ativo — usa logo ou iniciais no topo.'
+                    defaultActiveHint: landingUsesDefaultBioImage(c.bioImageUrl)
+                        ? 'Padrão ativo — foto de academia até você enviar a sua.'
                         : null,
                   ),
                 ],
@@ -190,24 +190,23 @@ class LandingEditorContentTab extends StatelessWidget {
           LandingCollapsibleSection(
             title: 'Foto de capa',
             hint:
-                'Opcional — treino, estúdio ou você em ação. Prefira fotos do seu trabalho, não genéricas.',
+                'Opcional — treino, estúdio ou você em ação. Sem foto, usamos uma capa padrão de academia.',
             badgeLabel: 'Opcional',
             expanded: c.coverExpanded,
             onExpandedChanged: onCoverExpandedChanged,
             child: LandingEditorImageUploadCard(
               compact: true,
               imageUrl: c.heroImageUrl,
+              defaultPreviewUrl: landingDefaultHeroImageUrl(c.slug),
               uploading: c.uploadingHero,
               onUpload: onUploadHero,
               optional: true,
               emptyHint:
-                  'Sem capa — a abertura fica só com título, botões e números.',
-              defaultActiveHint: c.heroImageUrl == null || c.heroImageUrl!.isEmpty
-                  ? 'Padrão ativo — abertura sem foto de capa.'
+                  'Sem capa personalizada — a página usa uma foto padrão de academia.',
+              defaultActiveHint: landingUsesDefaultHeroImage(c.heroImageUrl)
+                  ? 'Padrão ativo — troque quando quiser enviando a sua foto.'
                   : null,
-              onPreview: c.heroImageUrl != null && c.heroImageUrl!.isNotEmpty
-                  ? onPreviewLanding
-                  : null,
+              onPreview: onPreviewLanding,
               onRemove: c.heroImageUrl != null && c.heroImageUrl!.isNotEmpty
                   ? onRemoveHero
                   : null,

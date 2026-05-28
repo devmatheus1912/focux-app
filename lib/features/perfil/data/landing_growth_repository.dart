@@ -8,6 +8,7 @@ class LandingNichePreset {
   final String label;
   final String heroTitle;
   final String heroSubtitle;
+  final String bioText;
   final String primaryCta;
   final String offerCta;
   final String finalCta;
@@ -21,6 +22,7 @@ class LandingNichePreset {
     required this.label,
     required this.heroTitle,
     required this.heroSubtitle,
+    this.bioText = '',
     required this.primaryCta,
     this.offerCta = '',
     this.finalCta = '',
@@ -35,6 +37,7 @@ class LandingNichePreset {
     label: j['label'] as String? ?? '',
     heroTitle: j['heroTitle'] as String? ?? '',
     heroSubtitle: j['heroSubtitle'] as String? ?? '',
+    bioText: j['bioText'] as String? ?? '',
     primaryCta: j['primaryCta'] as String? ?? '',
     offerCta: j['offerCta'] as String? ?? '',
     finalCta: j['finalCta'] as String? ?? '',

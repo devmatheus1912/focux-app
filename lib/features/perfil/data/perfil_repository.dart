@@ -277,6 +277,7 @@ class PerfilRepository {
     String? heroTitle,
     String? heroSubtitle,
     String? primaryCta,
+    String? descricaoProfissional,
     List<String>? sectionOrder,
     List<LandingServiceItem>? servicos,
     List<LandingFaqItem>? faq,
@@ -292,6 +293,8 @@ class PerfilRepository {
         if (heroTitle != null) 'heroTitle': heroTitle,
         if (heroSubtitle != null) 'heroSubtitle': heroSubtitle,
         if (primaryCta != null) 'primaryCta': primaryCta,
+        if (descricaoProfissional != null)
+          'descricaoProfissional': descricaoProfissional,
         if (sectionOrder != null) 'sectionOrder': sectionOrder,
         if (servicos != null) 'servicos': servicos.map((e) => e.toJson()).toList(),
         if (faq != null) 'faq': faq.map((e) => e.toJson()).toList(),

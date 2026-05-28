@@ -5,6 +5,7 @@ import 'package:focux_app/features/perfil/screens/landing_editor_checklist.dart'
 import 'package:focux_app/features/perfil/screens/landing_editor_quality.dart';
 import 'package:focux_app/features/perfil/screens/landing_editor_sections.dart';
 import 'package:focux_app/features/perfil/screens/landing_preset_mapper.dart';
+import 'package:focux_app/features/perfil/screens/landing_section_templates.dart';
 
 void main() {
   test('normalizeLandingSectionOrder deduplicates legacy keys', () {
@@ -181,6 +182,7 @@ void main() {
       label: 'Teste',
       heroTitle: 'Titulo',
       heroSubtitle: 'Sub',
+      bioText: 'Bio premium de exemplo.',
       primaryCta: 'CTA 1',
       offerCta: 'CTA 2',
       finalCta: 'CTA 3',
@@ -193,6 +195,7 @@ void main() {
     final template = landingCompleteTemplateFromPreset(preset);
 
     expect(template.id, 'TEST');
+    expect(template.bioText, 'Bio premium de exemplo.');
     expect(template.primaryCta, 'CTA 1');
     expect(template.sectionOrder.take(2), ['faq', 'bio']);
     expect(template.sectionOrder.where((k) => k == 'faq'), hasLength(1));
@@ -212,5 +215,15 @@ void main() {
     expect(catalog.first.id, landingDefaultTemplateId);
     expect(catalog, hasLength(2));
     expect(catalog.last.id, 'ONLINE');
+  });
+
+  test('landingDefaultCompleteTemplate preenche pagina com copy premium', () {
+    final template = landingDefaultCompleteTemplate;
+
+    expect(template.bioText, isNotEmpty);
+    expect(template.servicos, hasLength(3));
+    expect(template.faq, hasLength(4));
+    expect(template.heroTitle, isNotEmpty);
+    expect(template.contactCta, isNotEmpty);
   });
 }

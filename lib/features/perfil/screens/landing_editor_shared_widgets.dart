@@ -60,6 +60,7 @@ class LandingEditorImageUploadCard extends StatelessWidget {
     this.title,
     this.hint,
     required this.imageUrl,
+    this.defaultPreviewUrl,
     required this.uploading,
     required this.onUpload,
     this.optional = false,
@@ -75,6 +76,7 @@ class LandingEditorImageUploadCard extends StatelessWidget {
   final String? title;
   final String? hint;
   final String? imageUrl;
+  final String? defaultPreviewUrl;
   final bool uploading;
   final VoidCallback onUpload;
   final bool optional;
@@ -86,7 +88,15 @@ class LandingEditorImageUploadCard extends StatelessWidget {
   final String? useDefaultLabel;
   final String? defaultActiveHint;
 
-  bool get _hasImage => imageUrl != null && imageUrl!.isNotEmpty;
+  bool get _hasManualImage => imageUrl != null && imageUrl!.isNotEmpty;
+
+  bool get _usesDefaultPreview =>
+      !_hasManualImage &&
+      defaultPreviewUrl != null &&
+      defaultPreviewUrl!.isNotEmpty;
+
+  String? get _displayUrl =>
+      _hasManualImage ? imageUrl : (_usesDefaultPreview ? defaultPreviewUrl : null);
 
   @override
   Widget build(BuildContext context) {
@@ -139,32 +149,56 @@ class LandingEditorImageUploadCard extends StatelessWidget {
               ],
               const SizedBox(height: 8),
             ],
-            if (_hasImage)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(TokensStrip.rMd),
-                child: Image.network(
-                  imageUrl!,
-                  height: compact ? 100 : 120,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (_, child, progress) {
-                    if (progress == null) return child;
-                    return SizedBox(
+            if (_displayUrl != null)
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(TokensStrip.rMd),
+                    child: Image.network(
+                      _displayUrl!,
                       height: compact ? 100 : 120,
-                      child: Center(
-                        child: FxLoading(
-                          size: 24,
-                          strokeWidth: 2,
-                          color: scheme.primary,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (_, child, progress) {
+                        if (progress == null) return child;
+                        return SizedBox(
+                          height: compact ? 100 : 120,
+                          child: Center(
+                            child: FxLoading(
+                              size: 24,
+                              strokeWidth: 2,
+                              color: scheme.primary,
+                            ),
+                          ),
+                        );
+                      },
+                      errorBuilder: (_, __, ___) => SizedBox(
+                        height: compact ? 100 : 120,
+                        child: const Center(child: Icon(Icons.broken_image_outlined)),
+                      ),
+                    ),
+                  ),
+                  if (_usesDefaultPreview)
+                    Positioned(
+                      left: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(999),
+                          color: scheme.surface.withValues(alpha: 0.92),
+                        ),
+                        child: Text(
+                          'Padrão',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: scheme.primary,
+                          ),
                         ),
                       ),
-                    );
-                  },
-                  errorBuilder: (_, __, ___) => SizedBox(
-                    height: compact ? 100 : 120,
-                    child: const Center(child: Icon(Icons.broken_image_outlined)),
-                  ),
-                ),
+                    ),
+                ],
               )
             else if (optional)
               Padding(
@@ -205,6 +239,17 @@ class LandingEditorImageUploadCard extends StatelessWidget {
                 ),
                 child: const Icon(Icons.image_outlined, size: 36),
               ),
+            if (_usesDefaultPreview && defaultActiveHint != null) ...[
+              const SizedBox(height: 6),
+              Text(
+                defaultActiveHint!,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: scheme.primary.withValues(alpha: 0.9),
+                ),
+              ),
+            ],
             const SizedBox(height: 8),
             Row(
               children: [
@@ -215,7 +260,7 @@ class LandingEditorImageUploadCard extends StatelessWidget {
                     label: Text(uploading ? 'Enviando…' : 'Enviar imagem'),
                   ),
                 ),
-                if (_hasImage && onPreview != null) ...[
+                if (_hasManualImage && onPreview != null) ...[
                   const SizedBox(width: 8),
                   IconButton.filledTonal(
                     tooltip: 'Ver na página',
@@ -225,14 +270,26 @@ class LandingEditorImageUploadCard extends StatelessWidget {
                 ],
               ],
             ),
-            if ((_hasImage && onRemove != null) ||
-                (!_hasImage && onUseDefault != null && optional)) ...[
+            if (_usesDefaultPreview && onPreview != null) ...[
+              const SizedBox(height: 4),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: onPreview,
+                  icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                  label: const Text('Ver na página'),
+                ),
+              ),
+            ],
+            if ((_hasManualImage && onRemove != null) ||
+                (_hasManualImage && onUseDefault != null) ||
+                (!_hasManualImage && onUseDefault != null && optional)) ...[
               const SizedBox(height: 4),
               Wrap(
                 spacing: 4,
                 runSpacing: 0,
                 children: [
-                  if (_hasImage && onRemove != null)
+                  if (_hasManualImage && onRemove != null)
                     TextButton.icon(
                       onPressed: uploading ? null : onRemove,
                       icon: Icon(Icons.delete_outline, size: 18, color: scheme.error),
@@ -241,7 +298,7 @@ class LandingEditorImageUploadCard extends StatelessWidget {
                         style: TextStyle(color: scheme.error, fontWeight: FontWeight.w700),
                       ),
                     ),
-                  if (onUseDefault != null && (_hasImage || optional))
+                  if (onUseDefault != null && _hasManualImage)
                     TextButton.icon(
                       onPressed: uploading ? null : onUseDefault,
                       icon: const Icon(Icons.restore_rounded, size: 18),

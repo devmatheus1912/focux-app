@@ -511,8 +511,8 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       SnackBar(
         content: Text(
           hero
-              ? 'Padrão aplicado — abertura sem capa.'
-              : 'Padrão aplicado — logo ou iniciais no topo.',
+              ? 'Padrão aplicado — capa de academia na landing.'
+              : 'Padrão aplicado — foto de academia na seção sobre.',
         ),
       ),
     );
@@ -540,6 +540,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
             heroTitle: heroTitle,
             heroSubtitle: _c.heroSubtitle.text.trim(),
             primaryCta: primaryCta,
+            descricaoProfissional: _c.descricaoProfissional.trim(),
             sectionOrder: normalizedOrder,
             servicos: servicos,
             faq: faq,

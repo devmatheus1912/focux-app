@@ -1,0 +1,40 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/perfil/utils/landing_default_images.dart';
+
+void main() {
+  test('default images are stable per slug', () {
+    final heroA = landingDefaultHeroImageUrl('matheus-focux');
+    final heroB = landingDefaultHeroImageUrl('matheus-focux');
+    final bioA = landingDefaultBioImageUrl('matheus-focux');
+    final bioB = landingDefaultBioImageUrl('matheus-focux');
+
+    expect(heroA, isNotEmpty);
+    expect(heroA, heroB);
+    expect(bioA, isNotEmpty);
+    expect(bioA, bioB);
+    expect(bioA, isNot(heroA));
+  });
+
+  test('resolve prefers manual url when present', () {
+    const manual = 'https://cdn.example.com/foto.jpg';
+    expect(
+      landingResolvedHeroImageUrl('slug', manual),
+      manual,
+    );
+    expect(
+      landingResolvedBioImageUrl('slug', manual),
+      manual,
+    );
+  });
+
+  test('resolve falls back to default when manual empty', () {
+    expect(
+      landingResolvedHeroImageUrl('outro-slug', ''),
+      landingDefaultHeroImageUrl('outro-slug'),
+    );
+    expect(
+      landingResolvedBioImageUrl('outro-slug', null),
+      landingDefaultBioImageUrl('outro-slug'),
+    );
+  });
+}

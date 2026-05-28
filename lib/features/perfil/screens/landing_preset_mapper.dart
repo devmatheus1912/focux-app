@@ -16,6 +16,7 @@ LandingCompleteTemplate landingCompleteTemplateFromPreset(
     label: preset.label,
     heroTitle: preset.heroTitle,
     heroSubtitle: preset.heroSubtitle,
+    bioText: preset.bioText,
     primaryCta: preset.primaryCta,
     offerCta: preset.offerCta,
     finalCta: preset.finalCta,

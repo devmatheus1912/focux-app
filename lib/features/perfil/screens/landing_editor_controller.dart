@@ -34,6 +34,7 @@ class LandingEditorController {
   List<String> sectionOrder = List<String>.from(landingEditorCanonicalSections);
   List<LandingServiceItem> servicos = [];
   List<LandingFaqItem> faq = [];
+  String descricaoProfissional = '';
   String? slug;
   String? heroImageUrl;
   String? bioImageUrl;
@@ -152,6 +153,7 @@ class LandingEditorController {
     offerCta.text = p.offerCta ?? '';
     finalCta.text = p.finalCta ?? '';
     contactCta.text = p.contactCta ?? '';
+    descricaoProfissional = p.descricaoProfissional ?? '';
     slug = p.slug;
     heroImageUrl = p.heroImageUrl;
     bioImageUrl = p.bioImageUrl;
@@ -190,6 +192,7 @@ class LandingEditorController {
     offerCta.text = template.offerCta;
     finalCta.text = template.finalCta;
     contactCta.text = template.contactCta;
+    descricaoProfissional = template.bioText;
     servicos = List<LandingServiceItem>.from(template.servicos);
     faq = List<LandingFaqItem>.from(template.faq);
     sectionOrder = List<String>.from(template.sectionOrder);
