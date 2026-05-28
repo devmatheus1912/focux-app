@@ -16,6 +16,8 @@ class LandingEditorContentTab extends StatelessWidget {
     required this.onUploadBio,
     required this.onMarkDirty,
     required this.onHeroExpandedChanged,
+    required this.onCoverExpandedChanged,
+    required this.onPreviewLanding,
     required this.onCtasExpandedChanged,
     required this.onServicosExpandedChanged,
     required this.onFaqExpandedChanged,
@@ -34,6 +36,8 @@ class LandingEditorContentTab extends StatelessWidget {
   final VoidCallback onUploadBio;
   final VoidCallback onMarkDirty;
   final ValueChanged<bool> onHeroExpandedChanged;
+  final ValueChanged<bool> onCoverExpandedChanged;
+  final VoidCallback onPreviewLanding;
   final ValueChanged<bool> onCtasExpandedChanged;
   final ValueChanged<bool> onServicosExpandedChanged;
   final ValueChanged<bool> onFaqExpandedChanged;
@@ -88,20 +92,27 @@ class LandingEditorContentTab extends StatelessWidget {
                   const SizedBox(height: 12),
                   TextField(
                     controller: c.heroTitle,
-                    decoration: const InputDecoration(
+                    decoration: landingEditorFieldDecoration(
+                      context,
                       labelText: 'Título principal',
                       helperText: 'Aparece em destaque no topo da página.',
+                      maxLength: 180,
                     ),
                     maxLength: 180,
+                    scrollPadding: const EdgeInsets.only(bottom: 120),
+                    textInputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: c.heroSubtitle,
-                    decoration: const InputDecoration(
+                    decoration: landingEditorFieldDecoration(
+                      context,
                       labelText: 'Texto de apoio',
                       helperText: 'Explique em uma frase como você ajuda.',
                     ),
                     maxLines: 3,
+                    scrollPadding: const EdgeInsets.only(bottom: 120),
+                    textInputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: 8),
                   Builder(
@@ -113,10 +124,13 @@ class LandingEditorContentTab extends StatelessWidget {
                         children: [
                           TextField(
                             controller: c.primaryCta,
-                            decoration: const InputDecoration(
+                            decoration: landingEditorFieldDecoration(
+                              context,
                               labelText: 'Texto do botão principal',
                               helperText: 'Ex.: Quero começar · Agendar avaliação',
                             ),
+                            scrollPadding: const EdgeInsets.only(bottom: 120),
+                            textInputAction: TextInputAction.done,
                           ),
                           if (accentFix != null) ...[
                             const SizedBox(height: 4),
@@ -147,21 +161,34 @@ class LandingEditorContentTab extends StatelessWidget {
                     imageUrl: c.bioImageUrl,
                     uploading: c.uploadingBio,
                     onUpload: onUploadBio,
-                  ),
-                  const SizedBox(height: 12),
-                  LandingEditorImageUploadCard(
-                    title: 'Foto de capa',
-                    hint:
-                        'Grande imagem abaixo do título — treino, estúdio ou você em ação.',
-                    imageUrl: c.heroImageUrl,
-                    uploading: c.uploadingHero,
-                    onUpload: onUploadHero,
-                    optional: true,
-                    emptyHint:
-                        'Sem capa — a abertura fica só com título, botões e números.',
+                    onPreview: c.bioImageUrl != null && c.bioImageUrl!.isNotEmpty
+                        ? onPreviewLanding
+                        : null,
                   ),
                 ],
               ),
+            ),
+          ),
+        if (showHero) const SizedBox(height: 12),
+        if (showHero)
+          LandingCollapsibleSection(
+            title: 'Foto de capa',
+            hint:
+                'Opcional — treino, estúdio ou você em ação. Prefira fotos do seu trabalho, não genéricas.',
+            badgeLabel: 'Opcional',
+            expanded: c.coverExpanded,
+            onExpandedChanged: onCoverExpandedChanged,
+            child: LandingEditorImageUploadCard(
+              compact: true,
+              imageUrl: c.heroImageUrl,
+              uploading: c.uploadingHero,
+              onUpload: onUploadHero,
+              optional: true,
+              emptyHint:
+                  'Sem capa — a abertura fica só com título, botões e números.',
+              onPreview: c.heroImageUrl != null && c.heroImageUrl!.isNotEmpty
+                  ? onPreviewLanding
+                  : null,
             ),
           ),
         if (showHero) const SizedBox(height: 12),

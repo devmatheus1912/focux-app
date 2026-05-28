@@ -45,6 +45,7 @@ class LandingEditorController {
   bool generatingHero = false;
   int tabIndex = 0;
   bool heroExpanded = true;
+  bool coverExpanded = false;
   bool ctasExpanded = false;
   bool servicosExpanded = false;
   bool faqExpanded = false;
@@ -154,6 +155,7 @@ class LandingEditorController {
     slug = p.slug;
     heroImageUrl = p.heroImageUrl;
     bioImageUrl = p.bioImageUrl;
+    coverExpanded = heroImageUrl != null && heroImageUrl!.isNotEmpty;
     servicos = p.servicos
         .map((e) => LandingServiceItem(titulo: e.titulo, descricao: e.descricao))
         .toList();

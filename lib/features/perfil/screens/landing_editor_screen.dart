@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/config/env.dart';
 import '../../../core/api/media_upload_service.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -433,6 +434,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       setState(() {
         if (hero) {
           _c.heroImageUrl = url;
+          _c.coverExpanded = true;
         } else {
           _c.bioImageUrl = url;
         }
@@ -608,6 +610,16 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                             onMarkDirty: () => _c.markDirty(),
                             onHeroExpandedChanged: (v) =>
                                 setState(() => _c.heroExpanded = v),
+                            onCoverExpandedChanged: (v) =>
+                                setState(() => _c.coverExpanded = v),
+                            onPreviewLanding: () {
+                              final slug = _c.slug;
+                              if (slug == null || slug.isEmpty) return;
+                              openLandingLink(
+                                context,
+                                url: Env.landingPageUrl(slug),
+                              );
+                            },
                             onCtasExpandedChanged: (v) =>
                                 setState(() => _c.ctasExpanded = v),
                             onServicosExpandedChanged: (v) =>

@@ -628,6 +628,7 @@ class LandingCollapsibleSection extends StatelessWidget {
     super.key,
     required this.title,
     this.hint,
+    this.badgeLabel,
     required this.expanded,
     required this.onExpandedChanged,
     this.onAdd,
@@ -636,6 +637,7 @@ class LandingCollapsibleSection extends StatelessWidget {
 
   final String title;
   final String? hint;
+  final String? badgeLabel;
   final bool expanded;
   final ValueChanged<bool> onExpandedChanged;
   final VoidCallback? onAdd;
@@ -645,72 +647,109 @@ class LandingCollapsibleSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        InkWell(
-          borderRadius: BorderRadius.circular(TokensStrip.rMd),
-          onTap: () => onExpandedChanged(!expanded),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: TokensStrip.fontH2,
-                          letterSpacing: TokensStrip.trackingH2,
-                        ),
-                      ),
-                      if (hint != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          hint!,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: scheme.onSurface.withValues(alpha: 0.65),
+    return Semantics(
+      container: true,
+      expanded: expanded,
+      header: true,
+      label: title,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(TokensStrip.rMd),
+              onTap: () => onExpandedChanged(!expanded),
+              focusColor: scheme.primary.withValues(alpha: 0.1),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  title,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: TokensStrip.fontH2,
+                                    letterSpacing: TokensStrip.trackingH2,
+                                  ),
+                                ),
+                              ),
+                              if (badgeLabel != null)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(999),
+                                    color: scheme.primaryContainer.withValues(alpha: 0.55),
+                                  ),
+                                  child: Text(
+                                    badgeLabel!,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: scheme.onPrimaryContainer,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ],
-                  ),
+                          if (hint != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              hint!,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: scheme.onSurface.withValues(alpha: 0.72),
+                                height: 1.45,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    if (onAdd != null)
+                      TextButton.icon(
+                        onPressed: onAdd,
+                        icon: const Icon(Icons.add, size: 18),
+                        label: const Text('Adicionar'),
+                      ),
+                    AnimatedRotation(
+                      turns: expanded ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOutCubic,
+                      child: Icon(
+                        Icons.expand_more_rounded,
+                        color: scheme.onSurface.withValues(alpha: 0.55),
+                      ),
+                    ),
+                  ],
                 ),
-                if (onAdd != null)
-                  TextButton.icon(
-                    onPressed: onAdd,
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Adicionar'),
-                  ),
-                AnimatedRotation(
-                  turns: expanded ? 0.5 : 0,
-                  duration: const Duration(milliseconds: 200),
-                  child: Icon(
-                    Icons.expand_more_rounded,
-                    color: scheme.onSurface.withValues(alpha: 0.55),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
-        AnimatedCrossFade(
-          firstChild: const SizedBox.shrink(),
-          secondChild: Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: child,
+          AnimatedCrossFade(
+            firstChild: const SizedBox.shrink(),
+            secondChild: Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: child,
+            ),
+            crossFadeState:
+                expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            duration: const Duration(milliseconds: 220),
+            sizeCurve: Curves.easeOutCubic,
           ),
-          crossFadeState:
-              expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-          duration: const Duration(milliseconds: 220),
-          sizeCurve: Curves.easeOutCubic,
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -796,6 +835,7 @@ class _LandingEditorTabChip extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(TokensStrip.rMd - 2),
           onTap: onTap,
+          focusColor: scheme.primary.withValues(alpha: 0.14),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 220),
             curve: Curves.easeOutCubic,
@@ -877,7 +917,9 @@ class LandingStickySaveBar extends StatelessWidget {
                 ),
               Semantics(
                 button: true,
-                label: dirty ? 'Salvar alterações pendentes' : 'Salvar landing',
+                label: dirty
+                    ? 'Salvar alterações pendentes da landing'
+                    : 'Salvar landing',
                 child: FilledButton(
                   onPressed: saving ? null : onSave,
                   child: saving
