@@ -9,7 +9,7 @@ void main() {
     );
   });
 
-  test('default images use backend static paths', () {
+  test('default hero uses backend static paths', () {
     final hero = landingDefaultHeroImageUrl('matheus-focux');
     expect(hero, contains('/landing/defaults/hero-'));
     expect(hero, startsWith('https://'));
@@ -17,46 +17,54 @@ void main() {
 
   test('resolve prefers manual url when present', () {
     const manual = 'https://cdn.example.com/foto.jpg';
+    const profile = 'https://cdn.example.com/perfil.jpg';
+    expect(landingResolvedHeroImageUrl('slug', manual), manual);
     expect(
-      landingResolvedHeroImageUrl('slug', manual),
-      manual,
-    );
-    expect(
-      landingResolvedBioImageUrl('slug', manual),
+      landingResolvedBioImageUrl('slug', manual, profile),
       manual,
     );
   });
 
-  test('resolve falls back to default when manual empty', () {
+  test('bio without manual uses profile photo', () {
+    const profile = 'https://cdn.example.com/perfil.jpg';
     expect(
-      landingResolvedHeroImageUrl('outro-slug', ''),
-      landingDefaultHeroImageUrl('outro-slug'),
+      landingResolvedBioImageUrl('outro-slug', null, profile),
+      profile,
     );
     expect(
-      landingResolvedBioImageUrl('outro-slug', null),
-      landingDefaultBioImageUrl('outro-slug'),
+      landingBioEditorPreviewUrl(profile, 'outro-slug'),
+      profile,
     );
   });
 
-  test('resolve hero ignores bio when cover empty', () {
+  test('bio without manual or profile uses stock fallback', () {
+    expect(
+      landingResolvedBioImageUrl('outro-slug', null, null),
+      landingFallbackBioImageUrl('outro-slug'),
+    );
+    expect(
+      landingBioEditorPreviewUrl(null, 'outro-slug'),
+      landingFallbackBioImageUrl('outro-slug'),
+    );
+  });
+
+  test('hero never uses bio or profile urls', () {
     const manualBio = 'https://cdn.example.com/eu.jpg';
+    const profile = 'https://cdn.example.com/perfil.jpg';
     expect(
       landingResolvedHeroImageUrl('slug', ''),
       landingDefaultHeroImageUrl('slug'),
     );
     expect(
-      landingResolvedBioImageUrl('slug', manualBio),
+      landingResolvedBioImageUrl('slug', manualBio, profile),
       manualBio,
     );
   });
 
   test('webp urls mirror jpg defaults', () {
+    expect(landingDefaultHeroWebpUrl('matheus-focux'), endsWith('.webp'));
     expect(
-      landingDefaultHeroWebpUrl('matheus-focux'),
-      endsWith('.webp'),
-    );
-    expect(
-      landingDefaultBioWebpUrl('matheus-focux'),
+      landingFallbackBioWebpUrl('matheus-focux'),
       contains('/landing/defaults/bio-'),
     );
   });

@@ -36,6 +36,7 @@ class LandingEditorController {
   List<LandingFaqItem> faq = [];
   String descricaoProfissional = '';
   String? slug;
+  String? logoUrl;
   String? heroImageUrl;
   String? bioImageUrl;
   bool loaded = false;
@@ -155,6 +156,7 @@ class LandingEditorController {
     contactCta.text = p.contactCta ?? '';
     descricaoProfissional = p.descricaoProfissional ?? '';
     slug = p.slug;
+    logoUrl = p.logoUrl;
     heroImageUrl = p.heroImageUrl;
     bioImageUrl = p.bioImageUrl;
     coverExpanded = heroImageUrl != null && heroImageUrl!.isNotEmpty;

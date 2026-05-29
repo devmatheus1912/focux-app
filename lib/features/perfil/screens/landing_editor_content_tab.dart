@@ -166,9 +166,9 @@ class LandingEditorContentTab extends StatelessWidget {
                   LandingEditorImageUploadCard(
                     title: 'Foto na seção sobre',
                     hint:
-                        'Retrato ou foto profissional — aparece em "Sobre você". Se não enviar, usamos uma foto padrão de academia.',
+                        'Mostra quem você é em "Quem vai te acompanhar". Por padrão usamos sua foto de perfil — envie outra aqui só para a landing, sem alterar o perfil.',
                     imageUrl: c.bioImageUrl,
-                    defaultPreviewUrl: landingDefaultBioImageUrl(c.slug),
+                    defaultPreviewUrl: landingBioEditorPreviewUrl(c.logoUrl, c.slug),
                     uploading: c.uploadingBio,
                     onUpload: onUploadBio,
                     onPreview: onPreviewLanding,
@@ -176,9 +176,11 @@ class LandingEditorContentTab extends StatelessWidget {
                         ? onRemoveBio
                         : null,
                     onUseDefault: onUseDefaultBio,
-                    useDefaultLabel: 'Usar padrão',
+                    useDefaultLabel: 'Usar foto do perfil',
                     defaultActiveHint: landingUsesDefaultBioImage(c.bioImageUrl)
-                        ? 'Padrão ativo — envie uma foto profissional (rosto + ombros, boa luz).'
+                        ? (c.logoUrl != null && c.logoUrl!.isNotEmpty
+                            ? 'Usando sua foto de perfil. Envie outra aqui só para a landing.'
+                            : 'Sem foto de perfil — adicione no perfil ou envie uma foto aqui.')
                         : null,
                   ),
                 ],

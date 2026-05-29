@@ -460,14 +460,15 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
   }
 
   Future<void> _removeImage({required bool hero}) async {
-    final label = hero ? 'foto de capa' : 'foto da seção sobre';
+    final label = hero ? 'foto de capa' : 'foto customizada da seção sobre';
+    final content = hero
+        ? 'A imagem será removida da landing. Toque em Salvar para publicar a alteração.'
+        : 'A foto customizada será removida. A seção sobre voltará a usar sua foto de perfil.';
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text('Remover $label?'),
-        content: const Text(
-          'A imagem será removida da landing. Toque em Salvar para publicar a alteração.',
-        ),
+        content: Text(content),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
           FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Remover')),
@@ -511,8 +512,8 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       SnackBar(
         content: Text(
           hero
-              ? 'Padrão aplicado — capa de academia na landing.'
-              : 'Padrão aplicado — foto de academia na seção sobre.',
+              ? 'Padrão aplicado — capa premium de academia na landing.'
+              : 'Padrão aplicado — seção sobre usa sua foto de perfil.',
         ),
       ),
     );
