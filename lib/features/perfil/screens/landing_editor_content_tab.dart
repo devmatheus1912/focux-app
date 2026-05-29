@@ -202,9 +202,9 @@ class LandingEditorContentTab extends StatelessWidget {
               onUpload: onUploadHero,
               optional: true,
               emptyHint:
-                  'Sem capa personalizada — usamos foto padrão de academia no fundo do topo.',
+                  'Sem capa personalizada — usamos foto premium de academia no topo.',
               defaultActiveHint: landingUsesDefaultHeroImage(c.heroImageUrl)
-                  ? 'Padrão ativo — troque quando quiser enviando a sua foto.'
+                  ? 'Padrão ativo — ambiente de academia profissional. Envie sua foto para personalizar.'
                   : null,
               onPreview: onPreviewLanding,
               onRemove: c.heroImageUrl != null && c.heroImageUrl!.isNotEmpty
@@ -236,8 +236,8 @@ class LandingEditorContentTab extends StatelessWidget {
                   TextField(
                     controller: c.finalCta,
                     decoration: const InputDecoration(
-                      labelText: 'Botão fixo no rodapé',
-                      helperText: 'Barra que acompanha a rolagem no celular.',
+                      labelText: 'Botão fixo no rodapé (legado)',
+                      helperText: 'A barra fixa usa o mesmo texto do botão principal do hero.',
                     ),
                   ),
                   const SizedBox(height: 8),

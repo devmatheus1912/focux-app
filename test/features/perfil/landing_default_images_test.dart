@@ -2,6 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/perfil/utils/landing_default_images.dart';
 
 void main() {
+  test('matheus slug resolves ambient hero-5', () {
+    expect(
+      landingDefaultHeroImageUrl('matheus-focux'),
+      contains('/landing/defaults/hero-5.jpg'),
+    );
+  });
+
   test('default images use backend static paths', () {
     final hero = landingDefaultHeroImageUrl('matheus-focux');
     expect(hero, contains('/landing/defaults/hero-'));
