@@ -20,14 +20,22 @@ void main() {
     );
   });
 
-  test('resolve falls back to default when manual empty', () {
+  test('resolve falls back to bio default when manual empty', () {
     expect(
       landingResolvedHeroImageUrl('outro-slug', ''),
-      landingDefaultHeroImageUrl('outro-slug'),
+      landingDefaultBioImageUrl('outro-slug'),
     );
     expect(
       landingResolvedBioImageUrl('outro-slug', null),
       landingDefaultBioImageUrl('outro-slug'),
+    );
+  });
+
+  test('resolve hero uses manual bio when hero empty', () {
+    const manualBio = 'https://cdn.example.com/eu.jpg';
+    expect(
+      landingResolvedHeroImageUrl('slug', '', manualBio),
+      manualBio,
     );
   });
 
