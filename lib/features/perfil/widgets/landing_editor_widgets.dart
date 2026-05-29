@@ -890,14 +890,13 @@ class LandingStickySaveBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
     return Material(
       elevation: 8,
       color: scheme.surface,
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-          child: Column(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(16, 10, 16, 12 + bottomInset),
+        child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -930,7 +929,6 @@ class LandingStickySaveBar extends StatelessWidget {
             ],
           ),
         ),
-      ),
     );
   }
 }

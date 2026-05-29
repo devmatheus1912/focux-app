@@ -254,10 +254,15 @@ class LandingEditorImageUploadCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton.icon(
+                  child: FilledButton.tonalIcon(
                     onPressed: uploading ? null : onUpload,
                     icon: Icon(uploading ? Icons.hourglass_top : Icons.upload_outlined),
                     label: Text(uploading ? 'Enviando…' : 'Enviar imagem'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: scheme.primaryContainer.withValues(alpha: 0.72),
+                      foregroundColor: scheme.onPrimaryContainer,
+                      minimumSize: const Size.fromHeight(44),
+                    ),
                   ),
                 ),
                 if (_hasManualImage && onPreview != null) ...[
@@ -271,13 +276,18 @@ class LandingEditorImageUploadCard extends StatelessWidget {
               ],
             ),
             if (_usesDefaultPreview && onPreview != null) ...[
-              const SizedBox(height: 4),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
                   onPressed: onPreview,
                   icon: const Icon(Icons.open_in_new_rounded, size: 18),
                   label: const Text('Ver na página'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: scheme.primary,
+                    side: BorderSide(color: scheme.primary.withValues(alpha: 0.28)),
+                    minimumSize: const Size.fromHeight(42),
+                  ),
                 ),
               ),
             ],
