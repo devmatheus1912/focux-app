@@ -18,14 +18,11 @@ String landingDefaultHeroWebpUrl(String? slug) =>
 String landingDefaultBioWebpUrl(String? slug) =>
     landingDefaultBioImageUrl(slug).replaceAll(RegExp(r'\.jpe?g$'), '.webp');
 
-String landingResolvedHeroImageUrl(String? slug, String? manualUrl, [String? manualBioUrl]) {
+String landingResolvedHeroImageUrl(String? slug, String? manualUrl) {
   if (manualUrl != null && manualUrl.trim().isNotEmpty) {
     return manualUrl.trim();
   }
-  if (manualBioUrl != null && manualBioUrl.trim().isNotEmpty) {
-    return manualBioUrl.trim();
-  }
-  return landingDefaultBioImageUrl(slug);
+  return landingDefaultHeroImageUrl(slug);
 }
 
 String landingResolvedBioImageUrl(String? slug, String? manualUrl) {

@@ -20,10 +20,10 @@ void main() {
     );
   });
 
-  test('resolve falls back to bio default when manual empty', () {
+  test('resolve falls back to default when manual empty', () {
     expect(
       landingResolvedHeroImageUrl('outro-slug', ''),
-      landingDefaultBioImageUrl('outro-slug'),
+      landingDefaultHeroImageUrl('outro-slug'),
     );
     expect(
       landingResolvedBioImageUrl('outro-slug', null),
@@ -31,10 +31,14 @@ void main() {
     );
   });
 
-  test('resolve hero uses manual bio when hero empty', () {
+  test('resolve hero ignores bio when cover empty', () {
     const manualBio = 'https://cdn.example.com/eu.jpg';
     expect(
-      landingResolvedHeroImageUrl('slug', '', manualBio),
+      landingResolvedHeroImageUrl('slug', ''),
+      landingDefaultHeroImageUrl('slug'),
+    );
+    expect(
+      landingResolvedBioImageUrl('slug', manualBio),
       manualBio,
     );
   });
