@@ -178,7 +178,7 @@ class LandingEditorContentTab extends StatelessWidget {
                     onUseDefault: onUseDefaultBio,
                     useDefaultLabel: 'Usar padrão',
                     defaultActiveHint: landingUsesDefaultBioImage(c.bioImageUrl)
-                        ? 'Padrão ativo — foto de academia até você enviar a sua.'
+                        ? 'Padrão ativo — envie uma foto profissional (rosto + ombros, boa luz).'
                         : null,
                   ),
                 ],
