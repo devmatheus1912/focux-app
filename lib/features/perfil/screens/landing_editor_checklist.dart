@@ -4,6 +4,7 @@ library;
 const landingChecklistFriendlyLabels = <String, String>{
   'slug': 'Link público configurado',
   'marca': 'Logo ou cor da marca',
+  'cref': 'CREF informado no perfil',
   'hero': 'Título de abertura preenchido',
   'cta': 'Texto do botão principal definido',
   'captura': 'Formulário rápido disponível',
@@ -14,6 +15,7 @@ const landingChecklistFriendlyLabels = <String, String>{
 const landingChecklistActionHints = <String, String>{
   'slug': 'Abrir configurações de link',
   'marca': 'Ir para fotos e identidade visual',
+  'cref': 'Aparece no hero e na bio — editar perfil',
   'hero': 'Ir para abertura da página',
   'cta': 'Ir para o botão principal',
   'captura': 'Ver link do formulário rápido',
@@ -34,6 +36,7 @@ enum LandingChecklistTarget {
   conteudoServicos,
   conteudoFaq,
   identidadeVisual,
+  editProfile,
   whiteLabel,
   pacotes,
 }
@@ -42,6 +45,7 @@ LandingChecklistTarget? landingChecklistTarget(String id) {
   return switch (id) {
     'slug' => LandingChecklistTarget.whiteLabel,
     'marca' => LandingChecklistTarget.identidadeVisual,
+    'cref' => LandingChecklistTarget.editProfile,
     'hero' => LandingChecklistTarget.conteudoHero,
     'cta' => LandingChecklistTarget.conteudoHero,
     'captura' => LandingChecklistTarget.linksTab,

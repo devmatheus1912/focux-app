@@ -33,6 +33,7 @@ void main() {
 
   test('landingChecklistLabel humanizes backend jargon', () {
     expect(landingChecklistLabel('slug', 'Slug público'), 'Link público configurado');
+    expect(landingChecklistLabel('cref', 'CREF'), 'CREF informado no perfil');
     expect(landingChecklistLabel('cta', 'CTA principal'), 'Texto do botão principal definido');
     expect(landingChecklistLabel('captura', 'Modo Captura'), 'Formulário rápido disponível');
   });
@@ -225,5 +226,9 @@ void main() {
     expect(template.faq, hasLength(4));
     expect(template.heroTitle, isNotEmpty);
     expect(template.contactCta, isNotEmpty);
+  });
+
+  test('landingChecklistTarget maps cref to edit profile', () {
+    expect(landingChecklistTarget('cref'), LandingChecklistTarget.editProfile);
   });
 }

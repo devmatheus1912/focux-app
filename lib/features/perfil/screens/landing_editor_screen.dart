@@ -206,6 +206,11 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
         context.push('/perfil/white-label');
       case LandingChecklistTarget.identidadeVisual:
         context.push('/identidade-visual');
+      case LandingChecklistTarget.editProfile:
+        final perfil = ref.read(perfilProvider).valueOrNull;
+        if (perfil != null) {
+          context.push('/perfil/editar', extra: perfil);
+        }
       case LandingChecklistTarget.pacotes:
         context.push('/pacotes');
     }
