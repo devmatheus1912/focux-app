@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/config/env.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../data/landing_growth_repository.dart';
+import '../utils/landing_default_images.dart';
 import '../widgets/landing_editor_widgets.dart';
 import 'landing_editor_controller.dart';
 import 'landing_section_templates.dart';
@@ -49,9 +50,18 @@ class LandingEditorLinksTab extends StatelessWidget {
     final nicheCount = templates.length > 1 ? templates.length - 1 : 0;
     final applying = controller.applyingTemplate || controller.saving;
 
+    final previewImage = landingResolvedHeroImageUrl(slug, controller.heroImageUrl);
+
     return ListView(
       padding: const EdgeInsets.all(TokensStrip.s4),
       children: [
+        LandingLivePreviewCard(
+          previewImageUrl: previewImage,
+          displayLabel: Env.landingPageDisplayLabel(slug),
+          unsavedChanges: controller.dirty,
+          onOpen: () => openLandingLink(context, url: landingUrl),
+        ),
+        const SizedBox(height: 12),
         LandingLinkCard(
           icon: Icons.public_rounded,
           title: 'Página completa na internet',

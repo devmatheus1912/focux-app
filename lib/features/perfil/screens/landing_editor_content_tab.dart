@@ -6,6 +6,7 @@ import '../utils/landing_default_images.dart';
 import '../widgets/landing_editor_widgets.dart';
 import 'landing_editor_controller.dart';
 import 'landing_editor_quality.dart';
+import 'landing_editor_sections.dart';
 import 'landing_editor_shared_widgets.dart';
 
 class LandingEditorContentTab extends StatelessWidget {
@@ -33,6 +34,7 @@ class LandingEditorContentTab extends StatelessWidget {
     required this.onRemoveFaq,
     required this.onUpdateFaq,
     required this.onExitReviewFocus,
+    required this.onJumpToSection,
   });
 
   final LandingEditorController controller;
@@ -57,6 +59,7 @@ class LandingEditorContentTab extends StatelessWidget {
   final ValueChanged<int> onRemoveFaq;
   final void Function(int index, {String? pergunta, String? resposta}) onUpdateFaq;
   final VoidCallback onExitReviewFocus;
+  final ValueChanged<LandingEditorContentSection> onJumpToSection;
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +83,22 @@ class LandingEditorContentTab extends StatelessWidget {
             onExit: onExitReviewFocus,
           ),
         if (c.reviewFocusMode) const SizedBox(height: 12),
+        if (!c.reviewFocusMode) ...[
+          LandingContentSectionJumpBar(
+            onJump: onJumpToSection,
+            hiddenSections: {
+              if (!showHero) ...[
+                LandingEditorContentSection.abertura,
+                LandingEditorContentSection.capa,
+              ],
+              if (!showSecondarySections) ...[
+                LandingEditorContentSection.botoes,
+                LandingEditorContentSection.servicos,
+              ],
+            },
+          ),
+          const SizedBox(height: 14),
+        ],
         if (showHero)
           KeyedSubtree(
             key: c.heroSectionKey,
@@ -189,7 +208,9 @@ class LandingEditorContentTab extends StatelessWidget {
           ),
         if (showHero) const SizedBox(height: 12),
         if (showHero)
-          LandingCollapsibleSection(
+          KeyedSubtree(
+            key: c.coverSectionKey,
+            child: LandingCollapsibleSection(
             title: 'Foto de capa',
             hint:
                 'Opcional — aparece como fundo do topo com gradiente da sua cor de marca.',
@@ -216,39 +237,41 @@ class LandingEditorContentTab extends StatelessWidget {
               useDefaultLabel: 'Usar padrão',
             ),
           ),
+          ),
         if (showHero) const SizedBox(height: 12),
         if (showSecondarySections)
           KeyedSubtree(
             key: c.ctasSectionKey,
             child: LandingCollapsibleSection(
               title: 'Outros botões',
-              hint: 'Textos extras que aparecem em planos, rodapé e contato.',
+              hint: 'Textos dos botões em planos e na área de contato.',
               expanded: c.ctasExpanded,
               onExpandedChanged: onCtasExpandedChanged,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const LandingStickyCtaInfoBanner(),
+                  const SizedBox(height: 12),
                   TextField(
                     controller: c.offerCta,
-                    decoration: const InputDecoration(
+                    decoration: landingEditorFieldDecoration(
+                      context,
                       labelText: 'Botão nos planos',
                       helperText: 'Ex.: Escolher plano · Quero esse plano',
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: c.finalCta,
-                    decoration: const InputDecoration(
-                      labelText: 'Botão fixo no rodapé (legado)',
-                      helperText: 'A barra fixa usa o mesmo texto do botão principal do hero.',
-                    ),
+                    scrollPadding: const EdgeInsets.only(bottom: 120),
+                    textInputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: c.contactCta,
-                    decoration: const InputDecoration(
+                    decoration: landingEditorFieldDecoration(
+                      context,
                       labelText: 'Botão na área de contato',
                       helperText: 'Ex.: Falar comigo · Chamar no WhatsApp',
                     ),
+                    scrollPadding: const EdgeInsets.only(bottom: 120),
+                    textInputAction: TextInputAction.done,
                   ),
                 ],
               ),
@@ -269,12 +292,7 @@ class LandingEditorContentTab extends StatelessWidget {
                   if (c.servicos.isEmpty)
                     Text(
                       'Nenhum serviço ainda. Toque em Adicionar para incluir.',
-                      style: TextStyle(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.6),
-                      ),
+                      style: landingEditorMutedStyle(context),
                     ),
                   for (var i = 0; i < c.servicos.length; i++) ...[
                     Card(
@@ -290,8 +308,7 @@ class LandingEditorContentTab extends StatelessWidget {
                                   style: const TextStyle(fontWeight: FontWeight.w700),
                                 ),
                                 const Spacer(),
-                                IconButton(
-                                  icon: const Icon(Icons.delete_outline),
+                                landingEditorDeleteIconButton(
                                   onPressed: () => onRemoveServico(i),
                                   tooltip: 'Remover serviço',
                                 ),
@@ -300,10 +317,10 @@ class LandingEditorContentTab extends StatelessWidget {
                             TextFormField(
                               key: ValueKey('servico-titulo-$i'),
                               initialValue: c.servicos[i].titulo,
-                              decoration: InputDecoration(
+                              decoration: landingEditorFieldDecoration(
+                                context,
                                 labelText: 'Nome do serviço',
                                 helperText: landingPolishPreviewHint(c.servicos[i].titulo),
-                                helperMaxLines: 2,
                               ),
                               onChanged: (v) => onUpdateServico(i, titulo: v),
                             ),
@@ -311,7 +328,8 @@ class LandingEditorContentTab extends StatelessWidget {
                             TextFormField(
                               key: ValueKey('servico-desc-$i'),
                               initialValue: c.servicos[i].descricao,
-                              decoration: const InputDecoration(
+                              decoration: landingEditorFieldDecoration(
+                                context,
                                 labelText: 'Descrição curta',
                               ),
                               maxLines: 3,
@@ -342,12 +360,7 @@ class LandingEditorContentTab extends StatelessWidget {
                 if (c.faq.isEmpty)
                   Text(
                     'Nenhuma pergunta ainda. Ex.: "Preciso treinar todos os dias?"',
-                    style: TextStyle(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.6),
-                    ),
+                    style: landingEditorMutedStyle(context),
                   ),
                 if (c.reviewFocusMode && hiddenFaqCount > 0)
                   Padding(
@@ -356,10 +369,9 @@ class LandingEditorContentTab extends StatelessWidget {
                       hiddenFaqCount == 1
                           ? '1 pergunta ok — oculta no modo foco.'
                           : '$hiddenFaqCount perguntas ok — ocultas no modo foco.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.85),
+                      style: landingEditorMutedStyle(context).copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.9),
                       ),
                     ),
                   ),
@@ -381,8 +393,7 @@ class LandingEditorContentTab extends StatelessWidget {
                                 style: const TextStyle(fontWeight: FontWeight.w700),
                               ),
                               const Spacer(),
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline),
+                              landingEditorDeleteIconButton(
                                 onPressed: () => onRemoveFaq(i),
                                 tooltip: 'Remover pergunta',
                               ),
@@ -391,10 +402,10 @@ class LandingEditorContentTab extends StatelessWidget {
                           TextFormField(
                             key: ValueKey('faq-pergunta-$i'),
                             initialValue: c.faq[i].pergunta,
-                            decoration: InputDecoration(
+                            decoration: landingEditorFieldDecoration(
+                              context,
                               labelText: 'Pergunta',
                               helperText: landingPolishPreviewHint(c.faq[i].pergunta),
-                              helperMaxLines: 2,
                             ),
                             onChanged: (v) => onUpdateFaq(i, pergunta: v),
                           ),
@@ -402,10 +413,10 @@ class LandingEditorContentTab extends StatelessWidget {
                           TextFormField(
                             key: ValueKey('faq-resposta-$i'),
                             initialValue: c.faq[i].resposta,
-                            decoration: InputDecoration(
+                            decoration: landingEditorFieldDecoration(
+                              context,
                               labelText: 'Resposta',
                               helperText: landingPolishPreviewHint(c.faq[i].resposta),
-                              helperMaxLines: 2,
                             ),
                             maxLines: 3,
                             onChanged: (v) => onUpdateFaq(i, resposta: v),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -153,6 +154,16 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       onIssueTap: _navigateContentIssue,
       onFocusMode: () => _enterReviewFocus(),
     );
+  }
+
+  void _jumpToContentSection(LandingEditorContentSection section) {
+    setState(() {
+      _c.tabIndex = 1;
+      _c.expandForContentSection(section);
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToSection(_c.keyForContentSection(section));
+    });
   }
 
   Future<void> _scrollToSection(GlobalKey key) async {
@@ -538,7 +549,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       final heroTitle = landingPolishShortText(_c.heroTitle.text.trim());
       final primaryCta = _c.polishCta(_c.primaryCta.text.trim());
       final offerCta = _c.polishCta(_c.offerCta.text.trim());
-      final finalCta = _c.polishCta(_c.finalCta.text.trim());
+      final finalCta = _c.stickyBarCtaForSave();
       final contactCta = _c.polishCta(_c.contactCta.text.trim());
       final servicos = _c.servicosForSave();
       final faq = _c.faqForSave();
@@ -571,6 +582,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
           polishedContactCta: contactCta,
         );
       });
+      HapticFeedback.mediumImpact();
       FeedbackHelper.showSuccess(context, 'Landing publicada com sucesso.');
       await _loadGrowth();
     } catch (e) {
@@ -715,6 +727,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                               ),
                             ),
                             onExitReviewFocus: _exitReviewFocus,
+                            onJumpToSection: _jumpToContentSection,
                           ),
                         ),
                       _ => KeyedSubtree(

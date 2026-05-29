@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/tokens_strip.dart';
@@ -662,7 +663,7 @@ class LandingCollapsibleSection extends StatelessWidget {
               onTap: () => onExpandedChanged(!expanded),
               focusColor: scheme.primary.withValues(alpha: 0.1),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
+                padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -695,7 +696,7 @@ class LandingCollapsibleSection extends StatelessWidget {
                                   child: Text(
                                     badgeLabel!,
                                     style: TextStyle(
-                                      fontSize: 11,
+                                      fontSize: TokensStrip.fontBodySm,
                                       fontWeight: FontWeight.w700,
                                       color: scheme.onPrimaryContainer,
                                     ),
@@ -707,10 +708,8 @@ class LandingCollapsibleSection extends StatelessWidget {
                             const SizedBox(height: 4),
                             Text(
                               hint!,
-                              style: TextStyle(
-                                fontSize: 13,
+                              style: TokensStrip.bodyMuted(
                                 color: scheme.onSurface.withValues(alpha: 0.72),
-                                height: 1.45,
                               ),
                             ),
                           ],
@@ -720,16 +719,26 @@ class LandingCollapsibleSection extends StatelessWidget {
                     if (onAdd != null)
                       TextButton.icon(
                         onPressed: onAdd,
+                        style: TextButton.styleFrom(
+                          minimumSize: const Size(48, 48),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
                         icon: const Icon(Icons.add, size: 18),
                         label: const Text('Adicionar'),
                       ),
-                    AnimatedRotation(
-                      turns: expanded ? 0.5 : 0,
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOutCubic,
-                      child: Icon(
-                        Icons.expand_more_rounded,
-                        color: scheme.onSurface.withValues(alpha: 0.55),
+                    SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: Center(
+                        child: AnimatedRotation(
+                          turns: expanded ? 0.5 : 0,
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeOutCubic,
+                          child: Icon(
+                            Icons.expand_more_rounded,
+                            color: scheme.onSurface.withValues(alpha: 0.55),
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -994,9 +1003,13 @@ class LandingSectionOrderTile extends StatelessWidget {
             children: [
               ReorderableDragStartListener(
                 index: index,
-                child: Icon(
-                  Icons.drag_handle,
-                  color: scheme.onSurface.withValues(alpha: 0.45),
+                child: SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: Icon(
+                    Icons.drag_handle,
+                    color: scheme.onSurface.withValues(alpha: 0.45),
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
@@ -1758,6 +1771,153 @@ class LandingSectionTemplatesPanel extends StatelessWidget {
                 onApplyTemplate: onApplyTemplate,
               ),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Preview visual da capa + atalho para abrir a página como o cliente vê.
+class LandingLivePreviewCard extends StatelessWidget {
+  const LandingLivePreviewCard({
+    super.key,
+    required this.previewImageUrl,
+    required this.displayLabel,
+    required this.onOpen,
+    this.unsavedChanges = false,
+  });
+
+  final String previewImageUrl;
+  final String displayLabel;
+  final VoidCallback onOpen;
+  final bool unsavedChanges;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Semantics(
+      container: true,
+      label: 'Preview da landing. $displayLabel',
+      child: Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(TokensStrip.rLg),
+          side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.55)),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.network(
+                    previewImageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            scheme.primary.withValues(alpha: 0.35),
+                            scheme.surfaceContainerHighest,
+                          ],
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.image_outlined,
+                        size: 40,
+                        color: scheme.onSurface.withValues(alpha: 0.35),
+                      ),
+                    ),
+                  ),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withValues(alpha: 0.55),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 12,
+                    right: 12,
+                    bottom: 10,
+                    child: Text(
+                      displayLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: TokensStrip.fontBodySm,
+                        shadows: [Shadow(blurRadius: 8, color: Colors.black45)],
+                      ),
+                    ),
+                  ),
+                  if (unsavedChanges)
+                    Positioned(
+                      top: 10,
+                      right: 10,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.62),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: const Text(
+                          'Não salvo',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: TokensStrip.fontBodySm,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+              child: Row(
+                children: [
+                  Icon(Icons.visibility_outlined, size: 18, color: scheme.primary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Preview da sua página',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: TokensStrip.fontBody,
+                        color: scheme.onSurface,
+                      ),
+                    ),
+                  ),
+                  FilledButton.tonalIcon(
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      onOpen();
+                    },
+                    icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                    label: const Text('Ver ao vivo'),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(0, 44),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

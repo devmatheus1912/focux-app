@@ -1,7 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
+import 'landing_editor_sections.dart';
+
+/// Alvo mínimo de toque (Material 48dp / Apple 44pt).
+const double kLandingEditorMinTouch = 48;
+
+TextStyle landingEditorMutedStyle(BuildContext context) {
+  final scheme = Theme.of(context).colorScheme;
+  return TokensStrip.bodyMuted(color: scheme.onSurface.withValues(alpha: 0.72));
+}
+
+ButtonStyle landingEditorTextButtonStyle() => TextButton.styleFrom(
+      minimumSize: const Size(kLandingEditorMinTouch, kLandingEditorMinTouch),
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    );
+
+Widget landingEditorDeleteIconButton({
+  required VoidCallback onPressed,
+  required String tooltip,
+}) {
+  return IconButton(
+    onPressed: onPressed,
+    tooltip: tooltip,
+    icon: const Icon(Icons.delete_outline),
+    style: IconButton.styleFrom(
+      minimumSize: const Size(kLandingEditorMinTouch, kLandingEditorMinTouch),
+      foregroundColor: Colors.red.shade700,
+    ),
+  );
+}
 
 class LandingEditorSectionHeader extends StatelessWidget {
   const LandingEditorSectionHeader({
@@ -23,7 +53,6 @@ class LandingEditorSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -40,14 +69,7 @@ class LandingEditorSectionHeader extends StatelessWidget {
         ),
         if (hint != null) ...[
           const SizedBox(height: 4),
-          Text(
-            hint!,
-            style: TextStyle(
-              fontSize: 13,
-              color: scheme.onSurface.withValues(alpha: 0.72),
-              height: 1.45,
-            ),
-          ),
+          Text(hint!, style: landingEditorMutedStyle(context)),
         ],
       ],
     );
@@ -138,14 +160,7 @@ class LandingEditorImageUploadCard extends StatelessWidget {
               ),
               if (hint != null) ...[
                 const SizedBox(height: 4),
-                Text(
-                  hint!,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: scheme.onSurface.withValues(alpha: 0.72),
-                    height: 1.45,
-                  ),
-                ),
+                Text(hint!, style: landingEditorMutedStyle(context)),
               ],
               const SizedBox(height: 8),
             ],
@@ -271,6 +286,9 @@ class LandingEditorImageUploadCard extends StatelessWidget {
                     tooltip: 'Ver na página',
                     onPressed: onPreview,
                     icon: const Icon(Icons.open_in_new_rounded, size: 20),
+                    style: IconButton.styleFrom(
+                      minimumSize: const Size(kLandingEditorMinTouch, kLandingEditorMinTouch),
+                    ),
                   ),
                 ],
               ],
@@ -302,6 +320,7 @@ class LandingEditorImageUploadCard extends StatelessWidget {
                   if (_hasManualImage && onRemove != null)
                     TextButton.icon(
                       onPressed: uploading ? null : onRemove,
+                      style: landingEditorTextButtonStyle(),
                       icon: Icon(Icons.delete_outline, size: 18, color: scheme.error),
                       label: Text(
                         'Remover',
@@ -311,6 +330,7 @@ class LandingEditorImageUploadCard extends StatelessWidget {
                   if (onUseDefault != null && _hasManualImage)
                     TextButton.icon(
                       onPressed: uploading ? null : onUseDefault,
+                      style: landingEditorTextButtonStyle(),
                       icon: const Icon(Icons.restore_rounded, size: 18),
                       label: Text(useDefaultLabel ?? 'Usar padrão'),
                     ),
@@ -330,19 +350,101 @@ InputDecoration landingEditorFieldDecoration(
   String? helperText,
   int? maxLength,
 }) {
-  final scheme = Theme.of(context).colorScheme;
   return InputDecoration(
     labelText: labelText,
     helperText: helperText,
     helperMaxLines: 2,
-    helperStyle: TextStyle(
-      color: scheme.onSurface.withValues(alpha: 0.72),
-      height: 1.4,
-    ),
-    counterStyle: TextStyle(
-      color: scheme.onSurface.withValues(alpha: 0.72),
-      fontWeight: FontWeight.w600,
-      fontSize: 12,
-    ),
+    helperStyle: landingEditorMutedStyle(context),
+    counterStyle: landingEditorMutedStyle(context).copyWith(fontWeight: FontWeight.w600),
   );
+}
+
+/// Atalhos horizontais para pular entre blocos da aba Conteúdo.
+class LandingContentSectionJumpBar extends StatelessWidget {
+  const LandingContentSectionJumpBar({
+    super.key,
+    required this.onJump,
+    this.hiddenSections = const {},
+  });
+
+  final ValueChanged<LandingEditorContentSection> onJump;
+  final Set<LandingEditorContentSection> hiddenSections;
+
+  static const _order = LandingEditorContentSection.values;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final visible = _order.where((s) => !hiddenSections.contains(s)).toList();
+    if (visible.isEmpty) return const SizedBox.shrink();
+
+    return Semantics(
+      container: true,
+      label: 'Ir para seção do conteúdo',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Ir para',
+            style: TokensStrip.bodyMuted(color: scheme.onSurface.withValues(alpha: 0.8))
+                .copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 8),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (var i = 0; i < visible.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 8),
+                  ActionChip(
+                    label: Text(landingEditorContentSectionLabel(visible[i])),
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      onJump(visible[i]);
+                    },
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    labelStyle: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: TokensStrip.fontBodySm,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class LandingStickyCtaInfoBanner extends StatelessWidget {
+  const LandingStickyCtaInfoBanner({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: scheme.primaryContainer.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(TokensStrip.rMd),
+        border: Border.all(color: scheme.primary.withValues(alpha: 0.22)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.info_outline_rounded, size: 18, color: scheme.primary),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'A barra fixa no rodapé da página usa o mesmo texto do botão principal (Abertura).',
+              style: landingEditorMutedStyle(context),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

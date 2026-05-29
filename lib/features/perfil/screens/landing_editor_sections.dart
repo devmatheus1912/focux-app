@@ -92,3 +92,22 @@ List<String> normalizeLandingSectionOrder(List<String> raw) {
 
   return result;
 }
+
+/// Seções editáveis na aba Conteúdo do editor.
+enum LandingEditorContentSection {
+  abertura,
+  capa,
+  botoes,
+  servicos,
+  faq,
+}
+
+String landingEditorContentSectionLabel(LandingEditorContentSection section) {
+  return switch (section) {
+    LandingEditorContentSection.abertura => 'Abertura',
+    LandingEditorContentSection.capa => 'Capa',
+    LandingEditorContentSection.botoes => 'Botões',
+    LandingEditorContentSection.servicos => 'Serviços',
+    LandingEditorContentSection.faq => 'FAQ',
+  };
+}

@@ -19,6 +19,7 @@ class LandingEditorController {
 
   final conteudoScroll = ScrollController();
   final heroSectionKey = GlobalKey();
+  final coverSectionKey = GlobalKey();
   final ctasSectionKey = GlobalKey();
   final servicosSectionKey = GlobalKey();
   final faqSectionKey = GlobalKey();
@@ -228,6 +229,35 @@ class LandingEditorController {
   String polishCta(String text) {
     final polished = landingPolishShortText(text);
     return landingCtaAccentSuggestion(polished) ?? polished;
+  }
+
+  /// Barra fixa da landing pública usa o mesmo texto do botão principal do hero.
+  String stickyBarCtaForSave() => polishCta(primaryCta.text.trim());
+
+  void expandForContentSection(LandingEditorContentSection section) {
+    switch (section) {
+      case LandingEditorContentSection.abertura:
+        heroExpanded = true;
+      case LandingEditorContentSection.capa:
+        coverExpanded = true;
+      case LandingEditorContentSection.botoes:
+        ctasExpanded = true;
+      case LandingEditorContentSection.servicos:
+        servicosExpanded = true;
+      case LandingEditorContentSection.faq:
+        faqExpanded = true;
+    }
+    onStateChanged();
+  }
+
+  GlobalKey keyForContentSection(LandingEditorContentSection section) {
+    return switch (section) {
+      LandingEditorContentSection.abertura => heroSectionKey,
+      LandingEditorContentSection.capa => coverSectionKey,
+      LandingEditorContentSection.botoes => ctasSectionKey,
+      LandingEditorContentSection.servicos => servicosSectionKey,
+      LandingEditorContentSection.faq => faqSectionKey,
+    };
   }
 
   List<LandingFaqItem> faqForSave() {

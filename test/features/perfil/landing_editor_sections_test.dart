@@ -3,6 +3,7 @@ import 'package:focux_app/features/perfil/data/landing_growth_repository.dart';
 import 'package:focux_app/features/perfil/data/perfil_repository.dart';
 import 'package:focux_app/features/perfil/screens/landing_editor_checklist.dart';
 import 'package:focux_app/features/perfil/screens/landing_editor_quality.dart';
+import 'package:focux_app/features/perfil/screens/landing_editor_controller.dart';
 import 'package:focux_app/features/perfil/screens/landing_editor_sections.dart';
 import 'package:focux_app/features/perfil/screens/landing_preset_mapper.dart';
 import 'package:focux_app/features/perfil/screens/landing_section_templates.dart';
@@ -230,5 +231,29 @@ void main() {
 
   test('landingChecklistTarget maps cref to edit profile', () {
     expect(landingChecklistTarget('cref'), LandingChecklistTarget.editProfile);
+  });
+
+  test('landingEditorContentSectionLabel returns PT-BR labels', () {
+    expect(
+      landingEditorContentSectionLabel(LandingEditorContentSection.abertura),
+      'Abertura',
+    );
+    expect(
+      landingEditorContentSectionLabel(LandingEditorContentSection.faq),
+      'FAQ',
+    );
+  });
+
+  test('stickyBarCtaForSave mirrors primary CTA for sticky bar', () {
+    final c = LandingEditorController(onStateChanged: () {});
+    c.primaryCta.text = 'Comecar agora';
+    expect(c.stickyBarCtaForSave(), 'Comecar agora');
+    c.dispose();
+  });
+
+  test('keyForContentSection returns stable keys per section', () {
+    final c = LandingEditorController(onStateChanged: () {});
+    expect(c.keyForContentSection(LandingEditorContentSection.capa), c.coverSectionKey);
+    c.dispose();
   });
 }
