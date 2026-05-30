@@ -1,7 +1,10 @@
 # Matriz oficial — planos e capabilities (Focux Personal)
 
-**Fonte de verdade:** tabela `planos_saas` + endpoint `GET /api/planos/me`.  
+**Fonte de verdade:** tabela `planos_saas` + endpoint `GET /api/planos/me` (alias `GET /api/planos/contexto`).  
 O app **não** deve inventar features fora desta matriz.
+
+**Paywall:** `GET /api/planos/vitrine` (prova social; fallback estático no app).  
+**IAP/pagamentos:** `PaymentApiClient` com pinning opcional via `--dart-define=API_CERT_PINS=sha256/...`.
 
 ## Tiers
 
