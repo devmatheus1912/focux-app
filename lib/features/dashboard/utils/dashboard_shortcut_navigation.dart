@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../planos/data/planos_repository.dart';
-import '../../planos/providers/plano_features_provider.dart';
+import '../../planos/utils/effective_plano_features.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../../subscription/utils/landing_editor_access.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
@@ -16,8 +16,7 @@ Future<void> openDashboardShortcut(
   WidgetRef ref,
   DashboardToolShortcut shortcut,
 ) async {
-  final features = ref.read(planoFeaturesProvider).valueOrNull ??
-      PlanoFeatures.optimisticEnterprise;
+  final features = effectivePlanoFeatures(ref);
 
   if (!shortcut.isUnlocked(features)) {
     AnalyticsService.instance.track(

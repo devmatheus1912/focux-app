@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../planos/data/planos_repository.dart';
-import '../../planos/providers/plano_features_provider.dart';
+import '../../planos/utils/effective_plano_features.dart';
 import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
 
@@ -75,9 +74,7 @@ class GatedProfileShortcuts extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final features =
-        ref.watch(planoFeaturesProvider).valueOrNull ??
-        PlanoFeatures.optimisticEnterprise;
+    final features = effectivePlanoFeatures(ref);
 
     return Column(
       children: [

@@ -301,6 +301,103 @@ class PlanoFeatures {
       iaUsadaMes: (j['iaUsadaMes'] as num?)?.toInt() ?? 0,
       limiteMigracaoFotoMensal: (j['limiteMigracaoFotoMensal'] as num?)?.toInt(),
       migracaoFotosUsadasMes: (j['migracaoFotosUsadasMes'] as num?)?.toInt() ?? 0,
+    ).withTierCeiling();
+  }
+
+  /// Garante que flags Pro/Premium nunca ultrapassem o tier declarado em [plano].
+  /// Protege contra cache stale, fallback operacional ou drift do backend.
+  PlanoFeatures withTierCeiling() {
+    switch (plano) {
+      case SubscriptionPlan.FREE:
+        return _copyCaps(
+          financeiro: false,
+          relatorios: false,
+          whiteLabel: false,
+          iaCopiloto: false,
+          migracaoFoto: false,
+          landingCompleta: false,
+          habitCoaching: false,
+          comunidadePrivada: false,
+          automacoes: false,
+          automacoesAvancadas: false,
+          comunidadeGrupos: false,
+          equipeRbac: false,
+          lojaDigital: false,
+          poseCoach: false,
+          limiteAssistentes: null,
+        );
+      case SubscriptionPlan.PREMIUM:
+        return _copyCaps(
+          whiteLabel: false,
+          landingCompleta: false,
+          automacoes: false,
+          automacoesAvancadas: false,
+          comunidadeGrupos: false,
+          equipeRbac: false,
+          lojaDigital: false,
+          poseCoach: false,
+          limiteAssistentes: null,
+        );
+      case SubscriptionPlan.ENTERPRISE:
+        return _copyCaps(
+          landingCompleta: false,
+          automacoesAvancadas: false,
+          lojaDigital: false,
+          poseCoach: false,
+          limiteAssistentes: 1,
+        );
+      case SubscriptionPlan.ENTERPRISE_PRO:
+        return this;
+    }
+  }
+
+  PlanoFeatures _copyCaps({
+    bool? financeiro,
+    bool? relatorios,
+    bool? whiteLabel,
+    bool? iaCopiloto,
+    bool? migracaoFoto,
+    bool? landingCompleta,
+    bool? habitCoaching,
+    bool? comunidadePrivada,
+    bool? automacoes,
+    bool? automacoesAvancadas,
+    bool? comunidadeGrupos,
+    bool? equipeRbac,
+    bool? lojaDigital,
+    bool? poseCoach,
+    int? limiteAssistentes,
+  }) {
+    return PlanoFeatures(
+      plano: plano,
+      planoNomeOriginal: planoNomeOriginal,
+      displayName: displayName,
+      limiteAlunos: limiteAlunos,
+      limiteIaMensal: limiteIaMensal,
+      validoAte: validoAte,
+      fromCache: fromCache,
+      cacheSavedAt: cacheSavedAt,
+      syncWarning: syncWarning,
+      financeiro: financeiro ?? this.financeiro,
+      agenda: agenda,
+      relatorios: relatorios ?? this.relatorios,
+      whiteLabel: whiteLabel ?? this.whiteLabel,
+      iaCopiloto: iaCopiloto ?? this.iaCopiloto,
+      migracaoFoto: migracaoFoto ?? this.migracaoFoto,
+      landingCompleta: landingCompleta ?? this.landingCompleta,
+      habitCoaching: habitCoaching ?? this.habitCoaching,
+      comunidadePrivada: comunidadePrivada ?? this.comunidadePrivada,
+      automacoes: automacoes ?? this.automacoes,
+      automacoesAvancadas: automacoesAvancadas ?? this.automacoesAvancadas,
+      comunidadeGrupos: comunidadeGrupos ?? this.comunidadeGrupos,
+      equipeRbac: equipeRbac ?? this.equipeRbac,
+      lojaDigital: lojaDigital ?? this.lojaDigital,
+      poseCoach: poseCoach ?? this.poseCoach,
+      limiteAssistentes: limiteAssistentes ?? this.limiteAssistentes,
+      alunosAtivos: alunosAtivos,
+      iaUsadaMes: iaUsadaMes,
+      limiteMigracaoFotoMensal: limiteMigracaoFotoMensal,
+      migracaoFotosUsadasMes: migracaoFotosUsadasMes,
     );
   }
 
@@ -419,7 +516,7 @@ class PlanoFeatures {
     whiteLabel: true,
     iaCopiloto: true,
     migracaoFoto: true,
-    landingCompleta: true,
+    landingCompleta: false,
     habitCoaching: true,
     comunidadePrivada: true,
     automacoes: true,
@@ -435,7 +532,7 @@ class PlanoFeatures {
 
 class PlanosRepository {
   final Dio _dio;
-  static const _cacheKey = 'focux_plano_features_cache_v1';
+  static const _cacheKey = 'focux_plano_features_cache_v2';
 
   PlanosRepository(ApiClient client) : _dio = client.dio;
 

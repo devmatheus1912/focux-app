@@ -44,41 +44,60 @@ class FeatureGate extends ConsumerWidget {
     if (featuresAsync.hasError) {
       final isAluno = ref.read(authProvider) == AuthStatus.authenticated &&
           ref.read(authProvider.notifier).currentRole == UserRole.aluno;
-      return _PlanSyncBannerShell(
-        features: isAluno
-            ? PlanoFeatures.optimisticAluno
-            : PlanoFeatures.optimisticEnterprise,
-        onRefresh: () => ref.read(planoFeaturesProvider.notifier).refresh(),
-        child: child,
+      final fallback = (isAluno
+              ? PlanoFeatures.optimisticAluno
+              : PlanoFeatures.optimisticEnterprise)
+          .withTierCeiling();
+      return _buildGatedContent(
+        context: context,
+        ref: ref,
+        features: fallback,
+        hasAccess: _hasAccess(fallback, requiredPlan, capability),
+        featureName: featureName,
+        capability: capability,
+        requiredPlan: requiredPlan,
       );
     }
 
     final features = featuresAsync.value;
     if (features == null) {
-      return child;
+      return const Center(child: FxLoading());
     }
 
-    final currentPlan = features.plano;
+    final gated = features.withTierCeiling();
 
-    final hasAccess =
-        capability != null
-            ? _resolveCapability(features, capability!)
-            : currentPlan.canAccess(requiredPlan);
+    return _buildGatedContent(
+      context: context,
+      ref: ref,
+      features: gated,
+      hasAccess: _hasAccess(gated, requiredPlan, capability),
+      featureName: featureName,
+      capability: capability,
+      requiredPlan: requiredPlan,
+    );
+  }
 
-    if (hasAccess || features.fromCache) {
-      if (!hasAccess && features.fromCache) {
-        Future.microtask(
-          () => AnalyticsService.instance.track(
-            ProductEvents.featureGateBlocked,
-            props: {
-              'feature': featureName,
-              'requiredPlan': requiredPlan.name,
-              'currentPlan': currentPlan.name,
-              'allowedByStaleCache': true,
-            },
-          ),
-        );
-      }
+  bool _hasAccess(
+    PlanoFeatures features,
+    SubscriptionPlan requiredPlan,
+    String? capability,
+  ) {
+    if (capability != null) {
+      return _resolveCapability(features, capability);
+    }
+    return features.plano.canAccess(requiredPlan);
+  }
+
+  Widget _buildGatedContent({
+    required BuildContext context,
+    required WidgetRef ref,
+    required PlanoFeatures features,
+    required bool hasAccess,
+    required String featureName,
+    required String? capability,
+    required SubscriptionPlan requiredPlan,
+  }) {
+    if (hasAccess) {
       return _PlanSyncBannerShell(
         features: features,
         onRefresh: () => ref.read(planoFeaturesProvider.notifier).refresh(),
@@ -97,7 +116,7 @@ class FeatureGate extends ConsumerWidget {
           'feature': featureName,
           'capability': capability,
           'requiredPlan': requiredPlan.name,
-          'currentPlan': currentPlan.name,
+          'currentPlan': features.plano.name,
           'allowedByStaleCache': false,
         },
       ),

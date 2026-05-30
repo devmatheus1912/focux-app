@@ -31,8 +31,7 @@ import '../../subscription/widgets/plan_usage_banner.dart';
 import '../../subscription/widgets/trial_countdown_banner.dart';
 import '../../subscription/widgets/dashboard_activation_cta.dart';
 import '../../onboarding/providers/onboarding_provider.dart';
-import '../../planos/providers/plano_features_provider.dart';
-import '../../planos/data/planos_repository.dart';
+import '../../planos/utils/effective_plano_features.dart';
 import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
 
@@ -1727,9 +1726,7 @@ class _RoiQuickLinksRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final primary = Theme.of(context).colorScheme.primary;
     final link = BrandPalette.sectionLink(primary, dark: isDark);
-    final features =
-        ref.watch(planoFeaturesProvider).valueOrNull ??
-        PlanoFeatures.optimisticEnterprise;
+    final features = effectivePlanoFeatures(ref);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -1878,9 +1875,7 @@ class _CollapsibleToolsSectionState
     final mute =
         widget.isDark ? EagleTokens.darkInkMute : EagleTokens.inkSoft;
     final link = BrandPalette.sectionLink(primary, dark: widget.isDark);
-    final features =
-        ref.watch(planoFeaturesProvider).valueOrNull ??
-        PlanoFeatures.optimisticEnterprise;
+    final features = effectivePlanoFeatures(ref);
     final shortcuts = DashboardToolShortcut.moreTools;
     final lockedCount = countLockedShortcuts(shortcuts, features);
     final unlockedCount = shortcuts.length - lockedCount;
