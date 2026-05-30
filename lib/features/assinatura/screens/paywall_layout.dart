@@ -99,30 +99,38 @@ class _PaywallFeaturePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final comparing = plan != currentPlan && currentPlan != SubscriptionPlan.FREE;
+    final isCurrent = plan == currentPlan;
+    final comparing = !isCurrent && currentPlan != SubscriptionPlan.FREE;
     final motion = _paywallMotion(context);
     final secondary = _paywallSecondaryText(mute, isDark: isDark);
+    final planLabel = PaywallCatalog.displayPlanName(plan);
 
     return AnimatedSwitcher(
       duration: motion,
       switchInCurve: Curves.easeOutCubic,
       switchOutCurve: Curves.easeInCubic,
       child: Column(
-        key: ValueKey(plan.apiName),
+        key: ValueKey('${plan.apiName}-$isCurrent'),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
         Text(
-          'O que inclui ${PaywallCatalog.displayPlanName(plan)}',
+          isCurrent ? 'Seu plano inclui' : 'O que inclui $planLabel',
           style: TokensStrip.h2(
             color: ink,
             fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
           ).copyWith(fontSize: 17),
         ),
-          if (comparing) ...[
+          if (isCurrent) ...[
             const SizedBox(height: 6),
             Text(
-            'Comparando com o ${PaywallCatalog.displayPlanName(currentPlan)} que você usa hoje.',
-            style: TokensStrip.bodyMuted(color: secondary),
+              'Resumo do ${PaywallCatalog.displayPlanName(currentPlan)} ativo.',
+              style: TokensStrip.bodyMuted(color: secondary),
+            ),
+          ] else if (comparing) ...[
+            const SizedBox(height: 6),
+            Text(
+              'Em relação ao ${PaywallCatalog.displayPlanName(currentPlan)} que você usa hoje.',
+              style: TokensStrip.bodyMuted(color: secondary),
             ),
           ],
           const SizedBox(height: 14),

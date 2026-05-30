@@ -340,7 +340,7 @@ class PaywallRoiStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         border: Border.all(color: line),
         borderRadius: BorderRadius.circular(18),
@@ -666,14 +666,6 @@ class PaywallPlanFeatureSections extends StatelessWidget {
                   tilePadding: EdgeInsets.zero,
                   childrenPadding: const EdgeInsets.only(bottom: 4),
                   title: _PlanSectionTitle(title: section.title, accent: accent, mute: mute),
-                  trailing: Text(
-                    'Abrir',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      color: mute,
-                    ),
-                  ),
                   initiallyExpanded: section.initiallyExpanded,
                   children: section.items
                       .map(
@@ -759,19 +751,30 @@ class _PriceBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fill = isDark
-        ? Colors.white.withValues(alpha: selected ? 0.08 : 0.04)
-        : EagleTokens.paper;
+    final fill = selected
+        ? PaywallCatalog.brand.withValues(alpha: isDark ? 0.14 : 0.09)
+        : (isDark
+            ? Colors.white.withValues(alpha: 0.04)
+            : EagleTokens.paper);
     final borderColor = selected
-        ? PaywallCatalog.brand.withValues(alpha: 0.45)
+        ? PaywallCatalog.brand.withValues(alpha: 0.65)
         : line;
 
     final box = Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: borderColor, width: selected ? 1.4 : 1),
+        border: Border.all(color: borderColor, width: selected ? 2 : 1),
         color: fill,
+        boxShadow: selected
+            ? [
+                BoxShadow(
+                  color: PaywallCatalog.brand.withValues(alpha: 0.12),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -883,9 +886,153 @@ class PaywallSectionHeader extends StatelessWidget {
             child: Text(title, style: TokensStrip.h2(color: ink).copyWith(fontSize: 24)),
           ),
           if (note != null)
-            Text(note!, style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 13)),
+            Flexible(
+              child: Text(
+                note!,
+                textAlign: TextAlign.end,
+                style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 13),
+              ),
+            ),
         ],
       ),
+    );
+  }
+}
+
+/// Bloco recolhível — monta o filho só após a primeira expansão (performance).
+class PaywallCollapsibleBlock extends StatefulWidget {
+  final String title;
+  final String subtitle;
+  final Widget child;
+  final Color ink;
+  final Color mute;
+  final Color line;
+  final bool isDark;
+  final bool initiallyExpanded;
+
+  const PaywallCollapsibleBlock({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.child,
+    required this.ink,
+    required this.mute,
+    required this.line,
+    required this.isDark,
+    this.initiallyExpanded = false,
+  });
+
+  @override
+  State<PaywallCollapsibleBlock> createState() => _PaywallCollapsibleBlockState();
+}
+
+class _PaywallCollapsibleBlockState extends State<PaywallCollapsibleBlock> {
+  late bool _expanded;
+  late bool _mountedChild;
+
+  @override
+  void initState() {
+    super.initState();
+    _expanded = widget.initiallyExpanded;
+    _mountedChild = widget.initiallyExpanded;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final surface = widget.isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final border = widget.isDark ? EagleTokens.darkLine : widget.line;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: border),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          initiallyExpanded: _expanded,
+          onExpansionChanged: (open) {
+            setState(() {
+              _expanded = open;
+              if (open) _mountedChild = true;
+            });
+          },
+          tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+          title: Text(
+            widget.title,
+            style: TokensStrip.h2(color: widget.ink).copyWith(fontSize: 17),
+          ),
+          subtitle: Text(
+            widget.subtitle,
+            style: TokensStrip.bodyMuted(color: widget.mute).copyWith(fontSize: 13),
+          ),
+          trailing: _PaywallExpandTrailing(expanded: _expanded, mute: widget.mute),
+          children: [
+            if (_mountedChild) widget.child,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PaywallExpandTrailing extends StatelessWidget {
+  final bool expanded;
+  final Color mute;
+
+  const _PaywallExpandTrailing({required this.expanded, required this.mute});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          expanded ? 'Recolher' : 'Ver detalhes',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: mute,
+          ),
+        ),
+        const SizedBox(width: 2),
+        AnimatedRotation(
+          turns: expanded ? 0.5 : 0,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          child: Icon(Icons.keyboard_arrow_down_rounded, color: mute, size: 22),
+        ),
+      ],
+    );
+  }
+}
+
+class PaywallRoiBundle extends StatelessWidget {
+  final Color line;
+  final Color ink;
+  final Color mute;
+  final bool isDark;
+
+  const PaywallRoiBundle({
+    super.key,
+    required this.line,
+    required this.ink,
+    required this.mute,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        PaywallRoiStrip(line: line, ink: ink, mute: mute),
+        const SizedBox(height: 12),
+        PaywallRoiRowsList(ink: ink, mute: mute, line: line, isDark: isDark),
+      ],
     );
   }
 }
@@ -938,15 +1085,19 @@ class PaywallFeatureLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final row = feature.row;
     final off = !row.included;
+    final status = row.included ? 'Incluído' : 'Não incluído';
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         children: [
-          Text(
-            row.included ? '✓' : '—',
-            style: TextStyle(
-              fontWeight: FontWeight.w900,
-              color: row.included ? PaywallCatalog.green : mute,
+          Semantics(
+            label: status,
+            child: Text(
+              row.included ? '✓' : '—',
+              style: TextStyle(
+                fontWeight: FontWeight.w900,
+                color: row.included ? PaywallCatalog.green : mute,
+              ),
             ),
           ),
           const SizedBox(width: 8),
@@ -1272,62 +1423,89 @@ class PaywallComparisonTable extends StatelessWidget {
     required this.isDark,
   });
 
-  TextStyle _cellStyle({bool header = false}) => TextStyle(
-    color: header ? ink : mute,
-    fontSize: header ? 11 : 12,
-    fontWeight: header ? FontWeight.w800 : FontWeight.w500,
+  static const double _featureColWidth = 168;
+  static const double _tierColWidth = 64;
+
+  TextStyle _cellStyle({bool header = false, bool feature = false}) => TextStyle(
+    color: header ? ink : (feature ? ink : mute),
+    fontSize: header ? 10 : 12,
+    fontWeight: header || feature ? FontWeight.w700 : FontWeight.w500,
+    height: 1.25,
   );
+
+  Widget _cell(
+    String text, {
+    bool header = false,
+    bool feature = false,
+    double? width,
+    TextAlign align = TextAlign.left,
+  }) {
+    return SizedBox(
+      width: width,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+        child: Text(
+          text,
+          textAlign: align,
+          style: _cellStyle(header: header, feature: feature),
+          maxLines: header ? 2 : 4,
+          softWrap: true,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final headerBg = isDark ? EagleTokens.darkCardHi : EagleTokens.paper;
+    final rowDivider = line.withValues(alpha: 0.5);
+    final tableWidth = _featureColWidth + _tierColWidth * 4;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        border: Border.all(color: line),
-        borderRadius: BorderRadius.circular(16),
-        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
-      ),
-      child: ExpansionTile(
-        tilePadding: const EdgeInsets.symmetric(horizontal: 14),
-        title: Text('Comparar planos', style: TokensStrip.h2(color: ink).copyWith(fontSize: 17)),
-        subtitle: Text('Tabela completa · 4 tiers', style: TokensStrip.bodyMuted(color: mute)),
-        children: [
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
-            child: SizedBox(
-              width: 560,
-              child: DataTable(
-                headingRowHeight: 44,
-                dataRowMinHeight: 48,
-                columnSpacing: 20,
-                headingRowColor: WidgetStateProperty.all(headerBg),
-                columns: [
-                  DataColumn(label: Text('Recurso', style: _cellStyle(header: true))),
-                  DataColumn(label: Text('FREE', style: _cellStyle(header: true))),
-                  DataColumn(label: Text('PREMIUM', style: _cellStyle(header: true))),
-                  DataColumn(label: Text('ENTERPRISE', style: _cellStyle(header: true))),
-                  DataColumn(label: Text('ENT. PRO', style: _cellStyle(header: true))),
-                ],
-                rows: PaywallCatalog.comparisonRows
-                    .map(
-                      (r) => DataRow(
-                        cells: [
-                          DataCell(Text(r.feature, style: _cellStyle())),
-                          DataCell(Text(r.free, style: _cellStyle())),
-                          DataCell(Text(r.premium, style: _cellStyle())),
-                          DataCell(Text(r.enterprise, style: _cellStyle())),
-                          DataCell(Text(r.enterprisePro, style: _cellStyle())),
-                        ],
-                      ),
-                    )
-                    .toList(),
-              ),
+    return Semantics(
+      label: 'Tabela de comparação de planos, 4 tiers, ${PaywallCatalog.comparisonRows.length} recursos',
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.only(bottom: 4),
+        child: SizedBox(
+          width: tableWidth,
+          child: Table(
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            columnWidths: {
+              0: const FixedColumnWidth(_featureColWidth),
+              1: const FixedColumnWidth(_tierColWidth),
+              2: const FixedColumnWidth(_tierColWidth),
+              3: const FixedColumnWidth(_tierColWidth),
+              4: const FixedColumnWidth(_tierColWidth),
+            },
+            border: TableBorder(
+              horizontalInside: BorderSide(color: rowDivider, width: 1),
+              bottom: BorderSide(color: rowDivider),
             ),
+            children: [
+              TableRow(
+                decoration: BoxDecoration(color: headerBg),
+                children: [
+                  _cell('Recurso', header: true, width: _featureColWidth),
+                  _cell('FREE', header: true, width: _tierColWidth, align: TextAlign.center),
+                  _cell('PREM.', header: true, width: _tierColWidth, align: TextAlign.center),
+                  _cell('ENT.', header: true, width: _tierColWidth, align: TextAlign.center),
+                  _cell('PRO', header: true, width: _tierColWidth, align: TextAlign.center),
+                ],
+              ),
+              ...PaywallCatalog.comparisonRows.map(
+                (r) => TableRow(
+                  children: [
+                    _cell(r.feature, feature: true, width: _featureColWidth),
+                    _cell(r.free, width: _tierColWidth, align: TextAlign.center),
+                    _cell(r.premium, width: _tierColWidth, align: TextAlign.center),
+                    _cell(r.enterprise, width: _tierColWidth, align: TextAlign.center),
+                    _cell(r.enterprisePro, width: _tierColWidth, align: TextAlign.center),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

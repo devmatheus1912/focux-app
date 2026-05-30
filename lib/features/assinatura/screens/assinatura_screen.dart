@@ -854,7 +854,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   anchorKey: _paywallPlanosKey,
                   child: PaywallSectionHeader(
                     title: 'Planos',
-                    note: 'Mensal e anual lado a lado',
+                    note: 'Toque no card · Mensal ou Anual',
                     ink: ink,
                     mute: mute,
                   ),
@@ -941,7 +941,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                             style: TokensStrip.body(color: ink),
                           ),
                           subtitle: Text(
-                            'Referência do tier FREE',
+                            'Plano gratuito para referência',
                             style: TokensStrip.bodyMuted(color: mute),
                           ),
                           children: [planCard(freePlano)],
@@ -949,57 +949,13 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                       ),
                   ];
                 }(),
-                PaywallRoiStrip(line: line, ink: ink, mute: mute),
                 if (currentPlan == SubscriptionPlan.PREMIUM &&
                     selPlan == SubscriptionPlan.ENTERPRISE &&
                     !isCurrentPlanSelected) ...[
                   const SizedBox(height: 16),
                   _PaywallUpgradeNudge(primary: primary, ink: ink, isDark: isDark),
                 ],
-                PaywallRoiCalculator(
-                  paidPlans: paid,
-                  ink: ink,
-                  mute: mute,
-                  line: line,
-                  onSuggestPlan: _selectPlan,
-                ),
-                PaywallSectionAnchor(
-                  anchorKey: _paywallFeaturesKey,
-                  child: PaywallSectionHeader(
-                    title: 'Features',
-                    note: '10 maiores diferenciais',
-                    ink: ink,
-                    mute: mute,
-                  ),
-                ),
-                PaywallFeaturesGrid(
-                  ink: ink,
-                  mute: mute,
-                  line: line,
-                  isDark: isDark,
-                ),
-                PaywallComparisonTable(
-                  ink: ink,
-                  mute: mute,
-                  line: line,
-                  isDark: isDark,
-                ),
-                PaywallSectionAnchor(
-                  anchorKey: _paywallRoiKey,
-                  child: PaywallSectionHeader(
-                    title: 'ROI',
-                    note: 'Retorno por plano',
-                    ink: ink,
-                    mute: mute,
-                  ),
-                ),
-                PaywallRoiRowsList(
-                  ink: ink,
-                  mute: mute,
-                  line: line,
-                  isDark: isDark,
-                ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 8),
                 _PaywallFeaturePanel(
                   plano: isCurrentPlanSelected
                       ? sortedPlans.firstWhere(
@@ -1014,6 +970,61 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   line: line,
                   primary: primary,
                   isDark: isDark,
+                ),
+                PaywallRoiCalculator(
+                  paidPlans: paid,
+                  ink: ink,
+                  mute: mute,
+                  line: line,
+                  onSuggestPlan: _selectPlan,
+                ),
+                PaywallSectionAnchor(
+                  anchorKey: _paywallFeaturesKey,
+                  child: PaywallCollapsibleBlock(
+                    title: 'Features',
+                    subtitle: '10 diferenciais · PIX, IA, Command Center…',
+                    ink: ink,
+                    mute: mute,
+                    line: line,
+                    isDark: isDark,
+                    child: PaywallFeaturesGrid(
+                      ink: ink,
+                      mute: mute,
+                      line: line,
+                      isDark: isDark,
+                    ),
+                  ),
+                ),
+                PaywallCollapsibleBlock(
+                  title: 'Comparar planos',
+                  subtitle: 'Tabela completa · 4 tiers',
+                  ink: ink,
+                  mute: mute,
+                  line: line,
+                  isDark: isDark,
+                  child: PaywallComparisonTable(
+                    ink: ink,
+                    mute: mute,
+                    line: line,
+                    isDark: isDark,
+                  ),
+                ),
+                PaywallSectionAnchor(
+                  anchorKey: _paywallRoiKey,
+                  child: PaywallCollapsibleBlock(
+                    title: 'ROI',
+                    subtitle: 'Métricas e retorno por plano',
+                    ink: ink,
+                    mute: mute,
+                    line: line,
+                    isDark: isDark,
+                    child: PaywallRoiBundle(
+                      line: line,
+                      ink: ink,
+                      mute: mute,
+                      isDark: isDark,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 if (_shouldShowEnterpriseTrialCard(
