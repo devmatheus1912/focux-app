@@ -31,7 +31,7 @@ List<({String label, bool included})> _paywallFeatureRowsWithUsage(
       else if (row.included && row.label.contains('interações de IA'))
         (
           label:
-              usage.limiteIaMensal == null || usage.limiteIaMensal <= 0
+              (usage.limiteIaMensal ?? 0) <= 0
                   ? row.label
                   : 'IA: ${usage.iaUsadaMes} de ${usage.limiteIaMensal} este mês · ${usage.iaRestantes} restantes',
           included: true,
