@@ -491,25 +491,42 @@ class PaywallCatalog {
     String? capability,
     String? featureName,
   }) {
-    final key = (capability ?? featureName ?? '').toLowerCase();
-    if (key.isEmpty) return null;
-    for (final t in upgradeTriggers) {
-      final title = t.title.toLowerCase();
-      if (key.contains('pix') || key.contains('financeiro')) {
-        if (title.contains('pix')) return t.message;
-      }
-      if (key.contains('ia') || key.contains('copiloto')) {
-        if (title.contains('ia copiloto')) return t.message;
-      }
-      if (key.contains('white')) {
-        if (title.contains('white-label')) return t.message;
-      }
-      if (key.contains('landing')) {
-        if (title.contains('landing')) return t.message;
-      }
-      if (key.contains('aluno') && title.contains('alunos')) return t.message;
+    final cap = (capability ?? '').trim().toLowerCase();
+    final feat = (featureName ?? '').trim().toLowerCase();
+    if (cap.isEmpty && feat.isEmpty) return null;
+
+    int? index;
+    switch (cap) {
+      case 'financeiro':
+        index = 1;
+      case 'iacopiloto':
+        final quotaExhausted = feat.contains('limite') ||
+            feat.contains('cota') ||
+            feat.contains('esgot') ||
+            feat.contains('110');
+        index = quotaExhausted ? 5 : 2;
+      case 'whitelabel':
+        index = 4;
+      case 'landingcompleta':
+        index = 6;
+      default:
+        if (feat.contains('pix') || feat.contains('financeiro')) {
+          index = 1;
+        } else if (feat.contains('white')) {
+          index = 4;
+        } else if (feat.contains('landing')) {
+          index = 6;
+        } else if (feat.contains('meta') || feat.contains('tráfego') || feat.contains('trafego')) {
+          index = 7;
+        } else if (feat.contains('copiloto') || feat.contains(' ia')) {
+          index = 2;
+        }
     }
-    return null;
+
+    if (index == null || index < 0 || index >= upgradeTriggers.length) {
+      return null;
+    }
+    return upgradeTriggers[index].message;
   }
 
   /// Copy para modais in-app (`UpgradePromptSheet`) — não exibir na vitrine Planos.

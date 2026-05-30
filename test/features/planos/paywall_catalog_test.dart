@@ -68,4 +68,31 @@ void main() {
     expect(entPro.length, 3);
     expect(entPro.any((s) => s.title.contains('Landing')), isTrue);
   });
+
+  test('modalMessageFor maps capabilities to trigger copy', () {
+    expect(
+      PaywallCatalog.modalMessageFor(capability: 'financeiro'),
+      contains('inadimplência'),
+    );
+    expect(
+      PaywallCatalog.modalMessageFor(capability: 'iaCopiloto'),
+      contains('IA está aguardando'),
+    );
+    expect(
+      PaywallCatalog.modalMessageFor(
+        capability: 'iaCopiloto',
+        featureName: 'Cota de IA esgotada',
+      ),
+      contains('limite de IA'),
+    );
+    expect(
+      PaywallCatalog.modalMessageFor(capability: 'whiteLabel'),
+      contains('SEU logo'),
+    );
+    expect(
+      PaywallCatalog.modalMessageFor(capability: 'landingCompleta'),
+      contains('landing'),
+    );
+    expect(PaywallCatalog.modalMessageFor(capability: 'agenda'), isNull);
+  });
 }
