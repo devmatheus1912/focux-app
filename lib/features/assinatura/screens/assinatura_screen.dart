@@ -104,6 +104,11 @@ class AssinaturaScreen extends ConsumerStatefulWidget {
 class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   final Set<String> _handledPurchases = <String>{};
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
+  final ScrollController _paywallScrollController = ScrollController();
+  final GlobalKey _paywallPlanosKey = GlobalKey();
+  final GlobalKey _paywallFeaturesKey = GlobalKey();
+  final GlobalKey _paywallRoiKey = GlobalKey();
+  final GlobalKey _paywallGatilhosKey = GlobalKey();
 
   String? _selectedPlanName;
   bool _loadingCheckout = false;
@@ -241,9 +246,31 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     );
   }
 
+  void _scrollToPaywallSection(PaywallScrollTarget target) {
+    final key = switch (target) {
+      PaywallScrollTarget.planos => _paywallPlanosKey,
+      PaywallScrollTarget.features => _paywallFeaturesKey,
+      PaywallScrollTarget.roi => _paywallRoiKey,
+      PaywallScrollTarget.gatilhos => _paywallGatilhosKey,
+    };
+    final ctx = key.currentContext;
+    if (ctx == null) return;
+    HapticFeedback.selectionClick();
+    final motion = TokensStrip.prefersReducedMotion(context)
+        ? Duration.zero
+        : const Duration(milliseconds: 420);
+    Scrollable.ensureVisible(
+      ctx,
+      duration: motion,
+      curve: Curves.easeOutCubic,
+      alignment: 0.06,
+    );
+  }
+
   @override
   void dispose() {
     _purchaseSubscription?.cancel();
+    _paywallScrollController.dispose();
     super.dispose();
   }
 
@@ -801,6 +828,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
               );
 
           return ListView(
+              controller: _paywallScrollController,
               padding: const EdgeInsets.fromLTRB(
                 TokensStrip.s5,
                 4,
@@ -809,6 +837,11 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
               ),
               children: [
                 PaywallHero(ink: ink, mute: mute, primary: primary, isDark: isDark),
+                PaywallQuickNav(
+                  primary: primary,
+                  ink: isDark ? EagleTokens.darkInk : const Color(0xFF081012),
+                  onSectionTap: _scrollToPaywallSection,
+                ),
                 if (usage != null)
                   PaywallContextBanner(
                     usage: usage,
@@ -853,11 +886,14 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   ),
                   const SizedBox(height: 20),
                 ],
-                PaywallSectionHeader(
-                  title: 'Planos',
-                  note: 'Mensal e anual lado a lado',
-                  ink: ink,
-                  mute: mute,
+                PaywallSectionAnchor(
+                  anchorKey: _paywallPlanosKey,
+                  child: PaywallSectionHeader(
+                    title: 'Planos',
+                    note: 'Mensal e anual lado a lado',
+                    ink: ink,
+                    mute: mute,
+                  ),
                 ),
                 ...() {
                   Plano? freePlano;
@@ -947,11 +983,14 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   line: line,
                   onSuggestPlan: _selectPlan,
                 ),
-                PaywallSectionHeader(
-                  title: 'Features',
-                  note: '10 maiores diferenciais',
-                  ink: ink,
-                  mute: mute,
+                PaywallSectionAnchor(
+                  anchorKey: _paywallFeaturesKey,
+                  child: PaywallSectionHeader(
+                    title: 'Features',
+                    note: '10 maiores diferenciais',
+                    ink: ink,
+                    mute: mute,
+                  ),
                 ),
                 PaywallFeaturesGrid(
                   ink: ink,
@@ -965,11 +1004,14 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   line: line,
                   isDark: isDark,
                 ),
-                PaywallSectionHeader(
-                  title: 'ROI',
-                  note: 'Retorno por plano',
-                  ink: ink,
-                  mute: mute,
+                PaywallSectionAnchor(
+                  anchorKey: _paywallRoiKey,
+                  child: PaywallSectionHeader(
+                    title: 'ROI',
+                    note: 'Retorno por plano',
+                    ink: ink,
+                    mute: mute,
+                  ),
                 ),
                 PaywallRoiRowsList(
                   ink: ink,
@@ -993,11 +1035,14 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   primary: primary,
                   isDark: isDark,
                 ),
-                PaywallSectionHeader(
-                  title: 'Gatilhos',
-                  note: 'Toque para abrir',
-                  ink: ink,
-                  mute: mute,
+                PaywallSectionAnchor(
+                  anchorKey: _paywallGatilhosKey,
+                  child: PaywallSectionHeader(
+                    title: 'Gatilhos',
+                    note: 'Toque para abrir',
+                    ink: ink,
+                    mute: mute,
+                  ),
                 ),
                 PaywallGatilhosList(
                   ink: ink,

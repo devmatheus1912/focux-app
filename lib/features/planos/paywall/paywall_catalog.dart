@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../assinatura/data/assinatura_repository.dart';
 import '../../subscription/models/subscription_plan.dart';
+import 'paywall_plan_sections.dart';
+
+export 'paywall_plan_sections.dart';
 
 /// Catálogo estático de educação e vitrine — preços vêm do backend/loja.
 class PaywallCatalog {
@@ -71,6 +74,12 @@ class PaywallCatalog {
     (value: 'R\$ 50/mês', label: 'Substitui R\$ 1–3k agência', color: purple),
     (value: '40%', label: 'Menos inadimplência c/ PIX', color: green),
   ];
+
+  static List<PaywallPlanFeatureSection> featureSectionsForPlan(
+    Plano plano,
+    SubscriptionPlan plan,
+  ) =>
+      PaywallPlanSections.forPlan(plano, plan);
 
   static List<PaywallFeatureEducation> featuresForPlan(
     Plano plano,
