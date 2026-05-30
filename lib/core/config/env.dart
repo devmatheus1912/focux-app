@@ -17,6 +17,22 @@ class Env {
     defaultValue: 'https://focux-backend-production.up.railway.app',
   );
 
+  /// SHA-256 pins opcionais para IAP/pagamentos (`sha256/<base64>` ou só base64).
+  /// Ex.: `--dart-define=API_CERT_PINS=sha256/abc...,sha256/def...`
+  static const String _apiCertPinsRaw = String.fromEnvironment(
+    'API_CERT_PINS',
+    defaultValue: '',
+  );
+
+  static List<String> get apiCertPins {
+    if (_apiCertPinsRaw.isEmpty) return const [];
+    return _apiCertPinsRaw
+        .split(',')
+        .map((p) => p.trim())
+        .where((p) => p.isNotEmpty)
+        .toList();
+  }
+
   /// Public URL used for shareable landing links.
   ///
   /// Today the canonical `focux.app` domain points to another web project, so

@@ -29,6 +29,7 @@ import '../../../features/subscription/subscription_products.dart';
 import '../data/assinatura_repository.dart';
 import '../providers/assinatura_provider.dart';
 import '../../planos/paywall/paywall_components.dart';
+import '../../planos/paywall/paywall_vitrine.dart';
 import '../../subscription/plan_entitlements.dart';
 import '../services/subscription_biometric_gate.dart';
 import '../services/subscription_device_guard.dart';
@@ -474,9 +475,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     if (kIsWeb) {
       setState(() => _loadingCheckout = true);
       try {
-        final checkoutUrl = await AssinaturaRepository(
-          ref.read(apiClientProvider),
-        ).criarPreferencia(backendPlan.id);
+        final checkoutUrl = await ref
+            .read(assinaturaRepositoryProvider)
+            .criarPreferencia(backendPlan.id);
         final uri = Uri.parse(checkoutUrl);
         await launchUrl(uri, webOnlyWindowName: '_self');
       } catch (error) {
@@ -818,7 +819,15 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                       if (target != null) _selectPlan(target);
                     },
                   ),
-                PaywallSocialProofStrip(line: line, ink: ink, mute: mute),
+                PaywallSocialProofStrip(
+                  line: line,
+                  ink: ink,
+                  mute: mute,
+                  socialProof:
+                      (ref.watch(paywallVitrineProvider).valueOrNull ??
+                              PaywallVitrineSnapshot.fromCatalog())
+                          .socialProof,
+                ),
                 if (!kIsWeb && subscriptionUsesNativeStore) ...[
                   _PaywallBillingSegment(
                     period: _billingPeriod,

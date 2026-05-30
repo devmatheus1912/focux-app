@@ -179,13 +179,15 @@ class PaywallSocialProofStrip extends StatelessWidget {
   final Color line;
   final Color ink;
   final Color mute;
+  final List<({String value, String label})> socialProof;
 
   const PaywallSocialProofStrip({
     super.key,
     required this.line,
     required this.ink,
     required this.mute,
-  });
+    List<({String value, String label})>? socialProof,
+  }) : socialProof = socialProof ?? PaywallCatalog.socialProof;
 
   @override
   Widget build(BuildContext context) {
@@ -198,7 +200,7 @@ class PaywallSocialProofStrip extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: Row(
         children: [
-          for (var i = 0; i < PaywallCatalog.socialProof.length; i++) ...[
+          for (var i = 0; i < socialProof.length; i++) ...[
             if (i > 0) VerticalDivider(width: 1, color: line),
             Expanded(
               child: Padding(
@@ -206,7 +208,7 @@ class PaywallSocialProofStrip extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      PaywallCatalog.socialProof[i].value,
+                      socialProof[i].value,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w900,
@@ -216,7 +218,7 @@ class PaywallSocialProofStrip extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      PaywallCatalog.socialProof[i].label,
+                      socialProof[i].label,
                       textAlign: TextAlign.center,
                       style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 11),
                     ),

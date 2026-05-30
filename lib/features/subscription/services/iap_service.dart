@@ -4,8 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
-import '../../../core/api/api_client.dart';
-import '../../auth/providers/auth_provider.dart';
+import '../../../core/api/payment_api_client.dart';
 
 /// Bridge entre `in_app_purchase` e o backend `/api/iap/verify`.
 ///
@@ -17,9 +16,9 @@ import '../../auth/providers/auth_provider.dart';
 /// O servidor é a fonte de verdade do `Plano`; o app só reflete o estado
 /// que vier do `/perfil` após o verify.
 class IapService {
-  IapService(this._api);
+  IapService(this._payment);
 
-  final ApiClient _api;
+  final PaymentApiClient _payment;
   final InAppPurchase _iap = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _sub;
 
@@ -224,7 +223,7 @@ class IapService {
       'purchaseToken':
           isAndroid ? details.verificationData.serverVerificationData : null,
     };
-    final res = await _api.dio.post('/api/iap/verify', data: body);
+    final res = await _payment.dio.post('/api/iap/verify', data: body);
     final data = res.data;
     if (data is Map<String, dynamic>) return data;
     return <String, dynamic>{'status': 'PROCESSADO'};
@@ -246,5 +245,5 @@ class IapRestoreResult {
 }
 
 final iapServiceProvider = Provider<IapService>((ref) {
-  return IapService(ref.read(apiClientProvider));
+  return IapService(ref.read(paymentApiClientProvider));
 });
