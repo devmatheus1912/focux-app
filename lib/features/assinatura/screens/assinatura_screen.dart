@@ -884,6 +884,14 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
             currentBackend,
             currentPlan,
           );
+          SubscriptionPlan? nextTierPlan;
+          for (final p in paid) {
+            final tier = subscriptionPlanFromApi(p.nome);
+            if (tier.level > currentPlan.level &&
+                (nextTierPlan == null || tier.level > nextTierPlan.level)) {
+              nextTierPlan = tier;
+            }
+          }
           if (selPlan == SubscriptionPlan.ENTERPRISE &&
               currentPlan != SubscriptionPlan.ENTERPRISE &&
               !_enterprisePreviewRequested) {
@@ -999,6 +1007,18 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                         : paywallAnnualMonthlyEquiv(plano);
                     final storeOk =
                         kIsWeb || !subscriptionUsesNativeStore || _storeAvailable;
+                    final isUpgradeTier =
+                        !lockedDowngrade &&
+                        plan.level > currentPlan.level &&
+                        !isAcquisition;
+                    final upsellHighlights = isUpgradeTier
+                        ? _paywallUpgradeGains(
+                            currentBackend,
+                            currentPlan,
+                            plano,
+                            plan,
+                          ).map((r) => r.label).take(3).toList()
+                        : const <String>[];
                     return PaywallRichPlanCard(
                       plano: plano,
                       plan: plan,
@@ -1012,6 +1032,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                       collapseFeatureDetails:
                           plan == currentPlan &&
                           currentPlan != SubscriptionPlan.FREE,
+                      compactUpsell: isUpgradeTier && upsellHighlights.isNotEmpty,
+                      upsellHighlights: upsellHighlights,
                       billingDisabled:
                           !storeOk &&
                           plan.level > currentPlan.level &&
@@ -1132,13 +1154,24 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   primary: primary,
                   isDark: isDark,
                 ),
-                PaywallWebDetailsLink(
-                  ink: ink,
-                  mute: mute,
-                  primary: primary,
-                  line: line,
-                  isDark: isDark,
-                ),
+                if (isAcquisition)
+                  PaywallWebDetailsLink(
+                    ink: ink,
+                    mute: mute,
+                    primary: primary,
+                    line: line,
+                    isDark: isDark,
+                  )
+                else if (hasUpgradeAbove && nextTierPlan != null)
+                  PaywallSubscriberQuickCompare(
+                    currentPlan: currentPlan,
+                    targetPlan: nextTierPlan,
+                    ink: ink,
+                    mute: mute,
+                    line: line,
+                    primary: primary,
+                    isDark: isDark,
+                  ),
                 const SizedBox(height: 12),
                 if (_shouldShowEnterpriseTrialCard(
                   selPlan,
@@ -1177,7 +1210,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 if (!_storeAvailable &&
                     !kIsWeb &&
                     subscriptionUsesNativeStore &&
-                    !isAcquisition) ...[
+                    !isAcquisition &&
+                    !hasUpgradeAbove) ...[
                   const SizedBox(height: 12),
                   _PaywallInlineNote(
                     icon: Icons.store_outlined,

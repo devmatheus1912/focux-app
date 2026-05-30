@@ -181,8 +181,8 @@ class _PaywallFeaturePanel extends StatelessWidget {
     final isDowngrade = plan.level < currentPlan.level;
     final motion = _paywallMotion(context);
     final secondary = _paywallSecondaryText(mute, isDark: isDark);
-    final planLabel = PaywallCatalog.displayPlanName(plan);
-    final currentLabel = PaywallCatalog.displayPlanName(currentPlan);
+    final planLabel = PaywallCatalog.displayNameFor(plano, plan);
+    final currentLabel = PaywallCatalog.displayNameFor(currentPlano, currentPlan);
     final checkColor =
         isDowngrade ? PaywallCatalog.warning : primary;
 
@@ -203,7 +203,8 @@ class _PaywallFeaturePanel extends StatelessWidget {
     };
 
     final subtitle = switch (true) {
-      true when isCurrent => 'Resumo do $currentLabel ativo.',
+      true when isCurrent =>
+        'Resumo do ${usage?.displayName?.trim().isNotEmpty == true ? usage!.displayName!.trim() : currentLabel} ativo.',
       true when isUpgrade => 'Em relação ao $currentLabel que você usa hoje.',
       true when isDowngrade =>
         'Downgrade para $planLabel só pela ${subscriptionChannelLabel()}.',

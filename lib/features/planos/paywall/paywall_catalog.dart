@@ -668,6 +668,13 @@ class PaywallComparisonRow {
     required this.enterprise,
     this.enterprisePro = '—',
   });
+
+  String valueFor(SubscriptionPlan plan) => switch (plan) {
+    SubscriptionPlan.FREE => free,
+    SubscriptionPlan.PREMIUM => premium,
+    SubscriptionPlan.ENTERPRISE => enterprise,
+    SubscriptionPlan.ENTERPRISE_PRO => enterprisePro,
+  };
 }
 
 class PaywallRoiRow {

@@ -200,10 +200,12 @@ class PlanoFeatures {
   final int iaUsadaMes;
   final int? limiteMigracaoFotoMensal;
   final int migracaoFotosUsadasMes;
+  final String? displayName;
 
   const PlanoFeatures({
     required this.plano,
     this.planoNomeOriginal,
+    this.displayName,
     this.limiteAlunos,
     this.limiteIaMensal,
     this.validoAte,
@@ -254,6 +256,7 @@ class PlanoFeatures {
     return PlanoFeatures(
       plano: subscriptionPlanFromApi(j['plano'] as String?),
       planoNomeOriginal: j['planoNomeOriginal'] as String?,
+      displayName: j['displayName'] as String?,
       limiteAlunos: (j['limiteAlunos'] as num?)?.toInt(),
       limiteIaMensal: (j['limiteIaMensal'] as num?)?.toInt(),
       validoAte: _parseDateTime(j['validoAte']),

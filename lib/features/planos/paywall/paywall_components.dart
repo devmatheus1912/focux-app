@@ -259,6 +259,106 @@ class PaywallWebDetailsLink extends StatelessWidget {
   }
 }
 
+/// Comparativo enxuto no app (assinante) — sem depender da página web.
+class PaywallSubscriberQuickCompare extends StatelessWidget {
+  final SubscriptionPlan currentPlan;
+  final SubscriptionPlan? targetPlan;
+  final Color ink;
+  final Color mute;
+  final Color line;
+  final Color primary;
+  final bool isDark;
+
+  const PaywallSubscriberQuickCompare({
+    super.key,
+    required this.currentPlan,
+    this.targetPlan,
+    required this.ink,
+    required this.mute,
+    required this.line,
+    required this.primary,
+    required this.isDark,
+  });
+
+  List<PaywallComparisonRow> get _rows {
+    if (targetPlan == null) return const [];
+    final rows = PaywallCatalog.comparisonRows.where((row) {
+      final current = row.valueFor(currentPlan);
+      final next = row.valueFor(targetPlan!);
+      return current != next && next != '—';
+    });
+    return rows.take(5).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = _rows;
+    if (rows.isEmpty) return const SizedBox.shrink();
+
+    final targetLabel = PaywallCatalog.displayPlanName(targetPlan!);
+    final chrome = ShellChrome.of(context);
+
+    return PaywallCollapsibleBlock(
+      title: 'Comparativo rápido',
+      subtitle: '$targetLabel vs ${PaywallCatalog.displayPlanName(currentPlan)}',
+      ink: ink,
+      mute: mute,
+      line: line,
+      isDark: isDark,
+      initiallyExpanded: false,
+      child: Column(
+        children: [
+          for (final row in rows)
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: chrome.panel(radius: 12, elevationLevel: 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      row.feature,
+                      style: TokensStrip.body(color: ink).copyWith(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      row.valueFor(currentPlan),
+                      textAlign: TextAlign.center,
+                      style: TokensStrip.bodyMuted(color: mute).copyWith(
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      row.valueFor(targetPlan!),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: PaywallCatalog.accentForPlan(targetPlan!),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 4),
+          Text(
+            'Tabela completa e ROI no site quando disponível.',
+            style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class PaywallQuickNav extends StatelessWidget {
   final Color primary;
   final Color ink;
@@ -592,6 +692,8 @@ class PaywallRichPlanCard extends StatelessWidget {
   final bool isLockedDowngrade;
   final bool dimUnselected;
   final bool collapseFeatureDetails;
+  final bool compactUpsell;
+  final List<String> upsellHighlights;
   final bool billingDisabled;
   final String monthlyPrice;
   final String annualPrice;
@@ -613,6 +715,8 @@ class PaywallRichPlanCard extends StatelessWidget {
     this.isLockedDowngrade = false,
     this.dimUnselected = false,
     this.collapseFeatureDetails = false,
+    this.compactUpsell = false,
+    this.upsellHighlights = const [],
     this.billingDisabled = false,
     required this.monthlyPrice,
     required this.annualPrice,
@@ -639,6 +743,7 @@ class PaywallRichPlanCard extends StatelessWidget {
         : const Duration(milliseconds: 220);
     final hideUpgradePricing =
         billingDisabled && !isCurrent && plan != SubscriptionPlan.FREE;
+    final showCompactBody = compactUpsell && !isCurrent;
 
     return Semantics(
       selected: isSelected,
@@ -650,7 +755,7 @@ class PaywallRichPlanCard extends StatelessWidget {
         opacity: isLockedDowngrade
             ? 0.72
             : dimUnselected
-            ? 0.58
+            ? (compactUpsell ? 0.92 : 0.58)
             : 1,
         child: AnimatedContainer(
         duration: motion,
@@ -802,7 +907,8 @@ class PaywallRichPlanCard extends StatelessWidget {
                             const SizedBox(height: 10),
                             _RoiMoneyTag(text: roiTag),
                           ],
-                          if (!(collapseFeatureDetails && isCurrent)) ...[
+                          if (!(collapseFeatureDetails && isCurrent) &&
+                              !showCompactBody) ...[
                             const SizedBox(height: 8),
                             Text(
                               PaywallCatalog.descriptionForPlan(plan),
@@ -811,43 +917,81 @@ class PaywallRichPlanCard extends StatelessWidget {
                               ),
                             ),
                           ],
+                          if (showCompactBody && upsellHighlights.isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            for (final line in upsellHighlights)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 6),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(
+                                      Icons.add_circle_outline,
+                                      size: 16,
+                                      color: accent,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        line,
+                                        style: TokensStrip.body(color: ink).copyWith(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Detalhes completos no painel abaixo.',
+                              style: TokensStrip.bodyMuted(color: mute).copyWith(
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
                   ),
                 ),
-                const Divider(height: 1),
-                if (collapseFeatureDetails && isCurrent)
-                  Theme(
-                    data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                    child: ExpansionTile(
-                      tilePadding: const EdgeInsets.symmetric(horizontal: 20),
-                      childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                      title: Text(
-                        'Ver todos os recursos',
-                        style: TokensStrip.body(color: ink).copyWith(
-                          fontWeight: FontWeight.w700,
+                if (showCompactBody)
+                  const SizedBox(height: 12)
+                else ...[
+                  const Divider(height: 1),
+                  if (collapseFeatureDetails && isCurrent)
+                    Theme(
+                      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                      child: ExpansionTile(
+                        tilePadding: const EdgeInsets.symmetric(horizontal: 20),
+                        childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                        title: Text(
+                          'Ver todos os recursos',
+                          style: TokensStrip.body(color: ink).copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
+                        children: [
+                          PaywallPlanFeatureSections(
+                            sections: sections,
+                            accent: accent,
+                            ink: ink,
+                            mute: mute,
+                            onFeatureHelp: onFeatureHelp,
+                          ),
+                        ],
                       ),
-                      children: [
-                        PaywallPlanFeatureSections(
-                          sections: sections,
-                          accent: accent,
-                          ink: ink,
-                          mute: mute,
-                          onFeatureHelp: onFeatureHelp,
-                        ),
-                      ],
+                    )
+                  else
+                    PaywallPlanFeatureSections(
+                      sections: sections,
+                      accent: accent,
+                      ink: ink,
+                      mute: mute,
+                      onFeatureHelp: onFeatureHelp,
                     ),
-                  )
-                else
-                  PaywallPlanFeatureSections(
-                    sections: sections,
-                    accent: accent,
-                    ink: ink,
-                    mute: mute,
-                    onFeatureHelp: onFeatureHelp,
-                  ),
+                ],
               ],
             ),
           ],
