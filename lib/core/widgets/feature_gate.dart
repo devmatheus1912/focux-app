@@ -5,6 +5,7 @@ import '../../features/subscription/models/subscription_plan.dart';
 import '../../features/planos/providers/plano_features_provider.dart';
 import '../../features/planos/data/planos_repository.dart';
 import '../../features/subscription/plan_entitlements.dart';
+import '../../features/subscription/widgets/upgrade_prompt_sheet.dart';
 import '../analytics/analytics_service.dart';
 import '../router/role_home.dart';
 import '../router/safe_navigation.dart';
@@ -117,6 +118,8 @@ class FeatureGate extends ConsumerWidget {
         return f.iaCopiloto;
       case 'migracaoFoto':
         return f.migracaoFoto;
+      case 'landingCompleta':
+        return f.landingCompleta;
       default:
         return false;
     }
@@ -203,7 +206,7 @@ class _PlanSyncBannerShell extends StatelessWidget {
   }
 }
 
-class _LockedScreen extends ConsumerWidget {
+class _LockedScreen extends ConsumerStatefulWidget {
   final String featureName;
   final String? capability;
   final SubscriptionPlan requiredPlan;
@@ -215,11 +218,30 @@ class _LockedScreen extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_LockedScreen> createState() => _LockedScreenState();
+}
+
+class _LockedScreenState extends ConsumerState<_LockedScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      UpgradePromptSheet.showIfAllowed(
+        context: context,
+        featureName: widget.featureName,
+        capability: widget.capability,
+        requiredPlan: widget.requiredPlan,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final offer = PlanEntitlements.lockedOffer(
-      featureName: featureName,
-      capability: capability,
-      requiredPlan: requiredPlan,
+      featureName: widget.featureName,
+      capability: widget.capability,
+      requiredPlan: widget.requiredPlan,
     );
     final primary = Theme.of(context).colorScheme.primary;
 
@@ -273,8 +295,7 @@ class _LockedScreen extends ConsumerWidget {
                     offer.targetPlan == null
                         ? null
                         : () => context.push(
-                          '/assinatura',
-                          extra: offer.targetPlan!.apiName,
+                          '/assinatura?plano=${offer.targetPlan!.apiName}&source=feature_gate',
                         ),
               ),
               const SizedBox(height: 12),

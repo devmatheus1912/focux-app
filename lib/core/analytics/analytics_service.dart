@@ -77,6 +77,12 @@ class ProductEvents {
   static const paywallOpened = 'paywall_opened';
   static const paywallPlanSelected = 'paywall_plan_selected';
   static const paywallCtaTapped = 'paywall_cta_tapped';
+  static const featureEducationOpened = 'feature_education_opened';
+  static const roiCalculatorUsed = 'roi_calculator_used';
+  static const billingToggleChanged = 'billing_toggle_changed';
+  static const checkoutStarted = 'checkout_started';
+  static const checkoutCompleted = 'checkout_completed';
+  static const checkoutFailed = 'checkout_failed';
   static const subscriptionStarted = 'subscription_started';
   static const subscriptionCancelled = 'subscription_cancelled';
   static const trialStarted = 'trial_started';

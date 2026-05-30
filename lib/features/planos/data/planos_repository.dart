@@ -189,6 +189,7 @@ class PlanoFeatures {
   final bool whiteLabel;
   final bool iaCopiloto;
   final bool migracaoFoto;
+  final bool landingCompleta;
   final int alunosAtivos;
   final int iaUsadaMes;
   final int? limiteMigracaoFotoMensal;
@@ -209,6 +210,7 @@ class PlanoFeatures {
     required this.whiteLabel,
     required this.iaCopiloto,
     required this.migracaoFoto,
+    this.landingCompleta = false,
     this.alunosAtivos = 0,
     this.iaUsadaMes = 0,
     this.limiteMigracaoFotoMensal,
@@ -258,6 +260,7 @@ class PlanoFeatures {
       whiteLabel: f['whiteLabel'] as bool? ?? false,
       iaCopiloto: f['iaCopiloto'] as bool? ?? false,
       migracaoFoto: f['migracaoFoto'] as bool? ?? false,
+      landingCompleta: f['landingCompleta'] as bool? ?? false,
       alunosAtivos: (j['alunosAtivos'] as num?)?.toInt() ?? 0,
       iaUsadaMes: (j['iaUsadaMes'] as num?)?.toInt() ?? 0,
       limiteMigracaoFotoMensal: (j['limiteMigracaoFotoMensal'] as num?)?.toInt(),
@@ -284,6 +287,7 @@ class PlanoFeatures {
       'whiteLabel': whiteLabel,
       'iaCopiloto': iaCopiloto,
       'migracaoFoto': migracaoFoto,
+      'landingCompleta': landingCompleta,
     },
   };
 
@@ -307,6 +311,7 @@ class PlanoFeatures {
       whiteLabel: whiteLabel,
       iaCopiloto: iaCopiloto,
       migracaoFoto: migracaoFoto,
+      landingCompleta: landingCompleta,
       alunosAtivos: alunosAtivos,
       iaUsadaMes: iaUsadaMes,
       limiteMigracaoFotoMensal: limiteMigracaoFotoMensal,

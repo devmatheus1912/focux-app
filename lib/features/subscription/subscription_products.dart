@@ -10,6 +10,8 @@ class SubscriptionProducts {
   static const String premiumYearly = 'focux_premium_yearly';
   static const String enterpriseMonthly = 'focux_enterprise_monthly';
   static const String enterpriseYearly = 'focux_enterprise_yearly';
+  static const String enterpriseProMonthly = 'focux_enterprise_pro_monthly';
+  static const String enterpriseProYearly = 'focux_enterprise_pro_yearly';
 
   /// Desconto de referência no anual vs 12× mensal (exibido na vitrine).
   static const double annualDiscountRate = 0.20;
@@ -19,6 +21,8 @@ class SubscriptionProducts {
     premiumYearly,
     enterpriseMonthly,
     enterpriseYearly,
+    enterpriseProMonthly,
+    enterpriseProYearly,
   };
 
   static String productIdFor(
@@ -34,16 +38,19 @@ class SubscriptionProducts {
         period == SubscriptionBillingPeriod.yearly
             ? enterpriseYearly
             : enterpriseMonthly,
+      SubscriptionPlan.ENTERPRISE_PRO =>
+        period == SubscriptionBillingPeriod.yearly
+            ? enterpriseProYearly
+            : enterpriseProMonthly,
       SubscriptionPlan.FREE => '',
     };
   }
 
   static SubscriptionPlan? planForProductId(String productId) {
     final id = productId.toLowerCase();
+    if (id.contains('enterprise_pro')) return SubscriptionPlan.ENTERPRISE_PRO;
     if (id.contains('enterprise')) return SubscriptionPlan.ENTERPRISE;
-    if (id.contains('premium') || id.contains('pro')) {
-      return SubscriptionPlan.PREMIUM;
-    }
+    if (id.contains('premium')) return SubscriptionPlan.PREMIUM;
     return null;
   }
 

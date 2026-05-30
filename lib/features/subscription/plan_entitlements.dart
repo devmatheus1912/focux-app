@@ -11,6 +11,8 @@ class PlanEntitlements {
     SubscriptionPlan fallback = SubscriptionPlan.PREMIUM,
   }) {
     switch (capability) {
+      case 'landingCompleta':
+        return SubscriptionPlan.ENTERPRISE_PRO;
       case 'whiteLabel':
         return SubscriptionPlan.ENTERPRISE;
       case 'financeiro':
@@ -33,11 +35,17 @@ class PlanEntitlements {
       capability: capability,
       fallback: requiredPlan ?? SubscriptionPlan.PREMIUM,
     );
-    final planLabel = plan == SubscriptionPlan.ENTERPRISE ? 'Enterprise' : 'Premium';
+    final planLabel = switch (plan) {
+      SubscriptionPlan.ENTERPRISE_PRO => 'Enterprise Pro',
+      SubscriptionPlan.ENTERPRISE => 'Enterprise',
+      _ => 'Premium',
+    };
 
     final headline = switch (capability) {
       'financeiro' => 'Cobre seus alunos com controle total',
       'iaCopiloto' => 'IA Copiloto para escalar sem perder qualidade',
+      'landingCompleta' =>
+        'Landing page completa — vende 24h com depoimentos, FAQ e leads',
       'whiteLabel' => 'Sua marca em cada touchpoint',
       'relatorios' => 'Relatórios que mostram onde está o dinheiro',
       'migracaoFoto' => 'Importe alunos por foto ou print',
@@ -56,6 +64,9 @@ class PlanEntitlements {
       'migracaoFoto' =>
         'Importar alunos por foto/print (OCR gratuito) está no $planLabel '
             '— ${MigracaoFotoLimits.premium}/mês. Enterprise: ${MigracaoFotoLimits.enterprise}/mês.',
+      'landingCompleta' =>
+        'Depoimentos ilimitados, galeria, FAQ e formulário Meta exigem Enterprise Pro — '
+            'poupa R\$ 1k–3k de agência por +R\$ 50/mês vs Enterprise.',
       'whiteLabel' =>
         'Cores, logo e identidade visual premium exigem Enterprise — '
             'sua marca em cada tela do app, não um visual genérico.',
@@ -69,10 +80,11 @@ class PlanEntitlements {
     return LockedOffer(
       headline: headline,
       body: body,
-      ctaLabel:
-          plan == SubscriptionPlan.ENTERPRISE
-              ? 'Ver plano Enterprise'
-              : 'Assinar Premium',
+      ctaLabel: switch (plan) {
+        SubscriptionPlan.ENTERPRISE_PRO => 'Ver plano Enterprise Pro',
+        SubscriptionPlan.ENTERPRISE => 'Ver plano Enterprise',
+        _ => 'Assinar Premium',
+      },
       targetPlan: plan,
     );
   }
@@ -144,9 +156,11 @@ class PlanEntitlements {
 
   static SubscriptionPlan? softGateTargetPlan(PlanoUsageSnapshot usage) {
     if (usage.alunosNearLimit) {
-      return usage.plano == SubscriptionPlan.FREE
-          ? SubscriptionPlan.PREMIUM
-          : SubscriptionPlan.ENTERPRISE;
+      return switch (usage.plano) {
+        SubscriptionPlan.FREE => SubscriptionPlan.PREMIUM,
+        SubscriptionPlan.PREMIUM => SubscriptionPlan.ENTERPRISE,
+        _ => null,
+      };
     }
     if (usage.iaNearLimit || usage.iaAtLimit) {
       return usage.plano == SubscriptionPlan.PREMIUM

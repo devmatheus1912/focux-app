@@ -11,6 +11,7 @@ class Plano {
   final bool temFinanceiro;
   final bool temAgenda;
   final bool temRelatorios;
+  final bool temLandingCompleta;
 
   Plano({
     required this.id,
@@ -22,6 +23,7 @@ class Plano {
     required this.temFinanceiro,
     required this.temAgenda,
     required this.temRelatorios,
+    this.temLandingCompleta = false,
   });
 
   double annualPriceOrComputed() =>
@@ -37,6 +39,7 @@ class Plano {
     temFinanceiro: json['temFinanceiro'] as bool,
     temAgenda: json['temAgenda'] as bool,
     temRelatorios: json['temRelatorios'] as bool,
+    temLandingCompleta: json['temLandingCompleta'] as bool? ?? false,
   );
 }
 

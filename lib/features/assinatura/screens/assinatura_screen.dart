@@ -28,7 +28,12 @@ import '../../../features/subscription/subscription_products.dart';
 
 import '../data/assinatura_repository.dart';
 import '../providers/assinatura_provider.dart';
-import '../../../core/widgets/fx_loading.dart';
+import '../../planos/paywall/paywall_components.dart';
+import '../../subscription/plan_entitlements.dart';
+import '../services/subscription_biometric_gate.dart';
+import '../services/subscription_device_guard.dart';
+import 'assinatura_review_screen.dart';
+import 'assinatura_success_screen.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
 
@@ -80,8 +85,15 @@ bool _shouldShowEnterpriseTrialCard(
 
 class AssinaturaScreen extends ConsumerStatefulWidget {
   final String? initialPlan;
+  final String? source;
+  final String? blockedFeature;
 
-  const AssinaturaScreen({super.key, this.initialPlan});
+  const AssinaturaScreen({
+    super.key,
+    this.initialPlan,
+    this.source,
+    this.blockedFeature,
+  });
 
   @override
   ConsumerState<AssinaturaScreen> createState() => _AssinaturaScreenState();
@@ -104,16 +116,13 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   TrialStatus? _trialStatus;
   bool _loadingTrial = false;
   bool _restoringPurchases = false;
+  bool _paymentBlocked = false;
   SubscriptionBillingPeriod _billingPeriod = SubscriptionBillingPeriod.yearly;
 
-  String _planSubtitle(SubscriptionPlan plan) {
-    return switch (plan) {
-      SubscriptionPlan.PREMIUM =>
-        'IA (${PlanoIaLimits.premium}/mês), financeiro e relatórios para escalar com previsibilidade.',
-      SubscriptionPlan.ENTERPRISE =>
-        'Até ${PlanoIaLimits.enterprise} IA/mês, alunos ilimitados, white-label e automações.',
-      _ => 'Recursos essenciais para começar.',
-    };
+  Future<void> _checkDeviceSecurity() async {
+    if (kIsWeb) return;
+    final compromised = await SubscriptionDeviceGuard.isCompromised();
+    if (mounted && compromised) setState(() => _paymentBlocked = true);
   }
 
   Future<void> _restorePurchases() async {
@@ -179,7 +188,13 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   @override
   void initState() {
     super.initState();
-    AnalyticsService.instance.track(ProductEvents.paywallOpened);
+    AnalyticsService.instance.track(
+      ProductEvents.paywallOpened,
+      props: {
+        if (widget.source != null) 'source': widget.source,
+        if (widget.initialPlan != null) 'highlight': widget.initialPlan,
+      },
+    );
     _selectedPlanName = null;
     if (!kIsWeb) {
       _purchaseSubscription = InAppPurchase.instance.purchaseStream.listen(
@@ -191,6 +206,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     }
     _initializeStore();
     _loadTrialStatus();
+    _checkDeviceSecurity();
     if (widget.initialPlan?.trim().toUpperCase() == 'ENTERPRISE') {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _loadEnterprisePreview();
@@ -338,17 +354,24 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
 
       if (!mounted) return;
 
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(
-          content: Text(
-            purchasedPlan == SubscriptionPlan.ENTERPRISE
-                ? 'Assinatura Enterprise sincronizada com sucesso.'
-                : 'Assinatura Premium iniciada com sucesso.',
+      AnalyticsService.instance.track(
+        ProductEvents.checkoutCompleted,
+        props: {
+          'plan_id': purchasedPlan.apiName,
+          if (purchase.purchaseID != null) 'transaction_id': purchase.purchaseID,
+        },
+      );
+
+      if (!mounted) return;
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (_) => AssinaturaSuccessScreen(
+            plan: purchasedPlan,
+            transactionId: purchase.purchaseID,
           ),
         ),
       );
-
       if (mounted) safePopOrGo(context, '/dashboard/personal');
     } catch (error) {
       _handledPurchases.remove(purchaseKey);
@@ -370,6 +393,11 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
 
   Future<void> _selectPlan(SubscriptionPlan plan) async {
     if (_selectedPlanName == plan.apiName) return;
+
+    AnalyticsService.instance.track(
+      ProductEvents.paywallPlanSelected,
+      props: {'plan_id': plan.apiName},
+    );
 
     setState(() {
       _selectedPlanName = plan.apiName;
@@ -396,15 +424,59 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     }
   }
 
-  Future<void> _startCheckout(SubscriptionPlan plan, int planId) async {
+  Future<void> _startCheckout(SubscriptionPlan plan, Plano backendPlan) async {
     if (_loadingCheckout || _syncingPurchase) return;
+
+    AnalyticsService.instance.track(
+      ProductEvents.paywallCtaTapped,
+      props: {
+        'plan_id': plan.apiName,
+        'billing_period': _billingPeriod.name,
+        if (widget.source != null) 'source': widget.source,
+      },
+    );
+
+    if (!kIsWeb && subscriptionUsesNativeStore) {
+      final biometricOk = await SubscriptionBiometricGate.confirmSubscription(
+        planName: plan.apiName,
+      );
+      if (!mounted || !biometricOk) return;
+
+      final product = _productDetails[
+        SubscriptionProducts.productIdFor(plan, _billingPeriod)];
+      final priceDisplay = _formatPrice(
+        backendPlan,
+        product,
+        _billingPeriod,
+      );
+      final trialNote =
+          plan == SubscriptionPlan.ENTERPRISE &&
+                  (_trialStatus?.trialUsed == false)
+              ? 'Teste introdutório pode ser aplicado pela loja ao assinar.'
+              : null;
+      final confirmed = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => AssinaturaReviewScreen(
+            plan: plan,
+            billingPeriod: _billingPeriod,
+            priceDisplay: priceDisplay,
+            trialNote: trialNote,
+          ),
+        ),
+      );
+      if (!mounted || confirmed != true) return;
+      AnalyticsService.instance.track(
+        ProductEvents.checkoutStarted,
+        props: {'plan_id': plan.apiName, 'billing_period': _billingPeriod.name},
+      );
+    }
 
     if (kIsWeb) {
       setState(() => _loadingCheckout = true);
       try {
         final checkoutUrl = await AssinaturaRepository(
           ref.read(apiClientProvider),
-        ).criarPreferencia(planId);
+        ).criarPreferencia(backendPlan.id);
         final uri = Uri.parse(checkoutUrl);
         await launchUrl(uri, webOnlyWindowName: '_self');
       } catch (error) {
@@ -458,6 +530,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   }
 
   void _finishPurchaseFlowWithError(String message) {
+    AnalyticsService.instance.track(
+      ProductEvents.checkoutFailed,
+      props: {'error_message': message},
+    );
     if (!mounted) return;
     setState(() {
       _loadingCheckout = false;
@@ -478,6 +554,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     final perfil = ref.watch(perfilProvider).valueOrNull;
     final currentPlan = subscriptionPlanFromApi(perfil?.plano);
     final planosAsync = ref.watch(planosProvider);
+    final featuresAsync = ref.watch(planoFeaturesProvider);
 
     final planos = planosAsync.valueOrNull;
 
@@ -550,8 +627,12 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         final isUpgrade = selectedPlan.level > currentPlan.level;
         ctaLabel = trialOffer
             ? 'Começar 7 dias grátis — Enterprise'
+            : isUpgrade && selectedPlan == SubscriptionPlan.ENTERPRISE_PRO
+            ? 'Fazer upgrade para Enterprise Pro'
             : isUpgrade && selectedPlan == SubscriptionPlan.ENTERPRISE
             ? 'Fazer upgrade para Enterprise'
+            : selectedPlan == SubscriptionPlan.ENTERPRISE_PRO
+            ? 'Continuar com Enterprise Pro'
             : selectedPlan == SubscriptionPlan.ENTERPRISE
             ? 'Continuar com Enterprise'
             : 'Continuar com Premium';
@@ -568,6 +649,37 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         selectedPlan == SubscriptionPlan.ENTERPRISE &&
         !isCurrentPlan &&
         (_trialStatus?.trialUsed == false);
+    if (_paymentBlocked) {
+      return FxShellScaffold(
+        appBar: FxShellAppBar(
+          title: 'Planos',
+          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.shield_outlined, size: 48, color: primary),
+              const SizedBox(height: 16),
+              Text(
+                'Dispositivo não seguro',
+                textAlign: TextAlign.center,
+                style: TokensStrip.h2(color: ink),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Detectamos risco de jailbreak ou modo desenvolvedor. '
+                'Por sua segurança, pagamentos estão desativados neste aparelho.',
+                textAlign: TextAlign.center,
+                style: TokensStrip.bodyMuted(color: mute),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return FxShellScaffold(
       useMesh: true,
       appBar: FxShellAppBar(
@@ -604,15 +716,32 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     onSubscribe:
                         () => _startCheckout(
                           selectedPlan,
-                          selectedBackendPlan!.id,
+                          selectedBackendPlan!,
                         ),
                     onManage: _openSubscriptionManagement,
                   ),
                 ),
               ),
       body: planosAsync.when(
-        loading: () => const FxLoading(),
-        error: (error, _) => Center(child: Text('Erro: $error')),
+        loading: () => const PaywallLoadingSkeleton(),
+        error: (error, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Não foi possível carregar os planos.', style: TextStyle(color: mute)),
+                const SizedBox(height: 8),
+                Text('$error', textAlign: TextAlign.center, style: TokensStrip.bodyMuted(color: mute)),
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: () => ref.invalidate(planosProvider),
+                  child: const Text('Tentar novamente'),
+                ),
+              ],
+            ),
+          ),
+        ),
         data: (planosList) {
           final sortedPlans = [...planosList]..sort(
             (a, b) => subscriptionPlanFromApi(
@@ -659,6 +788,16 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
             });
           }
 
+          final usage = featuresAsync.valueOrNull == null
+              ? null
+              : PlanEntitlements.snapshotFrom(
+                plano: featuresAsync.value!.plano,
+                alunosAtivos: featuresAsync.value!.alunosAtivos,
+                limiteAlunos: featuresAsync.value!.limiteAlunos,
+                iaUsadaMes: featuresAsync.value!.iaUsadaMes,
+                limiteIaMensal: featuresAsync.value!.limiteIaMensal,
+              );
+
           return ListView(
               padding: const EdgeInsets.fromLTRB(
                 TokensStrip.s5,
@@ -667,15 +806,20 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 140,
               ),
               children: [
-                _PaywallHeader(
-                  ink: ink,
-                  mute: mute,
-                  primary: primary,
-                  currentPlan: currentPlan,
-                  selectedPlan: selPlan,
-                ),
+                PaywallHero(ink: ink, mute: mute, primary: primary, isDark: isDark),
+                if (usage != null)
+                  PaywallContextBanner(
+                    usage: usage,
+                    blockedFeatureLabel: widget.blockedFeature,
+                    ink: ink,
+                    mute: mute,
+                    onCta: () {
+                      final target = PlanEntitlements.softGateTargetPlan(usage);
+                      if (target != null) _selectPlan(target);
+                    },
+                  ),
+                PaywallSocialProofStrip(line: line, ink: ink, mute: mute),
                 if (!kIsWeb && subscriptionUsesNativeStore) ...[
-                  const SizedBox(height: 28),
                   _PaywallBillingSegment(
                     period: _billingPeriod,
                     ink: ink,
@@ -690,63 +834,68 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     ),
                     onChanged: (period) {
                       HapticFeedback.selectionClick();
+                      AnalyticsService.instance.track(
+                        ProductEvents.billingToggleChanged,
+                        props: {'to': period.name},
+                      );
                       setState(() => _billingPeriod = period);
                     },
                   ),
+                  const SizedBox(height: 20),
                 ],
-                const SizedBox(height: 24),
-                ...paid.map((plano) {
+                ...sortedPlans.map((plano) {
                   final plan = subscriptionPlanFromApi(plano.nome);
-                  final product = _productDetails[
-                    SubscriptionProducts.productIdFor(plan, _billingPeriod)];
                   final monthlyProduct = _productDetails[
                     SubscriptionProducts.productIdFor(
                       plan,
                       SubscriptionBillingPeriod.monthly,
                     )];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _PaywallPlanOptionTile(
-                      plano: plano,
-                      plan: plan,
-                      isSelected: plan == selPlan,
-                      isCurrent: plan == currentPlan,
-                      billingPeriod: _billingPeriod,
-                      priceLabel: _formatPrice(plano, product, _billingPeriod),
-                      monthlyEquiv:
-                          _billingPeriod == SubscriptionBillingPeriod.yearly
-                              ? _formatPrice(
-                                plano,
-                                monthlyProduct,
-                                SubscriptionBillingPeriod.monthly,
-                              )
-                              : null,
-                      yearlySavingsNote:
-                          _billingPeriod == SubscriptionBillingPeriod.yearly
-                              ? SubscriptionProducts.annualSavingsCardLabel(
-                                plano.precoMensal,
-                              )
-                              : null,
-                      subtitle: _planSubtitle(plan),
-                      ink: ink,
-                      mute: mute,
-                      line: line,
-                      primary: primary,
-                      isDark: isDark,
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        _selectPlan(plan);
-                      },
-                    ),
+                  final annualProduct = _productDetails[
+                    SubscriptionProducts.productIdFor(
+                      plan,
+                      SubscriptionBillingPeriod.yearly,
+                    )];
+                  final monthlyPrice = monthlyProduct != null
+                      ? monthlyProduct.price.replaceAll(RegExp(r'/.*'), '')
+                      : paywallMonthlyFromPlano(plano);
+                  final annualPrice = annualProduct != null
+                      ? annualProduct.price.replaceAll(RegExp(r'/.*'), '')
+                      : paywallAnnualMonthlyEquiv(plano);
+                  return PaywallRichPlanCard(
+                    plano: plano,
+                    plan: plan,
+                    isSelected: plan == selPlan,
+                    isCurrent: plan == currentPlan,
+                    monthlyPrice: monthlyPrice,
+                    annualPrice: annualPrice,
+                    ink: ink,
+                    mute: mute,
+                    line: line,
+                    isDark: isDark,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      _selectPlan(plan);
+                    },
                   );
                 }),
+                PaywallRoiStrip(line: line),
                 if (currentPlan == SubscriptionPlan.PREMIUM &&
                     selPlan == SubscriptionPlan.ENTERPRISE &&
                     !isCurrentPlanSelected) ...[
                   const SizedBox(height: 16),
                   _PaywallUpgradeNudge(primary: primary, ink: ink, isDark: isDark),
                 ],
-                const SizedBox(height: 28),
+                PaywallRoiCalculator(
+                  paidPlans: paid,
+                  ink: ink,
+                  mute: mute,
+                  line: line,
+                  onSuggestPlan: _selectPlan,
+                ),
+                PaywallComparisonTable(ink: ink, mute: mute, line: line),
+                const SizedBox(height: 8),
+                PaywallRoiRowsList(ink: ink, mute: mute),
+                const SizedBox(height: 20),
                 _PaywallFeaturePanel(
                   plano: selBackend,
                   plan: selPlan,
@@ -812,7 +961,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     isDark: isDark,
                   ),
                 ],
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
+                PaywallTrustFooter(mute: mute, primary: primary),
+                const SizedBox(height: 12),
                 _PaywallLegalFooter(
                   ink: ink,
                   mute: mute,

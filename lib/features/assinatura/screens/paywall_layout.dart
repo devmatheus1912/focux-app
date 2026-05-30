@@ -617,9 +617,9 @@ class _PaywallFeaturePanel extends StatelessWidget {
     ),
     if (plan != SubscriptionPlan.FREE)
       (
-        label: plan == SubscriptionPlan.ENTERPRISE
-            ? '${PlanoIaLimits.enterprise} interações de IA/mês'
-            : '${PlanoIaLimits.premium} interações de IA/mês',
+        label: plan == SubscriptionPlan.PREMIUM
+            ? '${PlanoIaLimits.premium} interações de IA/mês'
+            : '${PlanoIaLimits.enterprise} interações de IA/mês',
         included: true,
       ),
     if (plan != SubscriptionPlan.FREE)
@@ -633,6 +633,8 @@ class _PaywallFeaturePanel extends StatelessWidget {
     (label: 'Financeiro e CRM', included: plano.temFinanceiro),
     (label: 'Agenda e relatórios', included: plano.temAgenda && plano.temRelatorios),
     (label: 'White-label e identidade visual', included: plano.temWhiteLabel),
+    if (plan == SubscriptionPlan.ENTERPRISE_PRO)
+      (label: 'Landing page COMPLETA', included: plano.temLandingCompleta),
   ];
 
   @override

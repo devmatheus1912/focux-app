@@ -755,6 +755,8 @@ class AppRouter {
                       stringRouteExtra(state) ??
                       state.uri.queryParameters['plano'] ??
                       state.uri.queryParameters['plan'],
+                  source: state.uri.queryParameters['source'],
+                  blockedFeature: state.uri.queryParameters['feature'],
                 ),
           ),
           GoRoute(

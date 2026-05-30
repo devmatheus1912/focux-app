@@ -11,6 +11,8 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_celebration_overlay.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/feature_gate.dart';
+import '../../subscription/models/subscription_plan.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/landing_growth_repository.dart';
 import '../providers/perfil_provider.dart';
@@ -600,7 +602,11 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
   Widget build(BuildContext context) {
     final perfilAsync = ref.watch(perfilProvider);
 
-    return perfilAsync.when(
+    return FeatureGate(
+      requiredPlan: SubscriptionPlan.ENTERPRISE_PRO,
+      capability: 'landingCompleta',
+      featureName: 'Landing page completa',
+      child: perfilAsync.when(
       loading: () => const FxShellScaffold(
         appBar: FxShellAppBar(title: 'Editor da landing'),
         body: Center(child: FxLoading()),
@@ -771,6 +777,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
           ),
         );
       },
+    ),
     );
   }
 }

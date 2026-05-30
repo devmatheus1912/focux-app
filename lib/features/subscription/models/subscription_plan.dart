@@ -1,9 +1,13 @@
 // ignore_for_file: constant_identifier_names
 
-enum SubscriptionPlan { FREE, PREMIUM, ENTERPRISE }
+enum SubscriptionPlan { FREE, PREMIUM, ENTERPRISE, ENTERPRISE_PRO }
 
 SubscriptionPlan subscriptionPlanFromApi(String? value) {
-  switch ((value ?? '').trim().toUpperCase()) {
+  final raw = (value ?? '').trim().toUpperCase().replaceAll(' ', '_');
+  switch (raw) {
+    case 'ENTERPRISE_PRO':
+    case 'ENTERPRISEPRO':
+      return SubscriptionPlan.ENTERPRISE_PRO;
     case 'ENTERPRISE':
       return SubscriptionPlan.ENTERPRISE;
     case 'PREMIUM':
@@ -23,6 +27,8 @@ extension SubscriptionPlanExt on SubscriptionPlan {
         return 1;
       case SubscriptionPlan.ENTERPRISE:
         return 2;
+      case SubscriptionPlan.ENTERPRISE_PRO:
+        return 3;
     }
   }
 
