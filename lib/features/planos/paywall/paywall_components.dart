@@ -3,6 +3,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../core/legal/focux_legal.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../assinatura/data/assinatura_repository.dart';
 import '../../subscription/models/subscription_plan.dart';
@@ -20,6 +21,7 @@ class PaywallHero extends StatelessWidget {
   final Color mute;
   final Color primary;
   final bool isDark;
+  final SubscriptionPlan? currentPlan;
 
   const PaywallHero({
     super.key,
@@ -27,10 +29,64 @@ class PaywallHero extends StatelessWidget {
     required this.mute,
     required this.primary,
     required this.isDark,
+    this.currentPlan,
   });
+
+  bool get _isSubscriber =>
+      currentPlan != null && currentPlan != SubscriptionPlan.FREE;
 
   @override
   Widget build(BuildContext context) {
+    if (_isSubscriber) {
+      final label = PaywallCatalog.displayPlanName(currentPlan!);
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(4, 8, 4, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
+              decoration: BoxDecoration(
+                color: primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: primary.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.verified_outlined, size: 14, color: primary),
+                  const SizedBox(width: 6),
+                  Text(
+                    'FOCUX · $label',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.4,
+                      color: primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Você está no $label',
+              style: TokensStrip.h1(color: ink).copyWith(
+                fontSize: 26,
+                height: 1.08,
+                letterSpacing: -0.8,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Gerencie a assinatura ou faça upgrade. Comparação completa no site.',
+              style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 14),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(4, 8, 4, 20),
@@ -81,7 +137,7 @@ class PaywallHero extends StatelessWidget {
               'Seu app. Sua marca.\nSeus alunos. Sem limite.',
               textAlign: TextAlign.center,
               style: TokensStrip.h1(color: Colors.white).copyWith(
-                fontSize: 30,
+                fontSize: 26,
                 height: 1.06,
                 letterSpacing: -1.2,
               ),
@@ -94,6 +150,72 @@ class PaywallHero extends StatelessWidget {
             style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 15),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Link para vitrine web (comparativo, ROI, features).
+class PaywallWebDetailsLink extends StatelessWidget {
+  final Color ink;
+  final Color mute;
+  final Color primary;
+  final Color line;
+  final bool isDark;
+
+  const PaywallWebDetailsLink({
+    super.key,
+    required this.ink,
+    required this.mute,
+    required this.primary,
+    required this.line,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    return Semantics(
+      button: true,
+      label: 'Abrir comparação completa de planos no site',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => FocuxLegal.openPlansMarketing(),
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.all(16),
+            decoration: chrome.panel(
+              radius: 16,
+              accent: primary,
+              elevationLevel: 1,
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.open_in_new_rounded, color: primary, size: 22),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Comparação completa no site',
+                        style: TokensStrip.h2(color: ink).copyWith(fontSize: 16),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Tabela 4 tiers · ROI · 10 diferenciais',
+                        style: TokensStrip.bodyMuted(color: mute),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right_rounded, color: mute),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -427,13 +549,14 @@ class PaywallRichPlanCard extends StatelessWidget {
   final SubscriptionPlan plan;
   final bool isSelected;
   final bool isCurrent;
+  final bool isLockedDowngrade;
   final String monthlyPrice;
   final String annualPrice;
   final Color ink;
   final Color mute;
   final Color line;
   final bool isDark;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final SubscriptionBillingPeriod? billingPeriod;
   final ValueChanged<SubscriptionBillingPeriod>? onBillingPeriodTap;
   final VoidCallback? onFeatureHelp;
@@ -444,13 +567,14 @@ class PaywallRichPlanCard extends StatelessWidget {
     required this.plan,
     required this.isSelected,
     required this.isCurrent,
+    this.isLockedDowngrade = false,
     required this.monthlyPrice,
     required this.annualPrice,
     required this.ink,
     required this.mute,
     required this.line,
     required this.isDark,
-    required this.onTap,
+    this.onTap,
     this.billingPeriod,
     this.onBillingPeriodTap,
     this.onFeatureHelp,
@@ -468,8 +592,12 @@ class PaywallRichPlanCard extends StatelessWidget {
     return Semantics(
       selected: isSelected,
       label:
-          'Plano ${PaywallCatalog.displayPlanName(plan)}, $monthlyPrice mensal, $annualPrice anual',
-      child: AnimatedContainer(
+          'Plano ${PaywallCatalog.displayPlanName(plan)}, $monthlyPrice mensal, $annualPrice anual'
+          '${isCurrent ? ', plano atual' : ''}'
+          '${isLockedDowngrade ? ', downgrade pela loja' : ''}',
+      child: Opacity(
+        opacity: isLockedDowngrade ? 0.72 : 1,
+        child: AnimatedContainer(
         duration: motion,
         margin: const EdgeInsets.only(bottom: 14),
         decoration: BoxDecoration(
@@ -618,6 +746,7 @@ class PaywallRichPlanCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -1262,6 +1391,19 @@ class _PaywallRoiCalculatorState extends State<PaywallRoiCalculator> {
   bool _expanded = false;
   int _students = 12;
   double _monthlyFee = 400;
+  late final TextEditingController _feeController;
+
+  @override
+  void initState() {
+    super.initState();
+    _feeController = TextEditingController(text: _monthlyFee.toStringAsFixed(0));
+  }
+
+  @override
+  void dispose() {
+    _feeController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1326,10 +1468,12 @@ class _PaywallRoiCalculatorState extends State<PaywallRoiCalculator> {
                       labelText: 'Mensalidade média (R\$)',
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    controller: TextEditingController(text: _monthlyFee.toStringAsFixed(0)),
+                    controller: _feeController,
                     onChanged: (v) {
                       final n = double.tryParse(v.replaceAll(',', '.'));
-                      if (n != null) setState(() => _monthlyFee = n.clamp(50, 5000));
+                      if (n != null) {
+                        setState(() => _monthlyFee = n.clamp(50, 5000));
+                      }
                     },
                   ),
                   const SizedBox(height: 14),

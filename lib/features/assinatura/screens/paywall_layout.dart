@@ -1,6 +1,6 @@
 part of 'assinatura_screen.dart';
 
-// ─── Paywall Focux — conversão (10/10) ─────────────────────────────────────
+// ─── Paywall Focux — funil IAP mobile ───────────────────────────────────────
 
 Color _paywallSecondaryText(Color mute, {required bool isDark}) =>
     mute.withValues(alpha: isDark ? 0.78 : 0.72);
@@ -9,6 +9,68 @@ Duration _paywallMotion(BuildContext context) =>
     TokensStrip.prefersReducedMotion(context)
         ? Duration.zero
         : const Duration(milliseconds: 220);
+
+List<({String label, bool included})> _paywallFeatureRows(
+  Plano plano,
+  SubscriptionPlan plan,
+) => [
+  (
+    label:
+        plano.limiteAlunos == null
+            ? 'Alunos ilimitados'
+            : 'Até ${plano.limiteAlunos} alunos',
+    included: true,
+  ),
+  if (plan != SubscriptionPlan.FREE)
+    (
+      label: plan == SubscriptionPlan.PREMIUM
+          ? '${PlanoIaLimits.premium} interações de IA/mês'
+          : '${PlanoIaLimits.enterprise}+ interações de IA/mês',
+      included: true,
+    ),
+  if (plan == SubscriptionPlan.ENTERPRISE_PRO)
+    (
+      label: '${MigracaoFotoLimits.enterprise} fotos de migração/mês',
+      included: true,
+    ),
+  (label: 'IA Copiloto avançada', included: plan != SubscriptionPlan.FREE),
+  (label: 'Financeiro e CRM', included: plano.temFinanceiro),
+  (label: 'Agenda e relatórios', included: plano.temAgenda && plano.temRelatorios),
+  (label: 'White-label e identidade visual', included: plano.temWhiteLabel),
+  if (plan == SubscriptionPlan.ENTERPRISE_PRO)
+    (label: 'Landing page COMPLETA', included: plano.temLandingCompleta),
+];
+
+List<({String label, bool included})> _paywallUpgradeGains(
+  Plano currentPlano,
+  SubscriptionPlan currentPlan,
+  Plano targetPlano,
+  SubscriptionPlan targetPlan,
+) {
+  final currentByLabel = {
+    for (final r in _paywallFeatureRows(currentPlano, currentPlan)) r.label: r.included,
+  };
+  return [
+    for (final r in _paywallFeatureRows(targetPlano, targetPlan))
+      if (r.included && currentByLabel[r.label] != true) r,
+  ];
+}
+
+List<({String label, bool included})> _paywallDowngradeLosses(
+  Plano currentPlano,
+  SubscriptionPlan currentPlan,
+  Plano targetPlano,
+  SubscriptionPlan targetPlan,
+) {
+  final targetByLabel = {
+    for (final r in _paywallFeatureRows(targetPlano, targetPlan)) r.label: r.included,
+  };
+  return [
+    for (final r in _paywallFeatureRows(currentPlano, currentPlan))
+      if (r.included && targetByLabel[r.label] != true)
+        (label: r.label, included: false),
+  ];
+}
 
 class _PaywallUpgradeNudge extends StatelessWidget {
   final Color primary;
@@ -50,6 +112,7 @@ class _PaywallUpgradeNudge extends StatelessWidget {
 
 class _PaywallFeaturePanel extends StatelessWidget {
   final Plano plano;
+  final Plano currentPlano;
   final SubscriptionPlan plan;
   final SubscriptionPlan currentPlan;
   final Color ink;
@@ -60,6 +123,7 @@ class _PaywallFeaturePanel extends StatelessWidget {
 
   const _PaywallFeaturePanel({
     required this.plano,
+    required this.currentPlano,
     required this.plan,
     required this.currentPlan,
     required this.ink,
@@ -69,72 +133,101 @@ class _PaywallFeaturePanel extends StatelessWidget {
     required this.isDark,
   });
 
-  List<({String label, bool included})> get _rows => [
-    (
-      label:
-          plano.limiteAlunos == null
-              ? 'Alunos ilimitados'
-              : 'Até ${plano.limiteAlunos} alunos',
-      included: true,
-    ),
-    if (plan != SubscriptionPlan.FREE)
-      (
-        label: plan == SubscriptionPlan.PREMIUM
-            ? '${PlanoIaLimits.premium} interações de IA/mês'
-            : '${PlanoIaLimits.enterprise}+ interações de IA/mês',
-        included: true,
-      ),
-    if (plan == SubscriptionPlan.ENTERPRISE_PRO)
-      (
-        label: '${MigracaoFotoLimits.enterprise} fotos de migração/mês',
-        included: true,
-      ),
-    (label: 'IA Copiloto avançada', included: plan != SubscriptionPlan.FREE),
-    (label: 'Financeiro e CRM', included: plano.temFinanceiro),
-    (label: 'Agenda e relatórios', included: plano.temAgenda && plano.temRelatorios),
-    (label: 'White-label e identidade visual', included: plano.temWhiteLabel),
-    if (plan == SubscriptionPlan.ENTERPRISE_PRO)
-      (label: 'Landing page COMPLETA', included: plano.temLandingCompleta),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final isCurrent = plan == currentPlan;
-    final comparing = !isCurrent && currentPlan != SubscriptionPlan.FREE;
+    final isUpgrade = plan.level > currentPlan.level;
+    final isDowngrade = plan.level < currentPlan.level;
     final motion = _paywallMotion(context);
     final secondary = _paywallSecondaryText(mute, isDark: isDark);
     final planLabel = PaywallCatalog.displayPlanName(plan);
+    final currentLabel = PaywallCatalog.displayPlanName(currentPlan);
+    final accent =
+        isDowngrade ? PaywallCatalog.warning : PaywallCatalog.accentForPlan(plan);
+
+    final rows = switch (true) {
+      true when isCurrent => _paywallFeatureRows(plano, plan),
+      true when isUpgrade =>
+        _paywallUpgradeGains(currentPlano, currentPlan, plano, plan),
+      true when isDowngrade =>
+        _paywallDowngradeLosses(currentPlano, currentPlan, plano, plan),
+      _ => _paywallFeatureRows(plano, plan),
+    };
+
+    final title = switch (true) {
+      true when isCurrent => 'Seu plano inclui',
+      true when isUpgrade => 'O que você ganha com $planLabel',
+      true when isDowngrade => 'Recursos que você perde',
+      _ => 'O que inclui $planLabel',
+    };
+
+    final subtitle = switch (true) {
+      true when isCurrent => 'Resumo do $currentLabel ativo.',
+      true when isUpgrade => 'Em relação ao $currentLabel que você usa hoje.',
+      true when isDowngrade =>
+        'Downgrade para $planLabel só pela ${subscriptionChannelLabel()}.',
+      _ => null,
+    };
 
     return AnimatedSwitcher(
       duration: motion,
       switchInCurve: Curves.easeOutCubic,
       switchOutCurve: Curves.easeInCubic,
       child: Column(
-        key: ValueKey('${plan.apiName}-$isCurrent'),
+        key: ValueKey('${plan.apiName}-${currentPlan.apiName}-$isCurrent'),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-        Text(
-          isCurrent ? 'Seu plano inclui' : 'O que inclui $planLabel',
-          style: TokensStrip.h2(
-            color: ink,
-            fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
-          ).copyWith(fontSize: 17),
-        ),
-          if (isCurrent) ...[
+          Text(
+            title,
+            style: TokensStrip.h2(
+              color: ink,
+              fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
+            ).copyWith(fontSize: 17),
+          ),
+          if (subtitle != null) ...[
             const SizedBox(height: 6),
             Text(
-              'Resumo do ${PaywallCatalog.displayPlanName(currentPlan)} ativo.',
+              subtitle,
               style: TokensStrip.bodyMuted(color: secondary),
             ),
-          ] else if (comparing) ...[
-            const SizedBox(height: 6),
+          ],
+          if (isDowngrade) ...[
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: PaywallCatalog.warning.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: PaywallCatalog.warning.withValues(alpha: 0.35),
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.info_outline, size: 18, color: PaywallCatalog.warning),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Para mudar ou cancelar, use as assinaturas do dispositivo. '
+                      'Você pode perder acesso a recursos do $currentLabel.',
+                      style: TokensStrip.body(color: ink).copyWith(fontSize: 13),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          if (isUpgrade && rows.isEmpty) ...[
+            const SizedBox(height: 10),
             Text(
-              'Em relação ao ${PaywallCatalog.displayPlanName(currentPlan)} que você usa hoje.',
+              'Você já tem os principais recursos deste tier. Toque em um plano superior para ver ganhos.',
               style: TokensStrip.bodyMuted(color: secondary),
             ),
           ],
           const SizedBox(height: 14),
-          ..._rows.map(
+          ...rows.map(
             (row) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Row(
@@ -143,21 +236,18 @@ class _PaywallFeaturePanel extends StatelessWidget {
                   Icon(
                     row.included ? Icons.check_circle_rounded : Icons.cancel_rounded,
                     size: 20,
-                    color:
-                        row.included
-                            ? primary
-                            : mute.withValues(alpha: 0.4),
+                    color: row.included ? accent : mute.withValues(alpha: 0.4),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       row.label,
-                    style: TokensStrip.body(
-                      color: row.included ? ink : mute.withValues(alpha: 0.5),
-                    ).copyWith(
-                      decoration:
-                          row.included ? null : TextDecoration.lineThrough,
-                    ),
+                      style: TokensStrip.body(
+                        color: row.included ? ink : mute.withValues(alpha: 0.5),
+                      ).copyWith(
+                        decoration:
+                            row.included ? null : TextDecoration.lineThrough,
+                      ),
                     ),
                   ),
                 ],
@@ -174,7 +264,7 @@ class _PaywallFeaturePanel extends StatelessWidget {
                   subscriptionUsesNativeStore
                       ? 'Pagamento seguro · Cancele quando quiser · ${subscriptionChannelLabel()}'
                       : 'Checkout seguro via Mercado Pago',
-                style: TokensStrip.bodyMuted(color: secondary),
+                  style: TokensStrip.bodyMuted(color: secondary),
                 ),
               ),
             ],
@@ -264,8 +354,13 @@ class _PaywallLegalConsentLine extends StatelessWidget {
           Semantics(
             button: true,
             label: 'Abrir termos de uso',
-            child: GestureDetector(
-              onTap: () => FocuxLegal.openTerms(),
+            child: TextButton(
+              onPressed: () => FocuxLegal.openTerms(),
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
               child: Text('Termos', style: linkStyle()),
             ),
           ),
@@ -273,8 +368,13 @@ class _PaywallLegalConsentLine extends StatelessWidget {
           Semantics(
             button: true,
             label: 'Abrir política de privacidade',
-            child: GestureDetector(
-              onTap: () => FocuxLegal.openPrivacy(),
+            child: TextButton(
+              onPressed: () => FocuxLegal.openPrivacy(),
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
               child: Text('Privacidade', style: linkStyle()),
             ),
           ),

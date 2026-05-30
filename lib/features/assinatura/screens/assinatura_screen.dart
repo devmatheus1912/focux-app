@@ -105,8 +105,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
   final ScrollController _paywallScrollController = ScrollController();
   final GlobalKey _paywallPlanosKey = GlobalKey();
-  final GlobalKey _paywallFeaturesKey = GlobalKey();
-  final GlobalKey _paywallRoiKey = GlobalKey();
 
   String? _selectedPlanName;
   bool _loadingCheckout = false;
@@ -245,12 +243,12 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   }
 
   void _scrollToPaywallSection(PaywallScrollTarget target) {
-    final key = switch (target) {
-      PaywallScrollTarget.planos => _paywallPlanosKey,
-      PaywallScrollTarget.features => _paywallFeaturesKey,
-      PaywallScrollTarget.roi => _paywallRoiKey,
-    };
-    final ctx = key.currentContext;
+    if (target != PaywallScrollTarget.planos) {
+      HapticFeedback.selectionClick();
+      unawaited(FocuxLegal.openPlansMarketing());
+      return;
+    }
+    final ctx = _paywallPlanosKey.currentContext;
     if (ctx == null) return;
     HapticFeedback.selectionClick();
     final motion = TokensStrip.prefersReducedMotion(context)
@@ -261,6 +259,25 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       duration: motion,
       curve: Curves.easeOutCubic,
       alignment: 0.06,
+    );
+  }
+
+  void _handleDowngradeTierTap() {
+    HapticFeedback.lightImpact();
+    FeedbackHelper.showSnackBar(
+      context,
+      SnackBar(
+        content: Text(
+          'Downgrade e cancelamento só nas assinaturas do ${subscriptionChannelLabel()}.',
+        ),
+        action:
+            subscriptionUsesNativeStore
+                ? SnackBarAction(
+                  label: 'Abrir',
+                  onPressed: _openSubscriptionManagement,
+                )
+                : null,
+      ),
     );
   }
 
@@ -420,6 +437,13 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   Future<void> _selectPlan(SubscriptionPlan plan) async {
     if (_selectedPlanName == plan.apiName) return;
 
+    final perfil = ref.read(perfilProvider).valueOrNull;
+    final current = subscriptionPlanFromApi(perfil?.plano);
+    if (plan.level < current.level) {
+      _handleDowngradeTierTap();
+      return;
+    }
+
     AnalyticsService.instance.track(
       ProductEvents.paywallPlanSelected,
       props: {'plan_id': plan.apiName},
@@ -452,6 +476,20 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
 
   Future<void> _startCheckout(SubscriptionPlan plan, Plano backendPlan) async {
     if (_loadingCheckout || _syncingPurchase) return;
+
+    if (!kIsWeb &&
+        subscriptionUsesNativeStore &&
+        !_storeAvailable) {
+      FeedbackHelper.showSnackBar(
+        context,
+        const SnackBar(
+          content: Text(
+            'Loja do dispositivo indisponível. Tente novamente em instantes.',
+          ),
+        ),
+      );
+      return;
+    }
 
     AnalyticsService.instance.track(
       ProductEvents.paywallCtaTapped,
@@ -638,7 +676,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 ? 'Abrir assinaturas do dispositivo'
                 : 'Plano superior necessário';
         ctaEnabled = subscriptionUsesNativeStore;
-        footnote = '';
+        footnote =
+            subscriptionUsesNativeStore
+                ? 'Downgrade só nas assinaturas do dispositivo. Você pode perder recursos do plano atual.'
+                : '';
       } else if (selectedPlan == SubscriptionPlan.FREE) {
         ctaMode = _AssinaturaCtaMode.blocked;
         ctaLabel = 'Plano gratuito';
@@ -646,13 +687,15 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         footnote = 'O plano gratuito não requer assinatura.';
       } else {
         ctaMode = _AssinaturaCtaMode.subscribe;
-        ctaEnabled = !_loadingCheckout;
+        ctaEnabled =
+            !_loadingCheckout &&
+            (kIsWeb || !subscriptionUsesNativeStore || _storeAvailable);
         final trialOffer =
             selectedPlan == SubscriptionPlan.ENTERPRISE &&
             (_trialStatus?.trialUsed == false);
         final isUpgrade = selectedPlan.level > currentPlan.level;
         ctaLabel = trialOffer
-            ? 'Começar 7 dias grátis — Enterprise'
+            ? 'Começar 14 dias grátis — Enterprise'
             : isUpgrade && selectedPlan == SubscriptionPlan.ENTERPRISE_PRO
             ? 'Fazer upgrade para Enterprise Pro'
             : isUpgrade && selectedPlan == SubscriptionPlan.ENTERPRISE
@@ -675,6 +718,14 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         selectedPlan == SubscriptionPlan.ENTERPRISE &&
         !isCurrentPlan &&
         (_trialStatus?.trialUsed == false);
+    final planSummary = planos == null
+        ? null
+        : isCurrentPlan
+        ? '${PaywallCatalog.displayPlanName(currentPlan)} · Ativo'
+        : selectedPlan.level > currentPlan.level
+        ? 'Upgrade · ${PaywallCatalog.displayPlanName(selectedPlan)}'
+        : null;
+
     if (_paymentBlocked) {
       return FxShellScaffold(
         appBar: FxShellAppBar(
@@ -730,6 +781,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   child: _AssinaturaStickyFooter(
                     mode: ctaMode,
                     label: ctaLabel,
+                    planSummary: planSummary,
                     footnote: footnote,
                     enabled: ctaEnabled,
                     loading: _loadingCheckout || _syncingPurchase,
@@ -803,7 +855,12 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
             (plan) => subscriptionPlanFromApi(plan.nome) == selPlan,
             orElse: () => paid.last,
           );
+          final currentBackend = sortedPlans.firstWhere(
+            (plan) => subscriptionPlanFromApi(plan.nome) == currentPlan,
+            orElse: () => selBackend,
+          );
           final isCurrentPlanSelected = selPlan == currentPlan;
+          final isAcquisition = currentPlan == SubscriptionPlan.FREE;
 
           if (selPlan == SubscriptionPlan.ENTERPRISE &&
               currentPlan != SubscriptionPlan.ENTERPRISE &&
@@ -833,12 +890,19 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 140,
               ),
               children: [
-                PaywallHero(ink: ink, mute: mute, primary: primary, isDark: isDark),
-                PaywallQuickNav(
+                PaywallHero(
+                  ink: ink,
+                  mute: mute,
                   primary: primary,
-                  ink: isDark ? EagleTokens.darkInk : const Color(0xFF081012),
-                  onSectionTap: _scrollToPaywallSection,
+                  isDark: isDark,
+                  currentPlan: currentPlan,
                 ),
+                if (isAcquisition)
+                  PaywallQuickNav(
+                    primary: primary,
+                    ink: isDark ? EagleTokens.darkInk : const Color(0xFF081012),
+                    onSectionTap: _scrollToPaywallSection,
+                  ),
                 if (usage != null)
                   PaywallContextBanner(
                     usage: usage,
@@ -854,7 +918,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   anchorKey: _paywallPlanosKey,
                   child: PaywallSectionHeader(
                     title: 'Planos',
-                    note: 'Toque no card · Mensal ou Anual',
+                    note:
+                        isAcquisition
+                            ? 'Toque no card · Mensal ou Anual'
+                            : 'Upgrade no card · downgrade na loja',
                     ink: ink,
                     mute: mute,
                   ),
@@ -877,7 +944,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                           )
                           .toList();
 
-                  Widget planCard(Plano plano) {
+                  Widget planCard(Plano plano, {bool lockedDowngrade = false}) {
                     final plan = subscriptionPlanFromApi(plano.nome);
                     final monthlyProduct = _productDetails[
                       SubscriptionProducts.productIdFor(
@@ -895,11 +962,14 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     final annualPrice = annualProduct != null
                         ? annualProduct.price.replaceAll(RegExp(r'/.*'), '')
                         : paywallAnnualMonthlyEquiv(plano);
+                    final storeOk =
+                        kIsWeb || !subscriptionUsesNativeStore || _storeAvailable;
                     return PaywallRichPlanCard(
                       plano: plano,
                       plan: plan,
-                      isSelected: plan == selPlan,
+                      isSelected: plan == selPlan && !lockedDowngrade,
                       isCurrent: plan == currentPlan,
+                      isLockedDowngrade: lockedDowngrade,
                       monthlyPrice: monthlyPrice,
                       annualPrice: annualPrice,
                       ink: ink,
@@ -907,11 +977,19 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                       line: line,
                       isDark: isDark,
                       billingPeriod:
-                          plan == selPlan && !kIsWeb && subscriptionUsesNativeStore
+                          plan == selPlan &&
+                              !lockedDowngrade &&
+                              !kIsWeb &&
+                              subscriptionUsesNativeStore &&
+                              storeOk
                               ? _billingPeriod
                               : null,
                       onBillingPeriodTap:
-                          plan == SubscriptionPlan.FREE || kIsWeb || !subscriptionUsesNativeStore
+                          lockedDowngrade ||
+                              plan == SubscriptionPlan.FREE ||
+                              kIsWeb ||
+                              !subscriptionUsesNativeStore ||
+                              !storeOk
                               ? null
                               : (period) {
                                   HapticFeedback.selectionClick();
@@ -922,15 +1000,54 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                                   setState(() => _billingPeriod = period);
                                   _selectPlan(plan);
                                 },
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        _selectPlan(plan);
-                      },
+                      onTap:
+                          lockedDowngrade
+                              ? _handleDowngradeTierTap
+                              : () {
+                                  HapticFeedback.selectionClick();
+                                  _selectPlan(plan);
+                                },
                     );
                   }
 
+                  final upgradePlans =
+                      visiblePlans
+                          .where(
+                            (p) =>
+                                subscriptionPlanFromApi(p.nome).level >=
+                                currentPlan.level,
+                          )
+                          .toList();
+                  final lowerPlans =
+                      visiblePlans
+                          .where(
+                            (p) =>
+                                subscriptionPlanFromApi(p.nome).level <
+                                currentPlan.level,
+                          )
+                          .toList();
+
                   return [
-                    ...visiblePlans.map(planCard),
+                    ...upgradePlans.map((p) => planCard(p)),
+                    if (lowerPlans.isNotEmpty && currentPlan != SubscriptionPlan.FREE)
+                      Theme(
+                        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          tilePadding: EdgeInsets.zero,
+                          title: Text(
+                            'Outros planos e downgrade',
+                            style: TokensStrip.body(color: ink),
+                          ),
+                          subtitle: Text(
+                            'Mudança de tier só pela ${subscriptionChannelLabel()}',
+                            style: TokensStrip.bodyMuted(color: mute),
+                          ),
+                          children: [
+                            for (final p in lowerPlans)
+                              planCard(p, lockedDowngrade: true),
+                          ],
+                        ),
+                      ),
                     if (currentPlan != SubscriptionPlan.FREE && freePlano != null)
                       Theme(
                         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -957,12 +1074,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 ],
                 const SizedBox(height: 8),
                 _PaywallFeaturePanel(
-                  plano: isCurrentPlanSelected
-                      ? sortedPlans.firstWhere(
-                          (p) => subscriptionPlanFromApi(p.nome) == currentPlan,
-                          orElse: () => selBackend,
-                        )
-                      : selBackend,
+                  plano: isCurrentPlanSelected ? currentBackend : selBackend,
+                  currentPlano: currentBackend,
                   plan: isCurrentPlanSelected ? currentPlan : selPlan,
                   currentPlan: currentPlan,
                   ink: ink,
@@ -971,60 +1084,12 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   primary: primary,
                   isDark: isDark,
                 ),
-                PaywallRoiCalculator(
-                  paidPlans: paid,
+                PaywallWebDetailsLink(
                   ink: ink,
                   mute: mute,
-                  line: line,
-                  onSuggestPlan: _selectPlan,
-                ),
-                PaywallSectionAnchor(
-                  anchorKey: _paywallFeaturesKey,
-                  child: PaywallCollapsibleBlock(
-                    title: 'Features',
-                    subtitle: '10 diferenciais · PIX, IA, Command Center…',
-                    ink: ink,
-                    mute: mute,
-                    line: line,
-                    isDark: isDark,
-                    child: PaywallFeaturesGrid(
-                      ink: ink,
-                      mute: mute,
-                      line: line,
-                      isDark: isDark,
-                    ),
-                  ),
-                ),
-                PaywallCollapsibleBlock(
-                  title: 'Comparar planos',
-                  subtitle: 'Tabela completa · 4 tiers',
-                  ink: ink,
-                  mute: mute,
+                  primary: primary,
                   line: line,
                   isDark: isDark,
-                  child: PaywallComparisonTable(
-                    ink: ink,
-                    mute: mute,
-                    line: line,
-                    isDark: isDark,
-                  ),
-                ),
-                PaywallSectionAnchor(
-                  anchorKey: _paywallRoiKey,
-                  child: PaywallCollapsibleBlock(
-                    title: 'ROI',
-                    subtitle: 'Métricas e retorno por plano',
-                    ink: ink,
-                    mute: mute,
-                    line: line,
-                    isDark: isDark,
-                    child: PaywallRoiBundle(
-                      line: line,
-                      ink: ink,
-                      mute: mute,
-                      isDark: isDark,
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 12),
                 if (_shouldShowEnterpriseTrialCard(
@@ -1040,7 +1105,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                             ? 'Carregando oferta de teste…'
                             : subscriptionUsesNativeStore
                             ? 'Teste introdutório configurado na ${subscriptionChannelLabel()}.'
-                            : '7 dias grátis neste plano Enterprise.',
+                            : '14 dias grátis neste plano Enterprise.',
                     ink: ink,
                     mute: mute,
                     isDark: isDark,
@@ -1186,6 +1251,7 @@ class _AssinaturaStickyGlassBar extends StatelessWidget {
 class _AssinaturaStickyFooter extends StatelessWidget {
   final _AssinaturaCtaMode mode;
   final String label;
+  final String? planSummary;
   final String footnote;
   final bool enabled;
   final bool loading;
@@ -1201,6 +1267,7 @@ class _AssinaturaStickyFooter extends StatelessWidget {
   const _AssinaturaStickyFooter({
     required this.mode,
     required this.label,
+    this.planSummary,
     required this.footnote,
     required this.enabled,
     required this.loading,
@@ -1245,6 +1312,17 @@ class _AssinaturaStickyFooter extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (planSummary != null) ...[
+          Text(
+            planSummary!,
+            textAlign: TextAlign.center,
+            style: TokensStrip.body(color: ink).copyWith(
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
         if (trialHint) ...[
           Text(
             subscriptionUsesNativeStore

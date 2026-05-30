@@ -9,9 +9,15 @@ abstract class FocuxLegal {
   static const String privacyUrl =
       'https://focux-backend-production.up.railway.app/privacidade.html';
 
+  /// Vitrine completa (comparativo, ROI, features) — app mobile só IAP.
+  static const String plansMarketingUrl =
+      'https://focux-backend-production.up.railway.app/planos.html';
+
   static Future<bool> openTerms() => _open(termsUrl);
 
   static Future<bool> openPrivacy() => _open(privacyUrl);
+
+  static Future<bool> openPlansMarketing() => _open(plansMarketingUrl);
 
   static Future<bool> _open(String url) async {
     final uri = Uri.parse(url);
