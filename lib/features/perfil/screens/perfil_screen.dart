@@ -24,6 +24,7 @@ import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../utils/perfil_readiness.dart';
 import '../../subscription/utils/landing_editor_access.dart';
+import '../../dashboard/widgets/gated_profile_shortcuts.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -802,45 +803,31 @@ class _PerfilBody extends StatelessWidget {
                             line: line,
                             onTap: () => context.push('/migracao-magica'),
                           ),
-                          _ActionTile(
-                            icon: Icons.smart_toy_outlined,
-                            label: 'Automações',
-                            value: 'Fluxos e templates',
+                          GatedProfileShortcuts(
                             accent: accent,
                             actionInk: actionInk,
                             mute: mute,
                             line: line,
-                            onTap: () => context.push('/automacoes'),
-                          ),
-                          _ActionTile(
-                            icon: Icons.emoji_events_outlined,
-                            label: 'Desafios',
-                            value: 'Ranking da comunidade',
-                            accent: accent,
-                            actionInk: actionInk,
-                            mute: mute,
-                            line: line,
-                            onTap: () => context.push('/desafios'),
-                          ),
-                          _ActionTile(
-                            icon: Icons.storefront_outlined,
-                            label: 'Loja digital',
-                            value: 'Vitrine e pedidos PIX',
-                            accent: accent,
-                            actionInk: actionInk,
-                            mute: mute,
-                            line: line,
-                            onTap: () => context.push('/loja'),
-                          ),
-                          _ActionTile(
-                            icon: Icons.groups_outlined,
-                            label: 'Equipe',
-                            value: 'Assistentes e RBAC',
-                            accent: accent,
-                            actionInk: actionInk,
-                            mute: mute,
-                            line: line,
-                            onTap: () => context.push('/perfil/equipe'),
+                            tileBuilder:
+                                ({
+                                  required icon,
+                                  required label,
+                                  required value,
+                                  required onTap,
+                                  required locked,
+                                  upgradeTierLabel,
+                                }) => _ActionTile(
+                                  icon: icon,
+                                  label: label,
+                                  value: value,
+                                  accent: accent,
+                                  actionInk: actionInk,
+                                  mute: mute,
+                                  line: line,
+                                  locked: locked,
+                                  upgradeTierLabel: upgradeTierLabel,
+                                  onTap: onTap,
+                                ),
                           ),
                           _ActionTile(
                             icon: Icons.description_outlined,
@@ -2161,6 +2148,8 @@ class _ActionTile extends StatelessWidget {
   final Color line;
   final bool danger;
   final bool showDivider;
+  final bool locked;
+  final String? upgradeTierLabel;
   final VoidCallback onTap;
 
   const _ActionTile({
@@ -2174,6 +2163,8 @@ class _ActionTile extends StatelessWidget {
     required this.onTap,
     this.danger = false,
     this.showDivider = true,
+    this.locked = false,
+    this.upgradeTierLabel,
   });
 
   @override
@@ -2183,11 +2174,14 @@ class _ActionTile extends StatelessWidget {
         danger
             ? (isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad)
             : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
+    final inkMuted = locked ? ink.withValues(alpha: 0.55) : ink;
 
     final link = actionInk ?? accent;
     final a11y =
         danger
             ? label
+            : locked
+            ? '$label trancado. Plano ${upgradeTierLabel ?? 'upgrade'}'
             : (value.isEmpty ? label : '$label. $value');
 
     return Semantics(
@@ -2205,22 +2199,51 @@ class _ActionTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            _LeadingIcon(
-              icon: icon,
-              background:
-                  danger
-                      ? (isDark ? const Color(0x24FF8B8B) : EagleTokens.badSoft)
-                      : (isDark
-                          ? accent.withValues(alpha: 0.14)
-                          : BrandPalette.soft(accent)),
-              color: danger ? ink : accent,
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                _LeadingIcon(
+                  icon: icon,
+                  background:
+                      danger
+                          ? (isDark ? const Color(0x24FF8B8B) : EagleTokens.badSoft)
+                          : (isDark
+                              ? accent.withValues(alpha: locked ? 0.08 : 0.14)
+                              : BrandPalette.soft(accent).withValues(
+                                alpha: locked ? 0.55 : 1,
+                              )),
+                  color:
+                      danger
+                          ? ink
+                          : accent.withValues(alpha: locked ? 0.55 : 1),
+                ),
+                if (locked)
+                  Positioned(
+                    right: -2,
+                    bottom: -2,
+                    child: Container(
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF1A2228) : Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: line),
+                      ),
+                      child: Icon(
+                        Icons.lock_rounded,
+                        size: 10,
+                        color: mute,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 label,
                 style: TextStyle(
-                  color: ink,
+                  color: inkMuted,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -2233,7 +2256,10 @@ class _ActionTile extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: danger ? ink : link,
+                    color:
+                        danger
+                            ? ink
+                            : (locked ? mute : link),
                     fontSize: 12,
                     fontWeight: danger ? FontWeight.w600 : FontWeight.w800,
                   ),
@@ -2241,7 +2267,11 @@ class _ActionTile extends StatelessWidget {
               ),
             if (!danger) ...[
               const SizedBox(width: 8),
-              Icon(Icons.chevron_right, size: 18, color: link),
+              Icon(
+                locked ? Icons.lock_outline_rounded : Icons.chevron_right,
+                size: 18,
+                color: locked ? mute : link,
+              ),
             ],
           ],
         ),

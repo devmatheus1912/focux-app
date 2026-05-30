@@ -13,6 +13,23 @@ import '../services/upgrade_prompt_cooldown.dart';
 class UpgradePromptSheet {
   UpgradePromptSheet._();
 
+  /// Tap explícito (atalho trancado) — sempre mostra, sem cooldown.
+  static Future<void> show({
+    required BuildContext context,
+    required String featureName,
+    String? capability,
+    SubscriptionPlan? requiredPlan,
+    String source = 'upgrade_prompt',
+  }) =>
+      _present(
+        context: context,
+        featureName: featureName,
+        capability: capability,
+        requiredPlan: requiredPlan,
+        source: source,
+        respectCooldown: false,
+      );
+
   static Future<void> showIfAllowed({
     required BuildContext context,
     required String featureName,
@@ -25,6 +42,33 @@ class UpgradePromptSheet {
     );
     if (!await UpgradePromptCooldown.shouldShow(triggerKey)) return;
     if (!context.mounted) return;
+
+    await _present(
+      context: context,
+      featureName: featureName,
+      capability: capability,
+      requiredPlan: requiredPlan,
+      source: 'upgrade_prompt',
+      respectCooldown: true,
+      triggerKey: triggerKey,
+    );
+  }
+
+  static Future<void> _present({
+    required BuildContext context,
+    required String featureName,
+    String? capability,
+    SubscriptionPlan? requiredPlan,
+    required String source,
+    required bool respectCooldown,
+    String? triggerKey,
+  }) async {
+    final key =
+        triggerKey ??
+        UpgradePromptCooldown.keyFor(
+          capability: capability,
+          featureName: featureName,
+        );
 
     final offer = PlanEntitlements.lockedOffer(
       featureName: featureName,
@@ -82,18 +126,20 @@ class UpgradePromptSheet {
               const SizedBox(height: 14),
               FilledButton(
                 onPressed: () {
-                  UpgradePromptCooldown.markShown(triggerKey);
+                  if (respectCooldown) {
+                    UpgradePromptCooldown.markShown(key);
+                  }
                   AnalyticsService.instance.track(
                     ProductEvents.paywallCtaTapped,
                     props: {
-                      'source': 'upgrade_prompt',
-                      'trigger': triggerKey,
+                      'source': source,
+                      'trigger': key,
                       'plan_id': plan.apiName,
                     },
                   );
                   Navigator.pop(ctx);
                   context.push(
-                    '/assinatura?plano=${plan.apiName}&source=upgrade_prompt&feature=${Uri.encodeComponent(featureName)}',
+                    '/assinatura?plano=${plan.apiName}&source=$source&feature=${Uri.encodeComponent(featureName)}',
                   );
                 },
                 style: FilledButton.styleFrom(
@@ -105,27 +151,34 @@ class UpgradePromptSheet {
               ),
               TextButton(
                 onPressed: () {
-                  UpgradePromptCooldown.markShown(triggerKey);
+                  if (respectCooldown) {
+                    UpgradePromptCooldown.markShown(key);
+                  }
                   Navigator.pop(ctx);
                 },
                 child: const Text('Agora não'),
               ),
-              TextButton(
-                onPressed: () async {
-                  await UpgradePromptCooldown.dismissForever(triggerKey);
-                  if (ctx.mounted) Navigator.pop(ctx);
-                },
-                child: Text(
-                  'Não mostrar novamente',
-                  style: TextStyle(color: EagleTokens.darkInkMute.withValues(alpha: 0.8)),
+              if (respectCooldown)
+                TextButton(
+                  onPressed: () async {
+                    await UpgradePromptCooldown.dismissForever(key);
+                    if (ctx.mounted) Navigator.pop(ctx);
+                  },
+                  child: Text(
+                    'Não mostrar novamente',
+                    style: TextStyle(
+                      color: EagleTokens.darkInkMute.withValues(alpha: 0.8),
+                    ),
+                  ),
                 ),
-              ),
             ],
           ),
         );
       },
     );
 
-    await UpgradePromptCooldown.markShown(triggerKey);
+    if (respectCooldown) {
+      await UpgradePromptCooldown.markShown(key);
+    }
   }
 }

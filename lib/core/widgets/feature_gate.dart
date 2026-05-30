@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/planos/utils/plano_capability.dart';
 import '../../features/subscription/models/subscription_plan.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/planos/providers/plano_features_provider.dart';
@@ -109,42 +110,8 @@ class FeatureGate extends ConsumerWidget {
     );
   }
 
-  bool _resolveCapability(PlanoFeatures f, String cap) {
-    switch (cap) {
-      case 'financeiro':
-        return f.financeiro;
-      case 'agenda':
-        return f.agenda;
-      case 'relatorios':
-        return f.relatorios;
-      case 'whiteLabel':
-        return f.whiteLabel;
-      case 'iaCopiloto':
-        return f.iaCopiloto;
-      case 'migracaoFoto':
-        return f.migracaoFoto;
-      case 'landingCompleta':
-        return f.landingCompleta;
-      case 'habitCoaching':
-        return f.habitCoaching;
-      case 'comunidadePrivada':
-        return f.comunidadePrivada;
-      case 'automacoes':
-        return f.automacoes;
-      case 'automacoesAvancadas':
-        return f.automacoesAvancadas;
-      case 'comunidadeGrupos':
-        return f.comunidadeGrupos;
-      case 'equipeRbac':
-        return f.equipeRbac;
-      case 'lojaDigital':
-        return f.lojaDigital;
-      case 'poseCoach':
-        return f.poseCoach;
-      default:
-        return false;
-    }
-  }
+  bool _resolveCapability(PlanoFeatures f, String cap) =>
+      PlanoCapability.has(f, cap);
 }
 
 class _PlanSyncBannerShell extends StatelessWidget {

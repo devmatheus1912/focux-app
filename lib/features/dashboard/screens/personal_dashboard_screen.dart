@@ -31,7 +31,10 @@ import '../../subscription/widgets/plan_usage_banner.dart';
 import '../../subscription/widgets/trial_countdown_banner.dart';
 import '../../subscription/widgets/dashboard_activation_cta.dart';
 import '../../onboarding/providers/onboarding_provider.dart';
-import '../../subscription/utils/landing_editor_access.dart';
+import '../../planos/providers/plano_features_provider.dart';
+import '../../planos/data/planos_repository.dart';
+import '../data/dashboard_tool_shortcuts.dart';
+import '../utils/dashboard_shortcut_navigation.dart';
 
 class PersonalDashboardScreen extends ConsumerStatefulWidget {
   const PersonalDashboardScreen({super.key});
@@ -1724,13 +1727,9 @@ class _RoiQuickLinksRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final primary = Theme.of(context).colorScheme.primary;
     final link = BrandPalette.sectionLink(primary, dark: isDark);
-    final items = [
-      ('Pacotes', '/pacotes'),
-      ('Captura', '/leads-publicos'),
-      ('White-label', '/white-label'),
-      ('Smart Pricing', '/financeiro'),
-      ('Landing', ''),
-    ];
+    final features =
+        ref.watch(planoFeaturesProvider).valueOrNull ??
+        PlanoFeatures.optimisticEnterprise;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -1751,22 +1750,18 @@ class _RoiQuickLinksRow extends ConsumerWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                for (final item in items) ...[
-                  ActionChip(
-                    label: Text(item.$1),
-                    onPressed: () {
-                      if (item.$1 == 'Landing') {
-                        openLandingEditorOrUpgrade(context, ref);
-                      } else {
-                        context.push(item.$2);
-                      }
-                    },
-                    backgroundColor: BrandPalette.soft(primary, dark: isDark),
-                    labelStyle: TextStyle(
-                      color: link,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
-                    ),
+                for (final shortcut in DashboardToolShortcut.roiQuickLinks) ...[
+                  _RoiShortcutChip(
+                    shortcut: shortcut,
+                    isDark: isDark,
+                    locked: !shortcut.isUnlocked(features),
+                    tierLabel:
+                        shortcut.isUnlocked(features)
+                            ? null
+                            : shortcut.tierBadgeLabel(),
+                    linkColor: link,
+                    onTap:
+                        () => openDashboardShortcut(context, ref, shortcut),
                   ),
                   const SizedBox(width: 8),
                 ],
@@ -1774,6 +1769,85 @@ class _RoiQuickLinksRow extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _RoiShortcutChip extends StatelessWidget {
+  const _RoiShortcutChip({
+    required this.shortcut,
+    required this.isDark,
+    required this.locked,
+    required this.onTap,
+    required this.linkColor,
+    this.tierLabel,
+  });
+
+  final DashboardToolShortcut shortcut;
+  final bool isDark;
+  final bool locked;
+  final String? tierLabel;
+  final Color linkColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final bg =
+        locked
+            ? BrandPalette.soft(primary, dark: isDark).withValues(alpha: 0.55)
+            : BrandPalette.soft(primary, dark: isDark);
+    final labelColor =
+        locked ? linkColor.withValues(alpha: 0.62) : linkColor;
+
+    return Semantics(
+      button: true,
+      label:
+          locked
+              ? '${shortcut.label}, trancado. Plano ${tierLabel ?? shortcut.tierBadgeLabel()}'
+              : shortcut.label,
+      child: ActionChip(
+        avatar:
+            locked
+                ? Icon(Icons.lock_rounded, size: 14, color: labelColor)
+                : null,
+        label: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(shortcut.label),
+            if (locked && tierLabel != null) ...[
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: labelColor.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  tierLabel!,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: labelColor,
+                    height: 1,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        onPressed: onTap,
+        backgroundColor: bg,
+        side:
+            locked
+                ? BorderSide(color: labelColor.withValues(alpha: 0.22))
+                : BorderSide.none,
+        labelStyle: TextStyle(
+          color: labelColor,
+          fontWeight: FontWeight.w700,
+          fontSize: 13,
+        ),
       ),
     );
   }
@@ -1804,6 +1878,16 @@ class _CollapsibleToolsSectionState
     final mute =
         widget.isDark ? EagleTokens.darkInkMute : EagleTokens.inkSoft;
     final link = BrandPalette.sectionLink(primary, dark: widget.isDark);
+    final features =
+        ref.watch(planoFeaturesProvider).valueOrNull ??
+        PlanoFeatures.optimisticEnterprise;
+    final shortcuts = DashboardToolShortcut.moreTools;
+    final lockedCount = countLockedShortcuts(shortcuts, features);
+    final unlockedCount = shortcuts.length - lockedCount;
+    final collapsedHint =
+        lockedCount > 0
+            ? '$unlockedCount liberados · $lockedCount no upgrade'
+            : '${shortcuts.length} atalhos · toque para expandir';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -1823,7 +1907,7 @@ class _CollapsibleToolsSectionState
               label:
                   _expanded
                       ? 'Recolher mais ferramentas'
-                      : 'Expandir mais ferramentas, 6 atalhos',
+                      : 'Expandir mais ferramentas, $collapsedHint',
               child: InkWell(
               onTap: () => setState(() => _expanded = !_expanded),
               borderRadius: BorderRadius.circular(TokensStrip.rCard),
@@ -1857,7 +1941,7 @@ class _CollapsibleToolsSectionState
                           Text(
                             _expanded
                                 ? 'Acessos menos frequentes'
-                                : '6 atalhos · toque para expandir',
+                                : collapsedHint,
                             style: AppTypography.inter(
                               fontSize: TokensStrip.fontBodySm,
                               fontWeight: FontWeight.w500,
@@ -1895,138 +1979,19 @@ class _CollapsibleToolsSectionState
                 crossAxisSpacing: 10,
                 childAspectRatio: widget.shortcutAspectRatio,
                 children: [
-                  _ShortcutBtn(
-                    icon: 'dumbbell',
-                    label: 'Exercícios',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/exercicios'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'article',
-                    label: 'Feed',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/feed'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'trend',
-                    label: 'Leads',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/leads'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'trend',
-                    label: 'Indique',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/referral'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'spark',
-                    label: 'Ofertas',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/ofertas-upsell'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'dumbbell',
-                    label: 'Hábitos',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/habitos'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'zap',
-                    label: 'Automações',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/automacoes'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'spark',
-                    label: 'Desafios',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/desafios'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'spark',
-                    label: 'Loja',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/loja'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'users',
-                    label: 'Equipe',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/perfil/equipe'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'spark',
-                    label: 'Pacotes',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/pacotes'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'trend',
-                    label: 'Lead Público',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/leads-publicos'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'trend',
-                    label: 'NDR / MRR',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/relatorio/business'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'bell',
-                    label: 'Dunning',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/dunning'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'spark',
-                    label: 'Win-back',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/winback'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'article',
-                    label: 'Landing',
-                    isDark: widget.isDark,
-                    onTap: () => openLandingEditorOrUpgrade(context, ref),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'spark',
-                    label: 'Recorrência',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/recorrencia'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'trend',
-                    label: 'NPS',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/nps'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'dumbbell',
-                    label: 'Grupo',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/grupo-aulas'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'spark',
-                    label: 'Setup D0',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/onboarding/wizard'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'spark',
-                    label: 'Qualidade',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/dashboard/qualidade'),
-                  ),
-                  _ShortcutBtn(
-                    icon: 'bell',
-                    label: 'Broadcasts',
-                    isDark: widget.isDark,
-                    onTap: () => context.push('/broadcasts'),
-                  ),
+                  for (final shortcut in shortcuts)
+                    _ShortcutBtn(
+                      icon: shortcut.icon,
+                      label: shortcut.label,
+                      isDark: widget.isDark,
+                      locked: !shortcut.isUnlocked(features),
+                      tierLabel:
+                          shortcut.isUnlocked(features)
+                              ? null
+                              : shortcut.tierBadgeLabel(),
+                      onTap:
+                          () => openDashboardShortcut(context, ref, shortcut),
+                    ),
                 ],
               ),
             ),
@@ -2221,11 +2186,16 @@ class _ShortcutBtn extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
   final bool isDark;
+  final bool locked;
+  final String? tierLabel;
+
   const _ShortcutBtn({
     required this.icon,
     required this.label,
     required this.onTap,
     required this.isDark,
+    this.locked = false,
+    this.tierLabel,
   });
 
   @override
@@ -2235,73 +2205,148 @@ class _ShortcutBtn extends StatelessWidget {
     final rowAccent = BrandPalette.sectionAccent(primary, dark: isDark);
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final iconAccent =
+        locked
+            ? (isDark ? primaryAccent : rowAccent).withValues(alpha: 0.45)
+            : (isDark ? primaryAccent : rowAccent);
+    final labelColor = locked ? ink.withValues(alpha: 0.52) : ink;
 
     return Semantics(
-      label: label,
+      label:
+          locked
+              ? '$label, trancado. Plano ${tierLabel ?? 'upgrade'}'
+              : label,
       button: true,
       child: InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(TokensStrip.rCard),
-      child: Container(
+      child: Opacity(
+        opacity: locked ? 0.92 : 1,
+        child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
         decoration: fxStripCardDecoration(
           context,
           accent: primary,
           radius: TokensStrip.rCard,
-          glowStrength: 0.12,
+          glowStrength: locked ? 0.06 : 0.12,
+        ).copyWith(
+          border:
+              locked
+                  ? Border.all(
+                    color: mute.withValues(alpha: 0.22),
+                    width: 1,
+                  )
+                  : null,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    (isDark ? primaryAccent : rowAccent).withValues(
-                      alpha: isDark ? 0.20 : 0.12,
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        iconAccent.withValues(
+                          alpha: isDark ? 0.20 : 0.12,
+                        ),
+                        iconAccent.withValues(
+                          alpha: isDark ? 0.08 : 0.04,
+                        ),
+                      ],
                     ),
-                    (isDark ? primaryAccent : rowAccent).withValues(
-                      alpha: isDark ? 0.08 : 0.04,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: FxIcon(
+                      name: icon,
+                      size: 17,
+                      color: iconAccent,
+                      strokeWidth: 1.9,
                     ),
-                  ],
+                  ),
                 ),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(
-                child: FxIcon(
-                  name: icon,
-                  size: 17,
-                  color: isDark ? primaryAccent : rowAccent,
-                  strokeWidth: 1.9,
-                ),
-              ),
+                if (locked)
+                  Positioned(
+                    right: -4,
+                    bottom: -4,
+                    child: Container(
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color:
+                            isDark
+                                ? const Color(0xFF1A2228)
+                                : Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: mute.withValues(alpha: 0.35),
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.lock_rounded,
+                        size: 10,
+                        color: mute.withValues(alpha: 0.85),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12.2,
-                  fontWeight: FontWeight.w800,
-                  color: ink,
-                  height: 1.2,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 12.2,
+                      fontWeight: FontWeight.w800,
+                      color: labelColor,
+                      height: 1.2,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (locked && tierLabel != null) ...[
+                    const SizedBox(height: 3),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: iconAccent.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        tierLabel!,
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
+                          color: iconAccent.withValues(alpha: 0.95),
+                          height: 1,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
-            FxIcon(
-              name: 'chevron-right',
-              size: 14,
-              color: mute.withValues(alpha: 0.55),
-              strokeWidth: 1.8,
+            Icon(
+              locked ? Icons.lock_outline_rounded : Icons.chevron_right_rounded,
+              size: locked ? 15 : 18,
+              color: mute.withValues(alpha: locked ? 0.7 : 0.55),
             ),
           ],
         ),
+      ),
       ),
     ),
     );
