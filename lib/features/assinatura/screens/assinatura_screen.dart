@@ -81,6 +81,7 @@ bool _shouldShowEnterpriseTrialCard(
   if (selectedPlan != SubscriptionPlan.ENTERPRISE) return false;
   if (currentPlan == SubscriptionPlan.ENTERPRISE) return false;
   if (trialStatus?.trialAtivo == true) return true;
+  if (trialStatus?.trialEligible == true) return true;
   return trialStatus?.trialUsed != true;
 }
 
@@ -701,12 +702,14 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         ctaEnabled =
             !_loadingCheckout &&
             (kIsWeb || !subscriptionUsesNativeStore || _storeAvailable);
+        final trialDays = _trialStatus?.trialDaysOffer ?? 14;
         final trialOffer =
             selectedPlan == SubscriptionPlan.ENTERPRISE &&
-            (_trialStatus?.trialUsed == false);
+            (_trialStatus?.trialEligible == true ||
+                _trialStatus?.trialUsed == false);
         final isUpgrade = selectedPlan.level > currentPlan.level;
         ctaLabel = trialOffer
-            ? 'Começar 14 dias grátis — Enterprise'
+            ? 'Começar $trialDays dias grátis — Enterprise'
             : isUpgrade && selectedPlan == SubscriptionPlan.ENTERPRISE_PRO
             ? 'Fazer upgrade para Enterprise Pro'
             : isUpgrade && selectedPlan == SubscriptionPlan.ENTERPRISE
@@ -728,7 +731,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     final trialOffer =
         selectedPlan == SubscriptionPlan.ENTERPRISE &&
         !isCurrentPlan &&
-        (_trialStatus?.trialUsed == false);
+        (_trialStatus?.trialEligible == true ||
+            _trialStatus?.trialUsed == false);
     final planSummary = planos == null
         ? null
         : isCurrentPlan
@@ -1135,7 +1139,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                             ? 'Carregando oferta de teste…'
                             : subscriptionUsesNativeStore
                             ? 'Teste introdutório configurado na ${subscriptionChannelLabel()}.'
-                            : '14 dias grátis neste plano Enterprise.',
+                            : '${_trialStatus?.trialDaysOffer ?? 14} dias grátis neste plano Enterprise.',
                     ink: ink,
                     mute: mute,
                     isDark: isDark,

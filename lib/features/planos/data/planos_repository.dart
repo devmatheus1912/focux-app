@@ -36,6 +36,8 @@ class TrialStatus {
   final int diasRestantes;
   final SubscriptionPlan planoAtual;
   final bool subscriptionTokenPresent;
+  final int trialDaysOffer;
+  final bool trialEligible;
 
   const TrialStatus({
     required this.trialUsed,
@@ -45,6 +47,8 @@ class TrialStatus {
     required this.diasRestantes,
     required this.planoAtual,
     required this.subscriptionTokenPresent,
+    this.trialDaysOffer = 14,
+    this.trialEligible = false,
   });
 
   factory TrialStatus.fromJson(Map<String, dynamic> j) => TrialStatus(
@@ -55,6 +59,8 @@ class TrialStatus {
     diasRestantes: (j['diasRestantes'] as num?)?.toInt() ?? 0,
     planoAtual: subscriptionPlanFromApi(j['planoAtual'] as String?),
     subscriptionTokenPresent: j['subscriptionTokenPresent'] as bool? ?? false,
+    trialDaysOffer: (j['trialDaysOffer'] as num?)?.toInt() ?? 14,
+    trialEligible: j['trialEligible'] as bool? ?? false,
   );
 }
 

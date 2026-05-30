@@ -31,9 +31,9 @@ List<({String label, bool included})> _paywallFeatureRowsWithUsage(
       else if (row.included && row.label.contains('interações de IA'))
         (
           label:
-              usage.limiteIaMensal == null || (usage.limiteIaMensal ?? 0) <= 0
+              usage.limiteIaMensal == null || usage.limiteIaMensal <= 0
                   ? row.label
-                  : 'IA: ${usage.iaUsadaMes} de ${usage.limiteIaMensal} este mês',
+                  : 'IA: ${usage.iaUsadaMes} de ${usage.limiteIaMensal} este mês · ${usage.iaRestantes} restantes',
           included: true,
         )
       else if (row.included && row.label.contains('fotos de migração'))
@@ -41,7 +41,7 @@ List<({String label, bool included})> _paywallFeatureRowsWithUsage(
           label:
               usage.limiteMigracaoFotoMensal == null
                   ? row.label
-                  : 'Migração: ${usage.migracaoFotosUsadasMes} de ${usage.limiteMigracaoFotoMensal} fotos/mês',
+                  : 'Migração: ${usage.migracaoFotosUsadasMes} de ${usage.limiteMigracaoFotoMensal} fotos/mês · ${usage.migracaoFotosRestantes} restantes',
           included: true,
         )
       else
