@@ -245,7 +245,18 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   void _scrollToPaywallSection(PaywallScrollTarget target) {
     if (target != PaywallScrollTarget.planos) {
       HapticFeedback.selectionClick();
-      unawaited(FocuxLegal.openPlansMarketing());
+      if (FocuxLegal.plansMarketingWebLive) {
+        unawaited(FocuxLegal.openPlansMarketing());
+      } else {
+        FeedbackHelper.showSnackBar(
+          context,
+          const SnackBar(
+            content: Text(
+              'Comparação detalhada (tabela, ROI e features) no site em breve.',
+            ),
+          ),
+        );
+      }
       return;
     }
     final ctx = _paywallPlanosKey.currentContext;

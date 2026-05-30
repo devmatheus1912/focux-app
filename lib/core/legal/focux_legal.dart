@@ -9,7 +9,9 @@ abstract class FocuxLegal {
   static const String privacyUrl =
       'https://focux-backend-production.up.railway.app/privacidade.html';
 
-  /// Vitrine completa (comparativo, ROI, features) — app mobile só IAP.
+  /// Vitrine completa (comparativo, ROI, features) — fora do app; ativar quando a web estiver no ar.
+  static const bool plansMarketingWebLive = false;
+
   static const String plansMarketingUrl =
       'https://focux-backend-production.up.railway.app/planos.html';
 
@@ -17,7 +19,10 @@ abstract class FocuxLegal {
 
   static Future<bool> openPrivacy() => _open(privacyUrl);
 
-  static Future<bool> openPlansMarketing() => _open(plansMarketingUrl);
+  static Future<bool> openPlansMarketing() async {
+    if (!plansMarketingWebLive) return false;
+    return _open(plansMarketingUrl);
+  }
 
   static Future<bool> _open(String url) async {
     final uri = Uri.parse(url);

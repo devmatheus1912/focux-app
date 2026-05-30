@@ -79,7 +79,7 @@ class PaywallHero extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Gerencie a assinatura ou faça upgrade. Comparação completa no site.',
+              'Gerencie a assinatura ou faça upgrade no app.',
               style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 14),
             ),
           ],
@@ -155,7 +155,7 @@ class PaywallHero extends StatelessWidget {
   }
 }
 
-/// Link para vitrine web (comparativo, ROI, features).
+/// Vitrine web (comparativo, ROI, features) — link só quando [FocuxLegal.plansMarketingWebLive] for true.
 class PaywallWebDetailsLink extends StatelessWidget {
   final Color ink;
   final Color mute;
@@ -175,6 +175,56 @@ class PaywallWebDetailsLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
+    final live = FocuxLegal.plansMarketingWebLive;
+    final panel = Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: chrome.panel(
+        radius: 16,
+        accent: live ? primary : mute.withValues(alpha: 0.35),
+        elevationLevel: 1,
+      ),
+      child: Row(
+        children: [
+          Icon(
+            live ? Icons.open_in_new_rounded : Icons.schedule_rounded,
+            color: live ? primary : mute,
+            size: 22,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  live ? 'Comparação completa no site' : 'Comparação detalhada em breve',
+                  style: TokensStrip.h2(color: ink).copyWith(fontSize: 16),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  live
+                      ? 'Tabela 4 tiers · ROI · 10 diferenciais'
+                      : 'Tabela, ROI e diferenciais — disponível no site em breve.',
+                  style: TokensStrip.bodyMuted(color: mute),
+                ),
+              ],
+            ),
+          ),
+          if (live)
+            Icon(Icons.chevron_right_rounded, color: mute)
+          else
+            _PlanChip(label: 'EM BREVE', color: PaywallCatalog.warning),
+        ],
+      ),
+    );
+
+    if (!live) {
+      return Semantics(
+        label: 'Comparação detalhada de planos no site, em breve',
+        child: panel,
+      );
+    }
+
     return Semantics(
       button: true,
       label: 'Abrir comparação completa de planos no site',
@@ -183,38 +233,7 @@ class PaywallWebDetailsLink extends StatelessWidget {
         child: InkWell(
           onTap: () => FocuxLegal.openPlansMarketing(),
           borderRadius: BorderRadius.circular(16),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            padding: const EdgeInsets.all(16),
-            decoration: chrome.panel(
-              radius: 16,
-              accent: primary,
-              elevationLevel: 1,
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.open_in_new_rounded, color: primary, size: 22),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Comparação completa no site',
-                        style: TokensStrip.h2(color: ink).copyWith(fontSize: 16),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Tabela 4 tiers · ROI · 10 diferenciais',
-                        style: TokensStrip.bodyMuted(color: mute),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(Icons.chevron_right_rounded, color: mute),
-              ],
-            ),
-          ),
+          child: panel,
         ),
       ),
     );
