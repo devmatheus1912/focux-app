@@ -33,6 +33,12 @@ class UpgradePromptSheet {
     );
     final plan = offer.targetPlan ?? SubscriptionPlan.PREMIUM;
     final accent = PaywallCatalog.accentForPlan(plan);
+    final body =
+        PaywallCatalog.modalMessageFor(
+          capability: capability,
+          featureName: featureName,
+        ) ??
+        offer.body;
 
     await showModalBottomSheet<void>(
       context: context,
@@ -70,7 +76,7 @@ class UpgradePromptSheet {
               ),
               const SizedBox(height: 10),
               Text(
-                offer.body,
+                body,
                 style: TokensStrip.body(color: EagleTokens.darkInkMute),
               ),
               const SizedBox(height: 14),

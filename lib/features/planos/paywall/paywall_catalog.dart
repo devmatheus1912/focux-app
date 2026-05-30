@@ -486,6 +486,33 @@ class PaywallCatalog {
     ),
   ];
 
+  /// Mensagem do catálogo de gatilhos para modal in-app (não usar na vitrine Planos).
+  static String? modalMessageFor({
+    String? capability,
+    String? featureName,
+  }) {
+    final key = (capability ?? featureName ?? '').toLowerCase();
+    if (key.isEmpty) return null;
+    for (final t in upgradeTriggers) {
+      final title = t.title.toLowerCase();
+      if (key.contains('pix') || key.contains('financeiro')) {
+        if (title.contains('pix')) return t.message;
+      }
+      if (key.contains('ia') || key.contains('copiloto')) {
+        if (title.contains('ia copiloto')) return t.message;
+      }
+      if (key.contains('white')) {
+        if (title.contains('white-label')) return t.message;
+      }
+      if (key.contains('landing')) {
+        if (title.contains('landing')) return t.message;
+      }
+      if (key.contains('aluno') && title.contains('alunos')) return t.message;
+    }
+    return null;
+  }
+
+  /// Copy para modais in-app (`UpgradePromptSheet`) — não exibir na vitrine Planos.
   static const List<PaywallUpgradeTrigger> upgradeTriggers = [
     PaywallUpgradeTrigger(
       number: '01',

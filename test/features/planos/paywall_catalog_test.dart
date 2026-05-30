@@ -28,7 +28,7 @@ void main() {
     expect(PaywallCatalog.roiStrip.length, 6);
     expect(PaywallCatalog.roiRows.length, 10);
     expect(PaywallCatalog.topFeatures.length, 10);
-    expect(PaywallCatalog.upgradeTriggers.length, 8);
+    expect(PaywallCatalog.upgradeTriggers.length, 8); // modais in-app, não vitrine
   });
 
   test('displayPlanName formats ENTERPRISE PRO', () {

@@ -11,7 +11,7 @@ import '../../subscription/subscription_products.dart';
 import 'paywall_catalog.dart';
 
 /// Âncoras de scroll na vitrine de planos.
-enum PaywallScrollTarget { planos, features, roi, gatilhos }
+enum PaywallScrollTarget { planos, features, roi }
 
 // ─── Hero ───────────────────────────────────────────────────────────────────
 
@@ -115,7 +115,6 @@ class PaywallQuickNav extends StatelessWidget {
     (id: PaywallScrollTarget.planos, label: 'Planos', icon: Icons.view_agenda_outlined),
     (id: PaywallScrollTarget.features, label: 'Features', icon: Icons.star_outline_rounded),
     (id: PaywallScrollTarget.roi, label: 'ROI', icon: Icons.savings_outlined),
-    (id: PaywallScrollTarget.gatilhos, label: 'Gatilhos', icon: Icons.bolt_outlined),
   ];
 
   @override
@@ -435,6 +434,8 @@ class PaywallRichPlanCard extends StatelessWidget {
   final Color line;
   final bool isDark;
   final VoidCallback onTap;
+  final SubscriptionBillingPeriod? billingPeriod;
+  final ValueChanged<SubscriptionBillingPeriod>? onBillingPeriodTap;
   final VoidCallback? onFeatureHelp;
 
   const PaywallRichPlanCard({
@@ -450,6 +451,8 @@ class PaywallRichPlanCard extends StatelessWidget {
     required this.line,
     required this.isDark,
     required this.onTap,
+    this.billingPeriod,
+    this.onBillingPeriodTap,
     this.onFeatureHelp,
   });
 
@@ -547,6 +550,14 @@ class PaywallRichPlanCard extends StatelessWidget {
                                     mute: mute,
                                     line: line,
                                     isDark: isDark,
+                                    selected: isSelected &&
+                                        billingPeriod ==
+                                            SubscriptionBillingPeriod.monthly,
+                                    onTap: onBillingPeriodTap == null
+                                        ? null
+                                        : () => onBillingPeriodTap!(
+                                              SubscriptionBillingPeriod.monthly,
+                                            ),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
@@ -558,7 +569,15 @@ class PaywallRichPlanCard extends StatelessWidget {
                                     mute: mute,
                                     line: line,
                                     isDark: isDark,
-                                    highlight: true,
+                                    selected: isSelected &&
+                                        (billingPeriod ??
+                                                SubscriptionBillingPeriod.yearly) ==
+                                            SubscriptionBillingPeriod.yearly,
+                                    onTap: onBillingPeriodTap == null
+                                        ? null
+                                        : () => onBillingPeriodTap!(
+                                              SubscriptionBillingPeriod.yearly,
+                                            ),
                                   ),
                                 ),
                               ],
@@ -724,7 +743,8 @@ class _PriceBox extends StatelessWidget {
   final Color mute;
   final Color line;
   final bool isDark;
-  final bool highlight;
+  final bool selected;
+  final VoidCallback? onTap;
 
   const _PriceBox({
     required this.label,
@@ -733,23 +753,24 @@ class _PriceBox extends StatelessWidget {
     required this.mute,
     required this.line,
     required this.isDark,
-    this.highlight = false,
+    this.selected = false,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final fill = isDark
-        ? Colors.white.withValues(alpha: highlight ? 0.08 : 0.04)
+        ? Colors.white.withValues(alpha: selected ? 0.08 : 0.04)
         : EagleTokens.paper;
-    final borderColor = highlight
+    final borderColor = selected
         ? PaywallCatalog.brand.withValues(alpha: 0.45)
         : line;
 
-    return Container(
+    final box = Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: borderColor, width: highlight ? 1.4 : 1),
+        border: Border.all(color: borderColor, width: selected ? 1.4 : 1),
         color: fill,
       ),
       child: Column(
@@ -775,6 +796,22 @@ class _PriceBox extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+
+    if (onTap == null) return box;
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: '$label, $price',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: box,
+        ),
       ),
     );
   }
@@ -1372,118 +1409,6 @@ class PaywallFeaturesGrid extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-}
-
-class PaywallGatilhosList extends StatelessWidget {
-  final Color ink;
-  final Color mute;
-  final Color line;
-  final bool isDark;
-
-  const PaywallGatilhosList({
-    super.key,
-    required this.ink,
-    required this.mute,
-    required this.line,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final surface = isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final border = isDark ? EagleTokens.darkLine : line;
-
-    return Column(
-      children: PaywallCatalog.upgradeTriggers.map((t) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          decoration: BoxDecoration(
-            color: surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: border),
-          ),
-          child: Theme(
-            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-            child: ExpansionTile(
-              tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-              childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-              title: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 34,
-                    height: 34,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: PaywallCatalog.brand.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: PaywallCatalog.brand.withValues(alpha: 0.22)),
-                    ),
-                    child: Text(
-                      t.number,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        color: PaywallCatalog.brand,
-                        fontFamily: 'monospace',
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          t.title,
-                          style: TokensStrip.body(color: ink).copyWith(fontWeight: FontWeight.w700),
-                        ),
-                        Text(
-                          t.transition,
-                          style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 12),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: PaywallCatalog.brand.withValues(alpha: 0.06),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: PaywallCatalog.brand.withValues(alpha: 0.18)),
-                  ),
-                  child: Text(
-                    t.message,
-                    style: TokensStrip.bodyMuted(color: mute).copyWith(
-                      fontStyle: FontStyle.italic,
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.lightbulb_outline, size: 16, color: mute),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        'Mostrar como modal in-app no momento exato.',
-                        style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 12),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
     );
   }
 }

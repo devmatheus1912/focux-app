@@ -30,7 +30,6 @@ import '../data/assinatura_repository.dart';
 import '../providers/assinatura_provider.dart';
 import '../../planos/paywall/paywall_catalog.dart';
 import '../../planos/paywall/paywall_components.dart';
-import '../../planos/paywall/paywall_vitrine.dart';
 import '../../subscription/plan_entitlements.dart';
 import '../services/subscription_biometric_gate.dart';
 import '../services/subscription_device_guard.dart';
@@ -108,7 +107,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   final GlobalKey _paywallPlanosKey = GlobalKey();
   final GlobalKey _paywallFeaturesKey = GlobalKey();
   final GlobalKey _paywallRoiKey = GlobalKey();
-  final GlobalKey _paywallGatilhosKey = GlobalKey();
 
   String? _selectedPlanName;
   bool _loadingCheckout = false;
@@ -251,7 +249,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       PaywallScrollTarget.planos => _paywallPlanosKey,
       PaywallScrollTarget.features => _paywallFeaturesKey,
       PaywallScrollTarget.roi => _paywallRoiKey,
-      PaywallScrollTarget.gatilhos => _paywallGatilhosKey,
     };
     final ctx = key.currentContext;
     if (ctx == null) return;
@@ -853,39 +850,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                       if (target != null) _selectPlan(target);
                     },
                   ),
-                PaywallSocialProofStrip(
-                  line: line,
-                  ink: ink,
-                  mute: mute,
-                  socialProof:
-                      (ref.watch(paywallVitrineProvider).valueOrNull ??
-                              PaywallVitrineSnapshot.fromCatalog())
-                          .socialProof,
-                ),
-                if (!kIsWeb && subscriptionUsesNativeStore) ...[
-                  _PaywallBillingSegment(
-                    period: _billingPeriod,
-                    ink: ink,
-                    mute: mute,
-                    line: line,
-                    primary: primary,
-                    isDark: isDark,
-                    annualSavingsLabel: SubscriptionProducts.annualSavingsCompactLabel(
-                      paid
-                          .map((p) => p.precoMensal)
-                          .fold<double>(0, (a, b) => a > b ? a : b),
-                    ),
-                    onChanged: (period) {
-                      HapticFeedback.selectionClick();
-                      AnalyticsService.instance.track(
-                        ProductEvents.billingToggleChanged,
-                        props: {'to': period.name},
-                      );
-                      setState(() => _billingPeriod = period);
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                ],
                 PaywallSectionAnchor(
                   anchorKey: _paywallPlanosKey,
                   child: PaywallSectionHeader(
@@ -942,6 +906,22 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                       mute: mute,
                       line: line,
                       isDark: isDark,
+                      billingPeriod:
+                          plan == selPlan && !kIsWeb && subscriptionUsesNativeStore
+                              ? _billingPeriod
+                              : null,
+                      onBillingPeriodTap:
+                          plan == SubscriptionPlan.FREE || kIsWeb || !subscriptionUsesNativeStore
+                              ? null
+                              : (period) {
+                                  HapticFeedback.selectionClick();
+                                  AnalyticsService.instance.track(
+                                    ProductEvents.billingToggleChanged,
+                                    props: {'to': period.name, 'source': 'plan_card'},
+                                  );
+                                  setState(() => _billingPeriod = period);
+                                  _selectPlan(plan);
+                                },
                       onTap: () {
                         HapticFeedback.selectionClick();
                         _selectPlan(plan);
@@ -1033,21 +1013,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   mute: mute,
                   line: line,
                   primary: primary,
-                  isDark: isDark,
-                ),
-                PaywallSectionAnchor(
-                  anchorKey: _paywallGatilhosKey,
-                  child: PaywallSectionHeader(
-                    title: 'Gatilhos',
-                    note: 'Toque para abrir',
-                    ink: ink,
-                    mute: mute,
-                  ),
-                ),
-                PaywallGatilhosList(
-                  ink: ink,
-                  mute: mute,
-                  line: line,
                   isDark: isDark,
                 ),
                 const SizedBox(height: 12),
