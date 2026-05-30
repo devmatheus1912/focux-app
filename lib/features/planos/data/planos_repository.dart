@@ -301,73 +301,97 @@ class PlanoFeatures {
       iaUsadaMes: (j['iaUsadaMes'] as num?)?.toInt() ?? 0,
       limiteMigracaoFotoMensal: (j['limiteMigracaoFotoMensal'] as num?)?.toInt(),
       migracaoFotosUsadasMes: (j['migracaoFotosUsadasMes'] as num?)?.toInt() ?? 0,
-    ).withTierCeiling();
+    ).normalizeForTier();
   }
 
-  /// Garante que flags Pro/Premium nunca ultrapassem o tier declarado em [plano].
-  /// Protege contra cache stale, fallback operacional ou drift do backend.
-  PlanoFeatures withTierCeiling() {
-    switch (plano) {
-      case SubscriptionPlan.FREE:
-        return _copyCaps(
-          financeiro: false,
-          relatorios: false,
-          whiteLabel: false,
-          iaCopiloto: false,
-          migracaoFoto: false,
-          landingCompleta: false,
-          habitCoaching: false,
-          comunidadePrivada: false,
-          automacoes: false,
-          automacoesAvancadas: false,
-          comunidadeGrupos: false,
-          equipeRbac: false,
-          lojaDigital: false,
-          poseCoach: false,
-          limiteAssistentes: null,
-        );
-      case SubscriptionPlan.PREMIUM:
-        return _copyCaps(
-          whiteLabel: false,
-          landingCompleta: false,
-          automacoes: false,
-          automacoesAvancadas: false,
-          comunidadeGrupos: false,
-          equipeRbac: false,
-          lojaDigital: false,
-          poseCoach: false,
-          limiteAssistentes: null,
-        );
-      case SubscriptionPlan.ENTERPRISE:
-        return _copyCaps(
-          landingCompleta: false,
-          automacoesAvancadas: false,
-          lojaDigital: false,
-          poseCoach: false,
-          limiteAssistentes: 1,
-        );
-      case SubscriptionPlan.ENTERPRISE_PRO:
-        return this;
-    }
+  /// Perfil canônico de capabilities por tier (matriz V130 + landing Pro).
+  /// Aplica teto (não ultrapassa o plano) e piso (Pro/Premium recebem o mínimo do tier).
+  PlanoFeatures normalizeForTier() => _applyCanonical(_canonicalCapsFor(plano));
+
+  /// @deprecated Use [normalizeForTier].
+  PlanoFeatures withTierCeiling() => normalizeForTier();
+
+  static Map<String, bool> _canonicalCapsFor(SubscriptionPlan plan) {
+    const off = false;
+    const on = true;
+    return switch (plan) {
+      SubscriptionPlan.FREE => {
+        'financeiro': off,
+        'agenda': on,
+        'relatorios': off,
+        'whiteLabel': off,
+        'iaCopiloto': off,
+        'migracaoFoto': off,
+        'landingCompleta': off,
+        'habitCoaching': off,
+        'comunidadePrivada': off,
+        'automacoes': off,
+        'automacoesAvancadas': off,
+        'comunidadeGrupos': off,
+        'equipeRbac': off,
+        'lojaDigital': off,
+        'poseCoach': off,
+      },
+      SubscriptionPlan.PREMIUM => {
+        'financeiro': on,
+        'agenda': on,
+        'relatorios': on,
+        'whiteLabel': off,
+        'iaCopiloto': on,
+        'migracaoFoto': on,
+        'landingCompleta': off,
+        'habitCoaching': on,
+        'comunidadePrivada': on,
+        'automacoes': off,
+        'automacoesAvancadas': off,
+        'comunidadeGrupos': off,
+        'equipeRbac': off,
+        'lojaDigital': off,
+        'poseCoach': off,
+      },
+      SubscriptionPlan.ENTERPRISE => {
+        'financeiro': on,
+        'agenda': on,
+        'relatorios': on,
+        'whiteLabel': on,
+        'iaCopiloto': on,
+        'migracaoFoto': on,
+        'landingCompleta': off,
+        'habitCoaching': on,
+        'comunidadePrivada': on,
+        'automacoes': on,
+        'automacoesAvancadas': off,
+        'comunidadeGrupos': on,
+        'equipeRbac': on,
+        'lojaDigital': off,
+        'poseCoach': off,
+      },
+      SubscriptionPlan.ENTERPRISE_PRO => {
+        'financeiro': on,
+        'agenda': on,
+        'relatorios': on,
+        'whiteLabel': on,
+        'iaCopiloto': on,
+        'migracaoFoto': on,
+        'landingCompleta': on,
+        'habitCoaching': on,
+        'comunidadePrivada': on,
+        'automacoes': on,
+        'automacoesAvancadas': on,
+        'comunidadeGrupos': on,
+        'equipeRbac': on,
+        'lojaDigital': on,
+        'poseCoach': on,
+      },
+    };
   }
 
-  PlanoFeatures _copyCaps({
-    bool? financeiro,
-    bool? relatorios,
-    bool? whiteLabel,
-    bool? iaCopiloto,
-    bool? migracaoFoto,
-    bool? landingCompleta,
-    bool? habitCoaching,
-    bool? comunidadePrivada,
-    bool? automacoes,
-    bool? automacoesAvancadas,
-    bool? comunidadeGrupos,
-    bool? equipeRbac,
-    bool? lojaDigital,
-    bool? poseCoach,
-    int? limiteAssistentes,
-  }) {
+  PlanoFeatures _applyCanonical(Map<String, bool> caps) {
+    final limiteAssistentes = switch (plano) {
+      SubscriptionPlan.ENTERPRISE => 1,
+      SubscriptionPlan.ENTERPRISE_PRO => null,
+      _ => null,
+    };
     return PlanoFeatures(
       plano: plano,
       planoNomeOriginal: planoNomeOriginal,
@@ -378,22 +402,22 @@ class PlanoFeatures {
       fromCache: fromCache,
       cacheSavedAt: cacheSavedAt,
       syncWarning: syncWarning,
-      financeiro: financeiro ?? this.financeiro,
-      agenda: agenda,
-      relatorios: relatorios ?? this.relatorios,
-      whiteLabel: whiteLabel ?? this.whiteLabel,
-      iaCopiloto: iaCopiloto ?? this.iaCopiloto,
-      migracaoFoto: migracaoFoto ?? this.migracaoFoto,
-      landingCompleta: landingCompleta ?? this.landingCompleta,
-      habitCoaching: habitCoaching ?? this.habitCoaching,
-      comunidadePrivada: comunidadePrivada ?? this.comunidadePrivada,
-      automacoes: automacoes ?? this.automacoes,
-      automacoesAvancadas: automacoesAvancadas ?? this.automacoesAvancadas,
-      comunidadeGrupos: comunidadeGrupos ?? this.comunidadeGrupos,
-      equipeRbac: equipeRbac ?? this.equipeRbac,
-      lojaDigital: lojaDigital ?? this.lojaDigital,
-      poseCoach: poseCoach ?? this.poseCoach,
-      limiteAssistentes: limiteAssistentes ?? this.limiteAssistentes,
+      financeiro: caps['financeiro']!,
+      agenda: caps['agenda']!,
+      relatorios: caps['relatorios']!,
+      whiteLabel: caps['whiteLabel']!,
+      iaCopiloto: caps['iaCopiloto']!,
+      migracaoFoto: caps['migracaoFoto']!,
+      landingCompleta: caps['landingCompleta']!,
+      habitCoaching: caps['habitCoaching']!,
+      comunidadePrivada: caps['comunidadePrivada']!,
+      automacoes: caps['automacoes']!,
+      automacoesAvancadas: caps['automacoesAvancadas']!,
+      comunidadeGrupos: caps['comunidadeGrupos']!,
+      equipeRbac: caps['equipeRbac']!,
+      lojaDigital: caps['lojaDigital']!,
+      poseCoach: caps['poseCoach']!,
+      limiteAssistentes: limiteAssistentes,
       alunosAtivos: alunosAtivos,
       iaUsadaMes: iaUsadaMes,
       limiteMigracaoFotoMensal: limiteMigracaoFotoMensal,
@@ -501,6 +525,32 @@ class PlanoFeatures {
     equipeRbac: false,
     lojaDigital: false,
     poseCoach: false,
+  );
+
+  static const optimisticEnterprisePro = PlanoFeatures(
+    plano: SubscriptionPlan.ENTERPRISE_PRO,
+    fromCache: true,
+    syncWarning:
+        'Nao foi possivel confirmar o plano agora. Acesso Pro liberado em modo seguro enquanto sincroniza.',
+    limiteAlunos: null,
+    limiteIaMensal: 400,
+    financeiro: true,
+    agenda: true,
+    relatorios: true,
+    whiteLabel: true,
+    iaCopiloto: true,
+    migracaoFoto: true,
+    landingCompleta: true,
+    habitCoaching: true,
+    comunidadePrivada: true,
+    automacoes: true,
+    automacoesAvancadas: true,
+    comunidadeGrupos: true,
+    equipeRbac: true,
+    lojaDigital: true,
+    poseCoach: true,
+    limiteAssistentes: null,
+    limiteMigracaoFotoMensal: 50,
   );
 
   static const optimisticEnterprise = PlanoFeatures(

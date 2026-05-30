@@ -36,7 +36,7 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
   Future<void> bootstrap() async {
     final cached = await _repo.loadCachedPlanoFeatures();
     if (cached != null) {
-      state = AsyncData(cached.withTierCeiling());
+      state = AsyncData(cached.normalizeForTier());
       unawaited(
         AnalyticsService.instance.track(
           ProductEvents.planGateStaleUsed,
@@ -63,11 +63,11 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
 
     try {
       final fresh = await _fetchWithRetry();
-      state = AsyncData(fresh.withTierCeiling());
+      state = AsyncData(fresh.normalizeForTier());
     } catch (error) {
       if (previous != null) {
         state = AsyncData(
-          previous.withTierCeiling().copyWithOperationalState(
+          previous.normalizeForTier().copyWithOperationalState(
             fromCache: true,
             syncWarning:
                 'Nao foi possivel confirmar o plano agora. Mantivemos o ultimo acesso salvo.',
@@ -84,7 +84,7 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
         final fallback = (forAluno
                 ? PlanoFeatures.optimisticAluno
                 : PlanoFeatures.optimisticEnterprise)
-            .withTierCeiling();
+            .normalizeForTier();
         state = AsyncData(fallback);
         unawaited(
           AnalyticsService.instance.track(

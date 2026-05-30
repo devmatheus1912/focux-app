@@ -47,7 +47,7 @@ class FeatureGate extends ConsumerWidget {
       final fallback = (isAluno
               ? PlanoFeatures.optimisticAluno
               : PlanoFeatures.optimisticEnterprise)
-          .withTierCeiling();
+          .normalizeForTier();
       return _buildGatedContent(
         context: context,
         ref: ref,
@@ -64,7 +64,7 @@ class FeatureGate extends ConsumerWidget {
       return const Center(child: FxLoading());
     }
 
-    final gated = features.withTierCeiling();
+    final gated = features.normalizeForTier();
 
     return _buildGatedContent(
       context: context,
