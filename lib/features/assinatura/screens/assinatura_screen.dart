@@ -120,6 +120,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   bool _loadingTrial = false;
   bool _restoringPurchases = false;
   bool _paymentBlocked = false;
+  bool _upgradeOffersExpanded = false;
   SubscriptionBillingPeriod _billingPeriod = SubscriptionBillingPeriod.yearly;
 
   Future<void> _checkDeviceSecurity() async {
@@ -931,6 +932,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   planDisplayLabel: heroPlanLabel,
                   isMaxTier: isMaxTier,
                   hasUpgradePath: hasUpgradeAbove,
+                  viewingCurrentPlan: isCurrentPlanSelected,
                 ),
                 if (isAcquisition)
                   PaywallQuickNav(
@@ -959,7 +961,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                             : isMaxTier
                             ? 'Plano máximo · gerencie na loja'
                             : hasUpgradeAbove
-                            ? 'Upgrade no card · downgrade na loja'
+                            ? (isCurrentPlanSelected
+                                ? 'Seu plano · upgrade opcional recolhido'
+                                : 'Upgrade no card · downgrade na loja')
                             : 'Gerencie na loja do dispositivo',
                     ink: ink,
                     mute: mute,
@@ -1089,6 +1093,25 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                                 currentPlan.level,
                           )
                           .toList();
+                  final currentTierPlans = upgradePlans
+                      .where(
+                        (p) => subscriptionPlanFromApi(p.nome) == currentPlan,
+                      )
+                      .toList();
+                  final upperTierPlans = upgradePlans
+                      .where(
+                        (p) =>
+                            subscriptionPlanFromApi(p.nome).level >
+                            currentPlan.level,
+                      )
+                      .toList();
+                  final showUpgradeAccordion =
+                      !isAcquisition &&
+                      upperTierPlans.isNotEmpty &&
+                      currentPlan != SubscriptionPlan.FREE;
+                  final upgradeExpanded =
+                      _upgradeOffersExpanded ||
+                      selPlan.level > currentPlan.level;
                   final lowerPlans =
                       visiblePlans
                           .where(
@@ -1099,7 +1122,44 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                           .toList();
 
                   return [
-                    ...upgradePlans.map((p) => planCard(p)),
+                    ...currentTierPlans.map((p) => planCard(p)),
+                    if (showUpgradeAccordion)
+                      Theme(
+                        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          key: const ValueKey('paywall_upgrade_accordion'),
+                          tilePadding: EdgeInsets.zero,
+                          initiallyExpanded: upgradeExpanded,
+                          onExpansionChanged: (open) {
+                            setState(() => _upgradeOffersExpanded = open);
+                            final tier = nextTierPlan;
+                            if (open && tier != null) _selectPlan(tier);
+                          },
+                          title: Text(
+                            nextTierPlan == null
+                                ? 'Upgrade disponível'
+                                : 'Upgrade disponível — ${PaywallCatalog.displayPlanName(nextTierPlan)}',
+                            style: TokensStrip.body(color: ink).copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Preços e benefícios na ${subscriptionChannelLabel()}',
+                            style: TokensStrip.bodyMuted(
+                              color: PaywallCatalog.readableSecondary(
+                                ink,
+                                mute,
+                                isDark: isDark,
+                              ),
+                            ).copyWith(fontSize: 13),
+                          ),
+                          children: [
+                            for (final p in upperTierPlans) planCard(p),
+                          ],
+                        ),
+                      )
+                    else
+                      ...upperTierPlans.map((p) => planCard(p)),
                     if (lowerPlans.isNotEmpty && currentPlan != SubscriptionPlan.FREE)
                       Theme(
                         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -1462,7 +1522,7 @@ class _AssinaturaStickyFooter extends StatelessWidget {
         ],
         if (showLegalConsent) ...[
           const SizedBox(height: 10),
-          _PaywallLegalConsentLine(mute: mute, primary: primary),
+          _PaywallLegalConsentLine(ink: ink, mute: mute, primary: primary),
         ],
       ],
     );

@@ -26,6 +26,7 @@ class PaywallHero extends StatelessWidget {
   final String? planDisplayLabel;
   final bool isMaxTier;
   final bool hasUpgradePath;
+  final bool viewingCurrentPlan;
 
   const PaywallHero({
     super.key,
@@ -37,6 +38,7 @@ class PaywallHero extends StatelessWidget {
     this.planDisplayLabel,
     this.isMaxTier = false,
     this.hasUpgradePath = true,
+    this.viewingCurrentPlan = false,
   });
 
   bool get _isSubscriber =>
@@ -49,7 +51,10 @@ class PaywallHero extends StatelessWidget {
     if (!hasUpgradePath) {
       return 'Gerencie a assinatura na loja do dispositivo.';
     }
-    return 'Gerencie a assinatura ou faça upgrade no card abaixo.';
+    if (viewingCurrentPlan) {
+      return 'Plano ativo. Recursos abaixo; upgrade opcional está recolhido.';
+    }
+    return 'Toque em upgrade disponível ou gerencie na loja.';
   }
 
   @override
@@ -99,7 +104,9 @@ class PaywallHero extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               _subscriberSubtitle,
-              style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 14),
+              style: TokensStrip.bodyMuted(
+                color: PaywallCatalog.readableSecondary(ink, mute, isDark: isDark),
+              ).copyWith(fontSize: 14, height: 1.4),
             ),
           ],
         ),
@@ -313,7 +320,44 @@ class PaywallSubscriberQuickCompare extends StatelessWidget {
       isDark: isDark,
       initiallyExpanded: initiallyExpanded,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    'Recurso',
+                    style: TokensStrip.bodyMuted(
+                      color: PaywallCatalog.readableSecondary(ink, mute, isDark: isDark),
+                    ).copyWith(fontSize: 11, fontWeight: FontWeight.w700),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    PaywallCatalog.displayPlanName(currentPlan),
+                    textAlign: TextAlign.center,
+                    style: TokensStrip.bodyMuted(
+                      color: PaywallCatalog.readableSecondary(ink, mute, isDark: isDark),
+                    ).copyWith(fontSize: 10, fontWeight: FontWeight.w700),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    targetLabel,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: PaywallCatalog.accentForPlan(targetPlan!),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           for (final row in rows)
             Container(
               margin: const EdgeInsets.only(bottom: 8),
@@ -359,7 +403,9 @@ class PaywallSubscriberQuickCompare extends StatelessWidget {
             catalogFromApi
                 ? 'Comparativo sincronizado com o servidor.'
                 : 'Tabela completa e ROI no site quando disponível.',
-            style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 12),
+            style: TokensStrip.bodyMuted(
+              color: PaywallCatalog.readableSecondary(ink, mute, isDark: isDark),
+            ).copyWith(fontSize: 12),
           ),
         ],
       ),
@@ -794,6 +840,7 @@ class PaywallRichPlanCard extends StatelessWidget {
     final badge = PaywallCatalog.badgeFor(plano, plan);
     final planTitle = PaywallCatalog.displayNameFor(plano, plan);
     final planSubtitle = PaywallCatalog.subtitleFor(plano, plan);
+    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
     final roiTag = PaywallCatalog.roiTagFor(plano, plan);
     final sections = PaywallCatalog.featureSectionsForPlan(plano, plan);
     final motion = TokensStrip.prefersReducedMotion(context)
@@ -882,12 +929,13 @@ class PaywallRichPlanCard extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             planSubtitle,
-                            style: TokensStrip.bodyMuted(color: mute),
+                            style: TokensStrip.bodyMuted(color: secondary),
                           ),
                           const SizedBox(height: 12),
                           if (!isCurrent && plan != SubscriptionPlan.FREE)
                             hideUpgradePricing
                                 ? _StoreBillingHint(
+                                    ink: ink,
                                     mute: mute,
                                     line: line,
                                     isDark: isDark,
@@ -970,7 +1018,7 @@ class PaywallRichPlanCard extends StatelessWidget {
                             const SizedBox(height: 8),
                             Text(
                               PaywallCatalog.descriptionForPlan(plan),
-                              style: TokensStrip.bodyMuted(color: mute).copyWith(
+                              style: TokensStrip.bodyMuted(color: secondary).copyWith(
                                 fontSize: 13,
                               ),
                             ),
@@ -1004,7 +1052,7 @@ class PaywallRichPlanCard extends StatelessWidget {
                             const SizedBox(height: 4),
                             Text(
                               'Detalhes completos no painel abaixo.',
-                              style: TokensStrip.bodyMuted(color: mute).copyWith(
+                              style: TokensStrip.bodyMuted(color: secondary).copyWith(
                                 fontSize: 12,
                               ),
                             ),
@@ -1265,11 +1313,13 @@ class _PriceBox extends StatelessWidget {
 }
 
 class _StoreBillingHint extends StatelessWidget {
+  final Color ink;
   final Color mute;
   final Color line;
   final bool isDark;
 
   const _StoreBillingHint({
+    required this.ink,
     required this.mute,
     required this.line,
     required this.isDark,
@@ -1295,7 +1345,9 @@ class _StoreBillingHint extends StatelessWidget {
             child: Text(
               'Preços e upgrade disponíveis na ${subscriptionChannelLabel()} '
               'deste dispositivo. Abra a loja para concluir.',
-              style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 13),
+              style: TokensStrip.bodyMuted(
+                color: PaywallCatalog.readableSecondary(ink, mute, isDark: isDark),
+              ).copyWith(fontSize: 13),
             ),
           ),
         ],
@@ -1361,6 +1413,8 @@ class PaywallSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: Row(
@@ -1374,7 +1428,7 @@ class PaywallSectionHeader extends StatelessWidget {
               child: Text(
                 note!,
                 textAlign: TextAlign.end,
-                style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 13),
+                style: TokensStrip.bodyMuted(color: secondary).copyWith(fontSize: 13),
               ),
             ),
         ],
@@ -1529,20 +1583,22 @@ class _PlanChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final onChip = isDark ? color.withValues(alpha: 0.95) : color.withValues(alpha: 0.9);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withValues(alpha: 0.38)),
+        border: Border.all(color: color.withValues(alpha: isDark ? 0.45 : 0.55)),
         color: color.withValues(alpha: 0.13),
       ),
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 9,
+          fontSize: 10,
           fontWeight: FontWeight.w900,
-          letterSpacing: 0.8,
-          color: color,
+          letterSpacing: 0.6,
+          color: onChip,
         ),
       ),
     );

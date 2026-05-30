@@ -16,6 +16,10 @@ class PaywallCatalog {
   static const Color green = Color(0xFF4ADE80);
   static const Color warning = Color(0xFFB5760A);
 
+  /// Texto secundário com contraste AA em fundos claros (ui-ux-pro-max).
+  static Color readableSecondary(Color ink, Color mute, {required bool isDark}) =>
+      isDark ? mute.withValues(alpha: 0.92) : ink.withValues(alpha: 0.58);
+
   static Color accentForPlan(SubscriptionPlan plan) => switch (plan) {
     SubscriptionPlan.PREMIUM => brand,
     SubscriptionPlan.ENTERPRISE => gold,

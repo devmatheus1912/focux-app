@@ -2,8 +2,8 @@ part of 'assinatura_screen.dart';
 
 // ─── Paywall Focux — funil IAP mobile ───────────────────────────────────────
 
-Color _paywallSecondaryText(Color mute, {required bool isDark}) =>
-    mute.withValues(alpha: isDark ? 0.78 : 0.72);
+Color _paywallSecondaryText(Color ink, Color mute, {required bool isDark}) =>
+    PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
 
 Duration _paywallMotion(BuildContext context) =>
     TokensStrip.prefersReducedMotion(context)
@@ -180,7 +180,7 @@ class _PaywallFeaturePanel extends StatelessWidget {
     final isUpgrade = plan.level > currentPlan.level;
     final isDowngrade = plan.level < currentPlan.level;
     final motion = _paywallMotion(context);
-    final secondary = _paywallSecondaryText(mute, isDark: isDark);
+    final secondary = _paywallSecondaryText(ink, mute, isDark: isDark);
     final planLabel = PaywallCatalog.displayNameFor(plano, plan);
     final currentLabel = PaywallCatalog.displayNameFor(currentPlano, currentPlan);
     final checkColor =
@@ -360,10 +360,12 @@ class _PaywallInlineNote extends StatelessWidget {
 }
 
 class _PaywallLegalConsentLine extends StatelessWidget {
+  final Color ink;
   final Color mute;
   final Color primary;
 
   const _PaywallLegalConsentLine({
+    required this.ink,
     required this.mute,
     required this.primary,
   });
@@ -380,7 +382,7 @@ class _PaywallLegalConsentLine extends StatelessWidget {
       height: 1.35,
     );
     final body = TokensStrip.bodyMuted(
-      color: _paywallSecondaryText(mute, isDark: isDark),
+      color: _paywallSecondaryText(ink, mute, isDark: isDark),
     ).copyWith(fontSize: 11);
 
     return Semantics(
@@ -445,7 +447,7 @@ class _PaywallLegalFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final secondary = _paywallSecondaryText(mute, isDark: isDark);
+    final secondary = _paywallSecondaryText(ink, mute, isDark: isDark);
 
     return Column(
       children: [
