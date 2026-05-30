@@ -75,6 +75,21 @@ void main() {
     );
     expect(entPro.length, 3);
     expect(entPro.any((s) => s.title.contains('Landing')), isTrue);
+
+    final enterprise = PaywallCatalog.featureSectionsForPlan(
+      _mockPlano('ENTERPRISE'),
+      SubscriptionPlan.ENTERPRISE,
+    );
+    expect(
+      enterprise.any((s) => s.title.contains('Landing page · Enterprise Pro')),
+      isTrue,
+    );
+    expect(
+      enterprise
+          .expand((s) => s.items)
+          .any((i) => i.label.contains('Editor completo') && !i.included),
+      isTrue,
+    );
   });
 
   test('modalMessageFor maps capabilities to trigger copy', () {

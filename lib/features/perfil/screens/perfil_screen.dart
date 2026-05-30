@@ -23,6 +23,7 @@ import '../../dashboard/providers/dashboard_provider.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../utils/perfil_readiness.dart';
+import '../../subscription/utils/landing_editor_access.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -154,6 +155,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                   onPickPhoto: _pickAndUploadPhoto,
                   onEditPerfil: () => _openEditPerfil(perfil),
                   onLogout: _logout,
+                  onOpenLandingEditor: () => openLandingEditorOrUpgrade(context, ref),
                   onChecklistAction:
                       (action) => _handleChecklistAction(action, perfil),
                 ),
@@ -176,6 +178,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                   onPickPhoto: _pickAndUploadPhoto,
                   onEditPerfil: () => _openEditPerfil(perfil),
                   onLogout: _logout,
+                  onOpenLandingEditor: () => openLandingEditorOrUpgrade(context, ref),
                   onChecklistAction:
                       (action) => _handleChecklistAction(action, perfil),
                 ),
@@ -187,6 +190,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                   onPickPhoto: _pickAndUploadPhoto,
                   onEditPerfil: () => _openEditPerfil(perfil),
                   onLogout: _logout,
+                  onOpenLandingEditor: () => openLandingEditorOrUpgrade(context, ref),
                   onChecklistAction:
                       (action) => _handleChecklistAction(action, perfil),
                 ),
@@ -317,6 +321,7 @@ class _PerfilBody extends StatelessWidget {
   final VoidCallback onPickPhoto;
   final VoidCallback onEditPerfil;
   final VoidCallback onLogout;
+  final VoidCallback onOpenLandingEditor;
   final void Function(PerfilChecklistAction action) onChecklistAction;
 
   const _PerfilBody({
@@ -327,6 +332,7 @@ class _PerfilBody extends StatelessWidget {
     required this.onPickPhoto,
     required this.onEditPerfil,
     required this.onLogout,
+    required this.onOpenLandingEditor,
     required this.onChecklistAction,
   });
 
@@ -695,7 +701,7 @@ class _PerfilBody extends StatelessWidget {
                                 child: TextButton.icon(
                                   onPressed: () {
                                     HapticFeedback.selectionClick();
-                                    context.push('/perfil/landing-editor');
+                                    onOpenLandingEditor();
                                   },
                                   icon: const Icon(Icons.language_outlined),
                                   label: Text(
@@ -795,6 +801,46 @@ class _PerfilBody extends StatelessWidget {
                             mute: mute,
                             line: line,
                             onTap: () => context.push('/migracao-magica'),
+                          ),
+                          _ActionTile(
+                            icon: Icons.smart_toy_outlined,
+                            label: 'Automações',
+                            value: 'Fluxos e templates',
+                            accent: accent,
+                            actionInk: actionInk,
+                            mute: mute,
+                            line: line,
+                            onTap: () => context.push('/automacoes'),
+                          ),
+                          _ActionTile(
+                            icon: Icons.emoji_events_outlined,
+                            label: 'Desafios',
+                            value: 'Ranking da comunidade',
+                            accent: accent,
+                            actionInk: actionInk,
+                            mute: mute,
+                            line: line,
+                            onTap: () => context.push('/desafios'),
+                          ),
+                          _ActionTile(
+                            icon: Icons.storefront_outlined,
+                            label: 'Loja digital',
+                            value: 'Vitrine e pedidos PIX',
+                            accent: accent,
+                            actionInk: actionInk,
+                            mute: mute,
+                            line: line,
+                            onTap: () => context.push('/loja'),
+                          ),
+                          _ActionTile(
+                            icon: Icons.groups_outlined,
+                            label: 'Equipe',
+                            value: 'Assistentes e RBAC',
+                            accent: accent,
+                            actionInk: actionInk,
+                            mute: mute,
+                            line: line,
+                            onTap: () => context.push('/perfil/equipe'),
                           ),
                           _ActionTile(
                             icon: Icons.description_outlined,

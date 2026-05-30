@@ -80,6 +80,10 @@ import '../../features/monetizacao/screens/ofertas_upsell_screen.dart';
 import '../../features/monetizacao/screens/cancel_save_screen.dart';
 import '../../features/habitos/screens/habitos_personal_screen.dart';
 import '../../features/habitos/screens/habitos_aluno_screen.dart';
+import '../../features/automacoes/screens/automacoes_screen.dart';
+import '../../features/desafios/screens/desafios_screen.dart';
+import '../../features/loja/screens/loja_screen.dart';
+import '../../features/perfil/screens/equipe_screen.dart';
 import '../../features/pacotes/screens/pacotes_screen.dart';
 import '../../features/recorrencia/screens/recorrencia_screen.dart';
 import '../../features/recorrencia/screens/recorrencia_aluno_screen.dart';
@@ -778,6 +782,22 @@ class AppRouter {
           GoRoute(
             path: '/habitos',
             builder: (context, state) => const HabitosPersonalScreen(),
+          ),
+          GoRoute(
+            path: '/automacoes',
+            builder: (context, state) => const AutomacoesScreen(),
+          ),
+          GoRoute(
+            path: '/desafios',
+            builder: (context, state) => const DesafiosScreen(),
+          ),
+          GoRoute(
+            path: '/loja',
+            builder: (context, state) => const LojaScreen(),
+          ),
+          GoRoute(
+            path: '/perfil/equipe',
+            builder: (context, state) => const EquipeScreen(),
           ),
           GoRoute(
             path: '/pacotes',

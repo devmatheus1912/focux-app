@@ -11,8 +11,9 @@ class PaywallCatalog {
   PaywallCatalog._();
 
   static const Color brand = Color(0xFF13C2C2);
+  /// Teal profundo — tier ENTERPRISE PRO (harmoniza com CTA; não compete com ouro).
+  static const Color brandDeep = Color(0xFF0D9494);
   static const Color gold = Color(0xFFE5B84C);
-  static const Color purple = Color(0xFFA78BFA);
   static const Color green = Color(0xFF4ADE80);
   static const Color warning = Color(0xFFB5760A);
 
@@ -38,9 +39,32 @@ class PaywallCatalog {
   static Color accentForPlan(SubscriptionPlan plan) => switch (plan) {
     SubscriptionPlan.PREMIUM => brand,
     SubscriptionPlan.ENTERPRISE => gold,
-    SubscriptionPlan.ENTERPRISE_PRO => purple,
+    SubscriptionPlan.ENTERPRISE_PRO => brandDeep,
     _ => const Color(0xFF7A8A96),
   };
+
+  /// Labels e ícones do tier em card claro (contraste AA, independente da marca do personal).
+  static Color tierAccentOnSurface(
+    SubscriptionPlan plan, {
+    required bool isDark,
+  }) {
+    if (isDark) return accentForPlan(plan);
+    return switch (plan) {
+      SubscriptionPlan.ENTERPRISE => const Color(0xFF8A6914),
+      SubscriptionPlan.ENTERPRISE_PRO => const Color(0xFF066666),
+      SubscriptionPlan.PREMIUM => brandDeep,
+      _ => accentForPlan(plan),
+    };
+  }
+
+  /// Versão por [accent] (seções internas do card sem [SubscriptionPlan]).
+  static Color readableTierAccent(Color accent, {required bool isDark}) {
+    if (isDark) return accent;
+    if (accent == gold) return const Color(0xFF8A6914);
+    if (accent == brandDeep) return const Color(0xFF066666);
+    if (accent == brand) return brandDeep;
+    return accent;
+  }
 
   static String? badgeForPlan(SubscriptionPlan plan) => switch (plan) {
     SubscriptionPlan.PREMIUM => 'MAIS POPULAR',
@@ -98,9 +122,9 @@ class PaywallCatalog {
     SubscriptionPlan.PREMIUM =>
       'Para o personal que quer organizar, cobrar e reter alunos.',
     SubscriptionPlan.ENTERPRISE =>
-      'Alunos ilimitados + white-label + sua identidade no app.',
+      'Alunos ilimitados + white-label + CRM. Landing completa no Enterprise Pro.',
     SubscriptionPlan.ENTERPRISE_PRO =>
-      'Tudo do Enterprise + landing completa + loja digital (em breve).',
+      'Tudo do Enterprise + landing completa + loja digital com PIX.',
   };
 
   static const List<({String value, String label})> socialProof = [
@@ -114,7 +138,7 @@ class PaywallCatalog {
     (value: '25%+', label: 'Lucro com +5% retenção', color: gold),
     (value: 'R\$ 8.000', label: 'MRR com 20 alunos', color: green),
     (value: '< 1%', label: 'Faturamento = Premium', color: brand),
-    (value: 'R\$ 50/mês', label: 'Substitui R\$ 1–3k agência', color: purple),
+    (value: 'R\$ 50/mês', label: 'Substitui R\$ 1–3k agência', color: brandDeep),
     (value: '40%', label: 'Menos inadimplência c/ PIX', color: green),
   ];
 
@@ -400,19 +424,19 @@ class PaywallCatalog {
       label: 'Landing page completa',
       value: 'Poupa R\$ 1k–3k de agência',
       planChip: 'ENT. PRO',
-      color: purple,
+      color: brandDeep,
     ),
     PaywallRoiRow(
       label: 'Link na bio que converte',
       value: 'Lead → aluno 24h/dia',
       planChip: 'ENT. PRO',
-      color: purple,
+      color: brandDeep,
     ),
     PaywallRoiRow(
       label: 'Loja de programas digitais ✦',
       value: 'Receita passiva enquanto dorme',
       planChip: 'ENT. PRO',
-      color: purple,
+      color: brandDeep,
     ),
   ];
 
@@ -466,7 +490,7 @@ class PaywallCatalog {
       icon: Icons.language_rounded,
       title: 'Landing page COMPLETA',
       badge: 'MÁXIMO ROI',
-      badgeColor: purple,
+      badgeColor: brandDeep,
       description:
           'Depoimentos, galeria, FAQ e formulário. Link na bio que vende 24h/dia.',
       roiMoney: 'Poupa R\$ 1k–3k de agência — por +R\$ 50/mês',
@@ -487,45 +511,41 @@ class PaywallCatalog {
       rank: 7,
       icon: Icons.track_changes_rounded,
       title: 'Habit Coaching ✦',
-      badge: 'EM BREVE',
-      badgeColor: warning,
+      badge: 'LIVE',
+      badgeColor: green,
       description: 'Hábitos diários: água, sono, passos. Acompanhe a vida, não só o treino.',
       roiMoney: 'Personais que acompanham hábitos retêm 35% mais',
       planChips: ['PREMIUM', 'ENTERPRISE', 'ENT. PRO'],
-      comingSoon: true,
     ),
     PaywallTopFeature(
       rank: 8,
       icon: Icons.accessibility_new_rounded,
       title: 'Pose Coach — análise de postura ✦',
-      badge: 'EM BREVE',
-      badgeColor: warning,
+      badge: 'LIVE',
+      badgeColor: green,
       description: 'Análise de postura por ML em tempo real. Nenhum app nacional chega perto.',
       roiMoney: 'Diferencial sem custo extra — ML na stack',
       planChips: ['ENT. PRO'],
-      comingSoon: true,
     ),
     PaywallTopFeature(
       rank: 9,
       icon: Icons.storefront_outlined,
       title: 'Loja de programas digitais ✦',
-      badge: 'EM BREVE',
-      badgeColor: warning,
+      badge: 'LIVE',
+      badgeColor: green,
       description: 'Venda treinos avulsos e desafios com checkout PIX integrado.',
       roiMoney: 'Receita passiva enquanto dorme',
       planChips: ['ENT. PRO'],
-      comingSoon: true,
     ),
     PaywallTopFeature(
       rank: 10,
       icon: Icons.groups_outlined,
       title: 'Equipe & RBAC ✦',
-      badge: 'EM BREVE',
-      badgeColor: warning,
+      badge: 'LIVE',
+      badgeColor: green,
       description: 'Assistentes ou sócios com permissões granulares. Escala com controle.',
       roiMoney: 'Escala sem contratar full-time',
       planChips: ['ENTERPRISE', 'ENT. PRO'],
-      comingSoon: true,
     ),
   ];
 

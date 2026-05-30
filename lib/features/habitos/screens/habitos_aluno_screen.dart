@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../core/widgets/feature_gate.dart';
+import '../../../features/subscription/models/subscription_plan.dart';
 import '../data/habito_repository.dart';
 
 final _repoProvider = Provider(
@@ -20,6 +24,7 @@ class HabitosAlunoScreen extends ConsumerStatefulWidget {
 class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
   List<Habito> _habitos = [];
   bool _loading = true;
+  String? _error;
 
   @override
   void initState() {
@@ -28,7 +33,10 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
   }
 
   Future<void> _carregar() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
       final lista = await ref.read(_repoProvider).meusHabitos();
       if (!mounted) return;
@@ -36,14 +44,18 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
         _habitos = lista;
         _loading = false;
       });
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = friendlyError(e);
+      });
     }
   }
 
   Future<void> _toggle(Habito h) async {
     try {
-      final novo = await ref.read(_repoProvider).toggleHoje(h.id);
+      final result = await ref.read(_repoProvider).toggleHoje(h.id);
       setState(() {
         _habitos = _habitos
             .map((x) => x.id == h.id
@@ -52,44 +64,53 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                     titulo: x.titulo,
                     descricao: x.descricao,
                     icone: x.icone,
+                    tipo: x.tipo,
+                    metaDiaria: x.metaDiaria,
                     metaSemanal: x.metaSemanal,
-                    feitosNaSemana: novo
+                    feitosNaSemana: result.feito
                         ? x.feitosNaSemana + 1
                         : (x.feitosNaSemana - 1).clamp(0, 7),
-                    feitoHoje: novo,
+                    feitoHoje: result.feito,
+                    streakAtual: result.streak,
+                    badgeSemana: result.streak >= 7,
                   )
                 : x)
             .toList();
       });
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(content: Text('Erro: $e')),
-      );
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return FeatureGate(
+      featureName: 'Habit Coaching',
+      requiredPlan: SubscriptionPlan.PREMIUM,
+      capability: 'habitCoaching',
+      child: Scaffold(
       appBar: AppBar(title: const Text('Meus hábitos')),
       body: _loading
           ? const Center(child: FxLoading())
-          : RefreshIndicator(
+          : _error != null
+              ? FxEmptyState(
+                  icon: 'alert-triangle',
+                  title: 'Erro ao carregar',
+                  subtitle: _error,
+                  action: FxEmptyAction(label: 'Tentar novamente', onTap: _carregar),
+                )
+              : RefreshIndicator(
               onRefresh: _carregar,
               child: _habitos.isEmpty
                   ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       children: const [
-                        SizedBox(height: 100),
-                        Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(32),
-                            child: Text(
-                              'Seu personal ainda não cadastrou hábitos.\nAvise para começar a sua jornada de consistência.',
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
+                        FxEmptyState(
+                          icon: 'dumbbell',
+                          title: 'Nenhum hábito ainda',
+                          subtitle:
+                              'Seu personal ainda não cadastrou hábitos. Avise para começar sua jornada.',
                         ),
                       ],
                     )
@@ -107,9 +128,14 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                               padding: const EdgeInsets.all(16),
                               child: Row(
                                 children: [
-                                  Checkbox(
-                                    value: h.feitoHoje,
-                                    onChanged: (_) => _toggle(h),
+                                  Semantics(
+                                    label: h.feitoHoje
+                                        ? 'Desmarcar hábito ${h.titulo}'
+                                        : 'Marcar hábito ${h.titulo}',
+                                    child: Checkbox(
+                                      value: h.feitoHoje,
+                                      onChanged: (_) => _toggle(h),
+                                    ),
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(
@@ -145,6 +171,24 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 10, vertical: 4),
                                     decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primaryContainer,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      '🔥 ${h.streakAtual}',
+                                      style: const TextStyle(
+                                          color: Colors.orange,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w800),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
                                       color: Colors.green.withValues(alpha: .12),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
@@ -164,6 +208,7 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                       },
                     ),
             ),
+      ),
     );
   }
 }

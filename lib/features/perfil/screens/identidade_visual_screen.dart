@@ -16,6 +16,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
+import '../../subscription/utils/landing_editor_access.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -176,9 +177,11 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
 
     final chrome = ShellChrome.of(context);
     final plano = perfil?.plano ?? 'FREE';
-    final isEnterprise = plano.toUpperCase() == 'ENTERPRISE';
+    final planUpper = plano.toUpperCase();
+    final isEnterprise =
+        planUpper == 'ENTERPRISE' || planUpper == 'ENTERPRISE_PRO';
     final isPremiumOrAbove =
-        ['PREMIUM', 'ENTERPRISE'].contains(plano.toUpperCase());
+        ['PREMIUM', 'ENTERPRISE', 'ENTERPRISE_PRO'].contains(planUpper);
     final nomePersonal = perfil?.nome ?? '';
 
     return FxShellScaffold(
@@ -236,11 +239,12 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
                           paletteName: _palette.name,
                         ),
                         const SizedBox(height: 12),
-                        OutlinedButton.icon(
-                          onPressed: () => context.push('/perfil/landing-editor'),
-                          icon: const Icon(Icons.language_outlined),
-                          label: const Text('Editor da landing pública'),
-                        ),
+                        if (isEnterprise)
+                          OutlinedButton.icon(
+                            onPressed: () => openLandingEditorOrUpgrade(context, ref),
+                            icon: const Icon(Icons.language_outlined),
+                            label: const Text('Editor da landing (Enterprise Pro)'),
+                          ),
                         const SizedBox(height: TokensStrip.s4),
                         ShellSurface(
                           accent: _corPrimaria,

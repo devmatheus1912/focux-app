@@ -39,19 +39,28 @@ import '../../../core/theme/tokens_strip.dart';
 
 part 'paywall_layout.dart';
 
-/// Preview de upgrade só quando há dados úteis para quem ainda não é Enterprise.
+/// Preview de upgrade quando há dados úteis para o tier selecionado.
 bool _enterprisePreviewIsInformative(
   EnterpriseUpgradePreview preview,
   SubscriptionPlan currentPlan,
   SubscriptionPlan selectedPlan,
 ) {
-  if (currentPlan == SubscriptionPlan.ENTERPRISE) return false;
-  if (selectedPlan != SubscriptionPlan.ENTERPRISE) return false;
-  if (preview.planoDestino != SubscriptionPlan.ENTERPRISE) return false;
+  if (selectedPlan.level <= currentPlan.level) return false;
+  if (preview.planoDestino != selectedPlan) return false;
   return preview.cobrancaImediata ||
       preview.diasRestantes > 0 ||
       preview.valorProporcional > 0 ||
       preview.diferencaDiaria > 0;
+}
+
+bool _shouldLoadEnterprisePreview(
+  SubscriptionPlan currentPlan,
+  SubscriptionPlan selectedPlan,
+) {
+  if (selectedPlan.level <= currentPlan.level) return false;
+  return selectedPlan == SubscriptionPlan.ENTERPRISE ||
+      (currentPlan == SubscriptionPlan.ENTERPRISE &&
+          selectedPlan == SubscriptionPlan.ENTERPRISE_PRO);
 }
 
 /// Plano pré-selecionado: atual por padrão; deep link só se for upgrade válido.
@@ -104,6 +113,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
   final ScrollController _paywallScrollController = ScrollController();
   final GlobalKey _paywallPlanosKey = GlobalKey();
+  final GlobalKey _paywallUpgradeKey = GlobalKey();
+  final GlobalKey _paywallCompareKey = GlobalKey();
+  final GlobalKey _paywallLegalKey = GlobalKey();
+  final GlobalKey _paywallUpgradeTargetKey = GlobalKey();
 
   String? _selectedPlanName;
   bool _loadingCheckout = false;
@@ -243,7 +256,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   }
 
   void _scrollToPaywallSection(PaywallScrollTarget target) {
-    if (target != PaywallScrollTarget.planos) {
+    if (target == PaywallScrollTarget.features ||
+        target == PaywallScrollTarget.roi) {
       HapticFeedback.selectionClick();
       if (FocuxLegal.plansMarketingWebLive) {
         unawaited(FocuxLegal.openPlansMarketing());
@@ -259,7 +273,18 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       }
       return;
     }
-    final ctx = _paywallPlanosKey.currentContext;
+
+    final GlobalKey anchorKey = switch (target) {
+      PaywallScrollTarget.planos || PaywallScrollTarget.seuPlano =>
+        _paywallPlanosKey,
+      PaywallScrollTarget.upgrade => _paywallUpgradeKey,
+      PaywallScrollTarget.comparar => _paywallCompareKey,
+      PaywallScrollTarget.legal => _paywallLegalKey,
+      PaywallScrollTarget.features || PaywallScrollTarget.roi =>
+        _paywallPlanosKey,
+    };
+
+    final ctx = anchorKey.currentContext;
     if (ctx == null) return;
     HapticFeedback.selectionClick();
     final motion = TokensStrip.prefersReducedMotion(context)
@@ -270,6 +295,20 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       duration: motion,
       curve: Curves.easeOutCubic,
       alignment: 0.06,
+    );
+  }
+
+  void _scrollToUpgradeTargetCard() {
+    final ctx = _paywallUpgradeTargetKey.currentContext;
+    if (ctx == null) return;
+    final motion = TokensStrip.prefersReducedMotion(context)
+        ? Duration.zero
+        : const Duration(milliseconds: 420);
+    Scrollable.ensureVisible(
+      ctx,
+      duration: motion,
+      curve: Curves.easeOutCubic,
+      alignment: 0.12,
     );
   }
 
@@ -462,13 +501,15 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
 
     setState(() {
       _selectedPlanName = plan.apiName;
-      if (plan != SubscriptionPlan.ENTERPRISE) {
+      if (!_shouldLoadEnterprisePreview(current, plan)) {
         _enterprisePreview = null;
-        _enterprisePreviewRequested = false;
       }
+      _enterprisePreviewRequested = false;
     });
 
-    if (plan == SubscriptionPlan.ENTERPRISE) await _loadEnterprisePreview();
+    if (_shouldLoadEnterprisePreview(current, plan)) {
+      await _loadEnterprisePreview();
+    }
   }
 
   Future<void> _loadEnterprisePreview() async {
@@ -711,17 +752,16 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
             selectedPlan == SubscriptionPlan.ENTERPRISE &&
             _trialStatus?.trialEligible == true;
         final isUpgrade = selectedPlan.level > currentPlan.level;
+        final selectedLabel = PaywallCatalog.displayPlanName(selectedPlan);
         ctaLabel = trialOffer
-            ? 'Começar $trialDays dias grátis — Enterprise'
-            : isUpgrade && selectedPlan == SubscriptionPlan.ENTERPRISE_PRO
-            ? 'Fazer upgrade para Enterprise Pro'
-            : isUpgrade && selectedPlan == SubscriptionPlan.ENTERPRISE
-            ? 'Fazer upgrade para Enterprise'
+            ? 'Começar $trialDays dias grátis — ${PaywallCatalog.displayPlanName(SubscriptionPlan.ENTERPRISE)}'
+            : isUpgrade
+            ? 'Fazer upgrade para $selectedLabel'
             : selectedPlan == SubscriptionPlan.ENTERPRISE_PRO
-            ? 'Continuar com Enterprise Pro'
+            ? 'Continuar com $selectedLabel'
             : selectedPlan == SubscriptionPlan.ENTERPRISE
-            ? 'Continuar com Enterprise'
-            : 'Continuar com Premium';
+            ? 'Continuar com $selectedLabel'
+            : 'Continuar com ${PaywallCatalog.displayPlanName(SubscriptionPlan.PREMIUM)}';
         footnote =
             subscriptionUsesNativeStore
                 ? (_billingPeriod == SubscriptionBillingPeriod.yearly
@@ -741,6 +781,15 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         ? '${PaywallCatalog.displayPlanName(currentPlan)} · Ativo'
         : selectedPlan.level > currentPlan.level
         ? 'Upgrade · ${PaywallCatalog.displayPlanName(selectedPlan)}'
+        : null;
+
+    final isUpgradeSelection =
+        planos != null &&
+        subscriptionPlanFromApi(_selectedPlanName ?? currentPlan.apiName).level >
+            currentPlan.level;
+    final stickyTierAccent = isUpgradeSelection &&
+            selectedPlan == SubscriptionPlan.ENTERPRISE_PRO
+        ? PaywallCatalog.accentForPlan(SubscriptionPlan.ENTERPRISE_PRO)
         : null;
 
     if (_paymentBlocked) {
@@ -808,6 +857,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     loading: _loadingCheckout || _syncingPurchase,
                     trialHint: trialOffer,
                     showLegalConsent: ctaMode == _AssinaturaCtaMode.subscribe,
+                    isUpgrade: isUpgradeSelection,
+                    tierAccent: stickyTierAccent,
                     ink: ink,
                     mute: mute,
                     line: line,
@@ -898,8 +949,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
               nextTierPlan = tier;
             }
           }
-          if (selPlan == SubscriptionPlan.ENTERPRISE &&
-              currentPlan != SubscriptionPlan.ENTERPRISE &&
+          if (_shouldLoadEnterprisePreview(currentPlan, selPlan) &&
               !_enterprisePreviewRequested) {
             _enterprisePreviewRequested = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -917,6 +967,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 limiteIaMensal: featuresAsync.value!.limiteIaMensal,
               );
 
+          final isUpgradeTargetSelected = selPlan.level > currentPlan.level;
+          final usePlanStudio =
+              !isAcquisition && currentPlan != SubscriptionPlan.FREE;
+
           return ListView(
               controller: _paywallScrollController,
               padding: const EdgeInsets.fromLTRB(
@@ -926,19 +980,28 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 140,
               ),
               children: [
-                PaywallHero(
-                  ink: ink,
-                  mute: mute,
-                  primary: primary,
-                  isDark: isDark,
-                  currentPlan: currentPlan,
-                  planDisplayLabel: heroPlanLabel,
-                  isMaxTier: isMaxTier,
-                  hasUpgradePath: hasUpgradeAbove,
-                  viewingCurrentPlan: isCurrentPlanSelected,
-                ),
+                if (!usePlanStudio)
+                  PaywallHero(
+                    ink: ink,
+                    mute: mute,
+                    primary: primary,
+                    isDark: isDark,
+                    currentPlan: currentPlan,
+                    planDisplayLabel: heroPlanLabel,
+                    isMaxTier: isMaxTier,
+                    hasUpgradePath: hasUpgradeAbove,
+                    viewingCurrentPlan: isCurrentPlanSelected,
+                    upgradeOffersExpanded: _upgradeOffersExpanded || isUpgradeTargetSelected,
+                    upgradeTargetSelected: isUpgradeTargetSelected,
+                  ),
                 if (isAcquisition)
                   PaywallQuickNav(
+                    primary: primary,
+                    ink: isDark ? EagleTokens.darkInk : const Color(0xFF081012),
+                    onSectionTap: _scrollToPaywallSection,
+                  )
+                else if (!usePlanStudio)
+                  PaywallSubscriberQuickNav(
                     primary: primary,
                     ink: isDark ? EagleTokens.darkInk : const Color(0xFF081012),
                     onSectionTap: _scrollToPaywallSection,
@@ -954,24 +1017,25 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                       if (target != null) _selectPlan(target);
                     },
                   ),
-                PaywallSectionAnchor(
-                  anchorKey: _paywallPlanosKey,
-                  child: PaywallSectionHeader(
-                    title: 'Planos',
-                    note:
-                        isAcquisition
-                            ? 'Toque no card · Mensal ou Anual'
-                            : isMaxTier
-                            ? 'Plano máximo · gerencie na loja'
-                            : hasUpgradeAbove
-                            ? (isCurrentPlanSelected
-                                ? 'Seu plano · upgrade opcional recolhido'
-                                : 'Upgrade no card · downgrade na loja')
-                            : 'Gerencie na loja do dispositivo',
-                    ink: ink,
-                    mute: mute,
+                if (!usePlanStudio)
+                  PaywallSectionAnchor(
+                    anchorKey: _paywallPlanosKey,
+                    child: PaywallSectionHeader(
+                      title: 'Planos',
+                      note:
+                          isAcquisition
+                              ? 'Toque no card · Mensal ou Anual'
+                              : isMaxTier
+                              ? 'Plano máximo · gerencie na loja'
+                              : hasUpgradeAbove
+                              ? (isCurrentPlanSelected
+                                  ? 'Seu plano · upgrade opcional recolhido'
+                                  : 'Upgrade no card · downgrade na loja')
+                              : 'Gerencie na loja do dispositivo',
+                      ink: ink,
+                      mute: mute,
+                    ),
                   ),
-                ),
                 ...() {
                   Plano? freePlano;
                   for (final p in sortedPlans) {
@@ -996,8 +1060,16 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                         currentPlan.level,
                   );
 
-                  Widget planCard(Plano plano, {bool lockedDowngrade = false}) {
+                  Widget planCard(
+                    Plano plano, {
+                    bool lockedDowngrade = false,
+                    bool referenceOnly = false,
+                  }) {
                     final plan = subscriptionPlanFromApi(plano.nome);
+                    final isReferenceCard =
+                        referenceOnly ||
+                        (usePlanStudio &&
+                            (lockedDowngrade || plan == SubscriptionPlan.FREE));
                     final monthlyProduct = _productDetails[
                       SubscriptionProducts.productIdFor(
                         plan,
@@ -1030,21 +1102,31 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                         : const <String>[];
                     final nestedInAccordion =
                         plan != currentPlan || lockedDowngrade;
+                    final cardKey = isUpgradeTier && plan == selPlan
+                        ? _paywallUpgradeTargetKey
+                        : null;
                     return PaywallRichPlanCard(
+                      key: cardKey,
                       plano: plano,
                       plan: plan,
+                      embeddedInStudio: usePlanStudio && !lockedDowngrade,
                       isSelected: plan == selPlan && !lockedDowngrade,
                       isCurrent: plan == currentPlan,
                       isLockedDowngrade: lockedDowngrade,
-                      nestedInAccordion: nestedInAccordion,
-                      dimUnselected:
-                          hasUpgradeAbove &&
-                          plan != currentPlan &&
-                          plan != selPlan,
+                      referenceOnly: isReferenceCard,
+                      nestedInAccordion: usePlanStudio ? false : nestedInAccordion,
+                      dimUnselected: usePlanStudio
+                          ? false
+                          : hasUpgradeAbove &&
+                              plan != currentPlan &&
+                              plan != selPlan,
                       collapseFeatureDetails:
                           plan == currentPlan &&
                           currentPlan != SubscriptionPlan.FREE,
-                      compactUpsell: isUpgradeTier && upsellHighlights.isNotEmpty,
+                      compactUpsell:
+                          !usePlanStudio &&
+                          isUpgradeTier &&
+                          upsellHighlights.isNotEmpty,
                       upsellHighlights: upsellHighlights,
                       billingDisabled:
                           !storeOk &&
@@ -1057,6 +1139,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                       mute: mute,
                       line: line,
                       isDark: isDark,
+                      onFeatureHelp: () {},
                       billingPeriod:
                           plan == selPlan &&
                               !lockedDowngrade &&
@@ -1081,13 +1164,16 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                                   setState(() => _billingPeriod = period);
                                   _selectPlan(plan);
                                 },
-                      onTap:
-                          lockedDowngrade
-                              ? _handleDowngradeTierTap
-                              : () {
-                                  HapticFeedback.selectionClick();
-                                  _selectPlan(plan);
-                                },
+                      onTap: isReferenceCard
+                          ? _handleDowngradeTierTap
+                          : usePlanStudio
+                              ? null
+                              : lockedDowngrade
+                                  ? _handleDowngradeTierTap
+                                  : () {
+                                      HapticFeedback.selectionClick();
+                                      _selectPlan(plan);
+                                    },
                     );
                   }
 
@@ -1127,16 +1213,118 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                           )
                           .toList();
 
+                  if (usePlanStudio) {
+                    Widget? studioBelowPlan;
+                    if (_enterprisePreview != null &&
+                        _enterprisePreviewIsInformative(
+                          _enterprisePreview!,
+                          currentPlan,
+                          selPlan,
+                        )) {
+                      studioBelowPlan = _EnterprisePreviewCard(
+                        preview: _enterprisePreview!,
+                        primary: primary,
+                        ink: ink,
+                        mute: mute,
+                        isDark: isDark,
+                      );
+                    } else if (isUpgradeTargetSelected &&
+                        currentPlan == SubscriptionPlan.ENTERPRISE &&
+                        selPlan == SubscriptionPlan.ENTERPRISE_PRO) {
+                      studioBelowPlan = _EnterpriseProUpgradePriceHint(
+                        currentPlan: currentPlan,
+                        targetPlan: selPlan,
+                        billingPeriod: _billingPeriod,
+                        productDetails: _productDetails,
+                        currentBackend: currentBackend,
+                        targetBackend: selBackend,
+                        primary: primary,
+                        ink: ink,
+                        mute: mute,
+                        isDark: isDark,
+                      );
+                    }
+
+                    return [
+                      PaywallSectionAnchor(
+                        anchorKey: _paywallPlanosKey,
+                        child: PaywallPlanStudio(
+                          currentPlan: currentPlan,
+                          selectedPlan: selPlan,
+                          studioPlanos: upgradePlans,
+                          isMaxTier: isMaxTier,
+                          onPlanSelected: (plan) {
+                            HapticFeedback.selectionClick();
+                            setState(
+                              () => _upgradeOffersExpanded =
+                                  plan.level > currentPlan.level,
+                            );
+                            _selectPlan(plan);
+                          },
+                          planContent: planCard(selBackend),
+                          belowPlanSection: studioBelowPlan,
+                          ink: ink,
+                          mute: mute,
+                          isDark: isDark,
+                        ),
+                      ),
+                      if (lowerPlans.isNotEmpty || freePlano != null)
+                        PaywallGlassAccordion(
+                          ink: ink,
+                          mute: mute,
+                          isDark: isDark,
+                          accent: PaywallCatalog.accentForPlan(currentPlan),
+                          title: 'Outros planos',
+                          subtitle:
+                              'Downgrade e plano gratuito · só pela ${subscriptionChannelLabel()}',
+                          children: [
+                            PaywallOtherPlansIntro(
+                              ink: ink,
+                              mute: mute,
+                              isDark: isDark,
+                            ),
+                            for (var i = 0; i < lowerPlans.length; i++) ...[
+                              if (i > 0)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  child: Divider(
+                                    height: 1,
+                                    color: line.withValues(alpha: 0.45),
+                                  ),
+                                ),
+                              planCard(lowerPlans[i], lockedDowngrade: true),
+                            ],
+                            if (lowerPlans.isNotEmpty && freePlano != null)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                child: Divider(
+                                  height: 1,
+                                  color: line.withValues(alpha: 0.45),
+                                ),
+                              ),
+                            if (freePlano != null) planCard(freePlano),
+                          ],
+                        ),
+                    ];
+                  }
+
                   return [
                     ...currentTierPlans.map((p) => planCard(p)),
                     if (showUpgradeAccordion)
-                      PaywallGlassAccordion(
+                      PaywallSectionAnchor(
+                        anchorKey: _paywallUpgradeKey,
+                        child: PaywallGlassAccordion(
                         tileKey: const ValueKey('paywall_upgrade_accordion'),
                         initiallyExpanded: upgradeExpanded,
                         onExpansionChanged: (open) {
                           setState(() => _upgradeOffersExpanded = open);
                           final tier = nextTierPlan;
-                          if (open && tier != null) _selectPlan(tier);
+                          if (open && tier != null) {
+                            _selectPlan(tier);
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (mounted) _scrollToUpgradeTargetCard();
+                            });
+                          }
                         },
                         accent: nextTierPlan == null
                             ? primary
@@ -1152,6 +1340,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                         children: [
                           for (final p in upperTierPlans) planCard(p),
                         ],
+                      ),
                       )
                     else
                       ...upperTierPlans.map((p) => planCard(p)),
@@ -1186,6 +1375,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   const SizedBox(height: 16),
                   _PaywallUpgradeNudge(primary: primary, ink: ink, isDark: isDark),
                 ],
+                if (!usePlanStudio && !isUpgradeTargetSelected) ...[
                 const SizedBox(height: 8),
                 _PaywallFeaturePanel(
                   plano: isCurrentPlanSelected ? currentBackend : selBackend,
@@ -1199,6 +1389,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   primary: primary,
                   isDark: isDark,
                 ),
+                ],
                 if (isAcquisition)
                   PaywallWebDetailsLink(
                     ink: ink,
@@ -1207,8 +1398,12 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     line: line,
                     isDark: isDark,
                   )
-                else if (hasUpgradeAbove && nextTierPlan != null)
-                  PaywallSubscriberQuickCompare(
+                else if (!usePlanStudio &&
+                    hasUpgradeAbove &&
+                    nextTierPlan != null)
+                  PaywallSectionAnchor(
+                    anchorKey: _paywallCompareKey,
+                    child: PaywallSubscriberQuickCompare(
                     currentPlan: currentPlan,
                     targetPlan: nextTierPlan,
                     comparisonRows: vitrineComparison,
@@ -1222,8 +1417,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     primary: primary,
                     isDark: isDark,
                   ),
+                  ),
                 const SizedBox(height: 12),
-                if (_shouldShowEnterpriseTrialCard(
+                if (!usePlanStudio &&
+                    _shouldShowEnterpriseTrialCard(
                   selPlan,
                   currentPlan,
                   _trialStatus,
@@ -1242,7 +1439,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     isDark: isDark,
                   ),
                 ],
-                if (_enterprisePreview != null &&
+                if (!usePlanStudio &&
+                    _enterprisePreview != null &&
                     _enterprisePreviewIsInformative(
                       _enterprisePreview!,
                       currentPlan,
@@ -1251,6 +1449,23 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   const SizedBox(height: 12),
                   _EnterprisePreviewCard(
                     preview: _enterprisePreview!,
+                    primary: primary,
+                    ink: ink,
+                    mute: mute,
+                    isDark: isDark,
+                  ),
+                ] else if (!usePlanStudio &&
+                    isUpgradeTargetSelected &&
+                    currentPlan == SubscriptionPlan.ENTERPRISE &&
+                    selPlan == SubscriptionPlan.ENTERPRISE_PRO) ...[
+                  const SizedBox(height: 12),
+                  _EnterpriseProUpgradePriceHint(
+                    currentPlan: currentPlan,
+                    targetPlan: selPlan,
+                    billingPeriod: _billingPeriod,
+                    productDetails: _productDetails,
+                    currentBackend: currentBackend,
+                    targetBackend: selBackend,
                     primary: primary,
                     ink: ink,
                     mute: mute,
@@ -1284,25 +1499,26 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   ),
                 ],
                 const SizedBox(height: 16),
-                if (!isAcquisition && isCurrentPlanSelected) ...[
-                  PaywallSubscriberLegalStrip(
-                    mute: mute,
-                    primary: primary,
-                    restoring: _restoringPurchases,
-                    onRestore:
-                        subscriptionUsesNativeStore ? _restorePurchases : null,
-                  ),
-                ] else ...[
-                  PaywallUpgradeLegalCompact(
-                    ink: ink,
-                    mute: mute,
-                    primary: primary,
-                    showStoreBillingNote: subscriptionUsesNativeStore,
-                    restoring: _restoringPurchases,
-                    onRestore:
-                        subscriptionUsesNativeStore ? _restorePurchases : null,
-                  ),
-                ],
+                PaywallSectionAnchor(
+                  anchorKey: _paywallLegalKey,
+                  child: !isAcquisition && isCurrentPlanSelected
+                      ? PaywallSubscriberLegalStrip(
+                          mute: mute,
+                          primary: primary,
+                          restoring: _restoringPurchases,
+                          onRestore:
+                              subscriptionUsesNativeStore ? _restorePurchases : null,
+                        )
+                      : PaywallUpgradeLegalCompact(
+                          ink: ink,
+                          mute: mute,
+                          primary: primary,
+                          showStoreBillingNote: subscriptionUsesNativeStore,
+                          restoring: _restoringPurchases,
+                          onRestore:
+                              subscriptionUsesNativeStore ? _restorePurchases : null,
+                        ),
+                ),
               ],
           );
         },
@@ -1328,16 +1544,97 @@ class _EnterprisePreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accent = PaywallCatalog.accentForPlan(preview.planoDestino);
+    final destLabel = PaywallCatalog.displayPlanName(preview.planoDestino);
     return PaywallGlassCard(
-      accent: primary,
+      accent: accent,
       padding: const EdgeInsets.all(14),
       blur: false,
       elevationLevel: 4,
       child: Text(
         preview.cobrancaImediata
-            ? 'Upgrade: cobrança proporcional de R\$ ${preview.valorProporcional.toStringAsFixed(2)} (${preview.diasRestantes} dias restantes no ciclo).'
-            : 'Upgrade sem cobrança proporcional imediata neste ciclo.',
+            ? 'Upgrade para $destLabel: cobrança proporcional de R\$ ${preview.valorProporcional.toStringAsFixed(2)} (${preview.diasRestantes} dias restantes no ciclo).'
+            : 'Upgrade para $destLabel sem cobrança proporcional imediata neste ciclo.',
         style: TokensStrip.body(color: ink),
+      ),
+    );
+  }
+}
+
+class _EnterpriseProUpgradePriceHint extends StatelessWidget {
+  final SubscriptionPlan currentPlan;
+  final SubscriptionPlan targetPlan;
+  final SubscriptionBillingPeriod billingPeriod;
+  final Map<String, ProductDetails> productDetails;
+  final Plano currentBackend;
+  final Plano targetBackend;
+  final Color primary;
+  final Color ink;
+  final Color mute;
+  final bool isDark;
+
+  const _EnterpriseProUpgradePriceHint({
+    required this.currentPlan,
+    required this.targetPlan,
+    required this.billingPeriod,
+    required this.productDetails,
+    required this.currentBackend,
+    required this.targetBackend,
+    required this.primary,
+    required this.ink,
+    required this.mute,
+    required this.isDark,
+  });
+
+  String? _storeDeltaCopy() {
+    final currentProduct = productDetails[
+      SubscriptionProducts.productIdFor(currentPlan, billingPeriod)];
+    final targetProduct = productDetails[
+      SubscriptionProducts.productIdFor(targetPlan, billingPeriod)];
+    if (currentProduct == null || targetProduct == null) return null;
+
+    final currentRaw = currentProduct.rawPrice;
+    final targetRaw = targetProduct.rawPrice;
+    if (currentRaw <= 0 || targetRaw <= currentRaw) return null;
+
+    final delta = targetRaw - currentRaw;
+    final periodLabel =
+        billingPeriod == SubscriptionBillingPeriod.yearly ? 'ano' : 'mês';
+    return 'Diferença estimada na ${subscriptionChannelLabel()}: '
+        '${targetProduct.currencySymbol}${delta.toStringAsFixed(2)}/$periodLabel '
+        '(${currentProduct.price} → ${targetProduct.price}). '
+        'A loja pode aplicar crédito proporcional do ciclo atual.';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = PaywallCatalog.accentForPlan(targetPlan);
+    final targetLabel = PaywallCatalog.displayPlanName(targetPlan);
+    final storeCopy = _storeDeltaCopy();
+    final fallbackMonthly =
+        targetBackend.precoMensal - currentBackend.precoMensal;
+    final text = storeCopy ??
+        (fallbackMonthly > 0
+            ? 'Upgrade para $targetLabel: diferença de referência '
+                'R\$ ${fallbackMonthly.toStringAsFixed(2)}/mês. '
+                'Valor final e crédito proporcional confirmados na ${subscriptionChannelLabel()}.'
+            : 'Upgrade para $targetLabel: valor final confirmado na ${subscriptionChannelLabel()} '
+                'com possível crédito proporcional do ciclo atual.');
+
+    return PaywallGlassCard(
+      accent: accent,
+      padding: const EdgeInsets.all(14),
+      blur: false,
+      elevationLevel: 4,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.payments_outlined, size: 18, color: accent),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(text, style: TokensStrip.body(color: ink)),
+          ),
+        ],
       ),
     );
   }
@@ -1403,6 +1700,8 @@ class _AssinaturaStickyFooter extends StatelessWidget {
   final bool loading;
   final bool trialHint;
   final bool showLegalConsent;
+  final bool isUpgrade;
+  final Color? tierAccent;
   final Color ink;
   final Color mute;
   final Color line;
@@ -1419,6 +1718,8 @@ class _AssinaturaStickyFooter extends StatelessWidget {
     required this.loading,
     required this.trialHint,
     required this.showLegalConsent,
+    this.isUpgrade = false,
+    this.tierAccent,
     required this.ink,
     required this.mute,
     required this.line,
@@ -1480,16 +1781,40 @@ class _AssinaturaStickyFooter extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         if (isActionable)
-          FxLiquidPrimaryButton(
-            label: label,
-            icon: icon,
-            loading: loading || mode == _AssinaturaCtaMode.syncing,
-            loadingLabel:
-                mode == _AssinaturaCtaMode.syncing
-                    ? 'Sincronizando…'
-                    : null,
-            onPressed: onPressed,
-          )
+          tierAccent != null
+              ? DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(TokensStrip.rButton),
+                  border: Border.all(color: tierAccent!, width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: tierAccent!.withValues(alpha: 0.28),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: FxLiquidPrimaryButton(
+                  label: label,
+                  icon: icon,
+                  loading: loading || mode == _AssinaturaCtaMode.syncing,
+                  loadingLabel:
+                      mode == _AssinaturaCtaMode.syncing
+                          ? 'Sincronizando…'
+                          : null,
+                  onPressed: onPressed,
+                ),
+              )
+              : FxLiquidPrimaryButton(
+                label: label,
+                icon: icon,
+                loading: loading || mode == _AssinaturaCtaMode.syncing,
+                loadingLabel:
+                    mode == _AssinaturaCtaMode.syncing
+                        ? 'Sincronizando…'
+                        : null,
+                onPressed: onPressed,
+              )
         else
           FxLiquidPrimaryButton(
             label: label,
@@ -1505,7 +1830,12 @@ class _AssinaturaStickyFooter extends StatelessWidget {
         ],
         if (showLegalConsent) ...[
           const SizedBox(height: 10),
-          _PaywallLegalConsentLine(ink: ink, mute: mute, primary: primary),
+          _PaywallLegalConsentLine(
+            ink: ink,
+            mute: mute,
+            primary: primary,
+            isUpgrade: isUpgrade,
+          ),
         ],
       ],
     );

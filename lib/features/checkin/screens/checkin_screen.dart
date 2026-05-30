@@ -19,7 +19,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_celebration_overlay.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
-import '../widgets/pose_coach_panel.dart';
+import '../widgets/gated_pose_coach_panel.dart';
 import '../../../core/theme/tokens_strip.dart';
 
 class CheckinScreen extends ConsumerStatefulWidget {
@@ -942,7 +942,7 @@ class _SerieCard extends StatelessWidget {
                   const SizedBox(height: 14),
                 ],
                 if (!ee.concluido) ...[
-                  PoseCoachPanel(
+                  GatedPoseCoachPanel(
                     exerciseName: ee.exercicioNome,
                     targetReps: _parseTargetReps(ee.repeticoes),
                     brand: brand,

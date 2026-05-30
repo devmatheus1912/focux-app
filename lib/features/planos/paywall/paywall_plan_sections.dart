@@ -102,15 +102,13 @@ class PaywallPlanSections {
           label: 'Financeiro + dashboard + inadimplência',
           included: plano.temFinanceiro,
         ),
-        const PaywallPlanFeatureItem(label: 'CRM de leads + landing page padrão'),
+        const PaywallPlanFeatureItem(label: 'CRM de leads'),
         const PaywallPlanFeatureItem(label: 'Chat, feed e broadcasts'),
         const PaywallPlanFeatureItem(
           label: 'Habit coaching diário ✦',
-          comingSoon: true,
         ),
         const PaywallPlanFeatureItem(
           label: 'Comunidade privada de alunos ✦',
-          comingSoon: true,
         ),
       ],
     ),
@@ -164,7 +162,7 @@ class PaywallPlanSections {
           label: 'Financeiro + dashboard + inadimplência',
           included: plano.temFinanceiro,
         ),
-        const PaywallPlanFeatureItem(label: 'CRM + landing page padrão Focux'),
+        const PaywallPlanFeatureItem(label: 'CRM de leads'),
         PaywallPlanFeatureItem(
           label: 'White-label — seu logo e suas cores',
           included: plano.temWhiteLabel,
@@ -174,7 +172,24 @@ class PaywallPlanSections {
         const PaywallPlanFeatureItem(label: 'NFS-e automática (para PJ)'),
         const PaywallPlanFeatureItem(
           label: 'Automações sequenciais ✦',
-          comingSoon: true,
+        ),
+      ],
+    ),
+    const PaywallPlanFeatureSection(
+      title: 'Landing page · Enterprise Pro',
+      collapsible: true,
+      items: [
+        PaywallPlanFeatureItem(
+          label: 'Editor completo — depoimentos, galeria e FAQ',
+          included: false,
+        ),
+        PaywallPlanFeatureItem(
+          label: 'Formulário Meta e link focux.app/p/seunome',
+          included: false,
+        ),
+        PaywallPlanFeatureItem(
+          label: 'Domínio customizado na landing',
+          included: false,
         ),
       ],
     ),
@@ -194,22 +209,15 @@ class PaywallPlanSections {
         const PaywallPlanFeatureItem(label: 'Gamificação, ranking e badges'),
         const PaywallPlanFeatureItem(
           label: 'Habit coaching diário ✦',
-          comingSoon: true,
         ),
         const PaywallPlanFeatureItem(
           label: 'Equipe / RBAC (assistente) ✦',
-          comingSoon: true,
         ),
         const PaywallPlanFeatureItem(
           label: 'Comunidade + grupos ✦',
-          comingSoon: true,
         ),
         const PaywallPlanFeatureItem(
           label: 'Pose Coach — análise ML ✦',
-          included: false,
-        ),
-        const PaywallPlanFeatureItem(
-          label: 'Landing page COMPLETA',
           included: false,
         ),
       ],
@@ -231,15 +239,12 @@ class PaywallPlanSections {
         ),
         PaywallPlanFeatureItem(
           label: 'Automações sequenciais avançadas ✦',
-          comingSoon: true,
         ),
         PaywallPlanFeatureItem(
           label: 'Equipe / RBAC ilimitado ✦',
-          comingSoon: true,
         ),
         PaywallPlanFeatureItem(
           label: 'Pose Coach — análise de postura ML ✦',
-          comingSoon: true,
         ),
       ],
     ),
@@ -271,21 +276,17 @@ class PaywallPlanSections {
       items: [
         PaywallPlanFeatureItem(
           label: 'Venda treinos avulsos e desafios',
-          comingSoon: true,
           highlight: true,
         ),
         PaywallPlanFeatureItem(
           label: '"Desafio 30 dias" como produto digital',
-          comingSoon: true,
           highlight: true,
         ),
         PaywallPlanFeatureItem(
           label: 'Checkout integrado com PIX',
-          comingSoon: true,
         ),
         PaywallPlanFeatureItem(
           label: 'Receita passiva sem hora extra',
-          comingSoon: true,
           highlight: true,
         ),
       ],

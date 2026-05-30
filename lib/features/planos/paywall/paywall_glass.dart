@@ -44,6 +44,7 @@ abstract class PaywallTierChrome {
   };
 
   static Widget accentRail(Color accent, {PaywallTierEmphasis emphasis = PaywallTierEmphasis.mid}) {
+    final rail = accent.withValues(alpha: _railAlpha(emphasis));
     return Positioned(
       top: 0,
       left: 0,
@@ -54,12 +55,14 @@ abstract class PaywallTierChrome {
           borderRadius: const BorderRadius.vertical(
             top: Radius.circular(cardRadius),
           ),
-          gradient: LinearGradient(
-            colors: [
-              accent.withValues(alpha: _railAlpha(emphasis)),
-              accent.withValues(alpha: 0.08),
-            ],
-          ),
+          color: emphasis == PaywallTierEmphasis.high
+              ? rail
+              : null,
+          gradient: emphasis == PaywallTierEmphasis.high
+              ? null
+              : LinearGradient(
+                  colors: [rail, accent.withValues(alpha: 0.08)],
+                ),
         ),
       ),
     );
@@ -70,19 +73,20 @@ abstract class PaywallTierChrome {
     required bool isDark,
     PaywallTierEmphasis emphasis = PaywallTierEmphasis.mid,
   }) {
-    final surface = isDark ? TokensStrip.cinematicSurface : TokensStrip.cardBg;
+    final alpha = _washAlpha(emphasis, isDark);
     return Positioned.fill(
       child: IgnorePointer(
         child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(cardRadius),
             gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
               colors: [
-                accent.withValues(alpha: _washAlpha(emphasis, isDark)),
-                surface.withValues(alpha: 0.0),
+                accent.withValues(alpha: alpha),
+                accent.withValues(alpha: 0),
               ],
+              stops: const [0.0, 0.52],
             ),
           ),
         ),
@@ -127,7 +131,7 @@ class PaywallGlassCard extends StatelessWidget {
   final EdgeInsetsGeometry? margin;
   final int elevationLevel;
   final double radius;
-  /// Atenua glow de tiers (ouro/roxo) para não competir com o teal do app.
+  /// Atenua glow de tiers (ouro/teal profundo) para não competir com o CTA do app.
   final double glowStrength;
 
   @override
@@ -226,6 +230,7 @@ class PaywallTierCard extends StatelessWidget {
       elevationLevel: isCurrent ? 12 : (isSelected ? 10 : 8),
       padding: EdgeInsets.zero,
       child: Stack(
+        clipBehavior: Clip.hardEdge,
         children: [
           PaywallTierChrome.cardWash(
             accent: accent,
@@ -311,7 +316,61 @@ class PaywallTierMedallion extends StatelessWidget {
       child: Icon(
         _tierIconFor(plan),
         size: size * 0.48,
-        color: accent,
+        color: PaywallCatalog.tierAccentOnSurface(plan, isDark: isDark),
+      ),
+    );
+  }
+}
+
+/// Pill de tier unificada (hero FOCUX · tier e chip SEU PLANO / badges).
+class PaywallTierBrandPill extends StatelessWidget {
+  const PaywallTierBrandPill({
+    super.key,
+    required this.label,
+    required this.accent,
+    required this.isDark,
+    this.icon,
+    this.iconSize = 14,
+  });
+
+  final String label;
+  final Color accent;
+  final bool isDark;
+  final IconData? icon;
+  final double iconSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = PaywallCatalog.readableTierAccent(accent, isDark: isDark);
+    final panelAccent = !isDark && accent == PaywallCatalog.gold
+        ? PaywallCatalog.gold.withValues(alpha: 0.82)
+        : accent;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: ShellChrome.forDark(isDark).panel(
+        radius: TokensStrip.rPill,
+        accent: panelAccent,
+        elevationLevel: 2,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: iconSize, color: fg),
+            const SizedBox(width: 6),
+          ],
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.2,
+              height: 1.1,
+              color: fg,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -350,11 +409,13 @@ class PaywallGlassAccordion extends StatefulWidget {
 
 class _PaywallGlassAccordionState extends State<PaywallGlassAccordion> {
   late bool _expanded;
+  late bool _mountedChildren;
 
   @override
   void initState() {
     super.initState();
     _expanded = widget.initiallyExpanded;
+    _mountedChildren = widget.initiallyExpanded;
   }
 
   @override
@@ -362,6 +423,7 @@ class _PaywallGlassAccordionState extends State<PaywallGlassAccordion> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initiallyExpanded != widget.initiallyExpanded) {
       _expanded = widget.initiallyExpanded;
+      if (_expanded) _mountedChildren = true;
     }
   }
 
@@ -408,7 +470,10 @@ class _PaywallGlassAccordionState extends State<PaywallGlassAccordion> {
               key: widget.tileKey,
               initiallyExpanded: widget.initiallyExpanded,
               onExpansionChanged: (open) {
-                setState(() => _expanded = open);
+                setState(() {
+                  _expanded = open;
+                  if (open) _mountedChildren = true;
+                });
                 widget.onExpansionChanged?.call(open);
               },
               tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -431,7 +496,7 @@ class _PaywallGlassAccordionState extends State<PaywallGlassAccordion> {
                         color: secondary,
                       ),
                     ),
-              children: widget.children,
+              children: _mountedChildren ? widget.children : const [],
             ),
             ),
           ),
@@ -453,6 +518,8 @@ class PaywallSubscriberHeroGlass extends StatelessWidget {
     required this.isMaxTier,
     required this.hasUpgradePath,
     required this.viewingCurrentPlan,
+    this.upgradeOffersExpanded = false,
+    this.upgradeTargetSelected = false,
   });
 
   final SubscriptionPlan plan;
@@ -463,6 +530,8 @@ class PaywallSubscriberHeroGlass extends StatelessWidget {
   final bool isMaxTier;
   final bool hasUpgradePath;
   final bool viewingCurrentPlan;
+  final bool upgradeOffersExpanded;
+  final bool upgradeTargetSelected;
 
   String get _subtitle {
     if (isMaxTier) {
@@ -470,6 +539,12 @@ class PaywallSubscriberHeroGlass extends StatelessWidget {
     }
     if (!hasUpgradePath) {
       return 'Gerencie a assinatura na loja do dispositivo.';
+    }
+    if (upgradeTargetSelected) {
+      return 'Revise preço e benefícios abaixo — decisão rápida.';
+    }
+    if (upgradeOffersExpanded) {
+      return 'Upgrade aberto — escolha o tier e confirme abaixo.';
     }
     if (viewingCurrentPlan) {
       return 'Recursos do seu plano abaixo. Upgrade opcional está recolhido.';
@@ -483,14 +558,15 @@ class PaywallSubscriberHeroGlass extends StatelessWidget {
     final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
 
     return PaywallGlassCard(
-      margin: const EdgeInsets.fromLTRB(0, 8, 0, TokensStrip.s4),
+      margin: const EdgeInsets.fromLTRB(0, 4, 0, TokensStrip.s3),
       accent: accent,
       glow: !TokensStrip.prefersReducedMotion(context),
       glowStrength: 0.9,
       blur: false,
       elevationLevel: 12,
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.zero,
       child: Stack(
+        clipBehavior: Clip.hardEdge,
         children: [
           PaywallTierChrome.cardWash(
             accent: accent,
@@ -498,71 +574,52 @@ class PaywallSubscriberHeroGlass extends StatelessWidget {
             emphasis: PaywallTierEmphasis.high,
           ),
           PaywallTierChrome.accentRail(accent, emphasis: PaywallTierEmphasis.high),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  PaywallTierMedallion(plan: plan, accent: accent, isDark: isDark),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 5,
-                          ),
-                          decoration: ShellChrome.forDark(isDark).panel(
-                            radius: TokensStrip.rPill,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    PaywallTierMedallion(plan: plan, accent: accent, isDark: isDark),
+                    const SizedBox(width: TokensStrip.s3),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          PaywallTierBrandPill(
+                            label: 'FOCUX · $planLabel',
                             accent: accent,
-                            elevationLevel: 2,
+                            isDark: isDark,
+                            icon: Icons.verified_rounded,
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.verified_rounded, size: 14, color: accent),
-                              const SizedBox(width: 6),
-                              Text(
-                                'FOCUX · $planLabel',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.3,
-                                  color: accent,
-                                ),
-                              ),
-                            ],
+                          const SizedBox(height: TokensStrip.s3),
+                          Text(
+                            isMaxTier ? 'Plano máximo' : 'Você está no $planLabel',
+                            style: AppTypography.inter(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 22,
+                              letterSpacing: -0.5,
+                              color: ink,
+                              height: 1.12,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          isMaxTier ? 'Plano máximo' : 'Você está no $planLabel',
-                          style: AppTypography.inter(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 24,
-                            letterSpacing: -0.6,
-                            color: ink,
-                            height: 1.1,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                _subtitle,
-                style: TextStyle(
-                  fontSize: 14,
-                  height: 1.45,
-                  color: secondary,
+                  ],
                 ),
-              ),
-            ],
+                const SizedBox(height: TokensStrip.s3),
+                Text(
+                  _subtitle,
+                  style: TokensStrip.bodyMuted(color: secondary).copyWith(
+                    fontSize: TokensStrip.fontBodySm,
+                    height: 1.45,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

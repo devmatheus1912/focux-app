@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/feature_gate.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../features/subscription/models/subscription_plan.dart';
 import '../data/habito_repository.dart';
 
 final _repoProvider = Provider(
@@ -22,6 +27,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
   List<Habito> _habitos = [];
   List<ComplianceItem> _compliance = [];
   bool _loading = true;
+  String? _error;
 
   @override
   void initState() {
@@ -30,7 +36,10 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
   }
 
   Future<void> _carregar() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
       final repo = ref.read(_repoProvider);
       final results = await Future.wait([repo.listar(), repo.compliance()]);
@@ -40,42 +49,79 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
         _compliance = results[1] as List<ComplianceItem>;
         _loading = false;
       });
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = friendlyError(e);
+      });
     }
   }
 
   Future<void> _novoHabito() async {
+    List<HabitoTemplate> templates = [];
+    try {
+      templates = await ref.read(_repoProvider).templates();
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    }
+
+    HabitoTemplate? selected;
     final tituloCtrl = TextEditingController();
     final descricaoCtrl = TextEditingController();
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Novo hábito'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: tituloCtrl,
-              decoration: const InputDecoration(labelText: 'Título'),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('Novo hábito'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (templates.isNotEmpty) ...[
+                  DropdownButtonFormField<HabitoTemplate>(
+                    decoration: const InputDecoration(labelText: 'Template'),
+                    items: templates
+                        .map((t) => DropdownMenuItem(
+                              value: t,
+                              child: Text('${t.icone ?? ''} ${t.titulo}'),
+                            ))
+                        .toList(),
+                    onChanged: (t) {
+                      setDialogState(() {
+                        selected = t;
+                        if (t != null) {
+                          tituloCtrl.text = t.titulo;
+                          descricaoCtrl.text = t.descricao ?? '';
+                        }
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                TextField(
+                  controller: tituloCtrl,
+                  decoration: const InputDecoration(labelText: 'Título'),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: descricaoCtrl,
+                  decoration: const InputDecoration(labelText: 'Descrição (opcional)'),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: descricaoCtrl,
-              decoration: const InputDecoration(labelText: 'Descrição (opcional)'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Criar'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Criar'),
-          ),
-        ],
       ),
     );
     if (ok == true && tituloCtrl.text.trim().isNotEmpty) {
@@ -85,6 +131,10 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
               descricao: descricaoCtrl.text.trim().isEmpty
                   ? null
                   : descricaoCtrl.text.trim(),
+              tipo: selected?.tipo ?? 'CUSTOM',
+              metaDiaria: selected?.metaDiaria,
+              metaSemanal: selected?.metaSemanal,
+              icone: selected?.icone,
             );
         await _carregar();
       } catch (e) {
@@ -99,16 +149,34 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Hábitos & Compliance')),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _novoHabito,
-        icon: const Icon(Icons.add),
-        label: const Text('Novo hábito'),
+    return FeatureGate(
+      featureName: 'Habit Coaching',
+      requiredPlan: SubscriptionPlan.PREMIUM,
+      capability: 'habitCoaching',
+      child: FxShellScaffold(
+      appBar: const FxShellAppBar(
+        title: 'Hábitos & Compliance',
+        subtitle: 'Coaching diário e aderência',
+      ),
+      floatingActionButton: Semantics(
+        label: 'Novo hábito',
+        button: true,
+        child: FloatingActionButton.extended(
+          onPressed: _novoHabito,
+          icon: const Icon(Icons.add),
+          label: const Text('Novo hábito'),
+        ),
       ),
       body: _loading
           ? const Center(child: FxLoading())
-          : RefreshIndicator(
+          : _error != null
+              ? FxEmptyState(
+                  icon: 'alert-triangle',
+                  title: 'Erro ao carregar',
+                  subtitle: _error,
+                  action: FxEmptyAction(label: 'Tentar novamente', onTap: _carregar),
+                )
+              : RefreshIndicator(
               onRefresh: _carregar,
               child: ListView(
                 padding: const EdgeInsets.all(16),
@@ -155,6 +223,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                 ],
               ),
             ),
+      ),
     );
   }
 }

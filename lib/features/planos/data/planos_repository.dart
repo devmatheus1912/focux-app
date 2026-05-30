@@ -196,6 +196,15 @@ class PlanoFeatures {
   final bool iaCopiloto;
   final bool migracaoFoto;
   final bool landingCompleta;
+  final bool habitCoaching;
+  final bool comunidadePrivada;
+  final bool automacoes;
+  final bool automacoesAvancadas;
+  final bool comunidadeGrupos;
+  final bool equipeRbac;
+  final bool lojaDigital;
+  final bool poseCoach;
+  final int? limiteAssistentes;
   final int alunosAtivos;
   final int iaUsadaMes;
   final int? limiteMigracaoFotoMensal;
@@ -219,6 +228,15 @@ class PlanoFeatures {
     required this.iaCopiloto,
     required this.migracaoFoto,
     this.landingCompleta = false,
+    this.habitCoaching = false,
+    this.comunidadePrivada = false,
+    this.automacoes = false,
+    this.automacoesAvancadas = false,
+    this.comunidadeGrupos = false,
+    this.equipeRbac = false,
+    this.lojaDigital = false,
+    this.poseCoach = false,
+    this.limiteAssistentes,
     this.alunosAtivos = 0,
     this.iaUsadaMes = 0,
     this.limiteMigracaoFotoMensal,
@@ -270,6 +288,15 @@ class PlanoFeatures {
       iaCopiloto: f['iaCopiloto'] as bool? ?? false,
       migracaoFoto: f['migracaoFoto'] as bool? ?? false,
       landingCompleta: f['landingCompleta'] as bool? ?? false,
+      habitCoaching: f['habitCoaching'] as bool? ?? false,
+      comunidadePrivada: f['comunidadePrivada'] as bool? ?? false,
+      automacoes: f['automacoes'] as bool? ?? false,
+      automacoesAvancadas: f['automacoesAvancadas'] as bool? ?? false,
+      comunidadeGrupos: f['comunidadeGrupos'] as bool? ?? false,
+      equipeRbac: f['equipeRbac'] as bool? ?? false,
+      lojaDigital: f['lojaDigital'] as bool? ?? false,
+      poseCoach: f['poseCoach'] as bool? ?? false,
+      limiteAssistentes: (j['limiteAssistentes'] as num?)?.toInt(),
       alunosAtivos: (j['alunosAtivos'] as num?)?.toInt() ?? 0,
       iaUsadaMes: (j['iaUsadaMes'] as num?)?.toInt() ?? 0,
       limiteMigracaoFotoMensal: (j['limiteMigracaoFotoMensal'] as num?)?.toInt(),
@@ -297,6 +324,14 @@ class PlanoFeatures {
       'iaCopiloto': iaCopiloto,
       'migracaoFoto': migracaoFoto,
       'landingCompleta': landingCompleta,
+      'habitCoaching': habitCoaching,
+      'comunidadePrivada': comunidadePrivada,
+      'automacoes': automacoes,
+      'automacoesAvancadas': automacoesAvancadas,
+      'comunidadeGrupos': comunidadeGrupos,
+      'equipeRbac': equipeRbac,
+      'lojaDigital': lojaDigital,
+      'poseCoach': poseCoach,
     },
   };
 
@@ -321,6 +356,15 @@ class PlanoFeatures {
       iaCopiloto: iaCopiloto,
       migracaoFoto: migracaoFoto,
       landingCompleta: landingCompleta,
+      habitCoaching: habitCoaching,
+      comunidadePrivada: comunidadePrivada,
+      automacoes: automacoes,
+      automacoesAvancadas: automacoesAvancadas,
+      comunidadeGrupos: comunidadeGrupos,
+      equipeRbac: equipeRbac,
+      lojaDigital: lojaDigital,
+      poseCoach: poseCoach,
+      limiteAssistentes: limiteAssistentes,
       alunosAtivos: alunosAtivos,
       iaUsadaMes: iaUsadaMes,
       limiteMigracaoFotoMensal: limiteMigracaoFotoMensal,
@@ -340,6 +384,28 @@ class PlanoFeatures {
     limiteMigracaoFotoMensal: 0,
   );
 
+  /// Fallback conservador para aluno — não concede Enterprise completo.
+  static const optimisticAluno = PlanoFeatures(
+    plano: SubscriptionPlan.PREMIUM,
+    fromCache: true,
+    syncWarning:
+        'Nao foi possivel confirmar o plano do seu personal. Habitos liberados em modo seguro.',
+    financeiro: false,
+    agenda: true,
+    relatorios: false,
+    whiteLabel: false,
+    iaCopiloto: false,
+    migracaoFoto: false,
+    habitCoaching: true,
+    comunidadePrivada: false,
+    automacoes: false,
+    automacoesAvancadas: false,
+    comunidadeGrupos: false,
+    equipeRbac: false,
+    lojaDigital: false,
+    poseCoach: false,
+  );
+
   static const optimisticEnterprise = PlanoFeatures(
     plano: SubscriptionPlan.ENTERPRISE,
     fromCache: true,
@@ -353,6 +419,16 @@ class PlanoFeatures {
     whiteLabel: true,
     iaCopiloto: true,
     migracaoFoto: true,
+    landingCompleta: true,
+    habitCoaching: true,
+    comunidadePrivada: true,
+    automacoes: true,
+    automacoesAvancadas: false,
+    comunidadeGrupos: true,
+    equipeRbac: true,
+    lojaDigital: false,
+    poseCoach: false,
+    limiteAssistentes: 1,
     limiteMigracaoFotoMensal: 50,
   );
 }
@@ -378,8 +454,9 @@ class PlanosRepository {
     }
   }
 
-  Future<PlanoFeatures> getPlanoFeaturesFresh() async {
-    final r = await _dio.get('/api/planos/me');
+  Future<PlanoFeatures> getPlanoFeaturesFresh({bool forAluno = false}) async {
+    final path = forAluno ? '/api/planos/contexto-aluno' : '/api/planos/me';
+    final r = await _dio.get(path);
     final features = PlanoFeatures.fromJson(
       r.data as Map<String, dynamic>,
     ).copyWithOperationalState(fromCache: false, syncWarning: null);

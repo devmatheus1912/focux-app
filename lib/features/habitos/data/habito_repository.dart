@@ -1,14 +1,46 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 
+class HabitoTemplate {
+  final String tipo;
+  final String titulo;
+  final String? descricao;
+  final String? icone;
+  final int metaDiaria;
+  final int metaSemanal;
+
+  HabitoTemplate({
+    required this.tipo,
+    required this.titulo,
+    this.descricao,
+    this.icone,
+    required this.metaDiaria,
+    required this.metaSemanal,
+  });
+
+  factory HabitoTemplate.fromJson(Map<String, dynamic> j) => HabitoTemplate(
+    tipo: j['tipo'] as String? ?? 'CUSTOM',
+    titulo: j['titulo'] as String? ?? '',
+    descricao: j['descricao'] as String?,
+    icone: j['icone'] as String?,
+    metaDiaria: (j['metaDiaria'] as num?)?.toInt() ?? 1,
+    metaSemanal: (j['metaSemanal'] as num?)?.toInt() ?? 7,
+  );
+}
+
 class Habito {
   final int id;
   final String titulo;
   final String? descricao;
   final String? icone;
+  final String tipo;
+  final int metaDiaria;
   final int metaSemanal;
+  final String? lembreteHora;
   final int feitosNaSemana;
   final bool feitoHoje;
+  final int streakAtual;
+  final bool badgeSemana;
 
   Habito({
     required this.id,
@@ -18,6 +50,11 @@ class Habito {
     required this.feitoHoje,
     this.descricao,
     this.icone,
+    this.tipo = 'CUSTOM',
+    this.metaDiaria = 1,
+    this.lembreteHora,
+    this.streakAtual = 0,
+    this.badgeSemana = false,
   });
 
   factory Habito.fromJson(Map<String, dynamic> j) => Habito(
@@ -25,9 +62,14 @@ class Habito {
     titulo: j['titulo'] as String? ?? '',
     descricao: j['descricao'] as String?,
     icone: j['icone'] as String?,
+    tipo: j['tipo'] as String? ?? 'CUSTOM',
+    metaDiaria: (j['metaDiaria'] as num?)?.toInt() ?? 1,
     metaSemanal: (j['metaSemanal'] as num?)?.toInt() ?? 7,
+    lembreteHora: j['lembreteHora'] as String?,
     feitosNaSemana: (j['feitosNaSemana'] as num?)?.toInt() ?? 0,
     feitoHoje: j['feitoHoje'] as bool? ?? false,
+    streakAtual: (j['streakAtual'] as num?)?.toInt() ?? 0,
+    badgeSemana: j['badgeSemana'] as bool? ?? false,
   );
 }
 
@@ -56,6 +98,13 @@ class HabitoRepository {
   final Dio _dio;
   HabitoRepository(ApiClient c) : _dio = c.dio;
 
+  Future<List<HabitoTemplate>> templates() async {
+    final r = await _dio.get('/api/habitos/templates');
+    return (r.data as List<dynamic>)
+        .map((e) => HabitoTemplate.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
   Future<List<Habito>> listar() async {
     final r = await _dio.get('/api/habitos');
     return (r.data as List<dynamic>)
@@ -67,14 +116,20 @@ class HabitoRepository {
     required String titulo,
     String? descricao,
     String? icone,
+    String? tipo,
+    int? metaDiaria,
     int? metaSemanal,
+    String? lembreteHora,
     int? alunoId,
   }) async {
     final r = await _dio.post('/api/habitos', data: {
       'titulo': titulo,
       'descricao': descricao,
       'icone': icone,
+      'tipo': tipo,
+      'metaDiaria': metaDiaria,
       'metaSemanal': metaSemanal,
+      'lembreteHora': lembreteHora,
       'alunoId': alunoId,
     });
     return Habito.fromJson(r.data as Map<String, dynamic>);
@@ -98,9 +153,12 @@ class HabitoRepository {
         .toList();
   }
 
-  Future<bool> toggleHoje(int habitoId) async {
+  Future<({bool feito, int streak})> toggleHoje(int habitoId) async {
     final r = await _dio.post('/api/habitos/me/$habitoId/check');
     final data = r.data as Map<String, dynamic>;
-    return data['feito'] as bool? ?? false;
+    return (
+      feito: data['feito'] as bool? ?? false,
+      streak: (data['streak'] as num?)?.toInt() ?? 0,
+    );
   }
 }

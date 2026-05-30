@@ -13,6 +13,7 @@ class PoseCoachPanel extends StatefulWidget {
     required this.brand,
     required this.dark,
     required this.onRepCompleted,
+    this.enhancedFeedback = false,
   });
 
   final String exerciseName;
@@ -20,6 +21,7 @@ class PoseCoachPanel extends StatefulWidget {
   final Color brand;
   final bool dark;
   final VoidCallback onRepCompleted;
+  final bool enhancedFeedback;
 
   @override
   State<PoseCoachPanel> createState() => _PoseCoachPanelState();
@@ -31,7 +33,14 @@ class _PoseCoachPanelState extends State<PoseCoachPanel> {
 
   void _registerRep() {
     HapticFeedback.lightImpact();
-    setState(() => _reps++);
+    setState(() {
+      _reps++;
+      if (widget.enhancedFeedback) {
+        _formHint = _reps.isEven
+            ? 'Joelhos alinhados — boa profundidade.'
+            : 'Mantenha o core ativo — costas retas.';
+      }
+    });
     widget.onRepCompleted();
     final target = widget.targetReps;
     if (target != null && _reps >= target) {

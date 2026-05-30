@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/storage/secure_storage.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/planos_repository.dart';
 
@@ -79,14 +80,19 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
           ),
         );
       } else {
-        state = const AsyncData(PlanoFeatures.optimisticEnterprise);
+        final forAluno = await _isAlunoSession();
+        final fallback = forAluno
+            ? PlanoFeatures.optimisticAluno
+            : PlanoFeatures.optimisticEnterprise;
+        state = AsyncData(fallback);
         unawaited(
           AnalyticsService.instance.track(
             ProductEvents.planGateRefreshFailed,
             props: {
-              'plan': PlanoFeatures.optimisticEnterprise.plano.name,
+              'plan': fallback.plano.name,
               'error': error.toString(),
               'allowedByOptimisticFallback': true,
+              'forAluno': forAluno,
             },
           ),
         );
@@ -99,12 +105,18 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
   /// Cold-start cases (Railway free tier, mobile data flaky) often need a
   /// couple of attempts before /planos/me responds. Retry up to 3 times
   /// with 1s/2s backoff before surfacing a hard error.
+  Future<bool> _isAlunoSession() async {
+    final role = await SecureStorage.getRole();
+    return role == 'ALUNO';
+  }
+
   Future<PlanoFeatures> _fetchWithRetry() async {
+    final forAluno = await _isAlunoSession();
     Object? lastError;
     StackTrace? lastStack;
     for (int attempt = 0; attempt < 3; attempt++) {
       try {
-        return await _repo.getPlanoFeaturesFresh();
+        return await _repo.getPlanoFeaturesFresh(forAluno: forAluno);
       } catch (error, stack) {
         lastError = error;
         lastStack = stack;

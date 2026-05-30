@@ -31,6 +31,7 @@ import '../../subscription/widgets/plan_usage_banner.dart';
 import '../../subscription/widgets/trial_countdown_banner.dart';
 import '../../subscription/widgets/dashboard_activation_cta.dart';
 import '../../onboarding/providers/onboarding_provider.dart';
+import '../../subscription/utils/landing_editor_access.dart';
 
 class PersonalDashboardScreen extends ConsumerStatefulWidget {
   const PersonalDashboardScreen({super.key});
@@ -1714,13 +1715,13 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
-class _RoiQuickLinksRow extends StatelessWidget {
+class _RoiQuickLinksRow extends ConsumerWidget {
   const _RoiQuickLinksRow({required this.isDark});
 
   final bool isDark;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final primary = Theme.of(context).colorScheme.primary;
     final link = BrandPalette.sectionLink(primary, dark: isDark);
     final items = [
@@ -1728,7 +1729,7 @@ class _RoiQuickLinksRow extends StatelessWidget {
       ('Captura', '/leads-publicos'),
       ('White-label', '/white-label'),
       ('Smart Pricing', '/financeiro'),
-      ('Landing', '/perfil/landing-editor'),
+      ('Landing', ''),
     ];
 
     return Padding(
@@ -1753,7 +1754,13 @@ class _RoiQuickLinksRow extends StatelessWidget {
                 for (final item in items) ...[
                   ActionChip(
                     label: Text(item.$1),
-                    onPressed: () => context.push(item.$2),
+                    onPressed: () {
+                      if (item.$1 == 'Landing') {
+                        openLandingEditorOrUpgrade(context, ref);
+                      } else {
+                        context.push(item.$2);
+                      }
+                    },
                     backgroundColor: BrandPalette.soft(primary, dark: isDark),
                     labelStyle: TextStyle(
                       color: link,
@@ -1772,7 +1779,7 @@ class _RoiQuickLinksRow extends StatelessWidget {
   }
 }
 
-class _CollapsibleToolsSection extends StatefulWidget {
+class _CollapsibleToolsSection extends ConsumerStatefulWidget {
   const _CollapsibleToolsSection({
     required this.isDark,
     required this.shortcutAspectRatio,
@@ -1782,11 +1789,12 @@ class _CollapsibleToolsSection extends StatefulWidget {
   final double shortcutAspectRatio;
 
   @override
-  State<_CollapsibleToolsSection> createState() =>
+  ConsumerState<_CollapsibleToolsSection> createState() =>
       _CollapsibleToolsSectionState();
 }
 
-class _CollapsibleToolsSectionState extends State<_CollapsibleToolsSection> {
+class _CollapsibleToolsSectionState
+    extends ConsumerState<_CollapsibleToolsSection> {
   bool _expanded = false;
 
   @override
@@ -1924,6 +1932,30 @@ class _CollapsibleToolsSectionState extends State<_CollapsibleToolsSection> {
                     onTap: () => context.push('/habitos'),
                   ),
                   _ShortcutBtn(
+                    icon: 'zap',
+                    label: 'Automações',
+                    isDark: widget.isDark,
+                    onTap: () => context.push('/automacoes'),
+                  ),
+                  _ShortcutBtn(
+                    icon: 'spark',
+                    label: 'Desafios',
+                    isDark: widget.isDark,
+                    onTap: () => context.push('/desafios'),
+                  ),
+                  _ShortcutBtn(
+                    icon: 'spark',
+                    label: 'Loja',
+                    isDark: widget.isDark,
+                    onTap: () => context.push('/loja'),
+                  ),
+                  _ShortcutBtn(
+                    icon: 'users',
+                    label: 'Equipe',
+                    isDark: widget.isDark,
+                    onTap: () => context.push('/perfil/equipe'),
+                  ),
+                  _ShortcutBtn(
                     icon: 'spark',
                     label: 'Pacotes',
                     isDark: widget.isDark,
@@ -1957,7 +1989,7 @@ class _CollapsibleToolsSectionState extends State<_CollapsibleToolsSection> {
                     icon: 'article',
                     label: 'Landing',
                     isDark: widget.isDark,
-                    onTap: () => context.push('/perfil/landing-editor'),
+                    onTap: () => openLandingEditorOrUpgrade(context, ref),
                   ),
                   _ShortcutBtn(
                     icon: 'spark',

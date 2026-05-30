@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/subscription/models/subscription_plan.dart';
+import '../../features/auth/providers/auth_provider.dart';
 import '../../features/planos/providers/plano_features_provider.dart';
 import '../../features/planos/data/planos_repository.dart';
 import '../../features/subscription/plan_entitlements.dart';
@@ -40,8 +41,12 @@ class FeatureGate extends ConsumerWidget {
     }
 
     if (featuresAsync.hasError) {
+      final isAluno = ref.read(authProvider) == AuthStatus.authenticated &&
+          ref.read(authProvider.notifier).currentRole == UserRole.aluno;
       return _PlanSyncBannerShell(
-        features: PlanoFeatures.optimisticEnterprise,
+        features: isAluno
+            ? PlanoFeatures.optimisticAluno
+            : PlanoFeatures.optimisticEnterprise,
         onRefresh: () => ref.read(planoFeaturesProvider.notifier).refresh(),
         child: child,
       );
@@ -120,6 +125,22 @@ class FeatureGate extends ConsumerWidget {
         return f.migracaoFoto;
       case 'landingCompleta':
         return f.landingCompleta;
+      case 'habitCoaching':
+        return f.habitCoaching;
+      case 'comunidadePrivada':
+        return f.comunidadePrivada;
+      case 'automacoes':
+        return f.automacoes;
+      case 'automacoesAvancadas':
+        return f.automacoesAvancadas;
+      case 'comunidadeGrupos':
+        return f.comunidadeGrupos;
+      case 'equipeRbac':
+        return f.equipeRbac;
+      case 'lojaDigital':
+        return f.lojaDigital;
+      case 'poseCoach':
+        return f.poseCoach;
       default:
         return false;
     }

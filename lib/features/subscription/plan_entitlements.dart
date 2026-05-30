@@ -12,9 +12,17 @@ class PlanEntitlements {
   }) {
     switch (capability) {
       case 'landingCompleta':
+      case 'lojaDigital':
+      case 'poseCoach':
+      case 'automacoesAvancadas':
         return SubscriptionPlan.ENTERPRISE_PRO;
       case 'whiteLabel':
+      case 'automacoes':
+      case 'comunidadeGrupos':
+      case 'equipeRbac':
         return SubscriptionPlan.ENTERPRISE;
+      case 'habitCoaching':
+      case 'comunidadePrivada':
       case 'financeiro':
       case 'relatorios':
       case 'iaCopiloto':
@@ -50,6 +58,14 @@ class PlanEntitlements {
       'relatorios' => 'Relatórios que mostram onde está o dinheiro',
       'migracaoFoto' => 'Importe alunos por foto ou print',
       'agenda' => 'Agenda completa para sua operação',
+      'habitCoaching' => 'Habit coaching diário para retenção',
+      'comunidadePrivada' => 'Comunidade privada de alunos',
+      'automacoes' => 'Automações sequenciais para escalar',
+      'automacoesAvancadas' => 'Automações avançadas com ramificações',
+      'comunidadeGrupos' => 'Desafios e grupos com ranking',
+      'equipeRbac' => 'Equipe com permissões granulares',
+      'lojaDigital' => 'Loja digital com checkout PIX',
+      'poseCoach' => 'Pose Coach — análise de postura ML',
       _ => 'Desbloqueie $featureName',
     };
 
@@ -72,8 +88,25 @@ class PlanEntitlements {
             'sua marca em cada tela do app, não um visual genérico.',
       'relatorios' =>
         'Analytics de aderência e visão global do negócio estão no $planLabel.',
-      'agenda' =>
-        'Recursos avançados de agenda estão no $planLabel ou superior.',
+      'agenda' => 'Agenda completa para sua operação',
+      'habitCoaching' =>
+        'Hábitos diários (água, sono, passos) fazem parte do plano $planLabel — '
+            'personais que acompanham hábitos retêm 35% mais alunos.',
+      'comunidadePrivada' =>
+        'Comunidade privada fechada para seus alunos está no $planLabel.',
+      'automacoes' =>
+        'Automações sequenciais (onboarding, winback) exigem Enterprise.',
+      'automacoesAvancadas' =>
+        'Ramificações e automações avançadas exigem Enterprise Pro.',
+      'comunidadeGrupos' =>
+        'Desafios com ranking e grupos exigem Enterprise ou superior.',
+      'equipeRbac' =>
+        'Convide assistentes com permissões granulares no Enterprise '
+            '(1 assistente) ou Pro (ilimitado).',
+      'lojaDigital' =>
+        'Venda programas digitais com checkout PIX no Enterprise Pro.',
+      'poseCoach' =>
+        'Análise de postura por ML em tempo real no Enterprise Pro.',
       _ => '"$featureName" faz parte do plano $planLabel. Faça upgrade em um passo.',
     };
 

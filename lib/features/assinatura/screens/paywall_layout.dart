@@ -389,27 +389,29 @@ class _PaywallLegalConsentLine extends StatelessWidget {
   final Color ink;
   final Color mute;
   final Color primary;
+  final bool isUpgrade;
 
   const _PaywallLegalConsentLine({
     required this.ink,
     required this.mute,
     required this.primary,
+    this.isUpgrade = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     TextStyle linkStyle() => TextStyle(
-      fontSize: 11,
+      fontSize: 12,
       fontWeight: FontWeight.w600,
       color: primary,
       decoration: TextDecoration.underline,
       decorationColor: primary.withValues(alpha: 0.45),
-      height: 1.35,
+      height: 1.4,
     );
     final body = TokensStrip.bodyMuted(
       color: _paywallSecondaryText(ink, mute, isDark: isDark),
-    ).copyWith(fontSize: 11);
+    ).copyWith(fontSize: 12, height: 1.4);
 
     final linkButtonStyle = TextButton.styleFrom(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
@@ -417,16 +419,20 @@ class _PaywallLegalConsentLine extends StatelessWidget {
       tapTargetSize: MaterialTapTargetSize.padded,
     );
 
+    final lead = isUpgrade ? 'Ao confirmar upgrade, concorda com os ' : 'Ao assinar, concorda com os ';
+    final semanticsLead = isUpgrade
+        ? 'Ao confirmar upgrade, você concorda com os Termos de uso e a Política de privacidade'
+        : 'Ao assinar, você concorda com os Termos de uso e a Política de privacidade';
+
     return Semantics(
-      label:
-          'Ao assinar, você concorda com os Termos de uso e a Política de privacidade',
+      label: semanticsLead,
       child: Wrap(
         alignment: WrapAlignment.center,
         crossAxisAlignment: WrapCrossAlignment.center,
         spacing: 0,
         runSpacing: 2,
         children: [
-          Text('Ao assinar, concorda com os ', style: body),
+          Text(lead, style: body),
           Semantics(
             button: true,
             label: 'Abrir termos de uso',
