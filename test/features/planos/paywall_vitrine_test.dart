@@ -16,4 +16,17 @@ void main() {
     final snapshot = PaywallVitrineSnapshot.fromApi({'socialProof': []});
     expect(snapshot.socialProof, PaywallCatalog.socialProof);
   });
+
+  test('fromApi parses roi strip and trial offer', () {
+    final snapshot = PaywallVitrineSnapshot.fromApi({
+      'socialProof': [{'value': '1', 'label': 'x'}],
+      'roiStrip': [
+        {'value': '5×', 'label': 'ROI', 'tone': 'brand'},
+      ],
+      'trialDaysOffer': 14,
+    });
+    expect(snapshot.fromApi, isTrue);
+    expect(snapshot.trialDaysOffer, 14);
+    expect(snapshot.effectiveRoiStrip.first.value, '5×');
+  });
 }

@@ -35,6 +35,30 @@ class PaywallCatalog {
     _ => plan.apiName,
   };
 
+  static String displayNameFor(Plano plano, SubscriptionPlan plan) {
+    final api = plano.displayName?.trim();
+    if (api != null && api.isNotEmpty) return api;
+    return displayPlanName(plan);
+  }
+
+  static String subtitleFor(Plano plano, SubscriptionPlan plan) {
+    final api = plano.subtitle?.trim();
+    if (api != null && api.isNotEmpty) return api;
+    return subtitleForPlan(plan);
+  }
+
+  static String? badgeFor(Plano plano, SubscriptionPlan plan) {
+    final api = plano.badge?.trim();
+    if (api != null && api.isNotEmpty) return api;
+    return badgeForPlan(plan);
+  }
+
+  static String? roiTagFor(Plano plano, SubscriptionPlan plan) {
+    final api = plano.roiTag?.trim();
+    if (api != null && api.isNotEmpty) return api;
+    return roiTagForPlan(plan);
+  }
+
   static String subtitleForPlan(SubscriptionPlan plan) => switch (plan) {
     SubscriptionPlan.FREE => 'Para começar',
     SubscriptionPlan.PREMIUM => 'Para crescer',

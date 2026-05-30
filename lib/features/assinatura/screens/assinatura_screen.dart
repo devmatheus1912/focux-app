@@ -81,8 +81,7 @@ bool _shouldShowEnterpriseTrialCard(
   if (selectedPlan != SubscriptionPlan.ENTERPRISE) return false;
   if (currentPlan == SubscriptionPlan.ENTERPRISE) return false;
   if (trialStatus?.trialAtivo == true) return true;
-  if (trialStatus?.trialEligible == true) return true;
-  return trialStatus?.trialUsed != true;
+  return trialStatus?.trialEligible == true;
 }
 
 class AssinaturaScreen extends ConsumerStatefulWidget {
@@ -527,7 +526,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       );
       final trialNote =
           plan == SubscriptionPlan.ENTERPRISE &&
-                  (_trialStatus?.trialUsed == false)
+                  _trialStatus?.trialEligible == true
               ? 'Teste introdutório pode ser aplicado pela loja ao assinar.'
               : null;
       final confirmed = await Navigator.of(context).push<bool>(
@@ -630,6 +629,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     final perfil = ref.watch(perfilProvider).valueOrNull;
     final currentPlan = subscriptionPlanFromApi(perfil?.plano);
     final planosAsync = ref.watch(planosProvider);
+    final vitrineAsync = ref.watch(paywallVitrineProvider);
+    final trialDaysFromVitrine = vitrineAsync.valueOrNull?.trialDaysOffer;
     final featuresAsync = ref.watch(planoFeaturesProvider);
 
     final planos = planosAsync.valueOrNull;
@@ -702,11 +703,11 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         ctaEnabled =
             !_loadingCheckout &&
             (kIsWeb || !subscriptionUsesNativeStore || _storeAvailable);
-        final trialDays = _trialStatus?.trialDaysOffer ?? 14;
+        final trialDays =
+            _trialStatus?.trialDaysOffer ?? trialDaysFromVitrine ?? 14;
         final trialOffer =
             selectedPlan == SubscriptionPlan.ENTERPRISE &&
-            (_trialStatus?.trialEligible == true ||
-                _trialStatus?.trialUsed == false);
+            _trialStatus?.trialEligible == true;
         final isUpgrade = selectedPlan.level > currentPlan.level;
         ctaLabel = trialOffer
             ? 'Começar $trialDays dias grátis — Enterprise'
@@ -731,8 +732,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     final trialOffer =
         selectedPlan == SubscriptionPlan.ENTERPRISE &&
         !isCurrentPlan &&
-        (_trialStatus?.trialEligible == true ||
-            _trialStatus?.trialUsed == false);
+        _trialStatus?.trialEligible == true;
     final planSummary = planos == null
         ? null
         : isCurrentPlan
@@ -876,7 +876,14 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
           );
           final isCurrentPlanSelected = selPlan == currentPlan;
           final isAcquisition = currentPlan == SubscriptionPlan.FREE;
-
+          final isMaxTier = currentPlan == SubscriptionPlan.ENTERPRISE_PRO;
+          final hasUpgradeAbove = paid.any(
+            (p) => subscriptionPlanFromApi(p.nome).level > currentPlan.level,
+          );
+          final heroPlanLabel = PaywallCatalog.displayNameFor(
+            currentBackend,
+            currentPlan,
+          );
           if (selPlan == SubscriptionPlan.ENTERPRISE &&
               currentPlan != SubscriptionPlan.ENTERPRISE &&
               !_enterprisePreviewRequested) {
@@ -911,6 +918,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   primary: primary,
                   isDark: isDark,
                   currentPlan: currentPlan,
+                  planDisplayLabel: heroPlanLabel,
+                  isMaxTier: isMaxTier,
+                  hasUpgradePath: hasUpgradeAbove,
                 ),
                 if (isAcquisition)
                   PaywallQuickNav(
@@ -936,7 +946,11 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     note:
                         isAcquisition
                             ? 'Toque no card · Mensal ou Anual'
-                            : 'Upgrade no card · downgrade na loja',
+                            : isMaxTier
+                            ? 'Plano máximo · gerencie na loja'
+                            : hasUpgradeAbove
+                            ? 'Upgrade no card · downgrade na loja'
+                            : 'Gerencie na loja do dispositivo',
                     ink: ink,
                     mute: mute,
                   ),
@@ -1160,11 +1174,16 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     isDark: isDark,
                   ),
                 ],
-                if (!_storeAvailable && !kIsWeb) ...[
+                if (!_storeAvailable &&
+                    !kIsWeb &&
+                    subscriptionUsesNativeStore &&
+                    !isAcquisition) ...[
                   const SizedBox(height: 12),
                   _PaywallInlineNote(
                     icon: Icons.store_outlined,
-                    text: 'Loja do dispositivo indisponível nesta sessão.',
+                    text: hasUpgradeAbove
+                        ? 'Loja indisponível nesta sessão — use o botão abaixo para abrir ${subscriptionChannelLabel()} e gerenciar ou fazer upgrade.'
+                        : 'Loja indisponível nesta sessão — use o botão abaixo para abrir ${subscriptionChannelLabel()} e gerenciar sua assinatura.',
                     ink: ink,
                     mute: mute,
                     isDark: isDark,

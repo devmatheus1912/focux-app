@@ -8,6 +8,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../assinatura/data/assinatura_repository.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../../subscription/plan_entitlements.dart';
+import '../../subscription/store_subscription_policy.dart';
 import '../../subscription/subscription_products.dart';
 import 'paywall_catalog.dart';
 
@@ -22,6 +23,9 @@ class PaywallHero extends StatelessWidget {
   final Color primary;
   final bool isDark;
   final SubscriptionPlan? currentPlan;
+  final String? planDisplayLabel;
+  final bool isMaxTier;
+  final bool hasUpgradePath;
 
   const PaywallHero({
     super.key,
@@ -30,15 +34,30 @@ class PaywallHero extends StatelessWidget {
     required this.primary,
     required this.isDark,
     this.currentPlan,
+    this.planDisplayLabel,
+    this.isMaxTier = false,
+    this.hasUpgradePath = true,
   });
 
   bool get _isSubscriber =>
       currentPlan != null && currentPlan != SubscriptionPlan.FREE;
 
+  String get _subscriberSubtitle {
+    if (isMaxTier) {
+      return 'Você está no plano máximo. Gerencie a assinatura na loja do dispositivo.';
+    }
+    if (!hasUpgradePath) {
+      return 'Gerencie a assinatura na loja do dispositivo.';
+    }
+    return 'Gerencie a assinatura ou faça upgrade no card abaixo.';
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isSubscriber) {
-      final label = PaywallCatalog.displayPlanName(currentPlan!);
+      final label =
+          planDisplayLabel ??
+          PaywallCatalog.displayPlanName(currentPlan!);
       return Padding(
         padding: const EdgeInsets.fromLTRB(4, 8, 4, 16),
         child: Column(
@@ -70,7 +89,7 @@ class PaywallHero extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Você está no $label',
+              isMaxTier ? 'Plano máximo ativo' : 'Você está no $label',
               style: TokensStrip.h1(color: ink).copyWith(
                 fontSize: 26,
                 height: 1.08,
@@ -79,7 +98,7 @@ class PaywallHero extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Gerencie a assinatura ou faça upgrade no app.',
+              _subscriberSubtitle,
               style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 14),
             ),
           ],
@@ -470,12 +489,14 @@ class PaywallRoiStrip extends StatelessWidget {
   final Color line;
   final Color ink;
   final Color mute;
+  final List<({String value, String label, Color color})>? roiStrip;
 
   const PaywallRoiStrip({
     super.key,
     required this.line,
     required this.ink,
     required this.mute,
+    this.roiStrip,
   });
 
   @override
@@ -489,7 +510,7 @@ class PaywallRoiStrip extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: LayoutBuilder(
         builder: (context, c) {
-          final items = PaywallCatalog.roiStrip;
+          final items = roiStrip ?? PaywallCatalog.roiStrip;
           final cols = c.maxWidth < 520 ? 2 : 3;
           return Column(
             children: [
@@ -608,16 +629,21 @@ class PaywallRichPlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = PaywallCatalog.accentForPlan(plan);
-    final badge = PaywallCatalog.badgeForPlan(plan);
+    final badge = PaywallCatalog.badgeFor(plano, plan);
+    final planTitle = PaywallCatalog.displayNameFor(plano, plan);
+    final planSubtitle = PaywallCatalog.subtitleFor(plano, plan);
+    final roiTag = PaywallCatalog.roiTagFor(plano, plan);
     final sections = PaywallCatalog.featureSectionsForPlan(plano, plan);
     final motion = TokensStrip.prefersReducedMotion(context)
         ? Duration.zero
         : const Duration(milliseconds: 220);
+    final hideUpgradePricing =
+        billingDisabled && !isCurrent && plan != SubscriptionPlan.FREE;
 
     return Semantics(
       selected: isSelected,
       label:
-          'Plano ${PaywallCatalog.displayPlanName(plan)}, $monthlyPrice mensal, $annualPrice anual'
+          'Plano $planTitle, $monthlyPrice mensal, $annualPrice anual'
           '${isCurrent ? ', plano atual' : ''}'
           '${isLockedDowngrade ? ', downgrade pela loja' : ''}',
       child: Opacity(
@@ -682,7 +708,7 @@ class PaywallRichPlanCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            PaywallCatalog.displayPlanName(plan),
+                            planTitle,
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w900,
@@ -692,12 +718,18 @@ class PaywallRichPlanCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            PaywallCatalog.subtitleForPlan(plan),
+                            planSubtitle,
                             style: TokensStrip.bodyMuted(color: mute),
                           ),
                           const SizedBox(height: 12),
                           if (!isCurrent && plan != SubscriptionPlan.FREE)
-                            Column(
+                            hideUpgradePricing
+                                ? _StoreBillingHint(
+                                    mute: mute,
+                                    line: line,
+                                    isDark: isDark,
+                                  )
+                                : Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 Row(
@@ -754,15 +786,6 @@ class PaywallRichPlanCard extends StatelessWidget {
                                     ),
                                   ],
                                 ),
-                                if (billingDisabled) ...[
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Preços da loja indisponíveis nesta sessão.',
-                                    style: TokensStrip.bodyMuted(color: mute).copyWith(
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
                               ],
                             )
                           else if (isCurrent)
@@ -775,15 +798,19 @@ class PaywallRichPlanCard extends StatelessWidget {
                               'R\$ 0',
                               style: TokensStrip.h2(color: ink).copyWith(fontSize: 22),
                             ),
-                          if (PaywallCatalog.roiTagForPlan(plan) != null) ...[
+                          if (roiTag != null) ...[
                             const SizedBox(height: 10),
-                            _RoiMoneyTag(text: PaywallCatalog.roiTagForPlan(plan)!),
+                            _RoiMoneyTag(text: roiTag),
                           ],
-                          const SizedBox(height: 8),
-                          Text(
-                            PaywallCatalog.descriptionForPlan(plan),
-                            style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 13),
-                          ),
+                          if (!(collapseFeatureDetails && isCurrent)) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              PaywallCatalog.descriptionForPlan(plan),
+                              style: TokensStrip.bodyMuted(color: mute).copyWith(
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -801,10 +828,6 @@ class PaywallRichPlanCard extends StatelessWidget {
                         style: TokensStrip.body(color: ink).copyWith(
                           fontWeight: FontWeight.w700,
                         ),
-                      ),
-                      subtitle: Text(
-                        PaywallCatalog.descriptionForPlan(plan),
-                        style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 12),
                       ),
                       children: [
                         PaywallPlanFeatureSections(
@@ -1034,6 +1057,46 @@ class _PriceBox extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           child: box,
         ),
+      ),
+    );
+  }
+}
+
+class _StoreBillingHint extends StatelessWidget {
+  final Color mute;
+  final Color line;
+  final bool isDark;
+
+  const _StoreBillingHint({
+    required this.mute,
+    required this.line,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: (isDark ? EagleTokens.darkCard : EagleTokens.card).withValues(
+          alpha: 0.9,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: line.withValues(alpha: 0.55)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.storefront_outlined, size: 18, color: mute),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Preços e upgrade disponíveis na ${subscriptionChannelLabel()} '
+              'deste dispositivo. Abra a loja para concluir.',
+              style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 13),
+            ),
+          ),
+        ],
       ),
     );
   }
