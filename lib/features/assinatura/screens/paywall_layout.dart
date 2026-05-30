@@ -10,6 +10,45 @@ Duration _paywallMotion(BuildContext context) =>
         ? Duration.zero
         : const Duration(milliseconds: 220);
 
+List<({String label, bool included})> _paywallFeatureRowsWithUsage(
+  Plano plano,
+  SubscriptionPlan plan,
+  PlanoFeatures? usage,
+) {
+  final rows = _paywallFeatureRows(plano, plan);
+  if (usage == null) return rows;
+
+  return [
+    for (final row in rows)
+      if (row.included && (row.label.startsWith('Até') || row.label.contains('ilimitados')))
+        (
+          label:
+              usage.limiteAlunos == null
+                  ? '${usage.alunosAtivos} alunos ativos · ilimitados'
+                  : '${usage.alunosAtivos} de ${usage.limiteAlunos} alunos ativos',
+          included: true,
+        )
+      else if (row.included && row.label.contains('interações de IA'))
+        (
+          label:
+              usage.limiteIaMensal == null || (usage.limiteIaMensal ?? 0) <= 0
+                  ? row.label
+                  : 'IA: ${usage.iaUsadaMes} de ${usage.limiteIaMensal} este mês',
+          included: true,
+        )
+      else if (row.included && row.label.contains('fotos de migração'))
+        (
+          label:
+              usage.limiteMigracaoFotoMensal == null
+                  ? row.label
+                  : 'Migração: ${usage.migracaoFotosUsadasMes} de ${usage.limiteMigracaoFotoMensal} fotos/mês',
+          included: true,
+        )
+      else
+        row,
+  ];
+}
+
 List<({String label, bool included})> _paywallFeatureRows(
   Plano plano,
   SubscriptionPlan plan,
@@ -115,6 +154,7 @@ class _PaywallFeaturePanel extends StatelessWidget {
   final Plano currentPlano;
   final SubscriptionPlan plan;
   final SubscriptionPlan currentPlan;
+  final PlanoFeatures? usage;
   final Color ink;
   final Color mute;
   final Color line;
@@ -126,6 +166,7 @@ class _PaywallFeaturePanel extends StatelessWidget {
     required this.currentPlano,
     required this.plan,
     required this.currentPlan,
+    this.usage,
     required this.ink,
     required this.mute,
     required this.line,
@@ -142,11 +183,11 @@ class _PaywallFeaturePanel extends StatelessWidget {
     final secondary = _paywallSecondaryText(mute, isDark: isDark);
     final planLabel = PaywallCatalog.displayPlanName(plan);
     final currentLabel = PaywallCatalog.displayPlanName(currentPlan);
-    final accent =
-        isDowngrade ? PaywallCatalog.warning : PaywallCatalog.accentForPlan(plan);
+    final checkColor =
+        isDowngrade ? PaywallCatalog.warning : primary;
 
     final rows = switch (true) {
-      true when isCurrent => _paywallFeatureRows(plano, plan),
+      true when isCurrent => _paywallFeatureRowsWithUsage(plano, plan, usage),
       true when isUpgrade =>
         _paywallUpgradeGains(currentPlano, currentPlan, plano, plan),
       true when isDowngrade =>
@@ -236,7 +277,7 @@ class _PaywallFeaturePanel extends StatelessWidget {
                   Icon(
                     row.included ? Icons.check_circle_rounded : Icons.cancel_rounded,
                     size: 20,
-                    color: row.included ? accent : mute.withValues(alpha: 0.4),
+                    color: row.included ? checkColor : mute.withValues(alpha: 0.4),
                   ),
                   const SizedBox(width: 12),
                   Expanded(

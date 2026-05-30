@@ -569,6 +569,9 @@ class PaywallRichPlanCard extends StatelessWidget {
   final bool isSelected;
   final bool isCurrent;
   final bool isLockedDowngrade;
+  final bool dimUnselected;
+  final bool collapseFeatureDetails;
+  final bool billingDisabled;
   final String monthlyPrice;
   final String annualPrice;
   final Color ink;
@@ -587,6 +590,9 @@ class PaywallRichPlanCard extends StatelessWidget {
     required this.isSelected,
     required this.isCurrent,
     this.isLockedDowngrade = false,
+    this.dimUnselected = false,
+    this.collapseFeatureDetails = false,
+    this.billingDisabled = false,
     required this.monthlyPrice,
     required this.annualPrice,
     required this.ink,
@@ -615,7 +621,11 @@ class PaywallRichPlanCard extends StatelessWidget {
           '${isCurrent ? ', plano atual' : ''}'
           '${isLockedDowngrade ? ', downgrade pela loja' : ''}',
       child: Opacity(
-        opacity: isLockedDowngrade ? 0.72 : 1,
+        opacity: isLockedDowngrade
+            ? 0.72
+            : dimUnselected
+            ? 0.58
+            : 1,
         child: AnimatedContainer(
         duration: motion,
         margin: const EdgeInsets.only(bottom: 14),
@@ -687,46 +697,72 @@ class PaywallRichPlanCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 12),
                           if (!isCurrent && plan != SubscriptionPlan.FREE)
-                            Row(
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Expanded(
-                                  child: _PriceBox(
-                                    label: 'Mensal',
-                                    price: monthlyPrice,
-                                    ink: ink,
-                                    mute: mute,
-                                    line: line,
-                                    isDark: isDark,
-                                    selected: isSelected &&
-                                        billingPeriod ==
-                                            SubscriptionBillingPeriod.monthly,
-                                    onTap: onBillingPeriodTap == null
-                                        ? null
-                                        : () => onBillingPeriodTap!(
-                                              SubscriptionBillingPeriod.monthly,
-                                            ),
-                                  ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _PriceBox(
+                                        label: 'Mensal',
+                                        price: monthlyPrice,
+                                        ink: ink,
+                                        mute: mute,
+                                        line: line,
+                                        isDark: isDark,
+                                        disabled: billingDisabled,
+                                        selected:
+                                            !billingDisabled &&
+                                            isSelected &&
+                                            billingPeriod ==
+                                                SubscriptionBillingPeriod.monthly,
+                                        onTap:
+                                            billingDisabled
+                                                ? null
+                                                : onBillingPeriodTap == null
+                                                ? null
+                                                : () => onBillingPeriodTap!(
+                                                      SubscriptionBillingPeriod.monthly,
+                                                    ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: _PriceBox(
+                                        label: 'Anual',
+                                        price: annualPrice,
+                                        ink: ink,
+                                        mute: mute,
+                                        line: line,
+                                        isDark: isDark,
+                                        disabled: billingDisabled,
+                                        selected:
+                                            !billingDisabled &&
+                                            isSelected &&
+                                            (billingPeriod ??
+                                                    SubscriptionBillingPeriod.yearly) ==
+                                                SubscriptionBillingPeriod.yearly,
+                                        onTap:
+                                            billingDisabled
+                                                ? null
+                                                : onBillingPeriodTap == null
+                                                ? null
+                                                : () => onBillingPeriodTap!(
+                                                      SubscriptionBillingPeriod.yearly,
+                                                    ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: _PriceBox(
-                                    label: 'Anual',
-                                    price: annualPrice,
-                                    ink: ink,
-                                    mute: mute,
-                                    line: line,
-                                    isDark: isDark,
-                                    selected: isSelected &&
-                                        (billingPeriod ??
-                                                SubscriptionBillingPeriod.yearly) ==
-                                            SubscriptionBillingPeriod.yearly,
-                                    onTap: onBillingPeriodTap == null
-                                        ? null
-                                        : () => onBillingPeriodTap!(
-                                              SubscriptionBillingPeriod.yearly,
-                                            ),
+                                if (billingDisabled) ...[
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Preços da loja indisponíveis nesta sessão.',
+                                    style: TokensStrip.bodyMuted(color: mute).copyWith(
+                                      fontSize: 12,
+                                    ),
                                   ),
-                                ),
+                                ],
                               ],
                             )
                           else if (isCurrent)
@@ -754,13 +790,41 @@ class PaywallRichPlanCard extends StatelessWidget {
                   ),
                 ),
                 const Divider(height: 1),
-                PaywallPlanFeatureSections(
-                  sections: sections,
-                  accent: accent,
-                  ink: ink,
-                  mute: mute,
-                  onFeatureHelp: onFeatureHelp,
-                ),
+                if (collapseFeatureDetails && isCurrent)
+                  Theme(
+                    data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                    child: ExpansionTile(
+                      tilePadding: const EdgeInsets.symmetric(horizontal: 20),
+                      childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                      title: Text(
+                        'Ver todos os recursos',
+                        style: TokensStrip.body(color: ink).copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      subtitle: Text(
+                        PaywallCatalog.descriptionForPlan(plan),
+                        style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 12),
+                      ),
+                      children: [
+                        PaywallPlanFeatureSections(
+                          sections: sections,
+                          accent: accent,
+                          ink: ink,
+                          mute: mute,
+                          onFeatureHelp: onFeatureHelp,
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  PaywallPlanFeatureSections(
+                    sections: sections,
+                    accent: accent,
+                    ink: ink,
+                    mute: mute,
+                    onFeatureHelp: onFeatureHelp,
+                  ),
               ],
             ),
           ],
@@ -884,6 +948,7 @@ class _PriceBox extends StatelessWidget {
   final Color line;
   final bool isDark;
   final bool selected;
+  final bool disabled;
   final VoidCallback? onTap;
 
   const _PriceBox({
@@ -894,63 +959,69 @@ class _PriceBox extends StatelessWidget {
     required this.line,
     required this.isDark,
     this.selected = false,
+    this.disabled = false,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final fill = selected
+    final effectiveSelected = selected && !disabled;
+    final fill = effectiveSelected
         ? PaywallCatalog.brand.withValues(alpha: isDark ? 0.14 : 0.09)
         : (isDark
             ? Colors.white.withValues(alpha: 0.04)
             : EagleTokens.paper);
-    final borderColor = selected
+    final borderColor = effectiveSelected
         ? PaywallCatalog.brand.withValues(alpha: 0.65)
         : line;
+    final textInk = disabled ? mute.withValues(alpha: 0.55) : ink;
 
-    final box = Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: borderColor, width: selected ? 2 : 1),
-        color: fill,
-        boxShadow: selected
-            ? [
-                BoxShadow(
-                  color: PaywallCatalog.brand.withValues(alpha: 0.12),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : null,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label.toUpperCase(),
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1,
-              color: mute,
+    final box = Opacity(
+      opacity: disabled ? 0.5 : 1,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: borderColor, width: effectiveSelected ? 2 : 1),
+          color: disabled ? mute.withValues(alpha: 0.08) : fill,
+          boxShadow: effectiveSelected
+              ? [
+                  BoxShadow(
+                    color: PaywallCatalog.brand.withValues(alpha: 0.12),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label.toUpperCase(),
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1,
+                color: mute,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            price,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w900,
-              color: ink,
-              fontFamily: 'monospace',
+            const SizedBox(height: 4),
+            Text(
+              price,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+                color: textInk,
+                fontFamily: 'monospace',
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
 
-    if (onTap == null) return box;
+    if (onTap == null || disabled) return box;
 
     return Semantics(
       button: true,

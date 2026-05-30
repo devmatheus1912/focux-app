@@ -955,6 +955,12 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                           )
                           .toList();
 
+                  final hasUpgradeAbove = visiblePlans.any(
+                    (p) =>
+                        subscriptionPlanFromApi(p.nome).level >
+                        currentPlan.level,
+                  );
+
                   Widget planCard(Plano plano, {bool lockedDowngrade = false}) {
                     final plan = subscriptionPlanFromApi(plano.nome);
                     final monthlyProduct = _productDetails[
@@ -981,6 +987,18 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                       isSelected: plan == selPlan && !lockedDowngrade,
                       isCurrent: plan == currentPlan,
                       isLockedDowngrade: lockedDowngrade,
+                      dimUnselected:
+                          hasUpgradeAbove &&
+                          plan != currentPlan &&
+                          plan != selPlan,
+                      collapseFeatureDetails:
+                          plan == currentPlan &&
+                          currentPlan != SubscriptionPlan.FREE,
+                      billingDisabled:
+                          !storeOk &&
+                          plan.level > currentPlan.level &&
+                          !kIsWeb &&
+                          subscriptionUsesNativeStore,
                       monthlyPrice: monthlyPrice,
                       annualPrice: annualPrice,
                       ink: ink,
@@ -1089,6 +1107,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   currentPlano: currentBackend,
                   plan: isCurrentPlanSelected ? currentPlan : selPlan,
                   currentPlan: currentPlan,
+                  usage: featuresAsync.valueOrNull,
                   ink: ink,
                   mute: mute,
                   line: line,
