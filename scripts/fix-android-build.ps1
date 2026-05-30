@@ -35,6 +35,12 @@ try {
     Pop-Location
 
     & flutter pub get | Out-Null
+
+    $patchScript = Join-Path $PSScriptRoot 'patch-android-legacy-plugins.ps1'
+    if (Test-Path $patchScript) {
+        & $patchScript
+    }
+
     Write-Host "Pronto. Rode: .\scripts\run-android.ps1" -ForegroundColor Green
 } finally {
     Pop-Location

@@ -28,6 +28,7 @@ import '../../../features/subscription/subscription_products.dart';
 
 import '../data/assinatura_repository.dart';
 import '../providers/assinatura_provider.dart';
+import '../../planos/paywall/paywall_catalog.dart';
 import '../../planos/paywall/paywall_components.dart';
 import '../../planos/paywall/paywall_vitrine.dart';
 import '../../subscription/plan_entitlements.dart';
@@ -852,42 +853,87 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   ),
                   const SizedBox(height: 20),
                 ],
-                ...sortedPlans.map((plano) {
-                  final plan = subscriptionPlanFromApi(plano.nome);
-                  final monthlyProduct = _productDetails[
-                    SubscriptionProducts.productIdFor(
-                      plan,
-                      SubscriptionBillingPeriod.monthly,
-                    )];
-                  final annualProduct = _productDetails[
-                    SubscriptionProducts.productIdFor(
-                      plan,
-                      SubscriptionBillingPeriod.yearly,
-                    )];
-                  final monthlyPrice = monthlyProduct != null
-                      ? monthlyProduct.price.replaceAll(RegExp(r'/.*'), '')
-                      : paywallMonthlyFromPlano(plano);
-                  final annualPrice = annualProduct != null
-                      ? annualProduct.price.replaceAll(RegExp(r'/.*'), '')
-                      : paywallAnnualMonthlyEquiv(plano);
-                  return PaywallRichPlanCard(
-                    plano: plano,
-                    plan: plan,
-                    isSelected: plan == selPlan,
-                    isCurrent: plan == currentPlan,
-                    monthlyPrice: monthlyPrice,
-                    annualPrice: annualPrice,
-                    ink: ink,
-                    mute: mute,
-                    line: line,
-                    isDark: isDark,
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      _selectPlan(plan);
-                    },
-                  );
-                }),
-                PaywallRoiStrip(line: line),
+                PaywallSectionHeader(
+                  title: 'Planos',
+                  note: 'Mensal e anual lado a lado',
+                  ink: ink,
+                  mute: mute,
+                ),
+                ...() {
+                  Plano? freePlano;
+                  for (final p in sortedPlans) {
+                    if (subscriptionPlanFromApi(p.nome) == SubscriptionPlan.FREE) {
+                      freePlano = p;
+                      break;
+                    }
+                  }
+                  final visiblePlans = currentPlan == SubscriptionPlan.FREE
+                      ? sortedPlans
+                      : sortedPlans
+                          .where(
+                            (p) =>
+                                subscriptionPlanFromApi(p.nome) !=
+                                SubscriptionPlan.FREE,
+                          )
+                          .toList();
+
+                  Widget planCard(Plano plano) {
+                    final plan = subscriptionPlanFromApi(plano.nome);
+                    final monthlyProduct = _productDetails[
+                      SubscriptionProducts.productIdFor(
+                        plan,
+                        SubscriptionBillingPeriod.monthly,
+                      )];
+                    final annualProduct = _productDetails[
+                      SubscriptionProducts.productIdFor(
+                        plan,
+                        SubscriptionBillingPeriod.yearly,
+                      )];
+                    final monthlyPrice = monthlyProduct != null
+                        ? monthlyProduct.price.replaceAll(RegExp(r'/.*'), '')
+                        : paywallMonthlyFromPlano(plano);
+                    final annualPrice = annualProduct != null
+                        ? annualProduct.price.replaceAll(RegExp(r'/.*'), '')
+                        : paywallAnnualMonthlyEquiv(plano);
+                    return PaywallRichPlanCard(
+                      plano: plano,
+                      plan: plan,
+                      isSelected: plan == selPlan,
+                      isCurrent: plan == currentPlan,
+                      monthlyPrice: monthlyPrice,
+                      annualPrice: annualPrice,
+                      ink: ink,
+                      mute: mute,
+                      line: line,
+                      isDark: isDark,
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        _selectPlan(plan);
+                      },
+                    );
+                  }
+
+                  return [
+                    ...visiblePlans.map(planCard),
+                    if (currentPlan != SubscriptionPlan.FREE && freePlano != null)
+                      Theme(
+                        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          tilePadding: EdgeInsets.zero,
+                          title: Text(
+                            'Ver plano gratuito',
+                            style: TokensStrip.body(color: ink),
+                          ),
+                          subtitle: Text(
+                            'Referência do tier FREE',
+                            style: TokensStrip.bodyMuted(color: mute),
+                          ),
+                          children: [planCard(freePlano)],
+                        ),
+                      ),
+                  ];
+                }(),
+                PaywallRoiStrip(line: line, ink: ink, mute: mute),
                 if (currentPlan == SubscriptionPlan.PREMIUM &&
                     selPlan == SubscriptionPlan.ENTERPRISE &&
                     !isCurrentPlanSelected) ...[
@@ -901,13 +947,45 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   line: line,
                   onSuggestPlan: _selectPlan,
                 ),
-                PaywallComparisonTable(ink: ink, mute: mute, line: line),
-                const SizedBox(height: 8),
-                PaywallRoiRowsList(ink: ink, mute: mute),
+                PaywallSectionHeader(
+                  title: 'Features',
+                  note: '10 maiores diferenciais',
+                  ink: ink,
+                  mute: mute,
+                ),
+                PaywallFeaturesGrid(
+                  ink: ink,
+                  mute: mute,
+                  line: line,
+                  isDark: isDark,
+                ),
+                PaywallComparisonTable(
+                  ink: ink,
+                  mute: mute,
+                  line: line,
+                  isDark: isDark,
+                ),
+                PaywallSectionHeader(
+                  title: 'ROI',
+                  note: 'Retorno por plano',
+                  ink: ink,
+                  mute: mute,
+                ),
+                PaywallRoiRowsList(
+                  ink: ink,
+                  mute: mute,
+                  line: line,
+                  isDark: isDark,
+                ),
                 const SizedBox(height: 20),
                 _PaywallFeaturePanel(
-                  plano: selBackend,
-                  plan: selPlan,
+                  plano: isCurrentPlanSelected
+                      ? sortedPlans.firstWhere(
+                          (p) => subscriptionPlanFromApi(p.nome) == currentPlan,
+                          orElse: () => selBackend,
+                        )
+                      : selBackend,
+                  plan: isCurrentPlanSelected ? currentPlan : selPlan,
                   currentPlan: currentPlan,
                   ink: ink,
                   mute: mute,
@@ -915,6 +993,19 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   primary: primary,
                   isDark: isDark,
                 ),
+                PaywallSectionHeader(
+                  title: 'Gatilhos',
+                  note: 'Toque para abrir',
+                  ink: ink,
+                  mute: mute,
+                ),
+                PaywallGatilhosList(
+                  ink: ink,
+                  mute: mute,
+                  line: line,
+                  isDark: isDark,
+                ),
+                const SizedBox(height: 12),
                 if (_shouldShowEnterpriseTrialCard(
                   selPlan,
                   currentPlan,

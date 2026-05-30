@@ -27,17 +27,22 @@ class PaywallCatalog {
     _ => null,
   };
 
+  static String displayPlanName(SubscriptionPlan plan) => switch (plan) {
+    SubscriptionPlan.ENTERPRISE_PRO => 'ENTERPRISE PRO',
+    _ => plan.apiName,
+  };
+
   static String subtitleForPlan(SubscriptionPlan plan) => switch (plan) {
     SubscriptionPlan.FREE => 'Para começar',
-    SubscriptionPlan.PREMIUM => 'Para personal em crescimento',
+    SubscriptionPlan.PREMIUM => 'Para crescer',
     SubscriptionPlan.ENTERPRISE => 'Para escalar com sua marca',
     SubscriptionPlan.ENTERPRISE_PRO => 'Seu app. Sua marca. Sua página.',
   };
 
   static String? roiTagForPlan(SubscriptionPlan plan) => switch (plan) {
-    SubscriptionPlan.PREMIUM => '💰 Custa menos que 1 falta de aluno',
-    SubscriptionPlan.ENTERPRISE => '💰 1 aluno novo paga o plano inteiro',
-    SubscriptionPlan.ENTERPRISE_PRO => '💰 Poupa R\$ 1k–3k de agência',
+    SubscriptionPlan.PREMIUM => 'Custa menos que 1 falta de aluno',
+    SubscriptionPlan.ENTERPRISE => '1 aluno novo paga o plano inteiro',
+    SubscriptionPlan.ENTERPRISE_PRO => 'Poupa R\$ 1k–3k de agência',
     _ => null,
   };
 
@@ -60,9 +65,11 @@ class PaywallCatalog {
 
   static const List<({String value, String label, Color color})> roiStrip = [
     (value: '5×', label: 'ROI médio em 2 anos', color: brand),
-    (value: '< 1%', label: 'do faturamento = Premium', color: brand),
+    (value: '25%+', label: 'Lucro com +5% retenção', color: gold),
     (value: 'R\$ 8.000', label: 'MRR com 20 alunos', color: green),
-    (value: 'R\$ 50/mês', label: 'vs R\$ 1–3k em agência', color: purple),
+    (value: '< 1%', label: 'Faturamento = Premium', color: brand),
+    (value: 'R\$ 50/mês', label: 'Substitui R\$ 1–3k agência', color: purple),
+    (value: '40%', label: 'Menos inadimplência c/ PIX', color: green),
   ];
 
   static List<PaywallFeatureEducation> featuresForPlan(
@@ -76,9 +83,7 @@ class PaywallCatalog {
       PaywallFeatureRow(label: alunosLabel, included: true, highlight: unlimited),
       if (plan != SubscriptionPlan.FREE)
         PaywallFeatureRow(
-          label: plan == SubscriptionPlan.ENTERPRISE
-              ? 'IA Copiloto — 400+ interações/mês'
-              : 'IA Copiloto — 120 interações/mês',
+          label: _iaCopilotoLabel(plan),
           included: true,
           highlight: true,
         ),
@@ -132,7 +137,7 @@ class PaywallCatalog {
       whyMatters:
           'Personais que cobram pelo app têm 40% menos inadimplência. '
           'Chega de cobrar no WhatsApp sem saber se foi pago.',
-      roiStatement: '💰 1 mensalidade recuperada = 5× o custo do Premium',
+      roiStatement: '1 mensalidade recuperada = 5× o custo do Premium',
       plans: ['PREMIUM', 'ENTERPRISE'],
     ),
     'IA Copiloto — 120 interações/mês': PaywallEducationContent(
@@ -143,17 +148,17 @@ class PaywallCatalog {
           'Monta treino e responde em minutos.',
       whyMatters:
           'Treino pronto em 3 minutos, não 30. Você escala sem perder qualidade.',
-      roiStatement: '💰 5h/semana = R\$ 1.280+/mês em produtividade',
+      roiStatement: '5h/semana = R\$ 1.280+/mês em produtividade',
       plans: ['PREMIUM', 'ENTERPRISE'],
     ),
     'IA Copiloto — 400+ interações/mês': PaywallEducationContent(
       id: 'ia_copiloto_ent',
-      title: 'IA Copiloto avançada',
+      title: 'IA Copiloto — 400+ interações/mês',
       whatIs:
           'Mesma IA com mais interações e contexto avançado por aluno.',
       whyMatters:
           'Ideal para operações com muitos alunos e alto volume de ajustes.',
-      roiStatement: '💰 Escala sem contratar assistente full-time',
+      roiStatement: 'Escala sem contratar assistente full-time',
       plans: ['ENTERPRISE'],
     ),
     'Command Center + Focux Score™': PaywallEducationContent(
@@ -163,7 +168,7 @@ class PaywallCatalog {
           'Painel do CEO do personal: quem vai cancelar, inadimplência e próxima ação.',
       whyMatters:
           'Em 2 minutos você sabe o que priorizar — sem planilha.',
-      roiStatement: '💰 Salvar 1 aluno/mês = R\$ 300–600',
+      roiStatement: 'Salvar 1 aluno/mês = R\$ 300–600',
       plans: ['PREMIUM', 'ENTERPRISE'],
     ),
     'White-label — seu logo e suas cores': PaywallEducationContent(
@@ -173,7 +178,7 @@ class PaywallCatalog {
           'Seus alunos abrem o app com SEU logo e SUAS cores — não um visual genérico.',
       whyMatters:
           'Posicionamento premium que justifica cobrar 20–30% mais.',
-      roiStatement: '💰 Diferencial de marca = ticket maior',
+      roiStatement: 'Diferencial de marca = ticket maior',
       plans: ['ENTERPRISE'],
     ),
     'Alunos ILIMITADOS': PaywallEducationContent(
@@ -182,28 +187,118 @@ class PaywallCatalog {
       whatIs: 'Sem teto de cadastro de alunos ativos no app.',
       whyMatters:
           'Cada novo aluno = R\$ 300–600/mês. O teto do plano anterior vira receita perdida.',
-      roiStatement: '💰 ROI imediato no 1º aluno extra',
+      roiStatement: 'ROI imediato no 1º aluno extra',
       plans: ['ENTERPRISE'],
     ),
   };
 
+  static String _iaCopilotoLabel(SubscriptionPlan plan) {
+    if (plan == SubscriptionPlan.ENTERPRISE ||
+        plan == SubscriptionPlan.ENTERPRISE_PRO) {
+      return 'IA Copiloto — 400+ interações/mês';
+    }
+    return 'IA Copiloto — 120 interações/mês';
+  }
+
   static const List<PaywallComparisonRow> comparisonRows = [
-    PaywallComparisonRow(feature: 'PIX + QR Code', free: '—', premium: '✓', enterprise: '✓'),
+    PaywallComparisonRow(
+      feature: 'PIX + QR Code',
+      free: '—',
+      premium: '✓',
+      enterprise: '✓',
+      enterprisePro: '✓',
+    ),
     PaywallComparisonRow(
       feature: 'IA Copiloto',
       free: '—',
       premium: '120/mês',
       enterprise: '400+/mês',
+      enterprisePro: '400+/mês',
     ),
     PaywallComparisonRow(
       feature: 'Command Center+Score™',
       free: '—',
       premium: '✓',
       enterprise: '✓',
+      enterprisePro: '✓',
     ),
-    PaywallComparisonRow(feature: 'White-label', free: '—', premium: '—', enterprise: '✓'),
-    PaywallComparisonRow(feature: 'Alunos', free: '5', premium: '20', enterprise: '∞'),
-    PaywallComparisonRow(feature: 'Recovery Score', free: '—', premium: '✓', enterprise: '✓'),
+    PaywallComparisonRow(
+      feature: 'White-label',
+      free: '—',
+      premium: '—',
+      enterprise: '✓',
+      enterprisePro: '✓',
+    ),
+    PaywallComparisonRow(
+      feature: 'Landing page COMPLETA',
+      free: '—',
+      premium: '—',
+      enterprise: '—',
+      enterprisePro: '✓',
+    ),
+    PaywallComparisonRow(
+      feature: 'Alunos',
+      free: '5',
+      premium: '20',
+      enterprise: '∞',
+      enterprisePro: '∞',
+    ),
+    PaywallComparisonRow(
+      feature: 'Recovery Score',
+      free: '—',
+      premium: '✓',
+      enterprise: '✓',
+      enterprisePro: '✓',
+    ),
+    PaywallComparisonRow(
+      feature: 'Habit coaching ✦',
+      free: '—',
+      premium: '✓',
+      enterprise: '✓',
+      enterprisePro: '✓',
+    ),
+    PaywallComparisonRow(
+      feature: 'Pose Coach ML ✦',
+      free: '—',
+      premium: '—',
+      enterprise: '—',
+      enterprisePro: '✓',
+    ),
+    PaywallComparisonRow(
+      feature: 'Loja digital ✦',
+      free: '—',
+      premium: '—',
+      enterprise: '—',
+      enterprisePro: '✓',
+    ),
+    PaywallComparisonRow(
+      feature: 'Equipe / RBAC ✦',
+      free: '—',
+      premium: '—',
+      enterprise: '✓',
+      enterprisePro: '✓',
+    ),
+    PaywallComparisonRow(
+      feature: 'NFS-e automática',
+      free: '—',
+      premium: '—',
+      enterprise: '✓',
+      enterprisePro: '✓',
+    ),
+    PaywallComparisonRow(
+      feature: 'Domínio customizado',
+      free: '—',
+      premium: '—',
+      enterprise: '✓',
+      enterprisePro: '✓',
+    ),
+    PaywallComparisonRow(
+      feature: '50 fotos migração/mês',
+      free: '—',
+      premium: '—',
+      enterprise: '—',
+      enterprisePro: '✓',
+    ),
   ];
 
   static const List<PaywallRoiRow> roiRows = [
@@ -226,10 +321,219 @@ class PaywallCatalog {
       color: brand,
     ),
     PaywallRoiRow(
+      label: 'Recovery Score evita lesão',
+      value: 'Menos churn por lesão',
+      planChip: 'PREMIUM',
+      color: brand,
+    ),
+    PaywallRoiRow(
+      label: 'White-label no app',
+      value: '+20–30% no valor percebido',
+      planChip: 'ENTERPRISE',
+      color: gold,
+    ),
+    PaywallRoiRow(
       label: 'Alunos ilimitados — sem teto',
       value: 'Cada novo = R\$ 300–600/mês',
       planChip: 'ENTERPRISE',
       color: gold,
+    ),
+    PaywallRoiRow(
+      label: 'NFS-e automática (PJ)',
+      value: 'Zero burocracia fiscal',
+      planChip: 'ENTERPRISE',
+      color: gold,
+    ),
+    PaywallRoiRow(
+      label: 'Landing page completa',
+      value: 'Poupa R\$ 1k–3k de agência',
+      planChip: 'ENT. PRO',
+      color: purple,
+    ),
+    PaywallRoiRow(
+      label: 'Link na bio que converte',
+      value: 'Lead → aluno 24h/dia',
+      planChip: 'ENT. PRO',
+      color: purple,
+    ),
+    PaywallRoiRow(
+      label: 'Loja de programas digitais ✦',
+      value: 'Receita passiva enquanto dorme',
+      planChip: 'ENT. PRO',
+      color: purple,
+    ),
+  ];
+
+  static const List<PaywallTopFeature> topFeatures = [
+    PaywallTopFeature(
+      rank: 1,
+      icon: Icons.qr_code_2_rounded,
+      title: 'PIX com QR Code no chat',
+      badge: 'EXCLUSIVO BR',
+      badgeColor: brand,
+      description:
+          'Cobra sem constrangimento. QR Code gerado e enviado direto no chat do aluno.',
+      roiMoney: '1 mensalidade recuperada = 5× o custo do Premium',
+      planChips: ['PREMIUM', 'ENTERPRISE', 'ENT. PRO'],
+    ),
+    PaywallTopFeature(
+      rank: 2,
+      icon: Icons.smart_toy_outlined,
+      title: 'IA Copiloto com contexto real',
+      badge: 'TOP CONVERSÃO',
+      badgeColor: brand,
+      description:
+          'Conhece histórico, aderência e Recovery Score. Monta treino em minutos.',
+      roiMoney: '5h economizadas/semana = R\$ 1.280+/mês',
+      planChips: ['PREMIUM', 'ENTERPRISE', 'ENT. PRO'],
+    ),
+    PaywallTopFeature(
+      rank: 3,
+      icon: Icons.dashboard_outlined,
+      title: 'Command Center + Focux Score™',
+      badge: 'ÚNICO NO MERCADO',
+      badgeColor: gold,
+      description:
+          'Painel do CEO do personal: churn, inadimplência e próxima ação em 2 min.',
+      roiMoney: 'Salvar 1 aluno/mês = R\$ 400+ = Premium pago 5×',
+      planChips: ['PREMIUM', 'ENTERPRISE', 'ENT. PRO'],
+    ),
+    PaywallTopFeature(
+      rank: 4,
+      icon: Icons.palette_outlined,
+      title: 'White-label — seu app, sua marca',
+      badge: 'SÓ ENTERPRISE+',
+      badgeColor: gold,
+      description:
+          'Seus alunos abrem SEU app com SEU logo. Posicionamento premium.',
+      roiMoney: 'Personais com white-label cobram 20–30% mais',
+      planChips: ['ENTERPRISE', 'ENT. PRO'],
+    ),
+    PaywallTopFeature(
+      rank: 5,
+      icon: Icons.language_rounded,
+      title: 'Landing page COMPLETA',
+      badge: 'MÁXIMO ROI',
+      badgeColor: purple,
+      description:
+          'Depoimentos, galeria, FAQ e formulário. Link na bio que vende 24h/dia.',
+      roiMoney: 'Poupa R\$ 1k–3k de agência — por +R\$ 50/mês',
+      planChips: ['ENT. PRO'],
+    ),
+    PaywallTopFeature(
+      rank: 6,
+      icon: Icons.watch_rounded,
+      title: 'Recovery Score + relógio',
+      badge: 'NÍVEL GLOBAL',
+      badgeColor: brand,
+      description:
+          'Apple Health, Google Fit, Garmin. Sabe se o aluno dormiu bem antes do treino.',
+      roiMoney: 'Menos lesão = menos cancelamento',
+      planChips: ['PREMIUM', 'ENTERPRISE', 'ENT. PRO'],
+    ),
+    PaywallTopFeature(
+      rank: 7,
+      icon: Icons.track_changes_rounded,
+      title: 'Habit Coaching ✦',
+      badge: 'EM BREVE',
+      badgeColor: warning,
+      description: 'Hábitos diários: água, sono, passos. Acompanhe a vida, não só o treino.',
+      roiMoney: 'Personais que acompanham hábitos retêm 35% mais',
+      planChips: ['PREMIUM', 'ENTERPRISE', 'ENT. PRO'],
+      comingSoon: true,
+    ),
+    PaywallTopFeature(
+      rank: 8,
+      icon: Icons.accessibility_new_rounded,
+      title: 'Pose Coach — análise de postura ✦',
+      badge: 'EM BREVE',
+      badgeColor: warning,
+      description: 'Análise de postura por ML em tempo real. Nenhum app nacional chega perto.',
+      roiMoney: 'Diferencial sem custo extra — ML na stack',
+      planChips: ['ENT. PRO'],
+      comingSoon: true,
+    ),
+    PaywallTopFeature(
+      rank: 9,
+      icon: Icons.storefront_outlined,
+      title: 'Loja de programas digitais ✦',
+      badge: 'EM BREVE',
+      badgeColor: warning,
+      description: 'Venda treinos avulsos e desafios com checkout PIX integrado.',
+      roiMoney: 'Receita passiva enquanto dorme',
+      planChips: ['ENT. PRO'],
+      comingSoon: true,
+    ),
+    PaywallTopFeature(
+      rank: 10,
+      icon: Icons.groups_outlined,
+      title: 'Equipe & RBAC ✦',
+      badge: 'EM BREVE',
+      badgeColor: warning,
+      description: 'Assistentes ou sócios com permissões granulares. Escala com controle.',
+      roiMoney: 'Escala sem contratar full-time',
+      planChips: ['ENTERPRISE', 'ENT. PRO'],
+      comingSoon: true,
+    ),
+  ];
+
+  static const List<PaywallUpgradeTrigger> upgradeTriggers = [
+    PaywallUpgradeTrigger(
+      number: '01',
+      title: '4 alunos cadastrados (não 5)',
+      transition: 'FREE → PREMIUM',
+      message:
+          'Você está a 1 aluno de lotar. Com 20 alunos a R\$ 400 = R\$ 8.000/mês. '
+          'Upgrade por R\$ 79 — menos que 1 sessão avulsa.',
+    ),
+    PaywallUpgradeTrigger(
+      number: '02',
+      title: 'Tenta cobrar via PIX (bloqueado)',
+      transition: 'FREE → PREMIUM',
+      message:
+          'Personais que cobram pelo app têm 40% menos inadimplência. Desbloqueie por R\$ 79/mês.',
+    ),
+    PaywallUpgradeTrigger(
+      number: '03',
+      title: 'IA Copiloto bloqueado',
+      transition: 'FREE → PREMIUM',
+      message:
+          'Sua IA está aguardando. Monte o próximo treino em 3 minutos, não 30. Upgrade por R\$ 79.',
+    ),
+    PaywallUpgradeTrigger(
+      number: '04',
+      title: '17 alunos ativos (não 20)',
+      transition: 'PREMIUM → ENTERPRISE',
+      message:
+          'Você está a 3 alunos de lotar. Cada novo = R\$ 400+/mês. Enterprise libera ilimitados.',
+    ),
+    PaywallUpgradeTrigger(
+      number: '05',
+      title: 'Clica em white-label (bloqueado)',
+      transition: 'PREMIUM → ENTERPRISE',
+      message:
+          'Seus alunos veem Focux. Com Enterprise, veem SEU logo. Seu app, sua marca.',
+    ),
+    PaywallUpgradeTrigger(
+      number: '06',
+      title: '110+ interações de IA no mês',
+      transition: 'PREMIUM → ENTERPRISE',
+      message:
+          'Você está chegando no limite de IA. Enterprise dá 400/mês + contexto avançado.',
+    ),
+    PaywallUpgradeTrigger(
+      number: '07',
+      title: 'Acessa landing page (padrão Focux)',
+      transition: 'ENTERPRISE → ENT. PRO',
+      message:
+          'Sua landing está no padrão Focux. Por +R\$ 50 você libera depoimentos, galeria e FAQ.',
+    ),
+    PaywallUpgradeTrigger(
+      number: '08',
+      title: 'Tráfego pago / anúncio no Meta',
+      transition: 'ENTERPRISE → ENT. PRO',
+      message:
+          'Investe em tráfego mas manda para página genérica? Landing que converte lead 24h/dia.',
     ),
   ];
 }
@@ -278,12 +582,14 @@ class PaywallComparisonRow {
   final String free;
   final String premium;
   final String enterprise;
+  final String enterprisePro;
 
   const PaywallComparisonRow({
     required this.feature,
     required this.free,
     required this.premium,
     required this.enterprise,
+    this.enterprisePro = '—',
   });
 }
 
@@ -298,5 +604,43 @@ class PaywallRoiRow {
     required this.value,
     required this.planChip,
     required this.color,
+  });
+}
+
+class PaywallTopFeature {
+  final int rank;
+  final IconData icon;
+  final String title;
+  final String badge;
+  final Color badgeColor;
+  final String description;
+  final String roiMoney;
+  final List<String> planChips;
+  final bool comingSoon;
+
+  const PaywallTopFeature({
+    required this.rank,
+    required this.icon,
+    required this.title,
+    required this.badge,
+    required this.badgeColor,
+    required this.description,
+    required this.roiMoney,
+    required this.planChips,
+    this.comingSoon = false,
+  });
+}
+
+class PaywallUpgradeTrigger {
+  final String number;
+  final String title;
+  final String transition;
+  final String message;
+
+  const PaywallUpgradeTrigger({
+    required this.number,
+    required this.title,
+    required this.transition,
+    required this.message,
   });
 }

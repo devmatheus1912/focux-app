@@ -22,6 +22,11 @@ $fixScript = Join-Path $PSScriptRoot 'fix-android-build.ps1'
 
 Push-Location $root
 try {
+    $patchScript = Join-Path $PSScriptRoot 'patch-android-legacy-plugins.ps1'
+    if (Test-Path $patchScript) {
+        & $patchScript
+    }
+
     if ($OptionalClean) {
         Write-Host 'OptionalClean: running fix-android-build.ps1...' -ForegroundColor Yellow
         & $fixScript

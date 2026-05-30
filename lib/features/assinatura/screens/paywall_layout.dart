@@ -289,14 +289,12 @@ class _PaywallFeaturePanel extends StatelessWidget {
       (
         label: plan == SubscriptionPlan.PREMIUM
             ? '${PlanoIaLimits.premium} interações de IA/mês'
-            : '${PlanoIaLimits.enterprise} interações de IA/mês',
+            : '${PlanoIaLimits.enterprise}+ interações de IA/mês',
         included: true,
       ),
-    if (plan != SubscriptionPlan.FREE)
+    if (plan == SubscriptionPlan.ENTERPRISE_PRO)
       (
-        label: plan == SubscriptionPlan.ENTERPRISE
-            ? '${MigracaoFotoLimits.enterprise} fotos de migração/mês'
-            : '${MigracaoFotoLimits.premium} fotos de migração/mês',
+        label: '${MigracaoFotoLimits.enterprise} fotos de migração/mês',
         included: true,
       ),
     (label: 'IA Copiloto avançada', included: plan != SubscriptionPlan.FREE),
@@ -322,7 +320,7 @@ class _PaywallFeaturePanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
         Text(
-          'O que inclui ${plan.apiName}',
+          'O que inclui ${PaywallCatalog.displayPlanName(plan)}',
           style: TokensStrip.h2(
             color: ink,
             fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
@@ -331,7 +329,7 @@ class _PaywallFeaturePanel extends StatelessWidget {
           if (comparing) ...[
             const SizedBox(height: 6),
             Text(
-            'Comparando com o ${currentPlan.apiName} que você usa hoje.',
+            'Comparando com o ${PaywallCatalog.displayPlanName(currentPlan)} que você usa hoje.',
             style: TokensStrip.bodyMuted(color: secondary),
             ),
           ],

@@ -50,14 +50,21 @@ class PaywallHero extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
               border: Border.all(color: primary.withValues(alpha: 0.3)),
             ),
-            child: Text(
-              '⚡ FOCUX · PLANOS',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.4,
-                color: primary,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.bolt_rounded, size: 14, color: primary),
+                const SizedBox(width: 6),
+                Text(
+                  'FOCUX · PLANOS',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.4,
+                    color: primary,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 18),
@@ -235,8 +242,15 @@ class PaywallSocialProofStrip extends StatelessWidget {
 
 class PaywallRoiStrip extends StatelessWidget {
   final Color line;
+  final Color ink;
+  final Color mute;
 
-  const PaywallRoiStrip({super.key, required this.line});
+  const PaywallRoiStrip({
+    super.key,
+    required this.line,
+    required this.ink,
+    required this.mute,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -249,24 +263,31 @@ class PaywallRoiStrip extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: LayoutBuilder(
         builder: (context, c) {
-          final narrow = c.maxWidth < 520;
-          if (narrow) {
-            return Column(
-              children: [
-                for (var i = 0; i < PaywallCatalog.roiStrip.length; i++)
-                  _RoiCell(
-                    item: PaywallCatalog.roiStrip[i],
-                    line: line,
-                    showBottom: i < PaywallCatalog.roiStrip.length - 1,
-                  ),
-              ],
-            );
-          }
-          return Row(
+          final items = PaywallCatalog.roiStrip;
+          final cols = c.maxWidth < 520 ? 2 : 3;
+          return Column(
             children: [
-              for (var i = 0; i < PaywallCatalog.roiStrip.length; i++) ...[
-                if (i > 0) VerticalDivider(width: 1, color: line),
-                Expanded(child: _RoiCell(item: PaywallCatalog.roiStrip[i], line: line)),
+              for (var row = 0; row < (items.length / cols).ceil(); row++) ...[
+                if (row > 0) Divider(height: 1, color: line),
+                IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var col = 0; col < cols; col++) ...[
+                        if (col > 0) VerticalDivider(width: 1, color: line),
+                        Expanded(
+                          child: row * cols + col < items.length
+                              ? _RoiCell(
+                                  item: items[row * cols + col],
+                                  line: line,
+                                  mute: mute,
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ],
             ],
           );
@@ -279,23 +300,18 @@ class PaywallRoiStrip extends StatelessWidget {
 class _RoiCell extends StatelessWidget {
   final ({String value, String label, Color color}) item;
   final Color line;
-  final bool showBottom;
+  final Color mute;
 
   const _RoiCell({
     required this.item,
     required this.line,
-    this.showBottom = false,
+    required this.mute,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-      decoration: showBottom
-          ? BoxDecoration(
-              border: Border(bottom: BorderSide(color: line)),
-            )
-          : null,
       child: Column(
         children: [
           Text(
@@ -311,7 +327,7 @@ class _RoiCell extends StatelessWidget {
           Text(
             item.label,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 11, color: EagleTokens.darkInkMute),
+            style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 11),
           ),
         ],
       ),
@@ -363,7 +379,8 @@ class PaywallRichPlanCard extends StatelessWidget {
     return Semantics(
       button: true,
       selected: isSelected,
-      label: 'Plano ${plan.apiName}, $monthlyPrice mensal, $annualPrice anual',
+      label:
+          'Plano ${PaywallCatalog.displayPlanName(plan)}, $monthlyPrice mensal, $annualPrice anual',
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
@@ -414,7 +431,7 @@ class PaywallRichPlanCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      plan.apiName,
+                      PaywallCatalog.displayPlanName(plan),
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w900,
@@ -435,7 +452,10 @@ class PaywallRichPlanCard extends StatelessWidget {
                             child: _PriceBox(
                               label: 'Mensal',
                               price: monthlyPrice,
+                              ink: ink,
                               mute: mute,
+                              line: line,
+                              isDark: isDark,
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -443,7 +463,10 @@ class PaywallRichPlanCard extends StatelessWidget {
                             child: _PriceBox(
                               label: 'Anual',
                               price: annualPrice,
+                              ink: ink,
                               mute: mute,
+                              line: line,
+                              isDark: isDark,
                               highlight: true,
                             ),
                           ),
@@ -461,24 +484,7 @@ class PaywallRichPlanCard extends StatelessWidget {
                       ),
                     if (PaywallCatalog.roiTagForPlan(plan) != null) ...[
                       const SizedBox(height: 10),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                        decoration: BoxDecoration(
-                          color: PaywallCatalog.green.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(9),
-                          border: Border.all(
-                            color: PaywallCatalog.green.withValues(alpha: 0.25),
-                          ),
-                        ),
-                        child: Text(
-                          PaywallCatalog.roiTagForPlan(plan)!,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                            color: PaywallCatalog.green,
-                          ),
-                        ),
-                      ),
+                      _RoiMoneyTag(text: PaywallCatalog.roiTagForPlan(plan)!),
                     ],
                     const SizedBox(height: 8),
                     Text(
@@ -513,26 +519,37 @@ class PaywallRichPlanCard extends StatelessWidget {
 class _PriceBox extends StatelessWidget {
   final String label;
   final String price;
+  final Color ink;
   final Color mute;
+  final Color line;
+  final bool isDark;
   final bool highlight;
 
   const _PriceBox({
     required this.label,
     required this.price,
+    required this.ink,
     required this.mute,
+    required this.line,
+    required this.isDark,
     this.highlight = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final fill = isDark
+        ? Colors.white.withValues(alpha: highlight ? 0.08 : 0.04)
+        : EagleTokens.paper;
+    final borderColor = highlight
+        ? PaywallCatalog.brand.withValues(alpha: 0.45)
+        : line;
+
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: highlight ? 0.14 : 0.08),
-        ),
-        color: Colors.black.withValues(alpha: 0.18),
+        border: Border.all(color: borderColor, width: highlight ? 1.4 : 1),
+        color: fill,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -549,13 +566,86 @@ class _PriceBox extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             price,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w900,
-              color: Colors.white,
+              color: ink,
               fontFamily: 'monospace',
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RoiMoneyTag extends StatelessWidget {
+  final String text;
+
+  const _RoiMoneyTag({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: PaywallCatalog.green.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(9),
+        border: Border.all(color: PaywallCatalog.green.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.savings_outlined, size: 16, color: PaywallCatalog.green),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: PaywallCatalog.green,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Color paywallChipColorForLabel(String label) => switch (label) {
+  'PREMIUM' => PaywallCatalog.brand,
+  'ENTERPRISE' => PaywallCatalog.gold,
+  'ENT. PRO' => PaywallCatalog.purple,
+  _ => PaywallCatalog.brand,
+};
+
+class PaywallSectionHeader extends StatelessWidget {
+  final String title;
+  final String? note;
+  final Color ink;
+  final Color mute;
+
+  const PaywallSectionHeader({
+    super.key,
+    required this.title,
+    this.note,
+    required this.ink,
+    required this.mute,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: Text(title, style: TokensStrip.h2(color: ink).copyWith(fontSize: 24)),
+          ),
+          if (note != null)
+            Text(note!, style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 13)),
         ],
       ),
     );
@@ -655,10 +745,16 @@ void showPaywallFeatureEducation(
   BuildContext context,
   PaywallEducationContent content,
 ) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final sheetBg = isDark ? EagleTokens.darkCard : EagleTokens.card;
+  final sheetInk = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+  final sheetMute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+  final sheetLine = isDark ? EagleTokens.darkLine : EagleTokens.line;
+
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: EagleTokens.darkCard,
+    backgroundColor: sheetBg,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
@@ -678,7 +774,7 @@ void showPaywallFeatureEducation(
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: EagleTokens.darkLine,
+                    color: sheetLine,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -686,19 +782,19 @@ void showPaywallFeatureEducation(
               const SizedBox(height: 20),
               Text(
                 content.title,
-                style: TokensStrip.h2(color: EagleTokens.darkInk),
+                style: TokensStrip.h2(color: sheetInk),
               ),
               const SizedBox(height: 16),
               Text('O que é', style: TextStyle(color: PaywallCatalog.brand, fontWeight: FontWeight.w800)),
               const SizedBox(height: 6),
-              Text(content.whatIs, style: TokensStrip.body(color: EagleTokens.darkInkMute)),
+              Text(content.whatIs, style: TokensStrip.body(color: sheetMute)),
               const SizedBox(height: 14),
               Text(
                 'Por que importa pra você',
                 style: TextStyle(color: PaywallCatalog.brand, fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 6),
-              Text(content.whyMatters, style: TokensStrip.body(color: EagleTokens.darkInkMute)),
+              Text(content.whyMatters, style: TokensStrip.body(color: sheetMute)),
               if (content.roiStatement != null) ...[
                 const SizedBox(height: 14),
                 Container(
@@ -709,12 +805,21 @@ void showPaywallFeatureEducation(
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: PaywallCatalog.green.withValues(alpha: 0.25)),
                   ),
-                  child: Text(
-                    content.roiStatement!,
-                    style: const TextStyle(
-                      color: PaywallCatalog.green,
-                      fontWeight: FontWeight.w800,
-                    ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.savings_outlined, size: 18, color: PaywallCatalog.green),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          content.roiStatement!,
+                          style: const TextStyle(
+                            color: PaywallCatalog.green,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -785,7 +890,7 @@ class _PaywallRoiCalculatorState extends State<PaywallRoiCalculator> {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    const Text('🧮', style: TextStyle(fontSize: 22)),
+                    Icon(Icons.calculate_outlined, size: 26, color: PaywallCatalog.brand),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Column(
@@ -869,7 +974,7 @@ class _PaywallRoiCalculatorState extends State<PaywallRoiCalculator> {
                         children: [
                           Expanded(
                             child: Text(
-                              '${plan.apiName} · R\$ ${price.toStringAsFixed(2)}/mês',
+                              '${PaywallCatalog.displayPlanName(plan)} · R\$ ${price.toStringAsFixed(2)}/mês',
                               style: TokensStrip.body(color: widget.ink),
                             ),
                           ),
@@ -914,50 +1019,69 @@ class PaywallComparisonTable extends StatelessWidget {
   final Color ink;
   final Color mute;
   final Color line;
+  final bool isDark;
 
   const PaywallComparisonTable({
     super.key,
     required this.ink,
     required this.mute,
     required this.line,
+    required this.isDark,
   });
+
+  TextStyle _cellStyle({bool header = false}) => TextStyle(
+    color: header ? ink : mute,
+    fontSize: header ? 11 : 12,
+    fontWeight: header ? FontWeight.w800 : FontWeight.w500,
+  );
 
   @override
   Widget build(BuildContext context) {
+    final headerBg = isDark ? EagleTokens.darkCardHi : EagleTokens.paper;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
         border: Border.all(color: line),
         borderRadius: BorderRadius.circular(16),
+        color: isDark ? EagleTokens.darkCard : EagleTokens.card,
       ),
       child: ExpansionTile(
         tilePadding: const EdgeInsets.symmetric(horizontal: 14),
         title: Text('Comparar planos', style: TokensStrip.h2(color: ink).copyWith(fontSize: 17)),
-        subtitle: Text('Tabela completa', style: TokensStrip.bodyMuted(color: mute)),
+        subtitle: Text('Tabela completa · 4 tiers', style: TokensStrip.bodyMuted(color: mute)),
         children: [
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
-            child: DataTable(
-              headingRowColor: WidgetStateProperty.all(EagleTokens.darkCardHi),
-              columns: const [
-                DataColumn(label: Text('Feature')),
-                DataColumn(label: Text('FREE')),
-                DataColumn(label: Text('PREMIUM')),
-                DataColumn(label: Text('ENT.')),
-              ],
-              rows: PaywallCatalog.comparisonRows
-                  .map(
-                    (r) => DataRow(
-                      cells: [
-                        DataCell(Text(r.feature, style: TextStyle(color: ink, fontSize: 12))),
-                        DataCell(Text(r.free, style: TextStyle(color: mute))),
-                        DataCell(Text(r.premium, style: TextStyle(color: mute))),
-                        DataCell(Text(r.enterprise, style: TextStyle(color: mute))),
-                      ],
-                    ),
-                  )
-                  .toList(),
+            child: SizedBox(
+              width: 560,
+              child: DataTable(
+                headingRowHeight: 44,
+                dataRowMinHeight: 48,
+                columnSpacing: 20,
+                headingRowColor: WidgetStateProperty.all(headerBg),
+                columns: [
+                  DataColumn(label: Text('Recurso', style: _cellStyle(header: true))),
+                  DataColumn(label: Text('FREE', style: _cellStyle(header: true))),
+                  DataColumn(label: Text('PREMIUM', style: _cellStyle(header: true))),
+                  DataColumn(label: Text('ENTERPRISE', style: _cellStyle(header: true))),
+                  DataColumn(label: Text('ENT. PRO', style: _cellStyle(header: true))),
+                ],
+                rows: PaywallCatalog.comparisonRows
+                    .map(
+                      (r) => DataRow(
+                        cells: [
+                          DataCell(Text(r.feature, style: _cellStyle())),
+                          DataCell(Text(r.free, style: _cellStyle())),
+                          DataCell(Text(r.premium, style: _cellStyle())),
+                          DataCell(Text(r.enterprise, style: _cellStyle())),
+                          DataCell(Text(r.enterprisePro, style: _cellStyle())),
+                        ],
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
           ),
         ],
@@ -966,43 +1090,273 @@ class PaywallComparisonTable extends StatelessWidget {
   }
 }
 
-class PaywallRoiRowsList extends StatelessWidget {
+class PaywallFeaturesGrid extends StatelessWidget {
   final Color ink;
   final Color mute;
+  final Color line;
+  final bool isDark;
 
-  const PaywallRoiRowsList({super.key, required this.ink, required this.mute});
+  const PaywallFeaturesGrid({
+    super.key,
+    required this.ink,
+    required this.mute,
+    required this.line,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final surface = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final border = isDark ? EagleTokens.darkLine : line;
+
     return Column(
-      children: PaywallCatalog.roiRows
-          .map(
-            (r) => Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: EagleTokens.darkCard,
-                borderRadius: BorderRadius.circular(13),
-                border: Border.all(color: EagleTokens.darkLine),
-              ),
-              child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final f in PaywallCatalog.topFeatures)
+          Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: surface,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: border),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: PaywallCatalog.brand.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(f.icon, color: PaywallCatalog.brand, size: 24),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '#${f.rank} ${f.title}',
+                        style: TokensStrip.h2(color: ink).copyWith(fontSize: 15),
+                      ),
+                      const SizedBox(height: 6),
+                      _PlanChip(label: f.badge, color: f.badgeColor),
+                      const SizedBox(height: 8),
+                      Text(
+                        f.description,
+                        style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 13),
+                      ),
+                      const SizedBox(height: 10),
+                      _RoiMoneyTag(text: f.roiMoney),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: f.planChips
+                            .map((p) => _PlanChip(label: p, color: paywallChipColorForLabel(p)))
+                            .toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class PaywallGatilhosList extends StatelessWidget {
+  final Color ink;
+  final Color mute;
+  final Color line;
+  final bool isDark;
+
+  const PaywallGatilhosList({
+    super.key,
+    required this.ink,
+    required this.mute,
+    required this.line,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final surface = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final border = isDark ? EagleTokens.darkLine : line;
+
+    return Column(
+      children: PaywallCatalog.upgradeTriggers.map((t) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            color: surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: border),
+          ),
+          child: Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+              title: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(child: Text(r.label, style: TokensStrip.body(color: ink))),
-                  Text(
-                    r.value,
-                    style: TextStyle(
-                      color: PaywallCatalog.green,
-                      fontWeight: FontWeight.w800,
+                  Container(
+                    width: 34,
+                    height: 34,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: PaywallCatalog.brand.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: PaywallCatalog.brand.withValues(alpha: 0.22)),
+                    ),
+                    child: Text(
+                      t.number,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        color: PaywallCatalog.brand,
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          t.title,
+                          style: TokensStrip.body(color: ink).copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        Text(
+                          t.transition,
+                          style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: PaywallCatalog.brand.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: PaywallCatalog.brand.withValues(alpha: 0.18)),
+                  ),
+                  child: Text(
+                    t.message,
+                    style: TokensStrip.bodyMuted(color: mute).copyWith(
+                      fontStyle: FontStyle.italic,
                       fontSize: 13,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  _PlanChip(label: r.planChip, color: r.color),
-                ],
-              ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.lightbulb_outline, size: 16, color: mute),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Mostrar como modal in-app no momento exato.',
+                        style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          )
-          .toList(),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+class PaywallRoiRowsList extends StatelessWidget {
+  final Color ink;
+  final Color mute;
+  final Color line;
+  final bool isDark;
+
+  const PaywallRoiRowsList({
+    super.key,
+    required this.ink,
+    required this.mute,
+    required this.line,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final surface = isDark ? EagleTokens.darkCard : EagleTokens.card;
+    final border = isDark ? EagleTokens.darkLine : line;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ...PaywallCatalog.roiRows.map(
+          (r) => Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: surface,
+              borderRadius: BorderRadius.circular(13),
+              border: Border.all(color: border),
+            ),
+            child: LayoutBuilder(
+              builder: (context, c) {
+                final stacked = c.maxWidth < 340;
+                final value = Text(
+                  r.value,
+                  style: TextStyle(
+                    color: PaywallCatalog.green,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                  ),
+                );
+                final chip = _PlanChip(label: r.planChip, color: r.color);
+                if (stacked) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(r.label, style: TokensStrip.body(color: ink)),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(child: value),
+                          chip,
+                        ],
+                      ),
+                    ],
+                  );
+                }
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Text(r.label, style: TokensStrip.body(color: ink)),
+                    ),
+                    Expanded(flex: 2, child: value),
+                    const SizedBox(width: 8),
+                    chip,
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -1055,8 +1409,9 @@ class PaywallLoadingSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final base = EagleTokens.darkCard;
-    final highlight = EagleTokens.darkCardHi;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final base = isDark ? EagleTokens.darkCard : EagleTokens.lineSoft;
+    final highlight = isDark ? EagleTokens.darkCardHi : EagleTokens.line;
     return Shimmer.fromColors(
       baseColor: base,
       highlightColor: highlight,
