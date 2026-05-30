@@ -1,9 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_windowmanager/flutter_windowmanager.dart';
-
 import '../../../core/legal/focux_legal.dart';
+import '../../../core/platform/secure_screen.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -47,14 +46,14 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
   Future<void> _enableSecureScreen() async {
     if (kIsWeb) return;
     try {
-      await FlutterWindowManager.addFlags(FlutterWindowManager.FLAG_SECURE);
+      await SecureScreen.enable();
     } catch (_) {}
   }
 
   Future<void> _disableSecureScreen() async {
     if (kIsWeb) return;
     try {
-      await FlutterWindowManager.clearFlags(FlutterWindowManager.FLAG_SECURE);
+      await SecureScreen.disable();
     } catch (_) {}
   }
 

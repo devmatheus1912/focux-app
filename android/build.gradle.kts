@@ -1,7 +1,9 @@
-
 plugins {
     id("com.google.gms.google-services") version "4.4.1" apply false
 }
+
+// AGP 8+ / JVM: namespace e Java 11 em plugins legados (jailbreak, windowmanager, etc.).
+apply(from = "legacy_android_plugins.gradle")
 
 allprojects {
     repositories {

@@ -1,0 +1,30 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+// Namespace AGP 8+ para plugins que não declaram (ex.: flutter_jailbreak_detection).
+subprojects { subproject ->
+    subproject.plugins.withId("com.android.library") {
+        subproject.android {
+            if (namespace == null || namespace.toString().trim().isEmpty()) {
+                def manifestFile = subproject.file("src/main/AndroidManifest.xml")
+                if (manifestFile.exists()) {
+                    def pkg = new XmlSlurper().parse(manifestFile).'@package'.text()
+                    if (pkg != null && !pkg.trim().isEmpty()) {
+                        namespace = pkg.trim()
+                    }
+                }
+                if (namespace == null || namespace.toString().trim().isEmpty()) {
+                    def fallback = subproject.group?.toString()?.trim()
+                    if (fallback != null && !fallback.isEmpty()) {
+                        namespace = fallback
+                    }
+                }
+            }
+        }
+    }
+
+    if (subproject.name == "flutter_jailbreak_detection") {
+        subproject.tasks.withType(KotlinCompile).configureEach {
+            kotlinOptions.jvmTarget = "1.8"
+        }
+    }
+}
