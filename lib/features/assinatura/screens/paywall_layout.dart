@@ -124,14 +124,12 @@ class _PaywallUpgradeNudge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    return Container(
+    return PaywallGlassCard(
+      accent: primary,
+      glow: !TokensStrip.prefersReducedMotion(context),
+      glowStrength: 0.65,
+      blur: false,
       padding: const EdgeInsets.all(14),
-      decoration: chrome.panel(
-        radius: TokensStrip.rCard,
-        accent: primary,
-        elevationLevel: 2,
-      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -183,8 +181,11 @@ class _PaywallFeaturePanel extends StatelessWidget {
     final secondary = _paywallSecondaryText(ink, mute, isDark: isDark);
     final planLabel = PaywallCatalog.displayNameFor(plano, plan);
     final currentLabel = PaywallCatalog.displayNameFor(currentPlano, currentPlan);
-    final checkColor =
-        isDowngrade ? PaywallCatalog.warning : primary;
+    final checkColor = switch (true) {
+      true when isDowngrade => PaywallCatalog.warning,
+      true when isCurrent => PaywallCatalog.accentForPlan(plan),
+      _ => primary,
+    };
 
     final rows = switch (true) {
       true when isCurrent => _paywallFeatureRowsWithUsage(plano, plan, usage),
@@ -211,12 +212,29 @@ class _PaywallFeaturePanel extends StatelessWidget {
       _ => null,
     };
 
+    final tierAccent = PaywallCatalog.accentForPlan(plan);
+
     return AnimatedSwitcher(
       duration: motion,
       switchInCurve: Curves.easeOutCubic,
       switchOutCurve: Curves.easeInCubic,
-      child: Column(
+      child: PaywallGlassCard(
         key: ValueKey('${plan.apiName}-${currentPlan.apiName}-$isCurrent'),
+        accent: tierAccent,
+        glow: (isCurrent || isUpgrade) && !TokensStrip.prefersReducedMotion(context),
+        glowStrength: 0.7,
+        blur: false,
+        elevationLevel: 8,
+        padding: const EdgeInsets.all(18),
+        child: Stack(
+          children: [
+            PaywallTierChrome.cardWash(
+              accent: tierAccent,
+              isDark: isDark,
+              emphasis: PaywallTierEmphasis.mid,
+            ),
+            PaywallTierChrome.accentRail(tierAccent, emphasis: PaywallTierEmphasis.mid),
+            Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
@@ -270,7 +288,11 @@ class _PaywallFeaturePanel extends StatelessWidget {
           ],
           const SizedBox(height: 14),
           ...rows.map(
-            (row) => Padding(
+            (row) => Semantics(
+              label: row.included
+                  ? 'Incluído: ${row.label}'
+                  : 'Não incluído: ${row.label}',
+              child: Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -295,6 +317,7 @@ class _PaywallFeaturePanel extends StatelessWidget {
                 ],
               ),
             ),
+            ),
           ),
           const SizedBox(height: 4),
           Row(
@@ -312,6 +335,9 @@ class _PaywallFeaturePanel extends StatelessWidget {
             ],
           ),
         ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -334,10 +360,10 @@ class _PaywallInlineNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    return Container(
+    return PaywallGlassCard(
       padding: const EdgeInsets.all(14),
-      decoration: chrome.panel(radius: TokensStrip.rCard, elevationLevel: 1),
+      blur: false,
+      elevationLevel: 4,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -385,6 +411,12 @@ class _PaywallLegalConsentLine extends StatelessWidget {
       color: _paywallSecondaryText(ink, mute, isDark: isDark),
     ).copyWith(fontSize: 11);
 
+    final linkButtonStyle = TextButton.styleFrom(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+      minimumSize: const Size(44, 44),
+      tapTargetSize: MaterialTapTargetSize.padded,
+    );
+
     return Semantics(
       label:
           'Ao assinar, você concorda com os Termos de uso e a Política de privacidade',
@@ -400,11 +432,7 @@ class _PaywallLegalConsentLine extends StatelessWidget {
             label: 'Abrir termos de uso',
             child: TextButton(
               onPressed: () => FocuxLegal.openTerms(),
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
+              style: linkButtonStyle,
               child: Text('Termos', style: linkStyle()),
             ),
           ),
@@ -414,63 +442,13 @@ class _PaywallLegalConsentLine extends StatelessWidget {
             label: 'Abrir política de privacidade',
             child: TextButton(
               onPressed: () => FocuxLegal.openPrivacy(),
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
+              style: linkButtonStyle,
               child: Text('Privacidade', style: linkStyle()),
             ),
           ),
           Text('.', style: body),
         ],
       ),
-    );
-  }
-}
-
-class _PaywallLegalFooter extends StatelessWidget {
-  final Color ink;
-  final Color mute;
-  final bool showStoreBillingNote;
-  final bool restoring;
-  final VoidCallback? onRestore;
-
-  const _PaywallLegalFooter({
-    required this.ink,
-    required this.mute,
-    required this.showStoreBillingNote,
-    required this.restoring,
-    this.onRestore,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final secondary = _paywallSecondaryText(ink, mute, isDark: isDark);
-
-    return Column(
-      children: [
-        if (onRestore != null)
-          TextButton(
-            onPressed: restoring ? null : onRestore,
-            child: Text(
-              restoring ? 'Restaurando compras…' : 'Restaurar compras',
-              style: TextStyle(
-                fontSize: 14,
-                color: ink.withValues(alpha: 0.82),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        if (showStoreBillingNote) ...[
-          Text(
-            'Cobrança e renovação automática pela ${subscriptionChannelLabel()}. Cancele quando quiser nas configurações do dispositivo.',
-            textAlign: TextAlign.center,
-            style: TokensStrip.bodyMuted(color: secondary),
-          ),
-        ],
-      ],
     );
   }
 }

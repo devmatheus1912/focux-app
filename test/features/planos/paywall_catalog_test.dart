@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focux_app/features/assinatura/data/assinatura_repository.dart';
+import 'package:focux_app/features/assinatura/data/plano.dart';
 import 'package:focux_app/features/planos/paywall/paywall_catalog.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 
@@ -42,6 +42,14 @@ void main() {
     final tag = PaywallCatalog.roiTagForPlan(SubscriptionPlan.PREMIUM);
     expect(tag, isNotNull);
     expect(tag!, isNot(startsWith('💰')));
+  });
+
+  test('parseFeatureLabel strips pro markers', () {
+    final a = PaywallCatalog.parseFeatureLabel('Pose Coach ML ✦');
+    expect(a.label, 'Pose Coach ML');
+    expect(a.pro, isTrue);
+    final b = PaywallCatalog.parseFeatureLabel('20 alunos ativos');
+    expect(b.pro, isFalse);
   });
 
   test('plan cards expose collapsible feature sections', () {

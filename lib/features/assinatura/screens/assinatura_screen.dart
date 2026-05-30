@@ -12,7 +12,6 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/legal/focux_legal.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -26,7 +25,7 @@ import '../../../features/subscription/services/iap_service.dart';
 import '../../../features/subscription/store_subscription_policy.dart';
 import '../../../features/subscription/subscription_products.dart';
 
-import '../data/assinatura_repository.dart';
+import '../data/plano.dart';
 import '../providers/assinatura_provider.dart';
 import '../../planos/paywall/paywall_catalog.dart';
 import '../../planos/paywall/paywall_components.dart';
@@ -781,10 +780,14 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         title: 'Planos',
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.exit_to_app_outlined),
-            tooltip: 'Cancelar assinatura',
-            onPressed: () => context.push('/cancel-save'),
+          Semantics(
+            button: true,
+            label: 'Cancelar assinatura',
+            child: IconButton(
+              icon: const Icon(Icons.cancel_outlined),
+              tooltip: 'Cancelar assinatura',
+              onPressed: () => context.push('/cancel-save'),
+            ),
           ),
         ],
       ),
@@ -1025,12 +1028,15 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                             plan,
                           ).map((r) => r.label).take(3).toList()
                         : const <String>[];
+                    final nestedInAccordion =
+                        plan != currentPlan || lockedDowngrade;
                     return PaywallRichPlanCard(
                       plano: plano,
                       plan: plan,
                       isSelected: plan == selPlan && !lockedDowngrade,
                       isCurrent: plan == currentPlan,
                       isLockedDowngrade: lockedDowngrade,
+                      nestedInAccordion: nestedInAccordion,
                       dimUnselected:
                           hasUpgradeAbove &&
                           plan != currentPlan &&
@@ -1124,76 +1130,53 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   return [
                     ...currentTierPlans.map((p) => planCard(p)),
                     if (showUpgradeAccordion)
-                      Theme(
-                        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                        child: ExpansionTile(
-                          key: const ValueKey('paywall_upgrade_accordion'),
-                          tilePadding: EdgeInsets.zero,
-                          initiallyExpanded: upgradeExpanded,
-                          onExpansionChanged: (open) {
-                            setState(() => _upgradeOffersExpanded = open);
-                            final tier = nextTierPlan;
-                            if (open && tier != null) _selectPlan(tier);
-                          },
-                          title: Text(
-                            nextTierPlan == null
-                                ? 'Upgrade disponível'
-                                : 'Upgrade disponível — ${PaywallCatalog.displayPlanName(nextTierPlan)}',
-                            style: TokensStrip.body(color: ink).copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          subtitle: Text(
+                      PaywallGlassAccordion(
+                        tileKey: const ValueKey('paywall_upgrade_accordion'),
+                        initiallyExpanded: upgradeExpanded,
+                        onExpansionChanged: (open) {
+                          setState(() => _upgradeOffersExpanded = open);
+                          final tier = nextTierPlan;
+                          if (open && tier != null) _selectPlan(tier);
+                        },
+                        accent: nextTierPlan == null
+                            ? primary
+                            : PaywallCatalog.accentForPlan(nextTierPlan),
+                        ink: ink,
+                        mute: mute,
+                        isDark: isDark,
+                        title: nextTierPlan == null
+                            ? 'Upgrade disponível'
+                            : 'Upgrade disponível — ${PaywallCatalog.displayPlanName(nextTierPlan)}',
+                        subtitle:
                             'Preços e benefícios na ${subscriptionChannelLabel()}',
-                            style: TokensStrip.bodyMuted(
-                              color: PaywallCatalog.readableSecondary(
-                                ink,
-                                mute,
-                                isDark: isDark,
-                              ),
-                            ).copyWith(fontSize: 13),
-                          ),
-                          children: [
-                            for (final p in upperTierPlans) planCard(p),
-                          ],
-                        ),
+                        children: [
+                          for (final p in upperTierPlans) planCard(p),
+                        ],
                       )
                     else
                       ...upperTierPlans.map((p) => planCard(p)),
                     if (lowerPlans.isNotEmpty && currentPlan != SubscriptionPlan.FREE)
-                      Theme(
-                        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                        child: ExpansionTile(
-                          tilePadding: EdgeInsets.zero,
-                          title: Text(
-                            'Outros planos e downgrade',
-                            style: TokensStrip.body(color: ink),
-                          ),
-                          subtitle: Text(
+                      PaywallGlassAccordion(
+                        ink: ink,
+                        mute: mute,
+                        isDark: isDark,
+                        accent: TokensStrip.primary,
+                        title: 'Outros planos e downgrade',
+                        subtitle:
                             'Mudança de tier só pela ${subscriptionChannelLabel()}',
-                            style: TokensStrip.bodyMuted(color: mute),
-                          ),
-                          children: [
-                            for (final p in lowerPlans)
-                              planCard(p, lockedDowngrade: true),
-                          ],
-                        ),
+                        children: [
+                          for (final p in lowerPlans)
+                            planCard(p, lockedDowngrade: true),
+                        ],
                       ),
                     if (currentPlan != SubscriptionPlan.FREE && freePlano != null)
-                      Theme(
-                        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                        child: ExpansionTile(
-                          tilePadding: EdgeInsets.zero,
-                          title: Text(
-                            'Ver plano gratuito',
-                            style: TokensStrip.body(color: ink),
-                          ),
-                          subtitle: Text(
-                            'Plano gratuito para referência',
-                            style: TokensStrip.bodyMuted(color: mute),
-                          ),
-                          children: [planCard(freePlano)],
-                        ),
+                      PaywallGlassAccordion(
+                        ink: ink,
+                        mute: mute,
+                        isDark: isDark,
+                        title: 'Ver plano gratuito',
+                        subtitle: 'Plano gratuito para referência',
+                        children: [planCard(freePlano)],
                       ),
                   ];
                 }(),
@@ -1345,10 +1328,11 @@ class _EnterprisePreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    return Container(
+    return PaywallGlassCard(
+      accent: primary,
       padding: const EdgeInsets.all(14),
-      decoration: chrome.panel(radius: TokensStrip.rCard, elevationLevel: 1),
+      blur: false,
+      elevationLevel: 4,
       child: Text(
         preview.cobrancaImediata
             ? 'Upgrade: cobrança proporcional de R\$ ${preview.valorProporcional.toStringAsFixed(2)} (${preview.diasRestantes} dias restantes no ciclo).'

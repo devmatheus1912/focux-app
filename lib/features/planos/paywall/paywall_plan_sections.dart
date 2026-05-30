@@ -1,4 +1,4 @@
-import '../../assinatura/data/assinatura_repository.dart';
+import '../../assinatura/data/plano.dart';
 import '../../subscription/models/subscription_plan.dart';
 
 /// Grupos colapsáveis de features por card de plano (paridade HTML).

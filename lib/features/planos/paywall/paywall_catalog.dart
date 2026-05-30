@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../assinatura/data/assinatura_repository.dart';
+import '../../assinatura/data/plano.dart';
 import '../../subscription/models/subscription_plan.dart';
 import 'paywall_plan_sections.dart';
 
@@ -19,6 +19,21 @@ class PaywallCatalog {
   /// Texto secundário com contraste AA em fundos claros (ui-ux-pro-max).
   static Color readableSecondary(Color ink, Color mute, {required bool isDark}) =>
       isDark ? mute.withValues(alpha: 0.92) : ink.withValues(alpha: 0.58);
+
+  /// Remove marcadores tipográficos (✦/✨) — o ícone vai no widget, não no texto.
+  static ({String label, bool pro}) parseFeatureLabel(String raw) {
+    var t = raw.trim();
+    final pro = t.contains('✦') || t.contains('✨');
+    t = t.replaceAll(RegExp(r'[✦✨]\s*'), '').trim();
+    return (label: t, pro: pro);
+  }
+
+  static IconData tierIconFor(SubscriptionPlan plan) => switch (plan) {
+    SubscriptionPlan.PREMIUM => Icons.trending_up_rounded,
+    SubscriptionPlan.ENTERPRISE => Icons.diamond_outlined,
+    SubscriptionPlan.ENTERPRISE_PRO => Icons.workspace_premium_rounded,
+    _ => Icons.layers_outlined,
+  };
 
   static Color accentForPlan(SubscriptionPlan plan) => switch (plan) {
     SubscriptionPlan.PREMIUM => brand,

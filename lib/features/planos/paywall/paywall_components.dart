@@ -5,61 +5,64 @@ import '../../../core/legal/focux_legal.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../assinatura/data/assinatura_repository.dart';
+import '../../assinatura/data/plano.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../../subscription/plan_entitlements.dart';
 import '../../subscription/store_subscription_policy.dart';
 import '../../subscription/subscription_products.dart';
+import '../../../core/widgets/fx_glass_surface.dart';
 import 'paywall_catalog.dart';
+import 'paywall_glass.dart';
+
+export 'paywall_glass.dart';
 
 /// Âncoras de scroll na vitrine de planos.
 enum PaywallScrollTarget { planos, features, roi }
 
-/// Superfícies Liquid Glass do paywall — alinhadas a [ShellChrome] / TOKENS STRIP.
+/// Alias legado — use [PaywallTierChrome] / [PaywallTierCard].
 abstract class PaywallSurface {
-  static const double cardRadius = TokensStrip.rXl;
+  static const double cardRadius = PaywallTierChrome.cardRadius;
+}
 
-  static BoxDecoration planCard({
-    required bool isDark,
-    required Color accent,
-    required bool isSelected,
-    required bool isCurrent,
-  }) {
-    final chrome = ShellChrome.forDark(isDark);
-    if (isCurrent) {
-      return chrome.accentPanel(accent: accent, radius: cardRadius);
-    }
-    if (isSelected) {
-      return chrome.listCard(
-        selected: true,
-        primary: accent,
-        radius: cardRadius,
-      );
-    }
-    return chrome.panel(
-      radius: cardRadius,
-      accent: accent,
-      elevationLevel: isDark ? 4 : 3,
-    );
-  }
+/// Rótulo de feature sem emoji no texto — ícone vetorial quando [pro].
+class PaywallFeatureLabel extends StatelessWidget {
+  final String raw;
+  final Color ink;
+  final Color accent;
+  final TextStyle? style;
+  final int? maxLines;
 
-  static Widget accentRail(Color accent, {bool visible = true}) {
-    if (!visible) return const SizedBox.shrink();
-    return Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
-      height: 3,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(cardRadius),
-          ),
-          gradient: LinearGradient(
-            colors: [accent, accent.withValues(alpha: 0.12)],
+  const PaywallFeatureLabel({
+    super.key,
+    required this.raw,
+    required this.ink,
+    required this.accent,
+    this.style,
+    this.maxLines,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final parsed = PaywallCatalog.parseFeatureLabel(raw);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Text(
+            parsed.label,
+            maxLines: maxLines,
+            overflow: maxLines != null ? TextOverflow.ellipsis : null,
+            style: style ?? TokensStrip.body(color: ink),
           ),
         ),
-      ),
+        if (parsed.pro) ...[
+          const SizedBox(width: 6),
+          Semantics(
+            label: 'Recurso premium',
+            child: Icon(Icons.auto_awesome_rounded, size: 14, color: accent),
+          ),
+        ],
+      ],
     );
   }
 }
@@ -93,101 +96,39 @@ class PaywallHero extends StatelessWidget {
   bool get _isSubscriber =>
       currentPlan != null && currentPlan != SubscriptionPlan.FREE;
 
-  String get _subscriberSubtitle {
-    if (isMaxTier) {
-      return 'Você está no plano máximo. Gerencie a assinatura na loja do dispositivo.';
-    }
-    if (!hasUpgradePath) {
-      return 'Gerencie a assinatura na loja do dispositivo.';
-    }
-    if (viewingCurrentPlan) {
-      return 'Plano ativo. Recursos abaixo; upgrade opcional está recolhido.';
-    }
-    return 'Toque em upgrade disponível ou gerencie na loja.';
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_isSubscriber) {
       final label =
           planDisplayLabel ??
           PaywallCatalog.displayPlanName(currentPlan!);
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(4, 8, 4, 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Builder(
-              builder: (context) {
-                final chrome = ShellChrome.forDark(isDark);
-                return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
-              decoration: chrome.panel(
-                radius: TokensStrip.rPill,
-                accent: primary,
-                elevationLevel: 2,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.verified_outlined, size: 14, color: primary),
-                  const SizedBox(width: 6),
-                  Text(
-                    'FOCUX · $label',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.4,
-                      color: primary,
-                    ),
-                  ),
-                ],
-              ),
-            );
-              },
-            ),
-            const SizedBox(height: 12),
-            Text(
-              isMaxTier ? 'Plano máximo ativo' : 'Você está no $label',
-              style: TokensStrip.h1(color: ink).copyWith(
-                fontSize: 26,
-                height: 1.08,
-                letterSpacing: -0.8,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _subscriberSubtitle,
-              style: TokensStrip.bodyMuted(
-                color: PaywallCatalog.readableSecondary(ink, mute, isDark: isDark),
-              ).copyWith(fontSize: 14, height: 1.4),
-            ),
-          ],
-        ),
+      return PaywallSubscriberHeroGlass(
+        plan: currentPlan!,
+        planLabel: label,
+        ink: ink,
+        mute: mute,
+        isDark: isDark,
+        isMaxTier: isMaxTier,
+        hasUpgradePath: hasUpgradePath,
+        viewingCurrentPlan: viewingCurrentPlan,
       );
     }
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(4, 8, 4, 20),
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: const Alignment(0, -0.9),
-          radius: 1.1,
-          colors: [
-            primary.withValues(alpha: isDark ? 0.14 : 0.10),
-            Colors.transparent,
-          ],
-        ),
-      ),
+    return PaywallGlassCard(
+      margin: const EdgeInsets.fromLTRB(0, 8, 0, 20),
+      accent: primary,
+      glow: true,
+      blur: false,
+      elevationLevel: 12,
+      padding: const EdgeInsets.all(22),
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
-            decoration: BoxDecoration(
-              color: primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: primary.withValues(alpha: 0.3)),
+            decoration: ShellChrome.forDark(isDark).panel(
+              radius: TokensStrip.rPill,
+              accent: primary,
+              elevationLevel: 2,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -197,7 +138,7 @@ class PaywallHero extends StatelessWidget {
                 Text(
                   'FOCUX · PLANOS',
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 1.4,
                     color: primary,
@@ -254,16 +195,14 @@ class PaywallWebDetailsLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
     final live = FocuxLegal.plansMarketingWebLive;
-    final panel = Container(
+    final panel = PaywallGlassCard(
       margin: const EdgeInsets.only(bottom: 16),
+      accent: live ? primary : mute.withValues(alpha: 0.35),
+      glow: live,
+      blur: false,
+      elevationLevel: 6,
       padding: const EdgeInsets.all(16),
-      decoration: chrome.panel(
-        radius: 16,
-        accent: live ? primary : mute.withValues(alpha: 0.35),
-        elevationLevel: 1,
-      ),
       child: Row(
         children: [
           Icon(
@@ -363,7 +302,6 @@ class PaywallSubscriberQuickCompare extends StatelessWidget {
     if (rows.isEmpty) return const SizedBox.shrink();
 
     final targetLabel = PaywallCatalog.displayPlanName(targetPlan!);
-    final chrome = ShellChrome.of(context);
 
     return PaywallCollapsibleBlock(
       title: 'Comparativo rápido',
@@ -386,7 +324,7 @@ class PaywallSubscriberQuickCompare extends StatelessWidget {
                     'Recurso',
                     style: TokensStrip.bodyMuted(
                       color: PaywallCatalog.readableSecondary(ink, mute, isDark: isDark),
-                    ).copyWith(fontSize: 11, fontWeight: FontWeight.w700),
+                    ).copyWith(fontSize: 12, fontWeight: FontWeight.w700),
                   ),
                 ),
                 Expanded(
@@ -395,7 +333,7 @@ class PaywallSubscriberQuickCompare extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TokensStrip.bodyMuted(
                       color: PaywallCatalog.readableSecondary(ink, mute, isDark: isDark),
-                    ).copyWith(fontSize: 10, fontWeight: FontWeight.w700),
+                    ).copyWith(fontSize: 12, fontWeight: FontWeight.w700),
                   ),
                 ),
                 Expanded(
@@ -403,7 +341,7 @@ class PaywallSubscriberQuickCompare extends StatelessWidget {
                     targetLabel,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 12,
                       fontWeight: FontWeight.w800,
                       color: PaywallCatalog.accentForPlan(targetPlan!),
                     ),
@@ -412,46 +350,66 @@ class PaywallSubscriberQuickCompare extends StatelessWidget {
               ],
             ),
           ),
-          for (final row in rows)
-            Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: chrome.panel(radius: 12, elevationLevel: 0),
-              child: Row(
+          Semantics(
+            label:
+                'Comparativo rápido entre ${PaywallCatalog.displayPlanName(currentPlan)} '
+                'e $targetLabel, ${rows.length} recursos',
+            child: DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: line.withValues(alpha: isDark ? 0.35 : 0.5),
+              ),
+              borderRadius: BorderRadius.circular(TokensStrip.rCard),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(TokensStrip.rCard),
+              child: Column(
                 children: [
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      row.feature,
-                      style: TokensStrip.body(color: ink).copyWith(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                  for (var i = 0; i < rows.length; i++) ...[
+                    if (i > 0) Divider(height: 1, color: line.withValues(alpha: 0.45)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: PaywallFeatureLabel(
+                              raw: rows[i].feature,
+                              ink: ink,
+                              accent: PaywallCatalog.accentForPlan(targetPlan!),
+                              style: TokensStrip.body(color: ink).copyWith(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: _CompareValueCell(
+                              value: rows[i].valueFor(currentPlan),
+                              accent: mute,
+                              ink: ink,
+                              mute: mute,
+                            ),
+                          ),
+                          Expanded(
+                            child: _CompareValueCell(
+                              value: rows[i].valueFor(targetPlan!),
+                              accent: PaywallCatalog.accentForPlan(targetPlan!),
+                              ink: ink,
+                              mute: mute,
+                              emphasize: true,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      row.valueFor(currentPlan),
-                      textAlign: TextAlign.center,
-                      style: TokensStrip.bodyMuted(color: mute).copyWith(
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      row.valueFor(targetPlan!),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        color: PaywallCatalog.accentForPlan(targetPlan!),
-                      ),
-                    ),
-                  ),
+                  ],
                 ],
               ),
             ),
+          ),
+          ),
           const SizedBox(height: 4),
           Text(
             catalogFromApi
@@ -490,26 +448,46 @@ class PaywallSubscriberLegalStrip extends StatelessWidget {
       color: primary,
       decoration: TextDecoration.underline,
     );
+    final linkStyle = TextButton.styleFrom(
+      minimumSize: const Size(44, 44),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      tapTargetSize: MaterialTapTargetSize.padded,
+    );
     return Wrap(
       alignment: WrapAlignment.center,
       crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 10,
-      runSpacing: 6,
+      spacing: 4,
+      runSpacing: 0,
       children: [
-        GestureDetector(
-          onTap: () => FocuxLegal.openPrivacy(),
-          child: Text('Privacidade', style: link()),
+        Semantics(
+          button: true,
+          label: 'Abrir política de privacidade',
+          child: TextButton(
+            onPressed: () => FocuxLegal.openPrivacy(),
+            style: linkStyle,
+            child: Text('Privacidade', style: link()),
+          ),
         ),
-        GestureDetector(
-          onTap: () => FocuxLegal.openTerms(),
-          child: Text('Termos', style: link()),
+        Semantics(
+          button: true,
+          label: 'Abrir termos de uso',
+          child: TextButton(
+            onPressed: () => FocuxLegal.openTerms(),
+            style: linkStyle,
+            child: Text('Termos', style: link()),
+          ),
         ),
         if (onRestore != null)
-          GestureDetector(
-            onTap: restoring ? null : onRestore,
-            child: Text(
-              restoring ? 'Restaurando…' : 'Restaurar compras',
-              style: link(),
+          Semantics(
+            button: true,
+            label: restoring ? 'Restaurando compras' : 'Restaurar compras anteriores',
+            child: TextButton(
+              onPressed: restoring ? null : onRestore,
+              style: linkStyle,
+              child: Text(
+                restoring ? 'Restaurando…' : 'Restaurar compras',
+                style: link(),
+              ),
             ),
           ),
       ],
@@ -535,43 +513,49 @@ class PaywallQuickNav extends StatelessWidget {
     (id: PaywallScrollTarget.roi, label: 'ROI', icon: Icons.savings_outlined),
   ];
 
+  List<({PaywallScrollTarget id, String label, IconData icon})> get _visibleItems {
+    if (FocuxLegal.plansMarketingWebLive) return _items;
+    return _items
+        .where((item) => item.id == PaywallScrollTarget.planos)
+        .toList(growable: false);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final items = _visibleItems;
+    if (items.isEmpty) return const SizedBox.shrink();
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            for (var i = 0; i < _items.length; i++) ...[
+            for (var i = 0; i < items.length; i++) ...[
               if (i > 0) const SizedBox(width: 8),
               Semantics(
                 button: true,
-                label: 'Ir para ${_items[i].label}',
-                child: Material(
-                  color: primary,
-                  borderRadius: BorderRadius.circular(12),
-                  child: InkWell(
-                    onTap: () => onSectionTap(_items[i].id),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(_items[i].icon, size: 16, color: ink),
-                          const SizedBox(width: 8),
-                          Text(
-                            _items[i].label,
-                            style: TextStyle(
-                              color: ink,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
+                label: 'Ir para ${items[i].label}',
+                child: FxGlassSurface(
+                  accent: primary,
+                  radius: TokensStrip.rPill,
+                  elevationLevel: 6,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+                  onTap: () => onSectionTap(items[i].id),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(items[i].icon, size: 16, color: primary),
+                      const SizedBox(width: 8),
+                      Text(
+                        items[i].label,
+                        style: AppTypography.inter(
+                          color: ink,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 13,
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ),
@@ -656,14 +640,13 @@ class PaywallContextBanner extends StatelessWidget {
         SubscriptionPlan.PREMIUM;
     final accent = PaywallCatalog.accentForPlan(target);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
+    return PaywallGlassCard(
+      accent: accent,
+      glow: true,
+      blur: false,
+      elevationLevel: 6,
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(TokensStrip.rCard),
-        border: Border.all(color: accent.withValues(alpha: 0.35)),
-        color: accent.withValues(alpha: 0.08),
-      ),
+      margin: const EdgeInsets.only(bottom: 20),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -759,15 +742,13 @@ class PaywallRoiStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    return Container(
+    return PaywallGlassCard(
       margin: const EdgeInsets.only(bottom: 12),
-      decoration: chrome.panel(
-        radius: PaywallSurface.cardRadius,
-        accent: PaywallCatalog.brand,
-        elevationLevel: 2,
-      ),
-      clipBehavior: Clip.antiAlias,
+      accent: PaywallCatalog.brand,
+      glow: false,
+      blur: false,
+      elevationLevel: 6,
+      padding: EdgeInsets.zero,
       child: LayoutBuilder(
         builder: (context, c) {
           final items = roiStrip ?? PaywallCatalog.roiStrip;
@@ -865,6 +846,7 @@ class PaywallRichPlanCard extends StatelessWidget {
   final SubscriptionBillingPeriod? billingPeriod;
   final ValueChanged<SubscriptionBillingPeriod>? onBillingPeriodTap;
   final VoidCallback? onFeatureHelp;
+  final bool nestedInAccordion;
 
   const PaywallRichPlanCard({
     super.key,
@@ -888,6 +870,7 @@ class PaywallRichPlanCard extends StatelessWidget {
     this.billingPeriod,
     this.onBillingPeriodTap,
     this.onFeatureHelp,
+    this.nestedInAccordion = false,
   });
 
   @override
@@ -899,9 +882,6 @@ class PaywallRichPlanCard extends StatelessWidget {
     final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
     final roiTag = PaywallCatalog.roiTagFor(plano, plan);
     final sections = PaywallCatalog.featureSectionsForPlan(plano, plan);
-    final motion = TokensStrip.prefersReducedMotion(context)
-        ? Duration.zero
-        : const Duration(milliseconds: 220);
     final hideUpgradePricing =
         billingDisabled && !isCurrent && plan != SubscriptionPlan.FREE;
     final showCompactBody = compactUpsell && !isCurrent;
@@ -916,24 +896,16 @@ class PaywallRichPlanCard extends StatelessWidget {
         opacity: isLockedDowngrade
             ? 0.72
             : dimUnselected
-            ? (compactUpsell ? 0.92 : 0.58)
+            ? (compactUpsell ? 0.92 : 0.72)
             : 1,
-        child: AnimatedContainer(
-        duration: motion,
-        margin: const EdgeInsets.only(bottom: 14),
-        decoration: PaywallSurface.planCard(
-          isDark: isDark,
-          accent: accent,
-          isSelected: isSelected && plan != SubscriptionPlan.FREE,
-          isCurrent: isCurrent,
-        ),
-        clipBehavior: Clip.antiAlias,
+        child: PaywallTierCard(
+        plan: plan,
+        isDark: isDark,
+        isCurrent: isCurrent,
+        isSelected: isSelected && plan != SubscriptionPlan.FREE,
+        nestedInAccordion: nestedInAccordion,
         child: Stack(
           children: [
-            PaywallSurface.accentRail(
-              accent,
-              visible: isCurrent || (isSelected && plan != SubscriptionPlan.FREE),
-            ),
             if (badge != null && !isCurrent)
               Positioned(
                 top: 14,
@@ -961,27 +933,45 @@ class PaywallRichPlanCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            planTitle,
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 2,
-                              color: accent,
-                            ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              PaywallTierMedallion(
+                                plan: plan,
+                                accent: accent,
+                                isDark: isDark,
+                                size: 40,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      planTitle,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 2,
+                                        color: accent,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      planSubtitle,
+                                      style: TokensStrip.bodyMuted(color: secondary),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            planSubtitle,
-                            style: TokensStrip.bodyMuted(color: secondary),
-                          ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 14),
                           if (!isCurrent && plan != SubscriptionPlan.FREE)
                             hideUpgradePricing
                                 ? _StoreBillingHint(
                                     ink: ink,
                                     mute: mute,
-                                    line: line,
                                     isDark: isDark,
                                   )
                                 : Column(
@@ -1048,7 +1038,12 @@ class PaywallRichPlanCard extends StatelessWidget {
                           else if (isCurrent)
                             Text(
                               'Ativo',
-                              style: TokensStrip.h2(color: ink).copyWith(fontSize: 22),
+                              style: AppTypography.inter(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 28,
+                                letterSpacing: -0.5,
+                                color: ink,
+                              ),
                             )
                           else
                             Text(
@@ -1071,35 +1066,43 @@ class PaywallRichPlanCard extends StatelessWidget {
                           ],
                           if (showCompactBody && upsellHighlights.isNotEmpty) ...[
                             const SizedBox(height: 12),
-                            for (final line in upsellHighlights)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 6),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Icon(
-                                      Icons.add_circle_outline,
-                                      size: 16,
-                                      color: accent,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        line,
-                                        style: TokensStrip.body(color: ink).copyWith(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                            PaywallInsetPanel(
+                              accent: accent,
+                              isDark: isDark,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  for (final line in upsellHighlights)
+                                    Padding(
+                                      padding: const EdgeInsets.only(bottom: 6),
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Icon(
+                                            Icons.add_circle_outline,
+                                            size: 16,
+                                            color: accent,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              line,
+                                              style: TokensStrip.body(color: ink).copyWith(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Detalhes completos no painel abaixo.',
-                              style: TokensStrip.bodyMuted(color: secondary).copyWith(
-                                fontSize: 12,
+                                  Text(
+                                    'Detalhes completos no painel abaixo.',
+                                    style: TokensStrip.bodyMuted(color: secondary).copyWith(
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -1111,10 +1114,10 @@ class PaywallRichPlanCard extends StatelessWidget {
                 if (showCompactBody)
                   const SizedBox(height: 12)
                 else ...[
-                  const Divider(height: 1),
+                  Divider(height: 1, color: line.withValues(alpha: isDark ? 0.35 : 0.45)),
                   if (collapseFeatureDetails && isCurrent)
                     Theme(
-                      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                      data: PaywallTierChrome.expansionTheme(context, accent),
                       child: ExpansionTile(
                         tilePadding: const EdgeInsets.symmetric(horizontal: 20),
                         childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
@@ -1192,7 +1195,7 @@ class PaywallPlanFeatureSections extends StatelessWidget {
           for (final section in sections) ...[
             if (section.collapsible)
               Theme(
-                data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                data: PaywallTierChrome.expansionTheme(context, accent),
                 child: ExpansionTile(
                   tilePadding: EdgeInsets.zero,
                   childrenPadding: const EdgeInsets.only(bottom: 4),
@@ -1287,30 +1290,24 @@ class _PriceBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectiveSelected = selected && !disabled;
-    final chrome = ShellChrome.forDark(isDark);
     final textInk = disabled ? mute.withValues(alpha: 0.55) : ink;
 
     final box = Opacity(
       opacity: disabled ? 0.5 : 1,
-      child: Container(
+      child: FxGlassSurface(
+        accent: accent,
+        glow: effectiveSelected,
+        blur: false,
+        radius: TokensStrip.rSm,
+        elevationLevel: effectiveSelected ? 8 : 3,
         padding: const EdgeInsets.all(10),
-        decoration: effectiveSelected
-            ? chrome.listCard(
-                selected: true,
-                primary: accent,
-                radius: TokensStrip.rCard,
-              )
-            : chrome.panel(
-                radius: TokensStrip.rCard,
-                elevationLevel: 1,
-              ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               label.toUpperCase(),
               style: TextStyle(
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1,
                 color: mute,
@@ -1352,26 +1349,19 @@ class _PriceBox extends StatelessWidget {
 class _StoreBillingHint extends StatelessWidget {
   final Color ink;
   final Color mute;
-  final Color line;
   final bool isDark;
 
   const _StoreBillingHint({
     required this.ink,
     required this.mute,
-    required this.line,
     required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: chrome.panel(
-        radius: TokensStrip.rCard,
-        accent: TokensStrip.primary,
-        elevationLevel: 1,
-      ),
+    return PaywallInsetPanel(
+      accent: TokensStrip.primary,
+      isDark: isDark,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1400,14 +1390,10 @@ class _RoiMoneyTag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final chrome = ShellChrome.forDark(isDark);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-      decoration: chrome.panel(
-        radius: TokensStrip.rSm,
-        accent: PaywallCatalog.green,
-        elevationLevel: 1,
-      ),
+    return PaywallInsetPanel(
+      accent: PaywallCatalog.green,
+      isDark: isDark,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       child: Row(
         children: [
           const Icon(Icons.savings_outlined, size: 16, color: PaywallCatalog.green),
@@ -1454,22 +1440,58 @@ class PaywallSectionHeader extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Expanded(
-            child: Text(title, style: TokensStrip.h2(color: ink).copyWith(fontSize: 24)),
-          ),
-          if (note != null)
-            Flexible(
-              child: Text(
-                note!,
-                textAlign: TextAlign.end,
-                style: TokensStrip.bodyMuted(color: secondary).copyWith(fontSize: 13),
-              ),
-            ),
-        ],
+      padding: const EdgeInsets.only(bottom: TokensStrip.s3),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final stackNote = constraints.maxWidth < 360 && note != null;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (stackNote) ...[
+                Text(
+                  title,
+                  style: AppTypography.inter(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 22,
+                    letterSpacing: -0.4,
+                    color: ink,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  note!,
+                  style: TokensStrip.bodyMuted(color: secondary).copyWith(fontSize: 12),
+                ),
+              ] else
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: AppTypography.inter(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 22,
+                          letterSpacing: -0.4,
+                          color: ink,
+                        ),
+                      ),
+                    ),
+                    if (note != null)
+                      Flexible(
+                        child: Text(
+                          note!,
+                          textAlign: TextAlign.end,
+                          style: TokensStrip.bodyMuted(color: secondary).copyWith(fontSize: 12),
+                        ),
+                      ),
+                  ],
+                ),
+              const SizedBox(height: 10),
+              Divider(height: 1, color: secondary.withValues(alpha: 0.35)),
+            ],
+          );
+        },
       ),
     );
   }
@@ -1515,41 +1537,60 @@ class _PaywallCollapsibleBlockState extends State<PaywallCollapsibleBlock> {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(widget.isDark);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      decoration: chrome.panel(
-        radius: PaywallSurface.cardRadius,
-        accent: TokensStrip.primary.withValues(alpha: 0.5),
-        elevationLevel: widget.isDark ? 4 : 3,
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          initiallyExpanded: _expanded,
-          onExpansionChanged: (open) {
-            setState(() {
-              _expanded = open;
-              if (open) _mountedChild = true;
-            });
-          },
-          tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-          childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-          title: Text(
-            widget.title,
-            style: TokensStrip.h2(color: widget.ink).copyWith(fontSize: 17),
+    return PaywallGlassCard(
+      margin: const EdgeInsets.only(bottom: TokensStrip.s4),
+      accent: TokensStrip.primary,
+      glow: _expanded && !TokensStrip.prefersReducedMotion(context),
+      glowStrength: 0.55,
+      blur: _expanded,
+      elevationLevel: _expanded ? 10 : 7,
+      padding: EdgeInsets.zero,
+      child: Stack(
+        children: [
+          PaywallTierChrome.cardWash(
+            accent: TokensStrip.primary,
+            isDark: widget.isDark,
+            emphasis:
+                _expanded ? PaywallTierEmphasis.mid : PaywallTierEmphasis.low,
           ),
-          subtitle: Text(
-            widget.subtitle,
-            style: TokensStrip.bodyMuted(color: widget.mute).copyWith(fontSize: 13),
+          PaywallTierChrome.accentRail(
+            TokensStrip.primary,
+            emphasis:
+                _expanded ? PaywallTierEmphasis.mid : PaywallTierEmphasis.low,
           ),
-          trailing: _PaywallExpandTrailing(expanded: _expanded, mute: widget.mute),
-          children: [
-            if (_mountedChild) widget.child,
-          ],
-        ),
+          Theme(
+            data: PaywallTierChrome.expansionTheme(context, TokensStrip.primary),
+            child: Semantics(
+              button: true,
+              expanded: _expanded,
+              label: widget.title,
+              hint: _expanded ? 'Recolher seção' : 'Expandir seção',
+              child: ExpansionTile(
+                initiallyExpanded: _expanded,
+                onExpansionChanged: (open) {
+                  setState(() {
+                    _expanded = open;
+                    if (open) _mountedChild = true;
+                  });
+                },
+                tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                title: Text(
+                  widget.title,
+                  style: TokensStrip.h2(color: widget.ink).copyWith(fontSize: 17),
+                ),
+                subtitle: Text(
+                  widget.subtitle,
+                  style: TokensStrip.bodyMuted(color: widget.mute).copyWith(fontSize: 13),
+                ),
+                trailing: _PaywallExpandTrailing(expanded: _expanded, mute: widget.mute),
+                children: [
+                  if (_mountedChild) widget.child,
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1613,6 +1654,56 @@ class PaywallRoiBundle extends StatelessWidget {
   }
 }
 
+class _CompareValueCell extends StatelessWidget {
+  final String value;
+  final Color accent;
+  final Color ink;
+  final Color mute;
+  final bool emphasize;
+
+  const _CompareValueCell({
+    required this.value,
+    required this.accent,
+    required this.ink,
+    required this.mute,
+    this.emphasize = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final included = value == '✓' || value.toLowerCase() == 'sim';
+    if (included) {
+      return Align(
+        alignment: Alignment.center,
+        child: Icon(
+          Icons.check_rounded,
+          size: 18,
+          color: accent,
+          semanticLabel: 'Incluído',
+        ),
+      );
+    }
+    if (value == '—' || value == '-') {
+      return Text(
+        '—',
+        textAlign: TextAlign.center,
+        style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 12),
+      );
+    }
+    return Text(
+      value,
+      textAlign: TextAlign.center,
+      style: emphasize
+          ? TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: accent,
+            )
+          : TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 12),
+    );
+  }
+}
+
 class _PlanChip extends StatelessWidget {
   final String label;
   final Color color;
@@ -1622,19 +1713,27 @@ class _PlanChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final onChip = isDark ? color.withValues(alpha: 0.95) : color.withValues(alpha: 0.9);
+    final isGold = color == PaywallCatalog.gold;
+    final onChip = isDark
+        ? color.withValues(alpha: 0.95)
+        : isGold
+        ? const Color(0xFF6B4F0A)
+        : color.withValues(alpha: 0.88);
+    final chipAccent = !isDark && isGold
+        ? PaywallCatalog.gold.withValues(alpha: 0.82)
+        : color;
     final chrome = ShellChrome.forDark(isDark);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: chrome.panel(
         radius: TokensStrip.rSm,
-        accent: color,
+        accent: chipAccent,
         elevationLevel: 2,
       ),
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 10,
+          fontSize: 11,
           fontWeight: FontWeight.w900,
           letterSpacing: 0.6,
           color: onChip,
@@ -1671,18 +1770,18 @@ class PaywallFeatureLine extends StatelessWidget {
         children: [
           Semantics(
             label: status,
-            child: Text(
-              row.included ? '✓' : '—',
-              style: TextStyle(
-                fontWeight: FontWeight.w900,
-                color: row.included ? PaywallCatalog.green : mute,
-              ),
+            child: Icon(
+              row.included ? Icons.check_circle_rounded : Icons.remove_rounded,
+              size: 18,
+              color: row.included ? PaywallCatalog.green : mute.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              row.label,
+            child: PaywallFeatureLabel(
+              raw: row.label,
+              ink: off ? mute.withValues(alpha: 0.42) : ink,
+              accent: accent,
               style: TextStyle(
                 fontSize: 12.5,
                 fontWeight: row.highlight ? FontWeight.w800 : FontWeight.w500,
@@ -1691,7 +1790,11 @@ class PaywallFeatureLine extends StatelessWidget {
               ),
             ),
           ),
-          if (row.highlight) Text('★', style: TextStyle(color: accent, fontSize: 12)),
+          if (row.highlight)
+            Semantics(
+              label: 'Destaque do plano',
+              child: Icon(Icons.star_rounded, size: 14, color: accent),
+            ),
           if (row.comingSoon)
             Padding(
               padding: const EdgeInsets.only(left: 6),
@@ -2022,7 +2125,7 @@ class PaywallComparisonTable extends StatelessWidget {
 
   TextStyle _cellStyle({bool header = false, bool feature = false}) => TextStyle(
     color: header ? ink : (feature ? ink : mute),
-    fontSize: header ? 10 : 12,
+    fontSize: header ? 12 : 12,
     fontWeight: header || feature ? FontWeight.w700 : FontWeight.w500,
     height: 1.25,
   );
@@ -2336,16 +2439,18 @@ class PaywallUpgradeLegalCompact extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
     final secondary = PaywallCatalog.readableSecondary(
       ink,
       mute,
       isDark: Theme.of(context).brightness == Brightness.dark,
     );
 
-    return Container(
+    return PaywallGlassCard(
+      accent: primary,
+      blur: false,
+      glow: false,
+      elevationLevel: 4,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: chrome.panel(radius: TokensStrip.rCard, elevationLevel: 1),
       child: Column(
         children: [
           Text(

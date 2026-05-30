@@ -3,6 +3,7 @@ import '../../../core/api/payment_api_client.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../planos/paywall/paywall_vitrine.dart';
 import '../data/assinatura_repository.dart';
+import '../data/plano.dart';
 
 final assinaturaRepositoryProvider = Provider<AssinaturaRepository>(
   (ref) => AssinaturaRepository(
