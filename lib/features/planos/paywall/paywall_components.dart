@@ -15,6 +15,55 @@ import 'paywall_catalog.dart';
 /// Âncoras de scroll na vitrine de planos.
 enum PaywallScrollTarget { planos, features, roi }
 
+/// Superfícies Liquid Glass do paywall — alinhadas a [ShellChrome] / TOKENS STRIP.
+abstract class PaywallSurface {
+  static const double cardRadius = TokensStrip.rXl;
+
+  static BoxDecoration planCard({
+    required bool isDark,
+    required Color accent,
+    required bool isSelected,
+    required bool isCurrent,
+  }) {
+    final chrome = ShellChrome.forDark(isDark);
+    if (isCurrent) {
+      return chrome.accentPanel(accent: accent, radius: cardRadius);
+    }
+    if (isSelected) {
+      return chrome.listCard(
+        selected: true,
+        primary: accent,
+        radius: cardRadius,
+      );
+    }
+    return chrome.panel(
+      radius: cardRadius,
+      accent: accent,
+      elevationLevel: isDark ? 4 : 3,
+    );
+  }
+
+  static Widget accentRail(Color accent, {bool visible = true}) {
+    if (!visible) return const SizedBox.shrink();
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      height: 3,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(cardRadius),
+          ),
+          gradient: LinearGradient(
+            colors: [accent, accent.withValues(alpha: 0.12)],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // ─── Hero ───────────────────────────────────────────────────────────────────
 
 class PaywallHero extends StatelessWidget {
@@ -68,12 +117,15 @@ class PaywallHero extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
+            Builder(
+              builder: (context) {
+                final chrome = ShellChrome.forDark(isDark);
+                return Container(
               padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
-              decoration: BoxDecoration(
-                color: primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: primary.withValues(alpha: 0.3)),
+              decoration: chrome.panel(
+                radius: TokensStrip.rPill,
+                accent: primary,
+                elevationLevel: 2,
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -91,6 +143,8 @@ class PaywallHero extends StatelessWidget {
                   ),
                 ],
               ),
+            );
+              },
             ),
             const SizedBox(height: 12),
             Text(
@@ -705,11 +759,13 @@ class PaywallRoiStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        border: Border.all(color: line),
-        borderRadius: BorderRadius.circular(18),
+      decoration: chrome.panel(
+        radius: PaywallSurface.cardRadius,
+        accent: PaywallCatalog.brand,
+        elevationLevel: 2,
       ),
       clipBehavior: Clip.antiAlias,
       child: LayoutBuilder(
@@ -865,33 +921,19 @@ class PaywallRichPlanCard extends StatelessWidget {
         child: AnimatedContainer(
         duration: motion,
         margin: const EdgeInsets.only(bottom: 14),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(
-            color: isSelected
-                ? accent.withValues(alpha: 0.55)
-                : line.withValues(alpha: 0.6),
-            width: isSelected ? 2 : 1.2,
-          ),
-          boxShadow: isSelected && plan != SubscriptionPlan.FREE
-              ? [
-                  BoxShadow(
-                    color: accent.withValues(alpha: 0.18),
-                    blurRadius: 40,
-                  ),
-                ]
-              : null,
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white.withValues(alpha: isDark ? 0.04 : 0.9),
-              isDark ? EagleTokens.darkCard : EagleTokens.card,
-            ],
-          ),
+        decoration: PaywallSurface.planCard(
+          isDark: isDark,
+          accent: accent,
+          isSelected: isSelected && plan != SubscriptionPlan.FREE,
+          isCurrent: isCurrent,
         ),
+        clipBehavior: Clip.antiAlias,
         child: Stack(
           children: [
+            PaywallSurface.accentRail(
+              accent,
+              visible: isCurrent || (isSelected && plan != SubscriptionPlan.FREE),
+            ),
             if (badge != null && !isCurrent)
               Positioned(
                 top: 14,
@@ -911,7 +953,9 @@ class PaywallRichPlanCard extends StatelessWidget {
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: onTap,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(PaywallSurface.cardRadius),
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(20, 22, 20, 12),
                       child: Column(
@@ -949,6 +993,7 @@ class PaywallRichPlanCard extends StatelessWidget {
                                       child: _PriceBox(
                                         label: 'Mensal',
                                         price: monthlyPrice,
+                                        accent: accent,
                                         ink: ink,
                                         mute: mute,
                                         line: line,
@@ -974,6 +1019,7 @@ class PaywallRichPlanCard extends StatelessWidget {
                                       child: _PriceBox(
                                         label: 'Anual',
                                         price: annualPrice,
+                                        accent: accent,
                                         ink: ink,
                                         mute: mute,
                                         line: line,
@@ -1216,6 +1262,7 @@ class _PlanSectionTitle extends StatelessWidget {
 class _PriceBox extends StatelessWidget {
   final String label;
   final String price;
+  final Color accent;
   final Color ink;
   final Color mute;
   final Color line;
@@ -1227,6 +1274,7 @@ class _PriceBox extends StatelessWidget {
   const _PriceBox({
     required this.label,
     required this.price,
+    required this.accent,
     required this.ink,
     required this.mute,
     required this.line,
@@ -1239,34 +1287,23 @@ class _PriceBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectiveSelected = selected && !disabled;
-    final fill = effectiveSelected
-        ? PaywallCatalog.brand.withValues(alpha: isDark ? 0.14 : 0.09)
-        : (isDark
-            ? Colors.white.withValues(alpha: 0.04)
-            : EagleTokens.paper);
-    final borderColor = effectiveSelected
-        ? PaywallCatalog.brand.withValues(alpha: 0.65)
-        : line;
+    final chrome = ShellChrome.forDark(isDark);
     final textInk = disabled ? mute.withValues(alpha: 0.55) : ink;
 
     final box = Opacity(
       opacity: disabled ? 0.5 : 1,
       child: Container(
         padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: borderColor, width: effectiveSelected ? 2 : 1),
-          color: disabled ? mute.withValues(alpha: 0.08) : fill,
-          boxShadow: effectiveSelected
-              ? [
-                  BoxShadow(
-                    color: PaywallCatalog.brand.withValues(alpha: 0.12),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : null,
-        ),
+        decoration: effectiveSelected
+            ? chrome.listCard(
+                selected: true,
+                primary: accent,
+                radius: TokensStrip.rCard,
+              )
+            : chrome.panel(
+                radius: TokensStrip.rCard,
+                elevationLevel: 1,
+              ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1327,14 +1364,13 @@ class _StoreBillingHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.forDark(isDark);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: (isDark ? EagleTokens.darkCard : EagleTokens.card).withValues(
-          alpha: 0.9,
-        ),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: line.withValues(alpha: 0.55)),
+      decoration: chrome.panel(
+        radius: TokensStrip.rCard,
+        accent: TokensStrip.primary,
+        elevationLevel: 1,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1363,12 +1399,14 @@ class _RoiMoneyTag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.forDark(isDark);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-      decoration: BoxDecoration(
-        color: PaywallCatalog.green.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(9),
-        border: Border.all(color: PaywallCatalog.green.withValues(alpha: 0.25)),
+      decoration: chrome.panel(
+        radius: TokensStrip.rSm,
+        accent: PaywallCatalog.green,
+        elevationLevel: 1,
       ),
       child: Row(
         children: [
@@ -1477,16 +1515,16 @@ class _PaywallCollapsibleBlockState extends State<PaywallCollapsibleBlock> {
 
   @override
   Widget build(BuildContext context) {
-    final surface = widget.isDark ? EagleTokens.darkCard : EagleTokens.card;
-    final border = widget.isDark ? EagleTokens.darkLine : widget.line;
+    final chrome = ShellChrome.forDark(widget.isDark);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
-      decoration: BoxDecoration(
-        color: surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: border),
+      decoration: chrome.panel(
+        radius: PaywallSurface.cardRadius,
+        accent: TokensStrip.primary.withValues(alpha: 0.5),
+        elevationLevel: widget.isDark ? 4 : 3,
       ),
+      clipBehavior: Clip.antiAlias,
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
@@ -1585,12 +1623,13 @@ class _PlanChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final onChip = isDark ? color.withValues(alpha: 0.95) : color.withValues(alpha: 0.9);
+    final chrome = ShellChrome.forDark(isDark);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withValues(alpha: isDark ? 0.45 : 0.55)),
-        color: color.withValues(alpha: 0.13),
+      decoration: chrome.panel(
+        radius: TokensStrip.rSm,
+        accent: color,
+        elevationLevel: 2,
       ),
       child: Text(
         label,
@@ -2225,6 +2264,174 @@ class PaywallRoiRowsList extends StatelessWidget {
   }
 }
 
+/// Rodapé legal compacto no fluxo de upgrade — detalhes em bottom sheet.
+class PaywallUpgradeLegalCompact extends StatelessWidget {
+  final Color ink;
+  final Color mute;
+  final Color primary;
+  final bool showStoreBillingNote;
+  final bool restoring;
+  final VoidCallback? onRestore;
+
+  const PaywallUpgradeLegalCompact({
+    super.key,
+    required this.ink,
+    required this.mute,
+    required this.primary,
+    this.showStoreBillingNote = true,
+    this.restoring = false,
+    this.onRestore,
+  });
+
+  static Future<void> showBillingSheet(
+    BuildContext context, {
+    required Color ink,
+    required Color mute,
+    required Color primary,
+    required bool showStoreBillingNote,
+    required bool restoring,
+    VoidCallback? onRestore,
+  }) {
+    final chrome = ShellChrome.of(context);
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final bottom = MediaQuery.paddingOf(ctx).bottom;
+        return Padding(
+          padding: EdgeInsets.fromLTRB(12, 0, 12, bottom + 12),
+          child: DecoratedBox(
+            decoration: chrome.bottomSheet(radius: PaywallSurface.cardRadius),
+            child: SafeArea(
+              top: false,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Termos e cobrança',
+                      style: TokensStrip.h2(color: ink).copyWith(fontSize: 20),
+                    ),
+                    const SizedBox(height: 16),
+                    PaywallTrustFooter(mute: mute, primary: primary),
+                    const SizedBox(height: 16),
+                    PaywallBillingLegalPanel(
+                      ink: ink,
+                      mute: mute,
+                      showStoreBillingNote: showStoreBillingNote,
+                      restoring: restoring,
+                      onRestore: onRestore,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final secondary = PaywallCatalog.readableSecondary(
+      ink,
+      mute,
+      isDark: Theme.of(context).brightness == Brightness.dark,
+    );
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: chrome.panel(radius: TokensStrip.rCard, elevationLevel: 1),
+      child: Column(
+        children: [
+          Text(
+            'Sem fidelidade · Cancele quando quiser',
+            textAlign: TextAlign.center,
+            style: TokensStrip.bodyMuted(color: secondary).copyWith(fontSize: 13),
+          ),
+          const SizedBox(height: 8),
+          Semantics(
+            button: true,
+            label: 'Abrir termos, privacidade e informações de cobrança',
+            child: TextButton.icon(
+              onPressed: () => showBillingSheet(
+                context,
+                ink: ink,
+                mute: mute,
+                primary: primary,
+                showStoreBillingNote: showStoreBillingNote,
+                restoring: restoring,
+                onRestore: onRestore,
+              ),
+              icon: Icon(Icons.policy_outlined, size: 18, color: primary),
+              label: Text(
+                'Termos, privacidade e cobrança',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: primary,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Painel de cobrança / restaurar (sheet ou inline).
+class PaywallBillingLegalPanel extends StatelessWidget {
+  final Color ink;
+  final Color mute;
+  final bool showStoreBillingNote;
+  final bool restoring;
+  final VoidCallback? onRestore;
+
+  const PaywallBillingLegalPanel({
+    super.key,
+    required this.ink,
+    required this.mute,
+    this.showStoreBillingNote = true,
+    this.restoring = false,
+    this.onRestore,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+
+    return Column(
+      children: [
+        if (onRestore != null)
+          TextButton(
+            onPressed: restoring ? null : onRestore,
+            child: Text(
+              restoring ? 'Restaurando compras…' : 'Restaurar compras',
+              style: TextStyle(
+                fontSize: 14,
+                color: ink.withValues(alpha: 0.82),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        if (showStoreBillingNote)
+          Text(
+            'Cobrança e renovação automática pela ${subscriptionChannelLabel()}. '
+            'Cancele quando quiser nas configurações do dispositivo.',
+            textAlign: TextAlign.center,
+            style: TokensStrip.bodyMuted(color: secondary),
+          ),
+      ],
+    );
+  }
+}
+
 class PaywallTrustFooter extends StatelessWidget {
   final Color mute;
   final Color primary;
@@ -2290,7 +2497,10 @@ class PaywallLoadingSkeleton extends StatelessWidget {
             Container(
               height: 180,
               margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(color: base, borderRadius: BorderRadius.circular(22)),
+              decoration: BoxDecoration(
+                color: base,
+                borderRadius: BorderRadius.circular(PaywallSurface.cardRadius),
+              ),
             ),
         ],
       ),

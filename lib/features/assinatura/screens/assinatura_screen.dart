@@ -1310,11 +1310,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                         subscriptionUsesNativeStore ? _restorePurchases : null,
                   ),
                 ] else ...[
-                  PaywallTrustFooter(mute: mute, primary: primary),
-                  const SizedBox(height: 12),
-                  _PaywallLegalFooter(
+                  PaywallUpgradeLegalCompact(
                     ink: ink,
                     mute: mute,
+                    primary: primary,
                     showStoreBillingNote: subscriptionUsesNativeStore,
                     restoring: _restoringPurchases,
                     onRestore:
