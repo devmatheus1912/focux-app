@@ -7,38 +7,56 @@ class PaywallVitrineSnapshot {
   const PaywallVitrineSnapshot({
     required this.socialProof,
     this.roiStrip = const [],
+    this.comparisonRows = const [],
     this.trialDaysOffer,
     this.fromApi = false,
+    this.version,
   });
 
   final List<({String value, String label})> socialProof;
   final List<({String value, String label, Color color})> roiStrip;
+  final List<PaywallComparisonRow> comparisonRows;
   final int? trialDaysOffer;
   final bool fromApi;
+  final String? version;
 
   List<({String value, String label, Color color})> get effectiveRoiStrip =>
       roiStrip.isNotEmpty ? roiStrip : PaywallCatalog.roiStrip;
 
+  List<PaywallComparisonRow> get effectiveComparisonRows =>
+      comparisonRows.isNotEmpty
+          ? comparisonRows
+          : PaywallCatalog.comparisonRows;
+
   factory PaywallVitrineSnapshot.fromApi(Map<String, dynamic> json) {
     final social = _parseSocialProof(json['socialProof']);
     final roi = _parseRoiStrip(json['roiStrip']);
+    final comparison = _parseComparisonRows(json['comparisonRows']);
     final trial = (json['trialDaysOffer'] as num?)?.toInt();
-    if (social.isEmpty && roi.isEmpty && trial == null) {
+    final version = json['version'] as String?;
+    if (social.isEmpty &&
+        roi.isEmpty &&
+        comparison.isEmpty &&
+        trial == null) {
       return PaywallVitrineSnapshot.fromCatalog();
     }
     return PaywallVitrineSnapshot(
       socialProof: social.isNotEmpty ? social : PaywallCatalog.socialProof,
       roiStrip: roi,
+      comparisonRows: comparison,
       trialDaysOffer: trial,
       fromApi: true,
+      version: version,
     );
   }
 
   factory PaywallVitrineSnapshot.fromCatalog() => PaywallVitrineSnapshot(
     socialProof: PaywallCatalog.socialProof,
     roiStrip: PaywallCatalog.roiStrip,
+    comparisonRows: PaywallCatalog.comparisonRows,
     trialDaysOffer: 14,
     fromApi: false,
+    version: null,
   );
 
   static List<({String value, String label})> _parseSocialProof(Object? raw) {
@@ -72,6 +90,28 @@ class PaywallVitrineSnapshot {
           );
         })
         .whereType<({String value, String label, Color color})>()
+        .toList();
+  }
+
+  static List<PaywallComparisonRow> _parseComparisonRows(Object? raw) {
+    if (raw is! List) return const [];
+    return raw
+        .map((e) {
+          final m = e as Map<String, dynamic>;
+          final feature = m['feature'] as String? ?? '';
+          if (feature.isEmpty) return null;
+          return PaywallComparisonRow(
+            feature: feature,
+            free: m['free'] as String? ?? '—',
+            premium: m['premium'] as String? ?? '—',
+            enterprise: m['enterprise'] as String? ?? '—',
+            enterprisePro:
+                m['enterprisePro'] as String? ??
+                m['entPro'] as String? ??
+                '—',
+          );
+        })
+        .whereType<PaywallComparisonRow>()
         .toList();
   }
 

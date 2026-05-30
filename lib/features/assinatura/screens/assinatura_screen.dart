@@ -630,7 +630,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     final currentPlan = subscriptionPlanFromApi(perfil?.plano);
     final planosAsync = ref.watch(planosProvider);
     final vitrineAsync = ref.watch(paywallVitrineProvider);
-    final trialDaysFromVitrine = vitrineAsync.valueOrNull?.trialDaysOffer;
+    final vitrine = vitrineAsync.valueOrNull;
+    final trialDaysFromVitrine = vitrine?.trialDaysOffer;
+    final vitrineComparison = vitrine?.effectiveComparisonRows ?? PaywallCatalog.comparisonRows;
     final featuresAsync = ref.watch(planoFeaturesProvider);
 
     final planos = planosAsync.valueOrNull;
@@ -1166,6 +1168,11 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   PaywallSubscriberQuickCompare(
                     currentPlan: currentPlan,
                     targetPlan: nextTierPlan,
+                    comparisonRows: vitrineComparison,
+                    catalogFromApi: vitrine?.fromApi ?? false,
+                    initiallyExpanded:
+                        selPlan == nextTierPlan &&
+                        selPlan.level > currentPlan.level,
                     ink: ink,
                     mute: mute,
                     line: line,
@@ -1215,9 +1222,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   const SizedBox(height: 12),
                   _PaywallInlineNote(
                     icon: Icons.store_outlined,
-                    text: hasUpgradeAbove
-                        ? 'Loja indisponível nesta sessão — use o botão abaixo para abrir ${subscriptionChannelLabel()} e gerenciar ou fazer upgrade.'
-                        : 'Loja indisponível nesta sessão — use o botão abaixo para abrir ${subscriptionChannelLabel()} e gerenciar sua assinatura.',
+                    text:
+                        'Loja indisponível nesta sessão — use o botão abaixo para abrir ${subscriptionChannelLabel()} e gerenciar sua assinatura.',
                     ink: ink,
                     mute: mute,
                     isDark: isDark,
@@ -1235,16 +1241,26 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   ),
                 ],
                 const SizedBox(height: 16),
-                PaywallTrustFooter(mute: mute, primary: primary),
-                const SizedBox(height: 12),
-                _PaywallLegalFooter(
-                  ink: ink,
-                  mute: mute,
-                  showStoreBillingNote: subscriptionUsesNativeStore,
-                  restoring: _restoringPurchases,
-                  onRestore:
-                      subscriptionUsesNativeStore ? _restorePurchases : null,
-                ),
+                if (!isAcquisition && isCurrentPlanSelected) ...[
+                  PaywallSubscriberLegalStrip(
+                    mute: mute,
+                    primary: primary,
+                    restoring: _restoringPurchases,
+                    onRestore:
+                        subscriptionUsesNativeStore ? _restorePurchases : null,
+                  ),
+                ] else ...[
+                  PaywallTrustFooter(mute: mute, primary: primary),
+                  const SizedBox(height: 12),
+                  _PaywallLegalFooter(
+                    ink: ink,
+                    mute: mute,
+                    showStoreBillingNote: subscriptionUsesNativeStore,
+                    restoring: _restoringPurchases,
+                    onRestore:
+                        subscriptionUsesNativeStore ? _restorePurchases : null,
+                  ),
+                ],
               ],
           );
         },

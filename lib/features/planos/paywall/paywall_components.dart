@@ -263,6 +263,9 @@ class PaywallWebDetailsLink extends StatelessWidget {
 class PaywallSubscriberQuickCompare extends StatelessWidget {
   final SubscriptionPlan currentPlan;
   final SubscriptionPlan? targetPlan;
+  final List<PaywallComparisonRow> comparisonRows;
+  final bool initiallyExpanded;
+  final bool catalogFromApi;
   final Color ink;
   final Color mute;
   final Color line;
@@ -273,6 +276,9 @@ class PaywallSubscriberQuickCompare extends StatelessWidget {
     super.key,
     required this.currentPlan,
     this.targetPlan,
+    this.comparisonRows = PaywallCatalog.comparisonRows,
+    this.initiallyExpanded = false,
+    this.catalogFromApi = false,
     required this.ink,
     required this.mute,
     required this.line,
@@ -282,12 +288,12 @@ class PaywallSubscriberQuickCompare extends StatelessWidget {
 
   List<PaywallComparisonRow> get _rows {
     if (targetPlan == null) return const [];
-    final rows = PaywallCatalog.comparisonRows.where((row) {
+    final rows = comparisonRows.where((row) {
       final current = row.valueFor(currentPlan);
       final next = row.valueFor(targetPlan!);
       return current != next && next != '—';
     });
-    return rows.take(5).toList();
+    return rows.take(6).toList();
   }
 
   @override
@@ -305,7 +311,7 @@ class PaywallSubscriberQuickCompare extends StatelessWidget {
       mute: mute,
       line: line,
       isDark: isDark,
-      initiallyExpanded: false,
+      initiallyExpanded: initiallyExpanded,
       child: Column(
         children: [
           for (final row in rows)
@@ -350,11 +356,63 @@ class PaywallSubscriberQuickCompare extends StatelessWidget {
             ),
           const SizedBox(height: 4),
           Text(
-            'Tabela completa e ROI no site quando disponível.',
+            catalogFromApi
+                ? 'Comparativo sincronizado com o servidor.'
+                : 'Tabela completa e ROI no site quando disponível.',
             style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 12),
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Rodapé legal enxuto para assinante no plano atual (sem bloco de compra).
+class PaywallSubscriberLegalStrip extends StatelessWidget {
+  final Color mute;
+  final Color primary;
+  final VoidCallback? onRestore;
+  final bool restoring;
+
+  const PaywallSubscriberLegalStrip({
+    super.key,
+    required this.mute,
+    required this.primary,
+    this.onRestore,
+    this.restoring = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    TextStyle link() => TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w600,
+      color: primary,
+      decoration: TextDecoration.underline,
+    );
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 10,
+      runSpacing: 6,
+      children: [
+        GestureDetector(
+          onTap: () => FocuxLegal.openPrivacy(),
+          child: Text('Privacidade', style: link()),
+        ),
+        GestureDetector(
+          onTap: () => FocuxLegal.openTerms(),
+          child: Text('Termos', style: link()),
+        ),
+        if (onRestore != null)
+          GestureDetector(
+            onTap: restoring ? null : onRestore,
+            child: Text(
+              restoring ? 'Restaurando…' : 'Restaurar compras',
+              style: link(),
+            ),
+          ),
+      ],
     );
   }
 }
