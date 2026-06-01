@@ -138,8 +138,11 @@ class UpgradePromptSheet {
                     },
                   );
                   Navigator.pop(ctx);
+                  final capQuery = capability != null && capability.isNotEmpty
+                      ? '&capability=${Uri.encodeComponent(capability)}'
+                      : '';
                   context.push(
-                    '/assinatura?plano=${plan.apiName}&source=$source&feature=${Uri.encodeComponent(featureName)}',
+                    '/assinatura?plano=${plan.apiName}&source=$source&feature=${Uri.encodeComponent(featureName)}$capQuery',
                   );
                 },
                 style: FilledButton.styleFrom(

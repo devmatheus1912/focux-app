@@ -96,12 +96,14 @@ class AssinaturaScreen extends ConsumerStatefulWidget {
   final String? initialPlan;
   final String? source;
   final String? blockedFeature;
+  final String? blockedCapability;
 
   const AssinaturaScreen({
     super.key,
     this.initialPlan,
     this.source,
     this.blockedFeature,
+    this.blockedCapability,
   });
 
   @override
@@ -1010,11 +1012,16 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   PaywallContextBanner(
                     usage: usage,
                     blockedFeatureLabel: widget.blockedFeature,
+                    blockedCapability: widget.blockedCapability,
                     ink: ink,
                     mute: mute,
                     onCta: () {
-                      final target = PlanEntitlements.softGateTargetPlan(usage);
-                      if (target != null) _selectPlan(target);
+                      final target = PlanEntitlements.resolveUpgradeTarget(
+                        usage: usage,
+                        blockedFeatureLabel: widget.blockedFeature,
+                        blockedCapability: widget.blockedCapability,
+                      );
+                      _selectPlan(target);
                     },
                   ),
                 if (!usePlanStudio)
@@ -1110,6 +1117,11 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                       plano: plano,
                       plan: plan,
                       embeddedInStudio: usePlanStudio && !lockedDowngrade,
+                      showFeatureLegend:
+                          usePlanStudio &&
+                          plan == currentPlan &&
+                          !lockedDowngrade &&
+                          !isReferenceCard,
                       isSelected: plan == selPlan && !lockedDowngrade,
                       isCurrent: plan == currentPlan,
                       isLockedDowngrade: lockedDowngrade,

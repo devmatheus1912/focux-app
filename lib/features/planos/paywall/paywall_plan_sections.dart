@@ -212,6 +212,7 @@ class PaywallPlanSections {
     const PaywallPlanFeatureSection(
       title: 'Landing page · Enterprise Pro',
       collapsible: true,
+      initiallyExpanded: true,
       items: [
         PaywallPlanFeatureItem(
           label: 'Editor completo — depoimentos, galeria e FAQ',
@@ -233,6 +234,7 @@ class PaywallPlanSections {
     const PaywallPlanFeatureSection(
       title: 'Loja · Enterprise Pro',
       collapsible: true,
+      initiallyExpanded: true,
       items: [
         PaywallPlanFeatureItem(
           label: 'Venda treinos avulsos e desafios',

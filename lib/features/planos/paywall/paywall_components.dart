@@ -667,6 +667,7 @@ class PaywallSectionAnchor extends StatelessWidget {
 class PaywallContextBanner extends StatelessWidget {
   final PlanoUsageSnapshot usage;
   final String? blockedFeatureLabel;
+  final String? blockedCapability;
   final Color ink;
   final Color mute;
   final VoidCallback? onCta;
@@ -675,16 +676,16 @@ class PaywallContextBanner extends StatelessWidget {
     super.key,
     required this.usage,
     this.blockedFeatureLabel,
+    this.blockedCapability,
     required this.ink,
     required this.mute,
     this.onCta,
   });
 
-  String? _message() {
+  String? _message(SubscriptionPlan target) {
     if (blockedFeatureLabel != null && blockedFeatureLabel!.isNotEmpty) {
-      final target = PlanEntitlements.targetPlan(capability: null);
       return 'Você tentou usar $blockedFeatureLabel. '
-          'Disponível no plano ${target.apiName}.';
+          'Disponível no plano ${PlanEntitlements.displayPlanName(target)}.';
     }
     if (usage.alunosAtLimit && usage.limiteAlunos != null) {
       return 'Você atingiu ${usage.limiteAlunos} alunos. '
@@ -712,11 +713,14 @@ class PaywallContextBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final msg = _message();
+    final target = PlanEntitlements.resolveUpgradeTarget(
+      usage: usage,
+      blockedFeatureLabel: blockedFeatureLabel,
+      blockedCapability: blockedCapability,
+    );
+    final msg = _message(target);
     if (msg == null) return const SizedBox.shrink();
 
-    final target = PlanEntitlements.softGateTargetPlan(usage) ??
-        SubscriptionPlan.PREMIUM;
     final accent = PaywallCatalog.accentForPlan(target);
 
     return PaywallGlassCard(
@@ -737,7 +741,10 @@ class PaywallContextBanner extends StatelessWidget {
           if (onCta != null)
             TextButton(
               onPressed: onCta,
-              child: Text('Ver ${target.apiName}', style: TextStyle(color: accent)),
+              child: Text(
+                'Ver ${PlanEntitlements.displayPlanName(target)}',
+                style: TextStyle(color: accent),
+              ),
             ),
         ],
       ),
@@ -929,6 +936,7 @@ class PaywallRichPlanCard extends StatelessWidget {
   final VoidCallback? onFeatureHelp;
   final bool nestedInAccordion;
   final bool embeddedInStudio;
+  final bool showFeatureLegend;
 
   const PaywallRichPlanCard({
     super.key,
@@ -955,6 +963,7 @@ class PaywallRichPlanCard extends StatelessWidget {
     this.onFeatureHelp,
     this.nestedInAccordion = false,
     this.embeddedInStudio = false,
+    this.showFeatureLegend = false,
   });
 
   @override
@@ -1271,6 +1280,7 @@ class PaywallRichPlanCard extends StatelessWidget {
                             mute: mute,
                             onFeatureHelp: onFeatureHelp,
                             allowLockedTap: !referenceMode,
+                            showLegend: showFeatureLegend,
                           ),
                         ],
                       ),
@@ -1283,6 +1293,7 @@ class PaywallRichPlanCard extends StatelessWidget {
                       mute: mute,
                       onFeatureHelp: onFeatureHelp,
                       allowLockedTap: !referenceMode,
+                      showLegend: showFeatureLegend,
                     ),
                 ],
               ],
@@ -1327,6 +1338,7 @@ class PaywallPlanFeatureSections extends StatelessWidget {
   final Color mute;
   final VoidCallback? onFeatureHelp;
   final bool allowLockedTap;
+  final bool showLegend;
 
   const PaywallPlanFeatureSections({
     super.key,
@@ -1336,7 +1348,13 @@ class PaywallPlanFeatureSections extends StatelessWidget {
     required this.mute,
     this.onFeatureHelp,
     this.allowLockedTap = true,
+    this.showLegend = false,
   });
+
+  Duration _expansionDuration(BuildContext context) =>
+      TokensStrip.prefersReducedMotion(context)
+          ? Duration.zero
+          : const Duration(milliseconds: 220);
 
   PaywallFeatureEducation _education(PaywallPlanFeatureItem item) {
     return PaywallFeatureEducation(
@@ -1374,6 +1392,11 @@ class PaywallPlanFeatureSections extends StatelessWidget {
                   childrenPadding: const EdgeInsets.only(bottom: 4),
                   title: _PlanSectionTitle(title: section.title, accent: accent, mute: mute),
                   initiallyExpanded: section.initiallyExpanded,
+                  expansionAnimationStyle: AnimationStyle(
+                    duration: _expansionDuration(context),
+                    curve: Curves.easeOutCubic,
+                    reverseCurve: Curves.easeInCubic,
+                  ),
                   children: section.items
                       .where((item) => !item.comingSoon)
                       .map(
@@ -1418,7 +1441,145 @@ class PaywallPlanFeatureSections extends StatelessWidget {
               ),
             ),
           ],
+          if (showLegend) ...[
+            const SizedBox(height: 10),
+            _PaywallFeatureLegend(ink: ink, mute: mute),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+/// Legenda compacta — ícone + texto (sem depender só de cor).
+class _PaywallFeatureLegend extends StatelessWidget {
+  final Color ink;
+  final Color mute;
+
+  const _PaywallFeatureLegend({required this.ink, required this.mute});
+
+  @override
+  Widget build(BuildContext context) {
+    final style = TextStyle(fontSize: 11, height: 1.35, color: mute.withValues(alpha: 0.88));
+    return Semantics(
+      label:
+          'Legenda: check verde incluído no plano; cadeado requer upgrade; '
+          'estrela destaque; badge PRO indica plano Enterprise Pro',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _PaywallLegendRow(
+            icon: Icons.check_circle_rounded,
+            iconColor: PaywallCatalog.green,
+            label: 'Incluído no seu plano',
+            style: style,
+          ),
+          const SizedBox(height: 4),
+          _PaywallLegendRow(
+            icon: Icons.lock_rounded,
+            iconColor: mute.withValues(alpha: 0.72),
+            label: 'Toque para ver upgrade',
+            style: style,
+          ),
+          const SizedBox(height: 4),
+          _PaywallLegendRow(
+            icon: Icons.star_rounded,
+            iconColor: PaywallCatalog.gold,
+            label: 'Destaque do plano',
+            style: style,
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              _PlanChip(label: 'PRO', color: PaywallCatalog.brandDeep),
+              const SizedBox(width: 6),
+              Expanded(child: Text('Requer Enterprise Pro', style: style)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PaywallLegendRow extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+  final TextStyle style;
+
+  const _PaywallLegendRow({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    required this.style,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: iconColor),
+        const SizedBox(width: 6),
+        Expanded(child: Text(label, style: style)),
+      ],
+    );
+  }
+}
+
+/// Convite discreto para explorar o tier Pro no Plan Studio.
+class PaywallProExploreStrip extends StatelessWidget {
+  final Color ink;
+  final Color mute;
+  final bool isDark;
+  final VoidCallback onExplorePro;
+
+  const PaywallProExploreStrip({
+    super.key,
+    required this.ink,
+    required this.mute,
+    required this.isDark,
+    required this.onExplorePro,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = PaywallCatalog.brandDeep;
+    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    return Semantics(
+      button: true,
+      label:
+          'Landing, Loja digital e Pose Coach estão no Enterprise Pro. '
+          'Toque para ver o plano Pro',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onExplorePro();
+          },
+          borderRadius: BorderRadius.circular(TokensStrip.rSm),
+          child: PaywallInsetPanel(
+            accent: accent,
+            isDark: isDark,
+            child: Row(
+              children: [
+                Icon(Icons.workspace_premium_rounded, size: 20, color: accent),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Landing, Loja e Pose Coach estão no Enterprise Pro',
+                    style: TokensStrip.body(color: secondary).copyWith(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Icon(Icons.chevron_right_rounded, color: accent, size: 22),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

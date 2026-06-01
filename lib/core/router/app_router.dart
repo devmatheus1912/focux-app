@@ -761,6 +761,7 @@ class AppRouter {
                       state.uri.queryParameters['plan'],
                   source: state.uri.queryParameters['source'],
                   blockedFeature: state.uri.queryParameters['feature'],
+                  blockedCapability: state.uri.queryParameters['capability'],
                 ),
           ),
           GoRoute(

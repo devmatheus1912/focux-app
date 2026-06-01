@@ -8,7 +8,6 @@ import '../../subscription/models/subscription_plan.dart';
 import 'paywall_catalog.dart';
 // subscriptionPlanFromApi → subscription_plan.dart
 import 'paywall_components.dart';
-import 'paywall_glass.dart';
 
 /// Card único para assinante — alterna tier no mesmo shell (preço + features + compare).
 class PaywallPlanStudio extends StatelessWidget {
@@ -121,6 +120,19 @@ class PaywallPlanStudio extends StatelessWidget {
                 ink: ink,
                 mute: mute,
                 onSelected: onPlanSelected,
+              ),
+            ),
+          ],
+          if (showPicker &&
+              currentPlan == SubscriptionPlan.ENTERPRISE &&
+              selectedPlan == SubscriptionPlan.ENTERPRISE) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+              child: PaywallProExploreStrip(
+                ink: ink,
+                mute: mute,
+                isDark: isDark,
+                onExplorePro: () => onPlanSelected(SubscriptionPlan.ENTERPRISE_PRO),
               ),
             ),
           ],

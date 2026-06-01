@@ -6,6 +6,70 @@ import '../subscription/utils/plano_ia_limits.dart';
 class PlanEntitlements {
   PlanEntitlements._();
 
+  static String displayPlanName(SubscriptionPlan plan) => switch (plan) {
+    SubscriptionPlan.ENTERPRISE_PRO => 'ENTERPRISE PRO',
+    _ => plan.apiName,
+  };
+
+  /// Infere capability a partir do rótulo exibido no paywall ou deep link `feature=`.
+  static String? capabilityFromFeatureLabel(String label) {
+    final lower = label.toLowerCase();
+    if (lower.contains('editor completo') ||
+        lower.contains('landing') ||
+        lower.contains('depoimentos') && lower.contains('faq') ||
+        lower.contains('formulário meta') ||
+        lower.contains('focux.app/p/')) {
+      return 'landingCompleta';
+    }
+    if (lower.contains('loja') ||
+        lower.contains('desafio 30') ||
+        lower.contains('checkout integrado') ||
+        lower.contains('receita passiva')) {
+      return 'lojaDigital';
+    }
+    if (lower.contains('pose coach')) return 'poseCoach';
+    if (lower.contains('white-label')) return 'whiteLabel';
+    if (lower.contains('automações sequenciais avançadas')) {
+      return 'automacoesAvancadas';
+    }
+    if (lower.contains('automações')) return 'automacoes';
+    if (lower.contains('equipe / rbac') || lower.contains('rbac')) {
+      return 'equipeRbac';
+    }
+    if (lower.contains('comunidade + grupos')) return 'comunidadeGrupos';
+    if (lower.contains('crm')) return null;
+    if (lower.contains('pix') || lower.contains('financeiro')) {
+      return 'financeiro';
+    }
+    if (lower.contains('ia copiloto')) return 'iaCopiloto';
+    return null;
+  }
+
+  /// Plano-alvo para banner/CTA contextual (feature bloqueada ou soft gate).
+  static SubscriptionPlan resolveUpgradeTarget({
+    required PlanoUsageSnapshot usage,
+    String? blockedFeatureLabel,
+    String? blockedCapability,
+  }) {
+    final cap =
+        blockedCapability ??
+        (blockedFeatureLabel != null
+            ? capabilityFromFeatureLabel(blockedFeatureLabel)
+            : null);
+    if (cap != null) {
+      final plan = targetPlan(capability: cap);
+      if (plan.level > usage.plano.level) return plan;
+    }
+    final soft = softGateTargetPlan(usage);
+    if (soft != null && soft.level > usage.plano.level) return soft;
+    return switch (usage.plano) {
+      SubscriptionPlan.ENTERPRISE => SubscriptionPlan.ENTERPRISE_PRO,
+      SubscriptionPlan.PREMIUM => SubscriptionPlan.ENTERPRISE,
+      SubscriptionPlan.FREE => SubscriptionPlan.PREMIUM,
+      _ => SubscriptionPlan.PREMIUM,
+    };
+  }
+
   static SubscriptionPlan targetPlan({
     String? capability,
     SubscriptionPlan fallback = SubscriptionPlan.PREMIUM,

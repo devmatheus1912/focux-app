@@ -301,9 +301,16 @@ class _LockedScreenState extends ConsumerState<_LockedScreen> {
                 onPressed:
                     offer.targetPlan == null
                         ? null
-                        : () => context.push(
-                          '/assinatura?plano=${offer.targetPlan!.apiName}&source=feature_gate',
-                        ),
+                        : () {
+                          final cap = widget.capability;
+                          final capQuery =
+                              cap != null && cap.isNotEmpty
+                                  ? '&capability=${Uri.encodeComponent(cap)}'
+                                  : '';
+                          context.push(
+                            '/assinatura?plano=${offer.targetPlan!.apiName}&source=feature_gate&feature=${Uri.encodeComponent(widget.featureName)}$capQuery',
+                          );
+                        },
               ),
               const SizedBox(height: 12),
               TextButton(
