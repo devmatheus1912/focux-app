@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../core/legal/focux_legal.dart';
@@ -9,6 +10,7 @@ import '../../assinatura/data/plano.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../../subscription/plan_entitlements.dart';
 import '../../subscription/store_subscription_policy.dart';
+import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../../subscription/subscription_products.dart';
 import '../../../core/widgets/fx_glass_surface.dart';
 import 'paywall_catalog.dart';
@@ -1268,6 +1270,7 @@ class PaywallRichPlanCard extends StatelessWidget {
                             ink: ink,
                             mute: mute,
                             onFeatureHelp: onFeatureHelp,
+                            allowLockedTap: !referenceMode,
                           ),
                         ],
                       ),
@@ -1279,6 +1282,7 @@ class PaywallRichPlanCard extends StatelessWidget {
                       ink: ink,
                       mute: mute,
                       onFeatureHelp: onFeatureHelp,
+                      allowLockedTap: !referenceMode,
                     ),
                 ],
               ],
@@ -1322,6 +1326,7 @@ class PaywallPlanFeatureSections extends StatelessWidget {
   final Color ink;
   final Color mute;
   final VoidCallback? onFeatureHelp;
+  final bool allowLockedTap;
 
   const PaywallPlanFeatureSections({
     super.key,
@@ -1330,6 +1335,7 @@ class PaywallPlanFeatureSections extends StatelessWidget {
     required this.ink,
     required this.mute,
     this.onFeatureHelp,
+    this.allowLockedTap = true,
   });
 
   PaywallFeatureEducation _education(PaywallPlanFeatureItem item) {
@@ -1341,6 +1347,8 @@ class PaywallPlanFeatureSections extends StatelessWidget {
         comingSoon: item.comingSoon,
       ),
       education: PaywallCatalog.educationByLabel[item.label],
+      capability: item.capability,
+      upgradePlan: item.upgradePlan,
     );
   }
 
@@ -1375,6 +1383,7 @@ class PaywallPlanFeatureSections extends StatelessWidget {
                           mute: mute,
                           ink: ink,
                           onHelp: onFeatureHelp,
+                          allowLockedTap: allowLockedTap,
                         ),
                       )
                       .toList(),
@@ -1389,6 +1398,7 @@ class PaywallPlanFeatureSections extends StatelessWidget {
                   mute: mute,
                   ink: ink,
                   onHelp: onFeatureHelp,
+                  allowLockedTap: allowLockedTap,
                 ),
               ),
             ],
@@ -1404,6 +1414,7 @@ class PaywallPlanFeatureSections extends StatelessWidget {
                 mute: mute,
                 ink: ink,
                 onHelp: onFeatureHelp,
+                allowLockedTap: allowLockedTap,
               ),
             ),
           ],
@@ -2068,6 +2079,7 @@ class PaywallFeatureLine extends StatelessWidget {
   final Color mute;
   final Color ink;
   final VoidCallback? onHelp;
+  final bool allowLockedTap;
 
   const PaywallFeatureLine({
     super.key,
@@ -2076,64 +2088,128 @@ class PaywallFeatureLine extends StatelessWidget {
     required this.mute,
     required this.ink,
     this.onHelp,
+    this.allowLockedTap = true,
   });
+
+  String _tierBadgeLabel(SubscriptionPlan plan) => switch (plan) {
+    SubscriptionPlan.ENTERPRISE_PRO => 'PRO',
+    SubscriptionPlan.ENTERPRISE => 'ENT',
+    SubscriptionPlan.PREMIUM => 'PREMIUM',
+    _ => 'FREE',
+  };
+
+  Future<void> _onLockedTap(BuildContext context) async {
+    final parsed = PaywallCatalog.parseFeatureLabel(feature.row.label);
+    await UpgradePromptSheet.show(
+      context: context,
+      featureName: parsed.label,
+      capability: feature.capability,
+      requiredPlan: feature.upgradePlan,
+      source: 'paywall_feature_line',
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final row = feature.row;
     final off = !row.included;
-    final status = row.included ? 'Incluído' : 'Não incluído';
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
-      child: Row(
-        children: [
+    final upgradePlan = feature.upgradePlan;
+    final tierName = upgradePlan != null
+        ? PaywallCatalog.displayPlanName(upgradePlan)
+        : 'Enterprise Pro';
+    final status = row.included
+        ? 'Incluído no plano'
+        : 'Bloqueado. Disponível no plano $tierName.'
+            '${allowLockedTap ? " Toque para ver upgrade." : ""}';
+    final lockedInk = mute.withValues(alpha: 0.72);
+    final canTapLocked = off && allowLockedTap && upgradePlan != null;
+
+    final rowBody = Row(
+      children: [
+        Icon(
+          row.included ? Icons.check_circle_rounded : Icons.lock_rounded,
+          size: 18,
+          color: row.included ? PaywallCatalog.green : lockedInk,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: PaywallFeatureLabel(
+            raw: row.label,
+            ink: off ? lockedInk : ink,
+            accent: accent,
+            style: TextStyle(
+              fontSize: 12.5,
+              fontWeight: row.highlight ? FontWeight.w800 : FontWeight.w500,
+              color: off ? lockedInk : ink,
+            ),
+          ),
+        ),
+        if (off && upgradePlan != null)
+          Padding(
+            padding: const EdgeInsets.only(left: 6),
+            child: Semantics(
+              label: 'Requer plano $tierName',
+              child: _PlanChip(
+                label: _tierBadgeLabel(upgradePlan),
+                color: PaywallCatalog.accentForPlan(upgradePlan),
+              ),
+            ),
+          ),
+        if (row.highlight && row.included)
           Semantics(
-            label: status,
-            child: Icon(
-              row.included ? Icons.check_circle_rounded : Icons.remove_rounded,
-              size: 18,
-              color: row.included ? PaywallCatalog.green : mute.withValues(alpha: 0.5),
+            label: 'Destaque do plano',
+            child: Icon(Icons.star_rounded, size: 14, color: accent),
+          ),
+        if (row.comingSoon)
+          Padding(
+            padding: const EdgeInsets.only(left: 6),
+            child: _PlanChip(label: 'EM BREVE', color: PaywallCatalog.warning),
+          ),
+        if (feature.education != null)
+          Semantics(
+            button: true,
+            label: 'Saiba mais sobre ${row.label}',
+            child: IconButton(
+              visualDensity: VisualDensity.compact,
+              constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+              icon: Icon(Icons.help_outline_rounded, size: 18, color: mute),
+              onPressed: () {
+                onHelp?.call();
+                showPaywallFeatureEducation(context, feature.education!);
+              },
             ),
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: PaywallFeatureLabel(
-              raw: row.label,
-              ink: off ? mute.withValues(alpha: 0.42) : ink,
-              accent: accent,
-              style: TextStyle(
-                fontSize: 12.5,
-                fontWeight: row.highlight ? FontWeight.w800 : FontWeight.w500,
-                color: off ? mute.withValues(alpha: 0.42) : ink,
-                decoration: off ? TextDecoration.lineThrough : null,
-              ),
-            ),
+        if (canTapLocked)
+          Icon(
+            Icons.chevron_right_rounded,
+            size: 18,
+            color: mute.withValues(alpha: 0.55),
           ),
-          if (row.highlight)
-            Semantics(
-              label: 'Destaque do plano',
-              child: Icon(Icons.star_rounded, size: 14, color: accent),
-            ),
-          if (row.comingSoon)
-            Padding(
-              padding: const EdgeInsets.only(left: 6),
-              child: _PlanChip(label: 'EM BREVE', color: PaywallCatalog.warning),
-            ),
-          if (feature.education != null)
-            Semantics(
-              button: true,
-              label: 'Saiba mais sobre ${row.label}',
-              child: IconButton(
-                visualDensity: VisualDensity.compact,
-                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-                icon: Icon(Icons.help_outline_rounded, size: 18, color: mute),
-                onPressed: () {
-                  onHelp?.call();
-                  showPaywallFeatureEducation(context, feature.education!);
-                },
-              ),
-            ),
-        ],
+      ],
+    );
+
+    final padded = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: rowBody,
+    );
+
+    if (!canTapLocked) {
+      return Semantics(label: status, child: padded);
+    }
+
+    return Semantics(
+      button: true,
+      label: status,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            _onLockedTap(context);
+          },
+          borderRadius: BorderRadius.circular(TokensStrip.rSm),
+          child: padded,
+        ),
       ),
     );
   }

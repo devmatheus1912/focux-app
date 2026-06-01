@@ -66,8 +66,8 @@ void main() {
       _mockPlano('PREMIUM', limite: 20),
       SubscriptionPlan.PREMIUM,
     );
-    expect(premium.length, 3);
-    expect(premium.where((s) => s.collapsible).length, 2);
+    expect(premium.length, 4);
+    expect(premium.where((s) => s.collapsible).length, 3);
 
     final entPro = PaywallCatalog.featureSectionsForPlan(
       _mockPlano('ENTERPRISE_PRO'),
@@ -85,11 +85,29 @@ void main() {
       isTrue,
     );
     expect(
+      enterprise.any((s) => s.title.contains('Loja · Enterprise Pro')),
+      isTrue,
+    );
+    expect(
       enterprise
           .expand((s) => s.items)
           .any((i) => i.label.contains('Editor completo') && !i.included),
       isTrue,
     );
+    final lojaItems = enterprise
+        .firstWhere((s) => s.title.contains('Loja · Enterprise Pro'))
+        .items;
+    expect(lojaItems.every((i) => !i.included), isTrue);
+    expect(lojaItems.every((i) => i.upgradePlan == SubscriptionPlan.ENTERPRISE_PRO), isTrue);
+
+    final proLoja = entPro
+        .firstWhere((s) => s.title.toLowerCase().contains('loja'))
+        .items;
+    expect(proLoja.every((i) => i.included), isTrue);
+    final proPose = entPro
+        .expand((s) => s.items)
+        .firstWhere((i) => i.label.toLowerCase().contains('pose coach'));
+    expect(proPose.included, isTrue);
   });
 
   test('modalMessageFor maps capabilities to trigger copy', () {

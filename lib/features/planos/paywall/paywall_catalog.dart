@@ -671,8 +671,15 @@ class PaywallFeatureRow {
 class PaywallFeatureEducation {
   final PaywallFeatureRow row;
   final PaywallEducationContent? education;
+  final String? capability;
+  final SubscriptionPlan? upgradePlan;
 
-  const PaywallFeatureEducation({required this.row, this.education});
+  const PaywallFeatureEducation({
+    required this.row,
+    this.education,
+    this.capability,
+    this.upgradePlan,
+  });
 }
 
 class PaywallEducationContent {

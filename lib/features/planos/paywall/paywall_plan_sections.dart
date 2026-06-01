@@ -1,5 +1,7 @@
 import '../../assinatura/data/plano.dart';
 import '../../subscription/models/subscription_plan.dart';
+import '../../subscription/plan_entitlements.dart';
+import '../data/planos_repository.dart';
 
 /// Grupos colapsáveis de features por card de plano (paridade HTML).
 class PaywallPlanFeatureSection {
@@ -21,25 +23,31 @@ class PaywallPlanFeatureItem {
   final bool included;
   final bool highlight;
   final bool comingSoon;
+  final String? capability;
+  final SubscriptionPlan? upgradePlan;
 
   const PaywallPlanFeatureItem({
     required this.label,
     this.included = true,
     this.highlight = false,
     this.comingSoon = false,
+    this.capability,
+    this.upgradePlan,
   });
 }
 
 class PaywallPlanSections {
   PaywallPlanSections._();
 
-  static List<PaywallPlanFeatureSection> forPlan(Plano plano, SubscriptionPlan plan) =>
-      switch (plan) {
-        SubscriptionPlan.FREE => _free(plano),
-        SubscriptionPlan.PREMIUM => _premium(plano),
-        SubscriptionPlan.ENTERPRISE => _enterprise(plano),
-        SubscriptionPlan.ENTERPRISE_PRO => _enterprisePro(plano),
-      };
+  static List<PaywallPlanFeatureSection> forPlan(Plano plano, SubscriptionPlan plan) {
+    final raw = switch (plan) {
+      SubscriptionPlan.FREE => _free(plano),
+      SubscriptionPlan.PREMIUM => _premium(plano),
+      SubscriptionPlan.ENTERPRISE => _enterprise(plano),
+      SubscriptionPlan.ENTERPRISE_PRO => _enterprisePro(plano),
+    };
+    return _PaywallPlanInclusion.applyCanonical(raw, plan, plano);
+  }
 
   static String _alunosLabel(Plano plano) {
     final n = plano.limiteAlunos;
@@ -129,6 +137,32 @@ class PaywallPlanSections {
         const PaywallPlanFeatureItem(label: 'Referral + programa de indicação'),
       ],
     ),
+    const PaywallPlanFeatureSection(
+      title: 'No Enterprise',
+      collapsible: true,
+      items: [
+        PaywallPlanFeatureItem(
+          label: 'White-label — seu logo e suas cores',
+          included: false,
+          capability: 'whiteLabel',
+        ),
+        PaywallPlanFeatureItem(
+          label: 'Automações sequenciais ✦',
+          included: false,
+          capability: 'automacoes',
+        ),
+        PaywallPlanFeatureItem(
+          label: 'Equipe / RBAC (assistente) ✦',
+          included: false,
+          capability: 'equipeRbac',
+        ),
+        PaywallPlanFeatureItem(
+          label: 'Comunidade + grupos ✦',
+          included: false,
+          capability: 'comunidadeGrupos',
+        ),
+      ],
+    ),
   ];
 
   static List<PaywallPlanFeatureSection> _enterprise(Plano plano) => [
@@ -182,14 +216,46 @@ class PaywallPlanSections {
         PaywallPlanFeatureItem(
           label: 'Editor completo — depoimentos, galeria e FAQ',
           included: false,
+          capability: 'landingCompleta',
         ),
         PaywallPlanFeatureItem(
           label: 'Formulário Meta e link focux.app/p/seunome',
           included: false,
+          capability: 'landingCompleta',
         ),
         PaywallPlanFeatureItem(
           label: 'Domínio customizado na landing',
           included: false,
+          capability: 'landingCompleta',
+        ),
+      ],
+    ),
+    const PaywallPlanFeatureSection(
+      title: 'Loja · Enterprise Pro',
+      collapsible: true,
+      items: [
+        PaywallPlanFeatureItem(
+          label: 'Venda treinos avulsos e desafios',
+          included: false,
+          highlight: true,
+          capability: 'lojaDigital',
+        ),
+        PaywallPlanFeatureItem(
+          label: '"Desafio 30 dias" como produto digital',
+          included: false,
+          highlight: true,
+          capability: 'lojaDigital',
+        ),
+        PaywallPlanFeatureItem(
+          label: 'Checkout integrado com PIX',
+          included: false,
+          capability: 'lojaDigital',
+        ),
+        PaywallPlanFeatureItem(
+          label: 'Receita passiva sem hora extra',
+          included: false,
+          highlight: true,
+          capability: 'lojaDigital',
         ),
       ],
     ),
@@ -219,6 +285,7 @@ class PaywallPlanSections {
         const PaywallPlanFeatureItem(
           label: 'Pose Coach — análise ML ✦',
           included: false,
+          capability: 'poseCoach',
         ),
       ],
     ),
@@ -245,6 +312,7 @@ class PaywallPlanSections {
         ),
         PaywallPlanFeatureItem(
           label: 'Pose Coach — análise de postura ML ✦',
+          capability: 'poseCoach',
         ),
       ],
     ),
@@ -277,19 +345,146 @@ class PaywallPlanSections {
         PaywallPlanFeatureItem(
           label: 'Venda treinos avulsos e desafios',
           highlight: true,
+          capability: 'lojaDigital',
         ),
         PaywallPlanFeatureItem(
           label: '"Desafio 30 dias" como produto digital',
           highlight: true,
+          capability: 'lojaDigital',
         ),
         PaywallPlanFeatureItem(
           label: 'Checkout integrado com PIX',
+          capability: 'lojaDigital',
         ),
         PaywallPlanFeatureItem(
           label: 'Receita passiva sem hora extra',
           highlight: true,
+          capability: 'lojaDigital',
         ),
       ],
     ),
   ];
+}
+
+/// Aplica a matriz canônica de tier às linhas da vitrine (paridade com [PlanoFeatures.normalizeForTier]).
+class _PaywallPlanInclusion {
+  _PaywallPlanInclusion._();
+
+  static List<PaywallPlanFeatureSection> applyCanonical(
+    List<PaywallPlanFeatureSection> sections,
+    SubscriptionPlan cardPlan,
+    Plano vitrinePlano,
+  ) {
+    final caps = PlanoFeatures.canonicalCapabilitiesFor(cardPlan);
+    return [
+      for (final section in sections)
+        PaywallPlanFeatureSection(
+          title: section.title,
+          collapsible: section.collapsible,
+          initiallyExpanded: section.initiallyExpanded,
+          items: [
+            for (final item in section.items)
+              _patchItem(
+                item,
+                sectionTitle: section.title,
+                caps: caps,
+                vitrinePlano: vitrinePlano,
+              ),
+          ],
+        ),
+    ];
+  }
+
+  static PaywallPlanFeatureItem _patchItem(
+    PaywallPlanFeatureItem item, {
+    required String sectionTitle,
+    required Map<String, bool> caps,
+    required Plano vitrinePlano,
+  }) {
+    final capability = item.capability ?? _inferCapability(sectionTitle, item.label);
+    final included = _resolveIncluded(
+      item: item,
+      sectionTitle: sectionTitle,
+      caps: caps,
+      vitrinePlano: vitrinePlano,
+      capability: capability,
+    );
+    final upgradePlan = !included
+        ? (item.upgradePlan ??
+            (capability != null
+                ? PlanEntitlements.targetPlan(capability: capability)
+                : _defaultUpgradeForSection(sectionTitle)))
+        : null;
+
+    return PaywallPlanFeatureItem(
+      label: item.label,
+      included: included,
+      highlight: item.highlight,
+      comingSoon: item.comingSoon,
+      capability: capability,
+      upgradePlan: upgradePlan,
+    );
+  }
+
+  static bool _resolveIncluded({
+    required PaywallPlanFeatureItem item,
+    required String sectionTitle,
+    required Map<String, bool> caps,
+    required Plano vitrinePlano,
+    required String? capability,
+  }) {
+    final sectionLower = sectionTitle.toLowerCase();
+    if (sectionLower.contains('bloqueado no free')) return false;
+
+    if (sectionLower.contains('landing')) {
+      return caps['landingCompleta'] ?? false;
+    }
+    if (sectionLower.contains('loja')) {
+      return caps['lojaDigital'] ?? false;
+    }
+
+    if (capability != null && caps.containsKey(capability)) {
+      return caps[capability]!;
+    }
+
+    if (item.label.toLowerCase().contains('white-label')) {
+      return caps['whiteLabel']! && vitrinePlano.temWhiteLabel;
+    }
+    if (item.label.contains('PIX') ||
+        item.label.contains('Financeiro + dashboard')) {
+      return caps['financeiro']! && vitrinePlano.temFinanceiro;
+    }
+
+    return item.included;
+  }
+
+  static String? _inferCapability(String sectionTitle, String label) {
+    final lower = label.toLowerCase();
+    final sectionLower = sectionTitle.toLowerCase();
+
+    if (sectionLower.contains('landing')) return 'landingCompleta';
+    if (sectionLower.contains('loja')) return 'lojaDigital';
+    if (lower.contains('pose coach')) return 'poseCoach';
+    if (lower.contains('white-label')) return 'whiteLabel';
+    if (lower.contains('automações sequenciais avançadas')) {
+      return 'automacoesAvancadas';
+    }
+    if (lower.contains('automações sequenciais')) return 'automacoes';
+    if (lower.contains('equipe / rbac')) return 'equipeRbac';
+    if (lower.contains('comunidade + grupos')) return 'comunidadeGrupos';
+    if (lower.contains('comunidade privada')) return 'comunidadePrivada';
+    if (lower.contains('habit coaching')) return 'habitCoaching';
+    if (label.contains('PIX') || label.contains('Financeiro + dashboard')) {
+      return 'financeiro';
+    }
+    return null;
+  }
+
+  static SubscriptionPlan _defaultUpgradeForSection(String sectionTitle) {
+    final s = sectionTitle.toLowerCase();
+    if (s.contains('enterprise pro') || s.contains('loja') || s.contains('landing')) {
+      return SubscriptionPlan.ENTERPRISE_PRO;
+    }
+    return SubscriptionPlan.PREMIUM;
+  }
 }
