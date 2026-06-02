@@ -132,8 +132,9 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
   @override
   void initState() {
     super.initState();
-    PlanSyncCoordinator.bind(ProviderScope.containerOf(context));
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      PlanSyncCoordinator.bind(ProviderScope.containerOf(context));
       _loadCustomTheme();
       if (!kIsWeb) {
         ref.read(iapStoreHealthProvider);

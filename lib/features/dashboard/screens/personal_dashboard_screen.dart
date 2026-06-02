@@ -34,6 +34,10 @@ import '../../onboarding/providers/onboarding_provider.dart';
 import '../../planos/utils/effective_plano_features.dart';
 import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
+import '../utils/dashboard_day_focus.dart';
+import '../utils/dashboard_readability.dart';
+import '../utils/dashboard_tool_groups.dart';
+import '../widgets/dashboard_day_focus_banner.dart';
 
 class PersonalDashboardScreen extends ConsumerStatefulWidget {
   const PersonalDashboardScreen({super.key});
@@ -122,7 +126,7 @@ Color _pulseCheckinsAccent({
   required int checkinsHoje,
   required Color neutralAccent,
 }) =>
-    checkinsHoje > 0 ? EagleTokens.good : neutralAccent;
+    checkinsHoje > 0 ? EagleTokens.good : EagleTokens.warn.withValues(alpha: 0.92);
 
 /// Fade na borda direita para indicar scroll horizontal.
 class _HorizontalScrollPeek extends StatelessWidget {
@@ -377,6 +381,17 @@ class _PersonalDashboardScreenState
               final riskDominante =
                   alunosAtivos > 0 &&
                   riscoAlto >= math.max(2, (alunosAtivos * 0.5).ceil());
+              final vencimentosCount =
+                  _finData?.vencimentosProximos.length ?? 0;
+              final dayFocus = DashboardDayFocus.resolve(
+                riscoAlto: riscoAlto,
+                alunosAtivos: alunosAtivos,
+                checkinsHoje: checkinsHoje,
+                agendaHoje: agendaHoje,
+                receitaMes: receitaAtual,
+                vencimentosPendentes: vencimentosCount,
+                riskDominante: riskDominante,
+              );
 
               return RefreshIndicator(
                 onRefresh: () async {
@@ -384,6 +399,7 @@ class _PersonalDashboardScreenState
                   ref.invalidate(commandCenterProvider);
                   ref.invalidate(alunosProvider);
                   ref.invalidate(historicoCheckinProvider);
+                  ref.invalidate(aderenciaTop3Provider);
                   ref.invalidate(notificacoesProvider);
                   ref.invalidate(notificacoesNaoLidasProvider);
                   ref.invalidate(onboardingStatusProvider);
@@ -449,20 +465,6 @@ class _PersonalDashboardScreenState
                                               : TokensStrip.textPrimary,
                                     ),
                                   ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Prioridades do dia',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.inter(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                      color:
-                                          themeDark
-                                              ? EagleTokens.darkInkMute
-                                              : EagleTokens.inkSoft,
-                                    ),
-                                  ),
                                 ],
                               ),
                             ),
@@ -489,6 +491,13 @@ class _PersonalDashboardScreenState
                         ),
                       ),
                     ),
+                    SliverToBoxAdapter(
+                      child: DashboardDayFocusBanner(
+                        focus: dayFocus,
+                        isDark: themeDark,
+                        primary: primary,
+                      ),
+                    ),
 
                     // CENTRAL DE COMANDO — protagonista do dia
                     SliverToBoxAdapter(
@@ -512,9 +521,7 @@ class _PersonalDashboardScreenState
                               finData: _finData,
                               hideRiskSummary: alunosEmRisco.isNotEmpty,
                               contextualSubtitle:
-                                  alunosEmRisco.isNotEmpty
-                                      ? 'Foco em cobrança, mensagens e agenda. Alunos em risco estão logo abaixo.'
-                                      : null,
+                                  'Próximas ações com maior impacto hoje.',
                             ),
                           ),
                         ),
@@ -552,7 +559,11 @@ class _PersonalDashboardScreenState
                         ),
                       ),
                       SliverToBoxAdapter(
-                        child: _HorizontalScrollPeek(
+                        child: Semantics(
+                          container: true,
+                          label:
+                              'Lista horizontal: alunos e cobranças que precisam de atenção',
+                          child: _HorizontalScrollPeek(
                           showPeek:
                               [
                                 ...alunosEmRisco.take(riskDominante ? 2 : 4),
@@ -621,6 +632,7 @@ class _PersonalDashboardScreenState
                               );
                             },
                           ),
+                        ),
                         ),
                         ),
                       ),
@@ -769,6 +781,8 @@ class _PersonalDashboardScreenState
                                       Text(
                                         metaSuperada
                                             ? 'Meta superada · receita acima do previsto.'
+                                            : receitaAtual <= 0 && !_loadingFin
+                                            ? 'Nenhuma receita lançada em $mes. Registre cobranças para acompanhar a meta.'
                                             : pendente > 0
                                             ? 'Recebido agora. Faltam R\$ ${pendente.toInt()} para a meta.'
                                             : 'Recebido agora. Meta do mês sob controle.',
@@ -891,10 +905,13 @@ class _PersonalDashboardScreenState
                                         progress: progressRaw.clamp(0.0, 1.0),
                                         exceeded: metaSuperada,
                                         glow: BrandPalette.accent(heroPrimary),
-                                        percentLabel: _financePercentLabel(
-                                          progressRaw,
-                                          exceeded: metaSuperada,
-                                        ),
+                                        percentLabel:
+                                            receitaAtual <= 0 && !_loadingFin
+                                                ? 'Primeiro passo: registrar recebimentos'
+                                                : _financePercentLabel(
+                                                  progressRaw,
+                                                  exceeded: metaSuperada,
+                                                ),
                                         excessBeyondMeta:
                                             metaSuperada
                                                 ? math.max(
@@ -903,6 +920,28 @@ class _PersonalDashboardScreenState
                                                 )
                                                 : 0,
                                       ),
+                                      if (receitaAtual <= 0 && !_loadingFin) ...[
+                                        const SizedBox(height: 12),
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: FilledButton.tonal(
+                                            onPressed: () => context.go('/financeiro'),
+                                            style: FilledButton.styleFrom(
+                                              minimumSize: const Size.fromHeight(44),
+                                              backgroundColor: Colors.white.withValues(
+                                                alpha: 0.18,
+                                              ),
+                                              foregroundColor: Colors.white,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(
+                                                  TokensStrip.rButton,
+                                                ),
+                                              ),
+                                            ),
+                                            child: const Text('Abrir financeiro'),
+                                          ),
+                                        ),
+                                      ],
                                       const SizedBox(height: TokensStrip.s3),
                                       Row(
                                         mainAxisAlignment:
@@ -1796,7 +1835,7 @@ class _RoiShortcutChip extends StatelessWidget {
             ? BrandPalette.soft(primary, dark: isDark).withValues(alpha: 0.55)
             : BrandPalette.soft(primary, dark: isDark);
     final labelColor =
-        locked ? linkColor.withValues(alpha: 0.62) : linkColor;
+        locked ? linkColor.withValues(alpha: 0.78) : linkColor;
 
     return Semantics(
       button: true,
@@ -1867,17 +1906,24 @@ class _CollapsibleToolsSection extends ConsumerStatefulWidget {
 class _CollapsibleToolsSectionState
     extends ConsumerState<_CollapsibleToolsSection> {
   bool _expanded = false;
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final heading = BrandPalette.sectionHeading(primary, dark: widget.isDark);
-    final mute =
-        widget.isDark ? EagleTokens.darkInkMute : EagleTokens.inkSoft;
+    final mute = dashboardReadableMuted(context, isDark: widget.isDark);
     final link = BrandPalette.sectionLink(primary, dark: widget.isDark);
     final features = effectivePlanoFeatures(ref);
-    final shortcuts = DashboardToolShortcut.moreTools;
-    final lockedCount = countLockedShortcuts(shortcuts, features);
+    final shortcuts = filterDashboardToolShortcuts(
+      DashboardToolShortcut.moreTools,
+      _searchQuery,
+    );
+    final groups = groupDashboardToolShortcuts(shortcuts);
+    final lockedCount = countLockedShortcuts(
+      DashboardToolShortcut.moreTools,
+      features,
+    );
     final unlockedCount = shortcuts.length - lockedCount;
     final collapsedHint =
         lockedCount > 0
@@ -1966,27 +2012,100 @@ class _CollapsibleToolsSectionState
             firstChild: const SizedBox.shrink(),
             secondChild: Padding(
               padding: const EdgeInsets.only(top: 10),
-              child: GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                mainAxisSpacing: 9,
-                crossAxisSpacing: 10,
-                childAspectRatio: widget.shortcutAspectRatio,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  for (final shortcut in shortcuts)
-                    _ShortcutBtn(
-                      icon: shortcut.icon,
-                      label: shortcut.label,
-                      isDark: widget.isDark,
-                      locked: !shortcut.isUnlocked(features),
-                      tierLabel:
-                          shortcut.isUnlocked(features)
-                              ? null
-                              : shortcut.tierBadgeLabel(),
-                      onTap:
-                          () => openDashboardShortcut(context, ref, shortcut),
+                  Semantics(
+                    textField: true,
+                    label: 'Buscar ferramenta',
+                    child: TextField(
+                      onChanged: (v) => setState(() => _searchQuery = v),
+                      style: AppTypography.inter(
+                        fontSize: 14,
+                        color:
+                            widget.isDark
+                                ? EagleTokens.darkInk
+                                : TokensStrip.textPrimary,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Buscar ferramenta…',
+                        hintStyle: TextStyle(color: mute),
+                        prefixIcon: Icon(Icons.search_rounded, color: mute),
+                        isDense: true,
+                        filled: true,
+                        fillColor:
+                            widget.isDark
+                                ? EagleTokens.darkCard
+                                : Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            TokensStrip.rInput,
+                          ),
+                          borderSide: BorderSide(
+                            color: TokensStrip.borderDefault.withValues(
+                              alpha: 0.9,
+                            ),
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                      ),
                     ),
+                  ),
+                  const SizedBox(height: 12),
+                  if (groups.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        'Nenhum atalho para "$_searchQuery".',
+                        style: AppTypography.inter(fontSize: 13, color: mute),
+                      ),
+                    )
+                  else
+                    for (final group in groups) ...[
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Text(
+                          group.title,
+                          style: AppTypography.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.3,
+                            color: link,
+                          ),
+                        ),
+                      ),
+                      GridView.count(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 9,
+                        crossAxisSpacing: 10,
+                        childAspectRatio: widget.shortcutAspectRatio,
+                        children: [
+                          for (final shortcut in group.shortcuts)
+                            _ShortcutBtn(
+                              icon: shortcut.icon,
+                              label: shortcut.label,
+                              isDark: widget.isDark,
+                              locked: !shortcut.isUnlocked(features),
+                              tierLabel:
+                                  shortcut.isUnlocked(features)
+                                      ? null
+                                      : shortcut.tierBadgeLabel(),
+                              onTap:
+                                  () => openDashboardShortcut(
+                                    context,
+                                    ref,
+                                    shortcut,
+                                  ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                    ],
                 ],
               ),
             ),
@@ -2027,7 +2146,7 @@ class _AttentionCard extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final mute = dashboardReadableMuted(context, isDark: isDark);
     final accent = statusAccent ?? EagleTokens.warn;
 
     return Semantics(
@@ -3152,10 +3271,9 @@ class _AderenciaSemanaWidget extends StatelessWidget {
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final rowAccent = BrandPalette.sectionAccent(primary, dark: isDark);
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-
     return Consumer(
       builder: (context, ref, _) {
+        final mute = dashboardReadableMuted(context, isDark: isDark);
         final async = ref.watch(aderenciaTop3Provider);
         return async.when(
           loading:
@@ -3276,7 +3394,7 @@ class _AderenciaSemanaWidget extends StatelessWidget {
                 mute: mute,
                 title: 'Treinos parados na semana',
                 body:
-                    'Nenhum check-in de treino ainda. A receita pode estar ok — acione a base para retomar os treinos.',
+                    'Acione alunos sem treino esta semana — o foco do dia já está no topo.',
                 primaryAction: 'Ver agenda',
                 secondaryAction: 'Plano retomada',
                 onPrimary: () => context.go('/agenda'),

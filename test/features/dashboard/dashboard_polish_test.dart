@@ -25,9 +25,13 @@ void main() {
     expect(screen, contains('BrandPalette.sectionLink'));
     expect(screen, contains('nextActions.length > 1'));
     expect(screen, contains('Recolher mais ferramentas'));
-    expect(screen, contains('Expandir mais ferramentas, 6 atalhos'));
+    expect(screen, contains('DashboardDayFocusBanner'));
+    expect(screen, contains('groupDashboardToolShortcuts'));
+    expect(screen, contains('Buscar ferramenta'));
+    expect(screen, contains('dashboardReadableMuted'));
+    expect(screen, contains('Abrir financeiro'));
 
     final semanticsCount = 'Semantics('.allMatches(screen).length;
-    expect(semanticsCount, greaterThanOrEqualTo(6));
+    expect(semanticsCount, greaterThanOrEqualTo(10));
   });
 }
