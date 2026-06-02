@@ -1419,13 +1419,14 @@ class PaywallRichPlanCard extends StatelessWidget {
                               accent: accent,
                             )
                           else if (!isCurrent && plan != SubscriptionPlan.FREE)
-                            hideUpgradePricing
+                            hideUpgradePricing && !embeddedInStudio
                                 ? _StoreBillingHint(
                                     ink: ink,
                                     mute: mute,
                                     isDark: isDark,
                                   )
-                                : Column(
+                                : !hideUpgradePricing
+                                ? Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 Row(
@@ -1486,6 +1487,7 @@ class PaywallRichPlanCard extends StatelessWidget {
                                 ),
                               ],
                             )
+                                : const SizedBox.shrink()
                           else if (isCurrent)
                             embeddedInStudio
                                 ? _StudioActiveStatusBanner(

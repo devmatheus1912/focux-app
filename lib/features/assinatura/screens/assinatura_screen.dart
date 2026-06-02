@@ -753,6 +753,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     var ctaMode = _AssinaturaCtaMode.subscribe;
     String footnote = '';
     var showEnterpriseProStickySecondary = false;
+    var hideScrollUpgradeLegal = false;
 
     if (planos != null && planos.isNotEmpty) {
       selectedPlan = subscriptionPlanFromApi(
@@ -764,6 +765,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       );
       isCurrentPlan = selectedPlan == currentPlan;
       isDowngrade = selectedPlan.level < currentPlan.level;
+      hideScrollUpgradeLegal =
+          currentPlan != SubscriptionPlan.FREE &&
+          selectedPlan.level > currentPlan.level;
       showEnterpriseProStickySecondary =
           isCurrentPlan &&
           currentPlan == SubscriptionPlan.ENTERPRISE &&
@@ -950,6 +954,26 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                           selectedBackendPlan!,
                         ),
                     onManage: _openSubscriptionManagement,
+                    onRestore:
+                        hideScrollUpgradeLegal && subscriptionUsesNativeStore
+                            ? _restorePurchases
+                            : null,
+                    restoringPurchases: _restoringPurchases,
+                    onBillingDetails:
+                        hideScrollUpgradeLegal
+                            ? () => PaywallUpgradeLegalCompact.showBillingSheet(
+                                context,
+                                ink: ink,
+                                mute: mute,
+                                primary: primary,
+                                showStoreBillingNote: subscriptionUsesNativeStore,
+                                restoring: _restoringPurchases,
+                                onRestore:
+                                    subscriptionUsesNativeStore
+                                        ? _restorePurchases
+                                        : null,
+                              )
+                            : null,
                   ),
                 ),
               ),
@@ -1668,27 +1692,33 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     isDark: isDark,
                   ),
                 ],
-                const SizedBox(height: 16),
-                PaywallSectionAnchor(
-                  anchorKey: _paywallLegalKey,
-                  child: !isAcquisition && isCurrentPlanSelected
-                      ? PaywallSubscriberLegalStrip(
-                          mute: mute,
-                          primary: primary,
-                          restoring: _restoringPurchases,
-                          onRestore:
-                              subscriptionUsesNativeStore ? _restorePurchases : null,
-                        )
-                      : PaywallUpgradeLegalCompact(
-                          ink: ink,
-                          mute: mute,
-                          primary: primary,
-                          showStoreBillingNote: subscriptionUsesNativeStore,
-                          restoring: _restoringPurchases,
-                          onRestore:
-                              subscriptionUsesNativeStore ? _restorePurchases : null,
-                        ),
-                ),
+                if (!(usePlanStudio && isUpgradeTargetSelected)) ...[
+                  const SizedBox(height: 16),
+                  PaywallSectionAnchor(
+                    anchorKey: _paywallLegalKey,
+                    child: !isAcquisition && isCurrentPlanSelected
+                        ? PaywallSubscriberLegalStrip(
+                            mute: mute,
+                            primary: primary,
+                            restoring: _restoringPurchases,
+                            onRestore:
+                                subscriptionUsesNativeStore
+                                    ? _restorePurchases
+                                    : null,
+                          )
+                        : PaywallUpgradeLegalCompact(
+                            ink: ink,
+                            mute: mute,
+                            primary: primary,
+                            showStoreBillingNote: subscriptionUsesNativeStore,
+                            restoring: _restoringPurchases,
+                            onRestore:
+                                subscriptionUsesNativeStore
+                                    ? _restorePurchases
+                                    : null,
+                          ),
+                  ),
+                ],
               ],
           );
         },
@@ -1903,6 +1933,9 @@ class _AssinaturaStickyFooter extends StatelessWidget {
   final VoidCallback onManage;
   final String? secondaryLabel;
   final VoidCallback? onSecondary;
+  final VoidCallback? onRestore;
+  final bool restoringPurchases;
+  final VoidCallback? onBillingDetails;
 
   const _AssinaturaStickyFooter({
     required this.mode,
@@ -1923,6 +1956,9 @@ class _AssinaturaStickyFooter extends StatelessWidget {
     required this.onManage,
     this.secondaryLabel,
     this.onSecondary,
+    this.onRestore,
+    this.restoringPurchases = false,
+    this.onBillingDetails,
   });
 
   @override
@@ -2068,8 +2104,52 @@ class _AssinaturaStickyFooter extends StatelessWidget {
             ),
           ),
         ],
+        if (onBillingDetails != null || onRestore != null) ...[
+          const SizedBox(height: 8),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 4,
+            runSpacing: 0,
+            children: [
+              if (onBillingDetails != null)
+                TextButton(
+                  onPressed: onBillingDetails,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(44, 36),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                  ),
+                  child: Text(
+                    'Cobrança e termos',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: tierAccent ?? primary,
+                    ),
+                  ),
+                ),
+              if (onRestore != null)
+                TextButton(
+                  onPressed: restoringPurchases ? null : onRestore,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(44, 36),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                  ),
+                  child: Text(
+                    restoringPurchases
+                        ? 'Restaurando…'
+                        : 'Restaurar compras',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: tierAccent ?? primary,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
         if (showLegalConsent) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           _PaywallLegalConsentLine(
             ink: ink,
             mute: mute,
