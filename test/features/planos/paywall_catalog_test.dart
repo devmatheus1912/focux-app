@@ -84,6 +84,10 @@ void main() {
       enterprise.any((s) => s.title.contains('Landing page · Enterprise Pro')),
       isTrue,
     );
+    final landingSection = enterprise.firstWhere(
+      (s) => s.title.contains('Landing page · Enterprise Pro'),
+    );
+    expect(landingSection.initiallyExpanded, isFalse);
     expect(
       enterprise.any((s) => s.title.contains('Loja · Enterprise Pro')),
       isTrue,

@@ -723,6 +723,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     var ctaLabel = 'Assinar';
     var ctaMode = _AssinaturaCtaMode.subscribe;
     String footnote = '';
+    var showEnterpriseProStickySecondary = false;
 
     if (planos != null && planos.isNotEmpty) {
       selectedPlan = subscriptionPlanFromApi(
@@ -734,6 +735,12 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       );
       isCurrentPlan = selectedPlan == currentPlan;
       isDowngrade = selectedPlan.level < currentPlan.level;
+      showEnterpriseProStickySecondary =
+          isCurrentPlan &&
+          currentPlan == SubscriptionPlan.ENTERPRISE &&
+          paywallHasUpgradeAbove &&
+          paywallNextTier == SubscriptionPlan.ENTERPRISE_PRO &&
+          subscriptionUsesNativeStore;
 
       if (_syncingPurchase) {
         ctaMode = _AssinaturaCtaMode.syncing;
@@ -750,7 +757,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 ? 'Gerenciar assinatura na loja'
                 : 'Plano atual';
         ctaEnabled = subscriptionUsesNativeStore && !_loadingCheckout;
-        if (currentPlan == SubscriptionPlan.ENTERPRISE &&
+        if (showEnterpriseProStickySecondary) {
+          footnote = '';
+        } else if (currentPlan == SubscriptionPlan.ENTERPRISE &&
             paywallHasUpgradeAbove &&
             paywallNextTier == SubscriptionPlan.ENTERPRISE_PRO &&
             subscriptionUsesNativeStore) {
@@ -829,13 +838,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
             selectedPlan == SubscriptionPlan.ENTERPRISE_PRO
         ? PaywallCatalog.accentForPlan(SubscriptionPlan.ENTERPRISE_PRO)
         : null;
-    final showEnterpriseProStickySecondary =
-        isCurrentPlan &&
-        currentPlan == SubscriptionPlan.ENTERPRISE &&
-        paywallHasUpgradeAbove &&
-        paywallNextTier == SubscriptionPlan.ENTERPRISE_PRO &&
-        subscriptionUsesNativeStore;
-
     if (_paymentBlocked) {
       return FxShellScaffold(
         appBar: FxShellAppBar(

@@ -160,6 +160,24 @@ class PaywallPlanStudio extends StatelessWidget {
                 : const Duration(milliseconds: 220),
             switchInCurve: Curves.easeOutCubic,
             switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, animation) {
+              final curved = CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+                reverseCurve: Curves.easeInCubic,
+              );
+              return FadeTransition(
+                opacity: curved,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.025),
+                    end: Offset.zero,
+                  ).animate(curved),
+                  child: child,
+                ),
+              );
+            },
+            layoutBuilder: (current, previous) => current ?? const SizedBox.shrink(),
             child: KeyedSubtree(
               key: ValueKey<SubscriptionPlan>(selectedPlan),
               child: Column(
@@ -309,7 +327,13 @@ class _PaywallStudioSegment extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(TokensStrip.rPill),
-          child: AnimatedContainer(
+            child: AnimatedScale(
+            scale: isSelected ? 1.0 : 0.98,
+            duration: TokensStrip.prefersReducedMotion(context)
+                ? Duration.zero
+                : const Duration(milliseconds: 180),
+            curve: Curves.easeOutCubic,
+            child: AnimatedContainer(
             duration: TokensStrip.prefersReducedMotion(context)
                 ? Duration.zero
                 : const Duration(milliseconds: 200),
@@ -358,6 +382,7 @@ class _PaywallStudioSegment extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }

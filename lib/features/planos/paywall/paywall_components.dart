@@ -306,10 +306,14 @@ class PaywallSubscriberQuickCompare extends StatelessWidget {
     if (rows.isEmpty) return const SizedBox.shrink();
 
     final targetLabel = PaywallCatalog.displayPlanName(targetPlan!);
+    final diffCount = rows.length;
 
     return PaywallCollapsibleBlock(
       title: 'Comparativo rápido',
-      subtitle: '$targetLabel vs ${PaywallCatalog.displayPlanName(currentPlan)}',
+      subtitle:
+          diffCount == 1
+              ? '1 recurso exclusivo no $targetLabel'
+              : '$diffCount recursos exclusivos no $targetLabel',
       ink: ink,
       mute: mute,
       line: line,
@@ -327,14 +331,9 @@ class PaywallSubscriberQuickCompare extends StatelessWidget {
                 for (var i = 0; i < rows.length; i++)
                   _PaywallCompareDiffRow(
                     feature: rows[i].feature,
-                    currentLabel: PaywallCatalog.displayPlanName(currentPlan),
-                    targetLabel: targetLabel,
-                    currentValue: rows[i].valueFor(currentPlan),
-                    targetValue: rows[i].valueFor(targetPlan!),
                     targetAccent: PaywallCatalog.accentForPlan(targetPlan!),
                     ink: ink,
                     mute: mute,
-                    line: line,
                     isDark: isDark,
                     isLast: i == rows.length - 1,
                   ),
@@ -603,9 +602,16 @@ class PaywallUsageMeters extends StatelessWidget {
   Widget build(BuildContext context) {
     final accent = PaywallCatalog.accentForPlan(usage.plano);
     final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
-    final showAlunos = usage.limiteAlunos != null && usage.limiteAlunos! > 0;
+    final showAlunosMeter =
+        usage.limiteAlunos != null && usage.limiteAlunos! > 0;
+    final showAlunosUnlimited =
+        usage.limiteAlunos == null &&
+        (usage.plano == SubscriptionPlan.ENTERPRISE ||
+            usage.plano == SubscriptionPlan.ENTERPRISE_PRO);
     final showIa = usage.limiteIaMensal > 0;
-    if (!showAlunos && !showIa) return const SizedBox.shrink();
+    if (!showAlunosMeter && !showAlunosUnlimited && !showIa) {
+      return const SizedBox.shrink();
+    }
 
     return PaywallInsetPanel(
       accent: accent,
@@ -623,7 +629,18 @@ class PaywallUsageMeters extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          if (showAlunos)
+          if (showAlunosUnlimited)
+            _PaywallUsageUnlimitedRow(
+              label: 'Alunos ativos',
+              detail: usage.alunosAtivos > 0
+                  ? '${usage.alunosAtivos} cadastrados agora'
+                  : 'Sem teto de cadastro',
+              accent: accent,
+              ink: ink,
+              secondary: secondary,
+              isDark: isDark,
+            ),
+          if (showAlunosMeter)
             _PaywallUsageMeterRow(
               label: 'Alunos ativos',
               used: usage.alunosAtivos,
@@ -635,7 +652,8 @@ class PaywallUsageMeters extends StatelessWidget {
               atLimit: usage.alunosAtLimit,
               nearLimit: usage.alunosNearLimit,
             ),
-          if (showAlunos && showIa) const SizedBox(height: 10),
+          if ((showAlunosMeter || showAlunosUnlimited) && showIa)
+            const SizedBox(height: 10),
           if (showIa)
             _PaywallUsageMeterRow(
               label: 'IA Copiloto (mês)',
@@ -683,7 +701,7 @@ class _PaywallUsageMeterRow extends StatelessWidget {
     final barColor = atLimit
         ? const Color(0xFFE85D5D)
         : nearLimit
-        ? const Color(0xFFE5A84C)
+        ? PaywallCatalog.warning
         : accent;
     return Semantics(
       label: '$label: $used de $limit',
@@ -720,6 +738,73 @@ class _PaywallUsageMeterRow extends StatelessWidget {
               minHeight: 6,
               backgroundColor: accent.withValues(alpha: isDark ? 0.12 : 0.08),
               color: barColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PaywallUsageUnlimitedRow extends StatelessWidget {
+  final String label;
+  final String detail;
+  final Color accent;
+  final Color ink;
+  final Color secondary;
+  final bool isDark;
+
+  const _PaywallUsageUnlimitedRow({
+    required this.label,
+    required this.detail,
+    required this.accent,
+    required this.ink,
+    required this.secondary,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: '$label: ilimitados. $detail',
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TokensStrip.body(color: secondary).copyWith(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  detail,
+                  style: TokensStrip.bodyMuted(color: secondary).copyWith(
+                    fontSize: 11.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: isDark ? 0.18 : 0.1),
+              borderRadius: BorderRadius.circular(TokensStrip.rPill),
+              border: Border.all(color: accent.withValues(alpha: 0.35)),
+            ),
+            child: Text(
+              'ILIMITADO',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.6,
+                color: PaywallCatalog.readableTierAccent(accent, isDark: isDark),
+              ),
             ),
           ),
         ],
@@ -2430,35 +2515,23 @@ class PaywallRoiBundle extends StatelessWidget {
 
 class _PaywallCompareDiffRow extends StatelessWidget {
   final String feature;
-  final String currentLabel;
-  final String targetLabel;
-  final String currentValue;
-  final String targetValue;
   final Color targetAccent;
   final Color ink;
   final Color mute;
-  final Color line;
   final bool isDark;
   final bool isLast;
 
   const _PaywallCompareDiffRow({
     required this.feature,
-    required this.currentLabel,
-    required this.targetLabel,
-    required this.currentValue,
-    required this.targetValue,
     required this.targetAccent,
     required this.ink,
     required this.mute,
-    required this.line,
     required this.isDark,
     required this.isLast,
   });
 
   @override
   Widget build(BuildContext context) {
-    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
-    final proIncluded = targetValue == '✓' || targetValue.toLowerCase() == 'sim';
     return Padding(
       padding: EdgeInsets.only(bottom: isLast ? 0 : 8),
       child: PaywallInsetPanel(
@@ -2466,38 +2539,25 @@ class _PaywallCompareDiffRow extends StatelessWidget {
         isDark: isDark,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(
-              proIncluded ? Icons.check_circle_rounded : Icons.add_circle_outline_rounded,
-              size: 20,
-              color: proIncluded ? PaywallCatalog.green : targetAccent,
-            ),
+            Icon(Icons.add_circle_outline_rounded, size: 18, color: targetAccent),
             const SizedBox(width: 10),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  PaywallFeatureLabel(
-                    raw: feature,
-                    ink: ink,
-                    accent: targetAccent,
-                    maxLines: 2,
-                    style: TokensStrip.body(color: ink).copyWith(
-                      fontSize: 13.5,
-                      height: 1.3,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '$currentLabel: ${currentValue == '✓' ? 'incluído' : currentValue} · '
-                    '$targetLabel: ${targetValue == '✓' ? 'incluído' : targetValue}',
-                    style: TokensStrip.bodyMuted(color: secondary).copyWith(fontSize: 11.5),
-                  ),
-                ],
+              child: PaywallFeatureLabel(
+                raw: feature,
+                ink: ink,
+                accent: targetAccent,
+                maxLines: 2,
+                style: TokensStrip.body(color: ink).copyWith(
+                  fontSize: 13.5,
+                  height: 1.3,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
+            const SizedBox(width: 8),
+            _PlanChip(label: 'SÓ PRO', color: targetAccent),
           ],
         ),
       ),
