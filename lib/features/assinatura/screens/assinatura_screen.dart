@@ -135,6 +135,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   bool _restoringPurchases = false;
   bool _paymentBlocked = false;
   bool _upgradeOffersExpanded = false;
+  bool _compareRevealed = false;
+  bool _planReconcileAttempted = false;
   SubscriptionBillingPeriod _billingPeriod = SubscriptionBillingPeriod.yearly;
 
   Future<void> _checkDeviceSecurity() async {
@@ -259,12 +261,30 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
 
   void _focusEnterpriseProUpgrade() {
     HapticFeedback.selectionClick();
-    setState(() => _upgradeOffersExpanded = true);
+    setState(() {
+      _upgradeOffersExpanded = true;
+      _compareRevealed = true;
+    });
     _selectPlan(SubscriptionPlan.ENTERPRISE_PRO);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _scrollToPaywallSection(PaywallScrollTarget.comparar);
     });
+  }
+
+  Future<void> _reconcilePlanFromServer() async {
+    await ref.read(planoFeaturesProvider.notifier).refresh(reconcileFirst: true);
+    ref.invalidate(perfilProvider);
+  }
+
+  void _maybeReconcilePlanOnLoad({
+    required SubscriptionPlan billingPlan,
+    required PlanoFeatures? meFeatures,
+  }) {
+    if (_planReconcileAttempted || meFeatures == null) return;
+    if (meFeatures.plano.level >= billingPlan.level) return;
+    _planReconcileAttempted = true;
+    unawaited(_reconcilePlanFromServer());
   }
 
   void _scrollToPaywallSection(PaywallScrollTarget target) {
@@ -1017,13 +1037,20 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
             });
           }
 
-          final meFeatures = featuresAsync.valueOrNull;
+          final meFeatures = featuresAsync.valueOrNull?.alignedToBilling(currentPlan);
+          if (meFeatures != null) {
+            _maybeReconcilePlanOnLoad(
+              billingPlan: currentPlan,
+              meFeatures: featuresAsync.valueOrNull,
+            );
+          }
+
           final usage = meFeatures == null
               ? null
               : PlanEntitlements.snapshotFrom(
                 plano: meFeatures.plano,
                 billingPlan: currentPlan,
-                serverPlano: meFeatures.plano,
+                serverPlano: featuresAsync.valueOrNull?.plano,
                 alunosAtivos: meFeatures.alunosAtivos,
                 limiteAlunos: meFeatures.limiteAlunos,
                 iaUsadaMes: meFeatures.iaUsadaMes,
@@ -1331,6 +1358,15 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                           comparisonRows: vitrineComparison,
                           catalogFromApi: vitrine?.fromApi ?? false,
                           initiallyExpanded: false,
+                          expandRequested: _compareRevealed,
+                          onReveal: () {
+                            HapticFeedback.selectionClick();
+                            setState(() => _compareRevealed = true);
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (!mounted) return;
+                              _scrollToPaywallSection(PaywallScrollTarget.comparar);
+                            });
+                          },
                           ink: ink,
                           mute: mute,
                           line: line,
@@ -1369,10 +1405,12 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                           roiTag: enterpriseProRoiTag,
                           usageSnapshot: usage,
                           showProExploreStrip: !showEnterpriseProStickySecondary,
-                          planMismatch: usage?.planMismatch ?? false,
-                          syncWarning: meFeatures?.syncWarning,
+                          planMismatch:
+                              featuresAsync.valueOrNull != null &&
+                              featuresAsync.value!.plano.level < currentPlan.level,
+                          syncWarning: featuresAsync.valueOrNull?.syncWarning,
                           onRefreshPlan: () {
-                            ref.invalidate(planoFeaturesProvider);
+                            unawaited(_reconcilePlanFromServer());
                           },
                           ink: ink,
                           mute: mute,

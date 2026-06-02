@@ -308,6 +308,53 @@ class PlanoFeatures {
   /// Aplica teto (não ultrapassa o plano) e piso (Pro/Premium recebem o mínimo do tier).
   PlanoFeatures normalizeForTier() => _applyCanonical(_canonicalCapsFor(plano));
 
+  /// Quando `/me` está atrás da assinatura (loja/perfil), eleva flags ao tier de cobrança.
+  PlanoFeatures alignedToBilling(SubscriptionPlan billing) {
+    if (billing.level <= plano.level) return this;
+    final limiteAlunosEff = switch (billing) {
+      SubscriptionPlan.ENTERPRISE || SubscriptionPlan.ENTERPRISE_PRO => null,
+      _ => limiteAlunos,
+    };
+    final limiteIaEff = switch (billing) {
+      SubscriptionPlan.ENTERPRISE || SubscriptionPlan.ENTERPRISE_PRO =>
+        (limiteIaMensal == null || limiteIaMensal! <= 0) ? 400 : limiteIaMensal!,
+      SubscriptionPlan.PREMIUM =>
+        (limiteIaMensal == null || limiteIaMensal! <= 0) ? 120 : limiteIaMensal!,
+      _ => limiteIaMensal ?? 0,
+    };
+    return PlanoFeatures(
+      plano: billing,
+      planoNomeOriginal: planoNomeOriginal,
+      displayName: displayName,
+      limiteAlunos: limiteAlunosEff,
+      limiteIaMensal: limiteIaEff,
+      validoAte: validoAte,
+      fromCache: fromCache,
+      cacheSavedAt: cacheSavedAt,
+      syncWarning: syncWarning,
+      financeiro: financeiro,
+      agenda: agenda,
+      relatorios: relatorios,
+      whiteLabel: whiteLabel,
+      iaCopiloto: iaCopiloto,
+      migracaoFoto: migracaoFoto,
+      landingCompleta: landingCompleta,
+      habitCoaching: habitCoaching,
+      comunidadePrivada: comunidadePrivada,
+      automacoes: automacoes,
+      automacoesAvancadas: automacoesAvancadas,
+      comunidadeGrupos: comunidadeGrupos,
+      equipeRbac: equipeRbac,
+      lojaDigital: lojaDigital,
+      poseCoach: poseCoach,
+      limiteAssistentes: limiteAssistentes,
+      alunosAtivos: alunosAtivos,
+      iaUsadaMes: iaUsadaMes,
+      limiteMigracaoFotoMensal: limiteMigracaoFotoMensal,
+      migracaoFotosUsadasMes: migracaoFotosUsadasMes,
+    ).normalizeForTier();
+  }
+
   /// @deprecated Use [normalizeForTier].
   PlanoFeatures withTierCeiling() => normalizeForTier();
 
@@ -613,6 +660,12 @@ class PlanosRepository {
     ).copyWithOperationalState(fromCache: false, syncWarning: null);
     await _savePlanoFeaturesCache(features);
     return features;
+  }
+
+  /// Reconcilia plano no servidor (IAP/validade) e retorna `/me` atualizado.
+  Future<PlanoFeatures> reconcilePlanoFeatures() async {
+    await _dio.post('/api/planos/reconcile');
+    return getPlanoFeaturesFresh();
   }
 
   Future<PlanoFeatures?> loadCachedPlanoFeatures() async {

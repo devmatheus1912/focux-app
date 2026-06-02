@@ -53,7 +53,7 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
     await refresh(forceLoading: true);
   }
 
-  Future<void> refresh({bool forceLoading = false}) async {
+  Future<void> refresh({bool forceLoading = false, bool reconcileFirst = false}) async {
     if (_refreshing) return;
     _refreshing = true;
     final previous = state.valueOrNull;
@@ -62,7 +62,9 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
     }
 
     try {
-      final fresh = await _fetchWithRetry();
+      final fresh = reconcileFirst
+          ? await _repo.reconcilePlanoFeatures()
+          : await _fetchWithRetry();
       state = AsyncData(fresh.normalizeForTier());
     } catch (error) {
       if (previous != null) {

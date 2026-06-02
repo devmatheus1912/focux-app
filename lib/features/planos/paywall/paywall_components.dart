@@ -270,6 +270,8 @@ class PaywallSubscriberQuickCompare extends StatelessWidget {
   final List<PaywallComparisonRow> comparisonRows;
   final bool initiallyExpanded;
   final bool catalogFromApi;
+  final bool expandRequested;
+  final VoidCallback? onReveal;
   final Color ink;
   final Color mute;
   final Color line;
@@ -283,6 +285,8 @@ class PaywallSubscriberQuickCompare extends StatelessWidget {
     this.comparisonRows = PaywallCatalog.comparisonRows,
     this.initiallyExpanded = false,
     this.catalogFromApi = false,
+    this.expandRequested = false,
+    this.onReveal,
     required this.ink,
     required this.mute,
     required this.line,
@@ -308,6 +312,60 @@ class PaywallSubscriberQuickCompare extends StatelessWidget {
     final targetLabel = PaywallCatalog.displayPlanName(targetPlan!);
     final diffCount = rows.length;
 
+    if (!expandRequested) {
+      return PaywallInsetPanel(
+        accent: PaywallCatalog.accentForPlan(targetPlan!),
+        isDark: isDark,
+        child: Semantics(
+          button: true,
+          label:
+              'Comparativo rápido com $targetLabel, '
+              '$diffCount recursos exclusivos. Toque para ver.',
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                HapticFeedback.selectionClick();
+                onReveal?.call();
+              },
+              borderRadius: BorderRadius.circular(TokensStrip.rSm),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Comparativo rápido',
+                            style: TokensStrip.body(color: ink).copyWith(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            diffCount == 1
+                                ? '1 recurso exclusivo no $targetLabel'
+                                : '$diffCount recursos exclusivos no $targetLabel',
+                            style: TokensStrip.bodyMuted(color: mute).copyWith(
+                              fontSize: 12.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.chevron_right_rounded, color: primary, size: 24),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return PaywallCollapsibleBlock(
       title: 'Comparativo rápido',
       subtitle:
@@ -318,7 +376,8 @@ class PaywallSubscriberQuickCompare extends StatelessWidget {
       mute: mute,
       line: line,
       isDark: isDark,
-      initiallyExpanded: initiallyExpanded,
+      initiallyExpanded: initiallyExpanded || expandRequested,
+      expandRequested: expandRequested,
       subscriberFlat: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -868,10 +927,8 @@ class PaywallPlanSyncBanner extends StatelessWidget {
     final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
     final body = message?.trim().isNotEmpty == true
         ? message!.trim()
-        : serverLabel != null
-        ? 'Assinatura $billingLabel · servidor reporta $serverLabel. '
-            'Uso e limites seguem sua assinatura até sincronizar.'
-        : 'Sincronização do plano pendente. Uso segue sua assinatura ativa.';
+        : 'Seu plano $billingLabel está ativo na loja. '
+            'Estamos sincronizando os dados — toque em Atualizar.';
 
     return Semantics(
       container: true,
@@ -2614,6 +2671,7 @@ class PaywallCollapsibleBlock extends StatefulWidget {
   final bool isDark;
   final bool initiallyExpanded;
   final bool subscriberFlat;
+  final bool expandRequested;
 
   const PaywallCollapsibleBlock({
     super.key,
@@ -2626,6 +2684,7 @@ class PaywallCollapsibleBlock extends StatefulWidget {
     required this.isDark,
     this.initiallyExpanded = false,
     this.subscriberFlat = false,
+    this.expandRequested = false,
   });
 
   @override
@@ -2639,8 +2698,19 @@ class _PaywallCollapsibleBlockState extends State<PaywallCollapsibleBlock> {
   @override
   void initState() {
     super.initState();
-    _expanded = widget.initiallyExpanded;
-    _mountedChild = widget.initiallyExpanded;
+    _expanded = widget.initiallyExpanded || widget.expandRequested;
+    _mountedChild = _expanded;
+  }
+
+  @override
+  void didUpdateWidget(PaywallCollapsibleBlock oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.expandRequested && !_expanded) {
+      setState(() {
+        _expanded = true;
+        _mountedChild = true;
+      });
+    }
   }
 
   @override
