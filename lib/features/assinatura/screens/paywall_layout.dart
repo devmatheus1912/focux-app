@@ -385,7 +385,7 @@ class _PaywallInlineNote extends StatelessWidget {
   }
 }
 
-class _PaywallLegalConsentLine extends StatelessWidget {
+class _PaywallLegalConsentLine extends StatefulWidget {
   final Color ink;
   final Color mute;
   final Color primary;
@@ -399,61 +399,75 @@ class _PaywallLegalConsentLine extends StatelessWidget {
   });
 
   @override
+  State<_PaywallLegalConsentLine> createState() => _PaywallLegalConsentLineState();
+}
+
+class _PaywallLegalConsentLineState extends State<_PaywallLegalConsentLine> {
+  late final TapGestureRecognizer _termsTap;
+  late final TapGestureRecognizer _privacyTap;
+
+  @override
+  void initState() {
+    super.initState();
+    _termsTap = TapGestureRecognizer()..onTap = FocuxLegal.openTerms;
+    _privacyTap = TapGestureRecognizer()..onTap = FocuxLegal.openPrivacy;
+  }
+
+  @override
+  void dispose() {
+    _termsTap.dispose();
+    _privacyTap.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    TextStyle linkStyle() => TextStyle(
+    final secondary = _paywallSecondaryText(
+      widget.ink,
+      widget.mute,
+      isDark: isDark,
+    );
+    final body = TokensStrip.bodyMuted(color: secondary).copyWith(
       fontSize: 12,
+      height: 1.45,
+    );
+    final link = body.copyWith(
       fontWeight: FontWeight.w600,
-      color: primary,
+      color: widget.primary,
       decoration: TextDecoration.underline,
-      decorationColor: primary.withValues(alpha: 0.45),
-      height: 1.4,
-    );
-    final body = TokensStrip.bodyMuted(
-      color: _paywallSecondaryText(ink, mute, isDark: isDark),
-    ).copyWith(fontSize: 12, height: 1.4);
-
-    final linkButtonStyle = TextButton.styleFrom(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
-      minimumSize: const Size(44, 44),
-      tapTargetSize: MaterialTapTargetSize.padded,
+      decorationColor: widget.primary.withValues(alpha: 0.45),
     );
 
-    final lead = isUpgrade ? 'Ao confirmar upgrade, concorda com os ' : 'Ao assinar, concorda com os ';
-    final semanticsLead = isUpgrade
+    final lead = widget.isUpgrade
+        ? 'Ao confirmar upgrade, você concorda com os '
+        : 'Ao assinar, você concorda com os ';
+    final semanticsLead = widget.isUpgrade
         ? 'Ao confirmar upgrade, você concorda com os Termos de uso e a Política de privacidade'
         : 'Ao assinar, você concorda com os Termos de uso e a Política de privacidade';
 
     return Semantics(
       label: semanticsLead,
-      child: Wrap(
-        alignment: WrapAlignment.center,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: 0,
-        runSpacing: 2,
-        children: [
-          Text(lead, style: body),
-          Semantics(
-            button: true,
-            label: 'Abrir termos de uso',
-            child: TextButton(
-              onPressed: () => FocuxLegal.openTerms(),
-              style: linkButtonStyle,
-              child: Text('Termos', style: linkStyle()),
+      child: Text.rich(
+        textAlign: TextAlign.center,
+        TextSpan(
+          style: body,
+          children: [
+            TextSpan(text: lead),
+            TextSpan(
+              text: 'Termos',
+              style: link,
+              recognizer: _termsTap,
             ),
-          ),
-          Text(' e a ', style: body),
-          Semantics(
-            button: true,
-            label: 'Abrir política de privacidade',
-            child: TextButton(
-              onPressed: () => FocuxLegal.openPrivacy(),
-              style: linkButtonStyle,
-              child: Text('Privacidade', style: linkStyle()),
+            const TextSpan(text: ' e a '),
+            TextSpan(
+              text: 'Privacidade',
+              style: link,
+              recognizer: _privacyTap,
             ),
-          ),
-          Text('.', style: body),
-        ],
+            const TextSpan(text: '.'),
+          ],
+        ),
       ),
     );
   }

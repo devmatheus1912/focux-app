@@ -1,6 +1,7 @@
 ﻿import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -831,7 +832,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         ctaLabel = trialOffer
             ? 'Começar $trialDays dias grátis — ${PaywallCatalog.displayPlanName(SubscriptionPlan.ENTERPRISE)}'
             : isUpgrade
-            ? 'Fazer upgrade para $selectedLabel'
+            ? 'Upgrade para $selectedLabel'
             : selectedPlan == SubscriptionPlan.ENTERPRISE_PRO
             ? 'Continuar com $selectedLabel'
             : selectedPlan == SubscriptionPlan.ENTERPRISE
@@ -1933,15 +1934,45 @@ class _AssinaturaStickyFooter extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (planSummary != null) ...[
-          Text(
-            planSummary!,
-            textAlign: TextAlign.center,
-            style: TokensStrip.body(color: ink).copyWith(
-              fontWeight: FontWeight.w700,
-              fontSize: 14,
-            ),
+          Builder(
+            builder: (context) {
+              final parts = planSummary!.split(' · ');
+              if (parts.length == 2) {
+                return Text.rich(
+                  textAlign: TextAlign.center,
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '${parts[0]} · ',
+                        style: TokensStrip.bodyMuted(color: secondary).copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      TextSpan(
+                        text: parts[1],
+                        style: TokensStrip.body(color: ink).copyWith(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                          letterSpacing: 0.15,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              return Text(
+                planSummary!,
+                textAlign: TextAlign.center,
+                style: TokensStrip.body(color: ink).copyWith(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
+              );
+            },
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
         ],
         if (trialHint) ...[
           Text(
@@ -2004,19 +2035,22 @@ class _AssinaturaStickyFooter extends StatelessWidget {
             onPressed: null,
           ),
         if (footnote.isNotEmpty) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Text(
             footnote,
             textAlign: TextAlign.center,
-            style: TokensStrip.bodyMuted(color: secondary),
+            style: TokensStrip.bodyMuted(color: secondary).copyWith(
+              fontSize: 12,
+              height: 1.45,
+            ),
           ),
         ],
         if (showLegalConsent) ...[
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           _PaywallLegalConsentLine(
             ink: ink,
             mute: mute,
-            primary: primary,
+            primary: tierAccent ?? primary,
             isUpgrade: isUpgrade,
           ),
         ],
