@@ -321,6 +321,7 @@ class PaywallPlanSections {
     PaywallPlanFeatureSection(
       title: 'Landing Page COMPLETA',
       collapsible: true,
+      initiallyExpanded: false,
       items: [
         PaywallPlanFeatureItem(
           label: 'Depoimentos + galeria + FAQ ilimitados',
@@ -343,6 +344,7 @@ class PaywallPlanSections {
     const PaywallPlanFeatureSection(
       title: 'Loja de Programas Digitais ✦',
       collapsible: true,
+      initiallyExpanded: false,
       items: [
         PaywallPlanFeatureItem(
           label: 'Venda treinos avulsos e desafios',

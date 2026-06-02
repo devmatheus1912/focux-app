@@ -1222,8 +1222,11 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                               plan != currentPlan &&
                               plan != selPlan,
                       collapseFeatureDetails:
-                          plan == currentPlan &&
-                          currentPlan != SubscriptionPlan.FREE,
+                          (plan == currentPlan &&
+                              currentPlan != SubscriptionPlan.FREE) ||
+                          (usePlanStudio &&
+                              plan == selPlan &&
+                              plan.level > currentPlan.level),
                       compactUpsell:
                           !usePlanStudio &&
                           isUpgradeTier &&
@@ -1407,8 +1410,24 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                           showProExploreStrip: !showEnterpriseProStickySecondary,
                           planMismatch:
                               featuresAsync.valueOrNull != null &&
-                              featuresAsync.value!.plano.level < currentPlan.level,
-                          syncWarning: featuresAsync.valueOrNull?.syncWarning,
+                              featuresAsync.value!.plano.level <
+                                  currentPlan.level,
+                          syncWarning: () {
+                            final warning =
+                                featuresAsync.valueOrNull?.syncWarning;
+                            if (warning == null || warning.isEmpty) {
+                              return null;
+                            }
+                            final mismatch =
+                                featuresAsync.valueOrNull != null &&
+                                featuresAsync.value!.plano.level <
+                                    currentPlan.level;
+                            if (selPlan.level > currentPlan.level &&
+                                !mismatch) {
+                              return null;
+                            }
+                            return warning;
+                          }(),
                           onRefreshPlan: () {
                             unawaited(_reconcilePlanFromServer());
                           },
@@ -1417,7 +1436,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                           isDark: isDark,
                         ),
                       ),
-                      if (lowerPlans.isNotEmpty || freePlano != null)
+                      if ((lowerPlans.isNotEmpty || freePlano != null) &&
+                          selPlan.level <= currentPlan.level)
                         PaywallGlassAccordion(
                           ink: ink,
                           mute: mute,

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -175,6 +176,40 @@ class SubscriptionMetadata {
     transactionId: transactionId,
     billingCycleEndsAt: billingCycleEndsAt,
   );
+}
+
+/// Microcopy para avisos de sync/cache no paywall e gates de plano.
+abstract final class PlanoFeaturesSyncCopy {
+  static const offlineCache =
+      'Sem conexão no momento. Mostramos o último plano salvo — toque em Atualizar.';
+
+  static const refreshFailed =
+      'Não foi possível atualizar o plano agora. Mantivemos o último acesso — toque em Atualizar.';
+
+  static const optimisticAluno =
+      'Não foi possível confirmar o plano do seu personal. Mantivemos acesso seguro enquanto sincroniza.';
+
+  static const optimisticEnterprisePro =
+      'Não foi possível confirmar o plano agora. Acesso Pro liberado em modo seguro enquanto sincroniza.';
+
+  static const optimisticEnterprise =
+      'Não foi possível confirmar o plano agora. Acesso liberado em modo seguro enquanto sincroniza.';
+
+  static String forRefreshError(Object error) {
+    if (_isLikelyOffline(error)) return offlineCache;
+    return refreshFailed;
+  }
+
+  static bool _isLikelyOffline(Object error) {
+    if (error is SocketException) return true;
+    if (error is DioException) {
+      return error.type == DioExceptionType.connectionTimeout ||
+          error.type == DioExceptionType.receiveTimeout ||
+          error.type == DioExceptionType.sendTimeout ||
+          error.type == DioExceptionType.connectionError;
+    }
+    return false;
+  }
 }
 
 /// Snapshot autoritativo do plano atual conforme retornado pelo backend
@@ -560,8 +595,7 @@ class PlanoFeatures {
   static const optimisticAluno = PlanoFeatures(
     plano: SubscriptionPlan.PREMIUM,
     fromCache: true,
-    syncWarning:
-        'Nao foi possivel confirmar o plano do seu personal. Habitos liberados em modo seguro.',
+    syncWarning: PlanoFeaturesSyncCopy.optimisticAluno,
     financeiro: false,
     agenda: true,
     relatorios: false,
@@ -581,8 +615,7 @@ class PlanoFeatures {
   static const optimisticEnterprisePro = PlanoFeatures(
     plano: SubscriptionPlan.ENTERPRISE_PRO,
     fromCache: true,
-    syncWarning:
-        'Nao foi possivel confirmar o plano agora. Acesso Pro liberado em modo seguro enquanto sincroniza.',
+    syncWarning: PlanoFeaturesSyncCopy.optimisticEnterprisePro,
     limiteAlunos: null,
     limiteIaMensal: 400,
     financeiro: true,
@@ -607,8 +640,7 @@ class PlanoFeatures {
   static const optimisticEnterprise = PlanoFeatures(
     plano: SubscriptionPlan.ENTERPRISE,
     fromCache: true,
-    syncWarning:
-        'Nao foi possivel confirmar o plano agora. Acesso liberado em modo seguro enquanto sincroniza.',
+    syncWarning: PlanoFeaturesSyncCopy.optimisticEnterprise,
     limiteAlunos: null,
     limiteIaMensal: 400,
     financeiro: true,

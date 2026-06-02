@@ -1296,7 +1296,8 @@ class PaywallRichPlanCard extends StatelessWidget {
         billingDisabled && !isCurrent && plan != SubscriptionPlan.FREE;
     final showCompactBody = compactUpsell && !isCurrent;
     final referenceMode = referenceOnly || isLockedDowngrade;
-    final collapseFeatures = collapseFeatureDetails && isCurrent || referenceMode;
+    final collapseFeatures = referenceMode ||
+        (collapseFeatureDetails && (isCurrent || embeddedInStudio));
 
     final cardBody = Stack(
           children: [
@@ -2376,7 +2377,8 @@ class _PlanReferenceStoreHint extends StatelessWidget {
         : 'Alteração só na $channel';
     final body = plan == SubscriptionPlan.FREE
         ? 'Compare limites com seu plano atual. Para voltar ao gratuito, use as assinaturas do dispositivo.'
-        : 'Downgrade e cancelamento não são feitos no app. Abra as assinaturas do dispositivo para mudar de tier.';
+        : 'Downgrade e cancelamento só na loja do dispositivo. '
+            'Em Assinaturas, escolha o tier desejado.';
 
     return PaywallInsetPanel(
       accent: accent,
@@ -2408,7 +2410,11 @@ class _PlanReferenceStoreHint extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   body,
-                  style: TokensStrip.bodyMuted(color: secondary).copyWith(fontSize: 13),
+                  softWrap: true,
+                  style: TokensStrip.bodyMuted(color: secondary).copyWith(
+                    fontSize: 13,
+                    height: 1.35,
+                  ),
                 ),
               ],
             ),

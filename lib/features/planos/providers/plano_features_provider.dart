@@ -71,8 +71,7 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
         state = AsyncData(
           previous.normalizeForTier().copyWithOperationalState(
             fromCache: true,
-            syncWarning:
-                'Nao foi possivel confirmar o plano agora. Mantivemos o ultimo acesso salvo.',
+            syncWarning: PlanoFeaturesSyncCopy.forRefreshError(error),
           ),
         );
         unawaited(

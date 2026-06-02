@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
@@ -41,12 +42,28 @@ void main() {
 
     final stale = fresh.copyWithOperationalState(
       fromCache: true,
-      syncWarning: 'Mantivemos o ultimo acesso salvo.',
+      syncWarning: 'Mantivemos o último acesso salvo.',
     );
 
     expect(stale.plano, SubscriptionPlan.ENTERPRISE);
     expect(stale.fromCache, isTrue);
     expect(stale.whiteLabel, isTrue);
-    expect(stale.syncWarning, contains('ultimo acesso'));
+    expect(stale.syncWarning, contains('último acesso'));
+  });
+
+  test('PlanoFeaturesSyncCopy distinguishes offline refresh failures', () {
+    expect(
+      PlanoFeaturesSyncCopy.forRefreshError(
+        DioException(
+          requestOptions: RequestOptions(path: '/planos/me'),
+          type: DioExceptionType.connectionError,
+        ),
+      ),
+      PlanoFeaturesSyncCopy.offlineCache,
+    );
+    expect(
+      PlanoFeaturesSyncCopy.forRefreshError(Exception('500')),
+      PlanoFeaturesSyncCopy.refreshFailed,
+    );
   });
 }
