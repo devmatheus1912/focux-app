@@ -279,6 +279,10 @@ class _PersonalDashboardScreenState
         setState(() {
           _loadingFin = false;
         });
+        FeedbackHelper.showWarn(
+          context,
+          'Financeiro indisponível agora. Puxe para atualizar.',
+        );
       }
     }
   }
@@ -706,20 +710,11 @@ class _PersonalDashboardScreenState
                                   : () => context.go('/alunos'),
                           showEmptyTrendCta:
                               !checkinsTrend.any((v) => v > 0) &&
-                              !(!onboardingIncomplete &&
-                                  (alunosAtivos == 0 ||
-                                      (!primeiroTreinoCriado &&
-                                          checkinsHoje == 0))),
-                          emptyTrendCtaLabel:
-                              !(primeiroTreinoCriado || checkinsHoje > 0) &&
-                                      alunosAtivos > 0
-                                  ? 'Agendar primeiro treino'
-                                  : 'Abrir agenda',
-                          onEmptyTrendCta:
-                              !(primeiroTreinoCriado || checkinsHoje > 0) &&
-                                      alunosAtivos > 0
-                                  ? () => context.push('/treinos/novo')
-                                  : () => context.go('/agenda'),
+                              onboardingIncomplete &&
+                              alunosAtivos > 0 &&
+                              !(primeiroTreinoCriado || checkinsHoje > 0),
+                          emptyTrendCtaLabel: 'Agendar primeiro treino',
+                          onEmptyTrendCta: () => context.push('/treinos/novo'),
                         ),
                       ),
                     ),
@@ -828,8 +823,8 @@ class _PersonalDashboardScreenState
                                     children: [
                                       Text(
                                         'Receita recebida · $mes',
-                                        style: const TextStyle(
-                                          color: Colors.white70,
+                                        style: TextStyle(
+                                          color: dashboardHeroLabelOnTeal(),
                                           fontSize: 11,
                                           fontWeight: FontWeight.w600,
                                           letterSpacing: 0.12,
@@ -847,10 +842,8 @@ class _PersonalDashboardScreenState
                                         style: TextStyle(
                                           color:
                                               metaSuperada
-                                                  ? Colors.white.withValues(
-                                                    alpha: 0.88,
-                                                  )
-                                                  : Colors.white70,
+                                                  ? dashboardHeroCaptionOnTeal()
+                                                  : dashboardHeroCaptionOnTeal(),
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -902,9 +895,7 @@ class _PersonalDashboardScreenState
                                             child: Text(
                                               'recebido',
                                               style: TextStyle(
-                                                color: Colors.white.withValues(
-                                                  alpha: 0.62,
-                                                ),
+                                                color: dashboardHeroLabelOnTeal(),
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.w600,
                                                 letterSpacing: 0.1,
@@ -917,9 +908,22 @@ class _PersonalDashboardScreenState
                                       Row(
                                         children: [
                                           Text(
-                                            'Meta R\$ ${_finData?.previsaoReceita.toStringAsFixed(0) ?? '--'}',
-                                            style: const TextStyle(
-                                              color: Colors.white54,
+                                            () {
+                                              final meta =
+                                                  _finData?.previsaoReceita ??
+                                                  0;
+                                              final ticket =
+                                                  _finData?.ticketMedio ?? 0;
+                                              if (meta > 0) {
+                                                return 'Meta R\$ ${meta.toStringAsFixed(0)}';
+                                              }
+                                              if (ticket > 0) {
+                                                return 'Ticket médio R\$ ${ticket.toStringAsFixed(0)} · defina meta no financeiro';
+                                              }
+                                              return 'Defina a meta mensal no financeiro';
+                                            }(),
+                                            style: TextStyle(
+                                              color: dashboardHeroMutedOnTeal(),
                                               fontSize: 12,
                                               fontWeight: FontWeight.w700,
                                             ),
@@ -972,10 +976,8 @@ class _PersonalDashboardScreenState
                                                 child: Text(
                                                   'Histórico mensal aparece ao registrar cobranças',
                                                   style: TextStyle(
-                                                    color: Colors.white
-                                                        .withValues(
-                                                          alpha: 0.72,
-                                                        ),
+                                                    color:
+                                                        dashboardHeroCaptionOnTeal(),
                                                     fontSize: 11,
                                                     fontWeight: FontWeight.w500,
                                                   ),
@@ -994,10 +996,8 @@ class _PersonalDashboardScreenState
                                                     Text(
                                                       'Receita · últimos meses',
                                                       style: TextStyle(
-                                                        color: Colors.white
-                                                            .withValues(
-                                                              alpha: 0.72,
-                                                            ),
+                                                        color:
+                                                            dashboardHeroCaptionOnTeal(),
                                                         fontSize: 11,
                                                         fontWeight:
                                                             FontWeight.w600,
@@ -1521,8 +1521,8 @@ class _HeroMiniStat extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: Colors.white70,
+          style: TextStyle(
+            color: dashboardHeroLabelOnTeal(),
             fontSize: 10.5,
             letterSpacing: 0.08,
             fontWeight: FontWeight.w600,
@@ -1536,10 +1536,10 @@ class _HeroMiniStat extends StatelessWidget {
               if (suffix != null)
                 TextSpan(
                   text: suffix,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white54,
-                    fontWeight: FontWeight.w400,
+                    color: dashboardHeroCaptionOnTeal(),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
             ],
@@ -1684,7 +1684,7 @@ class _DayPulseStrip extends StatelessWidget {
                   label:
                       hasTrend
                           ? 'Tendência de check-ins nos últimos 7 dias'
-                          : 'Sem check-ins nos últimos 7 dias. Abra a agenda para registrar treinos.',
+                          : 'Sem check-ins nos últimos 7 dias',
                   child: InkWell(
                     onTap: onCheckins,
                     borderRadius: BorderRadius.circular(TokensStrip.rInput),
@@ -1706,7 +1706,7 @@ class _DayPulseStrip extends StatelessWidget {
                                 if (!hasTrend) ...[
                                   const SizedBox(height: 2),
                                   Text(
-                                    'Sem check-ins · toque para abrir a agenda',
+                                    'Sem check-ins nos últimos 7 dias',
                                     style: AppTypography.inter(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w500,
@@ -2967,7 +2967,7 @@ class _ShortcutBtn extends StatelessWidget {
 // CENTRAL DE COMANDO
 // ---------------------------------------------------------------------------
 
-class _CommandCenterSection extends ConsumerWidget {
+class _CommandCenterSection extends ConsumerStatefulWidget {
   final bool isDark;
   final Color primary;
   final FinanceiroDashboard? finData;
@@ -2983,7 +2983,20 @@ class _CommandCenterSection extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_CommandCenterSection> createState() =>
+      _CommandCenterSectionState();
+}
+
+class _CommandCenterSectionState extends ConsumerState<_CommandCenterSection> {
+  bool _quickLinksExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = widget.isDark;
+    final primary = widget.primary;
+    final finData = widget.finData;
+    final hideRiskSummary = widget.hideRiskSummary;
+    final contextualSubtitle = widget.contextualSubtitle;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
@@ -3284,7 +3297,72 @@ class _CommandCenterSection extends ConsumerWidget {
           actions: nextActions.take(2).toList(growable: false),
         ),
         const SizedBox(height: 14),
-        LayoutBuilder(
+        Material(
+          color: Colors.transparent,
+          child: Semantics(
+            button: true,
+            expanded: _quickLinksExpanded,
+            label:
+                _quickLinksExpanded
+                    ? 'Atalhos rápidos, expandido. Toque para recolher'
+                    : 'Atalhos rápidos, recolhido. Copiloto, mensagens e mais. Toque para expandir',
+            child: InkWell(
+              onTap: () => setState(() => _quickLinksExpanded = !_quickLinksExpanded),
+              borderRadius: BorderRadius.circular(TokensStrip.rInput),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  children: [
+                    Text(
+                      'Atalhos rápidos',
+                      style: AppTypography.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.2,
+                        color: heading,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: primarySoft,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        '5',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          color: actionColor,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    AnimatedRotation(
+                      turns: _quickLinksExpanded ? 0.25 : 0,
+                      duration: const Duration(milliseconds: 220),
+                      curve: Curves.easeOutCubic,
+                      child: FxIcon(
+                        name: 'chevron-right',
+                        size: 16,
+                        color: actionColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        AnimatedCrossFade(
+          firstChild: const SizedBox.shrink(),
+          secondChild: Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: LayoutBuilder(
           builder: (context, constraints) {
             final moduleWidth = (constraints.maxWidth * 0.46).clamp(150.0, 188.0);
             return _HorizontalScrollPeek(
@@ -3340,6 +3418,14 @@ class _CommandCenterSection extends ConsumerWidget {
             ),
             );
           },
+            ),
+          ),
+          crossFadeState:
+              _quickLinksExpanded
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 220),
+          sizeCurve: Curves.easeOutCubic,
         ),
       ],
     );
