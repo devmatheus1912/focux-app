@@ -1,23 +1,21 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/planos/paywall/paywall_catalog.dart';
 import '../../../features/planos/paywall/paywall_components.dart';
 import '../../../features/subscription/store_subscription_policy.dart';
 import '../data/cancel_save_repository.dart';
-
-final _repoProvider = Provider(
-  (ref) => CancelSaveRepository(ref.read(apiClientProvider)),
-);
 
 class CancelSaveScreen extends ConsumerStatefulWidget {
   const CancelSaveScreen({super.key});
@@ -50,6 +48,14 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
   bool _enviando = false;
   String? _feedback;
 
+  @override
+  void initState() {
+    super.initState();
+    unawaited(
+      AnalyticsService.instance.track(ProductEvents.cancelSaveOpened),
+    );
+  }
+
   Future<void> _selecionarMotivo(String motivo) async {
     HapticFeedback.selectionClick();
     setState(() {
@@ -59,8 +65,24 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
       _erroOferta = null;
     });
     try {
-      final oferta = await ref.read(_repoProvider).oferta(motivo);
+      final oferta = await ref.read(cancelSaveRepositoryProvider).oferta(motivo);
       if (!mounted) return;
+      unawaited(
+        AnalyticsService.instance.track(
+          ProductEvents.cancelSaveMotivoSelected,
+          props: {'motivo': motivo, 'oferta': oferta.tipo},
+        ),
+      );
+      unawaited(
+        AnalyticsService.instance.track(
+          ProductEvents.cancelSaveOfertaLoaded,
+          props: {
+            'motivo': motivo,
+            'oferta': oferta.tipo,
+            'billingChannel': oferta.billingChannel,
+          },
+        ),
+      );
       setState(() {
         _oferta = oferta;
         _carregandoOferta = false;
@@ -80,13 +102,27 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
     HapticFeedback.lightImpact();
     setState(() => _enviando = true);
     try {
-      final resposta = await ref.read(_repoProvider).responder(
+      final resposta = await ref.read(cancelSaveRepositoryProvider).responder(
             motivo: _motivoSelecionado!,
             ofertaApresentada: _oferta!.tipo,
             aceitar: aceitar,
             feedback: _feedback,
           );
       if (!mounted) return;
+
+      unawaited(
+        AnalyticsService.instance.track(
+          aceitar
+              ? ProductEvents.cancelSaveOfertaAccepted
+              : ProductEvents.cancelSaveOfertaDeclined,
+          props: {
+            'motivo': _motivoSelecionado,
+            'oferta': _oferta!.tipo,
+            'billingApplied': resposta.billingApplied,
+            'requiresStoreAction': resposta.requiresStoreAction,
+          },
+        ),
+      );
 
       if (aceitar &&
           (resposta.requiresStoreAction || _oferta!.requiresStoreAction) &&
@@ -122,8 +158,11 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
           color: r.aceita ? PaywallCatalog.green : theme.colorScheme.outline,
           size: 48,
         ),
-        title: Text(r.aceita ? 'Oferta registrada' : 'Cancelamento confirmado'),
-        content: Text(r.mensagem),
+        title: Text(r.aceita ? 'Oferta registrada' : 'Cancelamento registrado'),
+        content: Text(
+          r.mensagem,
+          style: theme.textTheme.bodyMedium?.copyWith(height: 1.45),
+        ),
         actions: [
           TextButton(
             onPressed: () {
@@ -134,7 +173,7 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
                 context.go('/dashboard/personal');
               }
             },
-            child: const Text('Fechar'),
+            child: const Text('Continuar'),
           ),
         ],
       ),
@@ -157,7 +196,13 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
         onBack: () => context.canPop() ? context.pop() : context.go('/assinatura'),
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: EdgeInsets.fromLTRB(
+          20,
+          8,
+          20,
+          32 + MediaQuery.viewInsetsOf(context).bottom,
+        ),
         children: [
           Text(
             'Que pena que você quer ir embora.',

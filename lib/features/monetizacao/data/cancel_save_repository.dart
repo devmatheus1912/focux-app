@@ -1,5 +1,12 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../core/api/api_client.dart';
+import '../../auth/providers/auth_provider.dart';
+
+final cancelSaveRepositoryProvider = Provider<CancelSaveRepository>(
+  (ref) => CancelSaveRepository(ref.read(apiClientProvider)),
+);
 
 class CancelSaveOferta {
   final String tipo;

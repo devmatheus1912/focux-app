@@ -104,6 +104,12 @@ class ProductEvents {
   static const planGateStaleUsed = 'plan_gate_stale_used';
   static const planGateRefreshFailed = 'plan_gate_refresh_failed';
 
+  static const cancelSaveOpened = 'cancel_save_opened';
+  static const cancelSaveMotivoSelected = 'cancel_save_motivo_selected';
+  static const cancelSaveOfertaLoaded = 'cancel_save_oferta_loaded';
+  static const cancelSaveOfertaAccepted = 'cancel_save_oferta_accepted';
+  static const cancelSaveOfertaDeclined = 'cancel_save_oferta_declined';
+
   static const alunoAutonomyTaskViewed = 'aluno_autonomy_task_viewed';
   static const alunoAutonomyTaskClicked = 'aluno_autonomy_task_clicked';
   static const alunoAutonomyTaskCompleted = 'aluno_autonomy_task_completed';
