@@ -569,7 +569,6 @@ class _PersonalDashboardScreenState
                                   : 'Cobranças pendentes · toque para expandir',
                           isDark: themeDark,
                           initiallyExpanded: riscoAlto <= 3,
-                          semanticsLabel: 'Precisa de atenção',
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
@@ -705,6 +704,22 @@ class _PersonalDashboardScreenState
                               riscoAlto > 0
                                   ? () => context.go('/alunos?filtro=risco')
                                   : () => context.go('/alunos'),
+                          showEmptyTrendCta:
+                              !checkinsTrend.any((v) => v > 0) &&
+                              !(!onboardingIncomplete &&
+                                  (alunosAtivos == 0 ||
+                                      (!primeiroTreinoCriado &&
+                                          checkinsHoje == 0))),
+                          emptyTrendCtaLabel:
+                              !(primeiroTreinoCriado || checkinsHoje > 0) &&
+                                      alunosAtivos > 0
+                                  ? 'Agendar primeiro treino'
+                                  : 'Abrir agenda',
+                          onEmptyTrendCta:
+                              !(primeiroTreinoCriado || checkinsHoje > 0) &&
+                                      alunosAtivos > 0
+                                  ? () => context.push('/treinos/novo')
+                                  : () => context.go('/agenda'),
                         ),
                       ),
                     ),
@@ -716,7 +731,6 @@ class _PersonalDashboardScreenState
                         collapsedHint:
                             'Treinos parados e ranking · toque para expandir',
                         isDark: themeDark,
-                        semanticsLabel: 'Aderência da semana',
                         headerActionLabel: 'Relatório',
                         onHeaderAction:
                             () => context.push('/relatorios/global'),
@@ -1556,6 +1570,9 @@ class _DayPulseStrip extends StatelessWidget {
     required this.onCheckins,
     required this.onAgenda,
     required this.onRisco,
+    this.showEmptyTrendCta = false,
+    this.emptyTrendCtaLabel,
+    this.onEmptyTrendCta,
   });
 
   final Animation<double> fade;
@@ -1571,6 +1588,9 @@ class _DayPulseStrip extends StatelessWidget {
   final VoidCallback onCheckins;
   final VoidCallback onAgenda;
   final VoidCallback onRisco;
+  final bool showEmptyTrendCta;
+  final String? emptyTrendCtaLabel;
+  final VoidCallback? onEmptyTrendCta;
 
   @override
   Widget build(BuildContext context) {
@@ -1726,6 +1746,43 @@ class _DayPulseStrip extends StatelessWidget {
                 );
               },
             ),
+            if (showEmptyTrendCta &&
+                emptyTrendCtaLabel != null &&
+                onEmptyTrendCta != null) ...[
+              const SizedBox(height: 6),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Semantics(
+                  button: true,
+                  label: emptyTrendCtaLabel,
+                  child: TextButton.icon(
+                    onPressed: onEmptyTrendCta,
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(48, 36),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      foregroundColor: primary,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    icon: Icon(
+                      emptyTrendCtaLabel!.contains('treino')
+                          ? Icons.fitness_center_rounded
+                          : Icons.calendar_today_rounded,
+                      size: 16,
+                    ),
+                    label: Text(
+                      emptyTrendCtaLabel!,
+                      style: AppTypography.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -1983,7 +2040,6 @@ class _DashboardCollapsibleSection extends StatefulWidget {
     required this.collapsedHint,
     required this.isDark,
     required this.child,
-    this.semanticsLabel,
     this.initiallyExpanded = false,
     this.headerActionLabel,
     this.onHeaderAction,
@@ -1993,7 +2049,6 @@ class _DashboardCollapsibleSection extends StatefulWidget {
   final String collapsedHint;
   final bool isDark;
   final Widget child;
-  final String? semanticsLabel;
   final bool initiallyExpanded;
   final String? headerActionLabel;
   final VoidCallback? onHeaderAction;
@@ -2045,9 +2100,10 @@ class _DashboardCollapsibleSectionState
             child: Semantics(
               button: true,
               expanded: _expanded,
-              label:
-                  widget.semanticsLabel ??
-                  '${widget.title}. ${_expanded ? 'Recolher' : widget.collapsedHint}',
+              label: dashboardCollapsibleSemanticsLabel(
+                widget.title,
+                _expanded,
+              ),
               child: InkWell(
                 onTap: () => setState(() => _expanded = !_expanded),
                 borderRadius: BorderRadius.circular(TokensStrip.rCard),
@@ -2266,6 +2322,7 @@ class _ExpandableToolGroupsState extends ConsumerState<_ExpandableToolGroups> {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final link = BrandPalette.sectionLink(primary, dark: widget.isDark);
+    final badgeBg = BrandPalette.soft(primary, dark: widget.isDark);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2276,8 +2333,9 @@ class _ExpandableToolGroupsState extends ConsumerState<_ExpandableToolGroups> {
             child: Semantics(
               button: true,
               expanded: _openGroups.contains(group.title),
-              label: dashboardToolGroupSemanticsHint(
+              label: dashboardToolGroupSemanticsLabel(
                 group.title,
+                _openGroups.contains(group.title),
                 group.shortcuts.length,
               ),
               child: InkWell(
@@ -2301,6 +2359,25 @@ class _ExpandableToolGroupsState extends ConsumerState<_ExpandableToolGroups> {
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.3,
                           color: link,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: badgeBg,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          '${group.shortcuts.length}',
+                          style: AppTypography.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: link.withValues(alpha: 0.88),
+                          ),
                         ),
                       ),
                       const Spacer(),
@@ -2390,10 +2467,10 @@ class _CollapsibleToolsSectionState
             child: Semantics(
               button: true,
               expanded: _expanded,
-              label:
-                  _expanded
-                      ? 'Recolher mais ferramentas'
-                      : 'Expandir mais ferramentas, $collapsedHint',
+              label: dashboardCollapsibleSemanticsLabel(
+                'Mais ferramentas',
+                _expanded,
+              ),
               child: InkWell(
               onTap: () => setState(() => _expanded = !_expanded),
               borderRadius: BorderRadius.circular(TokensStrip.rCard),

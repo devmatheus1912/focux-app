@@ -16,6 +16,18 @@ String dashboardShortcutSemanticsLabel(DashboardToolShortcut shortcut) {
   };
 }
 
-String dashboardToolGroupSemanticsHint(String title, int count) {
-  return 'Grupo $title, $count ferramentas. Toque para expandir ou recolher';
+/// Rótulo de seção colapsável (TalkBack / VoiceOver).
+String dashboardCollapsibleSemanticsLabel(String title, bool expanded) {
+  return expanded
+      ? '$title, expandido, toque para recolher'
+      : '$title, recolhido, toque para expandir';
+}
+
+String dashboardToolGroupSemanticsLabel(
+  String title,
+  bool expanded,
+  int count,
+) {
+  return '${dashboardCollapsibleSemanticsLabel(title, expanded)}. '
+      '$count ferramentas';
 }
