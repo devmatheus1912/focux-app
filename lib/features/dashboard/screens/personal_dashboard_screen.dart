@@ -378,6 +378,10 @@ class _PersonalDashboardScreenState
                 data: (s) => !s.ativacaoCompleta,
                 orElse: () => false,
               );
+              final primeiroTreinoCriado = onboardingAsync.maybeWhen(
+                data: (s) => s.primeiroTreinoCriado,
+                orElse: () => false,
+              );
               final riskDominante =
                   alunosAtivos > 0 &&
                   riscoAlto >= math.max(2, (alunosAtivos * 0.5).ceil());
@@ -425,7 +429,7 @@ class _PersonalDashboardScreenState
                       SliverToBoxAdapter(
                         child: DashboardActivationCta(
                           alunosAtivos: alunosAtivos,
-                          temTreinos: checkinsHoje > 0 || alunosAtivos == 0,
+                          temTreinos: primeiroTreinoCriado || checkinsHoje > 0,
                           temFinanceiro: _finData != null &&
                               (_finData!.receitaMes > 0 ||
                                   _finData!.vencimentosProximos.isNotEmpty),

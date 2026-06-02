@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../onboarding/widgets/setup_step_widgets.dart';
 
 /// CTAs de ativação quando o personal ainda não extraiu valor do app.
 class DashboardActivationCta extends StatelessWidget {
@@ -34,7 +35,7 @@ class DashboardActivationCta extends StatelessWidget {
         title: 'Atribua o primeiro treino',
         body: 'Alunos engajados renovam plano. Gere com IA ou use um template.',
         cta: 'Criar treino',
-        route: '/treinos',
+        route: '/treinos/novo',
       );
     } else if (!temFinanceiro) {
       step = (
@@ -61,7 +62,7 @@ class DashboardActivationCta extends StatelessWidget {
               'activation_cta_tapped',
               props: {'route': activeStep.route},
             );
-            context.push(activeStep.route);
+            context.push(normalizeSetupActionRoute(activeStep.route));
           },
           child: Padding(
             padding: const EdgeInsets.all(14),
