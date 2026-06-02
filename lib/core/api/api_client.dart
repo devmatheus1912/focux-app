@@ -4,8 +4,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../auth/session_invalidator.dart';
 import '../config/env.dart';
+import '../planos/plano_cache_policy.dart';
 import '../storage/secure_storage.dart';
 import 'offline_sync_service.dart';
+import 'tls_certificate_pinning.dart';
 
 class ApiClient {
   static String get _baseUrl => Env.apiUrl;
@@ -23,6 +25,8 @@ class ApiClient {
         sendTimeout: const Duration(seconds: 30),
       ),
     );
+
+    TlsCertificatePinning.apply(_dio);
 
     _dio.interceptors.add(
       InterceptorsWrapper(
@@ -45,6 +49,7 @@ class ApiClient {
               LocalCache.put(
                 LocalCache.keyFor(response.requestOptions),
                 response.data,
+                ttl: _cacheTtlForPath(path),
               );
             }
           }
@@ -218,6 +223,7 @@ class ApiClient {
     const cacheable = [
       '/api/personal/perfil',
       '/api/planos/me',
+      '/api/planos/vitrine',
       '/api/alunos',
       '/api/treinos',
       '/api/dashboard',
@@ -231,6 +237,16 @@ class ApiClient {
       }
     }
     return false;
+  }
+
+  static Duration? _cacheTtlForPath(String path) {
+    if (path.startsWith('/api/planos/vitrine')) {
+      return PlanoCachePolicy.vitrineMaxAge;
+    }
+    if (path.startsWith('/api/planos/me')) {
+      return PlanoCachePolicy.planosMeHttpCacheTtl;
+    }
+    return null;
   }
 
   static bool _shouldRetry(DioException e) {

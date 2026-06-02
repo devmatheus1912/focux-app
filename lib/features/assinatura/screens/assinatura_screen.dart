@@ -274,6 +274,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   }
 
   Future<void> _reconcilePlanFromServer() async {
+    await ref.read(assinaturaRepositoryProvider).clearVitrineCache();
+    ref.invalidate(paywallVitrineProvider);
     await ref.read(planoFeaturesProvider.notifier).refresh(reconcileFirst: true);
     ref.invalidate(perfilProvider);
   }

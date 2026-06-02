@@ -737,7 +737,7 @@ class PaywallUsageMeters extends StatelessWidget {
   }
 }
 
-class _PaywallUsageMeterRow extends StatelessWidget {
+class _PaywallUsageMeterRow extends StatefulWidget {
   final String label;
   final int used;
   final int limit;
@@ -763,71 +763,126 @@ class _PaywallUsageMeterRow extends StatelessWidget {
   });
 
   @override
+  State<_PaywallUsageMeterRow> createState() => _PaywallUsageMeterRowState();
+}
+
+class _PaywallUsageMeterRowState extends State<_PaywallUsageMeterRow>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pulse;
+  late Animation<double> _usedTween;
+  double _displayUsed = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _displayUsed = widget.used.toDouble();
+    _pulse = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 520),
+    );
+    _usedTween = AlwaysStoppedAnimation(_displayUsed);
+    _pulse.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _displayUsed = widget.used.toDouble();
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant _PaywallUsageMeterRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.used != widget.used) {
+      _usedTween = Tween<double>(begin: _displayUsed, end: widget.used.toDouble())
+          .animate(CurvedAnimation(parent: _pulse, curve: Curves.easeOutCubic));
+      _pulse.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final ratio = limit <= 0 ? 0.0 : (used / limit).clamp(0.0, 1.0);
-    final barColor = atLimit
-        ? const Color(0xFFE85D5D)
-        : nearLimit
-        ? PaywallCatalog.warning
-        : accent;
-    final rest = remaining ?? (limit - used).clamp(0, limit);
-    final statusHint = atLimit
-        ? ', limite atingido'
-        : nearLimit
-        ? ', perto do limite'
-        : '';
-    return Semantics(
-      label: '$label: $used de $limit, $rest restantes$statusHint',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
+    return AnimatedBuilder(
+      animation: _pulse,
+      builder: (context, _) {
+        final animatedUsed = _usedTween.value.round();
+        final ratio = widget.limit <= 0
+            ? 0.0
+            : (animatedUsed / widget.limit).clamp(0.0, 1.0);
+        final barColor = widget.atLimit
+            ? const Color(0xFFE85D5D)
+            : widget.nearLimit
+            ? PaywallCatalog.warning
+            : widget.accent;
+        final rest =
+            widget.remaining ??
+            (widget.limit - animatedUsed).clamp(0, widget.limit);
+        final statusHint = widget.atLimit
+            ? ', limite atingido'
+            : widget.nearLimit
+            ? ', perto do limite'
+            : '';
+        return Semantics(
+          label:
+              '${widget.label}: $animatedUsed de ${widget.limit}, $rest restantes$statusHint',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: Text(
-                  label,
-                  style: TokensStrip.body(color: secondary).copyWith(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              Row(
                 children: [
-                  Text(
-                    '$used / $limit',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: ink,
-                      fontFeatures: const [FontFeature.tabularFigures()],
+                  Expanded(
+                    child: Text(
+                      widget.label,
+                      style: TokensStrip.body(color: widget.secondary).copyWith(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                  Text(
-                    '$rest restantes',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: secondary,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '$animatedUsed / ${widget.limit}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          color: widget.ink,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                      Text(
+                        '$rest restantes',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: widget.secondary,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: LinearProgressIndicator(
+                  value: ratio,
+                  minHeight: 8,
+                  backgroundColor: widget.accent.withValues(
+                    alpha: widget.isDark ? 0.14 : 0.1,
+                  ),
+                  color: barColor,
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: ratio,
-              minHeight: 6,
-              backgroundColor: accent.withValues(alpha: isDark ? 0.12 : 0.08),
-              color: barColor,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

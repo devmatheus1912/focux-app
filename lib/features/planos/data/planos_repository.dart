@@ -5,7 +5,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/planos/plano_cache_policy.dart';
+
 import '../../../core/api/api_client.dart';
+import '../../../core/api/offline_sync_service.dart';
 import '../../subscription/models/subscription_plan.dart';
 
 class TrialStartPayload {
@@ -704,6 +707,24 @@ class PlanosRepository {
     return _loadPlanoFeaturesCache();
   }
 
+  Future<void> clearPlanoFeaturesCache() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_cacheKey);
+    await LocalCache.invalidate('/api/planos/me');
+  }
+
+  static bool isEntitlementsCacheFresh(DateTime? savedAt) {
+    if (savedAt == null) return false;
+    final age = DateTime.now().difference(savedAt);
+    return age <= PlanoCachePolicy.entitlementsBootstrapMaxAge;
+  }
+
+  static bool canUseStaleEntitlementsOnError(DateTime? savedAt) {
+    if (savedAt == null) return true;
+    final age = DateTime.now().difference(savedAt);
+    return age <= PlanoCachePolicy.entitlementsStaleOnErrorMaxAge;
+  }
+
   Future<void> _savePlanoFeaturesCache(PlanoFeatures features) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
@@ -723,6 +744,13 @@ class PlanosRepository {
       final decoded = jsonDecode(raw) as Map<String, dynamic>;
       final isWrapped = decoded.containsKey('data');
       final savedAt = isWrapped ? _parseDateTime(decoded['savedAt']) : null;
+      if (savedAt != null) {
+        final age = DateTime.now().difference(savedAt);
+        if (age > PlanoCachePolicy.entitlementsHardExpire) {
+          await prefs.remove(_cacheKey);
+          return null;
+        }
+      }
       final data =
           isWrapped
               ? Map<String, dynamic>.from(decoded['data'] as Map)

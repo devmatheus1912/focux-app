@@ -35,7 +35,8 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
 
   Future<void> bootstrap() async {
     final cached = await _repo.loadCachedPlanoFeatures();
-    if (cached != null) {
+    if (cached != null &&
+        PlanosRepository.isEntitlementsCacheFresh(cached.cacheSavedAt)) {
       state = AsyncData(cached.normalizeForTier());
       unawaited(
         AnalyticsService.instance.track(
@@ -67,7 +68,10 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
           : await _fetchWithRetry();
       state = AsyncData(fresh.normalizeForTier());
     } catch (error) {
-      if (previous != null) {
+      if (previous != null &&
+          PlanosRepository.canUseStaleEntitlementsOnError(
+            previous.cacheSavedAt,
+          )) {
         state = AsyncData(
           previous.normalizeForTier().copyWithOperationalState(
             fromCache: true,

@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 
 import '../config/env.dart';
 
-/// TLS pinning opcional para chamadas de pagamento/IAP (`API_CERT_PINS`).
+/// TLS pinning opcional para API principal, pagamento e IAP (`API_CERT_PINS`).
 class TlsCertificatePinning {
   TlsCertificatePinning._();
 

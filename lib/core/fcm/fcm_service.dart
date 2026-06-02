@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -7,12 +9,18 @@ import '../storage/secure_storage.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // No-op: notificação aparece automaticamente. Aqui só chega quando o app está
-  // em background; o deep link é processado em [_handleNotificationTap]
-  // quando o usuário abrir a notificação.
+  if (message.data['type'] == 'plan_sync') {
+    // Sem ProviderContainer em background: invalidação ocorre no próximo open
+    // ou via tap (onMessageOpenedApp). Handler registrado só em foreground.
+  }
 }
 
+typedef PlanSyncHandler = Future<void> Function(Map<String, dynamic> data);
+
 class FcmService {
+  /// Chamado quando chega FCM `type=plan_sync` (revogação/atualização de tier).
+  static PlanSyncHandler? onPlanSync;
+
   static Future<void> init(ApiClient apiClient) async {
     final messaging = FirebaseMessaging.instance;
 
@@ -30,9 +38,8 @@ class FcmService {
 
     // Mensagem em foreground: notificação automática + deep link no tap manual.
     FirebaseMessaging.onMessage.listen((message) {
-      // O Android exibe automaticamente; iOS depende de configurar o
-      // payload com `notification`. Logging só para diagnóstico.
       if (kDebugMode) debugPrint('[FCM] foreground: ${message.messageId}');
+      unawaited(_dispatchPlanSync(message.data));
     });
 
     // Tap em notificação enquanto o app estava em background.
@@ -91,9 +98,23 @@ class FcmService {
   /// - `route: "/alunos/123"` → empilha rota literal.
   /// - `alunoId: "123"` → vai para `/alunos/123`.
   /// - `chatId: "123"` → vai para `/alunos/123/chat`.
+  static Future<void> _dispatchPlanSync(Map<String, dynamic> data) async {
+    if (data['type'] != 'plan_sync') return;
+    final handler = onPlanSync;
+    if (handler == null) return;
+    try {
+      await handler(data);
+    } catch (e) {
+      if (kDebugMode) debugPrint('[FCM] plan_sync handler error: $e');
+    }
+  }
+
   static void _handleNotificationTap(RemoteMessage message) {
     try {
       final data = message.data;
+      if (data['type'] == 'plan_sync') {
+        unawaited(_dispatchPlanSync(data));
+      }
       String? route = data['route'] as String?;
       if (route == null || route.isEmpty) {
         final alunoId = data['alunoId'] as String?;
