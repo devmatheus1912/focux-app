@@ -682,7 +682,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
 
     SubscriptionPlan? paywallNextTier;
     var paywallHasUpgradeAbove = false;
-    double? enterpriseProMonthlyDelta;
     String? enterpriseProRoiTag;
     if (planos != null && planos.isNotEmpty) {
       Plano? enterprisePlano;
@@ -701,7 +700,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       if (enterprisePlano != null && enterpriseProPlano != null) {
         final delta = enterpriseProPlano.precoMensal - enterprisePlano.precoMensal;
         if (delta > 0) {
-          enterpriseProMonthlyDelta = delta;
           enterpriseProRoiTag = '+R\$ ${delta.toStringAsFixed(0)}/mês';
         }
       }
@@ -1061,7 +1059,11 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     ink: isDark ? EagleTokens.darkInk : const Color(0xFF081012),
                     onSectionTap: _scrollToPaywallSection,
                   ),
-                if (usage != null)
+                if (usage != null &&
+                    (!usePlanStudio ||
+                        (widget.blockedFeature != null &&
+                            widget.blockedFeature!.isNotEmpty) ||
+                        widget.blockedCapability != null))
                   PaywallContextBanner(
                     usage: usage,
                     blockedFeatureLabel: widget.blockedFeature,
@@ -1329,31 +1331,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                           isDark: isDark,
                         ),
                       );
-                    }
-
-                    if (isCurrentPlanSelected &&
-                        currentPlan == SubscriptionPlan.ENTERPRISE) {
-                      final roiCard = PaywallEnterpriseProRoiCard(
-                        ink: ink,
-                        mute: mute,
-                        isDark: isDark,
-                        monthlyDelta: enterpriseProMonthlyDelta,
-                        onExplorePro: () {
-                          HapticFeedback.selectionClick();
-                          _selectPlan(SubscriptionPlan.ENTERPRISE_PRO);
-                        },
-                      );
-                      final existingBelow = studioBelowPlan;
-                      studioBelowPlan = existingBelow == null
-                          ? roiCard
-                          : Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                existingBelow,
-                                const SizedBox(height: 10),
-                                roiCard,
-                              ],
-                            );
                     }
 
                     return [
@@ -1909,7 +1886,7 @@ class _AssinaturaStickyFooter extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         if (isActionable)
-          tierAccent != null
+          tierAccent != null && mode == _AssinaturaCtaMode.subscribe
               ? DecoratedBox(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(TokensStrip.rButton),

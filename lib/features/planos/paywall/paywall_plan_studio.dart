@@ -62,13 +62,26 @@ class PaywallPlanStudio extends StatelessWidget {
             currentPlan,
           );
 
+    final onCurrentEnterprise =
+        selectedPlan == currentPlan &&
+        currentPlan == SubscriptionPlan.ENTERPRISE &&
+        showPicker;
+
     return PaywallTierCard(
       plan: selectedPlan,
       isDark: isDark,
       isCurrent: selectedPlan == currentPlan,
       isSelected: true,
       glow: false,
-      child: Column(
+      child: Stack(
+        clipBehavior: Clip.hardEdge,
+        children: [
+          PaywallTierChrome.cardWash(
+            accent: PaywallCatalog.accentForPlan(currentPlan),
+            isDark: isDark,
+            emphasis: PaywallTierEmphasis.low,
+          ),
+          Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
@@ -97,6 +110,8 @@ class PaywallPlanStudio extends StatelessWidget {
                       Text(
                         isMaxTier
                             ? 'Plano máximo ativo'
+                            : onCurrentEnterprise
+                            ? 'Recursos ativos · faixa acima leva ao Pro'
                             : !showPicker
                             ? 'Gerencie na loja do dispositivo'
                             : selectedPlan == currentPlan
@@ -199,6 +214,8 @@ class PaywallPlanStudio extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ],
           ),
         ],
       ),

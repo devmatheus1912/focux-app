@@ -613,7 +613,10 @@ class PaywallUsageMeters extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return PaywallInsetPanel(
+    return Semantics(
+      container: true,
+      label: 'Uso do seu plano',
+      child: PaywallInsetPanel(
       accent: accent,
       isDark: isDark,
       padding: const EdgeInsets.all(12),
@@ -668,6 +671,7 @@ class PaywallUsageMeters extends StatelessWidget {
             ),
         ],
       ),
+    ),
     );
   }
 }
@@ -1630,7 +1634,7 @@ class _PaywallFeatureLegend extends StatelessWidget {
     return Semantics(
       label:
           'Legenda: check verde incluído no plano; cadeado requer upgrade; '
-          'estrela destaque; badge PRO indica plano Enterprise Pro',
+          'ícone destaque do plano; badge PRO indica Enterprise Pro',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1856,6 +1860,7 @@ class PaywallProExploreStrip extends StatelessWidget {
     final accent = PaywallCatalog.brandDeep;
     final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
     final tag = roiTag?.trim();
+    final proAccent = PaywallCatalog.accentForPlan(SubscriptionPlan.ENTERPRISE_PRO);
     return Semantics(
       button: true,
       label:
@@ -1870,7 +1875,25 @@ class PaywallProExploreStrip extends StatelessWidget {
             onExplorePro();
           },
           borderRadius: BorderRadius.circular(TokensStrip.rSm),
-          child: PaywallInsetPanel(
+          child: Stack(
+            clipBehavior: Clip.hardEdge,
+            children: [
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(TokensStrip.rSm),
+                    gradient: LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        proAccent.withValues(alpha: isDark ? 0.14 : 0.08),
+                        accent.withValues(alpha: isDark ? 0.06 : 0.03),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              PaywallInsetPanel(
             accent: accent,
             isDark: isDark,
             child: Row(
@@ -1907,6 +1930,8 @@ class PaywallProExploreStrip extends StatelessWidget {
                 Icon(Icons.chevron_right_rounded, color: accent, size: 22),
               ],
             ),
+          ),
+            ],
           ),
         ),
       ),
@@ -2444,7 +2469,14 @@ class _PaywallCollapsibleBlockState extends State<PaywallCollapsibleBlock> {
                 ),
                 trailing: _PaywallExpandTrailing(expanded: _expanded, mute: widget.mute),
                 children: [
-                  if (_mountedChild) widget.child,
+                  AnimatedSize(
+                    duration: TokensStrip.prefersReducedMotion(context)
+                        ? Duration.zero
+                        : const Duration(milliseconds: 220),
+                    curve: Curves.easeOutCubic,
+                    alignment: Alignment.topCenter,
+                    child: _mountedChild ? widget.child : const SizedBox.shrink(),
+                  ),
                 ],
               ),
             ),
