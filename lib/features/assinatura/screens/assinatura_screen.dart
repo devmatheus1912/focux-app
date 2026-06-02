@@ -832,7 +832,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         ctaLabel = trialOffer
             ? 'Começar $trialDays dias grátis — ${PaywallCatalog.displayPlanName(SubscriptionPlan.ENTERPRISE)}'
             : isUpgrade
-            ? 'Upgrade para $selectedLabel'
+            ? 'Confirmar upgrade'
             : selectedPlan == SubscriptionPlan.ENTERPRISE_PRO
             ? 'Continuar com $selectedLabel'
             : selectedPlan == SubscriptionPlan.ENTERPRISE
@@ -1756,6 +1756,9 @@ class _EnterpriseProUpgradePriceHint extends StatelessWidget {
     required this.isDark,
   });
 
+  static String _formatBrl(double value) =>
+      'R\$ ${value.toStringAsFixed(2).replaceAll('.', ',')}';
+
   String? _storeDeltaCopy() {
     final currentProduct = productDetails[
       SubscriptionProducts.productIdFor(currentPlan, billingPeriod)];
@@ -1770,39 +1773,59 @@ class _EnterpriseProUpgradePriceHint extends StatelessWidget {
     final delta = targetRaw - currentRaw;
     final periodLabel =
         billingPeriod == SubscriptionBillingPeriod.yearly ? 'ano' : 'mês';
-    return 'Diferença estimada na ${subscriptionChannelLabel()}: '
-        '${targetProduct.currencySymbol}${delta.toStringAsFixed(2)}/$periodLabel '
-        '(${currentProduct.price} → ${targetProduct.price}). '
-        'A loja pode aplicar crédito proporcional do ciclo atual.';
+    final deltaLabel = delta.toStringAsFixed(2).replaceAll('.', ',');
+    return 'Estimativa na ${subscriptionChannelLabel()}: +'
+        '${targetProduct.currencySymbol}$deltaLabel/$periodLabel '
+        'em relação ao seu plano atual. A loja confirma o valor final '
+        'e o crédito proporcional do ciclo.';
   }
 
   @override
   Widget build(BuildContext context) {
     final accent = PaywallCatalog.accentForPlan(targetPlan);
-    final targetLabel = PaywallCatalog.displayPlanName(targetPlan);
+    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
     final storeCopy = _storeDeltaCopy();
     final fallbackMonthly =
         targetBackend.precoMensal - currentBackend.precoMensal;
-    final text = storeCopy ??
+    final body = storeCopy ??
         (fallbackMonthly > 0
-            ? 'Upgrade para $targetLabel: diferença de referência '
-                'R\$ ${fallbackMonthly.toStringAsFixed(2)}/mês. '
-                'Valor final e crédito proporcional confirmados na ${subscriptionChannelLabel()}.'
-            : 'Upgrade para $targetLabel: valor final confirmado na ${subscriptionChannelLabel()} '
-                'com possível crédito proporcional do ciclo atual.');
+            ? 'Referência: +${_formatBrl(fallbackMonthly)}/mês. '
+                'Valor final na ${subscriptionChannelLabel()}, '
+                'com crédito proporcional se aplicável.'
+            : 'Valor final na ${subscriptionChannelLabel()}, '
+                'com crédito proporcional do ciclo se aplicável.');
 
-    return PaywallGlassCard(
+    return PaywallInsetPanel(
       accent: accent,
-      padding: const EdgeInsets.all(14),
-      blur: false,
-      elevationLevel: 4,
+      isDark: isDark,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(Icons.payments_outlined, size: 18, color: accent),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(text, style: TokensStrip.body(color: ink)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Quanto custa o upgrade?',
+                  style: AppTypography.inter(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                    height: 1.25,
+                    color: ink,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  body,
+                  style: TokensStrip.bodyMuted(color: secondary).copyWith(
+                    fontSize: 13,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
