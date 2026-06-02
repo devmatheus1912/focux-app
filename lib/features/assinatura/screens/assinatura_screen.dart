@@ -257,6 +257,16 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     );
   }
 
+  void _focusEnterpriseProUpgrade() {
+    HapticFeedback.selectionClick();
+    setState(() => _upgradeOffersExpanded = true);
+    _selectPlan(SubscriptionPlan.ENTERPRISE_PRO);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _scrollToPaywallSection(PaywallScrollTarget.comparar);
+    });
+  }
+
   void _scrollToPaywallSection(PaywallScrollTarget target) {
     if (target == PaywallScrollTarget.features ||
         target == PaywallScrollTarget.roi) {
@@ -911,10 +921,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                         ? 'Ver Enterprise Pro'
                         : null,
                     onSecondary: showEnterpriseProStickySecondary
-                        ? () {
-                            HapticFeedback.selectionClick();
-                            _selectPlan(SubscriptionPlan.ENTERPRISE_PRO);
-                          }
+                        ? _focusEnterpriseProUpgrade
                         : null,
                     onSubscribe:
                         () => _startCheckout(
@@ -1018,6 +1025,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 limiteAlunos: featuresAsync.value!.limiteAlunos,
                 iaUsadaMes: featuresAsync.value!.iaUsadaMes,
                 limiteIaMensal: featuresAsync.value!.limiteIaMensal,
+                iaRestantes: featuresAsync.value!.iaRestantes,
               );
 
           final isUpgradeTargetSelected = selPlan.level > currentPlan.level;
@@ -1349,6 +1357,13 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                             );
                             _selectPlan(plan);
                           },
+                          onExplorePro: _focusEnterpriseProUpgrade,
+                          onScrollToUsage: () =>
+                              _scrollToPaywallSection(PaywallScrollTarget.planos),
+                          showCompareAnchor:
+                              isCurrentPlanSelected &&
+                              currentPlan == SubscriptionPlan.ENTERPRISE &&
+                              nextTierPlan == SubscriptionPlan.ENTERPRISE_PRO,
                           planContent: planCard(selBackend),
                           compareSection: studioCompare,
                           belowPlanSection: studioBelowPlan,

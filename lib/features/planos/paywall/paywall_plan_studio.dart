@@ -27,6 +27,9 @@ class PaywallPlanStudio extends StatelessWidget {
     this.isMaxTier = false,
     this.roiTag,
     this.usageSnapshot,
+    this.onExplorePro,
+    this.onScrollToUsage,
+    this.showCompareAnchor = false,
   });
 
   final SubscriptionPlan currentPlan;
@@ -42,6 +45,9 @@ class PaywallPlanStudio extends StatelessWidget {
   final bool isMaxTier;
   final String? roiTag;
   final PlanoUsageSnapshot? usageSnapshot;
+  final VoidCallback? onExplorePro;
+  final VoidCallback? onScrollToUsage;
+  final bool showCompareAnchor;
 
   @override
   Widget build(BuildContext context) {
@@ -79,11 +85,7 @@ class PaywallPlanStudio extends StatelessWidget {
           PaywallTierChrome.cardWash(
             accent: PaywallCatalog.accentForPlan(currentPlan),
             isDark: isDark,
-            emphasis: PaywallTierEmphasis.mid,
-          ),
-          PaywallTierChrome.accentRail(
-            PaywallCatalog.accentForPlan(currentPlan),
-            emphasis: PaywallTierEmphasis.mid,
+            emphasis: PaywallTierEmphasis.low,
           ),
           Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -109,6 +111,13 @@ class PaywallPlanStudio extends StatelessWidget {
             ink: ink,
             secondary: secondary,
             isDark: isDark,
+            showUsageAnchor:
+                usageSnapshot != null &&
+                selectedPlan == currentPlan &&
+                onScrollToUsage != null,
+            showCompareAnchor: showCompareAnchor && onExplorePro != null,
+            onScrollToUsage: onScrollToUsage,
+            onScrollToCompare: onExplorePro,
           ),
           if (showPicker) ...[
             const SizedBox(height: TokensStrip.s3),
@@ -146,7 +155,9 @@ class PaywallPlanStudio extends StatelessWidget {
                 mute: mute,
                 isDark: isDark,
                 roiTag: roiTag,
-                onExplorePro: () => onPlanSelected(SubscriptionPlan.ENTERPRISE_PRO),
+                onExplorePro:
+                    onExplorePro ??
+                    () => onPlanSelected(SubscriptionPlan.ENTERPRISE_PRO),
               ),
             ),
           ],
@@ -216,6 +227,10 @@ class _PaywallPlanStudioHero extends StatelessWidget {
     required this.ink,
     required this.secondary,
     required this.isDark,
+    this.showUsageAnchor = false,
+    this.showCompareAnchor = false,
+    this.onScrollToUsage,
+    this.onScrollToCompare,
   });
 
   final SubscriptionPlan currentPlan;
@@ -226,16 +241,25 @@ class _PaywallPlanStudioHero extends StatelessWidget {
   final Color ink;
   final Color secondary;
   final bool isDark;
+  final bool showUsageAnchor;
+  final bool showCompareAnchor;
+  final VoidCallback? onScrollToUsage;
+  final VoidCallback? onScrollToCompare;
 
   @override
   Widget build(BuildContext context) {
     final kickerColor = PaywallCatalog.readableTierAccent(accent, isDark: isDark);
+    final anchorStyle = TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w700,
+      color: PaywallCatalog.readableTierAccent(accent, isDark: isDark),
+    );
 
     return Semantics(
       header: true,
       label: '$statusLabel. $subtitle',
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(22, 26, 20, 0),
+        padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -246,9 +270,9 @@ class _PaywallPlanStudioHero extends StatelessWidget {
                   Text(
                     kicker,
                     style: AppTypography.inter(
-                      fontSize: 10,
+                      fontSize: 11,
                       fontWeight: FontWeight.w800,
-                      letterSpacing: 1.5,
+                      letterSpacing: 1.35,
                       height: 1.0,
                       color: kickerColor,
                     ),
@@ -281,6 +305,41 @@ class _PaywallPlanStudioHero extends StatelessWidget {
                       borderRadius: BorderRadius.circular(1),
                     ),
                   ),
+                  if (showUsageAnchor || showCompareAnchor) ...[
+                    const SizedBox(height: TokensStrip.s3),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: [
+                        if (showUsageAnchor)
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              minimumSize: const Size(44, 36),
+                              tapTargetSize: MaterialTapTargetSize.padded,
+                            ),
+                            onPressed: () {
+                              HapticFeedback.selectionClick();
+                              onScrollToUsage?.call();
+                            },
+                            child: Text('Uso', style: anchorStyle),
+                          ),
+                        if (showCompareAnchor)
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              minimumSize: const Size(44, 36),
+                              tapTargetSize: MaterialTapTargetSize.padded,
+                            ),
+                            onPressed: () {
+                              HapticFeedback.selectionClick();
+                              onScrollToCompare?.call();
+                            },
+                            child: Text('Comparar Pro', style: anchorStyle),
+                          ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),

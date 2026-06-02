@@ -224,13 +224,16 @@ class PlanEntitlements {
     required int? limiteAlunos,
     required int iaUsadaMes,
     required int? limiteIaMensal,
+    int? iaRestantes,
   }) {
+    final limite = limiteIaMensal ?? 0;
     return PlanoUsageSnapshot(
       plano: plano,
       alunosAtivos: alunosAtivos,
       limiteAlunos: limiteAlunos,
       iaUsadaMes: iaUsadaMes,
-      limiteIaMensal: limiteIaMensal ?? 0,
+      limiteIaMensal: limite,
+      iaRestantes: iaRestantes,
     );
   }
 
@@ -289,6 +292,7 @@ class PlanoUsageSnapshot {
   final int? limiteAlunos;
   final int iaUsadaMes;
   final int limiteIaMensal;
+  final int? iaRestantes;
 
   const PlanoUsageSnapshot({
     required this.plano,
@@ -296,7 +300,14 @@ class PlanoUsageSnapshot {
     required this.limiteAlunos,
     required this.iaUsadaMes,
     required this.limiteIaMensal,
+    this.iaRestantes,
   });
+
+  int get iaRestantesEfetivos {
+    if (iaRestantes != null) return iaRestantes!.clamp(0, limiteIaMensal);
+    if (limiteIaMensal <= 0) return 0;
+    return (limiteIaMensal - iaUsadaMes).clamp(0, limiteIaMensal);
+  }
 
   String get planoLabel => plano.apiName;
 

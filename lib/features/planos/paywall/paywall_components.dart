@@ -319,6 +319,7 @@ class PaywallSubscriberQuickCompare extends StatelessWidget {
       line: line,
       isDark: isDark,
       initiallyExpanded: initiallyExpanded,
+      subscriberFlat: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -662,6 +663,7 @@ class PaywallUsageMeters extends StatelessWidget {
               label: 'IA Copiloto (mês)',
               used: usage.iaUsadaMes,
               limit: usage.limiteIaMensal,
+              remaining: usage.iaRestantesEfetivos,
               accent: accent,
               ink: ink,
               secondary: secondary,
@@ -680,6 +682,7 @@ class _PaywallUsageMeterRow extends StatelessWidget {
   final String label;
   final int used;
   final int limit;
+  final int? remaining;
   final Color accent;
   final Color ink;
   final Color secondary;
@@ -691,6 +694,7 @@ class _PaywallUsageMeterRow extends StatelessWidget {
     required this.label,
     required this.used,
     required this.limit,
+    this.remaining,
     required this.accent,
     required this.ink,
     required this.secondary,
@@ -707,8 +711,14 @@ class _PaywallUsageMeterRow extends StatelessWidget {
         : nearLimit
         ? PaywallCatalog.warning
         : accent;
+    final rest = remaining ?? (limit - used).clamp(0, limit);
+    final statusHint = atLimit
+        ? ', limite atingido'
+        : nearLimit
+        ? ', perto do limite'
+        : '';
     return Semantics(
-      label: '$label: $used de $limit',
+      label: '$label: $used de $limit, $rest restantes$statusHint',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -723,14 +733,27 @@ class _PaywallUsageMeterRow extends StatelessWidget {
                   ),
                 ),
               ),
-              Text(
-                '$used / $limit',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  color: ink,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '$used / $limit',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: ink,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                  Text(
+                    '$rest restantes',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: secondary,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -804,9 +827,9 @@ class _PaywallUsageUnlimitedRow extends StatelessWidget {
             child: Text(
               'ILIMITADO',
               style: TextStyle(
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: FontWeight.w900,
-                letterSpacing: 0.6,
+                letterSpacing: 0.5,
                 color: PaywallCatalog.readableTierAccent(accent, isDark: isDark),
               ),
             ),
@@ -1436,6 +1459,8 @@ class PaywallRichPlanCard extends StatelessWidget {
                             onFeatureHelp: onFeatureHelp,
                             allowLockedTap: !referenceMode,
                             showLegend: showFeatureLegend,
+                            hideLockedOnlySections:
+                                embeddedInStudio && collapseFeatures && isCurrent,
                           ),
                         ],
                       ),
@@ -1449,6 +1474,8 @@ class PaywallRichPlanCard extends StatelessWidget {
                       onFeatureHelp: onFeatureHelp,
                       allowLockedTap: !referenceMode,
                       showLegend: showFeatureLegend,
+                      hideLockedOnlySections:
+                          embeddedInStudio && collapseFeatures && isCurrent,
                     ),
                 ],
               ],
@@ -1494,6 +1521,7 @@ class PaywallPlanFeatureSections extends StatelessWidget {
   final VoidCallback? onFeatureHelp;
   final bool allowLockedTap;
   final bool showLegend;
+  final bool hideLockedOnlySections;
 
   const PaywallPlanFeatureSections({
     super.key,
@@ -1504,7 +1532,19 @@ class PaywallPlanFeatureSections extends StatelessWidget {
     this.onFeatureHelp,
     this.allowLockedTap = true,
     this.showLegend = false,
+    this.hideLockedOnlySections = false,
   });
+
+  List<PaywallPlanFeatureSection> get _visibleSections {
+    if (!hideLockedOnlySections) return sections;
+    return sections
+        .where(
+          (section) => section.items.any(
+            (item) => item.included || item.comingSoon,
+          ),
+        )
+        .toList();
+  }
 
   Duration _expansionDuration(BuildContext context) =>
       TokensStrip.prefersReducedMotion(context)
@@ -1527,8 +1567,9 @@ class PaywallPlanFeatureSections extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final visibleSections = _visibleSections;
     final comingSoonItems = <PaywallPlanFeatureItem>[
-      for (final section in sections)
+      for (final section in visibleSections)
         for (final item in section.items)
           if (item.comingSoon) item,
     ];
@@ -1538,7 +1579,7 @@ class PaywallPlanFeatureSections extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final section in sections) ...[
+          for (final section in visibleSections) ...[
             if (section.collapsible)
               Theme(
                 data: PaywallTierChrome.expansionTheme(context, accent),
@@ -2391,6 +2432,7 @@ class PaywallCollapsibleBlock extends StatefulWidget {
   final Color line;
   final bool isDark;
   final bool initiallyExpanded;
+  final bool subscriberFlat;
 
   const PaywallCollapsibleBlock({
     super.key,
@@ -2402,6 +2444,7 @@ class PaywallCollapsibleBlock extends StatefulWidget {
     required this.line,
     required this.isDark,
     this.initiallyExpanded = false,
+    this.subscriberFlat = false,
   });
 
   @override
@@ -2421,33 +2464,40 @@ class _PaywallCollapsibleBlockState extends State<PaywallCollapsibleBlock> {
 
   @override
   Widget build(BuildContext context) {
+    final flat = widget.subscriberFlat;
+    final reducedMotion = TokensStrip.prefersReducedMotion(context);
+    final useBlur = _expanded && !flat && !reducedMotion;
     return PaywallGlassCard(
       margin: const EdgeInsets.only(bottom: TokensStrip.s4),
       accent: PaywallCatalog.brandDeep,
       glow: false,
       glowStrength: 0.2,
-      blur: _expanded,
-      elevationLevel: _expanded ? 10 : 7,
+      blur: useBlur,
+      elevationLevel: flat ? 7 : (_expanded ? 10 : 7),
       padding: EdgeInsets.zero,
       child: Stack(
         children: [
-          PaywallTierChrome.cardWash(
-            accent: PaywallCatalog.brandDeep,
-            isDark: widget.isDark,
-            emphasis:
-                _expanded ? PaywallTierEmphasis.mid : PaywallTierEmphasis.low,
-          ),
-          PaywallTierChrome.accentRail(
-            PaywallCatalog.brandDeep,
-            emphasis:
-                _expanded ? PaywallTierEmphasis.mid : PaywallTierEmphasis.low,
-          ),
+          if (!flat)
+            PaywallTierChrome.cardWash(
+              accent: PaywallCatalog.brandDeep,
+              isDark: widget.isDark,
+              emphasis:
+                  _expanded ? PaywallTierEmphasis.mid : PaywallTierEmphasis.low,
+            ),
+          if (!flat)
+            PaywallTierChrome.accentRail(
+              PaywallCatalog.brandDeep,
+              emphasis:
+                  _expanded ? PaywallTierEmphasis.mid : PaywallTierEmphasis.low,
+            ),
           Theme(
             data: PaywallTierChrome.expansionTheme(context, TokensStrip.primary),
             child: Semantics(
               button: true,
               expanded: _expanded,
-              label: widget.title,
+              label:
+                  '${widget.title}. ${widget.subtitle}'
+                  '${_expanded ? '' : '. Toque para expandir'}',
               hint: _expanded ? 'Recolher seção' : 'Expandir seção',
               child: ExpansionTile(
                 initiallyExpanded: _expanded,
