@@ -545,13 +545,13 @@ class _PersonalDashboardScreenState
                       ),
                     ),
 
-                    if (riscoAlto > 0)
+                    if (riscoAlto > 0 && !attentionVisible)
                       SliverToBoxAdapter(
                         child: Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
                             onPressed: () => context.push('/retencao'),
-                            child: const Text('Ver saúde da base (churn)'),
+                            child: const Text('Ver saúde da base'),
                           ),
                         ),
                       ),
@@ -573,6 +573,13 @@ class _PersonalDashboardScreenState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: () => context.push('/retencao'),
+                                  child: const Text('Saúde da base'),
+                                ),
+                              ),
                               Align(
                                 alignment: Alignment.centerRight,
                                 child: TextButton(
@@ -947,35 +954,66 @@ class _PersonalDashboardScreenState
                                       ),
                                       const SizedBox(height: 12),
                                       if (receitaTrend.isNotEmpty) ...[
-                                        Semantics(
-                                          label:
-                                              'Tendência de receita nos últimos meses',
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                'Receita · últimos meses',
-                                                style: TextStyle(
-                                                  color: Colors.white.withValues(
-                                                    alpha: 0.72,
+                                        Builder(
+                                          builder: (ctx) {
+                                            final hasReceita =
+                                                receitaTrend.any((v) => v > 0);
+                                            if (!hasReceita) {
+                                              return Padding(
+                                                padding: const EdgeInsets.only(
+                                                  bottom: 10,
+                                                ),
+                                                child: Text(
+                                                  'Histórico mensal aparece ao registrar cobranças',
+                                                  style: TextStyle(
+                                                    color: Colors.white
+                                                        .withValues(
+                                                          alpha: 0.72,
+                                                        ),
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w500,
                                                   ),
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              );
+                                            }
+                                            return Padding(
+                                              padding: const EdgeInsets.only(
+                                                bottom: 10,
+                                              ),
+                                              child: Semantics(
+                                                label:
+                                                    'Tendência de receita nos últimos meses',
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      'Receita · últimos meses',
+                                                      style: TextStyle(
+                                                        color: Colors.white
+                                                            .withValues(
+                                                              alpha: 0.72,
+                                                            ),
+                                                        fontSize: 11,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                    const Spacer(),
+                                                    FxSparkline(
+                                                      data: receitaTrend,
+                                                      color: Colors.white
+                                                          .withValues(
+                                                            alpha: 0.92,
+                                                          ),
+                                                      width: 96,
+                                                      height: 26,
+                                                      fill: true,
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
-                                              const Spacer(),
-                                              FxSparkline(
-                                                data: receitaTrend,
-                                                color: Colors.white.withValues(
-                                                  alpha: 0.92,
-                                                ),
-                                                width: 96,
-                                                height: 26,
-                                                fill: true,
-                                              ),
-                                            ],
-                                          ),
+                                            );
+                                          },
                                         ),
-                                        const SizedBox(height: 10),
                                       ],
                                       _HeroProgressRail(
                                         progress: progressRaw.clamp(0.0, 1.0),
@@ -1626,29 +1664,75 @@ class _DayPulseStrip extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            Semantics(
-              label: 'Tendência de check-ins nos últimos 7 dias',
-              child: Row(
-                children: [
-                  Text(
-                    'Tendência 7 dias',
-                    style: _dashboardSectionKickerStyle(
-                      context,
-                      isDark: isDark,
+            Builder(
+              builder: (context) {
+                final mute = dashboardReadableMuted(context, isDark: isDark);
+                final hasTrend = checkinsTrend.any((v) => v > 0);
+                return Semantics(
+                  label:
+                      hasTrend
+                          ? 'Tendência de check-ins nos últimos 7 dias'
+                          : 'Sem check-ins nos últimos 7 dias. Abra a agenda para registrar treinos.',
+                  child: InkWell(
+                    onTap: onCheckins,
+                    borderRadius: BorderRadius.circular(TokensStrip.rInput),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Tendência 7 dias',
+                                  style: _dashboardSectionKickerStyle(
+                                    context,
+                                    isDark: isDark,
+                                  ),
+                                ),
+                                if (!hasTrend) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Sem check-ins · toque para abrir a agenda',
+                                    style: AppTypography.inter(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                      color: mute,
+                                      height: 1.25,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          if (hasTrend)
+                            FxSparkline(
+                              data: checkinsTrend,
+                              color: _pulseCheckinsAccent(
+                                checkinsHoje: checkinsHoje,
+                                neutralAccent: neutralAccent,
+                              ),
+                              width: 88,
+                              height: 24,
+                            )
+                          else
+                            Container(
+                              width: 88,
+                              height: 24,
+                              alignment: Alignment.centerRight,
+                              child: Icon(
+                                Icons.timeline_rounded,
+                                size: 20,
+                                color: mute,
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                  const Spacer(),
-                  FxSparkline(
-                    data: checkinsTrend,
-                    color: _pulseCheckinsAccent(
-                      checkinsHoje: checkinsHoje,
-                      neutralAccent: neutralAccent,
-                    ),
-                    width: 88,
-                    height: 24,
-                  ),
-                ],
-              ),
+                );
+              },
             ),
           ],
         ),

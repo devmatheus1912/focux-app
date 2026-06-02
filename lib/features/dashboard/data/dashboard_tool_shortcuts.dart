@@ -87,7 +87,7 @@ class DashboardToolShortcut {
       capability: 'equipeRbac',
       featureName: 'Equipe e RBAC',
     ),
-    DashboardToolShortcut(icon: 'pix', label: 'Pacotes', route: '/pacotes'),
+    DashboardToolShortcut(icon: 'coin', label: 'Pacotes', route: '/pacotes'),
     DashboardToolShortcut(
       icon: 'message-circle',
       label: 'Lead Público',
@@ -148,20 +148,20 @@ class DashboardToolShortcut {
   ];
 
   static const List<DashboardToolShortcut> roiQuickLinks = [
-    DashboardToolShortcut(icon: 'pix', label: 'Pacotes', route: '/pacotes'),
+    DashboardToolShortcut(icon: 'coin', label: 'Pacotes', route: '/pacotes'),
     DashboardToolShortcut(
       icon: 'message-circle',
-      label: 'Captura',
+      label: 'Captura pública',
       route: '/leads-publicos',
       capability: 'financeiro',
       featureName: 'Captura pública',
     ),
     DashboardToolShortcut(
       icon: 'moon',
-      label: 'White-label',
+      label: 'Marca própria',
       route: '/white-label',
       capability: 'whiteLabel',
-      featureName: 'White-label',
+      featureName: 'Identidade visual e marca própria',
     ),
     DashboardToolShortcut(
       icon: 'dollar-sign',
