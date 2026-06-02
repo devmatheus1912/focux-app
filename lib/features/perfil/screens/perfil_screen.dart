@@ -22,6 +22,7 @@ import '../../dashboard/data/dashboard_repository.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
+import '../utils/perfil_plan_labels.dart';
 import '../utils/perfil_readiness.dart';
 import '../../subscription/utils/landing_editor_access.dart';
 import '../../dashboard/widgets/gated_profile_shortcuts.dart';
@@ -524,7 +525,7 @@ class _PerfilBody extends StatelessWidget {
                                         CrossAxisAlignment.start,
                                     children: [
                                       _PlanPill(
-                                        label: _formatProfilePlan(perfil.plano),
+                                        label: perfilPlanPillLabel(perfil.plano),
                                       ),
                                       const SizedBox(height: 7),
                                       Text(
@@ -751,7 +752,7 @@ class _PerfilBody extends StatelessWidget {
                           _ActionTile(
                             icon: Icons.auto_awesome_outlined,
                             label: 'Copiloto IA',
-                            value: '${_formatPlanLabel(perfil.plano)} ativo',
+                            value: '${perfilPlanSectionLabel(perfil.plano)} ativo',
                             accent: accent,
                             actionInk: actionInk,
                             mute: mute,
@@ -2388,23 +2389,6 @@ String _buildSubtitle(PerfilPersonal perfil) {
     return '$specialty  |  @${ig.replaceFirst('@', '')}';
   }
   return specialty;
-}
-
-String _formatPlanLabel(String value) {
-  switch (value.trim().toUpperCase()) {
-    case 'ENTERPRISE':
-      return 'ENTERPRISE';
-    case 'PREMIUM':
-    case 'PRO':
-      return 'PREMIUM';
-    default:
-      return 'FREE';
-  }
-}
-
-String _formatProfilePlan(String value) {
-  final label = _formatPlanLabel(value);
-  return label == 'PREMIUM' ? 'PRO' : label;
 }
 
 String _formatInstagram(String? value) {

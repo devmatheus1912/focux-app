@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/assinatura/providers/assinatura_provider.dart';
 import '../../features/assinatura/data/assinatura_repository.dart';
+import '../../features/perfil/providers/perfil_provider.dart';
 import '../../features/planos/providers/plano_features_provider.dart';
 import 'fcm_service.dart';
 
@@ -36,6 +37,7 @@ class PlanSyncCoordinator {
     await container.read(planosRepositoryProvider).clearPlanoFeaturesCache();
     await container.read(assinaturaRepositoryProvider).clearVitrineCache();
     container.invalidate(paywallVitrineProvider);
+    container.invalidate(perfilProvider);
     await container
         .read(planoFeaturesProvider.notifier)
         .refresh(reconcileFirst: event == 'tier_revoked');
