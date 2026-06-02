@@ -680,6 +680,33 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
 
     final planos = planosAsync.valueOrNull;
 
+    SubscriptionPlan? paywallNextTier;
+    var paywallHasUpgradeAbove = false;
+    double? enterpriseProMonthlyDelta;
+    String? enterpriseProRoiTag;
+    if (planos != null && planos.isNotEmpty) {
+      Plano? enterprisePlano;
+      Plano? enterpriseProPlano;
+      for (final p in planos) {
+        final tier = subscriptionPlanFromApi(p.nome);
+        if (tier == SubscriptionPlan.ENTERPRISE) enterprisePlano = p;
+        if (tier == SubscriptionPlan.ENTERPRISE_PRO) enterpriseProPlano = p;
+        final nextTier = paywallNextTier;
+        if (tier.level > currentPlan.level &&
+            (nextTier == null || tier.level > nextTier.level)) {
+          paywallNextTier = tier;
+        }
+      }
+      paywallHasUpgradeAbove = paywallNextTier != null;
+      if (enterprisePlano != null && enterpriseProPlano != null) {
+        final delta = enterpriseProPlano.precoMensal - enterprisePlano.precoMensal;
+        if (delta > 0) {
+          enterpriseProMonthlyDelta = delta;
+          enterpriseProRoiTag = '+R\$ ${delta.toStringAsFixed(0)}/mês';
+        }
+      }
+    }
+
     if (!_initialSelectionApplied && planos != null) {
       _selectedPlanName = _resolveInitialPlanSelection(
         currentPlan: currentPlan,
@@ -723,7 +750,16 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 ? 'Gerenciar assinatura na loja'
                 : 'Plano atual';
         ctaEnabled = subscriptionUsesNativeStore && !_loadingCheckout;
-        footnote = '';
+        if (currentPlan == SubscriptionPlan.ENTERPRISE &&
+            paywallHasUpgradeAbove &&
+            paywallNextTier == SubscriptionPlan.ENTERPRISE_PRO &&
+            subscriptionUsesNativeStore) {
+          footnote = enterpriseProRoiTag != null
+              ? 'Enterprise Pro: Landing, Loja e Pose Coach · $enterpriseProRoiTag'
+              : 'Enterprise Pro desbloqueia Landing, Loja digital e Pose Coach.';
+        } else {
+          footnote = '';
+        }
       } else if (isDowngrade) {
         ctaMode =
             subscriptionUsesNativeStore
@@ -793,6 +829,12 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
             selectedPlan == SubscriptionPlan.ENTERPRISE_PRO
         ? PaywallCatalog.accentForPlan(SubscriptionPlan.ENTERPRISE_PRO)
         : null;
+    final showEnterpriseProStickySecondary =
+        isCurrentPlan &&
+        currentPlan == SubscriptionPlan.ENTERPRISE &&
+        paywallHasUpgradeAbove &&
+        paywallNextTier == SubscriptionPlan.ENTERPRISE_PRO &&
+        subscriptionUsesNativeStore;
 
     if (_paymentBlocked) {
       return FxShellScaffold(
@@ -865,6 +907,15 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                     mute: mute,
                     line: line,
                     primary: primary,
+                    secondaryLabel: showEnterpriseProStickySecondary
+                        ? 'Ver Enterprise Pro'
+                        : null,
+                    onSecondary: showEnterpriseProStickySecondary
+                        ? () {
+                            HapticFeedback.selectionClick();
+                            _selectPlan(SubscriptionPlan.ENTERPRISE_PRO);
+                          }
+                        : null,
                     onSubscribe:
                         () => _startCheckout(
                           selectedPlan,
@@ -1257,6 +1308,52 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                       );
                     }
 
+                    Widget? studioCompare;
+                    if (isCurrentPlanSelected &&
+                        currentPlan == SubscriptionPlan.ENTERPRISE &&
+                        nextTierPlan == SubscriptionPlan.ENTERPRISE_PRO) {
+                      studioCompare = PaywallSectionAnchor(
+                        anchorKey: _paywallCompareKey,
+                        child: PaywallSubscriberQuickCompare(
+                          currentPlan: currentPlan,
+                          targetPlan: nextTierPlan,
+                          comparisonRows: vitrineComparison,
+                          catalogFromApi: vitrine?.fromApi ?? false,
+                          initiallyExpanded: false,
+                          ink: ink,
+                          mute: mute,
+                          line: line,
+                          primary: primary,
+                          isDark: isDark,
+                        ),
+                      );
+                    }
+
+                    if (isCurrentPlanSelected &&
+                        currentPlan == SubscriptionPlan.ENTERPRISE) {
+                      final roiCard = PaywallEnterpriseProRoiCard(
+                        ink: ink,
+                        mute: mute,
+                        isDark: isDark,
+                        monthlyDelta: enterpriseProMonthlyDelta,
+                        onExplorePro: () {
+                          HapticFeedback.selectionClick();
+                          _selectPlan(SubscriptionPlan.ENTERPRISE_PRO);
+                        },
+                      );
+                      final existingBelow = studioBelowPlan;
+                      studioBelowPlan = existingBelow == null
+                          ? roiCard
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                existingBelow,
+                                const SizedBox(height: 10),
+                                roiCard,
+                              ],
+                            );
+                    }
+
                     return [
                       PaywallSectionAnchor(
                         anchorKey: _paywallPlanosKey,
@@ -1274,7 +1371,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                             _selectPlan(plan);
                           },
                           planContent: planCard(selBackend),
+                          compareSection: studioCompare,
                           belowPlanSection: studioBelowPlan,
+                          roiTag: enterpriseProRoiTag,
                           ink: ink,
                           mute: mute,
                           isDark: isDark,
@@ -1720,6 +1819,8 @@ class _AssinaturaStickyFooter extends StatelessWidget {
   final Color primary;
   final VoidCallback onSubscribe;
   final VoidCallback onManage;
+  final String? secondaryLabel;
+  final VoidCallback? onSecondary;
 
   const _AssinaturaStickyFooter({
     required this.mode,
@@ -1738,6 +1839,8 @@ class _AssinaturaStickyFooter extends StatelessWidget {
     required this.primary,
     required this.onSubscribe,
     required this.onManage,
+    this.secondaryLabel,
+    this.onSecondary,
   });
 
   @override
@@ -1789,6 +1892,16 @@ class _AssinaturaStickyFooter extends StatelessWidget {
                 : 'Cancele antes do fim do período gratuito para evitar cobrança.',
             textAlign: TextAlign.center,
             style: TokensStrip.bodyMuted(color: secondary),
+          ),
+          const SizedBox(height: 8),
+        ],
+        if (secondaryLabel != null &&
+            onSecondary != null &&
+            mode == _AssinaturaCtaMode.manageStore) ...[
+          FxLiquidSecondaryButton(
+            label: secondaryLabel!,
+            icon: Icons.workspace_premium_outlined,
+            onPressed: onSecondary,
           ),
           const SizedBox(height: 8),
         ],

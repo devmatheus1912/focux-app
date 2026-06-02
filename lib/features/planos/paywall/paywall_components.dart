@@ -1527,12 +1527,154 @@ class _PaywallLegendRow extends StatelessWidget {
   }
 }
 
+/// ROI compacto — assinante Enterprise vendo o plano atual (upgrade para Pro).
+class PaywallEnterpriseProRoiCard extends StatelessWidget {
+  final Color ink;
+  final Color mute;
+  final bool isDark;
+  final double? monthlyDelta;
+  final VoidCallback? onExplorePro;
+
+  const PaywallEnterpriseProRoiCard({
+    super.key,
+    required this.ink,
+    required this.mute,
+    required this.isDark,
+    this.monthlyDelta,
+    this.onExplorePro,
+  });
+
+  static const _bullets = <({String text, IconData icon})>[
+    (
+      text: 'Landing, Loja digital e Pose Coach no seu app',
+      icon: Icons.auto_awesome_rounded,
+    ),
+    (
+      text: 'Economize agência e desenvolvimento sob medida',
+      icon: Icons.savings_outlined,
+    ),
+    (
+      text: 'Escale alunos sem refazer infraestrutura',
+      icon: Icons.trending_up_rounded,
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = PaywallCatalog.accentForPlan(SubscriptionPlan.ENTERPRISE_PRO);
+    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    final delta = monthlyDelta;
+    final deltaLabel = delta != null && delta > 0
+        ? '+R\$ ${delta.toStringAsFixed(0)}/mês'
+        : null;
+
+    return PaywallGlassCard(
+      margin: EdgeInsets.zero,
+      accent: accent,
+      glow: false,
+      blur: false,
+      elevationLevel: 6,
+      padding: const EdgeInsets.all(14),
+      child: PaywallInsetPanel(
+        accent: accent,
+        isDark: isDark,
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.workspace_premium_rounded, size: 22, color: accent),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Por que o Enterprise Pro?',
+                    style: AppTypography.inter(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                      height: 1.25,
+                      color: ink,
+                    ),
+                  ),
+                ),
+                if (deltaLabel != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: PaywallCatalog.green.withValues(alpha: isDark ? 0.18 : 0.12),
+                      borderRadius: BorderRadius.circular(TokensStrip.rPill),
+                      border: Border.all(
+                        color: PaywallCatalog.green.withValues(alpha: 0.35),
+                      ),
+                    ),
+                    child: Text(
+                      deltaLabel,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: PaywallCatalog.green,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            for (final bullet in _bullets) ...[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(bullet.icon, size: 16, color: accent),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        bullet.text,
+                        style: TokensStrip.body(color: secondary).copyWith(
+                          fontSize: 13,
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            if (onExplorePro != null) ...[
+              const SizedBox(height: 4),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () {
+                    HapticFeedback.selectionClick();
+                    onExplorePro!();
+                  },
+                  icon: Icon(Icons.chevron_right_rounded, size: 18, color: accent),
+                  label: Text(
+                    'Ver Enterprise Pro',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: PaywallCatalog.readableTierAccent(accent, isDark: isDark),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Convite discreto para explorar o tier Pro no Plan Studio.
 class PaywallProExploreStrip extends StatelessWidget {
   final Color ink;
   final Color mute;
   final bool isDark;
   final VoidCallback onExplorePro;
+  final String? roiTag;
 
   const PaywallProExploreStrip({
     super.key,
@@ -1540,16 +1682,19 @@ class PaywallProExploreStrip extends StatelessWidget {
     required this.mute,
     required this.isDark,
     required this.onExplorePro,
+    this.roiTag,
   });
 
   @override
   Widget build(BuildContext context) {
     final accent = PaywallCatalog.brandDeep;
     final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    final tag = roiTag?.trim();
     return Semantics(
       button: true,
       label:
           'Landing, Loja digital e Pose Coach estão no Enterprise Pro. '
+          '${tag != null && tag.isNotEmpty ? '$tag. ' : ''}'
           'Toque para ver o plano Pro',
       child: Material(
         color: Colors.transparent,
@@ -1575,6 +1720,24 @@ class PaywallProExploreStrip extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (tag != null && tag.isNotEmpty) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: PaywallCatalog.green.withValues(alpha: isDark ? 0.16 : 0.1),
+                      borderRadius: BorderRadius.circular(TokensStrip.rPill),
+                    ),
+                    child: Text(
+                      tag,
+                      style: const TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w800,
+                        color: PaywallCatalog.green,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                ],
                 Icon(Icons.chevron_right_rounded, color: accent, size: 22),
               ],
             ),

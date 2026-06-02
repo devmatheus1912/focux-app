@@ -24,6 +24,7 @@ class PaywallPlanStudio extends StatelessWidget {
     this.compareSection,
     this.belowPlanSection,
     this.isMaxTier = false,
+    this.roiTag,
   });
 
   final SubscriptionPlan currentPlan;
@@ -37,6 +38,7 @@ class PaywallPlanStudio extends StatelessWidget {
   final Widget? compareSection;
   final Widget? belowPlanSection;
   final bool isMaxTier;
+  final String? roiTag;
 
   @override
   Widget build(BuildContext context) {
@@ -132,6 +134,7 @@ class PaywallPlanStudio extends StatelessWidget {
                 ink: ink,
                 mute: mute,
                 isDark: isDark,
+                roiTag: roiTag,
                 onExplorePro: () => onPlanSelected(SubscriptionPlan.ENTERPRISE_PRO),
               ),
             ),
