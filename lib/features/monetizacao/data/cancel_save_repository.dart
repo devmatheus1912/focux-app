@@ -6,20 +6,26 @@ class CancelSaveOferta {
   final String titulo;
   final String descricao;
   final String ctaLabel;
+  final String billingChannel;
+  final bool requiresStoreAction;
 
   CancelSaveOferta({
     required this.tipo,
     required this.titulo,
     required this.descricao,
     required this.ctaLabel,
+    required this.billingChannel,
+    required this.requiresStoreAction,
   });
 
   factory CancelSaveOferta.fromJson(Map<String, dynamic> j) => CancelSaveOferta(
-    tipo: j['tipo'] as String? ?? '',
-    titulo: j['titulo'] as String? ?? '',
-    descricao: j['descricao'] as String? ?? '',
-    ctaLabel: j['ctaLabel'] as String? ?? 'Aceitar',
-  );
+        tipo: j['tipo'] as String? ?? '',
+        titulo: j['titulo'] as String? ?? '',
+        descricao: j['descricao'] as String? ?? '',
+        ctaLabel: j['ctaLabel'] as String? ?? 'Aceitar oferta',
+        billingChannel: j['billingChannel'] as String? ?? 'MERCADO_PAGO',
+        requiresStoreAction: j['requiresStoreAction'] as bool? ?? false,
+      );
 }
 
 class CancelSaveResposta {
@@ -28,6 +34,8 @@ class CancelSaveResposta {
   final DateTime? pausaAte;
   final int? descontoPct;
   final String mensagem;
+  final bool billingApplied;
+  final bool requiresStoreAction;
 
   CancelSaveResposta({
     required this.id,
@@ -35,6 +43,8 @@ class CancelSaveResposta {
     required this.mensagem,
     this.pausaAte,
     this.descontoPct,
+    this.billingApplied = false,
+    this.requiresStoreAction = false,
   });
 
   factory CancelSaveResposta.fromJson(Map<String, dynamic> j) =>
@@ -46,6 +56,8 @@ class CancelSaveResposta {
             : null,
         descontoPct: (j['descontoPct'] as num?)?.toInt(),
         mensagem: j['mensagem'] as String? ?? '',
+        billingApplied: j['billingApplied'] as bool? ?? false,
+        requiresStoreAction: j['requiresStoreAction'] as bool? ?? false,
       );
 }
 
@@ -73,7 +85,8 @@ class CancelSaveRepository {
         'motivo': motivo,
         'ofertaApresentada': ofertaApresentada,
         'aceitar': aceitar ? 'SIM' : 'NAO',
-        'feedback': feedback,
+        if (feedback != null && feedback.trim().isNotEmpty)
+          'feedback': feedback.trim(),
       },
     );
     return CancelSaveResposta.fromJson(r.data as Map<String, dynamic>);

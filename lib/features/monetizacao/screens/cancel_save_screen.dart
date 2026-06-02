@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../features/planos/paywall/paywall_catalog.dart';
+import '../../../features/planos/paywall/paywall_components.dart';
+import '../../../features/subscription/store_subscription_policy.dart';
 import '../data/cancel_save_repository.dart';
 
 final _repoProvider = Provider(
@@ -20,8 +28,8 @@ class CancelSaveScreen extends ConsumerStatefulWidget {
 
 class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
   static const _motivos = <_Motivo>[
-    _Motivo('MUITO_CARO', 'Está caro demais agora', Icons.attach_money),
-    _Motivo('NAO_USO', 'Não estou usando o suficiente', Icons.timelapse),
+    _Motivo('MUITO_CARO', 'Está caro demais agora', Icons.attach_money_rounded),
+    _Motivo('NAO_USO', 'Não estou usando o suficiente', Icons.timelapse_rounded),
     _Motivo(
       'FALTA_FUNCIONALIDADE',
       'Faltou uma funcionalidade que preciso',
@@ -30,22 +38,25 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
     _Motivo(
       'MUDANDO_FERRAMENTA',
       'Vou usar outra ferramenta',
-      Icons.swap_horiz,
+      Icons.swap_horiz_rounded,
     ),
-    _Motivo('OUTRO', 'Outro motivo', Icons.help_outline),
+    _Motivo('OUTRO', 'Outro motivo', Icons.help_outline_rounded),
   ];
 
   String? _motivoSelecionado;
   CancelSaveOferta? _oferta;
   bool _carregandoOferta = false;
+  String? _erroOferta;
   bool _enviando = false;
   String? _feedback;
 
   Future<void> _selecionarMotivo(String motivo) async {
+    HapticFeedback.selectionClick();
     setState(() {
       _motivoSelecionado = motivo;
       _carregandoOferta = true;
       _oferta = null;
+      _erroOferta = null;
     });
     try {
       final oferta = await ref.read(_repoProvider).oferta(motivo);
@@ -56,12 +67,17 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
       });
     } catch (_) {
       if (!mounted) return;
-      setState(() => _carregandoOferta = false);
+      setState(() {
+        _carregandoOferta = false;
+        _erroOferta =
+            'Não foi possível carregar a alternativa agora. Tente de novo.';
+      });
     }
   }
 
   Future<void> _responder(bool aceitar) async {
     if (_motivoSelecionado == null || _oferta == null) return;
+    HapticFeedback.lightImpact();
     setState(() => _enviando = true);
     try {
       final resposta = await ref.read(_repoProvider).responder(
@@ -71,12 +87,24 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
             feedback: _feedback,
           );
       if (!mounted) return;
+
+      if (aceitar &&
+          (resposta.requiresStoreAction || _oferta!.requiresStoreAction) &&
+          subscriptionUsesNativeStore) {
+        await openNativeSubscriptionManagement();
+      }
+
+      if (!mounted) return;
       _showResultado(resposta);
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showSnackBar(
         context,
-        SnackBar(content: Text('Erro: $e')),
+        SnackBar(
+          content: Text(
+            'Não foi possível concluir agora. Tente novamente em instantes.',
+          ),
+        ),
       );
     } finally {
       if (mounted) setState(() => _enviando = false);
@@ -84,22 +112,27 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
   }
 
   void _showResultado(CancelSaveResposta r) {
+    final theme = Theme.of(context);
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         icon: Icon(
-          r.aceita ? Icons.celebration : Icons.exit_to_app,
-          color: r.aceita ? Colors.green : Theme.of(ctx).colorScheme.outline,
+          r.aceita ? Icons.celebration_rounded : Icons.exit_to_app_rounded,
+          color: r.aceita ? PaywallCatalog.green : theme.colorScheme.outline,
           size: 48,
         ),
-        title: Text(r.aceita ? 'Tudo certo!' : 'Cancelamento confirmado'),
+        title: Text(r.aceita ? 'Oferta registrada' : 'Cancelamento confirmado'),
         content: Text(r.mensagem),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              context.go('/');
+              if (r.aceita) {
+                context.go('/assinatura');
+              } else {
+                context.go('/dashboard/personal');
+              }
             },
             child: const Text('Fechar'),
           ),
@@ -110,55 +143,196 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Antes de cancelar...')),
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final primary = theme.colorScheme.primary;
+    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+
+    return FxShellScaffold(
+      useMesh: true,
+      appBar: FxShellAppBar(
+        title: 'Antes de cancelar…',
+        onBack: () => context.canPop() ? context.pop() : context.go('/assinatura'),
+      ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
           Text(
             'Que pena que você quer ir embora.',
-            style: Theme.of(context).textTheme.titleLarge,
+            style: TokensStrip.h2(color: ink),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Text(
-            'Conta pra gente o motivo: a próxima tela tem uma alternativa que pode resolver.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+            'Selecione um motivo — mostramos uma alternativa personalizada aqui embaixo.',
+            style: TokensStrip.bodyMuted(color: secondary).copyWith(
+              fontSize: TokensStrip.fontBodySm,
+              height: 1.45,
+            ),
           ),
-          const SizedBox(height: 24),
-          for (final m in _motivos)
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(
-                  color: _motivoSelecionado == m.codigo
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.outlineVariant,
-                  width: _motivoSelecionado == m.codigo ? 2 : 1,
+          const SizedBox(height: 20),
+          for (final m in _motivos) ...[
+            _MotivoTile(
+              motivo: m,
+              selected: _motivoSelecionado == m.codigo,
+              ink: ink,
+              mute: mute,
+              primary: primary,
+              isDark: isDark,
+              onTap: () => _selecionarMotivo(m.codigo),
+            ),
+            const SizedBox(height: 8),
+          ],
+          const SizedBox(height: 8),
+          AnimatedSwitcher(
+            duration: TokensStrip.prefersReducedMotion(context)
+                ? Duration.zero
+                : const Duration(milliseconds: 220),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            child: _carregandoOferta
+                ? const Padding(
+                    key: ValueKey('loading'),
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Center(child: FxLoading()),
+                  )
+                : _erroOferta != null
+                ? _ErroOfertaPanel(
+                    key: const ValueKey('error'),
+                    message: _erroOferta!,
+                    ink: ink,
+                    mute: mute,
+                    isDark: isDark,
+                    onRetry: () => _selecionarMotivo(_motivoSelecionado!),
+                  )
+                : _oferta != null
+                ? _OfertaCard(
+                    key: ValueKey(_oferta!.tipo),
+                    oferta: _oferta!,
+                    enviando: _enviando,
+                    ink: ink,
+                    mute: mute,
+                    primary: primary,
+                    isDark: isDark,
+                    onAceitar: () => _responder(true),
+                    onRecusar: () => _responder(false),
+                    onFeedback: (txt) => _feedback = txt,
+                  )
+                : const SizedBox.shrink(key: ValueKey('empty')),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MotivoTile extends StatelessWidget {
+  const _MotivoTile({
+    required this.motivo,
+    required this.selected,
+    required this.ink,
+    required this.mute,
+    required this.primary,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  final _Motivo motivo;
+  final bool selected;
+  final Color ink;
+  final Color mute;
+  final Color primary;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: motivo.label,
+      child: Material(
+        color: TokensStrip.cardBg,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Ink(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: selected
+                    ? primary
+                    : TokensStrip.borderDefault.withValues(
+                        alpha: isDark ? 0.5 : 1,
+                      ),
+                width: selected ? 2 : 1,
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              children: [
+                Icon(
+                  motivo.icone,
+                  size: 22,
+                  color: selected ? primary : secondary,
                 ),
-              ),
-              child: ListTile(
-                leading: Icon(m.icone),
-                title: Text(m.label),
-                trailing: _motivoSelecionado == m.codigo
-                    ? const Icon(Icons.check, color: Colors.green)
-                    : null,
-                onTap: () => _selecionarMotivo(m.codigo),
-              ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    motivo.label,
+                    style: TokensStrip.body(color: ink).copyWith(
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+                if (selected)
+                  Icon(Icons.check_circle_rounded, color: primary, size: 22),
+              ],
             ),
-          const SizedBox(height: 16),
-          if (_carregandoOferta)
-            const Center(child: FxLoading())
-          else if (_oferta != null)
-            _OfertaCard(
-              oferta: _oferta!,
-              enviando: _enviando,
-              onAceitar: () => _responder(true),
-              onRecusar: () => _responder(false),
-              onFeedback: (txt) => _feedback = txt,
-            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ErroOfertaPanel extends StatelessWidget {
+  const _ErroOfertaPanel({
+    super.key,
+    required this.message,
+    required this.ink,
+    required this.mute,
+    required this.isDark,
+    required this.onRetry,
+  });
+
+  final String message;
+  final Color ink;
+  final Color mute;
+  final bool isDark;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return PaywallInsetPanel(
+      accent: PaywallCatalog.warning,
+      isDark: isDark,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            message,
+            style: TokensStrip.body(color: ink).copyWith(fontSize: 14),
+          ),
+          const SizedBox(height: 10),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(onPressed: onRetry, child: const Text('Tentar de novo')),
+          ),
         ],
       ),
     );
@@ -167,84 +341,124 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
 
 class _OfertaCard extends StatelessWidget {
   const _OfertaCard({
+    super.key,
     required this.oferta,
     required this.onAceitar,
     required this.onRecusar,
     required this.onFeedback,
     required this.enviando,
+    required this.ink,
+    required this.mute,
+    required this.primary,
+    required this.isDark,
   });
+
   final CancelSaveOferta oferta;
   final VoidCallback onAceitar;
   final VoidCallback onRecusar;
   final ValueChanged<String> onFeedback;
   final bool enviando;
+  final Color ink;
+  final Color mute;
+  final Color primary;
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: theme.colorScheme.primary.withValues(alpha: .3),
-        ),
-      ),
-      color: theme.colorScheme.primary.withValues(alpha: .05),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withValues(alpha: .15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(Icons.local_offer_outlined,
-                      color: theme.colorScheme.primary),
+    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    return PaywallInsetPanel(
+      accent: primary,
+      isDark: isDark,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(oferta.titulo,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(oferta.descricao,
-                style: theme.textTheme.bodyMedium),
-            const SizedBox(height: 16),
-            TextField(
-              maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'Quer deixar um feedback? (opcional)',
+                child: Icon(Icons.local_offer_outlined, color: primary, size: 22),
               ),
-              onChanged: onFeedback,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: enviando ? null : onAceitar,
-                    icon: const Icon(Icons.check),
-                    label: Text(oferta.ctaLabel.replaceAll('_', ' ')),
-                  ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      oferta.titulo,
+                      style: TokensStrip.body(color: ink).copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 17,
+                        height: 1.25,
+                      ),
+                    ),
+                    if (oferta.requiresStoreAction) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        'Conclusão na ${subscriptionChannelLabel()}',
+                        style: TokensStrip.bodyMuted(color: secondary).copyWith(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-                const SizedBox(width: 12),
-                TextButton(
-                  onPressed: enviando ? null : onRecusar,
-                  child: const Text('Cancelar mesmo assim'),
-                ),
-              ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            oferta.descricao,
+            style: TokensStrip.bodyMuted(color: secondary).copyWith(
+              fontSize: 14,
+              height: 1.45,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            maxLines: 3,
+            maxLength: 2000,
+            decoration: InputDecoration(
+              labelText: 'Feedback (opcional)',
+              hintText: 'Conte o que faltou ou o que podemos melhorar',
+              counterStyle: TokensStrip.bodyMuted(color: secondary).copyWith(
+                fontSize: 11,
+              ),
+            ),
+            onChanged: onFeedback,
+          ),
+          const SizedBox(height: 16),
+          FxLiquidPrimaryButton(
+            label: oferta.ctaLabel,
+            icon: Icons.check_rounded,
+            loading: enviando,
+            loadingLabel: 'Salvando…',
+            onPressed: enviando ? null : onAceitar,
+          ),
+          const SizedBox(height: 10),
+          Center(
+            child: TextButton(
+              onPressed: enviando ? null : onRecusar,
+              style: TextButton.styleFrom(
+                minimumSize: const Size(44, 44),
+              ),
+              child: Text(
+                'Cancelar mesmo assim',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: primary,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
