@@ -30,6 +30,10 @@ class PaywallPlanStudio extends StatelessWidget {
     this.onExplorePro,
     this.onScrollToUsage,
     this.showCompareAnchor = false,
+    this.showProExploreStrip = true,
+    this.syncWarning,
+    this.planMismatch = false,
+    this.onRefreshPlan,
   });
 
   final SubscriptionPlan currentPlan;
@@ -48,6 +52,10 @@ class PaywallPlanStudio extends StatelessWidget {
   final VoidCallback? onExplorePro;
   final VoidCallback? onScrollToUsage;
   final bool showCompareAnchor;
+  final bool showProExploreStrip;
+  final String? syncWarning;
+  final bool planMismatch;
+  final VoidCallback? onRefreshPlan;
 
   @override
   Widget build(BuildContext context) {
@@ -119,6 +127,22 @@ class PaywallPlanStudio extends StatelessWidget {
             onScrollToUsage: onScrollToUsage,
             onScrollToCompare: onExplorePro,
           ),
+          if (planMismatch || (syncWarning != null && syncWarning!.isNotEmpty)) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+              child: PaywallPlanSyncBanner(
+                ink: ink,
+                mute: mute,
+                isDark: isDark,
+                billingLabel: PaywallCatalog.displayPlanName(currentPlan),
+                serverLabel: usageSnapshot?.serverPlano != null
+                    ? PaywallCatalog.displayPlanName(usageSnapshot!.serverPlano!)
+                    : null,
+                message: syncWarning,
+                onRefresh: onRefreshPlan,
+              ),
+            ),
+          ],
           if (showPicker) ...[
             const SizedBox(height: TokensStrip.s3),
             Padding(
@@ -145,7 +169,8 @@ class PaywallPlanStudio extends StatelessWidget {
               ),
             ),
           ],
-          if (showPicker &&
+          if (showProExploreStrip &&
+              showPicker &&
               currentPlan == SubscriptionPlan.ENTERPRISE &&
               selectedPlan == SubscriptionPlan.ENTERPRISE) ...[
             Padding(

@@ -218,6 +218,31 @@ class PlanEntitlements {
     );
   }
 
+  /// Limites exibidos no paywall — prioriza tier da assinatura (loja) sobre `/me` divergente.
+  static int? effectiveLimiteAlunos({
+    required SubscriptionPlan billingPlan,
+    required int? fromApi,
+  }) {
+    if (billingPlan == SubscriptionPlan.ENTERPRISE ||
+        billingPlan == SubscriptionPlan.ENTERPRISE_PRO) {
+      return null;
+    }
+    return fromApi;
+  }
+
+  static int effectiveLimiteIaMensal({
+    required SubscriptionPlan billingPlan,
+    required int? fromApi,
+  }) {
+    if (fromApi != null && fromApi > 0) return fromApi;
+    return switch (billingPlan) {
+      SubscriptionPlan.ENTERPRISE ||
+      SubscriptionPlan.ENTERPRISE_PRO => PlanoIaLimits.enterprise,
+      SubscriptionPlan.PREMIUM => PlanoIaLimits.premium,
+      _ => 0,
+    };
+  }
+
   static PlanoUsageSnapshot snapshotFrom({
     required SubscriptionPlan plano,
     required int alunosAtivos,
@@ -225,14 +250,25 @@ class PlanEntitlements {
     required int iaUsadaMes,
     required int? limiteIaMensal,
     int? iaRestantes,
+    SubscriptionPlan? billingPlan,
+    SubscriptionPlan? serverPlano,
   }) {
-    final limite = limiteIaMensal ?? 0;
+    final bill = billingPlan ?? plano;
+    final limiteAlunosEff = effectiveLimiteAlunos(
+      billingPlan: bill,
+      fromApi: limiteAlunos,
+    );
+    final limiteIa = effectiveLimiteIaMensal(
+      billingPlan: bill,
+      fromApi: limiteIaMensal,
+    );
     return PlanoUsageSnapshot(
-      plano: plano,
+      plano: bill,
+      serverPlano: serverPlano ?? plano,
       alunosAtivos: alunosAtivos,
-      limiteAlunos: limiteAlunos,
+      limiteAlunos: limiteAlunosEff,
       iaUsadaMes: iaUsadaMes,
-      limiteIaMensal: limite,
+      limiteIaMensal: limiteIa,
       iaRestantes: iaRestantes,
     );
   }
@@ -288,6 +324,7 @@ class LockedOffer {
 /// Métricas de uso vindas de `/api/planos/me`.
 class PlanoUsageSnapshot {
   final SubscriptionPlan plano;
+  final SubscriptionPlan? serverPlano;
   final int alunosAtivos;
   final int? limiteAlunos;
   final int iaUsadaMes;
@@ -296,12 +333,16 @@ class PlanoUsageSnapshot {
 
   const PlanoUsageSnapshot({
     required this.plano,
+    this.serverPlano,
     required this.alunosAtivos,
     required this.limiteAlunos,
     required this.iaUsadaMes,
     required this.limiteIaMensal,
     this.iaRestantes,
   });
+
+  bool get planMismatch =>
+      serverPlano != null && serverPlano!.level != plano.level;
 
   int get iaRestantesEfetivos {
     if (iaRestantes != null) return iaRestantes!.clamp(0, limiteIaMensal);

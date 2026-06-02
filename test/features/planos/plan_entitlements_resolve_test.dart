@@ -26,4 +26,20 @@ void main() {
     );
     expect(target, SubscriptionPlan.ENTERPRISE_PRO);
   });
+
+  test('snapshot uses billing tier for unlimited alunos when API says FREE', () {
+    final usage = PlanEntitlements.snapshotFrom(
+      plano: SubscriptionPlan.FREE,
+      billingPlan: SubscriptionPlan.ENTERPRISE,
+      serverPlano: SubscriptionPlan.FREE,
+      alunosAtivos: 0,
+      limiteAlunos: 5,
+      iaUsadaMes: 0,
+      limiteIaMensal: 0,
+    );
+    expect(usage.plano, SubscriptionPlan.ENTERPRISE);
+    expect(usage.limiteAlunos, isNull);
+    expect(usage.planMismatch, isTrue);
+    expect(usage.limiteIaMensal, 400);
+  });
 }

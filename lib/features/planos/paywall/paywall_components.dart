@@ -840,6 +840,88 @@ class _PaywallUsageUnlimitedRow extends StatelessWidget {
   }
 }
 
+// ─── Sync banner (assinatura vs /me) ────────────────────────────────────────
+
+class PaywallPlanSyncBanner extends StatelessWidget {
+  final Color ink;
+  final Color mute;
+  final bool isDark;
+  final String billingLabel;
+  final String? serverLabel;
+  final String? message;
+  final VoidCallback? onRefresh;
+
+  const PaywallPlanSyncBanner({
+    super.key,
+    required this.ink,
+    required this.mute,
+    required this.isDark,
+    required this.billingLabel,
+    this.serverLabel,
+    this.message,
+    this.onRefresh,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = PaywallCatalog.warning;
+    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    final body = message?.trim().isNotEmpty == true
+        ? message!.trim()
+        : serverLabel != null
+        ? 'Assinatura $billingLabel · servidor reporta $serverLabel. '
+            'Uso e limites seguem sua assinatura até sincronizar.'
+        : 'Sincronização do plano pendente. Uso segue sua assinatura ativa.';
+
+    return Semantics(
+      container: true,
+      label: body,
+      child: PaywallInsetPanel(
+        accent: accent,
+        isDark: isDark,
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.sync_problem_rounded, size: 20, color: accent),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                body,
+                style: TokensStrip.body(color: secondary).copyWith(
+                  fontSize: 12.5,
+                  height: 1.4,
+                ),
+              ),
+            ),
+            if (onRefresh != null) ...[
+              const SizedBox(width: 6),
+              TextButton(
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  onRefresh!();
+                },
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(44, 44),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                ),
+                child: Text(
+                  'Atualizar',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12,
+                    color: PaywallCatalog.readableTierAccent(accent, isDark: isDark),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // ─── Context banner ─────────────────────────────────────────────────────────
 
 class PaywallContextBanner extends StatelessWidget {
@@ -1436,10 +1518,26 @@ class PaywallRichPlanCard extends StatelessWidget {
                   const SizedBox(height: 12)
                 else ...[
                   Divider(height: 1, color: line.withValues(alpha: isDark ? 0.35 : 0.45)),
+                  if (embeddedInStudio && collapseFeatures && isCurrent) ...[
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+                      child: _PaywallStudioFeatureSummary(
+                        sections: sections,
+                        accent: accent,
+                        ink: ink,
+                        mute: mute,
+                        isDark: isDark,
+                      ),
+                    ),
+                  ],
                   if (collapseFeatures)
                     Theme(
                       data: PaywallTierChrome.expansionTheme(context, accent),
-                      child: ExpansionTile(
+                      child: Semantics(
+                        label: referenceMode
+                            ? 'Ver recursos deste plano, referência'
+                            : 'Ver todos os recursos do plano',
+                        child: ExpansionTile(
                         tilePadding: const EdgeInsets.symmetric(horizontal: 20),
                         childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                         title: Text(
@@ -1463,6 +1561,7 @@ class PaywallRichPlanCard extends StatelessWidget {
                                 embeddedInStudio && collapseFeatures && isCurrent,
                           ),
                         ],
+                      ),
                       ),
                     )
                   else
@@ -1508,6 +1607,87 @@ class PaywallRichPlanCard extends StatelessWidget {
                 nestedInAccordion: nestedInAccordion,
                 child: cardBody,
               ),
+      ),
+    );
+  }
+}
+
+/// Três destaques do plano ativo — modo resumo no Plan Studio.
+class _PaywallStudioFeatureSummary extends StatelessWidget {
+  final List<PaywallPlanFeatureSection> sections;
+  final Color accent;
+  final Color ink;
+  final Color mute;
+  final bool isDark;
+
+  const _PaywallStudioFeatureSummary({
+    required this.sections,
+    required this.accent,
+    required this.ink,
+    required this.mute,
+    required this.isDark,
+  });
+
+  List<PaywallPlanFeatureItem> get _highlights {
+    final included = <PaywallPlanFeatureItem>[];
+    for (final section in sections) {
+      for (final item in section.items) {
+        if (item.included && !item.comingSoon) included.add(item);
+      }
+    }
+    included.sort((a, b) {
+      final ah = a.highlight ? 1 : 0;
+      final bh = b.highlight ? 1 : 0;
+      return bh.compareTo(ah);
+    });
+    return included.take(3).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final items = _highlights;
+    if (items.isEmpty) return const SizedBox.shrink();
+    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+
+    return PaywallInsetPanel(
+      accent: accent,
+      isDark: isDark,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Incluído no seu plano',
+            style: AppTypography.inter(
+              fontWeight: FontWeight.w800,
+              fontSize: 12,
+              color: ink,
+            ),
+          ),
+          const SizedBox(height: 8),
+          for (final item in items)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.check_circle_rounded, size: 16, color: PaywallCatalog.green),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: PaywallFeatureLabel(
+                      raw: item.label,
+                      ink: ink,
+                      accent: accent,
+                      style: TokensStrip.body(color: secondary).copyWith(
+                        fontSize: 12.5,
+                        fontWeight: item.highlight ? FontWeight.w700 : FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -1960,8 +2140,9 @@ class PaywallProExploreStrip extends StatelessWidget {
                     child: Text(
                       tag,
                       style: const TextStyle(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.2,
                         color: PaywallCatalog.green,
                       ),
                     ),

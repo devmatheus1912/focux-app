@@ -1017,15 +1017,18 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
             });
           }
 
-          final usage = featuresAsync.valueOrNull == null
+          final meFeatures = featuresAsync.valueOrNull;
+          final usage = meFeatures == null
               ? null
               : PlanEntitlements.snapshotFrom(
-                plano: featuresAsync.value!.plano,
-                alunosAtivos: featuresAsync.value!.alunosAtivos,
-                limiteAlunos: featuresAsync.value!.limiteAlunos,
-                iaUsadaMes: featuresAsync.value!.iaUsadaMes,
-                limiteIaMensal: featuresAsync.value!.limiteIaMensal,
-                iaRestantes: featuresAsync.value!.iaRestantes,
+                plano: meFeatures.plano,
+                billingPlan: currentPlan,
+                serverPlano: meFeatures.plano,
+                alunosAtivos: meFeatures.alunosAtivos,
+                limiteAlunos: meFeatures.limiteAlunos,
+                iaUsadaMes: meFeatures.iaUsadaMes,
+                limiteIaMensal: meFeatures.limiteIaMensal,
+                iaRestantes: meFeatures.iaRestantes,
               );
 
           final isUpgradeTargetSelected = selPlan.level > currentPlan.level;
@@ -1180,11 +1183,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                       plano: plano,
                       plan: plan,
                       embeddedInStudio: usePlanStudio && !lockedDowngrade,
-                      showFeatureLegend:
-                          usePlanStudio &&
-                          plan == currentPlan &&
-                          !lockedDowngrade &&
-                          !isReferenceCard,
+                      showFeatureLegend: false,
                       isSelected: plan == selPlan && !lockedDowngrade,
                       isCurrent: plan == currentPlan,
                       isLockedDowngrade: lockedDowngrade,
@@ -1369,6 +1368,12 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                           belowPlanSection: studioBelowPlan,
                           roiTag: enterpriseProRoiTag,
                           usageSnapshot: usage,
+                          showProExploreStrip: !showEnterpriseProStickySecondary,
+                          planMismatch: usage?.planMismatch ?? false,
+                          syncWarning: meFeatures?.syncWarning,
+                          onRefreshPlan: () {
+                            ref.invalidate(planoFeaturesProvider);
+                          },
                           ink: ink,
                           mute: mute,
                           isDark: isDark,
