@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/assinatura/providers/assinatura_provider.dart';
-import '../../features/assinatura/data/assinatura_repository.dart';
 import '../../features/perfil/providers/perfil_provider.dart';
 import '../../features/planos/providers/plano_features_provider.dart';
 import 'fcm_service.dart';
