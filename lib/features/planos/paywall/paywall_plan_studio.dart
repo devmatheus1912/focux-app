@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../assinatura/data/plano.dart';
+import '../../subscription/plan_entitlements.dart';
 import '../../subscription/models/subscription_plan.dart';
 import 'paywall_catalog.dart';
 // subscriptionPlanFromApi → subscription_plan.dart
@@ -25,6 +26,7 @@ class PaywallPlanStudio extends StatelessWidget {
     this.belowPlanSection,
     this.isMaxTier = false,
     this.roiTag,
+    this.usageSnapshot,
   });
 
   final SubscriptionPlan currentPlan;
@@ -39,6 +41,7 @@ class PaywallPlanStudio extends StatelessWidget {
   final Widget? belowPlanSection;
   final bool isMaxTier;
   final String? roiTag;
+  final PlanoUsageSnapshot? usageSnapshot;
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +67,7 @@ class PaywallPlanStudio extends StatelessWidget {
       isDark: isDark,
       isCurrent: selectedPlan == currentPlan,
       isSelected: true,
-      glow: !TokensStrip.prefersReducedMotion(context),
+      glow: false,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -122,6 +125,17 @@ class PaywallPlanStudio extends StatelessWidget {
                 ink: ink,
                 mute: mute,
                 onSelected: onPlanSelected,
+              ),
+            ),
+          ],
+          if (usageSnapshot != null && selectedPlan == currentPlan) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: PaywallUsageMeters(
+                usage: usageSnapshot!,
+                ink: ink,
+                mute: mute,
+                isDark: isDark,
               ),
             ),
           ],

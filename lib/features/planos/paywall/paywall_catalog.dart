@@ -11,11 +11,18 @@ class PaywallCatalog {
   PaywallCatalog._();
 
   static const Color brand = Color(0xFF13C2C2);
-  /// Teal profundo — tier ENTERPRISE PRO (harmoniza com CTA; não compete com ouro).
+  /// Teal profundo — tier ENTERPRISE PRO e CTAs de upgrade.
   static const Color brandDeep = Color(0xFF0D9494);
-  static const Color gold = Color(0xFFE5B84C);
+  /// Teal slate — tier ENTERPRISE (premium, sem ouro).
+  static const Color tierEnterprise = Color(0xFF1A5F5F);
+  /// Legado vitrine/API (`badgeColor: gold`) — mapeado para [tierEnterprise] na UI.
+  static const Color gold = tierEnterprise;
   static const Color green = Color(0xFF4ADE80);
   static const Color warning = Color(0xFFB5760A);
+
+  /// Chrome neutro para blocos secundários (accordions, downgrade).
+  static Color chromeNeutral(Color ink, {required bool isDark}) =>
+      isDark ? const Color(0xFF5C6B78) : ink.withValues(alpha: 0.38);
 
   /// Texto secundário com contraste AA em fundos claros (ui-ux-pro-max).
   static Color readableSecondary(Color ink, Color mute, {required bool isDark}) =>
@@ -38,7 +45,7 @@ class PaywallCatalog {
 
   static Color accentForPlan(SubscriptionPlan plan) => switch (plan) {
     SubscriptionPlan.PREMIUM => brand,
-    SubscriptionPlan.ENTERPRISE => gold,
+    SubscriptionPlan.ENTERPRISE => tierEnterprise,
     SubscriptionPlan.ENTERPRISE_PRO => brandDeep,
     _ => const Color(0xFF7A8A96),
   };
@@ -50,7 +57,7 @@ class PaywallCatalog {
   }) {
     if (isDark) return accentForPlan(plan);
     return switch (plan) {
-      SubscriptionPlan.ENTERPRISE => const Color(0xFF8A6914),
+      SubscriptionPlan.ENTERPRISE => const Color(0xFF0D4A4A),
       SubscriptionPlan.ENTERPRISE_PRO => const Color(0xFF066666),
       SubscriptionPlan.PREMIUM => brandDeep,
       _ => accentForPlan(plan),
@@ -60,7 +67,9 @@ class PaywallCatalog {
   /// Versão por [accent] (seções internas do card sem [SubscriptionPlan]).
   static Color readableTierAccent(Color accent, {required bool isDark}) {
     if (isDark) return accent;
-    if (accent == gold) return const Color(0xFF8A6914);
+    if (accent == tierEnterprise || accent == gold) {
+      return const Color(0xFF0D4A4A);
+    }
     if (accent == brandDeep) return const Color(0xFF066666);
     if (accent == brand) return brandDeep;
     return accent;
@@ -135,7 +144,7 @@ class PaywallCatalog {
 
   static const List<({String value, String label, Color color})> roiStrip = [
     (value: '5×', label: 'ROI médio em 2 anos', color: brand),
-    (value: '25%+', label: 'Lucro com +5% retenção', color: gold),
+    (value: '25%+', label: 'Lucro com +5% retenção', color: tierEnterprise),
     (value: 'R\$ 8.000', label: 'MRR com 20 alunos', color: green),
     (value: '< 1%', label: 'Faturamento = Premium', color: brand),
     (value: 'R\$ 50/mês', label: 'Substitui R\$ 1–3k agência', color: brandDeep),
@@ -406,19 +415,19 @@ class PaywallCatalog {
       label: 'White-label no app',
       value: '+20–30% no valor percebido',
       planChip: 'ENTERPRISE',
-      color: gold,
+      color: tierEnterprise,
     ),
     PaywallRoiRow(
       label: 'Alunos ilimitados — sem teto',
       value: 'Cada novo = R\$ 300–600/mês',
       planChip: 'ENTERPRISE',
-      color: gold,
+      color: tierEnterprise,
     ),
     PaywallRoiRow(
       label: 'NFS-e automática (PJ)',
       value: 'Zero burocracia fiscal',
       planChip: 'ENTERPRISE',
-      color: gold,
+      color: tierEnterprise,
     ),
     PaywallRoiRow(
       label: 'Landing page completa',
@@ -468,7 +477,7 @@ class PaywallCatalog {
       icon: Icons.dashboard_outlined,
       title: 'Command Center + Focux Score™',
       badge: 'ÚNICO NO MERCADO',
-      badgeColor: gold,
+      badgeColor: tierEnterprise,
       description:
           'Painel do CEO do personal: churn, inadimplência e próxima ação em 2 min.',
       roiMoney: 'Salvar 1 aluno/mês = R\$ 400+ = Premium pago 5×',
@@ -479,7 +488,7 @@ class PaywallCatalog {
       icon: Icons.palette_outlined,
       title: 'White-label — seu app, sua marca',
       badge: 'SÓ ENTERPRISE+',
-      badgeColor: gold,
+      badgeColor: tierEnterprise,
       description:
           'Seus alunos abrem SEU app com SEU logo. Posicionamento premium.',
       roiMoney: 'Personais com white-label cobram 20–30% mais',

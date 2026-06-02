@@ -177,7 +177,7 @@ class _TierGlowWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!enabled || TokensStrip.prefersReducedMotion(context)) return child;
     final isBrand = color == TokensStrip.primary || color == EagleTokens.brand;
-    final s = (isBrand ? 0.38 : 0.22) * strength.clamp(0.0, 1.2);
+    final s = (isBrand ? 0.28 : 0.14) * strength.clamp(0.0, 1.0);
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
@@ -225,7 +225,7 @@ class PaywallTierCard extends StatelessWidget {
           : const EdgeInsets.only(bottom: TokensStrip.s4),
       accent: accent,
       glow: showGlow && !TokensStrip.prefersReducedMotion(context),
-      glowStrength: isCurrent ? 1 : 0.85,
+      glowStrength: isCurrent ? 0.42 : 0.32,
       blur: false,
       elevationLevel: isCurrent ? 12 : (isSelected ? 10 : 8),
       padding: EdgeInsets.zero,
@@ -311,7 +311,7 @@ class PaywallTierMedallion extends StatelessWidget {
           ],
         ),
         border: Border.all(color: accent.withValues(alpha: 0.42)),
-        boxShadow: TokensStrip.coloredDepthGlow(accent, strength: 0.18),
+        boxShadow: TokensStrip.coloredDepthGlow(accent, strength: 0.1),
       ),
       child: Icon(
         _tierIconFor(plan),
@@ -342,15 +342,12 @@ class PaywallTierBrandPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fg = PaywallCatalog.readableTierAccent(accent, isDark: isDark);
-    final panelAccent = !isDark && accent == PaywallCatalog.gold
-        ? PaywallCatalog.gold.withValues(alpha: 0.82)
-        : accent;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: ShellChrome.forDark(isDark).panel(
         radius: TokensStrip.rPill,
-        accent: panelAccent,
+        accent: accent,
         elevationLevel: 2,
       ),
       child: Row(
@@ -444,7 +441,7 @@ class _PaywallGlassAccordionState extends State<PaywallGlassAccordion> {
       padding: EdgeInsets.zero,
       accent: tint,
       glow: _expanded && !reduceMotion,
-      glowStrength: 0.75,
+      glowStrength: 0.28,
       blur: _expanded,
       elevationLevel: _expanded ? 10 : 7,
       child: Stack(
@@ -560,8 +557,8 @@ class PaywallSubscriberHeroGlass extends StatelessWidget {
     return PaywallGlassCard(
       margin: const EdgeInsets.fromLTRB(0, 4, 0, TokensStrip.s3),
       accent: accent,
-      glow: !TokensStrip.prefersReducedMotion(context),
-      glowStrength: 0.9,
+      glow: false,
+      glowStrength: 0.35,
       blur: false,
       elevationLevel: 12,
       padding: EdgeInsets.zero,
@@ -571,9 +568,12 @@ class PaywallSubscriberHeroGlass extends StatelessWidget {
           PaywallTierChrome.cardWash(
             accent: accent,
             isDark: isDark,
-            emphasis: PaywallTierEmphasis.high,
+            emphasis: PaywallTierEmphasis.mid,
           ),
-          PaywallTierChrome.accentRail(accent, emphasis: PaywallTierEmphasis.high),
+          PaywallTierChrome.accentRail(
+            accent,
+            emphasis: PaywallTierEmphasis.mid,
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
             child: Column(

@@ -116,7 +116,7 @@ class PaywallVitrineSnapshot {
   }
 
   static Color _toneColor(String? tone) => switch (tone) {
-    'gold' => PaywallCatalog.gold,
+    'gold' => PaywallCatalog.tierEnterprise,
     'green' => PaywallCatalog.green,
     'purple' => PaywallCatalog.brandDeep,
     'brandDeep' => PaywallCatalog.brandDeep,

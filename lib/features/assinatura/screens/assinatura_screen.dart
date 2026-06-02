@@ -1374,6 +1374,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                           compareSection: studioCompare,
                           belowPlanSection: studioBelowPlan,
                           roiTag: enterpriseProRoiTag,
+                          usageSnapshot: usage,
                           ink: ink,
                           mute: mute,
                           isDark: isDark,
@@ -1384,7 +1385,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                           ink: ink,
                           mute: mute,
                           isDark: isDark,
-                          accent: PaywallCatalog.accentForPlan(currentPlan),
+                          accent: PaywallCatalog.chromeNeutral(ink, isDark: isDark),
                           title: 'Outros planos',
                           subtitle:
                               'Downgrade e plano gratuito · só pela ${subscriptionChannelLabel()}',
