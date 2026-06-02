@@ -100,7 +100,7 @@ TextStyle _dashboardSectionKickerStyle(
 }) {
   final primary = Theme.of(context).colorScheme.primary;
   return AppTypography.inter(
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: FontWeight.w700,
     letterSpacing: 0.35,
     color: BrandPalette.sectionLink(primary, dark: isDark),
@@ -126,7 +126,7 @@ Color _pulseCheckinsAccent({
   required int checkinsHoje,
   required Color neutralAccent,
 }) =>
-    checkinsHoje > 0 ? EagleTokens.good : EagleTokens.warn.withValues(alpha: 0.92);
+    checkinsHoje > 0 ? EagleTokens.good : neutralAccent;
 
 /// Fade na borda direita para indicar scroll horizontal.
 class _HorizontalScrollPeek extends StatelessWidget {
@@ -421,9 +421,6 @@ class _PersonalDashboardScreenState
                         child: SetupOnboardingWidget(),
                       ),
                     ),
-                    SliverToBoxAdapter(
-                      child: _RoiQuickLinksRow(isDark: themeDark),
-                    ),
                     if (!onboardingIncomplete)
                       SliverToBoxAdapter(
                         child: DashboardActivationCta(
@@ -670,19 +667,24 @@ class _PersonalDashboardScreenState
 
                     const SliverToBoxAdapter(child: SizedBox(height: 8)),
                     SliverToBoxAdapter(
-                      child: _SectionTitle(
+                      child: _DashboardCollapsibleSection(
                         title: 'Aderência da semana',
-                        action: 'Relatório',
-                        onAction: () => context.push('/relatorios/global'),
+                        collapsedHint: 'Relatório e plano de retomada · toque para expandir',
                         isDark: themeDark,
-                      ),
-                    ),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: TokensStrip.s4,
+                        semanticsLabel: 'Aderência da semana',
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () => context.push('/relatorios/global'),
+                                child: const Text('Relatório'),
+                              ),
+                            ),
+                            _AderenciaSemanaWidget(isDark: themeDark),
+                          ],
                         ),
-                        child: _AderenciaSemanaWidget(isDark: themeDark),
                       ),
                     ),
 
@@ -724,7 +726,13 @@ class _PersonalDashboardScreenState
                                   math.cos(angle),
                                   math.sin(angle),
                                 );
-                                return InkWell(
+                                return Semantics(
+                                  label:
+                                      'Panorama financeiro de $mes. '
+                                      'Recebido R\$ ${receitaAtual.toInt()}. '
+                                      'Toque para abrir financeiro',
+                                  button: true,
+                                  child: InkWell(
                                   onTap: () => context.go('/financeiro'),
                                   borderRadius: BorderRadius.circular(24),
                                   child: Container(
@@ -984,6 +992,7 @@ class _PersonalDashboardScreenState
                                   ),
                                 ),
                               ),
+                            ),
                             );
                           },
                         ),
@@ -1889,6 +1898,133 @@ class _RoiShortcutChip extends StatelessWidget {
   }
 }
 
+class _DashboardCollapsibleSection extends StatefulWidget {
+  const _DashboardCollapsibleSection({
+    required this.title,
+    required this.collapsedHint,
+    required this.isDark,
+    required this.child,
+    this.semanticsLabel,
+  });
+
+  final String title;
+  final String collapsedHint;
+  final bool isDark;
+  final Widget child;
+  final String? semanticsLabel;
+
+  @override
+  State<_DashboardCollapsibleSection> createState() =>
+      _DashboardCollapsibleSectionState();
+}
+
+class _DashboardCollapsibleSectionState
+    extends State<_DashboardCollapsibleSection> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final heading = BrandPalette.sectionHeading(primary, dark: widget.isDark);
+    final mute = dashboardReadableMuted(context, isDark: widget.isDark);
+    final link = BrandPalette.sectionLink(primary, dark: widget.isDark);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        TokensStrip.s4,
+        0,
+        TokensStrip.s4,
+        TokensStrip.s3,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Material(
+            color: Colors.transparent,
+            child: Semantics(
+              button: true,
+              expanded: _expanded,
+              label:
+                  widget.semanticsLabel ??
+                  '${widget.title}. ${_expanded ? 'Recolher' : widget.collapsedHint}',
+              child: InkWell(
+                onTap: () => setState(() => _expanded = !_expanded),
+                borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                child: Ink(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 13,
+                  ),
+                  decoration: fxStripCardDecoration(
+                    context,
+                    radius: TokensStrip.rCard,
+                    glowStrength: 0.08,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.title,
+                              style: AppTypography.inter(
+                                fontSize: TokensStrip.fontH2,
+                                fontWeight: TokensStrip.weightH2,
+                                letterSpacing: TokensStrip.trackingH2,
+                                color: heading,
+                                height: 1.2,
+                              ),
+                            ),
+                            if (!_expanded) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                widget.collapsedHint,
+                                style: AppTypography.inter(
+                                  fontSize: TokensStrip.fontBodySm,
+                                  fontWeight: FontWeight.w500,
+                                  color: mute,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      AnimatedRotation(
+                        turns: _expanded ? 0.25 : 0,
+                        duration: const Duration(milliseconds: 220),
+                        curve: Curves.easeOutCubic,
+                        child: Icon(
+                          Icons.chevron_right_rounded,
+                          size: 22,
+                          color: link,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          AnimatedCrossFade(
+            firstChild: const SizedBox.shrink(),
+            secondChild: Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: widget.child,
+            ),
+            crossFadeState:
+                _expanded
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
+            duration: const Duration(milliseconds: 220),
+            sizeCurve: Curves.easeOutCubic,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _CollapsibleToolsSection extends ConsumerStatefulWidget {
   const _CollapsibleToolsSection({
     required this.isDark,
@@ -2015,6 +2151,8 @@ class _CollapsibleToolsSectionState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  _RoiQuickLinksRow(isDark: widget.isDark),
+                  const SizedBox(height: 12),
                   Semantics(
                     textField: true,
                     label: 'Buscar ferramenta',

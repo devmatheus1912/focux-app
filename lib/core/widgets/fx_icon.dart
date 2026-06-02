@@ -417,6 +417,37 @@ class _FxIconPainter extends CustomPainter {
         );
         break;
 
+      case 'article':
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            const Rect.fromLTWH(5, 3, 14, 18),
+            const Radius.circular(2),
+          ),
+          paint,
+        );
+        canvas.drawLine(const Offset(8, 8), const Offset(16, 8), paint);
+        canvas.drawLine(const Offset(8, 12), const Offset(16, 12), paint);
+        canvas.drawLine(const Offset(8, 16), const Offset(13, 16), paint);
+        break;
+
+      case 'star':
+        canvas.drawPath(
+          Path()
+            ..moveTo(12, 3)
+            ..lineTo(14.5, 9)
+            ..lineTo(21, 9.5)
+            ..lineTo(16, 13.5)
+            ..lineTo(17.5, 20)
+            ..lineTo(12, 16.5)
+            ..lineTo(6.5, 20)
+            ..lineTo(8, 13.5)
+            ..lineTo(3, 9.5)
+            ..lineTo(9.5, 9)
+            ..close(),
+          paint,
+        );
+        break;
+
       default:
         // fallback circle
         canvas.drawCircle(const Offset(12, 12), 9, paint);
