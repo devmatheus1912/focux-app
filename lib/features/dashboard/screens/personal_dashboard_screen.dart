@@ -41,6 +41,9 @@ import '../utils/dashboard_a11y.dart';
 import '../utils/dashboard_sparkline_helpers.dart';
 import '../utils/dashboard_tool_groups.dart';
 import '../widgets/dashboard_day_focus_banner.dart';
+import '../widgets/dashboard_attention_card.dart';
+import '../widgets/dashboard_collapsible_section.dart';
+import '../utils/dashboard_haptic.dart';
 
 class PersonalDashboardScreen extends ConsumerStatefulWidget {
   const PersonalDashboardScreen({super.key});
@@ -411,6 +414,13 @@ class _PersonalDashboardScreenState
                 riskDominante: riskDominante,
               );
 
+              final attentionRiskItems =
+                  alunosEmRisco.take(riskDominante ? 2 : 4).toList();
+              final attentionVencItems =
+                  (_finData?.vencimentosProximos ?? const []).take(2).toList();
+              final attentionItemCount =
+                  attentionRiskItems.length + attentionVencItems.length;
+
               return RefreshIndicator(
                 onRefresh: () async {
                   ref.invalidate(dashboardProvider);
@@ -563,7 +573,7 @@ class _PersonalDashboardScreenState
                     // PRECISA DE ATENÇÃO — colapsável quando muitos sinais
                     if (attentionVisible) ...[
                       SliverToBoxAdapter(
-                        child: _DashboardCollapsibleSection(
+                        child: DashboardCollapsibleSection(
                           title: 'Precisa de atenção',
                           collapsedHint:
                               riskDominante
@@ -597,19 +607,12 @@ class _PersonalDashboardScreenState
                               ),
                               Semantics(
                                 container: true,
-                                label:
-                                    'Lista horizontal: alunos e cobranças que precisam de atenção',
+                                explicitChildNodes: true,
+                                label: dashboardAttentionCarouselSemantics(
+                                  attentionItemCount,
+                                ),
                                 child: _HorizontalScrollPeek(
-                                  showPeek:
-                                      [
-                                        ...alunosEmRisco.take(
-                                          riskDominante ? 2 : 4,
-                                        ),
-                                        ...(_finData?.vencimentosProximos ??
-                                                const [])
-                                            .take(2),
-                                      ].length >
-                                      1,
+                                  showPeek: attentionItemCount > 1,
                                   child: SizedBox(
                                     height: 168,
                                     child: ListView.separated(
@@ -620,25 +623,15 @@ class _PersonalDashboardScreenState
                                         horizontal: TokensStrip.s4,
                                       ),
                                       scrollDirection: Axis.horizontal,
-                                      itemCount:
-                                          [
-                                            ...alunosEmRisco.take(
-                                              riskDominante ? 2 : 4,
-                                            ),
-                                            ...(_finData?.vencimentosProximos ??
-                                                    const [])
-                                                .take(2),
-                                          ].length,
+                                      itemCount: attentionItemCount,
                                       separatorBuilder:
                                           (_, __) => const SizedBox(width: 12),
                                       itemBuilder: (context, index) {
-                                        final riskItems =
-                                            alunosEmRisco
-                                                .take(riskDominante ? 2 : 4)
-                                                .toList();
-                                        if (index < riskItems.length) {
-                                          final aluno = riskItems[index];
-                                          return _AttentionCard(
+                                        if (index < attentionRiskItems.length) {
+                                          final aluno = attentionRiskItems[index];
+                                          return DashboardAttentionCard(
+                                            listIndex: index + 1,
+                                            listTotal: attentionItemCount,
                                             nome: aluno.nome,
                                             objetivo: aluno.objetivo,
                                             titulo: _attentionSignalLabel(aluno),
@@ -658,9 +651,11 @@ class _PersonalDashboardScreenState
                                           );
                                         }
                                         final v =
-                                            (_finData!.vencimentosProximos)[index -
-                                                riskItems.length];
-                                        return _AttentionCard(
+                                            attentionVencItems[index -
+                                                attentionRiskItems.length];
+                                        return DashboardAttentionCard(
+                                          listIndex: index + 1,
+                                          listTotal: attentionItemCount,
                                           nome: v.alunoNome,
                                           titulo: 'Inadimplente',
                                           subt:
@@ -721,7 +716,7 @@ class _PersonalDashboardScreenState
 
                     const SliverToBoxAdapter(child: SizedBox(height: 8)),
                     SliverToBoxAdapter(
-                      child: _DashboardCollapsibleSection(
+                      child: DashboardCollapsibleSection(
                         title: 'Aderência da semana',
                         collapsedHint:
                             'Treinos parados e ranking · toque para expandir',
@@ -2034,170 +2029,6 @@ class _RoiShortcutChip extends StatelessWidget {
   }
 }
 
-class _DashboardCollapsibleSection extends StatefulWidget {
-  const _DashboardCollapsibleSection({
-    required this.title,
-    required this.collapsedHint,
-    required this.isDark,
-    required this.child,
-    this.initiallyExpanded = false,
-    this.headerActionLabel,
-    this.onHeaderAction,
-  });
-
-  final String title;
-  final String collapsedHint;
-  final bool isDark;
-  final Widget child;
-  final bool initiallyExpanded;
-  final String? headerActionLabel;
-  final VoidCallback? onHeaderAction;
-
-  @override
-  State<_DashboardCollapsibleSection> createState() =>
-      _DashboardCollapsibleSectionState();
-}
-
-class _DashboardCollapsibleSectionState
-    extends State<_DashboardCollapsibleSection> {
-  late bool _expanded;
-
-  @override
-  void initState() {
-    super.initState();
-    _expanded = widget.initiallyExpanded;
-  }
-
-  @override
-  void didUpdateWidget(covariant _DashboardCollapsibleSection oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.initiallyExpanded != widget.initiallyExpanded &&
-        !oldWidget.initiallyExpanded &&
-        widget.initiallyExpanded) {
-      _expanded = true;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final heading = BrandPalette.sectionHeading(primary, dark: widget.isDark);
-    final mute = dashboardReadableMuted(context, isDark: widget.isDark);
-    final link = BrandPalette.sectionLink(primary, dark: widget.isDark);
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        TokensStrip.s4,
-        0,
-        TokensStrip.s4,
-        TokensStrip.s3,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Material(
-            color: Colors.transparent,
-            child: Semantics(
-              button: true,
-              expanded: _expanded,
-              label: dashboardCollapsibleSemanticsLabel(
-                widget.title,
-                _expanded,
-              ),
-              child: InkWell(
-                onTap: () => setState(() => _expanded = !_expanded),
-                borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                child: Ink(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 13,
-                  ),
-                  decoration: fxStripCardDecoration(
-                    context,
-                    radius: TokensStrip.rCard,
-                    glowStrength: 0.08,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.title,
-                              style: AppTypography.inter(
-                                fontSize: TokensStrip.fontH2,
-                                fontWeight: TokensStrip.weightH2,
-                                letterSpacing: TokensStrip.trackingH2,
-                                color: heading,
-                                height: 1.2,
-                              ),
-                            ),
-                            if (!_expanded) ...[
-                              const SizedBox(height: 2),
-                              Text(
-                                widget.collapsedHint,
-                                style: AppTypography.inter(
-                                  fontSize: TokensStrip.fontBodySm,
-                                  fontWeight: FontWeight.w500,
-                                  color: mute,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      if (widget.headerActionLabel != null &&
-                          widget.onHeaderAction != null)
-                        Semantics(
-                          button: true,
-                          label: widget.headerActionLabel,
-                          child: TextButton(
-                            onPressed: widget.onHeaderAction,
-                            style: TextButton.styleFrom(
-                              minimumSize: const Size(48, 48),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                              ),
-                            ),
-                            child: Text(widget.headerActionLabel!),
-                          ),
-                        ),
-                      AnimatedRotation(
-                        turns: _expanded ? 0.25 : 0,
-                        duration: const Duration(milliseconds: 220),
-                        curve: Curves.easeOutCubic,
-                        child: Icon(
-                          Icons.chevron_right_rounded,
-                          size: 22,
-                          color: link,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          AnimatedCrossFade(
-            firstChild: const SizedBox.shrink(),
-            secondChild: Padding(
-              padding: const EdgeInsets.only(top: 10),
-              child: widget.child,
-            ),
-            crossFadeState:
-                _expanded
-                    ? CrossFadeState.showSecond
-                    : CrossFadeState.showFirst,
-            duration: const Duration(milliseconds: 220),
-            sizeCurve: Curves.easeOutCubic,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _DashboardShortcutGrid extends ConsumerWidget {
   const _DashboardShortcutGrid({
     required this.shortcuts,
@@ -2341,6 +2172,7 @@ class _ExpandableToolGroupsState extends ConsumerState<_ExpandableToolGroups> {
               child: InkWell(
                 onTap:
                     () => setState(() {
+                      dashboardHapticCollapseToggle();
                       if (_openGroups.contains(group.title)) {
                         _openGroups.remove(group.title);
                       } else {
@@ -2470,9 +2302,13 @@ class _CollapsibleToolsSectionState
               label: dashboardCollapsibleSemanticsLabel(
                 'Mais ferramentas',
                 _expanded,
+                collapsedHint: collapsedHint,
               ),
               child: InkWell(
-              onTap: () => setState(() => _expanded = !_expanded),
+              onTap: () {
+                dashboardHapticCollapseToggle();
+                setState(() => _expanded = !_expanded);
+              },
               borderRadius: BorderRadius.circular(TokensStrip.rCard),
               child: Ink(
                 padding: const EdgeInsets.symmetric(
@@ -2612,179 +2448,6 @@ class _CollapsibleToolsSectionState
           ),
         ],
       ),
-    );
-  }
-}
-
-class _AttentionCard extends StatelessWidget {
-  final String nome, titulo, subt, acao;
-  final String? objetivo;
-  final bool isDark;
-  final bool showStatusBadge;
-  final Color? statusAccent;
-  final VoidCallback? onTap;
-  const _AttentionCard({
-    required this.nome,
-    required this.titulo,
-    required this.subt,
-    required this.acao,
-    this.objetivo,
-    required this.isDark,
-    this.showStatusBadge = true,
-    this.statusAccent,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final primarySoft = BrandPalette.soft(primary, dark: isDark);
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = dashboardReadableMuted(context, isDark: isDark);
-    final accent = statusAccent ?? EagleTokens.warn;
-
-    return Semantics(
-      label: '$nome, $titulo. $subt. Toque para $acao',
-      button: true,
-      child: InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(TokensStrip.rCard),
-      child: Container(
-        width: 240,
-        padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
-        decoration: fxStripCardDecoration(
-          context,
-          accent: primary,
-          radius: TokensStrip.rCard,
-          glowStrength: 0.1,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 18,
-                  backgroundColor: primary,
-                  child: Text(
-                    fxInitials(nome),
-                    style: AppTypography.inter(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        fxTitleCaseName(nome),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.inter(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: ink,
-                        ),
-                      ),
-                      Text(
-                        objetivo?.trim().isNotEmpty == true
-                            ? objetivo!.trim()
-                            : 'Objetivo não definido',
-                        style: AppTypography.inter(fontSize: 11, color: mute),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            if (showStatusBadge) ...[
-              Row(
-                children: [
-                  Container(
-                    width: 5,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: accent,
-                    ),
-                  ),
-                  const SizedBox(width: 5),
-                  Expanded(
-                    child: Text(
-                      titulo.toUpperCase(),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.inter(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w700,
-                        color: accent,
-                        letterSpacing: 0.35,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-            ],
-            Text(
-              showStatusBadge ? subt : titulo,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.inter(
-                fontSize: 12.2,
-                color: ink,
-                height: 1.25,
-                fontWeight: showStatusBadge ? FontWeight.w400 : FontWeight.w600,
-              ),
-            ),
-            if (!showStatusBadge) ...[
-              const SizedBox(height: 4),
-              Text(
-                subt,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.inter(
-                  fontSize: 11.5,
-                  color: mute,
-                  height: 1.25,
-                ),
-              ),
-            ],
-            const Spacer(),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 9),
-              decoration: BoxDecoration(
-                color: primarySoft,
-                borderRadius: BorderRadius.circular(TokensStrip.rInput),
-                border: Border.all(
-                  color: primary.withValues(alpha: isDark ? 0.45 : 0.28),
-                ),
-                boxShadow: TokensStrip.coloredDepthGlow(
-                  primary,
-                  strength: 0.1,
-                ),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                acao,
-                style: AppTypography.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: BrandPalette.sectionAction(primary, dark: isDark),
-                  letterSpacing: 0.2,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
     );
   }
 }
@@ -3307,7 +2970,10 @@ class _CommandCenterSectionState extends ConsumerState<_CommandCenterSection> {
                     ? 'Atalhos rápidos, expandido. Toque para recolher'
                     : 'Atalhos rápidos, recolhido. Copiloto, mensagens e mais. Toque para expandir',
             child: InkWell(
-              onTap: () => setState(() => _quickLinksExpanded = !_quickLinksExpanded),
+              onTap: () {
+                dashboardHapticCollapseToggle();
+                setState(() => _quickLinksExpanded = !_quickLinksExpanded);
+              },
               borderRadius: BorderRadius.circular(TokensStrip.rInput),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
