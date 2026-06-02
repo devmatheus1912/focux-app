@@ -142,7 +142,7 @@ class PaywallPlanSections {
       collapsible: true,
       items: [
         PaywallPlanFeatureItem(
-          label: 'White-label — seu logo e suas cores',
+          label: 'Marca própria — seu logo e suas cores',
           included: false,
           capability: 'whiteLabel',
         ),
@@ -198,7 +198,7 @@ class PaywallPlanSections {
         ),
         const PaywallPlanFeatureItem(label: 'CRM de leads'),
         PaywallPlanFeatureItem(
-          label: 'White-label — seu logo e suas cores',
+          label: 'Marca própria — seu logo e suas cores',
           included: plano.temWhiteLabel,
           highlight: true,
         ),
@@ -299,7 +299,7 @@ class PaywallPlanSections {
       items: [
         PaywallPlanFeatureItem(label: 'Alunos ILIMITADOS', highlight: true),
         PaywallPlanFeatureItem(
-          label: 'White-label completo — logo + cores',
+          label: 'Marca própria completa — logo + cores',
           highlight: true,
         ),
         PaywallPlanFeatureItem(
@@ -451,7 +451,9 @@ class _PaywallPlanInclusion {
       return caps[capability]!;
     }
 
-    if (item.label.toLowerCase().contains('white-label')) {
+    if (item.label.toLowerCase().contains('white-label') ||
+        item.label.toLowerCase().contains('marca própria') ||
+        item.label.toLowerCase().contains('marca propria')) {
       return caps['whiteLabel']! && vitrinePlano.temWhiteLabel;
     }
     if (item.label.contains('PIX') ||
@@ -469,7 +471,11 @@ class _PaywallPlanInclusion {
     if (sectionLower.contains('landing')) return 'landingCompleta';
     if (sectionLower.contains('loja')) return 'lojaDigital';
     if (lower.contains('pose coach')) return 'poseCoach';
-    if (lower.contains('white-label')) return 'whiteLabel';
+    if (lower.contains('white-label') ||
+        lower.contains('marca própria') ||
+        lower.contains('marca propria')) {
+      return 'whiteLabel';
+    }
     if (lower.contains('automações sequenciais avançadas')) {
       return 'automacoesAvancadas';
     }

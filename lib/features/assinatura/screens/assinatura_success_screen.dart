@@ -124,11 +124,11 @@ class AssinaturaSuccessScreen extends StatelessWidget {
   static List<String> _nextSteps(SubscriptionPlan plan) => switch (plan) {
     SubscriptionPlan.ENTERPRISE_PRO => [
       'Personalize sua landing completa no editor.',
-      'Configure white-label e domínio.',
+      'Configure marca própria e domínio.',
       'Abra o IA Copiloto para o primeiro treino assistido.',
     ],
     SubscriptionPlan.ENTERPRISE => [
-      'Configure white-label e identidade visual.',
+      'Configure marca própria e identidade visual.',
       'Conecte domínio customizado se tiver.',
       'Use o Command Center para priorizar o dia.',
     ],

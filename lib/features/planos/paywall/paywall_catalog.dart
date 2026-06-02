@@ -131,7 +131,7 @@ class PaywallCatalog {
     SubscriptionPlan.PREMIUM =>
       'Para o personal que quer organizar, cobrar e reter alunos.',
     SubscriptionPlan.ENTERPRISE =>
-      'Alunos ilimitados + white-label + CRM. Landing completa no Enterprise Pro.',
+      'Alunos ilimitados + marca própria + CRM. Landing completa no Enterprise Pro.',
     SubscriptionPlan.ENTERPRISE_PRO =>
       'Tudo do Enterprise + landing completa + loja digital com PIX.',
   };
@@ -186,7 +186,7 @@ class PaywallCatalog {
         ),
       if (plan == SubscriptionPlan.ENTERPRISE || plan == SubscriptionPlan.ENTERPRISE_PRO)
         PaywallFeatureRow(
-          label: 'White-label — seu logo e suas cores',
+          label: 'Marca própria — seu logo e suas cores',
           included: plano.temWhiteLabel,
           highlight: true,
         ),
@@ -256,9 +256,9 @@ class PaywallCatalog {
       roiStatement: 'Salvar 1 aluno/mês = R\$ 300–600',
       plans: ['PREMIUM', 'ENTERPRISE'],
     ),
-    'White-label — seu logo e suas cores': PaywallEducationContent(
+    'Marca própria — seu logo e suas cores': PaywallEducationContent(
       id: 'white_label',
-      title: 'White-label',
+      title: 'Marca própria',
       whatIs:
           'Seus alunos abrem o app com SEU logo e SUAS cores — não um visual genérico.',
       whyMatters:
@@ -308,7 +308,7 @@ class PaywallCatalog {
       enterprisePro: '✓',
     ),
     PaywallComparisonRow(
-      feature: 'White-label',
+      feature: 'Marca própria',
       free: '—',
       premium: '—',
       enterprise: '✓',
@@ -412,7 +412,7 @@ class PaywallCatalog {
       color: brand,
     ),
     PaywallRoiRow(
-      label: 'White-label no app',
+      label: 'Marca própria no app',
       value: '+20–30% no valor percebido',
       planChip: 'ENTERPRISE',
       color: tierEnterprise,
@@ -486,12 +486,12 @@ class PaywallCatalog {
     PaywallTopFeature(
       rank: 4,
       icon: Icons.palette_outlined,
-      title: 'White-label — seu app, sua marca',
+      title: 'Marca própria — seu app, sua marca',
       badge: 'SÓ ENTERPRISE+',
       badgeColor: tierEnterprise,
       description:
           'Seus alunos abrem SEU app com SEU logo. Posicionamento premium.',
-      roiMoney: 'Personais com white-label cobram 20–30% mais',
+      roiMoney: 'Personais com marca própria cobram 20–30% mais',
       planChips: ['ENTERPRISE', 'ENT. PRO'],
     ),
     PaywallTopFeature(
@@ -634,7 +634,7 @@ class PaywallCatalog {
     ),
     PaywallUpgradeTrigger(
       number: '05',
-      title: 'Clica em white-label (bloqueado)',
+      title: 'Clica em marca própria (bloqueado)',
       transition: 'PREMIUM → ENTERPRISE',
       message:
           'Seus alunos veem Focux. Com Enterprise, veem SEU logo. Seu app, sua marca.',

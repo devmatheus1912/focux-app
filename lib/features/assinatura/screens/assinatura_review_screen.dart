@@ -174,12 +174,12 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
   static List<String> _topFeatures(SubscriptionPlan plan) => switch (plan) {
     SubscriptionPlan.ENTERPRISE_PRO => [
       'Landing page completa com depoimentos e FAQ',
-      'White-label e domínio customizado',
+      'Marca própria e domínio customizado',
       'Alunos ilimitados + IA ampliada',
     ],
     SubscriptionPlan.ENTERPRISE => [
       'Alunos ilimitados',
-      'White-label e identidade visual',
+      'Marca própria e identidade visual',
       'IA Copiloto com cota ampliada',
       'Financeiro, CRM e relatórios',
     ],

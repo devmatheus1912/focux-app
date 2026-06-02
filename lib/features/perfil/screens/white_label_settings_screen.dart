@@ -82,12 +82,12 @@ class _WhiteLabelSettingsScreenState extends ConsumerState<WhiteLabelSettingsScr
     final configAsync = ref.watch(whiteLabelConfigProvider);
 
     return FeatureGate(
-      featureName: 'White-label',
+      featureName: 'Marca própria',
       requiredPlan: SubscriptionPlan.ENTERPRISE,
       capability: 'whiteLabel',
       child: FxShellScaffold(
         appBar: FxShellAppBar(
-          title: 'White-label',
+          title: 'Marca própria',
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded),
             onPressed: () => context.pop(),

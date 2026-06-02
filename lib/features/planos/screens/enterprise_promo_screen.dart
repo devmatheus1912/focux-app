@@ -128,7 +128,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                 ...[
                   'Alunos ilimitados',
                   '${PlanoIaLimits.enterprise} interações de IA/mês',
-                  'White-label com sua marca',
+                  'Marca própria com sua marca',
                   'Identidade visual premium',
                   'Automações para escalar a operação',
                 ].map(

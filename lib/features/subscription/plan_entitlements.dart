@@ -28,7 +28,11 @@ class PlanEntitlements {
       return 'lojaDigital';
     }
     if (lower.contains('pose coach')) return 'poseCoach';
-    if (lower.contains('white-label')) return 'whiteLabel';
+    if (lower.contains('white-label') ||
+        lower.contains('marca própria') ||
+        lower.contains('marca propria')) {
+      return 'whiteLabel';
+    }
     if (lower.contains('automações sequenciais avançadas')) {
       return 'automacoesAvancadas';
     }

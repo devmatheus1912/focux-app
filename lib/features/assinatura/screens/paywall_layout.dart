@@ -75,7 +75,7 @@ List<({String label, bool included})> _paywallFeatureRows(
   (label: 'IA Copiloto avançada', included: plan != SubscriptionPlan.FREE),
   (label: 'Financeiro e CRM', included: plano.temFinanceiro),
   (label: 'Agenda e relatórios', included: plano.temAgenda && plano.temRelatorios),
-  (label: 'White-label e identidade visual', included: plano.temWhiteLabel),
+  (label: 'Marca própria e identidade visual', included: plano.temWhiteLabel),
   if (plan == SubscriptionPlan.ENTERPRISE_PRO)
     (label: 'Landing page COMPLETA', included: plano.temLandingCompleta),
 ];
@@ -137,7 +137,7 @@ class _PaywallUpgradeNudge extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Upgrade recomendado: ${PlanoIaLimits.enterprise} IA/mês, white-label e alunos ilimitados no Enterprise.',
+              'Upgrade recomendado: ${PlanoIaLimits.enterprise} IA/mês, marca própria e alunos ilimitados no Enterprise.',
               style: TokensStrip.body(color: ink),
             ),
           ),
