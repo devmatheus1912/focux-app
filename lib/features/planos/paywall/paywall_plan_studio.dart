@@ -79,54 +79,36 @@ class PaywallPlanStudio extends StatelessWidget {
           PaywallTierChrome.cardWash(
             accent: PaywallCatalog.accentForPlan(currentPlan),
             isDark: isDark,
-            emphasis: PaywallTierEmphasis.low,
+            emphasis: PaywallTierEmphasis.mid,
+          ),
+          PaywallTierChrome.accentRail(
+            PaywallCatalog.accentForPlan(currentPlan),
+            emphasis: PaywallTierEmphasis.mid,
           ),
           Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                PaywallTierMedallion(
-                  plan: currentPlan,
-                  accent: PaywallCatalog.accentForPlan(currentPlan),
-                  isDark: isDark,
-                  size: 40,
-                ),
-                const SizedBox(width: TokensStrip.s3),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      PaywallTierBrandPill(
-                        label: 'FOCUX · $statusLabel',
-                        accent: PaywallCatalog.accentForPlan(currentPlan),
-                        isDark: isDark,
-                        icon: Icons.verified_rounded,
-                      ),
-                      const SizedBox(height: TokensStrip.s2),
-                      Text(
-                        isMaxTier
-                            ? 'Plano máximo ativo'
-                            : onCurrentEnterprise
-                            ? 'Recursos ativos · faixa acima leva ao Pro'
-                            : !showPicker
-                            ? 'Gerencie na loja do dispositivo'
-                            : selectedPlan == currentPlan
-                            ? 'Recursos e cobrança do seu plano'
-                            : 'O que inclui neste plano',
-                        style: TokensStrip.bodyMuted(color: secondary).copyWith(
-                          fontSize: TokensStrip.fontBodySm,
-                          height: 1.4,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+          _PaywallPlanStudioHero(
+            currentPlan: currentPlan,
+            statusLabel: statusLabel,
+            kicker: isMaxTier
+                ? 'PLANO MÁXIMO'
+                : selectedPlan == currentPlan
+                ? 'SEU PLANO · ATIVO'
+                : 'VISUALIZANDO',
+            subtitle: isMaxTier
+                ? 'Plano máximo ativo — gerencie na loja do dispositivo.'
+                : onCurrentEnterprise
+                ? 'Recursos ativos · faixa acima leva ao Pro'
+                : !showPicker
+                ? 'Gerencie na loja do dispositivo'
+                : selectedPlan == currentPlan
+                ? 'Recursos e cobrança do seu plano'
+                : 'O que inclui neste plano',
+            accent: PaywallCatalog.accentForPlan(currentPlan),
+            ink: ink,
+            secondary: secondary,
+            isDark: isDark,
           ),
           if (showPicker) ...[
             const SizedBox(height: TokensStrip.s3),
@@ -218,6 +200,99 @@ class PaywallPlanStudio extends StatelessWidget {
         ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Hero editorial do Plan Studio — tipografia em escala de revista, sem cards aninhados.
+class _PaywallPlanStudioHero extends StatelessWidget {
+  const _PaywallPlanStudioHero({
+    required this.currentPlan,
+    required this.statusLabel,
+    required this.kicker,
+    required this.subtitle,
+    required this.accent,
+    required this.ink,
+    required this.secondary,
+    required this.isDark,
+  });
+
+  final SubscriptionPlan currentPlan;
+  final String statusLabel;
+  final String kicker;
+  final String subtitle;
+  final Color accent;
+  final Color ink;
+  final Color secondary;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final kickerColor = PaywallCatalog.readableTierAccent(accent, isDark: isDark);
+
+    return Semantics(
+      header: true,
+      label: '$statusLabel. $subtitle',
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(22, 26, 20, 0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    kicker,
+                    style: AppTypography.inter(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.5,
+                      height: 1.0,
+                      color: kickerColor,
+                    ),
+                  ),
+                  const SizedBox(height: TokensStrip.s3),
+                  Text(
+                    statusLabel,
+                    style: AppTypography.inter(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 30,
+                      letterSpacing: -0.85,
+                      height: 1.04,
+                      color: ink,
+                    ),
+                  ),
+                  const SizedBox(height: TokensStrip.s3),
+                  Text(
+                    subtitle,
+                    style: TokensStrip.bodyMuted(color: secondary).copyWith(
+                      fontSize: TokensStrip.fontBodySm,
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: TokensStrip.s4),
+                  Container(
+                    width: 56,
+                    height: 2,
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: isDark ? 0.55 : 0.38),
+                      borderRadius: BorderRadius.circular(1),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: TokensStrip.s4),
+            PaywallTierMedallion(
+              plan: currentPlan,
+              accent: accent,
+              isDark: isDark,
+              size: 52,
+            ),
+          ],
+        ),
       ),
     );
   }
