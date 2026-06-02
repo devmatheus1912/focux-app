@@ -97,21 +97,21 @@ class DashboardToolShortcut {
     ),
     DashboardToolShortcut(
       icon: 'dollar-sign',
-      label: 'NDR / MRR',
+      label: 'Receita recorrente',
       route: '/relatorio/business',
       capability: 'relatorios',
       featureName: 'Relatórios de negócio',
     ),
     DashboardToolShortcut(
       icon: 'alert-triangle',
-      label: 'Dunning',
+      label: 'Cobrança auto',
       route: '/dunning',
       capability: 'financeiro',
       featureName: 'Cobrança automática',
     ),
     DashboardToolShortcut(
       icon: 'route',
-      label: 'Win-back',
+      label: 'Recuperação',
       route: '/winback',
       capability: 'automacoes',
       featureName: 'Automação win-back',
@@ -130,7 +130,7 @@ class DashboardToolShortcut {
       capability: 'financeiro',
       featureName: 'Recorrência de alunos',
     ),
-    DashboardToolShortcut(icon: 'star', label: 'NPS', route: '/nps'),
+    DashboardToolShortcut(icon: 'star', label: 'Pesquisa NPS', route: '/nps'),
     DashboardToolShortcut(
       icon: 'chat',
       label: 'Grupo',
@@ -138,7 +138,11 @@ class DashboardToolShortcut {
       capability: 'comunidadeGrupos',
       featureName: 'Turmas em grupo',
     ),
-    DashboardToolShortcut(icon: 'arrow-left', label: 'Setup D0', route: '/onboarding/wizard'),
+    DashboardToolShortcut(
+      icon: 'arrow-left',
+      label: 'Configuração inicial',
+      route: '/onboarding/wizard',
+    ),
     DashboardToolShortcut(icon: 'circle-check', label: 'Qualidade', route: '/dashboard/qualidade'),
     DashboardToolShortcut(icon: 'bell', label: 'Broadcasts', route: '/broadcasts'),
   ];
@@ -161,7 +165,7 @@ class DashboardToolShortcut {
     ),
     DashboardToolShortcut(
       icon: 'dollar-sign',
-      label: 'Smart Pricing',
+      label: 'Preços inteligentes',
       route: '/financeiro',
       capability: 'financeiro',
       featureName: 'Financeiro',

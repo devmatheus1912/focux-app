@@ -64,17 +64,36 @@ class DashboardActivationCta extends StatelessWidget {
             );
             context.push(normalizeSetupActionRoute(activeStep.route));
           },
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(activeStep.title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
-                const SizedBox(height: 4),
-                Text(activeStep.body, style: const TextStyle(fontSize: 12, height: 1.4)),
-                const SizedBox(height: 10),
-                Text(activeStep.cta, style: TextStyle(color: primary, fontWeight: FontWeight.w700)),
-              ],
+          child: Semantics(
+            button: true,
+            label: '${activeStep.title}. ${activeStep.cta}',
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    activeStep.title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    activeStep.body,
+                    style: const TextStyle(fontSize: 12, height: 1.4),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    activeStep.cta,
+                    style: TextStyle(
+                      color: primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

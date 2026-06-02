@@ -51,8 +51,8 @@ _ToolGroupKey _groupKey(DashboardToolShortcut shortcut) {
   final label = shortcut.label;
   if (shortcut.capability == 'financeiro' ||
       {
-        'Dunning',
-        'NDR / MRR',
+        'Cobrança auto',
+        'Receita recorrente',
         'Recorrência',
         'Loja',
         'Ofertas',
@@ -64,15 +64,15 @@ _ToolGroupKey _groupKey(DashboardToolShortcut shortcut) {
     'Lead Público',
     'Landing',
     'Indique',
-    'Win-back',
-    'NPS',
+    'Recuperação',
+    'Pesquisa NPS',
   }.contains(label)) {
     return _ToolGroupKey.growth;
   }
   if ({
     'Automações',
     'Broadcasts',
-    'Setup D0',
+    'Configuração inicial',
     'Qualidade',
     'Equipe',
     'Grupo',

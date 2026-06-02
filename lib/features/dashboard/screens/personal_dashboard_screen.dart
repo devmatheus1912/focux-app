@@ -25,6 +25,7 @@ import '../../onboarding/screens/setup_onboarding_widget.dart';
 import '../../onboarding/data/onboarding_repository.dart';
 import '../../chat/screens/chat_inbox_screen.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../subscription/widgets/plan_usage_banner.dart';
@@ -36,6 +37,8 @@ import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
 import '../utils/dashboard_day_focus.dart';
 import '../utils/dashboard_readability.dart';
+import '../utils/dashboard_a11y.dart';
+import '../utils/dashboard_sparkline_helpers.dart';
 import '../utils/dashboard_tool_groups.dart';
 import '../widgets/dashboard_day_focus_banner.dart';
 
@@ -365,6 +368,13 @@ class _PersonalDashboardScreenState
                 },
                 orElse: () => 0,
               );
+              final checkinsTrend = historicoCheckinsAsync.maybeWhen(
+                data: (items) => dashboardCheckinsSparklineUltimos7Dias(items),
+                orElse: () => List<double>.filled(7, 0),
+              );
+              final receitaTrend = dashboardReceitaSparklineMensal(
+                _finData?.evolucaoMensal ?? const [],
+              );
               final commandAsync = ref.watch(commandCenterProvider);
               final agendaHoje = commandAsync.maybeWhen(
                 data: (cc) => cc.agendaHoje.length,
@@ -408,6 +418,12 @@ class _PersonalDashboardScreenState
                   ref.invalidate(notificacoesNaoLidasProvider);
                   ref.invalidate(onboardingStatusProvider);
                   await _loadFin();
+                  if (context.mounted) {
+                    FeedbackHelper.showSuccess(
+                      context,
+                      'Painel atualizado',
+                    );
+                  }
                 },
                 child: CustomScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -540,101 +556,117 @@ class _PersonalDashboardScreenState
                         ),
                       ),
 
-                    // PRECISA DE ATENÇÃO — rostos + CTA (só quando houver sinal)
+                    // PRECISA DE ATENÇÃO — colapsável quando muitos sinais
                     if (attentionVisible) ...[
                       SliverToBoxAdapter(
-                        child: _SectionTitle(
+                        child: _DashboardCollapsibleSection(
                           title: 'Precisa de atenção',
-                          subtitle:
+                          collapsedHint:
                               riskDominante
                                   ? '$riscoAlto de $alunosAtivos · retomada urgente'
                                   : riscoAlto > 0
-                                  ? '$riscoAlto no radar hoje'
-                                  : null,
-                          action:
-                              riscoAlto > 1
-                                  ? 'Ver tudo · +${riscoAlto - 1}'
-                                  : 'Ver tudo',
-                          onAction: () => context.go('/alunos?filtro=risco'),
+                                  ? '$riscoAlto no radar · toque para expandir'
+                                  : 'Cobranças pendentes · toque para expandir',
                           isDark: themeDark,
-                        ),
-                      ),
-                      SliverToBoxAdapter(
-                        child: Semantics(
-                          container: true,
-                          label:
-                              'Lista horizontal: alunos e cobranças que precisam de atenção',
-                          child: _HorizontalScrollPeek(
-                          showPeek:
-                              [
-                                ...alunosEmRisco.take(riskDominante ? 2 : 4),
-                                ...(_finData?.vencimentosProximos ?? const [])
-                                    .take(2),
-                              ].length >
-                              1,
-                          child: SizedBox(
-                          height: 168,
-                          child: ListView.separated(
-                            key: const PageStorageKey(
-                              'personal-attention-rail',
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: TokensStrip.s4,
-                            ),
-                            scrollDirection: Axis.horizontal,
-                            itemCount:
-                                [
-                                  ...alunosEmRisco.take(riskDominante ? 2 : 4),
-                                  ...(_finData?.vencimentosProximos ?? const [])
-                                      .take(2),
-                                ].length,
-                            separatorBuilder:
-                                (_, __) => const SizedBox(width: 12),
-                            itemBuilder: (context, index) {
-                              final riskItems =
-                                  alunosEmRisco
-                                      .take(riskDominante ? 2 : 4)
-                                      .toList();
-                              if (index < riskItems.length) {
-                                final aluno = riskItems[index];
-                                return _AttentionCard(
-                                  nome: aluno.nome,
-                                  objetivo: aluno.objetivo,
-                                  titulo: _attentionSignalLabel(aluno),
-                                  subt: _attentionSignalSub(aluno),
-                                  acao: 'Revisar',
-                                  isDark: themeDark,
-                                  showStatusBadge:
-                                      !riskDominante ||
-                                      aluno.inadimplente ||
-                                      aluno.statusFinanceiro ==
-                                          'INADIMPLENTE',
-                                  statusAccent:
-                                      aluno.inadimplente ||
-                                              aluno.statusFinanceiro ==
-                                                  'INADIMPLENTE'
-                                          ? EagleTokens.warn
-                                          : EagleTokens.warn,
-                                  onTap:
-                                      () => context.push('/alunos/${aluno.id}'),
-                                );
-                              }
-                              final v =
-                                  (_finData!.vencimentosProximos)[index -
-                                      riskItems.length];
-                              return _AttentionCard(
-                                nome: v.alunoNome,
-                                titulo: 'Inadimplente',
-                                subt:
-                                    'R\$ ${v.valor.toStringAsFixed(0)} pendente',
-                                acao: 'Cobrar',
-                                isDark: themeDark,
-                                onTap: () => context.go('/financeiro'),
-                              );
-                            },
+                          initiallyExpanded: riscoAlto <= 3,
+                          semanticsLabel: 'Precisa de atenção',
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed:
+                                      () => context.go('/alunos?filtro=risco'),
+                                  child: Text(
+                                    riscoAlto > 1
+                                        ? 'Ver tudo · +${riscoAlto - 1}'
+                                        : 'Ver tudo',
+                                  ),
+                                ),
+                              ),
+                              Semantics(
+                                container: true,
+                                label:
+                                    'Lista horizontal: alunos e cobranças que precisam de atenção',
+                                child: _HorizontalScrollPeek(
+                                  showPeek:
+                                      [
+                                        ...alunosEmRisco.take(
+                                          riskDominante ? 2 : 4,
+                                        ),
+                                        ...(_finData?.vencimentosProximos ??
+                                                const [])
+                                            .take(2),
+                                      ].length >
+                                      1,
+                                  child: SizedBox(
+                                    height: 168,
+                                    child: ListView.separated(
+                                      key: const PageStorageKey(
+                                        'personal-attention-rail',
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: TokensStrip.s4,
+                                      ),
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount:
+                                          [
+                                            ...alunosEmRisco.take(
+                                              riskDominante ? 2 : 4,
+                                            ),
+                                            ...(_finData?.vencimentosProximos ??
+                                                    const [])
+                                                .take(2),
+                                          ].length,
+                                      separatorBuilder:
+                                          (_, __) => const SizedBox(width: 12),
+                                      itemBuilder: (context, index) {
+                                        final riskItems =
+                                            alunosEmRisco
+                                                .take(riskDominante ? 2 : 4)
+                                                .toList();
+                                        if (index < riskItems.length) {
+                                          final aluno = riskItems[index];
+                                          return _AttentionCard(
+                                            nome: aluno.nome,
+                                            objetivo: aluno.objetivo,
+                                            titulo: _attentionSignalLabel(aluno),
+                                            subt: _attentionSignalSub(aluno),
+                                            acao: 'Revisar',
+                                            isDark: themeDark,
+                                            showStatusBadge:
+                                                !riskDominante ||
+                                                aluno.inadimplente ||
+                                                aluno.statusFinanceiro ==
+                                                    'INADIMPLENTE',
+                                            statusAccent: EagleTokens.warn,
+                                            onTap:
+                                                () => context.push(
+                                                  '/alunos/${aluno.id}',
+                                                ),
+                                          );
+                                        }
+                                        final v =
+                                            (_finData!.vencimentosProximos)[index -
+                                                riskItems.length];
+                                        return _AttentionCard(
+                                          nome: v.alunoNome,
+                                          titulo: 'Inadimplente',
+                                          subt:
+                                              'R\$ ${v.valor.toStringAsFixed(0)} pendente',
+                                          acao: 'Cobrar',
+                                          isDark: themeDark,
+                                          onTap:
+                                              () => context.go('/financeiro'),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        ),
                         ),
                       ),
                       const SliverToBoxAdapter(child: SizedBox(height: 8)),
@@ -654,6 +686,7 @@ class _PersonalDashboardScreenState
                           isDark: themeDark,
                           alunosAtivos: alunosAtivos,
                           checkinsHoje: checkinsHoje,
+                          checkinsTrend: checkinsTrend,
                           riscoAlto: riscoAlto,
                           agendaHoje: agendaHoje,
                           hideRiscoChip: alunosEmRisco.isNotEmpty,
@@ -913,6 +946,37 @@ class _PersonalDashboardScreenState
                                         ],
                                       ),
                                       const SizedBox(height: 12),
+                                      if (receitaTrend.isNotEmpty) ...[
+                                        Semantics(
+                                          label:
+                                              'Tendência de receita nos últimos meses',
+                                          child: Row(
+                                            children: [
+                                              Text(
+                                                'Receita · últimos meses',
+                                                style: TextStyle(
+                                                  color: Colors.white.withValues(
+                                                    alpha: 0.72,
+                                                  ),
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                              const Spacer(),
+                                              FxSparkline(
+                                                data: receitaTrend,
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.92,
+                                                ),
+                                                width: 96,
+                                                height: 26,
+                                                fill: true,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 10),
+                                      ],
                                       _HeroProgressRail(
                                         progress: progressRaw.clamp(0.0, 1.0),
                                         exceeded: metaSuperada,
@@ -1453,6 +1517,7 @@ class _DayPulseStrip extends StatelessWidget {
     required this.isDark,
     required this.alunosAtivos,
     required this.checkinsHoje,
+    required this.checkinsTrend,
     required this.riscoAlto,
     required this.agendaHoje,
     required this.hideRiscoChip,
@@ -1467,6 +1532,7 @@ class _DayPulseStrip extends StatelessWidget {
   final bool isDark;
   final int alunosAtivos;
   final int checkinsHoje;
+  final List<double> checkinsTrend;
   final int riscoAlto;
   final int agendaHoje;
   final bool hideRiscoChip;
@@ -1558,6 +1624,31 @@ class _DayPulseStrip extends StatelessWidget {
                           ),
                 ),
               ],
+            ),
+            const SizedBox(height: 8),
+            Semantics(
+              label: 'Tendência de check-ins nos últimos 7 dias',
+              child: Row(
+                children: [
+                  Text(
+                    'Tendência 7 dias',
+                    style: _dashboardSectionKickerStyle(
+                      context,
+                      isDark: isDark,
+                    ),
+                  ),
+                  const Spacer(),
+                  FxSparkline(
+                    data: checkinsTrend,
+                    color: _pulseCheckinsAccent(
+                      checkinsHoje: checkinsHoje,
+                      neutralAccent: neutralAccent,
+                    ),
+                    width: 88,
+                    height: 24,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -1677,98 +1768,6 @@ class _PulseChip extends StatelessWidget {
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-  final String? action;
-  final VoidCallback? onAction;
-  final bool isDark;
-  const _SectionTitle({
-    required this.title,
-    this.subtitle,
-    this.action,
-    this.onAction,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final heading = BrandPalette.sectionHeading(primary, dark: isDark);
-    final actionColor = BrandPalette.sectionLink(primary, dark: isDark);
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, TokensStrip.s4, 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTypography.inter(
-                    fontSize: TokensStrip.fontH2,
-                    fontWeight: TokensStrip.weightH2,
-                    letterSpacing: TokensStrip.trackingH2,
-                    height: 1.2,
-                    color: heading,
-                  ),
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 3),
-                  Text(
-                    subtitle!,
-                    style: AppTypography.inter(
-                      fontSize: TokensStrip.fontBodySm,
-                      fontWeight: FontWeight.w500,
-                      color: mute,
-                      height: 1.25,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          if (action != null)
-            Semantics(
-              button: true,
-              label: action,
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(999),
-                  onTap: onAction,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      minWidth: 48,
-                      minHeight: 48,
-                    ),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Text(
-                          '$action →',
-                          style: AppTypography.inter(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: actionColor,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
 class _RoiQuickLinksRow extends ConsumerWidget {
   const _RoiQuickLinksRow({required this.isDark});
 
@@ -1791,7 +1790,7 @@ class _RoiQuickLinksRow extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'ROI rápido',
+            'Retorno rápido',
             style: _dashboardSectionKickerStyle(context, isDark: isDark),
           ),
           const SizedBox(height: 8),
@@ -1909,6 +1908,7 @@ class _DashboardCollapsibleSection extends StatefulWidget {
     required this.isDark,
     required this.child,
     this.semanticsLabel,
+    this.initiallyExpanded = false,
   });
 
   final String title;
@@ -1916,6 +1916,7 @@ class _DashboardCollapsibleSection extends StatefulWidget {
   final bool isDark;
   final Widget child;
   final String? semanticsLabel;
+  final bool initiallyExpanded;
 
   @override
   State<_DashboardCollapsibleSection> createState() =>
@@ -1924,7 +1925,23 @@ class _DashboardCollapsibleSection extends StatefulWidget {
 
 class _DashboardCollapsibleSectionState
     extends State<_DashboardCollapsibleSection> {
-  bool _expanded = false;
+  late bool _expanded;
+
+  @override
+  void initState() {
+    super.initState();
+    _expanded = widget.initiallyExpanded;
+  }
+
+  @override
+  void didUpdateWidget(covariant _DashboardCollapsibleSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initiallyExpanded != widget.initiallyExpanded &&
+        !oldWidget.initiallyExpanded &&
+        widget.initiallyExpanded) {
+      _expanded = true;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2025,6 +2042,137 @@ class _DashboardCollapsibleSectionState
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ExpandableToolGroups extends ConsumerStatefulWidget {
+  const _ExpandableToolGroups({
+    required this.groups,
+    required this.isDark,
+    required this.shortcutAspectRatio,
+    required this.searchQuery,
+    required this.onShortcut,
+  });
+
+  final List<DashboardToolGroupSection> groups;
+  final bool isDark;
+  final double shortcutAspectRatio;
+  final String searchQuery;
+  final void Function(DashboardToolShortcut shortcut) onShortcut;
+
+  @override
+  ConsumerState<_ExpandableToolGroups> createState() =>
+      _ExpandableToolGroupsState();
+}
+
+class _ExpandableToolGroupsState extends ConsumerState<_ExpandableToolGroups> {
+  late Set<String> _openGroups;
+
+  @override
+  void initState() {
+    super.initState();
+    _openGroups = {'Operação'};
+  }
+
+  @override
+  void didUpdateWidget(covariant _ExpandableToolGroups oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final q = widget.searchQuery.trim();
+    final oldQ = oldWidget.searchQuery.trim();
+    if (q.isNotEmpty && q != oldQ) {
+      _openGroups = widget.groups.map((g) => g.title).toSet();
+    } else if (q.isEmpty && oldQ.isNotEmpty) {
+      _openGroups = {'Operação'};
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final features = effectivePlanoFeatures(ref);
+    final primary = Theme.of(context).colorScheme.primary;
+    final link = BrandPalette.sectionLink(primary, dark: widget.isDark);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final group in widget.groups) ...[
+          Material(
+            color: Colors.transparent,
+            child: Semantics(
+              button: true,
+              expanded: _openGroups.contains(group.title),
+              label: dashboardToolGroupSemanticsHint(
+                group.title,
+                group.shortcuts.length,
+              ),
+              child: InkWell(
+                onTap:
+                    () => setState(() {
+                      if (_openGroups.contains(group.title)) {
+                        _openGroups.remove(group.title);
+                      } else {
+                        _openGroups.add(group.title);
+                      }
+                    }),
+                borderRadius: BorderRadius.circular(TokensStrip.rInput),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    children: [
+                      Text(
+                        group.title,
+                        style: AppTypography.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.3,
+                          color: link,
+                        ),
+                      ),
+                      const Spacer(),
+                      AnimatedRotation(
+                        turns: _openGroups.contains(group.title) ? 0.25 : 0,
+                        duration: const Duration(milliseconds: 220),
+                        curve: Curves.easeOutCubic,
+                        child: Icon(
+                          Icons.chevron_right_rounded,
+                          size: 20,
+                          color: link,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          if (_openGroups.contains(group.title))
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              mainAxisSpacing: 9,
+              crossAxisSpacing: 10,
+              childAspectRatio: widget.shortcutAspectRatio,
+              children: [
+                for (final shortcut in group.shortcuts)
+                  _ShortcutBtn(
+                    icon: shortcut.icon,
+                    label: shortcut.label,
+                    semanticsLabel: dashboardShortcutSemanticsLabel(shortcut),
+                    isDark: widget.isDark,
+                    locked: !shortcut.isUnlocked(features),
+                    tierLabel:
+                        shortcut.isUnlocked(features)
+                            ? null
+                            : shortcut.tierBadgeLabel(),
+                    onTap: () => widget.onShortcut(shortcut),
+                  ),
+              ],
+            ),
+          const SizedBox(height: 8),
+        ],
+      ],
     );
   }
 }
@@ -2206,48 +2354,18 @@ class _CollapsibleToolsSectionState
                       ),
                     )
                   else
-                    for (final group in groups) ...[
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: Text(
-                          group.title,
-                          style: AppTypography.inter(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.3,
-                            color: link,
+                    _ExpandableToolGroups(
+                      groups: groups,
+                      isDark: widget.isDark,
+                      shortcutAspectRatio: widget.shortcutAspectRatio,
+                      searchQuery: _searchQuery,
+                      onShortcut:
+                          (shortcut) => openDashboardShortcut(
+                            context,
+                            ref,
+                            shortcut,
                           ),
-                        ),
-                      ),
-                      GridView.count(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 9,
-                        crossAxisSpacing: 10,
-                        childAspectRatio: widget.shortcutAspectRatio,
-                        children: [
-                          for (final shortcut in group.shortcuts)
-                            _ShortcutBtn(
-                              icon: shortcut.icon,
-                              label: shortcut.label,
-                              isDark: widget.isDark,
-                              locked: !shortcut.isUnlocked(features),
-                              tierLabel:
-                                  shortcut.isUnlocked(features)
-                                      ? null
-                                      : shortcut.tierBadgeLabel(),
-                              onTap:
-                                  () => openDashboardShortcut(
-                                    context,
-                                    ref,
-                                    shortcut,
-                                  ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                    ],
+                    ),
                 ],
               ),
             ),
@@ -2440,6 +2558,7 @@ class _AttentionCard extends StatelessWidget {
 class _ShortcutBtn extends StatelessWidget {
   final String icon;
   final String label;
+  final String? semanticsLabel;
   final VoidCallback onTap;
   final bool isDark;
   final bool locked;
@@ -2450,6 +2569,7 @@ class _ShortcutBtn extends StatelessWidget {
     required this.label,
     required this.onTap,
     required this.isDark,
+    this.semanticsLabel,
     this.locked = false,
     this.tierLabel,
   });
@@ -2470,8 +2590,8 @@ class _ShortcutBtn extends StatelessWidget {
     return Semantics(
       label:
           locked
-              ? '$label, trancado. Plano ${tierLabel ?? 'upgrade'}'
-              : label,
+              ? '${semanticsLabel ?? label}, trancado. Plano ${tierLabel ?? 'upgrade'}'
+              : (semanticsLabel ?? label),
       button: true,
       child: InkWell(
       onTap: onTap,
