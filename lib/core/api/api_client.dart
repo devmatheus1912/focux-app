@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'api_client_connection_pool.dart';
 import '../auth/session_invalidator.dart';
 import '../config/env.dart';
 import '../planos/plano_cache_policy.dart';
@@ -27,6 +28,7 @@ class ApiClient {
     );
 
     TlsCertificatePinning.apply(_dio);
+    configureHttpConnectionPool(_dio);
 
     _dio.interceptors.add(
       InterceptorsWrapper(

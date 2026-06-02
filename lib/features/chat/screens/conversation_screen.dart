@@ -82,6 +82,11 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   final _audioRecorder = AudioRecorder();
 
   StompClient? _stomp;
+  Timer? _wsReconnectTimer;
+  int _wsReconnectAttempt = 0;
+  int? _wsAlunoId;
+  bool _wsLifecycleEnded = false;
+  static const _maxWsReconnectAttempts = 8;
   bool _loading = true;
   bool _sending = false;
   bool _uploading = false;
@@ -122,6 +127,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
 
   @override
   void dispose() {
+    _wsLifecycleEnded = true;
+    _wsReconnectTimer?.cancel();
     _stomp?.deactivate();
     _recordTimer?.cancel();
     unawaited(_audioRecorder.dispose());
@@ -228,6 +235,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   }
 
   Future<void> _connectWs(int alunoId) async {
+    if (_wsLifecycleEnded) {
+      return;
+    }
+    _wsAlunoId = alunoId;
     if (_stomp != null) {
       return;
     }
@@ -238,8 +249,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         url: url,
         onConnect: (frame) => _onConnect(frame, alunoId),
         beforeConnect: () async {},
-        onStompError: (_) {},
-        onDisconnect: (_) {},
+        onStompError: (_) => _scheduleWsReconnect(),
+        onDisconnect: (_) => _scheduleWsReconnect(),
+        onWebSocketError: (_) => _scheduleWsReconnect(),
         stompConnectHeaders:
             token != null ? {'Authorization': 'Bearer $token'} : {},
         webSocketConnectHeaders:
@@ -249,7 +261,31 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     _stomp!.activate();
   }
 
+  void _scheduleWsReconnect() {
+    _wsReconnectTimer?.cancel();
+    if (_wsLifecycleEnded || _wsAlunoId == null) {
+      return;
+    }
+    if (_wsReconnectAttempt >= _maxWsReconnectAttempts) {
+      return;
+    }
+    final exp = _wsReconnectAttempt.clamp(0, 6);
+    final delayMs = (600 * (1 << exp)).clamp(600, 30000);
+    _wsReconnectAttempt++;
+    _wsReconnectTimer = Timer(Duration(milliseconds: delayMs), () async {
+      if (_wsLifecycleEnded || !mounted || _wsAlunoId == null) {
+        return;
+      }
+      try {
+        _stomp?.deactivate();
+      } catch (_) {}
+      _stomp = null;
+      await _connectWs(_wsAlunoId!);
+    });
+  }
+
   void _onConnect(StompFrame frame, int alunoId) {
+    _wsReconnectAttempt = 0;
     final destination =
         _isAlunoMode
             ? '/topic/chat.aluno.$alunoId'
