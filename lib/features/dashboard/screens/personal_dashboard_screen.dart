@@ -713,22 +713,14 @@ class _PersonalDashboardScreenState
                     SliverToBoxAdapter(
                       child: _DashboardCollapsibleSection(
                         title: 'Aderência da semana',
-                        collapsedHint: 'Relatório e plano de retomada · toque para expandir',
+                        collapsedHint:
+                            'Treinos parados e ranking · toque para expandir',
                         isDark: themeDark,
                         semanticsLabel: 'Aderência da semana',
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton(
-                                onPressed: () => context.push('/relatorios/global'),
-                                child: const Text('Relatório'),
-                              ),
-                            ),
-                            _AderenciaSemanaWidget(isDark: themeDark),
-                          ],
-                        ),
+                        headerActionLabel: 'Relatório',
+                        onHeaderAction:
+                            () => context.push('/relatorios/global'),
+                        child: _AderenciaSemanaWidget(isDark: themeDark),
                       ),
                     ),
 
@@ -1696,7 +1688,7 @@ class _DayPulseStrip extends StatelessWidget {
                                   Text(
                                     'Sem check-ins · toque para abrir a agenda',
                                     style: AppTypography.inter(
-                                      fontSize: 11,
+                                      fontSize: 12,
                                       fontWeight: FontWeight.w500,
                                       color: mute,
                                       height: 1.25,
@@ -1993,6 +1985,8 @@ class _DashboardCollapsibleSection extends StatefulWidget {
     required this.child,
     this.semanticsLabel,
     this.initiallyExpanded = false,
+    this.headerActionLabel,
+    this.onHeaderAction,
   });
 
   final String title;
@@ -2001,6 +1995,8 @@ class _DashboardCollapsibleSection extends StatefulWidget {
   final Widget child;
   final String? semanticsLabel;
   final bool initiallyExpanded;
+  final String? headerActionLabel;
+  final VoidCallback? onHeaderAction;
 
   @override
   State<_DashboardCollapsibleSection> createState() =>
@@ -2095,6 +2091,22 @@ class _DashboardCollapsibleSectionState
                           ],
                         ),
                       ),
+                      if (widget.headerActionLabel != null &&
+                          widget.onHeaderAction != null)
+                        Semantics(
+                          button: true,
+                          label: widget.headerActionLabel,
+                          child: TextButton(
+                            onPressed: widget.onHeaderAction,
+                            style: TextButton.styleFrom(
+                              minimumSize: const Size(48, 48),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                            ),
+                            child: Text(widget.headerActionLabel!),
+                          ),
+                        ),
                       AnimatedRotation(
                         turns: _expanded ? 0.25 : 0,
                         duration: const Duration(milliseconds: 220),
@@ -2126,6 +2138,85 @@ class _DashboardCollapsibleSectionState
           ),
         ],
       ),
+    );
+  }
+}
+
+class _DashboardShortcutGrid extends ConsumerWidget {
+  const _DashboardShortcutGrid({
+    required this.shortcuts,
+    required this.isDark,
+    required this.aspectRatio,
+    required this.onShortcut,
+  });
+
+  final List<DashboardToolShortcut> shortcuts;
+  final bool isDark;
+  final double aspectRatio;
+  final void Function(DashboardToolShortcut shortcut) onShortcut;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final features = effectivePlanoFeatures(ref);
+    final rows = <Widget>[];
+
+    Widget tile(DashboardToolShortcut shortcut) {
+      return _ShortcutBtn(
+        icon: shortcut.icon,
+        label: shortcut.label,
+        semanticsLabel: dashboardShortcutSemanticsLabel(shortcut),
+        isDark: isDark,
+        locked: !shortcut.isUnlocked(features),
+        tierLabel:
+            shortcut.isUnlocked(features) ? null : shortcut.tierBadgeLabel(),
+        onTap: () => onShortcut(shortcut),
+      );
+    }
+
+    for (var i = 0; i < shortcuts.length; i += 2) {
+      if (i + 1 < shortcuts.length) {
+        rows.add(
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: AspectRatio(
+                    aspectRatio: aspectRatio,
+                    child: tile(shortcuts[i]),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: AspectRatio(
+                    aspectRatio: aspectRatio,
+                    child: tile(shortcuts[i + 1]),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      } else {
+        final gridWidth =
+            MediaQuery.sizeOf(context).width - (TokensStrip.s4 * 2);
+        final tileHeight = ((gridWidth - 10) / 2) / aspectRatio;
+        rows.add(
+          SizedBox(
+            height: tileHeight,
+            width: double.infinity,
+            child: tile(shortcuts[i]),
+          ),
+        );
+      }
+      if (i + 2 < shortcuts.length) {
+        rows.add(const SizedBox(height: 9));
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: rows,
     );
   }
 }
@@ -2173,7 +2264,6 @@ class _ExpandableToolGroupsState extends ConsumerState<_ExpandableToolGroups> {
 
   @override
   Widget build(BuildContext context) {
-    final features = effectivePlanoFeatures(ref);
     final primary = Theme.of(context).colorScheme.primary;
     final link = BrandPalette.sectionLink(primary, dark: widget.isDark);
 
@@ -2231,28 +2321,11 @@ class _ExpandableToolGroupsState extends ConsumerState<_ExpandableToolGroups> {
             ),
           ),
           if (_openGroups.contains(group.title))
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              mainAxisSpacing: 9,
-              crossAxisSpacing: 10,
-              childAspectRatio: widget.shortcutAspectRatio,
-              children: [
-                for (final shortcut in group.shortcuts)
-                  _ShortcutBtn(
-                    icon: shortcut.icon,
-                    label: shortcut.label,
-                    semanticsLabel: dashboardShortcutSemanticsLabel(shortcut),
-                    isDark: widget.isDark,
-                    locked: !shortcut.isUnlocked(features),
-                    tierLabel:
-                        shortcut.isUnlocked(features)
-                            ? null
-                            : shortcut.tierBadgeLabel(),
-                    onTap: () => widget.onShortcut(shortcut),
-                  ),
-              ],
+            _DashboardShortcutGrid(
+              shortcuts: group.shortcuts,
+              isDark: widget.isDark,
+              aspectRatio: widget.shortcutAspectRatio,
+              onShortcut: widget.onShortcut,
             ),
           const SizedBox(height: 8),
         ],
