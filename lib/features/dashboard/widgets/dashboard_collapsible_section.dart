@@ -87,7 +87,6 @@ class _DashboardCollapsibleSectionState
     final motionDuration = dashboardMotionDuration(context);
     final primary = Theme.of(context).colorScheme.primary;
     final heading = BrandPalette.sectionHeading(primary, dark: widget.isDark);
-    final mute = dashboardReadableMuted(context, isDark: widget.isDark);
     final link = BrandPalette.sectionLink(primary, dark: widget.isDark);
     final hasCollapsedAction =
         !_expanded &&

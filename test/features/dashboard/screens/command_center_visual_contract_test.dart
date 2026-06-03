@@ -54,6 +54,8 @@ void main() {
     expect(widget, contains('priorityBadge'));
     expect(widget, contains('BILLING_PENDING'));
     expect(widget, contains('dashboardFormatCountCopy'));
+    expect(widget, contains('hasRiskCurated'));
+    expect(widget, contains('dashboardPriorityBadgeColors'));
     expect(widget, contains('DashboardCommandCenterStickyHeaderDelegate'));
     expect(widget, contains('SliverPersistentHeader'));
     expect(widget, contains('Agendar primeiro treino'));

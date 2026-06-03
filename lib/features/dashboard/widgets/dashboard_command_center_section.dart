@@ -60,7 +60,7 @@ class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandC
     final contextualSubtitle = widget.contextualSubtitle;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final mute = dashboardReadableCaption(context, isDark: isDark);
     final heading = BrandPalette.sectionHeading(primary, dark: isDark);
     final actionColor = BrandPalette.sectionAction(primary, dark: isDark);
     final rowAccent = BrandPalette.sectionAccent(primary, dark: isDark);
@@ -254,7 +254,10 @@ class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandC
                         vertical: 7,
                       ),
                       decoration: BoxDecoration(
-                        color: primarySoft,
+                        color: dashboardPrioritiesChipBackground(
+                          primary,
+                          isDark: isDark,
+                        ),
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Row(
@@ -265,7 +268,10 @@ class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandC
                                 ? 'lendo sinais'
                                 : 'Ver prioridades',
                             style: TextStyle(
-                              color: actionColor,
+                              color: dashboardPrioritiesChipForeground(
+                                primary,
+                                isDark: isDark,
+                              ),
                               fontSize: 11.5,
                               fontWeight: FontWeight.w800,
                             ),
@@ -275,7 +281,10 @@ class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandC
                             FxIcon(
                               name: 'chevron-right',
                               size: 13,
-                              color: actionColor,
+                              color: dashboardPrioritiesChipForeground(
+                                primary,
+                                isDark: isDark,
+                              ),
                             ),
                           ],
                         ],
@@ -558,7 +567,7 @@ CommandActionItem _sheetItemFromFila(FilaAcaoResumo action) {
   );
   return CommandActionItem(
     icon: 'zap',
-    title: isRadar ? radarName! : dashboardFormatActionCopy(rawTitle),
+    title: radarName ?? dashboardFormatActionCopy(rawTitle),
     subtitle: dashboardFormatCountCopy(action.descricao),
     route:
         action.acaoUrl.startsWith('/')
@@ -581,10 +590,21 @@ List<CommandActionItem> buildDashboardSheetActions({
   final hasBillingCurated = curated.any(
     (item) => item.route == '/financeiro' || item.tone == CommandActionTone.money,
   );
+  final hasRiskCurated = curated.any(
+    (item) =>
+        item.tone == CommandActionTone.hot &&
+        (item.route.contains('alertas') ||
+            item.route.contains('contato') ||
+            item.route.contains('risco')),
+  );
   final merged = <CommandActionItem>[...curated];
   for (final action in filaAcoes) {
     if (hasBillingCurated &&
         (action.actionKey == 'BILLING_PENDING' || action.tipo == 'COBRANCA')) {
+      continue;
+    }
+    if (hasRiskCurated &&
+        (action.actionKey == 'RISK_STUDENTS' || action.tipo == 'RISCO')) {
       continue;
     }
     final item = _sheetItemFromFila(action);

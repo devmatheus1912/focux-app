@@ -43,6 +43,9 @@ void main() {
     expect(screen, contains('groupDashboardToolShortcuts'));
     expect(screen, contains('Buscar ferramenta'));
     expect(screen, contains('dashboardReadableMuted'));
+    expect(screen, contains('dashboardPriorityBadgeColors'));
+    expect(screen, contains('dashboardPrioritiesChipForeground'));
+    expect(screen, contains('RISK_STUDENTS'));
     expect(screen, contains('Abrir financeiro'));
     expect(screen, contains('_compactZeroRevenue'));
     expect(screen, contains('backgroundColor: Colors.white'));

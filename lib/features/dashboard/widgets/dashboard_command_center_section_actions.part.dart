@@ -316,26 +316,40 @@ class CommandActionTile extends StatelessWidget {
                         ),
                         if (badge != null && badge.isNotEmpty) ...[
                           const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: accent.withValues(
-                                alpha: isDark ? 0.22 : 0.12,
-                              ),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              badge,
-                              style: TextStyle(
-                                color: accent,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.2,
-                              ),
-                            ),
+                          Builder(
+                            builder: (context) {
+                              final badgeColors = dashboardPriorityBadgeColors(
+                                isDark: isDark,
+                                accent: accent,
+                              );
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: badgeColors.background,
+                                  borderRadius: BorderRadius.circular(6),
+                                  border:
+                                      isDark
+                                          ? Border.all(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.12,
+                                            ),
+                                          )
+                                          : null,
+                                ),
+                                child: Text(
+                                  badge,
+                                  style: TextStyle(
+                                    color: badgeColors.foreground,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.2,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ],
