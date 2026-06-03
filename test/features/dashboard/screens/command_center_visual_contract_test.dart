@@ -7,6 +7,7 @@ void main() {
     const paths = [
       'lib/features/dashboard/screens/personal_dashboard_screen.dart',
       'lib/features/dashboard/widgets/dashboard_command_center_section.dart',
+      'lib/features/dashboard/widgets/dashboard_command_center_section_actions.part.dart',
       'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
       'lib/features/dashboard/widgets/dashboard_aderencia_semana_widget.dart',
       'lib/features/dashboard/utils/dashboard_screen_helpers.dart',
