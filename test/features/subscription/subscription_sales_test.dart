@@ -15,14 +15,13 @@ void main() {
   });
 
   test('paywall assinatura com CTA contextual e gerenciar loja', () {
-    final assinatura = File(
+    final assinatura = readScreenSourceBundle(
       'lib/features/assinatura/screens/assinatura_screen.dart',
-    ).readAsStringSync();
+    );
     expect(assinatura, contains('Gerenciar assinatura'));
     expect(
-      File('lib/features/assinatura/screens/paywall_layout.dart')
-          .readAsStringSync(),
-      contains('_PaywallPlanOptionTile'),
+      readPaywallComponentsBundle(),
+      contains('PaywallRichPlanCard'),
     );
     expect(assinatura, contains('openNativeSubscriptionManagement'));
   });
@@ -64,9 +63,9 @@ void main() {
 
     expect(entitlements, contains('LockedOffer'));
     expect(entitlements, contains('softGateMessage'));
-    expect(banner, contains("'/assinatura'"));
+    expect(banner, contains('/assinatura'));
     expect(gate, contains('PlanEntitlements.lockedOffer'));
-    expect(gate, contains("'/assinatura'"));
+    expect(gate, contains('/assinatura'));
     expect(repo, contains('alunosAtivos'));
     expect(repo, contains('agenda: true'));
     expect(repo, contains('limiteAlunos: 5'));

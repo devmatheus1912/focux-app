@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
 
+import '../../support/screen_source_bundle.dart';
+
 String _routerSources() {
   final routes = readRouterSourceBundle();
   final redirect =
@@ -210,10 +212,9 @@ void main() {
         File(
           'lib/features/perfil/screens/identidade_visual_screen.dart',
         ).readAsStringSync();
-    final agenda =
-        File(
-          'lib/features/agenda/screens/agenda_screen.dart',
-        ).readAsStringSync();
+    final agenda = readScreenSourceBundle(
+      'lib/features/agenda/screens/agenda_screen.dart',
+    );
     final avaliacao =
         File(
           'lib/features/avaliacao/screens/evolucao_comparativo_screen.dart',

@@ -268,6 +268,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
       await action();
       if (!mounted) return;
       ref.invalidate(iaActionsProvider(_status));
+      ref.invalidate(dashboardHomeProvider);
       ref.invalidate(commandCenterProvider);
       FeedbackHelper.showSnackBar(
         context,

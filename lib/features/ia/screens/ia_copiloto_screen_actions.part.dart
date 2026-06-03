@@ -450,6 +450,7 @@ Future<void> _selecionarAluno() async {
         _tarefaCriada = true;
         _tarefaPersistida = persisted;
       });
+      ref.invalidate(dashboardHomeProvider);
       ref.invalidate(commandCenterProvider);
       FeedbackHelper.showSnackBar(
         context,

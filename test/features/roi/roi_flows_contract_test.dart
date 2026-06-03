@@ -35,10 +35,13 @@ void main() {
     final landingEditor =
         File('lib/features/perfil/screens/landing_editor_screen.dart')
             .readAsStringSync();
+    final landingLinks =
+        File('lib/features/perfil/screens/landing_editor_links_tab.dart')
+            .readAsStringSync();
     final pacotes =
         File('lib/features/pacotes/screens/pacotes_screen.dart').readAsStringSync();
     expect(landingEditor, contains('Env.landingPageUrl'));
-    expect(landingEditor, contains('Env.capturaPageUrl'));
+    expect(landingLinks, contains('Env.capturaPageUrl'));
     expect(pacotes, isNot(contains('https://focux.app/p/')));
   });
 

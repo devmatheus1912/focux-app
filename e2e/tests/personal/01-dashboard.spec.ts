@@ -22,9 +22,9 @@ test.describe('@p0 @smoke personal dashboard', () => {
     }
   });
 
-  test('command-center: GET /api/dashboard/command-center responde', async ({ page }) => {
+  test('dashboard home: GET /api/dashboard/home responde', async ({ page }) => {
     const resp = page.waitForResponse((r) =>
-      r.url().includes('/api/dashboard/command-center') && r.request().method() === 'GET'
+      r.url().includes('/api/dashboard/home') && r.request().method() === 'GET'
     );
     await page.goto('/dashboard/personal');
     const r = await resp;

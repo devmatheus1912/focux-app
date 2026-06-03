@@ -59,11 +59,15 @@ class DashboardAttentionCard extends StatelessWidget {
     return Semantics(
       label: semanticsLabel,
       button: true,
-      child: InkWell(
+      child: Tooltip(
+        message: objetivo?.trim().isNotEmpty == true
+            ? '${fxTitleCaseName(nome)} · ${objetivo!.trim()}'
+            : fxTitleCaseName(nome),
+        child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(TokensStrip.rCard),
         child: Container(
-          width: 240,
+          width: 268,
           padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
           decoration: fxStripCardDecoration(
             context,
@@ -107,7 +111,13 @@ class DashboardAttentionCard extends StatelessWidget {
                           objetivo?.trim().isNotEmpty == true
                               ? objetivo!.trim()
                               : 'Objetivo não definido',
-                          style: AppTypography.inter(fontSize: 11, color: mute),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.inter(
+                            fontSize: 11,
+                            color: mute,
+                            height: 1.2,
+                          ),
                         ),
                       ],
                     ),
@@ -197,6 +207,7 @@ class DashboardAttentionCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

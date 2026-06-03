@@ -391,10 +391,10 @@ const qaSmokeEndpoints = <QaSmokeEndpoint>[
     expectedAnonymousStatus: 403,
   ),
   QaSmokeEndpoint(
-    id: 'command-center',
+    id: 'dashboard-home',
     area: 'personal',
     method: 'GET',
-    path: '/api/dashboard/command-center',
+    path: '/api/dashboard/home',
     authMode: 'PERSONAL',
     expectedAnonymousStatus: 403,
   ),

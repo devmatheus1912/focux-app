@@ -99,7 +99,7 @@ class _PersonalDashboardScreenState
       parent: _entryCtrl,
       curve: const Interval(0.08, 0.58, curve: Curves.easeOutCubic),
     );
-    _loadFin();
+    _loadFinFromHome();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _maybeShowOnboardingWizard();
       _bindDashboardReturnListener();
@@ -159,30 +159,16 @@ class _PersonalDashboardScreenState
     super.dispose();
   }
 
-  Future<void> _loadFin() async {
+  Future<void> _loadFinFromHome() async {
     if (mounted) {
       setState(() {
         _loadingFin = true;
       });
     }
     try {
-      final data =
-          await FinanceiroRepository(ref.read(apiClientProvider)).dashboard();
-      if (mounted) {
-        setState(() {
-          _finData = data;
-          _loadingFin = false;
-        });
-        _counterAnim = Tween<double>(
-          begin: 0,
-          end: _finData!.receitaMes,
-        ).animate(CurvedAnimation(parent: _counterCtrl, curve: Curves.easeOut));
-        if (TokensStrip.prefersReducedMotion(context)) {
-          _counterCtrl.value = 1.0;
-        } else {
-          _counterCtrl.forward(from: 0);
-        }
-      }
+      final home = await ref.read(dashboardHomeProvider.future);
+      if (!mounted) return;
+      _applyFinanceData(home.financeiro);
     } catch (e, st) {
       debugPrint('[Focux] Error loading financeiro dashboard: $e\n$st');
       if (mounted) {
@@ -197,12 +183,29 @@ class _PersonalDashboardScreenState
     }
   }
 
+  void _applyFinanceData(FinanceiroDashboard data) {
+    if (!mounted) return;
+    setState(() {
+      _finData = data;
+      _loadingFin = false;
+    });
+    _counterAnim = Tween<double>(
+      begin: 0,
+      end: data.receitaMes,
+    ).animate(CurvedAnimation(parent: _counterCtrl, curve: Curves.easeOut));
+    if (TokensStrip.prefersReducedMotion(context)) {
+      _counterCtrl.value = 1.0;
+    } else {
+      _counterCtrl.forward(from: 0);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final heroPrimary = BrandPalette.softened(primary, amount: 0.06);
     final heroDeep = BrandPalette.deep(heroPrimary);
-    final dashboardAsync = ref.watch(dashboardProvider);
+    final homeAsync = ref.watch(dashboardHomeProvider);
     final commandAsync = ref.watch(commandCenterProvider);
     final reduceMotion = TokensStrip.prefersReducedMotion(context);
     final themeDark = Theme.of(context).brightness == Brightness.dark;
@@ -214,7 +217,7 @@ class _PersonalDashboardScreenState
       backgroundColor: shellScaffoldColor,
       body: SafeArea(
         bottom: false,
-        child: dashboardAsync.when(
+        child: homeAsync.when(
           loading: () => DashboardShimmerLoading(themeDark: themeDark),
           error:
               (e, _) => DashboardErrorState(
@@ -222,12 +225,13 @@ class _PersonalDashboardScreenState
                 primary: primary,
                 message: friendlyError(e),
                 onRetry: () {
-                  ref.invalidate(dashboardProvider);
-                  ref.invalidate(commandCenterProvider);
+                  ref.invalidate(dashboardHomeProvider);
                   ref.invalidate(alunosProvider);
+                  _loadFinFromHome();
                 },
               ),
-          data: (data) {
+          data: (home) {
+              final data = home.personal;
               final screenWidth = MediaQuery.sizeOf(context).width;
               final isCompactPhone = screenWidth < 390;
               final shortcutAspectRatio = isCompactPhone ? 2.75 : 3.05;
@@ -321,6 +325,9 @@ class _PersonalDashboardScreenState
                 vencimentosPendentes: vencimentosCount,
                 riskDominante: riskDominante,
               );
+              final dayFocusCoversRetention =
+                  dayFocus.headline == 'Cobrança e retenção hoje' ||
+                  dayFocus.headline == 'Retomada urgente da base';
 
               final attentionRiskItems =
                   alunosEmRisco.take(riskDominante ? 2 : 4).toList();
@@ -331,15 +338,14 @@ class _PersonalDashboardScreenState
 
               return RefreshIndicator(
                 onRefresh: () async {
-                  ref.invalidate(dashboardProvider);
-                  ref.invalidate(commandCenterProvider);
+                  ref.invalidate(dashboardHomeProvider);
                   ref.invalidate(alunosProvider);
                   ref.invalidate(historicoCheckinProvider);
                   ref.invalidate(aderenciaTop3Provider);
                   ref.invalidate(notificacoesProvider);
                   ref.invalidate(notificacoesNaoLidasProvider);
                   ref.invalidate(onboardingStatusProvider);
-                  await _loadFin();
+                  await _loadFinFromHome();
                   if (context.mounted) {
                     FeedbackHelper.showSuccess(
                       context,
@@ -485,7 +491,8 @@ class _PersonalDashboardScreenState
                                   ? '$riscoAlto no radar · toque para expandir'
                                   : 'Cobranças pendentes · toque para expandir',
                           isDark: themeDark,
-                          initiallyExpanded: riscoAlto <= 3,
+                          initiallyExpanded:
+                              !dayFocusCoversRetention && riscoAlto <= 3,
                           resetToken: _attentionSectionResetToken,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -518,7 +525,7 @@ class _PersonalDashboardScreenState
                                 child: DashboardHorizontalScrollPeek(
                                   showPeek: attentionItemCount > 1,
                                   child: SizedBox(
-                                    height: 168,
+                                    height: 184,
                                     child: ListView.separated(
                                       key: const PageStorageKey(
                                         'personal-attention-rail',
@@ -633,44 +640,35 @@ class _PersonalDashboardScreenState
                     ),
 
                     const SliverToBoxAdapter(child: SizedBox(height: 4)),
-                    // PANORAMA FINANCEIRO — contexto, não protagonista
                     SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          TokensStrip.s4,
-                          TokensStrip.s4,
-                          TokensStrip.s4,
-                          0,
-                        ),
-                        child: Text(
-                          'Panorama financeiro',
-                          style: dashboardSectionKickerStyle(
-                            context,
-                            isDark: themeDark,
+                      child: DashboardCollapsibleSection(
+                        title: 'Panorama financeiro',
+                        collapsedHint:
+                            receitaAtual > 0
+                                ? 'R\$ ${receitaAtual.toInt()} recebido · toque para expandir'
+                                : 'Receita e meta do mês · toque para expandir',
+                        isDark: themeDark,
+                        initiallyExpanded: !dayFocusCoversRetention,
+                        child: dashboardEntryMotion(
+                          context: context,
+                          fade: _heroFade,
+                          slideBegin: const Offset(0, 0.05),
+                          child: DashboardFinancialHeroSection(
+                            gradientCtrl: _gradientCtrl,
+                            reduceMotion: reduceMotion,
+                            themeDark: themeDark,
+                            heroPrimary: heroPrimary,
+                            heroDeep: heroDeep,
+                            mes: mes,
+                            receitaAtual: receitaAtual,
+                            pendente: pendente,
+                            progressRaw: progressRaw,
+                            metaSuperada: metaSuperada,
+                            loadingFin: _loadingFin,
+                            counterAnim: _counterAnim,
+                            finData: _finData,
+                            receitaTrend: receitaTrend,
                           ),
-                        ),
-                      ),
-                    ),
-                    SliverToBoxAdapter(
-                      child: dashboardEntryMotion(
-                        context: context,
-                        fade: _heroFade,
-                        slideBegin: const Offset(0, 0.05),
-                        child: DashboardFinancialHeroSection(
-                          gradientCtrl: _gradientCtrl,
-                          reduceMotion: reduceMotion,
-                          themeDark: themeDark,
-                          heroPrimary: heroPrimary,
-                          heroDeep: heroDeep,
-                          mes: mes,
-                          receitaAtual: receitaAtual,
-                          pendente: pendente,
-                          progressRaw: progressRaw,
-                          metaSuperada: metaSuperada,
-                          loadingFin: _loadingFin,
-                          counterAnim: _counterAnim,
-                          finData: _finData,
-                          receitaTrend: receitaTrend,
                         ),
                       ),
                     ),

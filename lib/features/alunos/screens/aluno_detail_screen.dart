@@ -1586,6 +1586,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
             .getIaCommandActions(status: 'ABERTO', alunoId: aluno.id);
         persisted = abertas.any((item) => item.actionKey == actionKey);
       }
+      ref.invalidate(dashboardHomeProvider);
       ref.invalidate(commandCenterProvider);
       ref.invalidate(alunoOpenIaActionsProvider(aluno.id));
       if (context.mounted) {

@@ -95,7 +95,7 @@ void main() {
       'auth-capabilities',
       'auth-environment',
       'profile',
-      'command-center',
+      'dashboard-home',
       'notifications',
       'workouts',
       'exercises',

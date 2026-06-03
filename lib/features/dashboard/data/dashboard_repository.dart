@@ -1,6 +1,32 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../financeiro/data/financeiro_repository.dart';
 import 'command_center_data.dart';
+
+class DashboardHomeBundle {
+  final DashboardData personal;
+  final CommandCenterData commandCenter;
+  final FinanceiroDashboard financeiro;
+
+  DashboardHomeBundle({
+    required this.personal,
+    required this.commandCenter,
+    required this.financeiro,
+  });
+
+  factory DashboardHomeBundle.fromJson(Map<String, dynamic> json) =>
+      DashboardHomeBundle(
+        personal: DashboardData.fromJson(
+          json['personal'] as Map<String, dynamic>,
+        ),
+        commandCenter: CommandCenterData.fromJson(
+          json['commandCenter'] as Map<String, dynamic>,
+        ),
+        financeiro: FinanceiroDashboard.fromJson(
+          json['financeiro'] as Map<String, dynamic>,
+        ),
+      );
+}
 
 class DashboardData {
   final int totalAlunos;
@@ -46,14 +72,9 @@ class DashboardRepository {
 
   DashboardRepository(ApiClient client) : _dio = client.dio;
 
-  Future<DashboardData> getDashboard() async {
-    final response = await _dio.get('/api/dashboard/personal');
-    return DashboardData.fromJson(response.data as Map<String, dynamic>);
-  }
-
-  Future<CommandCenterData> getCommandCenter() async {
-    final response = await _dio.get('/api/dashboard/command-center');
-    return CommandCenterData.fromJson(response.data as Map<String, dynamic>);
+  Future<DashboardHomeBundle> getHome() async {
+    final response = await _dio.get('/api/dashboard/home');
+    return DashboardHomeBundle.fromJson(response.data as Map<String, dynamic>);
   }
 
   Future<List<FilaAcaoResumo>> getIaCommandActions({

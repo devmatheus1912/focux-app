@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -69,6 +69,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
 
       await ref.read(perfilRepositoryProvider).atualizar(logoUrl: logoUrl);
       ref.invalidate(perfilProvider);
+      ref.invalidate(dashboardHomeProvider);
       ref.invalidate(dashboardProvider);
 
       if (!mounted) return;
@@ -100,6 +101,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
     final updated = await context.push<bool>('/perfil/editar', extra: perfil);
     if (updated == true) {
       ref.invalidate(perfilProvider);
+      ref.invalidate(dashboardHomeProvider);
       ref.invalidate(dashboardProvider);
     }
   }
