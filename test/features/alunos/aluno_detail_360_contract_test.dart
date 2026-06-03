@@ -30,4 +30,24 @@ void main() {
     expect(screen, contains("'Abrir chat'"));
     expect(screen, contains('perfil, autonomia e financeiro'));
   });
+
+  test('aluno 360 polish: unified status, refresh, altura, sparkline', () {
+    final screen =
+        File(
+          'lib/features/alunos/screens/aluno_detail_screen.dart',
+        ).readAsStringSync();
+
+    expect(screen, contains('class _AlunoOperationalStatusSection'));
+    expect(screen, contains('Status operacional'));
+    expect(screen, contains('Índice operacional'));
+    expect(screen, contains('Sinais atualizados para priorizar sua ação'));
+    expect(screen, contains('Sugestão offline'));
+    expect(screen, contains('invalidateAluno360Providers'));
+    expect(screen, contains('alunoAderenciaSemanalProvider'));
+    expect(screen, contains('class _WeeklyActivitySparkline'));
+    expect(screen, contains('formatAlturaDisplay'));
+    expect(screen, contains('friendlyError'));
+    expect(screen, isNot(contains('Pulso operacional')));
+    expect(screen, isNot(contains('Score API')));
+  });
 }

@@ -2,12 +2,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../data/aluno_contact_utils.dart';
 import '../data/aluno_followup_store.dart';
+import '../utils/altura_display.dart';
 import '../providers/aluno_followup_provider.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
@@ -68,6 +69,25 @@ final alunoTimeline360ApiProvider =
         ref.read(apiClientProvider),
       ).buscarTimeline360(alunoId);
     });
+
+final alunoAderenciaSemanalProvider =
+    FutureProvider.family<List<Map<String, dynamic>>, int>((ref, alunoId) async {
+      return ref.read(alunoRepositoryProvider).aderenciaSemanal(alunoId);
+    });
+
+Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
+  ref.invalidate(alunoProvider(alunoId));
+  ref.invalidate(alunoRecoveryProvider(alunoId));
+  ref.invalidate(alunoAutonomiaEventosProvider(alunoId));
+  ref.invalidate(alunoAutonomiaResumoProvider(alunoId));
+  ref.invalidate(alunoScoreSnapshotsProvider(alunoId));
+  ref.invalidate(alunoEvolucaoInteligenteProvider(alunoId));
+  ref.invalidate(alunoTimeline360ApiProvider(alunoId));
+  ref.invalidate(alunoCopilotoActionProvider(alunoId));
+  ref.invalidate(alunoOpenIaActionsProvider(alunoId));
+  ref.invalidate(alunoAderenciaSemanalProvider(alunoId));
+  await ref.read(alunoProvider(alunoId).future);
+}
 
 int _perfilCompletion(Aluno aluno) {
   final fields = [
@@ -432,27 +452,16 @@ class AlunoDetailScreen extends ConsumerWidget {
         loading: () => const FxLoading(),
         error:
             (e, _) => _AlunoDetailErrorState(
-              message: '$e',
+              message: friendlyError(e, fallback: 'Não foi possível carregar os dados do aluno.'),
               onRetry: () {
-                ref.invalidate(alunoProvider(alunoId));
+                invalidateAluno360Providers(ref, alunoId);
               },
             ),
         data: (aluno) {
           ref.watch(alertasConfigProvider);
-          final aderencia =
-              aluno.aderenciaPercent == null
-                  ? '—'
-                  : '${aluno.aderenciaPercent}%';
-          final diasTreino =
-              aluno.diasSemTreino == null ? '—' : '${aluno.diasSemTreino}d';
-          final risco = formatRiscoNivel(aluno.riscoNivel);
-          final proximoContato = formatProximoContato(aluno);
 
           return RefreshIndicator(
-            onRefresh: () async {
-              ref.invalidate(alunoProvider(alunoId));
-              ref.invalidate(alunoRecoveryProvider(alunoId));
-            },
+            onRefresh: () => invalidateAluno360Providers(ref, alunoId),
             child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
@@ -543,31 +552,6 @@ class AlunoDetailScreen extends ConsumerWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _HeroStat(label: 'Aderência', value: aderencia),
-                              Container(
-                                width: 1,
-                                height: 24,
-                                color: chrome.line,
-                              ),
-                              _HeroStat(label: 'Sem treino', value: diasTreino),
-                              Container(
-                                width: 1,
-                                height: 24,
-                                color: chrome.line,
-                              ),
-                              _HeroStat(label: 'Risco', value: risco),
-                              Container(
-                                width: 1,
-                                height: 24,
-                                color: chrome.line,
-                              ),
-                              _HeroStat(label: 'Contato', value: proximoContato),
-                            ],
-                          ),
                         ],
                       ),
                     ),
@@ -644,7 +628,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                             ),
                       ),
                       const SizedBox(height: TokensStrip.s4),
-                      _AlunoOperationalPulseCard(
+                      _AlunoOperationalStatusSection(
                         aluno: aluno,
                         isDark: isDark,
                         primary: primary,
@@ -681,119 +665,19 @@ class AlunoDetailScreen extends ConsumerWidget {
                       const SizedBox(height: TokensStrip.s4),
 
                       // Weight evolution card
-                      Container(
-                        decoration: fxListCardDecoration(context),
-                        padding: const EdgeInsets.all(18),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'PESO · ÚLTIMAS 7 SEMANAS',
-                                      style: TextStyle(
-                                        color:
-                                            isDark
-                                                ? EagleTokens.darkInkMute
-                                                : TokensStrip.textSecondary,
-                                        fontSize: 11.5,
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: 0.8,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.baseline,
-                                      textBaseline: TextBaseline.alphabetic,
-                                      children: [
-                                        Text(
-                                          aluno.peso?.toStringAsFixed(1) ??
-                                              '--',
-                                          style: TextStyle(
-                                            color: ink,
-                                            fontSize: 32,
-                                            fontWeight: FontWeight.w600,
-                                            letterSpacing: -0.5,
-                                          ),
-                                        ),
-                                        if (aluno.peso != null) ...[
-                                          const SizedBox(width: 3),
-                                          Text(
-                                            'kg',
-                                            style: TextStyle(
-                                              color:
-                                                  isDark
-                                                      ? EagleTokens.darkInkMute
-                                                      : TokensStrip.textSecondary,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w400,
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                Text(
-                                  aluno.peso == null
-                                      ? 'Sem medida registrada'
-                                      : 'Ver evolução completa',
-                                  style: TextStyle(
-                                    color:
-                                        isDark
-                                            ? EagleTokens.darkInkMute
-                                            : TokensStrip.textSecondary,
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 14),
-                            SizedBox(
-                              height: 72,
-                              child:
-                                  aluno.peso == null
-                                      ? InkWell(
-                                        borderRadius: BorderRadius.circular(14),
-                                        onTap:
-                                            () => context.push(
-                                              '/alunos/$alunoId/evolucao',
-                                              extra: aluno.nome,
-                                            ),
-                                        child: _EmptyMiniState(
-                                          icon: Icons.monitor_weight_outlined,
-                                          text: 'Registrar primeira medida',
-                                          isDark: isDark,
-                                        ),
-                                      )
-                                      : InkWell(
-                                        borderRadius: BorderRadius.circular(14),
-                                        onTap:
-                                            () => context.push(
-                                              '/alunos/$alunoId/evolucao',
-                                              extra: aluno.nome,
-                                            ),
-                                        child: _EmptyMiniState(
-                                          icon: Icons.show_chart_rounded,
-                                          text: 'Abrir evolução de peso',
-                                          isDark: isDark,
-                                        ),
-                                      ),
-                            ),
-                          ],
-                        ),
+                      _AlunoWeightActivityCard(
+                        aluno: aluno,
+                        alunoId: alunoId,
+                        isDark: isDark,
+                        ink: ink,
                       ),
                       const SizedBox(height: TokensStrip.s4),
 
                       // Measurements Grid
-                      GridView.count(
+                      Builder(
+                        builder: (context) {
+                          final altura = formatAlturaDisplay(aluno.altura);
+                          return GridView.count(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         crossAxisCount: 4,
@@ -809,8 +693,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                           ),
                           _MeasurementCard(
                             label: 'Altura',
-                            value: aluno.altura?.toStringAsFixed(2) ?? '--',
-                            unit: 'm',
+                            value: altura.value,
+                            unit: altura.unit,
                             isDark: isDark,
                           ),
                           _MeasurementCard(
@@ -826,6 +710,8 @@ class AlunoDetailScreen extends ConsumerWidget {
                             isDark: isDark,
                           ),
                         ],
+                      );
+                        },
                       ),
                       const SizedBox(height: 20),
 
@@ -865,7 +751,7 @@ class AlunoDetailScreen extends ConsumerWidget {
                             label: 'Equipamentos',
                             sub:
                                 aluno.equipamentosDisponiveis.isEmpty
-                                    ? 'Sem restricao'
+                                    ? 'Sem restrição'
                                     : '${aluno.equipamentosDisponiveis.length} marcados',
                             isDark: isDark,
                             onTap:
@@ -923,7 +809,10 @@ class AlunoDetailScreen extends ConsumerWidget {
                           _ModuleTile(
                             icon: Icons.people,
                             label: 'Anamnese',
-                            sub: 'Completa ✓',
+                            sub:
+                                _perfilCompletion(aluno) >= 85
+                                    ? 'Completa ✓'
+                                    : 'Ver status',
                             isDark: isDark,
                             onTap:
                                 () => context.push('/alunos/$alunoId/anamnese'),
@@ -1571,7 +1460,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
         alunoId: aluno.id,
         acao: acao,
         motivo:
-            'Aluno 360: acao prescrita a partir de perfil, autonomia e risco.',
+            'Aluno 360: ação prescrita a partir de perfil, autonomia e risco.',
         modo: 'ALUNO_360',
         source: 'ALUNO_360',
         recommendationId:
@@ -1596,7 +1485,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
             content: Text(
               persisted
                   ? 'Tarefa criada no Command Center.'
-                  : 'Servidor aceitou, mas a tarefa ainda nao apareceu.',
+                  : 'Servidor aceitou, mas a tarefa ainda não apareceu.',
             ),
             action:
                 persisted
@@ -1616,7 +1505,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
       if (context.mounted) {
         FeedbackHelper.showSnackBar(
           context,
-          SnackBar(content: Text('Nao foi possivel criar tarefa: $e')),
+          SnackBar(content: Text('Não foi possível criar tarefa: ${friendlyError(e)}')),
         );
       }
       return false;
@@ -1787,7 +1676,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                   ),
               error:
                   (_, __) => _CopilotPrescription(
-                    title: 'Prescrição local',
+                    title: 'Sugestão offline',
                     action: fallback,
                     reason:
                         'IA indisponível agora; usando sinais do Aluno 360.',
@@ -1831,7 +1720,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                           icon: Icons.task_alt_rounded,
                           title: 'Tarefa aberta',
                           subtitle:
-                              'Ja existe no Command Center. Sem duplicar.',
+                              'Já existe no Command Center. Sem duplicar.',
                         ),
             orElse: () => const SizedBox.shrink(),
           ),
@@ -2037,7 +1926,7 @@ class _EvolucaoInteligenteCard extends StatelessWidget {
         loading: () => const LinearProgressIndicator(minHeight: 2),
         error:
             (e, _) => Text(
-              'Evolução inteligente indisponível: $e',
+              friendlyError(e, fallback: 'Evolução inteligente indisponível.'),
               style: TextStyle(color: mute, fontSize: 12.5),
             ),
         data: (ev) {
@@ -2959,43 +2848,6 @@ class _MiniAutonomyChip extends StatelessWidget {
   }
 }
 
-class _HeroStat extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _HeroStat({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    final ink = fxScreenInk(context);
-    final mute = fxScreenMute(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label.toUpperCase(),
-          style: TextStyle(
-            color: mute,
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 1.2,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: GoogleFonts.jetBrainsMono(
-            color: ink,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.4,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _EmptyMiniState extends StatelessWidget {
   final IconData icon;
   final String text;
@@ -3315,8 +3167,8 @@ class _AlunoRecoveryInsightCard extends StatelessWidget {
   }
 }
 
-class _AlunoOperationalPulseCard extends StatelessWidget {
-  const _AlunoOperationalPulseCard({
+class _AlunoOperationalStatusSection extends StatelessWidget {
+  const _AlunoOperationalStatusSection({
     required this.aluno,
     required this.isDark,
     required this.primary,
@@ -3334,6 +3186,7 @@ class _AlunoOperationalPulseCard extends StatelessWidget {
         aluno.emRisco
             ? (isDark ? const Color(0xFFFFB77A) : EagleTokens.warn)
             : (isDark ? const Color(0xFF6FE296) : EagleTokens.good);
+    final proximoContato = formatProximoContato(aluno);
 
     return Container(
       decoration: fxListCardDecoration(context),
@@ -3346,7 +3199,7 @@ class _AlunoOperationalPulseCard extends StatelessWidget {
               Icon(Icons.insights_rounded, size: 18, color: primary),
               const SizedBox(width: 8),
               Text(
-                'Pulso operacional',
+                'Status operacional',
                 style: TextStyle(
                   color: ink,
                   fontSize: 14,
@@ -3357,7 +3210,7 @@ class _AlunoOperationalPulseCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Sinais do backend para priorizar ação do personal',
+            'Sinais atualizados para priorizar sua ação',
             style: TextStyle(color: mute, fontSize: 11.5, height: 1.3),
           ),
           const SizedBox(height: 14),
@@ -3370,19 +3223,29 @@ class _AlunoOperationalPulseCard extends StatelessWidget {
                       aluno.scoreProntidao == null
                           ? '—'
                           : '${aluno.scoreProntidao}',
-                  hint: 'Score API',
+                  hint: 'Índice operacional',
                   color: primary,
                   isDark: isDark,
+                  semanticsLabel:
+                      'Prontidão ${aluno.scoreProntidao ?? 'indisponível'}',
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: _OperationalMetricTile(
-                  label: 'Risco',
-                  value: formatRiscoNivel(aluno.riscoNivel),
-                  hint: aluno.emRisco ? 'Em risco' : 'Estável',
-                  color: riscoColor,
+                  label: 'Aderência',
+                  value:
+                      aluno.aderenciaPercent == null
+                          ? '—'
+                          : '${aluno.aderenciaPercent}%',
+                  hint: 'Semana atual',
+                  color: EagleTokens.aderenciaColor(
+                    (aluno.aderenciaPercent ?? 0).toDouble(),
+                    isDark: isDark,
+                  ),
                   isDark: isDark,
+                  semanticsLabel:
+                      'Aderência ${aluno.aderenciaPercent ?? 'indisponível'} por cento',
                 ),
               ),
             ],
@@ -3404,27 +3267,283 @@ class _AlunoOperationalPulseCard extends StatelessWidget {
                           ? EagleTokens.warn
                           : mute,
                   isDark: isDark,
+                  semanticsLabel:
+                      'Sem treino ${aluno.diasSemTreino ?? 'indisponível'} dias',
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: _OperationalMetricTile(
-                  label: 'Aderência',
-                  value:
-                      aluno.aderenciaPercent == null
-                          ? '—'
-                          : '${aluno.aderenciaPercent}%',
-                  hint: 'Semana atual',
-                  color: EagleTokens.aderenciaColor(
-                    (aluno.aderenciaPercent ?? 0).toDouble(),
-                    isDark: isDark,
-                  ),
+                  label: 'Risco',
+                  value: formatRiscoNivel(aluno.riscoNivel),
+                  hint: aluno.emRisco ? 'Em risco' : 'Estável',
+                  color: riscoColor,
                   isDark: isDark,
+                  semanticsLabel:
+                      'Risco ${formatRiscoNivel(aluno.riscoNivel)}',
                 ),
               ),
             ],
           ),
+          const SizedBox(height: 8),
+          _OperationalMetricTile(
+            label: 'Contato',
+            value: proximoContato,
+            hint: 'Próximo follow-up',
+            color: primary,
+            isDark: isDark,
+            semanticsLabel: 'Próximo contato $proximoContato',
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _AlunoWeightActivityCard extends ConsumerWidget {
+  const _AlunoWeightActivityCard({
+    required this.aluno,
+    required this.alunoId,
+    required this.isDark,
+    required this.ink,
+  });
+
+  final Aluno aluno;
+  final int alunoId;
+  final bool isDark;
+  final Color ink;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final aderenciaAsync = ref.watch(alunoAderenciaSemanalProvider(alunoId));
+    final primary = Theme.of(context).colorScheme.primary;
+
+    return Container(
+      decoration: fxListCardDecoration(context),
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'PESO · ÚLTIMAS 7 SEMANAS',
+                    style: TextStyle(
+                      color:
+                          isDark
+                              ? EagleTokens.darkInkMute
+                              : TokensStrip.textSecondary,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Semantics(
+                    label:
+                        aluno.peso == null
+                            ? 'Peso não registrado'
+                            : 'Peso ${aluno.peso!.toStringAsFixed(1)} quilogramas',
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          aluno.peso?.toStringAsFixed(1) ?? '--',
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 32,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        if (aluno.peso != null) ...[
+                          const SizedBox(width: 3),
+                          Text(
+                            'kg',
+                            style: TextStyle(
+                              color:
+                                  isDark
+                                      ? EagleTokens.darkInkMute
+                                      : TokensStrip.textSecondary,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                aluno.peso == null
+                    ? 'Sem medida registrada'
+                    : 'Ver evolução completa',
+                style: TextStyle(
+                  color:
+                      isDark
+                          ? EagleTokens.darkInkMute
+                          : TokensStrip.textSecondary,
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            height: 72,
+            child: aderenciaAsync.when(
+              loading:
+                  () => const Center(
+                    child: LinearProgressIndicator(minHeight: 2),
+                  ),
+              error:
+                  (_, __) => InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap:
+                        () => context.push(
+                          '/alunos/$alunoId/evolucao',
+                          extra: aluno.nome,
+                        ),
+                    child: _EmptyMiniState(
+                      icon: Icons.show_chart_rounded,
+                      text: 'Abrir evolução de peso',
+                      isDark: isDark,
+                    ),
+                  ),
+              data: (semana) {
+                if (semana.isEmpty && aluno.peso == null) {
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap:
+                        () => context.push(
+                          '/alunos/$alunoId/evolucao',
+                          extra: aluno.nome,
+                        ),
+                    child: _EmptyMiniState(
+                      icon: Icons.monitor_weight_outlined,
+                      text: 'Registrar primeira medida',
+                      isDark: isDark,
+                    ),
+                  );
+                }
+                return InkWell(
+                  borderRadius: BorderRadius.circular(14),
+                  onTap:
+                      () => context.push(
+                        '/alunos/$alunoId/evolucao',
+                        extra: aluno.nome,
+                      ),
+                  child: _WeeklyActivitySparkline(
+                    values:
+                        semana
+                            .map(
+                              (e) =>
+                                  (e['checkins'] as num?)?.toDouble() ?? 0.0,
+                            )
+                            .toList(growable: false),
+                    color: EagleTokens.aderenciaColor(
+                      (aluno.aderenciaPercent ?? 0).toDouble(),
+                      isDark: isDark,
+                    ),
+                    trackColor: primary.withValues(alpha: isDark ? 0.18 : 0.12),
+                    isDark: isDark,
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WeeklyActivitySparkline extends StatelessWidget {
+  const _WeeklyActivitySparkline({
+    required this.values,
+    required this.color,
+    required this.trackColor,
+    required this.isDark,
+  });
+
+  final List<double> values;
+  final Color color;
+  final Color trackColor;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final maxValue = values.fold<double>(0, (p, v) => v > p ? v : p);
+    final effectiveMax = maxValue <= 0 ? 1.0 : maxValue;
+
+    return Semantics(
+      label: 'Atividade dos últimos ${values.length} dias',
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+        decoration: BoxDecoration(
+          color: trackColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withValues(alpha: 0.14)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Check-ins por dia',
+              style: TextStyle(
+                color: mute,
+                fontSize: 10.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  for (var i = 0; i < values.length; i++) ...[
+                    if (i > 0) const SizedBox(width: 6),
+                    Expanded(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final heightFactor = (values[i] / effectiveMax).clamp(
+                            0.08,
+                            1.0,
+                          );
+                          return Align(
+                            alignment: Alignment.bottomCenter,
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 220),
+                              curve: Curves.easeOutCubic,
+                              width: double.infinity,
+                              height: constraints.maxHeight * heightFactor,
+                              decoration: BoxDecoration(
+                                color:
+                                    values[i] > 0
+                                        ? color
+                                        : color.withValues(alpha: 0.22),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -3437,6 +3556,7 @@ class _OperationalMetricTile extends StatelessWidget {
     required this.hint,
     required this.color,
     required this.isDark,
+    this.semanticsLabel,
   });
 
   final String label;
@@ -3444,12 +3564,13 @@ class _OperationalMetricTile extends StatelessWidget {
   final String hint;
   final Color color;
   final bool isDark;
+  final String? semanticsLabel;
 
   @override
   Widget build(BuildContext context) {
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
-    return Container(
+    final tile = Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: color.withValues(alpha: isDark ? 0.12 : 0.08),
@@ -3482,6 +3603,9 @@ class _OperationalMetricTile extends StatelessWidget {
         ],
       ),
     );
+
+    if (semanticsLabel == null) return tile;
+    return Semantics(label: semanticsLabel, child: tile);
   }
 }
 
@@ -3578,10 +3702,14 @@ class _AlunoFollowUpCard extends ConsumerWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
-              OutlinedButton.icon(
+              Semantics(
+                label: 'Definir data de próximo contato para ${aluno.nome}',
+                button: true,
+                child: OutlinedButton.icon(
                 onPressed: () => _pickFollowUpDate(context, ref),
                 icon: const Icon(Icons.calendar_month_rounded, size: 16),
                 label: const Text('Definir data'),
+              ),
               ),
               OutlinedButton.icon(
                 onPressed: () async {
@@ -3603,7 +3731,10 @@ class _AlunoFollowUpCard extends ConsumerWidget {
                 icon: const Icon(Icons.schedule_rounded, size: 16),
                 label: const Text('Adiar 3d'),
               ),
-              FilledButton.icon(
+              Semantics(
+                label: 'Registrar contato realizado com ${aluno.nome}',
+                button: true,
+                child: FilledButton.icon(
                 onPressed: () async {
                   await actions.markContactDone(aluno.id);
                   if (context.mounted) {
@@ -3616,6 +3747,7 @@ class _AlunoFollowUpCard extends ConsumerWidget {
                   backgroundColor: primary,
                   foregroundColor: Colors.white,
                 ),
+              ),
               ),
               if (followUpDate != null || isSnoozed)
                 TextButton(
