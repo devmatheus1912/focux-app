@@ -18,6 +18,8 @@ void main() {
     expect(screen, contains('Migração Focux'));
     expect(screen, contains('landingPageDisplayLabel'));
     expect(screen, contains('Operação'));
+    expect(screen, contains('Crescimento'));
+    expect(screen, contains('if (!profileComplete)'));
     expect(screen, contains('Conta e segurança'));
     expect(screen, isNot(contains('Conta e plano')));
     expect(screen, isNot(contains('Nao informado')));

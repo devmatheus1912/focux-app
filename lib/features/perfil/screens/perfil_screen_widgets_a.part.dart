@@ -180,13 +180,20 @@ class _PerfilBody extends StatelessWidget {
         label: 'Alunos',
         value: loadingMetrics ? '--' : dashboard.totalAlunos.toString(),
         icon: Icons.groups_2_outlined,
+        onTap: () => goPersonalShellTab(context, '/alunos'),
       ),
       _ProfileStat(
         label: 'Ativos',
         value: loadingMetrics ? '--' : dashboard.alunosAtivos.toString(),
         icon: Icons.bolt_outlined,
+        onTap: () => goPersonalShellTab(context, '/alunos?filtro=ativos'),
       ),
-      _ProfileStat(label: 'Marca', value: '$profileScore%', icon: Icons.tune),
+      _ProfileStat(
+        label: 'Marca',
+        value: '$profileScore%',
+        icon: Icons.tune,
+        onTap: () => context.push('/identidade-visual'),
+      ),
     ];
 
     final primaryCta =
@@ -377,60 +384,79 @@ class _PerfilBody extends StatelessWidget {
                             child: Row(
                               children: List.generate(stats.length, (index) {
                                 final item = stats[index];
+                                final cell = Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 10,
+                                    horizontal: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border:
+                                        index < stats.length - 1
+                                            ? Border(
+                                              right: BorderSide(
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.10,
+                                                ),
+                                              ),
+                                            )
+                                            : null,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        item.icon,
+                                        size: 15,
+                                        color: Colors.white.withValues(
+                                          alpha: 0.78,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        item.value,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: 0,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        item.label,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+
                                 return Expanded(
                                   child: Semantics(
-                                    label: '${item.label}: ${item.value}',
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 10,
-                                        horizontal: 8,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        border:
-                                            index < stats.length - 1
-                                                ? Border(
-                                                  right: BorderSide(
-                                                    color: Colors.white
-                                                        .withValues(alpha: 0.10),
-                                                  ),
-                                                )
-                                                : null,
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          Icon(
-                                            item.icon,
-                                            size: 15,
-                                            color: Colors.white.withValues(
-                                              alpha: 0.78,
+                                    button: item.onTap != null,
+                                    label:
+                                        item.onTap != null
+                                            ? '${item.label}: ${item.value}. Abrir'
+                                            : '${item.label}: ${item.value}',
+                                    child:
+                                        item.onTap == null
+                                            ? cell
+                                            : Material(
+                                              color: Colors.transparent,
+                                              child: InkWell(
+                                                onTap: () {
+                                                  HapticFeedback.selectionClick();
+                                                  item.onTap!();
+                                                },
+                                                child: cell,
+                                              ),
                                             ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            item.value,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.w900,
-                                              letterSpacing: 0,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            item.label,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              color: Colors.white70,
-                                              fontSize: 10.5,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
                                   ),
                                 );
                               }),
@@ -533,23 +559,31 @@ class _PerfilBody extends StatelessWidget {
                     const SizedBox(height: 14),
                     _CardSection(
                       title: 'Operação',
-                      subtitle: 'IA, alunos, carteira e ferramentas de crescimento.',
+                      subtitle:
+                          profileComplete
+                              ? 'Plano, carteira e ferramentas de crescimento.'
+                              : 'IA, alunos, carteira e ferramentas de crescimento.',
                       isDark: isDark,
                       accent: accent,
                       actionInk: actionInk,
                       child: Column(
                         children: [
-                          _ActionTile(
-                            icon: Icons.auto_awesome_outlined,
-                            label: 'Copiloto IA',
-                            value: perfilPlanSectionLabel(perfil.plano),
-                            accent: accent,
-                            actionInk: actionInk,
-                            mute: mute,
-                            line: line,
-                            onTap:
-                                () => goPersonalShellTab(context, '/ia/copiloto'),
-                          ),
+                          if (!profileComplete) ...[
+                            _ActionTile(
+                              icon: Icons.auto_awesome_outlined,
+                              label: 'Copiloto IA',
+                              value: perfilPlanSectionLabel(perfil.plano),
+                              accent: accent,
+                              actionInk: actionInk,
+                              mute: mute,
+                              line: line,
+                              onTap:
+                                  () => goPersonalShellTab(
+                                    context,
+                                    '/ia/copiloto',
+                                  ),
+                            ),
+                          ],
                           _ActionTile(
                             icon: Icons.workspace_premium_outlined,
                             label: 'Planos e assinatura',
@@ -560,19 +594,20 @@ class _PerfilBody extends StatelessWidget {
                             line: line,
                             onTap: () => context.push('/assinatura'),
                           ),
-                          _ActionTile(
-                            icon: Icons.groups_2_outlined,
-                            label: 'Meus alunos',
-                            value:
-                                loadingMetrics
-                                    ? '--'
-                                    : '${dashboard.totalAlunos} cadastrados',
-                            accent: accent,
-                            actionInk: actionInk,
-                            mute: mute,
-                            line: line,
-                            onTap: () => goPersonalShellTab(context, '/alunos'),
-                          ),
+                          if (!profileComplete)
+                            _ActionTile(
+                              icon: Icons.groups_2_outlined,
+                              label: 'Meus alunos',
+                              value:
+                                  loadingMetrics
+                                      ? '--'
+                                      : '${dashboard.totalAlunos} cadastrados',
+                              accent: accent,
+                              actionInk: actionInk,
+                              mute: mute,
+                              line: line,
+                              onTap: () => goPersonalShellTab(context, '/alunos'),
+                            ),
                           _ActionTile(
                             icon: Icons.account_balance_wallet_outlined,
                             label: 'Carteira e PIX',
@@ -594,31 +629,38 @@ class _PerfilBody extends StatelessWidget {
                             line: line,
                             onTap: () => context.push('/migracao-magica'),
                           ),
-                          GatedProfileShortcuts(
-                            accent: accent,
-                            actionInk: actionInk,
-                            mute: mute,
-                            line: line,
-                            tileBuilder:
-                                ({
-                                  required icon,
-                                  required label,
-                                  required value,
-                                  required onTap,
-                                  required locked,
-                                  upgradeTierLabel,
-                                }) => _ActionTile(
-                                  icon: icon,
-                                  label: label,
-                                  value: value,
-                                  accent: accent,
-                                  actionInk: actionInk,
-                                  mute: mute,
-                                  line: line,
-                                  locked: locked,
-                                  upgradeTierLabel: upgradeTierLabel,
-                                  onTap: onTap,
-                                ),
+                          DashboardCollapsibleSection(
+                            title: 'Crescimento',
+                            collapsedHint:
+                                'Automações, desafios, loja, equipe e hábitos',
+                            isDark: isDark,
+                            initiallyExpanded: false,
+                            child: GatedProfileShortcuts(
+                              accent: accent,
+                              actionInk: actionInk,
+                              mute: mute,
+                              line: line,
+                              tileBuilder:
+                                  ({
+                                    required icon,
+                                    required label,
+                                    required value,
+                                    required onTap,
+                                    required locked,
+                                    upgradeTierLabel,
+                                  }) => _ActionTile(
+                                    icon: icon,
+                                    label: label,
+                                    value: value,
+                                    accent: accent,
+                                    actionInk: actionInk,
+                                    mute: mute,
+                                    line: line,
+                                    locked: locked,
+                                    upgradeTierLabel: upgradeTierLabel,
+                                    onTap: onTap,
+                                  ),
+                            ),
                           ),
                         ],
                       ),
