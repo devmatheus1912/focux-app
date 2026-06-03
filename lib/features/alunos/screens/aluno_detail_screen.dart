@@ -39,7 +39,12 @@ part 'aluno_detail_screen_weight.part.dart';
 part 'aluno_detail_screen_operational_metrics.part.dart';
 part 'aluno_detail_screen_follow_up.part.dart';
 part 'aluno_detail_screen_shared.part.dart';
+part 'aluno_detail_screen_tabs.part.dart';
 
+
+final aluno360Provider = FutureProvider.family<Aluno360, int>((ref, alunoId) async {
+  return AlunoRepository(ref.read(apiClientProvider)).buscarAluno360(alunoId);
+});
 
 final alunoRecoveryProvider = FutureProvider.family<RecoverySnapshot?, int>((
   ref,
@@ -89,6 +94,7 @@ final alunoAderenciaSemanalProvider =
     });
 
 Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
+  ref.invalidate(aluno360Provider(alunoId));
   ref.invalidate(alunoProvider(alunoId));
   ref.invalidate(alunoRecoveryProvider(alunoId));
   ref.invalidate(alunoAutonomiaEventosProvider(alunoId));
@@ -99,30 +105,39 @@ Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
   ref.invalidate(alunoCopilotoActionProvider(alunoId));
   ref.invalidate(alunoOpenIaActionsProvider(alunoId));
   ref.invalidate(alunoAderenciaSemanalProvider(alunoId));
-  await ref.read(alunoProvider(alunoId).future);
+  await ref.read(aluno360Provider(alunoId).future);
 }
 
-int _perfilCompletion(Aluno aluno) {
-  final fields = [
-    aluno.nome,
-    aluno.email,
-    aluno.telefone,
-    aluno.whatsapp,
-    aluno.objetivo,
-    aluno.genero,
-    aluno.tipoConsultoria,
-  ];
-  final filled =
-      fields.where((value) {
-        if (value == null) return false;
-        return value.trim().isNotEmpty;
-      }).length;
-  return ((filled / fields.length) * 100).round().clamp(0, 100);
-}
-
-class AlunoDetailScreen extends ConsumerWidget {
+class AlunoDetailScreen extends ConsumerStatefulWidget {
   final int alunoId;
   const AlunoDetailScreen({super.key, required this.alunoId});
+
+  @override
+  ConsumerState<AlunoDetailScreen> createState() => _AlunoDetailScreenState();
+}
+
+class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  int get alunoId => widget.alunoId;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   Future<void> _confirmarExclusao(
     BuildContext context,
@@ -443,15 +458,12 @@ class AlunoDetailScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final aluno360Async = ref.watch(aluno360Provider(alunoId));
     final alunoAsync = ref.watch(alunoProvider(alunoId));
-    final autonomiaAsync = ref.watch(alunoAutonomiaEventosProvider(alunoId));
-    final autonomiaResumoAsync = ref.watch(
-      alunoAutonomiaResumoProvider(alunoId),
-    );
-    final scoreSnapshotsAsync = ref.watch(alunoScoreSnapshotsProvider(alunoId));
-    final evolucaoAsync = ref.watch(alunoEvolucaoInteligenteProvider(alunoId));
-    final timeline360ApiAsync = ref.watch(alunoTimeline360ApiProvider(alunoId));
+    final autonomiaResumoAsync = ref.watch(alunoAutonomiaResumoProvider(alunoId));
+    final evolucaoGranularAsync = ref.watch(alunoEvolucaoInteligenteProvider(alunoId));
+    final timelineGranularAsync = ref.watch(alunoTimeline360ApiProvider(alunoId));
     final recoveryAsync = ref.watch(alunoRecoveryProvider(alunoId));
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
@@ -459,19 +471,49 @@ class AlunoDetailScreen extends ConsumerWidget {
     final ink = chrome.ink;
     final mute = chrome.mute;
 
+    AsyncValue<Aluno> resolvedAlunoAsync = alunoAsync;
+    if (aluno360Async.hasValue) {
+      resolvedAlunoAsync = AsyncData(aluno360Async.value!.aluno);
+    }
+
+    AsyncValue<AlunoAutonomiaResumo> resolvedAutonomiaResumoAsync =
+        autonomiaResumoAsync;
+    if (aluno360Async.hasValue) {
+      resolvedAutonomiaResumoAsync = AsyncData(aluno360Async.value!.autonomiaResumo);
+    }
+
+    AsyncValue<EvolucaoInteligente> resolvedEvolucaoAsync = evolucaoGranularAsync;
+    if (aluno360Async.hasValue) {
+      resolvedEvolucaoAsync = AsyncData(aluno360Async.value!.evolucaoInteligente);
+    }
+
+    AsyncValue<List<Timeline360Event>> resolvedTimelineAsync = timelineGranularAsync;
+    if (aluno360Async.hasValue) {
+      resolvedTimelineAsync = AsyncData(aluno360Async.value!.timelinePreview);
+    }
+
+    final loadingPrimary = aluno360Async.isLoading && !aluno360Async.hasValue;
+    final loadingFallback = resolvedAlunoAsync.isLoading && !resolvedAlunoAsync.hasValue;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: alunoAsync.when(
+      body: loadingPrimary || loadingFallback
+          ? const FxLoading()
+          : resolvedAlunoAsync.when(
         loading: () => const FxLoading(),
         error:
             (e, _) => _AlunoDetailErrorState(
-              message: friendlyError(e, fallback: 'Não foi possível carregar os dados do aluno.'),
+              message: friendlyError(
+                aluno360Async.error ?? e,
+                fallback: 'Não foi possível carregar os dados do aluno.',
+              ),
               onRetry: () {
                 invalidateAluno360Providers(ref, alunoId);
               },
             ),
         data: (aluno) {
           ref.watch(alertasConfigProvider);
+          final perfilCompletion = _perfilCompletion(aluno);
 
           return RefreshIndicator(
             onRefresh: () => invalidateAluno360Providers(ref, alunoId),
@@ -602,7 +644,15 @@ class AlunoDetailScreen extends ConsumerWidget {
                 ],
               ),
 
-              // Body Content
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _AlunoDetailTabBarDelegate(
+                  tabController: _tabController,
+                  primary: primary,
+                  mute: mute,
+                  line: chrome.line,
+                ),
+              ),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.only(
@@ -611,271 +661,49 @@ class AlunoDetailScreen extends ConsumerWidget {
                     right: 16,
                     bottom: 118,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: IndexedStack(
+                    index: _tabController.index,
                     children: [
-                      _StudentQuickActions(
+                      _AlunoDetailOperacaoTab(
                         aluno: aluno,
+                        alunoId: alunoId,
                         isDark: isDark,
                         primary: primary,
-                        onPassword:
-                            () => _confirmarGerarSenha(context, ref, aluno),
+                        recoveryAsync: recoveryAsync,
+                        autonomiaResumoAsync: resolvedAutonomiaResumoAsync,
+                        onPassword: () => _confirmarGerarSenha(context, ref, aluno),
                         onEdit: () async {
                           final updated = await context.push<bool>(
                             '/alunos/$alunoId/editar',
                             extra: aluno,
                           );
                           if (updated == true) {
-                            ref.invalidate(alunoProvider(alunoId));
+                            invalidateAluno360Providers(ref, alunoId);
                           }
                         },
-                        onMessage:
-                            () => context.push(
-                              '/alunos/${aluno.id}/chat',
-                              extra: aluno.nome,
-                            ),
-                        onEvolve:
-                            () => context.push(
-                              '/alunos/${aluno.id}/ia/progressao',
-                              extra: aluno.nome,
-                            ),
+                        onMessage: () => context.push(
+                          '/alunos/${aluno.id}/chat',
+                          extra: aluno.nome,
+                        ),
+                        onEvolve: () => context.push(
+                          '/alunos/${aluno.id}/ia/progressao',
+                          extra: aluno.nome,
+                        ),
                       ),
-                      const SizedBox(height: TokensStrip.s4),
-                      _AlunoOperationalStatusSection(
-                        aluno: aluno,
-                        isDark: isDark,
-                        primary: primary,
-                      ),
-                      const SizedBox(height: TokensStrip.s4),
-                      _AlunoFollowUpCard(aluno: aluno, isDark: isDark),
-                      const SizedBox(height: TokensStrip.s4),
-                      _AlunoRecoveryInsightCard(
-                        recoveryAsync: recoveryAsync,
-                        isDark: isDark,
-                        primary: primary,
-                      ),
-                      const SizedBox(height: TokensStrip.s4),
-                      _Aluno360CopilotCard(
-                        aluno: aluno,
-                        resumoAsync: autonomiaResumoAsync,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: TokensStrip.s4),
-                      _EvolucaoInteligenteCard(
-                        alunoId: alunoId,
-                        alunoNome: aluno.nome,
-                        evolucaoAsync: evolucaoAsync,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: TokensStrip.s4),
-                      _Aluno360TimelineCard(
-                        aluno: aluno,
-                        eventosAsync: autonomiaAsync,
-                        snapshotsAsync: scoreSnapshotsAsync,
-                        timelineApiAsync: timeline360ApiAsync,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: TokensStrip.s4),
-
-                      // Weight evolution card
-                      _AlunoWeightActivityCard(
+                      _AlunoDetailEvolucaoTab(
                         aluno: aluno,
                         alunoId: alunoId,
                         isDark: isDark,
                         ink: ink,
+                        evolucaoAsync: resolvedEvolucaoAsync,
+                        timeline360Async: resolvedTimelineAsync,
                       ),
-                      const SizedBox(height: TokensStrip.s4),
-
-                      // Measurements Grid
-                      Builder(
-                        builder: (context) {
-                          final altura = formatAlturaDisplay(aluno.altura);
-                          return GridView.count(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        crossAxisCount: 4,
-                        mainAxisSpacing: 8,
-                        crossAxisSpacing: 8,
-                        childAspectRatio: 1.1,
-                        children: [
-                          _MeasurementCard(
-                            label: 'Idade',
-                            value: (aluno.idade ?? '--').toString(),
-                            unit: 'anos',
-                            isDark: isDark,
-                          ),
-                          _MeasurementCard(
-                            label: 'Altura',
-                            value: altura.value,
-                            unit: altura.unit,
-                            isDark: isDark,
-                          ),
-                          _MeasurementCard(
-                            label: 'BF',
-                            value: '--',
-                            unit: '%',
-                            isDark: isDark,
-                          ),
-                          _MeasurementCard(
-                            label: 'M. Magra',
-                            value: '--',
-                            unit: 'kg',
-                            isDark: isDark,
-                          ),
-                        ],
-                      );
-                        },
-                      ),
-                      const SizedBox(height: 20),
-
-                      Text(
-                        'Módulos',
-                        style: AppTypography.inter(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -0.4,
-                          color: BrandPalette.sectionHeading(primary, dark: isDark),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Grid Ferramentas (SaaS Handoff style)
-                      GridView.count(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 8,
-                        crossAxisSpacing: 10,
-                        childAspectRatio: 2.55,
-                        children: [
-                          _ModuleTile(
-                            icon: Icons.fitness_center,
-                            label: 'Treinos',
-                            sub: 'Sem dados recentes',
-                            isDark: isDark,
-                            onTap:
-                                () => context.push(
-                                  '/alunos/$alunoId/treinos-list',
-                                  extra: aluno.nome,
-                                ),
-                          ),
-                          _ModuleTile(
-                            icon: Icons.tune_rounded,
-                            label: 'Equipamentos',
-                            sub:
-                                aluno.equipamentosDisponiveis.isEmpty
-                                    ? 'Sem restrição'
-                                    : '${aluno.equipamentosDisponiveis.length} marcados',
-                            isDark: isDark,
-                            onTap:
-                                () => context.push(
-                                  '/alunos/$alunoId/equipamentos',
-                                ),
-                          ),
-                          _ModuleTile(
-                            icon: Icons.auto_awesome,
-                            label: 'IA Progresso',
-                            sub: 'Sugerir carga',
-                            badge: 'IA',
-                            highlight: true,
-                            isDark: isDark,
-                            onTap:
-                                () => context.push(
-                                  '/alunos/$alunoId/ia/progressao',
-                                  extra: aluno.nome,
-                                ),
-                          ),
-                          _ModuleTile(
-                            icon: Icons.show_chart,
-                            label: 'Medidas',
-                            sub: 'Sem medida',
-                            badge: 'Pendente',
-                            isDark: isDark,
-                            onTap:
-                                () => context.push(
-                                  '/alunos/$alunoId/evolucao',
-                                  extra: aluno.nome,
-                                ),
-                          ),
-                          _ModuleTile(
-                            icon: Icons.assessment_outlined,
-                            label: 'Aderência',
-                            sub: 'Sem dados',
-                            isDark: isDark,
-                            onTap:
-                                () => context.push(
-                                  '/alunos/$alunoId/relatorio',
-                                  extra: aluno.nome,
-                                ),
-                          ),
-                          _ModuleTile(
-                            icon: Icons.flag_outlined,
-                            label: 'Sucesso',
-                            sub: 'Acompanhar',
-                            isDark: isDark,
-                            onTap:
-                                () => context.push(
-                                  '/alunos/$alunoId/plano-sucesso',
-                                  extra: aluno.nome,
-                                ),
-                          ),
-                          _ModuleTile(
-                            icon: Icons.people,
-                            label: 'Anamnese',
-                            sub:
-                                _perfilCompletion(aluno) >= 85
-                                    ? 'Completa ✓'
-                                    : 'Ver status',
-                            isDark: isDark,
-                            onTap:
-                                () => context.push('/alunos/$alunoId/anamnese'),
-                          ),
-                          _ModuleTile(
-                            icon: Icons.attach_money,
-                            label: 'Mensalidades',
-                            sub:
-                                aluno.statusFinanceiro == 'INADIMPLENTE'
-                                    ? 'Em atraso'
-                                    : 'Em dia',
-                            badge:
-                                aluno.statusFinanceiro == 'INADIMPLENTE'
-                                    ? 'Ação'
-                                    : null,
-                            isDark: isDark,
-                            onTap: () => context.push('/financeiro'),
-                          ),
-                          _ModuleTile(
-                            icon: Icons.chat,
-                            label: 'Chat',
-                            sub: 'Última ação',
-                            isDark: isDark,
-                            onTap:
-                                () => context.push(
-                                  '/alunos/$alunoId/chat',
-                                  extra: aluno.nome,
-                                ),
-                          ),
-                          _ModuleTile(
-                            icon: Icons.restaurant_menu,
-                            label: 'Dieta',
-                            sub: 'Plano atual',
-                            isDark: isDark,
-                            onTap:
-                                () =>
-                                    context.push('/alunos/$alunoId/alimentar'),
-                          ),
-                          _ModuleTile(
-                            icon: Icons.video_camera_back,
-                            label: 'Feedback',
-                            sub: 'Análise de vídeo',
-                            isDark: isDark,
-                            onTap:
-                                () => context.push(
-                                  '/alunos/$alunoId/feedback-video',
-                                  extra: aluno.nome,
-                                ),
-                          ),
-                        ],
+                      _AlunoDetailFerramentasTab(
+                        aluno: aluno,
+                        alunoId: alunoId,
+                        isDark: isDark,
+                        primary: primary,
+                        perfilCompletion: perfilCompletion,
                       ),
                     ],
                   ),
@@ -888,4 +716,21 @@ class AlunoDetailScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+int _perfilCompletion(Aluno aluno) {
+  final fields = [
+    aluno.nome,
+    aluno.email,
+    aluno.telefone,
+    aluno.whatsapp,
+    aluno.objetivo,
+    aluno.genero,
+    aluno.tipoConsultoria,
+  ];
+  final filled = fields.where((value) {
+    if (value == null) return false;
+    return value.trim().isNotEmpty;
+  }).length;
+  return ((filled / fields.length) * 100).round().clamp(0, 100);
 }

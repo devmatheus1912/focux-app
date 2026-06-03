@@ -165,7 +165,7 @@ class _EvolucaoInteligenteCard extends StatelessWidget {
       padding: const EdgeInsets.all(TokensStrip.s4),
       decoration: fxListCardDecoration(context),
       child: evolucaoAsync.when(
-        loading: () => const LinearProgressIndicator(minHeight: 2),
+        loading: () => FxLoading.sectionBar(context),
         error:
             (e, _) => Text(
               friendlyError(e, fallback: 'Evolução inteligente indisponível.'),

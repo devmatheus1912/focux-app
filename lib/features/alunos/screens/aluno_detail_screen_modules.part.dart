@@ -91,7 +91,10 @@ class _ModuleTile extends StatelessWidget {
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
 
-    return InkWell(
+    return Semantics(
+      button: true,
+      label: '$label. $sub',
+      child: InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
@@ -174,6 +177,7 @@ class _ModuleTile extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

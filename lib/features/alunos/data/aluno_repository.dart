@@ -259,6 +259,60 @@ class Timeline360Event {
       );
 }
 
+class ProximaAcaoResumo {
+  final String acao;
+  final String motivo;
+  final String fonte;
+  final String prioridade;
+
+  const ProximaAcaoResumo({
+    required this.acao,
+    required this.motivo,
+    required this.fonte,
+    required this.prioridade,
+  });
+
+  factory ProximaAcaoResumo.fromJson(Map<String, dynamic> json) =>
+      ProximaAcaoResumo(
+        acao: json['acao'] as String? ?? '',
+        motivo: json['motivo'] as String? ?? '',
+        fonte: json['fonte'] as String? ?? 'PADRAO',
+        prioridade: json['prioridade'] as String? ?? 'P2',
+      );
+}
+
+class Aluno360 {
+  final Aluno aluno;
+  final AlunoAutonomiaResumo autonomiaResumo;
+  final List<Timeline360Event> timelinePreview;
+  final ProximaAcaoResumo proximaAcao;
+  final EvolucaoInteligente evolucaoInteligente;
+
+  const Aluno360({
+    required this.aluno,
+    required this.autonomiaResumo,
+    required this.timelinePreview,
+    required this.proximaAcao,
+    required this.evolucaoInteligente,
+  });
+
+  factory Aluno360.fromJson(Map<String, dynamic> json) => Aluno360(
+    aluno: Aluno.fromJson(json['aluno'] as Map<String, dynamic>),
+    autonomiaResumo: AlunoAutonomiaResumo.fromJson(
+      json['autonomiaResumo'] as Map<String, dynamic>,
+    ),
+    timelinePreview: (json['timelinePreview'] as List<dynamic>? ?? const [])
+        .map((e) => Timeline360Event.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    proximaAcao: ProximaAcaoResumo.fromJson(
+      json['proximaAcao'] as Map<String, dynamic>,
+    ),
+    evolucaoInteligente: EvolucaoInteligente.fromJson(
+      json['evolucaoInteligente'] as Map<String, dynamic>,
+    ),
+  );
+}
+
 class AlunoAutonomiaResumo {
   final int alunoId;
   final int totalEventos;
@@ -352,6 +406,11 @@ class AlunoRepository {
   Future<Aluno> buscar(int id) async {
     final response = await _dio.get('/api/alunos/$id');
     return Aluno.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<Aluno360> buscarAluno360(int id) async {
+    final response = await _dio.get('/api/alunos/$id/360');
+    return Aluno360.fromJson(response.data as Map<String, dynamic>);
   }
 
   Future<Aluno> criar({

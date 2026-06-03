@@ -630,9 +630,9 @@ class _Aluno360CopilotCard extends ConsumerWidget {
             ),
             child: actionAsync.when(
               loading:
-                  () => const SizedBox(
+                  () => SizedBox(
                     height: 52,
-                    child: Center(child: LinearProgressIndicator(minHeight: 2)),
+                    child: Center(child: FxLoading.sectionBar(context)),
                   ),
               error:
                   (_, __) => _CopilotPrescription(

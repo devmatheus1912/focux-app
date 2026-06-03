@@ -20,6 +20,16 @@ class FxLoading extends StatelessWidget {
     this.valueColor,
   });
 
+  /// Inline section loading bar — matches dashboard pulse / aluno 360 cards.
+  static Widget sectionBar(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return LinearProgressIndicator(
+      minHeight: 2,
+      color: primary,
+      backgroundColor: primary.withValues(alpha: 0.12),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(

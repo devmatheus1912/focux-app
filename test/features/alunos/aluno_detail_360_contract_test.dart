@@ -22,8 +22,8 @@ void main() {
     expect(screen, contains('Aluno 360'));
     expect(screen, contains('class _Aluno360TimelineCard'));
     expect(screen, contains("'Linha do tempo 360'"));
-    expect(screen, contains('alunoScoreSnapshotsProvider'));
-    expect(screen, contains('getFocuxScoreSnapshots(alunoId)'));
+    expect(screen, contains('aluno360Provider'));
+    expect(screen, contains('buscarAluno360'));
     expect(screen, contains('class _Timeline360Tile'));
     expect(screen, contains('alunoCopilotoActionProvider'));
     expect(screen, contains('proximaAcao(alunoId)'));
@@ -40,7 +40,7 @@ void main() {
     expect(screen, contains('perfil, autonomia e financeiro'));
   });
 
-  test('aluno 360 polish: unified status, refresh, altura, sparkline', () {
+  test('aluno 360 polish: tabs, unified status, refresh, altura, sparkline', () {
     final screen = _alunoDetailLibrarySource();
 
     expect(screen, contains('class _AlunoOperationalStatusSection'));
@@ -53,6 +53,14 @@ void main() {
     expect(screen, contains('class _WeeklyActivitySparkline'));
     expect(screen, contains('formatAlturaDisplay'));
     expect(screen, contains('friendlyError'));
+    expect(screen, contains('_AlunoDetailTabBarDelegate'));
+    expect(screen, contains("Tab(text: 'Operação')"));
+    expect(screen, contains("Tab(text: 'Evolução')"));
+    expect(screen, contains("Tab(text: 'Ferramentas')"));
+    expect(screen, contains('class _AlunoDetailOperacaoTab'));
+    expect(screen, contains('class _AlunoDetailEvolucaoTab'));
+    expect(screen, contains('class _AlunoDetailFerramentasTab'));
+    expect(screen, contains('FxLoading.sectionBar'));
     expect(screen, isNot(contains('Pulso operacional')));
     expect(screen, isNot(contains('Score API')));
   });

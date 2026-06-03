@@ -2,15 +2,11 @@
 
 class _Aluno360TimelineCard extends StatelessWidget {
   final Aluno aluno;
-  final AsyncValue<List<AlunoAutonomiaEvento>> eventosAsync;
-  final AsyncValue<List<FocuxScoreSnapshotResumo>> snapshotsAsync;
   final AsyncValue<List<Timeline360Event>> timelineApiAsync;
   final bool isDark;
 
   const _Aluno360TimelineCard({
     required this.aluno,
-    required this.eventosAsync,
-    required this.snapshotsAsync,
     required this.timelineApiAsync,
     required this.isDark,
   });
@@ -76,79 +72,13 @@ class _Aluno360TimelineCard extends StatelessWidget {
   }
 
   List<_Timeline360Item> _items(Color primary) {
-    final api = timelineApiAsync.valueOrNull;
-    if (api != null && api.isNotEmpty) {
-      return api
-          .take(7)
-          .map((event) => _itemFromApi(event, primary: primary))
-          .toList();
+    if (!timelineApiAsync.hasValue) {
+      return const [];
     }
-    final items = <_Timeline360Item>[];
-    for (final snapshot in snapshotsAsync.valueOrNull ?? const []) {
-      final date = DateTime.tryParse(snapshot.dataReferencia);
-      items.add(
-        _Timeline360Item(
-          at: date,
-          kind: 'Radar',
-          title: '${snapshot.score} pts · ${snapshot.ritmo}',
-          body: snapshot.narrativa,
-          meta: snapshot.proximaAcao,
-          priority: snapshot.prioridade,
-          icon: Icons.radar_outlined,
-          color: snapshot.score >= 80 ? EagleTokens.good : EagleTokens.warn,
-        ),
-      );
-    }
-    for (final evento in eventosAsync.valueOrNull ?? const []) {
-      items.add(
-        _Timeline360Item(
-          at: evento.criadoEm,
-          kind: 'Autonomia',
-          title: evento.taskTitle,
-          body: _autonomyBody(evento),
-          meta: evento.priority ?? 'Sinal do aluno',
-          priority: evento.action,
-          icon: _autonomyIcon(evento.action),
-          color: _autonomyColor(evento.action),
-        ),
-      );
-    }
-    items.sort((a, b) {
-      final left = a.at ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final right = b.at ?? DateTime.fromMillisecondsSinceEpoch(0);
-      return right.compareTo(left);
-    });
-    return items.take(7).toList();
-  }
-
-  static String _autonomyBody(AlunoAutonomiaEvento evento) {
-    final action = switch (evento.action.toUpperCase()) {
-      'VIEWED' => 'O aluno viu esta tarefa.',
-      'CLICKED' => 'O aluno tentou avançar e clicou nesta tarefa.',
-      'COMPLETED' => 'O aluno concluiu esta etapa.',
-      _ => 'Sinal registrado no percurso do aluno.',
-    };
-    if (evento.profileCompletion != null) {
-      return '$action Perfil em ${evento.profileCompletion}%.';
-    }
-    return action;
-  }
-
-  static IconData _autonomyIcon(String action) {
-    return switch (action.toUpperCase()) {
-      'VIEWED' => Icons.visibility_outlined,
-      'CLICKED' => Icons.touch_app_outlined,
-      'COMPLETED' => Icons.check_circle_outline,
-      _ => Icons.bolt_outlined,
-    };
-  }
-
-  static Color _autonomyColor(String action) {
-    return switch (action.toUpperCase()) {
-      'CLICKED' => EagleTokens.warn,
-      'COMPLETED' => EagleTokens.good,
-      _ => TokensStrip.textSecondary,
-    };
+    return timelineApiAsync.value!
+        .take(7)
+        .map((event) => _itemFromApi(event, primary: primary))
+        .toList();
   }
 
   @override
@@ -157,10 +87,8 @@ class _Aluno360TimelineCard extends StatelessWidget {
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
     final line = ShellChrome.of(context).line;
-    final loading =
-        eventosAsync.isLoading ||
-        snapshotsAsync.isLoading ||
-        timelineApiAsync.isLoading;
+    final loading = timelineApiAsync.isLoading && !timelineApiAsync.hasValue;
+    final error = timelineApiAsync.hasError && !timelineApiAsync.hasValue;
     final items = _items(primary);
     final visibleItems = items.take(3).toList();
     final hasMore = items.length > visibleItems.length;
@@ -207,7 +135,16 @@ class _Aluno360TimelineCard extends StatelessWidget {
           ),
           if (loading) ...[
             const SizedBox(height: 14),
-            const LinearProgressIndicator(minHeight: 2),
+            FxLoading.sectionBar(context),
+          ] else if (error) ...[
+            const SizedBox(height: 14),
+            Text(
+              friendlyError(
+                timelineApiAsync.error!,
+                fallback: 'Não foi possível carregar a linha do tempo.',
+              ),
+              style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
+            ),
           ] else if (items.isEmpty) ...[
             const SizedBox(height: 14),
             Text(
@@ -405,17 +342,25 @@ class _Timeline360Tile extends StatelessWidget {
         ),
       ],
     );
+
+    final semanticsLabel =
+        '${item.kind}: ${item.title}. ${_timelineDate(item.at)}';
+
     if (link != null && link.isNotEmpty) {
-      return InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () => context.push(link),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: child,
+      return Semantics(
+        button: true,
+        label: semanticsLabel,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => context.push(link),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: child,
+          ),
         ),
       );
     }
-    return child;
+    return Semantics(label: semanticsLabel, child: child);
   }
 }
 
