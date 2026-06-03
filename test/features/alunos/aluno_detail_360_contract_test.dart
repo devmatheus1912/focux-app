@@ -2,12 +2,21 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+String _alunoDetailLibrarySource() {
+  const dir = 'lib/features/alunos/screens';
+  const mainFile = '$dir/aluno_detail_screen.dart';
+  final main = File(mainFile).readAsStringSync();
+  final partPattern = RegExp(r"part '([^']+\.part\.dart)';");
+  final parts = partPattern
+      .allMatches(main)
+      .map((m) => File('$dir/${m.group(1)!}').readAsStringSync())
+      .join('\n');
+  return '$main\n$parts';
+}
+
 void main() {
   test('aluno detail exposes 360 view and prescriptive copilot actions', () {
-    final screen =
-        File(
-          'lib/features/alunos/screens/aluno_detail_screen.dart',
-        ).readAsStringSync();
+    final screen = _alunoDetailLibrarySource();
 
     expect(screen, contains('class _Aluno360CopilotCard'));
     expect(screen, contains('Aluno 360'));
@@ -32,10 +41,7 @@ void main() {
   });
 
   test('aluno 360 polish: unified status, refresh, altura, sparkline', () {
-    final screen =
-        File(
-          'lib/features/alunos/screens/aluno_detail_screen.dart',
-        ).readAsStringSync();
+    final screen = _alunoDetailLibrarySource();
 
     expect(screen, contains('class _AlunoOperationalStatusSection'));
     expect(screen, contains('Status operacional'));
