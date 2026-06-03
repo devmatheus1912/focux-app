@@ -24,7 +24,8 @@ void main() {
     expect(screen, contains('excessBeyondMeta'));
     expect(screen, contains('BrandPalette.sectionLink'));
     expect(screen, contains('nextActions.length > 1'));
-    expect(screen, contains('Recolher mais ferramentas'));
+    expect(screen, contains('dashboardCollapsibleSemanticsLabel'));
+    expect(screen, contains('dashboard_entry_motion.dart'));
     expect(screen, contains('DashboardDayFocusBanner'));
     expect(screen, contains('groupDashboardToolShortcuts'));
     expect(screen, contains('Buscar ferramenta'));

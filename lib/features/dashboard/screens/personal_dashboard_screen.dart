@@ -43,6 +43,7 @@ import '../utils/dashboard_tool_groups.dart';
 import '../widgets/dashboard_day_focus_banner.dart';
 import '../widgets/dashboard_attention_card.dart';
 import '../widgets/dashboard_collapsible_section.dart';
+import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_haptic.dart';
 
 class PersonalDashboardScreen extends ConsumerStatefulWidget {
@@ -191,13 +192,13 @@ class _PersonalDashboardScreenState
   String? _lastTrackedLocation;
   VoidCallback? _routeListener;
   RouteInformationProvider? _routeInformationProvider;
+  bool _motionConfigured = false;
 
   late AnimationController _gradientCtrl;
   late AnimationController _counterCtrl;
   late AnimationController _entryCtrl;
   late Animation<double> _counterAnim;
   late Animation<double> _heroFade;
-  late Animation<Offset> _heroSlide;
   late Animation<double> _kpiFade;
   late Animation<double> _commandFade;
 
@@ -207,7 +208,7 @@ class _PersonalDashboardScreenState
     _gradientCtrl = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 8),
-    )..repeat();
+    );
     _counterCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
@@ -224,10 +225,6 @@ class _PersonalDashboardScreenState
       parent: _entryCtrl,
       curve: const Interval(0.32, 0.78, curve: Curves.easeOutCubic),
     );
-    _heroSlide = Tween<Offset>(
-      begin: const Offset(0, 0.05),
-      end: Offset.zero,
-    ).animate(_heroFade);
     _kpiFade = CurvedAnimation(
       parent: _entryCtrl,
       curve: const Interval(0.48, 0.92, curve: Curves.easeOutCubic),
@@ -238,10 +235,23 @@ class _PersonalDashboardScreenState
     );
     _loadFin();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _entryCtrl.forward(from: 0);
       _maybeShowOnboardingWizard();
       _bindDashboardReturnListener();
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_motionConfigured) return;
+    _motionConfigured = true;
+    if (TokensStrip.prefersReducedMotion(context)) {
+      _gradientCtrl.stop();
+      _entryCtrl.value = 1.0;
+    } else {
+      _gradientCtrl.repeat();
+      _entryCtrl.forward(from: 0);
+    }
   }
 
   void _bindDashboardReturnListener() {
@@ -301,7 +311,11 @@ class _PersonalDashboardScreenState
           begin: 0,
           end: _finData!.receitaMes,
         ).animate(CurvedAnimation(parent: _counterCtrl, curve: Curves.easeOut));
-        _counterCtrl.forward(from: 0);
+        if (TokensStrip.prefersReducedMotion(context)) {
+          _counterCtrl.value = 1.0;
+        } else {
+          _counterCtrl.forward(from: 0);
+        }
       }
     } catch (e, st) {
       debugPrint('[Focux] Error loading financeiro dashboard: $e\n$st');
@@ -323,6 +337,11 @@ class _PersonalDashboardScreenState
     final heroPrimary = BrandPalette.softened(primary, amount: 0.06);
     final heroDeep = BrandPalette.deep(heroPrimary);
     final dashboardAsync = ref.watch(dashboardProvider);
+    final commandAsync = ref.watch(commandCenterProvider);
+    final chatAsync = ref.watch(chatInboxProvider);
+    final homeSignalsLoading =
+        commandAsync.isLoading || chatAsync.isLoading;
+    final reduceMotion = TokensStrip.prefersReducedMotion(context);
     final themeDark = Theme.of(context).brightness == Brightness.dark;
     final alunosAsync = ref.watch(alunosProvider);
     final historicoCheckinsAsync = ref.watch(historicoCheckinProvider);
@@ -346,6 +365,9 @@ class _PersonalDashboardScreenState
                 },
               ),
           data: (data) {
+              if (homeSignalsLoading) {
+                return _buildShimmerLoading(context, themeDark);
+              }
               final screenWidth = MediaQuery.sizeOf(context).width;
               final isCompactPhone = screenWidth < 390;
               final shortcutAspectRatio = isCompactPhone ? 2.75 : 3.05;
@@ -409,7 +431,6 @@ class _PersonalDashboardScreenState
               final receitaTrend = dashboardReceitaSparklineMensal(
                 _finData?.evolucaoMensal ?? const [],
               );
-              final commandAsync = ref.watch(commandCenterProvider);
               final agendaHoje = commandAsync.maybeWhen(
                 data: (cc) => cc.agendaHoje.length,
                 orElse: () => 0,
@@ -559,28 +580,23 @@ class _PersonalDashboardScreenState
 
                     // CENTRAL DE COMANDO — protagonista do dia
                     SliverToBoxAdapter(
-                      child: FadeTransition(
-                        opacity: _commandFade,
-                        child: SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(0, 0.04),
-                            end: Offset.zero,
-                          ).animate(_commandFade),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              TokensStrip.s4,
-                              0,
-                              TokensStrip.s4,
-                              TokensStrip.s4,
-                            ),
-                            child: _CommandCenterSection(
-                              isDark: themeDark,
-                              primary: primary,
-                              finData: _finData,
-                              hideRiskSummary: alunosEmRisco.isNotEmpty,
-                              contextualSubtitle:
-                                  'Próximas ações com maior impacto hoje.',
-                            ),
+                      child: dashboardEntryMotion(
+                        context: context,
+                        fade: _commandFade,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            TokensStrip.s4,
+                            0,
+                            TokensStrip.s4,
+                            TokensStrip.s4,
+                          ),
+                          child: _CommandCenterSection(
+                            isDark: themeDark,
+                            primary: primary,
+                            finData: _finData,
+                            hideRiskSummary: alunosEmRisco.isNotEmpty,
+                            contextualSubtitle:
+                                'Próximas ações com maior impacto hoje.',
                           ),
                         ),
                       ),
@@ -776,16 +792,19 @@ class _PersonalDashboardScreenState
                       ),
                     ),
                     SliverToBoxAdapter(
-                      child: FadeTransition(
-                        opacity: _heroFade,
-                        child: SlideTransition(
-                          position: _heroSlide,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: AnimatedBuilder(
-                              animation: _gradientCtrl,
-                              builder: (ctx, _) {
-                                final angle = _gradientCtrl.value * 2 * math.pi;
+                      child: dashboardEntryMotion(
+                        context: context,
+                        fade: _heroFade,
+                        slideBegin: const Offset(0, 0.05),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: AnimatedBuilder(
+                            animation: _gradientCtrl,
+                            builder: (ctx, _) {
+                              final angle =
+                                  reduceMotion
+                                      ? 0.0
+                                      : _gradientCtrl.value * 2 * math.pi;
                                 final begin = Alignment(
                                   -math.cos(angle),
                                   -math.sin(angle),
@@ -892,6 +911,17 @@ class _PersonalDashboardScreenState
                                                           12,
                                                         ),
                                                   ),
+                                                ),
+                                              )
+                                              : reduceMotion
+                                              ? Text(
+                                                'R\$ ${receitaAtual.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}',
+                                                style: AppTypography.mono(
+                                                  color: Colors.white,
+                                                  fontSize: 34,
+                                                  fontWeight: FontWeight.w600,
+                                                  letterSpacing: -0.5,
+                                                  height: 1,
                                                 ),
                                               )
                                               : AnimatedBuilder(
@@ -1131,9 +1161,8 @@ class _PersonalDashboardScreenState
                             );
                           },
                         ),
-                          ),
-                        ),
                       ),
+                    ),
                     ),
 
                     const SliverToBoxAdapter(child: SizedBox(height: 12)),
@@ -1617,10 +1646,6 @@ class _DayPulseStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final slide = Tween<Offset>(
-      begin: const Offset(0, 0.03),
-      end: Offset.zero,
-    ).animate(fade);
     final riscoAccent =
         riscoAlto > 0 ? EagleTokens.warn : TokensStrip.badgeSuccess;
     final tight = MediaQuery.sizeOf(context).width < 400;
@@ -1630,17 +1655,17 @@ class _DayPulseStrip extends StatelessWidget {
             ? EagleTokens.darkInkMute.withValues(alpha: 0.72)
             : TokensStrip.textSecondary.withValues(alpha: 0.82);
 
-    return FadeTransition(
-      opacity: fade,
-      child: SlideTransition(
-        position: slide,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Pulso operacional',
-              style: _dashboardSectionKickerStyle(context, isDark: isDark),
-            ),
+    return dashboardEntryMotion(
+      context: context,
+      fade: fade,
+      slideBegin: const Offset(0, 0.03),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Pulso operacional',
+            style: _dashboardSectionKickerStyle(context, isDark: isDark),
+          ),
             const SizedBox(height: 6),
             Row(
               children: [
@@ -1808,7 +1833,6 @@ class _DayPulseStrip extends StatelessWidget {
             ],
           ],
         ),
-      ),
     );
   }
 }
@@ -2698,7 +2722,8 @@ class _CommandCenterSectionState extends ConsumerState<_CommandCenterSection> {
     // Chat inbox — count total unread messages
     final chatAsync = ref.watch(chatInboxProvider);
     final commandAsync = ref.watch(commandCenterProvider);
-    final isCommandPreparing = chatAsync.isLoading || commandAsync.isLoading;
+    final isCommandPreparing = commandAsync.isLoading;
+    final commandUnavailable = commandAsync.hasError;
     final unreadCount = chatAsync.maybeWhen(
       data: (items) => items.fold<int>(0, (sum, i) => sum + i.naoLidas),
       orElse: () => 0,
@@ -2985,6 +3010,7 @@ class _CommandCenterSectionState extends ConsumerState<_CommandCenterSection> {
           isDark: isDark,
           primary: primary,
           loading: isCommandPreparing,
+          unavailable: commandUnavailable,
           actions: nextActions.take(2).toList(growable: false),
         ),
         const SizedBox(height: 14),
@@ -3038,7 +3064,7 @@ class _CommandCenterSectionState extends ConsumerState<_CommandCenterSection> {
                     const Spacer(),
                     AnimatedRotation(
                       turns: _quickLinksExpanded ? 0.25 : 0,
-                      duration: const Duration(milliseconds: 220),
+                      duration: dashboardMotionDuration(context),
                       curve: Curves.easeOutCubic,
                       child: FxIcon(
                         name: 'chevron-right',
@@ -3303,12 +3329,14 @@ class _CommandActionPanel extends StatelessWidget {
   final bool isDark;
   final Color primary;
   final bool loading;
+  final bool unavailable;
   final List<_CommandActionItem> actions;
 
   const _CommandActionPanel({
     required this.isDark,
     required this.primary,
     required this.loading,
+    this.unavailable = false,
     required this.actions,
   });
 
@@ -3352,7 +3380,14 @@ class _CommandActionPanel extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         if (loading)
-          _CommandLoadingTile(isDark: isDark, primary: primary)
+          _CommandActionsShimmer(isDark: isDark, primary: primary)
+        else if (unavailable)
+          _CommandLoadingTile(
+            isDark: isDark,
+            primary: primary,
+            title: 'Central temporariamente indisponível',
+            subtitle: 'Puxe para atualizar ou tente em instantes.',
+          )
         else if (actions.isEmpty)
           _CommandLoadingTile(
             isDark: isDark,
@@ -3384,6 +3419,38 @@ class _CommandActionPanel extends StatelessWidget {
   }
 }
 
+class _CommandActionsShimmer extends StatelessWidget {
+  const _CommandActionsShimmer({
+    required this.isDark,
+    required this.primary,
+  });
+
+  final bool isDark;
+  final Color primary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: List.generate(2, (index) {
+        return Padding(
+          padding: EdgeInsets.only(bottom: index == 0 ? 10 : 0),
+          child: Shimmer.fromColors(
+            baseColor: primary.withValues(alpha: isDark ? 0.18 : 0.10),
+            highlightColor: primary.withValues(alpha: isDark ? 0.32 : 0.18),
+            child: Container(
+              height: 62,
+              decoration: BoxDecoration(
+                color: primary.withValues(alpha: isDark ? 0.24 : 0.14),
+                borderRadius: BorderRadius.circular(TokensStrip.rCard),
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
 class _CommandLoadingTile extends StatelessWidget {
   final bool isDark;
   final Color primary;
@@ -3393,8 +3460,8 @@ class _CommandLoadingTile extends StatelessWidget {
   const _CommandLoadingTile({
     required this.isDark,
     required this.primary,
-    this.title = 'Preparando prioridades',
-    this.subtitle = 'Lendo mensagens, risco, agenda e financeiro.',
+    required this.title,
+    required this.subtitle,
   });
 
   @override
@@ -3474,7 +3541,10 @@ class _CommandActionTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: AnimatedScale(
         scale: 1,
-        duration: const Duration(milliseconds: 110),
+        duration: dashboardMotionDuration(
+          context,
+          normal: const Duration(milliseconds: 110),
+        ),
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: fxStripCardDecoration(

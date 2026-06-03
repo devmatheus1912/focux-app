@@ -9,37 +9,9 @@ final dashboardRepositoryProvider = Provider<DashboardRepository>(
 );
 
 final dashboardProvider = FutureProvider<DashboardData>((ref) async {
-  try {
-    return await ref.read(dashboardRepositoryProvider).getDashboard();
-  } catch (_) {
-    return DashboardData(
-      totalAlunos: 40,
-      alunosAtivos: 24,
-      planoAtual: 'PREMIUM',
-      limiteAlunos: 40,
-      nomePersonal: 'Matheus Ribeiro',
-      logoUrl: null,
-      corPrimaria: '#3B5FE2',
-      corSecundaria: '#2440B8',
-      descricaoProfissional:
-          'Personal trainer focado em hipertrofia e performance.',
-      instagram: '@matheus.personal',
-    );
-  }
+  return ref.read(dashboardRepositoryProvider).getDashboard();
 });
 
 final commandCenterProvider = FutureProvider<CommandCenterData>((ref) async {
-  try {
-    return await ref.read(dashboardRepositoryProvider).getCommandCenter();
-  } catch (_) {
-    return CommandCenterData(
-      agendaHoje: const [],
-      alunosEmRisco: const [],
-      alunosScore: const [],
-      filaAcoes: const [],
-      cobrancasPendentes: const [],
-      autonomiaGargalos: const [],
-      modoOperacao: const [],
-    );
-  }
+  return ref.read(dashboardRepositoryProvider).getCommandCenter();
 });

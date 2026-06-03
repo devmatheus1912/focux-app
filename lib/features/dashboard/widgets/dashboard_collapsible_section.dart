@@ -6,6 +6,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../utils/dashboard_a11y.dart';
+import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_haptic.dart';
 import '../utils/dashboard_readability.dart';
 
@@ -67,6 +68,7 @@ class _DashboardCollapsibleSectionState
 
   @override
   Widget build(BuildContext context) {
+    final motionDuration = dashboardMotionDuration(context);
     final primary = Theme.of(context).colorScheme.primary;
     final heading = BrandPalette.sectionHeading(primary, dark: widget.isDark);
     final mute = dashboardReadableMuted(context, isDark: widget.isDark);
@@ -153,7 +155,7 @@ class _DashboardCollapsibleSectionState
                         ),
                       AnimatedRotation(
                         turns: _expanded ? 0.25 : 0,
-                        duration: const Duration(milliseconds: 220),
+                        duration: motionDuration,
                         curve: Curves.easeOutCubic,
                         child: Icon(
                           Icons.chevron_right_rounded,
@@ -177,7 +179,7 @@ class _DashboardCollapsibleSectionState
                 _expanded
                     ? CrossFadeState.showSecond
                     : CrossFadeState.showFirst,
-            duration: const Duration(milliseconds: 220),
+            duration: motionDuration,
             sizeCurve: Curves.easeOutCubic,
           ),
         ],
