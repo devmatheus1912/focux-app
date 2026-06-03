@@ -1,7 +1,11 @@
-﻿part of 'aluno_detail_screen.dart';
+import 'package:flutter/material.dart';
 
-class _OperationalMetricTile extends StatelessWidget {
-  const _OperationalMetricTile({
+import 'fx_shell_scaffold.dart';
+
+/// Display-only operational KPI tile shared by Aluno 360 and dashboard surfaces.
+class OperationalMetricTile extends StatelessWidget {
+  const OperationalMetricTile({
+    super.key,
     required this.label,
     required this.value,
     required this.hint,
@@ -72,7 +76,7 @@ class _OperationalMetricTile extends StatelessWidget {
   }
 }
 
-IconData _riscoMetricIcon(String? raw) {
+IconData riscoMetricIcon(String? raw) {
   final value = (raw ?? '').trim().toUpperCase();
   return switch (value) {
     'ALTO' || 'HIGH' => Icons.warning_amber_rounded,

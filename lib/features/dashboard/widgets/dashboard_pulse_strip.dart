@@ -9,6 +9,7 @@ import '../../../core/widgets/fx_sparkline.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_screen_helpers.dart';
+/// Display-only operational metrics live in `OperationalMetricTile` (core/widgets).
 class DashboardDayPulseStrip extends StatelessWidget {
   const DashboardDayPulseStrip({
     super.key,

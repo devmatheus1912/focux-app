@@ -71,7 +71,33 @@ void main() {
     expect(screen, isNot(contains('Pulso operacional')));
     expect(screen, isNot(contains('Score API')));
     expect(screen, contains('part \'aluno_detail_actions.part.dart\';'));
-    expect(screen, contains('_riscoMetricIcon'));
+    expect(screen, contains('riscoMetricIcon'));
+    expect(screen, contains('OperationalMetricTile'));
+    expect(screen, contains('copySensitiveToClipboard'));
+    expect(screen, isNot(contains('Erro: \$e')));
+    expect(screen, isNot(contains('operational_metrics.part.dart')));
     expect(screen, contains('CollapseMode.parallax'));
+  });
+
+  test('aluno 360 fase 3: tabs, semantics, friendly errors, shared tile', () {
+    final screen = _alunoDetailLibrarySource();
+
+    expect(screen, contains('class _AlunoDetailOperacaoTab'));
+    expect(screen, contains('_OperacaoStickyCtaBar'));
+    expect(screen, contains('_AlunoOperationalStatusSection'));
+    expect(screen, contains('Ações rápidas da aba operação'));
+    expect(screen, contains('class _AlunoDetailEvolucaoTab'));
+    expect(screen, contains('_Aluno360TimelineCard'));
+    expect(screen, contains('Linha do tempo 360'));
+    expect(screen, contains('Ver histórico completo da linha do tempo'));
+    expect(screen, contains('class _AlunoDetailFerramentasTab'));
+    expect(screen, contains("'Módulos'"));
+    expect(screen, contains('class _ModuleTile'));
+    expect(screen, contains('Abas do perfil do aluno'));
+    expect(screen, contains('friendlyError(e, fallback: \'Não foi possível gerar senha.\')'));
+    expect(
+      File('lib/core/widgets/operational_metric_tile.dart').readAsStringSync(),
+      contains('class OperationalMetricTile'),
+    );
   });
 }

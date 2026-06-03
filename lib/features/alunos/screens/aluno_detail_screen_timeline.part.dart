@@ -159,11 +159,15 @@ class _Aluno360TimelineCard extends StatelessWidget {
             ],
             if (hasMore) ...[
               const SizedBox(height: 6),
-              SizedBox(
+              Semantics(
+                button: true,
+                label: 'Ver histórico completo da linha do tempo',
+                child: SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
                   onPressed: () => _showFullTimeline(context, items),
                   child: Text('Ver histórico completo · ${items.length}'),
+                ),
                 ),
               ),
             ],

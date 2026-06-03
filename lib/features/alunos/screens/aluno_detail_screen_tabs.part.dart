@@ -214,7 +214,10 @@ class _AlunoFinanceiroRiskBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
-    return Material(
+    return Semantics(
+      button: true,
+      label: 'Pendência financeira. Abrir mensalidades deste aluno',
+      child: Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () => context.push('/financeiro?alunoId=$alunoId'),
@@ -254,6 +257,7 @@ class _AlunoFinanceiroRiskBanner extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }
@@ -330,7 +334,10 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
 
     return SafeArea(
       top: false,
-      child: Container(
+      child: Semantics(
+        container: true,
+        label: 'Ações rápidas da aba operação',
+        child: Container(
         decoration: BoxDecoration(
           color: ShellChrome.of(context).sheetFill,
           border: Border(top: BorderSide(color: line)),
@@ -346,15 +353,22 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
         child: Row(
           children: [
             Expanded(
-              child: FxLiquidPrimaryButton(
+              child: Semantics(
+                button: true,
+                label: primaryLabel,
+                child: FxLiquidPrimaryButton(
                 icon: primaryIcon,
                 label: primaryLabel,
                 onPressed: onPrimary,
+                ),
               ),
             ),
             if (!preferChat && !hasOpenTask) ...[
               const SizedBox(width: 8),
-              SizedBox(
+              Semantics(
+                button: true,
+                label: 'Abrir chat com aluno',
+                child: SizedBox(
                 width: 112,
                 height: 44,
                 child: OutlinedButton.icon(
@@ -375,10 +389,12 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
                     ),
                   ),
                 ),
+                ),
               ),
             ],
           ],
         ),
+      ),
       ),
     );
   }

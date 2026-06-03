@@ -36,7 +36,7 @@ extension _AlunoDetailActions on _AlunoDetailScreenState {
       }
     } catch (e) {
       if (context.mounted) {
-        FeedbackHelper.showError(context, 'Erro: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -82,7 +82,11 @@ extension _AlunoDetailActions on _AlunoDetailScreenState {
       if (context.mounted) {
         FeedbackHelper.showSnackBar(
           context,
-          SnackBar(content: Text('Não foi possível gerar senha: $e')),
+          SnackBar(
+            content: Text(
+              friendlyError(e, fallback: 'Não foi possível gerar senha.'),
+            ),
+          ),
         );
       }
     }
@@ -219,7 +223,7 @@ extension _AlunoDetailActions on _AlunoDetailScreenState {
                             return;
                           }
                         }
-                        await Clipboard.setData(ClipboardData(text: mensagem));
+                        await copySensitiveToClipboard(mensagem);
                         if (ctx.mounted) Navigator.of(ctx).pop();
                         if (context.mounted) {
                           FeedbackHelper.showSnackBar(
@@ -258,7 +262,7 @@ extension _AlunoDetailActions on _AlunoDetailScreenState {
                       height: 48,
                       child: OutlinedButton.icon(
                         onPressed: () async {
-                          await Clipboard.setData(ClipboardData(text: mensagem));
+                          await copySensitiveToClipboard(mensagem);
                           HapticFeedback.mediumImpact();
                           if (ctx.mounted) Navigator.of(ctx).pop();
                           if (context.mounted) {

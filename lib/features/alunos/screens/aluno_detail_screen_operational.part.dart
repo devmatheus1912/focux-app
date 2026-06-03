@@ -50,7 +50,7 @@ class _AlunoOperationalStatusSection extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _OperationalMetricTile(
+                child: OperationalMetricTile(
                   label: 'Prontidão',
                   value:
                       aluno.scoreProntidao == null
@@ -65,7 +65,7 @@ class _AlunoOperationalStatusSection extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _OperationalMetricTile(
+                child: OperationalMetricTile(
                   label: 'Aderência',
                   value:
                       aluno.aderenciaPercent == null
@@ -87,7 +87,7 @@ class _AlunoOperationalStatusSection extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _OperationalMetricTile(
+                child: OperationalMetricTile(
                   label: 'Sem treino',
                   value:
                       aluno.diasSemTreino == null
@@ -106,13 +106,13 @@ class _AlunoOperationalStatusSection extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _OperationalMetricTile(
+                child: OperationalMetricTile(
                   label: 'Risco',
                   value: formatRiscoNivel(aluno.riscoNivel),
                   hint: aluno.emRisco ? 'Em risco' : 'Estável',
                   color: riscoColor,
                   isDark: isDark,
-                  leadingIcon: _riscoMetricIcon(aluno.riscoNivel),
+                  leadingIcon: riscoMetricIcon(aluno.riscoNivel),
                   semanticsLabel:
                       'Risco ${formatRiscoNivel(aluno.riscoNivel)}',
                 ),
@@ -120,7 +120,7 @@ class _AlunoOperationalStatusSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          _OperationalMetricTile(
+          OperationalMetricTile(
             label: 'Contato',
             value: proximoContato,
             hint: 'Próximo follow-up',
