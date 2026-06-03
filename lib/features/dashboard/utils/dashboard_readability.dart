@@ -19,8 +19,8 @@ Color dashboardReadableCaption(BuildContext context, {required bool isDark}) {
 }
 
 /// Texto secundário sobre gradiente teal (hero financeiro) — ≥4.5:1 WCAG AA.
-Color dashboardHeroCaptionOnTeal() => Colors.white.withValues(alpha: 0.88);
+Color dashboardHeroCaptionOnTeal() => Colors.white.withValues(alpha: 0.94);
 
-Color dashboardHeroLabelOnTeal() => Colors.white.withValues(alpha: 0.82);
+Color dashboardHeroLabelOnTeal() => Colors.white.withValues(alpha: 0.92);
 
-Color dashboardHeroMutedOnTeal() => Colors.white.withValues(alpha: 0.78);
+Color dashboardHeroMutedOnTeal() => Colors.white.withValues(alpha: 0.90);

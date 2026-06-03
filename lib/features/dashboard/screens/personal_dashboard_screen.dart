@@ -13,6 +13,7 @@ import '../providers/aderencia_provider.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../checkin/providers/checkin_provider.dart';
+import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../../notificacoes/data/notificacoes_repository.dart';
@@ -351,6 +352,48 @@ class _PersonalDashboardScreenState
                 context.go('/alunos?filtro=risco');
               }
 
+              final commandFila = commandAsync.maybeWhen(
+                data: (cc) => cc.filaAcoes,
+                orElse: () => const <FilaAcaoResumo>[],
+              );
+              final stickyCommandActionsLabel =
+                  commandFila.length > 1 ? 'Ver ${commandFila.length}' : null;
+
+              void openCommandQuickActions() {
+                if (commandFila.length < 2) return;
+                showCommandActionsSheet(
+                  context,
+                  isDark: themeDark,
+                  primary: primary,
+                  actions:
+                      commandFila.take(6).map((action) {
+                        return CommandActionItem(
+                          icon: 'zap',
+                          title: action.titulo,
+                          subtitle: action.descricao,
+                          route:
+                              action.acaoUrl.startsWith('/')
+                                  ? action.acaoUrl
+                                  : '/dashboard/personal',
+                          tone: CommandActionTone.primary,
+                        );
+                      }).toList(),
+                );
+              }
+
+              final String? attentionCollapsedPreview;
+              if (attentionRiskItems.isNotEmpty) {
+                final first = attentionRiskItems.first;
+                attentionCollapsedPreview =
+                    '${first.nome} · ${attentionSignalLabel(first)}';
+              } else if (attentionVencItems.isNotEmpty) {
+                final first = attentionVencItems.first;
+                attentionCollapsedPreview =
+                    '${first.alunoNome} · R\$ ${first.valor.toStringAsFixed(0)} pendente';
+              } else {
+                attentionCollapsedPreview = null;
+              }
+
               return RefreshIndicator(
                 onRefresh: () async {
                   ref.invalidate(dashboardHomeProvider);
@@ -466,6 +509,11 @@ class _PersonalDashboardScreenState
                         isDark: themeDark,
                         primary: primary,
                         subtitle: commandCenterSubtitle,
+                        trailingActionLabel: stickyCommandActionsLabel,
+                        onTrailingAction:
+                            stickyCommandActionsLabel != null
+                                ? openCommandQuickActions
+                                : null,
                       ),
                     ),
                     SliverToBoxAdapter(
@@ -515,6 +563,7 @@ class _PersonalDashboardScreenState
                                   : 'Cobranças pendentes · toque em Revisar',
                           collapsedActionLabel: 'Revisar',
                           onCollapsedAction: openAttentionReview,
+                          collapsedPreview: attentionCollapsedPreview,
                           isDark: themeDark,
                           initiallyExpanded:
                               !dayFocusCoversRetention && riscoAlto <= 3,
@@ -641,11 +690,15 @@ class _PersonalDashboardScreenState
                                   : () => context.go('/alunos'),
                           showEmptyTrendCta:
                               !checkinsTrend.any((v) => v > 0) &&
-                              onboardingIncomplete &&
-                              alunosAtivos > 0 &&
-                              !(primeiroTreinoCriado || checkinsHoje > 0),
-                          emptyTrendCtaLabel: 'Agendar primeiro treino',
-                          onEmptyTrendCta: () => context.push('/treinos/novo'),
+                              alunosAtivos > 0,
+                          emptyTrendCtaLabel:
+                              !(primeiroTreinoCriado || checkinsHoje > 0)
+                                  ? 'Agendar primeiro treino'
+                                  : 'Abrir agenda do dia',
+                          onEmptyTrendCta:
+                              !(primeiroTreinoCriado || checkinsHoje > 0)
+                                  ? () => context.push('/treinos/novo')
+                                  : () => context.go('/agenda'),
                         ),
                       ),
                     ),

@@ -10,14 +10,18 @@ class DashboardCommandCenterStickyHeaderDelegate
     required this.isDark,
     required this.primary,
     required this.subtitle,
+    this.trailingActionLabel,
+    this.onTrailingAction,
   });
 
   final bool isDark;
   final Color primary;
   final String subtitle;
+  final String? trailingActionLabel;
+  final VoidCallback? onTrailingAction;
 
-  static const double _maxExtent = 68;
-  static const double _minExtent = 46;
+  static const double _maxExtent = 72;
+  static const double _minExtent = 48;
 
   @override
   double get minExtent => _minExtent;
@@ -35,6 +39,11 @@ class DashboardCommandCenterStickyHeaderDelegate
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final progress = (shrinkOffset / (_maxExtent - _minExtent)).clamp(0.0, 1.0);
     final showSubtitle = progress < 0.55;
+    final link = BrandPalette.sectionLink(primary, dark: isDark);
+    final hasTrailing =
+        trailingActionLabel != null &&
+        onTrailingAction != null &&
+        trailingActionLabel!.trim().isNotEmpty;
 
     return Semantics(
       header: true,
@@ -62,40 +71,65 @@ class DashboardCommandCenterStickyHeaderDelegate
               TokensStrip.s4,
               8,
             ),
-            child: Align(
-              alignment: Alignment.bottomLeft,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    'Central de Comando',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.inter(
-                      fontSize: TokensStrip.fontH2 - (2 * progress),
-                      fontWeight: TokensStrip.weightH2,
-                      letterSpacing: TokensStrip.trackingH2,
-                      height: 1.15,
-                      color: heading,
-                    ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Central de Comando',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.inter(
+                          fontSize: TokensStrip.fontH2 - (2 * progress),
+                          fontWeight: TokensStrip.weightH2,
+                          letterSpacing: TokensStrip.trackingH2,
+                          height: 1.15,
+                          color: heading,
+                        ),
+                      ),
+                      if (showSubtitle) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.inter(
+                            fontSize: TokensStrip.fontBodySm,
+                            fontWeight: FontWeight.w400,
+                            height: TokensStrip.leadingBody,
+                            color: mute,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                  if (showSubtitle) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.inter(
-                        fontSize: TokensStrip.fontBodySm,
-                        fontWeight: FontWeight.w400,
-                        height: TokensStrip.leadingBody,
-                        color: mute,
+                ),
+                if (hasTrailing && progress < 0.75)
+                  Semantics(
+                    button: true,
+                    label: trailingActionLabel,
+                    child: TextButton(
+                      onPressed: onTrailingAction,
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size(48, 40),
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        foregroundColor: link,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        trailingActionLabel!,
+                        style: AppTypography.inter(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
-                  ],
-                ],
-              ),
+                  ),
+              ],
             ),
           ),
         ),
@@ -107,6 +141,7 @@ class DashboardCommandCenterStickyHeaderDelegate
   bool shouldRebuild(covariant DashboardCommandCenterStickyHeaderDelegate oldDelegate) {
     return oldDelegate.isDark != isDark ||
         oldDelegate.primary != primary ||
-        oldDelegate.subtitle != subtitle;
+        oldDelegate.subtitle != subtitle ||
+        oldDelegate.trailingActionLabel != trailingActionLabel;
   }
 }

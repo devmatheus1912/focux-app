@@ -34,8 +34,11 @@ void main() {
     expect(widget, contains('BoxConstraints(minHeight: 48)'));
     expect(widget, contains('hideRiscoChip'));
     expect(widget, contains("collapsedActionLabel: 'Revisar'"));
+    expect(widget, contains('collapsedPreview: attentionCollapsedPreview'));
+    expect(widget, contains('trailingActionLabel: stickyCommandActionsLabel'));
     expect(widget, contains('DashboardCommandCenterStickyHeaderDelegate'));
     expect(widget, contains('SliverPersistentHeader'));
+    expect(widget, contains('Abrir agenda do dia'));
     expect(widget, isNot(contains('_RiskWaveBanner')));
     expect(widget, contains('DashboardAderenciaSemanaEmptyCard'));
     expect(widget, contains('isRiskEchoCopy'));

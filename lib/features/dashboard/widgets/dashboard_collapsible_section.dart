@@ -23,6 +23,7 @@ class DashboardCollapsibleSection extends StatefulWidget {
     this.onHeaderAction,
     this.collapsedActionLabel,
     this.onCollapsedAction,
+    this.collapsedPreview,
   });
 
   final String title;
@@ -35,6 +36,7 @@ class DashboardCollapsibleSection extends StatefulWidget {
   final VoidCallback? onHeaderAction;
   final String? collapsedActionLabel;
   final VoidCallback? onCollapsedAction;
+  final String? collapsedPreview;
 
   @override
   State<DashboardCollapsibleSection> createState() =>
@@ -152,6 +154,20 @@ class _DashboardCollapsibleSectionState
                                   color: mute,
                                 ),
                               ),
+                              if (widget.collapsedPreview != null &&
+                                  widget.collapsedPreview!.trim().isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  widget.collapsedPreview!,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTypography.inter(
+                                    fontSize: TokensStrip.fontBodySm,
+                                    fontWeight: FontWeight.w700,
+                                    color: heading,
+                                  ),
+                                ),
+                              ],
                             ],
                           ],
                         ),
