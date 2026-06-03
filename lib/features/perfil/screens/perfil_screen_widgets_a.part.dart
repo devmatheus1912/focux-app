@@ -469,7 +469,7 @@ class _PerfilBody extends StatelessWidget {
                 ),
               ),
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(18, 16, 18, profileComplete ? 28 : 96),
+                padding: EdgeInsets.fromLTRB(18, 16, 18, profileComplete ? 38 : 96),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
                     _CardSection(
@@ -521,7 +521,7 @@ class _PerfilBody extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 14),
                           _PerfilPublicLinkCard(
                             slug: perfil.slug,
                             accent: accent,
