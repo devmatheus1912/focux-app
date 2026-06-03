@@ -152,7 +152,7 @@ class _LiveBrandHero extends StatelessWidget {
                           const SizedBox(height: 6),
                           Text(
                             slogan.isNotEmpty
-                                ? slogan
+                                ? formatBrandSloganForDisplay(slogan)
                                 : 'Slogan aparece aqui em tempo real',
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,

@@ -163,7 +163,7 @@ class _PerfilBody extends StatelessWidget {
     );
     final profileScore = readiness.score;
     final brandSubtitle = () {
-      final slogan = (perfil.slogan ?? '').trim();
+      final slogan = formatBrandSloganForDisplay((perfil.slogan ?? '').trim());
       if (slogan.isNotEmpty) return slogan;
       final slug = perfil.slug?.trim();
       if (slug != null && slug.isNotEmpty) {
@@ -469,7 +469,7 @@ class _PerfilBody extends StatelessWidget {
                 ),
               ),
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(18, 16, 18, profileComplete ? 38 : 96),
+                padding: EdgeInsets.fromLTRB(18, 16, 18, profileComplete ? 44 : 96),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
                     _CardSection(

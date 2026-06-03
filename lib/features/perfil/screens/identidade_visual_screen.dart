@@ -16,6 +16,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
+import '../utils/brand_slogan_display.dart';
 import '../../subscription/utils/landing_editor_access.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/theme/app_typography.dart';
