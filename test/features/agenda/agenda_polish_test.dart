@@ -9,7 +9,7 @@ void main() {
     final screen = readScreenSourceBundle(
       'lib/features/agenda/screens/agenda_screen.dart',
     );
-    final router = File('lib/core/router/app_router.dart').readAsStringSync();
+    final router = readRouterSourceBundle();
 
     expect(screen, contains('NovoAgendamentoScreen'));
     expect(screen, contains("context.push('/agenda/novo')"));

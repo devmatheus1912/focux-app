@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -30,6 +30,7 @@ import '../data/plano.dart';
 import '../providers/assinatura_provider.dart';
 import '../../planos/paywall/paywall_catalog.dart';
 import '../../planos/paywall/paywall_components.dart';
+import '../../planos/paywall/paywall_vitrine.dart';
 import '../../subscription/plan_entitlements.dart';
 import '../services/subscription_biometric_gate.dart';
 import '../services/subscription_device_guard.dart';
@@ -40,6 +41,7 @@ import '../../../core/theme/tokens_strip.dart';
 
 part 'assinatura_screen_footer.part.dart';
 part 'assinatura_screen_build.part.dart';
+part 'assinatura_screen_build_body.part.dart';
 
 
 part 'paywall_layout.dart';

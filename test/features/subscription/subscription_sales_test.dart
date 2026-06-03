@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/subscription/subscription_products.dart';
 
+import '../../support/screen_source_bundle.dart';
+
 void main() {
   test('planos redireciona para assinatura unificada', () {
-    final router = File('lib/core/router/app_router.dart').readAsStringSync();
+    final router = readRouterSourceBundle();
     expect(router, contains("path: '/planos'"));
     expect(router, contains("path: '/paywall'"));
     expect(router, contains("return '/assinatura'"));

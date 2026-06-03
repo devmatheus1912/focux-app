@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/notificacoes/data/notificacoes_repository.dart';
 
+import '../../support/screen_source_bundle.dart';
+
 void main() {
   test('notification model parses evolution notification contract', () {
     final item = NotificacaoApp.fromJson({
@@ -24,7 +26,7 @@ void main() {
   });
 
   test('notification center is routed and visible from dashboards', () {
-    final router = File('lib/core/router/app_router.dart').readAsStringSync();
+    final router = readRouterSourceBundle();
     final alunoDashboard = File(
       'lib/features/dashboard/screens/aluno_dashboard_screen.dart',
     ).readAsStringSync();

@@ -49,7 +49,9 @@ import '../utils/exercise_picker_library_label.dart';
 part 'add_exercicio_to_treino_screen_widgets_a.part.dart';
 part 'add_exercicio_to_treino_screen_widgets_b.part.dart';
 part 'add_exercicio_to_treino_screen_widgets_c.part.dart';
-part 'add_exercicio_to_treino_screen_actions.part.dart';
+part 'add_exercicio_to_treino_screen_widgets_d.part.dart';
+part 'add_exercicio_to_treino_screen_actions_a.part.dart';
+part 'add_exercicio_to_treino_screen_actions_b.part.dart';
 
 
 

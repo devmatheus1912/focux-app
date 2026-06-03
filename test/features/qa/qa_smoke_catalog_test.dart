@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/qa/data/qa_smoke_catalog.dart';
 
+import '../../support/screen_source_bundle.dart';
+
 void main() {
   test('QA smoke catalog covers critical public and logged routes', () {
     final ids = qaSmokeRoutes.map((route) => route.id).toSet();
@@ -38,10 +40,7 @@ void main() {
   });
 
   test('QA smoke catalog routes stay registered in GoRouter', () {
-    final router = File('lib/core/router/app_router.dart').readAsStringSync();
-    final authRouter =
-        File('lib/core/router/app_router_auth_routes.dart').readAsStringSync();
-    final routes = '$router\n$authRouter';
+    final routes = readRouterSourceBundle();
 
     final redirect =
         File('lib/core/router/app_router_redirect.dart').readAsStringSync();

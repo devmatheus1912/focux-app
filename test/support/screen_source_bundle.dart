@@ -31,3 +31,22 @@ String readPaywallComponentsBundle() {
       .join('\n');
   return '$main\n$parts';
 }
+
+/// Reads app_router.dart and all app_router_*.dart siblings.
+String readRouterSourceBundle() {
+  const dirPath = 'lib/core/router';
+  final dir = Directory(dirPath);
+  final main = File('$dirPath/app_router.dart').readAsStringSync();
+  final siblings = dir
+      .listSync()
+      .whereType<File>()
+      .where((f) {
+        final name = f.uri.pathSegments.last;
+        return name.startsWith('app_router_') && name.endsWith('.dart');
+      })
+      .toList()
+    ..sort((a, b) => a.path.compareTo(b.path));
+  final extra = siblings.map((f) => f.readAsStringSync()).join('\n');
+  return '$main\n$extra';
+}
+

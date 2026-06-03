@@ -35,7 +35,10 @@ import '../widgets/conversation_message_widgets.dart';
 import '../widgets/conversation_composer_widgets.dart';
 import '../widgets/conversation_media_widgets.dart';
 part 'conversation_screen_messaging.part.dart';
-part 'conversation_screen_sheets.part.dart';
+part 'conversation_screen_sheets_actions.part.dart';
+part 'conversation_screen_sheets_search.part.dart';
+part 'conversation_screen_sheets_menu_media.part.dart';
+part 'conversation_screen_sheets_helpers.part.dart';
 
 
 enum ConversationMode { personal, aluno }

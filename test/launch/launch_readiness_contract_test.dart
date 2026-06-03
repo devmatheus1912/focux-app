@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/screen_source_bundle.dart';
+
 /// Launch gate for PT-only v1 — ensures every revenue-critical module ships wired.
 void main() {
   const launchModules = {
@@ -25,10 +27,7 @@ void main() {
   };
 
   test('launch modules have repository + route registered', () {
-    final router = File('lib/core/router/app_router.dart').readAsStringSync();
-    final authRouter =
-        File('lib/core/router/app_router_auth_routes.dart').readAsStringSync();
-    final routes = '$router\n$authRouter';
+    final routes = readRouterSourceBundle();
 
     for (final entry in launchModules.entries) {
       final moduleDir = Directory('lib/features/${entry.key}');

@@ -2,19 +2,19 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/screen_source_bundle.dart';
+
 String _routerSources() {
-  final router = File('lib/core/router/app_router.dart').readAsStringSync();
+  final routes = readRouterSourceBundle();
   final redirect =
       File('lib/core/router/app_router_redirect.dart').readAsStringSync();
-  return '$router\n$redirect';
+  return '$routes\n$redirect';
 }
 
 void main() {
   test('router keeps logged route aliases and fallback registered', () {
     final router = File('lib/core/router/app_router.dart').readAsStringSync();
-    final authRouter =
-        File('lib/core/router/app_router_auth_routes.dart').readAsStringSync();
-    final routes = '$router\n$authRouter';
+    final routes = readRouterSourceBundle();
 
     for (final path in [
       '/',

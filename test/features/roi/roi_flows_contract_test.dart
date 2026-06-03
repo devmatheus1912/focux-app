@@ -2,9 +2,11 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/screen_source_bundle.dart';
+
 void main() {
   test('ROI flow routes are registered in app router', () {
-    final router = File('lib/core/router/app_router.dart').readAsStringSync();
+    final router = readRouterSourceBundle();
 
     expect(router, contains("path: '/dunning'"));
     expect(router, contains("path: '/winback'"));
