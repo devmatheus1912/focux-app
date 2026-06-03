@@ -15,7 +15,7 @@ import '../providers/aderencia_provider.dart';
 import '../utils/dashboard_readability.dart';
 class DashboardAderenciaSemanaWidget extends StatelessWidget {
   final bool isDark;
-  const DashboardAderenciaSemanaWidget({required this.isDark});
+  const DashboardAderenciaSemanaWidget({super.key, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -254,6 +254,7 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
 
 class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
   const DashboardAderenciaSemanaEmptyCard({
+    super.key,
     required this.isDark,
     required this.primary,
     required this.mute,

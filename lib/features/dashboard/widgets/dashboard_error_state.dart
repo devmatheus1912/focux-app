@@ -9,6 +9,7 @@ class DashboardErrorState extends StatelessWidget {
   final VoidCallback onRetry;
 
   const DashboardErrorState({
+    super.key,
     required this.chromeOnDark,
     required this.primary,
     required this.message,

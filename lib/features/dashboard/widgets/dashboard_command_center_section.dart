@@ -28,6 +28,7 @@ class DashboardCommandCenterSection extends ConsumerStatefulWidget {
   final String? contextualSubtitle;
 
   const DashboardCommandCenterSection({
+    super.key,
     required this.isDark,
     required this.primary,
     required this.finData,
@@ -651,6 +652,7 @@ class CommandActionPanel extends StatelessWidget {
   final List<CommandActionItem> actions;
 
   const CommandActionPanel({
+    super.key,
     required this.isDark,
     required this.primary,
     required this.loading,
@@ -739,6 +741,7 @@ class CommandActionPanel extends StatelessWidget {
 
 class CommandActionsShimmer extends StatelessWidget {
   const CommandActionsShimmer({
+    super.key,
     required this.isDark,
     required this.primary,
   });
@@ -776,6 +779,7 @@ class CommandLoadingTile extends StatelessWidget {
   final String subtitle;
 
   const CommandLoadingTile({
+    super.key,
     required this.isDark,
     required this.primary,
     required this.title,
@@ -840,6 +844,7 @@ class CommandActionTile extends StatelessWidget {
   final VoidCallback? onTap;
 
   const CommandActionTile({
+    super.key,
     required this.item,
     required this.isDark,
     required this.primary,

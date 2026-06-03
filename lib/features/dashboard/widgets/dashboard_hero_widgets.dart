@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../utils/dashboard_readability.dart';
 class DashboardHeroProgressRail extends StatelessWidget {
   const DashboardHeroProgressRail({
+    super.key,
     required this.progress,
     required this.glow,
     this.exceeded = false,
@@ -146,7 +147,12 @@ class DashboardHeroMiniStat extends StatelessWidget {
   final String label;
   final String value;
   final String? suffix;
-  const DashboardHeroMiniStat({required this.label, required this.value, this.suffix});
+  const DashboardHeroMiniStat({
+    super.key,
+    required this.label,
+    required this.value,
+    this.suffix,
+  });
 
   @override
   Widget build(BuildContext context) {

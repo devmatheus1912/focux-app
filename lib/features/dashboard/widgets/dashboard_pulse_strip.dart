@@ -11,6 +11,7 @@ import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_screen_helpers.dart';
 class DashboardDayPulseStrip extends StatelessWidget {
   const DashboardDayPulseStrip({
+    super.key,
     required this.fade,
     required this.isDark,
     required this.alunosAtivos,
@@ -241,6 +242,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
 
 class DashboardPulseChip extends StatelessWidget {
   const DashboardPulseChip({
+    super.key,
     required this.icon,
     required this.value,
     required this.label,

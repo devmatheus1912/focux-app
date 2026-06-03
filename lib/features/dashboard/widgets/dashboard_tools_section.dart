@@ -15,7 +15,7 @@ import '../utils/dashboard_screen_helpers.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
 import '../utils/dashboard_tool_groups.dart';
 class DashboardRoiQuickLinksRow extends ConsumerWidget {
-  const DashboardRoiQuickLinksRow({required this.isDark});
+  const DashboardRoiQuickLinksRow({super.key, required this.isDark});
 
   final bool isDark;
 
@@ -228,6 +228,7 @@ class _DashboardShortcutGrid extends ConsumerWidget {
 
 class DashboardExpandableToolGroups extends ConsumerStatefulWidget {
   const DashboardExpandableToolGroups({
+    super.key,
     required this.groups,
     required this.isDark,
     required this.shortcutAspectRatio,
@@ -363,6 +364,7 @@ class DashboardExpandableToolGroupsState extends ConsumerState<DashboardExpandab
 
 class DashboardCollapsibleToolsSection extends ConsumerStatefulWidget {
   const DashboardCollapsibleToolsSection({
+    super.key,
     required this.isDark,
     required this.shortcutAspectRatio,
   });

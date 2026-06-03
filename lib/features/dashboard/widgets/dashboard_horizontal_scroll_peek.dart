@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 /// Fade na borda direita para indicar scroll horizontal.
 class DashboardHorizontalScrollPeek extends StatelessWidget {
   const DashboardHorizontalScrollPeek({
+    super.key,
     required this.child,
     required this.showPeek,
   });

@@ -11,6 +11,8 @@ void main() {
       'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
       'lib/features/dashboard/widgets/dashboard_command_center_section.dart',
       'lib/features/dashboard/widgets/dashboard_tools_section.dart',
+      'lib/features/dashboard/widgets/dashboard_financial_hero_section.dart',
+      'lib/features/dashboard/widgets/dashboard_shimmer_loading.dart',
     ];
     final screen = paths.map((p) => File(p).readAsStringSync()).join('\n');
 

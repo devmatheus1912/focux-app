@@ -5,7 +5,6 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/theme/theme_provider.dart';
-import '../../../core/widgets/fx_sparkline.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,7 +14,6 @@ import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../checkin/providers/checkin_provider.dart';
 import '../providers/dashboard_provider.dart';
-import 'package:shimmer/shimmer.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../../notificacoes/data/notificacoes_repository.dart';
 import '../../onboarding/screens/setup_onboarding_widget.dart';
@@ -28,7 +26,6 @@ import '../../subscription/widgets/trial_countdown_banner.dart';
 import '../../subscription/widgets/dashboard_activation_cta.dart';
 import '../../onboarding/providers/onboarding_provider.dart';
 import '../utils/dashboard_day_focus.dart';
-import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_a11y.dart';
 import '../utils/dashboard_sparkline_helpers.dart';
 import '../widgets/dashboard_day_focus_banner.dart';
@@ -38,7 +35,8 @@ import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import '../widgets/dashboard_horizontal_scroll_peek.dart';
 import '../widgets/dashboard_header_profile_avatar.dart';
-import '../widgets/dashboard_hero_widgets.dart';
+import '../widgets/dashboard_financial_hero_section.dart';
+import '../widgets/dashboard_shimmer_loading.dart';
 import '../widgets/dashboard_pulse_strip.dart';
 import '../widgets/dashboard_tools_section.dart';
 import '../widgets/dashboard_command_center_section.dart';
@@ -217,7 +215,7 @@ class _PersonalDashboardScreenState
       body: SafeArea(
         bottom: false,
         child: dashboardAsync.when(
-          loading: () => _buildShimmerLoading(context, themeDark),
+          loading: () => DashboardShimmerLoading(themeDark: themeDark),
           error:
               (e, _) => DashboardErrorState(
                 chromeOnDark: chromeOnDark,
@@ -658,373 +656,23 @@ class _PersonalDashboardScreenState
                         context: context,
                         fade: _heroFade,
                         slideBegin: const Offset(0, 0.05),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: AnimatedBuilder(
-                            animation: _gradientCtrl,
-                            builder: (ctx, _) {
-                              final angle =
-                                  reduceMotion
-                                      ? 0.0
-                                      : _gradientCtrl.value * 2 * math.pi;
-                                final begin = Alignment(
-                                  -math.cos(angle),
-                                  -math.sin(angle),
-                                );
-                                final end = Alignment(
-                                  math.cos(angle),
-                                  math.sin(angle),
-                                );
-                                return Semantics(
-                                  label:
-                                      'Panorama financeiro de $mes. '
-                                      'Recebido R\$ ${receitaAtual.toInt()}. '
-                                      'Toque para abrir financeiro',
-                                  button: true,
-                                  child: InkWell(
-                                  onTap: () => context.go('/financeiro'),
-                                  borderRadius: BorderRadius.circular(24),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(24),
-                                      gradient: LinearGradient(
-                                        colors:
-                                            themeDark
-                                                ? const [
-                                                  Color(0xFF128989),
-                                                  Color(0xFF0A2E2E),
-                                                ]
-                                                : [heroPrimary, heroDeep],
-                                        begin: begin,
-                                        end: end,
-                                      ),
-                                      boxShadow: [
-                                        ...TokensStrip.coloredDepthGlow(
-                                          heroPrimary,
-                                          strength: themeDark ? 0.28 : 0.34,
-                                        ),
-                                        BoxShadow(
-                                          color: heroPrimary.withValues(
-                                            alpha: themeDark ? 0.22 : 0.16,
-                                          ),
-                                          blurRadius: themeDark ? 32 : 26,
-                                          offset: const Offset(0, 14),
-                                          spreadRadius: themeDark ? -12 : -16,
-                                        ),
-                                      ],
-                                    ),
-                                padding: const EdgeInsets.fromLTRB(
-                                  18,
-                                  18,
-                                  18,
-                                  16,
-                                ),
-                                child: CustomPaint(
-                                  foregroundPainter: DashboardHeroGridPainter(),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Receita recebida · $mes',
-                                        style: TextStyle(
-                                          color: dashboardHeroLabelOnTeal(),
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w600,
-                                          letterSpacing: 0.12,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        metaSuperada
-                                            ? 'Meta superada · receita acima do previsto.'
-                                            : receitaAtual <= 0 && !_loadingFin
-                                            ? 'Nenhuma receita lançada em $mes. Registre cobranças para acompanhar a meta.'
-                                            : pendente > 0
-                                            ? 'Recebido agora. Faltam R\$ ${pendente.toInt()} para a meta.'
-                                            : 'Recebido agora. Meta do mês sob controle.',
-                                        style: TextStyle(
-                                          color:
-                                              metaSuperada
-                                                  ? dashboardHeroCaptionOnTeal()
-                                                  : dashboardHeroCaptionOnTeal(),
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: [
-                                          _loadingFin
-                                              ? Shimmer.fromColors(
-                                                baseColor: Colors.white
-                                                    .withValues(alpha: 0.15),
-                                                highlightColor: Colors.white
-                                                    .withValues(alpha: 0.30),
-                                                child: Container(
-                                                  width: 160,
-                                                  height: 36,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          12,
-                                                        ),
-                                                  ),
-                                                ),
-                                              )
-                                              : reduceMotion
-                                              ? Text(
-                                                'R\$ ${receitaAtual.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}',
-                                                style: AppTypography.mono(
-                                                  color: Colors.white,
-                                                  fontSize: 34,
-                                                  fontWeight: FontWeight.w600,
-                                                  letterSpacing: -0.5,
-                                                  height: 1,
-                                                ),
-                                              )
-                                              : AnimatedBuilder(
-                                                animation: _counterAnim,
-                                                builder:
-                                                    (ctx, _) => Text(
-                                                      'R\$ ${_counterAnim.value.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}',
-                                                      style:
-                                                          AppTypography.mono(
-                                                            color: Colors.white,
-                                                            fontSize: 34,
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            letterSpacing: -0.5,
-                                                            height: 1,
-                                                          ),
-                                                    ),
-                                              ),
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              left: 8,
-                                              bottom: 5,
-                                            ),
-                                            child: Text(
-                                              'recebido',
-                                              style: TextStyle(
-                                                color: dashboardHeroLabelOnTeal(),
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w600,
-                                                letterSpacing: 0.1,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 5),
-                                      Row(
-                                        children: [
-                                          Text(
-                                            () {
-                                              final meta =
-                                                  _finData?.previsaoReceita ??
-                                                  0;
-                                              final ticket =
-                                                  _finData?.ticketMedio ?? 0;
-                                              if (meta > 0) {
-                                                return 'Meta R\$ ${meta.toStringAsFixed(0)}';
-                                              }
-                                              if (ticket > 0) {
-                                                return 'Ticket médio R\$ ${ticket.toStringAsFixed(0)} · defina meta no financeiro';
-                                              }
-                                              return 'Defina a meta mensal no financeiro';
-                                            }(),
-                                            style: TextStyle(
-                                              color: dashboardHeroMutedOnTeal(),
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                          if (metaSuperada) ...[
-                                            const SizedBox(width: 8),
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 4,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: Colors.white.withValues(
-                                                  alpha: 0.14,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                      TokensStrip.rInput,
-                                                    ),
-                                                border: Border.all(
-                                                  color: Colors.white
-                                                      .withValues(alpha: 0.28),
-                                                ),
-                                              ),
-                                              child: const Text(
-                                                'SUPERADA',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 9,
-                                                  fontWeight: FontWeight.w800,
-                                                  letterSpacing: 0.55,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ],
-                                      ),
-                                      const SizedBox(height: 12),
-                                      if (receitaTrend.isNotEmpty) ...[
-                                        Builder(
-                                          builder: (ctx) {
-                                            final hasReceita =
-                                                receitaTrend.any((v) => v > 0);
-                                            if (!hasReceita) {
-                                              return Padding(
-                                                padding: const EdgeInsets.only(
-                                                  bottom: 10,
-                                                ),
-                                                child: Text(
-                                                  'Histórico mensal aparece ao registrar cobranças',
-                                                  style: TextStyle(
-                                                    color:
-                                                        dashboardHeroCaptionOnTeal(),
-                                                    fontSize: 11,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                              );
-                                            }
-                                            return Padding(
-                                              padding: const EdgeInsets.only(
-                                                bottom: 10,
-                                              ),
-                                              child: Semantics(
-                                                label:
-                                                    'Tendência de receita nos últimos meses',
-                                                child: Row(
-                                                  children: [
-                                                    Text(
-                                                      'Receita · últimos meses',
-                                                      style: TextStyle(
-                                                        color:
-                                                            dashboardHeroCaptionOnTeal(),
-                                                        fontSize: 11,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                      ),
-                                                    ),
-                                                    const Spacer(),
-                                                    FxSparkline(
-                                                      data: receitaTrend,
-                                                      color: Colors.white
-                                                          .withValues(
-                                                            alpha: 0.92,
-                                                          ),
-                                                      width: 96,
-                                                      height: 26,
-                                                      fill: true,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ],
-                                      DashboardHeroProgressRail(
-                                        progress: progressRaw.clamp(0.0, 1.0),
-                                        exceeded: metaSuperada,
-                                        glow: BrandPalette.accent(heroPrimary),
-                                        percentLabel:
-                                            receitaAtual <= 0 && !_loadingFin
-                                                ? 'Primeiro passo: registrar recebimentos'
-                                                : financePercentLabel(
-                                                  progressRaw,
-                                                  exceeded: metaSuperada,
-                                                ),
-                                        excessBeyondMeta:
-                                            metaSuperada
-                                                ? math.max(
-                                                  0,
-                                                  progressRaw - 1,
-                                                )
-                                                : 0,
-                                      ),
-                                      if (receitaAtual <= 0 && !_loadingFin) ...[
-                                        const SizedBox(height: 12),
-                                        SizedBox(
-                                          width: double.infinity,
-                                          child: FilledButton.tonal(
-                                            onPressed: () => context.go('/financeiro'),
-                                            style: FilledButton.styleFrom(
-                                              minimumSize: const Size.fromHeight(44),
-                                              backgroundColor: Colors.white.withValues(
-                                                alpha: 0.18,
-                                              ),
-                                              foregroundColor: Colors.white,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(
-                                                  TokensStrip.rButton,
-                                                ),
-                                              ),
-                                            ),
-                                            child: const Text('Abrir financeiro'),
-                                          ),
-                                        ),
-                                      ],
-                                      const SizedBox(height: TokensStrip.s3),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          DashboardHeroMiniStat(
-                                            label: 'Pendente',
-                                            value: 'R\$ ${pendente.toInt()}',
-                                          ),
-                                          Container(
-                                            width: 1,
-                                            height: 30,
-                                            color: Colors.white.withValues(
-                                              alpha: 0.15,
-                                            ),
-                                          ),
-                                          DashboardHeroMiniStat(
-                                            label: financeInadimplLabel(
-                                              MediaQuery.sizeOf(context).width,
-                                            ),
-                                            value:
-                                                '${_finData?.totalInadimplentes ?? 0}',
-                                            suffix: ' alunos',
-                                          ),
-                                          Container(
-                                            width: 1,
-                                            height: 30,
-                                            color: Colors.white.withValues(
-                                              alpha: 0.15,
-                                            ),
-                                          ),
-                                          DashboardHeroMiniStat(
-                                            label: 'Ticket médio',
-                                            value:
-                                                'R\$ ${_finData?.ticketMedio.toStringAsFixed(0) ?? '0'}',
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            );
-                          },
+                        child: DashboardFinancialHeroSection(
+                          gradientCtrl: _gradientCtrl,
+                          reduceMotion: reduceMotion,
+                          themeDark: themeDark,
+                          heroPrimary: heroPrimary,
+                          heroDeep: heroDeep,
+                          mes: mes,
+                          receitaAtual: receitaAtual,
+                          pendente: pendente,
+                          progressRaw: progressRaw,
+                          metaSuperada: metaSuperada,
+                          loadingFin: _loadingFin,
+                          counterAnim: _counterAnim,
+                          finData: _finData,
+                          receitaTrend: receitaTrend,
                         ),
                       ),
-                    ),
                     ),
 
                     const SliverToBoxAdapter(child: SizedBox(height: 12)),
@@ -1049,121 +697,4 @@ class _PersonalDashboardScreenState
     );
   }
 
-  Widget _buildShimmerLoading(BuildContext context, bool themeDark) {
-    final base = themeDark ? EagleTokens.darkCard : TokensStrip.borderDefault;
-    final highlight = themeDark ? EagleTokens.darkCardHi : TokensStrip.borderDefault;
-
-    Widget bone(double w, double h, {double radius = 12}) => Container(
-      width: w,
-      height: h,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(radius),
-      ),
-    );
-
-    return Shimmer.fromColors(
-      baseColor: base,
-      highlightColor: highlight,
-      child: SingleChildScrollView(
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 6, 16, 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      bone(170, 18, radius: 8),
-                      const SizedBox(height: 4),
-                      bone(110, 10, radius: 6),
-                    ],
-                  ),
-                ),
-                bone(36, 36, radius: 18),
-                const SizedBox(width: 6),
-                bone(40, 40, radius: 20),
-                const SizedBox(width: 6),
-                bone(36, 36, radius: 18),
-              ],
-            ),
-
-            const SizedBox(height: 14),
-
-            bone(140, 16),
-            const SizedBox(height: 12),
-            for (int i = 0; i < 2; i++) ...[
-              Padding(
-                padding: EdgeInsets.only(bottom: i < 1 ? 10 : 0),
-                child: Row(
-                  children: [
-                    bone(40, 40, radius: 12),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          bone(160, 13),
-                          const SizedBox(height: 6),
-                          bone(100, 10),
-                        ],
-                      ),
-                    ),
-                    bone(28, 28, radius: 8),
-                  ],
-                ),
-              ),
-            ],
-
-            const SizedBox(height: 18),
-
-            bone(double.infinity, 200, radius: 28),
-
-            const SizedBox(height: 12),
-
-            Row(
-              children: [
-                Expanded(child: bone(double.infinity, 52, radius: 12)),
-                const SizedBox(width: 8),
-                Expanded(child: bone(double.infinity, 52, radius: 12)),
-                const SizedBox(width: 8),
-                Expanded(child: bone(double.infinity, 52, radius: 12)),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            // ── Aderência section ──
-            bone(120, 16),
-            const SizedBox(height: 14),
-            for (int i = 0; i < 4; i++) ...[
-              Padding(
-                padding: EdgeInsets.only(bottom: i < 3 ? 8 : 0),
-                child: Row(
-                  children: [
-                    bone(36, 36, radius: 18),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          bone(140, 12),
-                          const SizedBox(height: 5),
-                          bone(80, 9),
-                        ],
-                      ),
-                    ),
-                    bone(40, 14, radius: 7),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
 }
