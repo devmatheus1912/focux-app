@@ -1,0 +1,59 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../features/auth/providers/auth_provider.dart';
+import '../../health/data/health_repository.dart';
+import '../data/ia_repository.dart';
+
+final resumoSemanalProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  return IaRepository(ref.read(apiClientProvider)).resumoSemanal();
+});
+
+/// Parameters for the insights provider.
+/// Equality + hashCode ensure Riverpod dedupes by (alunoId, mode).
+class InsightsQuery {
+  final int? alunoId;
+  final String? mode;
+  const InsightsQuery({this.alunoId, this.mode});
+
+  @override
+  bool operator ==(Object other) =>
+      other is InsightsQuery && other.alunoId == alunoId && other.mode == mode;
+
+  @override
+  int get hashCode => Object.hash(alunoId, mode);
+}
+
+final insightsProvider =
+    FutureProvider.family<List<Map<String, dynamic>>, InsightsQuery>((
+      ref,
+      query,
+    ) async {
+      return IaRepository(
+        ref.read(apiClientProvider),
+      ).insights(alunoId: query.alunoId, mode: query.mode);
+    });
+
+final proximaAcaoProvider = FutureProvider.family<Map<String, dynamic>, int>((
+  ref,
+  alunoId,
+) async {
+  return IaRepository(ref.read(apiClientProvider)).proximaAcao(alunoId);
+});
+
+final copilotRecoveryProvider = FutureProvider.family<RecoverySnapshot?, int>((
+  ref,
+  alunoId,
+) async {
+  return HealthRepository.fromClient(
+    ref.read(apiClientProvider),
+  ).fetchRecoveryForAluno(alunoId);
+});
+
+
+class IaCopilotTaskDraft {
+  const IaCopilotTaskDraft({required this.acao, required this.motivo});
+
+  final String acao;
+  final String motivo;
+}
+

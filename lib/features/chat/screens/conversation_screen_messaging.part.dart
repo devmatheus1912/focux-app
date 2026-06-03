@@ -1,0 +1,538 @@
+part of 'conversation_screen.dart';
+
+extension ConversationScreenMessaging on _ConversationScreenState {
+Future<void> _sendText() async {
+    final text = _ctrl.text.trim();
+    if (text.isEmpty || _sending || _uploading) return;
+    if (_isDuplicateOutgoing(text)) {
+      HapticFeedback.selectionClick();
+      if (mounted) {
+        FeedbackHelper.showSnackBar(
+          context,
+          const SnackBar(content: Text('Mensagem recente ja enviada.')),
+        );
+      }
+      return;
+    }
+    final replyToMessageId = _replyingTo?.id;
+    _ctrl.clear();
+    HapticFeedback.lightImpact();
+    setState(() => _sending = true);
+    try {
+      final repo = ChatRepository(ref.read(apiClientProvider));
+      final msg =
+          _isAlunoMode
+              ? await repo.enviarComoAluno(
+                text,
+                replyToMessageId: replyToMessageId,
+              )
+              : await repo.enviar(
+                _alunoId!,
+                text,
+                'PERSONAL',
+                replyToMessageId: replyToMessageId,
+              );
+      _captureAlunoId(msg);
+      if (!mounted) return;
+      setState(() {
+        _replyingTo = null;
+        _upsertMessage(msg);
+      });
+      _scrollToBottom();
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showSnackBar(
+          context,
+          SnackBar(content: Text(friendlyError(e))),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _sending = false);
+      }
+    }
+  }
+
+  void _dedupeInitialDraft() {
+    if (_initialDraftChecked) return;
+    _initialDraftChecked = true;
+    final draft = widget.initialDraft?.trim();
+    if (draft == null || draft.isEmpty) return;
+    if (!_isDuplicateOutgoing(draft)) return;
+    setState(() {
+      _ctrl.clear();
+      _composerHasText = false;
+    });
+    FeedbackHelper.showSnackBar(
+      context,
+      const SnackBar(content: Text('Mensagem recente ja existe no chat.')),
+    );
+  }
+
+  bool _isDuplicateOutgoing(String text) {
+    final normalized = _normalizeOutgoingText(text);
+    if (normalized.isEmpty) return false;
+    for (final msg in _msgs.reversed.take(8)) {
+      if (!_isMine(msg)) continue;
+      final sent = _normalizeOutgoingText(msg.conteudo);
+      if (sent == normalized || _looksLikeSameCopilotAction(sent, normalized)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  String _normalizeOutgoingText(String value) {
+    return normalizeChatText(
+      value,
+    ).replaceAll(RegExp(r'\s+'), ' ').trim().toLowerCase();
+  }
+
+  bool _looksLikeSameCopilotAction(String a, String b) {
+    final aWords = _meaningfulWords(a);
+    final bWords = _meaningfulWords(b);
+    if (aWords.length < 5 || bWords.length < 5) return false;
+    final overlap = aWords.intersection(bWords).length;
+    final smaller =
+        aWords.length < bWords.length ? aWords.length : bWords.length;
+    return overlap >= 5 && overlap / smaller >= 0.62;
+  }
+
+  Set<String> _meaningfulWords(String value) {
+    const stop = {
+      'oi',
+      'me',
+      'com',
+      'para',
+      'pelo',
+      'pela',
+      'seu',
+      'sua',
+      'que',
+      'uma',
+      'um',
+      'agora',
+      'quando',
+      'fizer',
+      'combinado',
+      'responde',
+      'aqui',
+      'ok',
+      'plano',
+    };
+    return value
+        .split(RegExp(r'[^a-z0-9áéíóúâêôãõç]+', caseSensitive: false))
+        .where((word) => word.length > 2 && !stop.contains(word))
+        .toSet();
+  }
+
+  void _captureAlunoId(ChatMsg msg) {
+    if (_alunoId == null && msg.alunoId != null) {
+      _alunoId = msg.alunoId;
+      _connectWs(msg.alunoId!);
+    }
+  }
+
+  Future<void> _pickAndSend(ConversationMediaType type) async {
+    XFile? file;
+    try {
+      if (type == ConversationMediaType.photo) {
+        file = await _picker.pickImage(
+          source: ImageSource.gallery,
+          imageQuality: 86,
+        );
+      } else if (type == ConversationMediaType.video) {
+        file = await _picker.pickVideo(source: ImageSource.gallery);
+      } else {
+        file = await _picker.pickMedia();
+      }
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showSnackBar(
+          context,
+          SnackBar(content: Text('Nao foi possivel selecionar o arquivo: $e')),
+        );
+      }
+      return;
+    }
+    if (file == null) return;
+
+    final replyToMessageId = _replyingTo?.id;
+    setState(() => _uploading = true);
+    try {
+      final mediaUrl = await MediaUploadService(
+        ref.read(apiClientProvider),
+      ).uploadBytes(
+        bytes: await file.readAsBytes(),
+        filename: file.name,
+        folder: 'chat',
+        resourceType: type == ConversationMediaType.photo ? 'image' : 'auto',
+      );
+      final repo = ChatRepository(ref.read(apiClientProvider));
+      final msg =
+          _isAlunoMode
+              ? await repo.enviarMidiaComoAluno(
+                conteudo: _mediaLabel(type),
+                tipoMidia: _mediaType(type),
+                midiaUrl: mediaUrl,
+                replyToMessageId: replyToMessageId,
+              )
+              : await repo.enviarMidia(
+                alunoId: _alunoId!,
+                conteudo: _mediaLabel(type),
+                remetente: 'PERSONAL',
+                tipoMidia: _mediaType(type),
+                midiaUrl: mediaUrl,
+                replyToMessageId: replyToMessageId,
+              );
+      _captureAlunoId(msg);
+      if (!mounted) return;
+      setState(() {
+        _replyingTo = null;
+        _upsertMessage(msg);
+      });
+      _scrollToBottom();
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showSnackBar(
+          context,
+          SnackBar(content: Text(friendlyError(e))),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _uploading = false);
+      }
+    }
+  }
+
+  Future<void> _startAudioRecording() async {
+    if (_recordingAudio || _sending || _uploading) return;
+    try {
+      final allowed = await _audioRecorder.hasPermission();
+      if (!allowed) {
+        if (!mounted) return;
+        FeedbackHelper.showSnackBar(
+          context,
+          const SnackBar(
+            content: Text('Permita o microfone para gravar audio.'),
+          ),
+        );
+        return;
+      }
+
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final extension = kIsWeb ? 'webm' : 'm4a';
+      final filename = 'focux_audio_$now.$extension';
+      final path =
+          kIsWeb
+              ? filename
+              : '${(await getTemporaryDirectory()).path}/$filename';
+
+      await _audioRecorder.start(
+        RecordConfig(
+          encoder: kIsWeb ? AudioEncoder.opus : AudioEncoder.aacLc,
+          bitRate: 96000,
+          sampleRate: 44100,
+        ),
+        path: path,
+      );
+
+      HapticFeedback.mediumImpact();
+      _recordTimer?.cancel();
+      setState(() {
+        _recordingAudio = true;
+        _recordDuration = Duration.zero;
+        _recordStartedAt = DateTime.now();
+      });
+      _recordTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (!mounted || _recordStartedAt == null) return;
+        setState(() {
+          _recordDuration = DateTime.now().difference(_recordStartedAt!);
+        });
+      });
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showSnackBar(
+        context,
+        SnackBar(content: Text('Nao foi possivel iniciar o audio: $e')),
+      );
+    }
+  }
+
+  Future<void> _stopAudioRecording({required bool send}) async {
+    if (!_recordingAudio) return;
+    final duration =
+        _recordStartedAt == null
+            ? _recordDuration
+            : DateTime.now().difference(_recordStartedAt!);
+
+    _recordTimer?.cancel();
+    setState(() {
+      _recordingAudio = false;
+      _recordDuration = duration;
+      _recordStartedAt = null;
+    });
+
+    String? path;
+    try {
+      path = await _audioRecorder.stop();
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showSnackBar(
+        context,
+        SnackBar(content: Text('Nao foi possivel finalizar o audio: $e')),
+      );
+      return;
+    }
+
+    if (!send) {
+      HapticFeedback.selectionClick();
+      return;
+    }
+    if (path == null || path.isEmpty) {
+      if (!mounted) return;
+      FeedbackHelper.showSnackBar(
+        context,
+        const SnackBar(content: Text('Audio vazio. Grave novamente.')),
+      );
+      return;
+    }
+
+    try {
+      final file = XFile(
+        path,
+        mimeType: kIsWeb ? 'audio/webm' : 'audio/mp4',
+        name: path.split(RegExp(r'[\\/]')).last,
+      );
+      await _sendAudioBytes(
+        bytes: await file.readAsBytes(),
+        filename: file.name,
+        duration: duration,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showSnackBar(
+        context,
+        SnackBar(content: Text('Nao foi possivel enviar o audio: $e')),
+      );
+    }
+  }
+
+  Future<void> _sendAudioBytes({
+    required List<int> bytes,
+    required String filename,
+    required Duration duration,
+  }) async {
+    final replyToMessageId = _replyingTo?.id;
+    setState(() => _uploading = true);
+    try {
+      final mediaUrl = await MediaUploadService(
+        ref.read(apiClientProvider),
+      ).uploadBytes(
+        bytes: bytes,
+        filename: filename,
+        folder: 'chat/audio',
+        resourceType: 'auto',
+      );
+      final repo = ChatRepository(ref.read(apiClientProvider));
+      final label = 'Audio ${_formatDuration(duration)}';
+      final msg =
+          _isAlunoMode
+              ? await repo.enviarMidiaComoAluno(
+                conteudo: label,
+                tipoMidia: 'AUDIO',
+                midiaUrl: mediaUrl,
+                replyToMessageId: replyToMessageId,
+              )
+              : await repo.enviarMidia(
+                alunoId: _alunoId!,
+                conteudo: label,
+                remetente: 'PERSONAL',
+                tipoMidia: 'AUDIO',
+                midiaUrl: mediaUrl,
+                replyToMessageId: replyToMessageId,
+              );
+      _captureAlunoId(msg);
+      if (!mounted) return;
+      setState(() {
+        _replyingTo = null;
+        _upsertMessage(msg);
+      });
+      HapticFeedback.mediumImpact();
+      _scrollToBottom();
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showSnackBar(
+          context,
+          SnackBar(content: Text(friendlyError(e))),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _uploading = false);
+      }
+    }
+  }
+
+  Future<void> _toggleReaction(ChatMsg msg, String emoji) async {
+    if (msg.id == null || msg.deletedAt != null) return;
+    HapticFeedback.selectionClick();
+    try {
+      final repo = ChatRepository(ref.read(apiClientProvider));
+      final updated =
+          _isAlunoMode
+              ? await repo.toggleReactionAluno(msg.id!, emoji)
+              : await repo.toggleReaction(msg.id!, emoji);
+      if (!mounted) return;
+      setState(() => _upsertMessage(updated));
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showSuccess(context, 'Nao foi possivel reagir: $e');
+      }
+    }
+  }
+
+  Future<void> _editMessage(ChatMsg msg) async {
+    if (!_canEditMessage(msg)) return;
+    final ctrl = TextEditingController(
+      text: formatChatTextForDisplay(msg.conteudo),
+    );
+    final next = await showDialog<String>(
+      context: context,
+      builder:
+          (dialogContext) => AlertDialog(
+            title: const Text('Editar mensagem'),
+            content: TextField(
+              controller: ctrl,
+              autofocus: true,
+              minLines: 1,
+              maxLines: 5,
+              textInputAction: TextInputAction.newline,
+              decoration: const InputDecoration(
+                hintText: 'Digite sua mensagem…',
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('Cancelar'),
+              ),
+              FxLiquidPrimaryButton(
+                label: 'Salvar',
+                expand: false,
+                onPressed: () => Navigator.pop(dialogContext, ctrl.text),
+              ),
+            ],
+          ),
+    );
+    ctrl.dispose();
+    final normalized = next?.trim();
+    if (normalized == null ||
+        normalized.isEmpty ||
+        normalized == msg.conteudo.trim()) {
+      return;
+    }
+    try {
+      final repo = ChatRepository(ref.read(apiClientProvider));
+      final updated =
+          _isAlunoMode
+              ? await repo.editarMensagemAluno(msg.id!, normalized)
+              : await repo.editarMensagem(msg.id!, normalized);
+      if (!mounted) return;
+      setState(() => _upsertMessage(updated));
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, 'Nao foi possivel editar: $e');
+    }
+  }
+
+  Future<void> _deleteMessage(ChatMsg msg) async {
+    if (!_canDeleteMessage(msg)) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (dialogContext) => AlertDialog(
+            title: const Text('Apagar mensagem?'),
+            content: const Text(
+              'A conversa vai mostrar que a mensagem foi apagada.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text('Apagar'),
+              ),
+            ],
+          ),
+    );
+    if (confirmed != true) return;
+    try {
+      final repo = ChatRepository(ref.read(apiClientProvider));
+      final updated =
+          _isAlunoMode
+              ? await repo.apagarMensagemAluno(msg.id!)
+              : await repo.apagarMensagem(msg.id!);
+      if (!mounted) return;
+      setState(() => _upsertMessage(updated));
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, 'Nao foi possivel apagar: $e');
+    }
+  }
+
+  void _setReply(ChatMsg msg) {
+    if (msg.deletedAt != null) return;
+    HapticFeedback.selectionClick();
+    setState(() => _replyingTo = msg);
+  }
+
+  void _focusMessage(ChatMsg msg) {
+    if (!mounted || msg.id == null) return;
+    setState(() => _highlightedMessageId = msg.id);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final key = _messageKeys[_messageIdentity(msg)];
+      final context = key?.currentContext;
+      if (context != null) {
+        Scrollable.ensureVisible(
+          context,
+          duration: const Duration(milliseconds: 240),
+          curve: Curves.easeOut,
+          alignment: 0.2,
+        );
+      }
+    });
+    unawaited(
+      Future<void>.delayed(const Duration(seconds: 2), () {
+        if (mounted && _highlightedMessageId == msg.id) {
+          setState(() => _highlightedMessageId = null);
+        }
+      }),
+    );
+  }
+
+  ChatMsg? _findMessageById(int? messageId) {
+    if (messageId == null) return null;
+    for (final msg in _msgs) {
+      if (msg.id == messageId) {
+        return msg;
+      }
+    }
+    return null;
+  }
+
+  void _jumpToReplySource(ChatMsg msg) {
+    final original = _findMessageById(msg.replyToMessageId);
+    if (original == null) {
+      FeedbackHelper.showSnackBar(
+        context,
+        const SnackBar(content: Text('Mensagem original nao encontrada aqui.')),
+      );
+      return;
+    }
+    _focusMessage(original);
+  }
+}

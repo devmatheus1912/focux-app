@@ -7,13 +7,15 @@ void main() {
     final conversation = File(
       'lib/features/chat/screens/conversation_screen.dart',
     ).readAsStringSync();
+    final messageWidgets = File(
+      'lib/features/chat/widgets/conversation_message_widgets.dart',
+    ).readAsStringSync();
 
-    expect(conversation, contains('formatChatTextForDisplay'));
-    expect(conversation, contains('BrandPalette.deep(accentColor)'));
     expect(conversation, contains('_loadFailed'));
-    expect(conversation, contains('_ConversationErrorState'));
-    expect(conversation, contains('Tentar novamente'));
-    expect(conversation, contains('_Bubble('));
+    expect(messageWidgets, contains('formatChatTextForDisplay'));
+    expect(messageWidgets, contains('ConversationErrorState'));
+    expect(messageWidgets, contains('Tentar novamente'));
+    expect(messageWidgets, contains('ConversationBubble('));
     expect(conversation, contains('accentColor: primary'));
   });
 
