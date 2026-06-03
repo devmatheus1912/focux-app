@@ -485,53 +485,55 @@ class _PerfilBody extends StatelessWidget {
                       accent: accent,
                       actionInk: actionInk,
                       child: Semantics(
-                        button: true,
-                        label: 'Abrir identidade visual da marca',
-                        child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () {
-                            HapticFeedback.selectionClick();
-                            context.push('/identidade-visual');
-                          },
-                          borderRadius: BorderRadius.circular(18),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _BrandPreview(
-                                primary: heroPrimary,
-                                secondary: heroSecondary,
-                                profileName: perfil.nome,
-                                subtitle: brandSubtitle,
-                                logoUrl: perfil.logoUrl ?? dashboard.logoUrl,
-                                isDark: isDark,
-                              ),
-                              const SizedBox(height: 14),
-                              _BrandPaletteStrip(
-                                primary: primaryColor,
-                                secondary: secondaryColor,
-                                mute: mute,
-                                usingDefault: usingDefaultBrand,
-                              ),
-                              const SizedBox(height: 12),
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: TextButton.icon(
-                                  onPressed: () {
-                                    HapticFeedback.selectionClick();
-                                    onOpenLandingEditor();
-                                  },
-                                  icon: const Icon(Icons.language_outlined),
-                                  label: Text(
-                                    perfil.slug != null
-                                        ? 'Editor landing · ${Env.landingPageDisplayLabel(perfil.slug!)}'
-                                        : 'Editor da landing pública',
+                        container: true,
+                        label: 'Identidade visual da marca e vitrine online',
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                context.push('/identidade-visual');
+                              },
+                              borderRadius: BorderRadius.circular(18),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _BrandPreview(
+                                    primary: heroPrimary,
+                                    secondary: heroSecondary,
+                                    profileName: perfil.nome,
+                                    subtitle: brandSubtitle,
+                                    logoUrl:
+                                        perfil.logoUrl ?? dashboard.logoUrl,
+                                    isDark: isDark,
                                   ),
-                                ),
+                                  const SizedBox(height: 14),
+                                  _BrandPaletteStrip(
+                                    primary: primaryColor,
+                                    secondary: secondaryColor,
+                                    mute: mute,
+                                    usingDefault: usingDefaultBrand,
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 12),
+                          _PerfilPublicLinkCard(
+                            slug: perfil.slug,
+                            accent: accent,
+                            actionInk: actionInk,
+                            mute: mute,
+                            isDark: isDark,
+                            onOpenEditor: () {
+                              HapticFeedback.selectionClick();
+                              onOpenLandingEditor();
+                            },
+                          ),
+                        ],
                       ),
                       ),
                     ),

@@ -26,6 +26,7 @@ import '../utils/perfil_plan_labels.dart';
 import '../utils/perfil_readiness.dart';
 import '../../subscription/utils/landing_editor_access.dart';
 import '../../dashboard/widgets/gated_profile_shortcuts.dart';
+import '../widgets/landing_editor_widgets.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_motion.dart';

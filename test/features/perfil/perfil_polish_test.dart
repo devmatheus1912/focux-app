@@ -16,7 +16,8 @@ void main() {
     expect(screen, contains('Não informado'));
     expect(screen, contains('Política de privacidade'));
     expect(screen, contains('Migração Focux'));
-    expect(screen, contains('landingPageDisplayLabel'));
+    expect(screen, contains('_PerfilPublicLinkCard'));
+    expect(screen, contains('Sua vitrine online'));
     expect(screen, contains('Operação'));
     expect(screen, contains('_PerfilGrowthSection'));
     expect(screen, contains('if (!profileComplete)'));
