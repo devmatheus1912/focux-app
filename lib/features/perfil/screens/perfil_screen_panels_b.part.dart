@@ -688,6 +688,7 @@ class _PerfilGrowthSectionState extends State<_PerfilGrowthSection> {
 
   static const _collapsedHint =
       'Automações, desafios, loja, equipe e hábitos';
+  static const _collapsedValue = '5 ferramentas';
 
   @override
   Widget build(BuildContext context) {
@@ -738,18 +739,14 @@ class _PerfilGrowthSectionState extends State<_PerfilGrowthSection> {
                     ),
                   ),
                   if (!_expanded)
-                    Flexible(
-                      flex: 5,
-                      child: Text(
-                        _collapsedHint,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.end,
-                        style: TextStyle(
-                          color: link,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                        ),
+                    Text(
+                      _collapsedValue,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: link,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   const SizedBox(width: 4),
