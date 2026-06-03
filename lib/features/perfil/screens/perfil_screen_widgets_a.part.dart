@@ -629,12 +629,12 @@ class _PerfilBody extends StatelessWidget {
                             line: line,
                             onTap: () => context.push('/migracao-magica'),
                           ),
-                          DashboardCollapsibleSection(
-                            title: 'Crescimento',
-                            collapsedHint:
-                                'Automações, desafios, loja, equipe e hábitos',
+                          _PerfilGrowthSection(
+                            accent: accent,
+                            actionInk: actionInk,
+                            mute: mute,
+                            line: line,
                             isDark: isDark,
-                            initiallyExpanded: false,
                             child: GatedProfileShortcuts(
                               accent: accent,
                               actionInk: actionInk,

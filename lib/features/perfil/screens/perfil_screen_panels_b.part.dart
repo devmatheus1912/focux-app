@@ -662,6 +662,125 @@ class _ActionTile extends StatelessWidget {
   }
 }
 
+class _PerfilGrowthSection extends StatefulWidget {
+  const _PerfilGrowthSection({
+    required this.accent,
+    required this.actionInk,
+    required this.mute,
+    required this.line,
+    required this.isDark,
+    required this.child,
+  });
+
+  final Color accent;
+  final Color actionInk;
+  final Color mute;
+  final Color line;
+  final bool isDark;
+  final Widget child;
+
+  @override
+  State<_PerfilGrowthSection> createState() => _PerfilGrowthSectionState();
+}
+
+class _PerfilGrowthSectionState extends State<_PerfilGrowthSection> {
+  bool _expanded = false;
+
+  static const _collapsedHint =
+      'Automações, desafios, loja, equipe e hábitos';
+
+  @override
+  Widget build(BuildContext context) {
+    final ink =
+        widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final link = widget.actionInk;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          button: true,
+          expanded: _expanded,
+          label:
+              _expanded
+                  ? 'Recolher Crescimento'
+                  : 'Expandir Crescimento. $_collapsedHint',
+          child: InkWell(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              setState(() => _expanded = !_expanded);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: widget.line, width: 0.5)),
+              ),
+              child: Row(
+                children: [
+                  _LeadingIcon(
+                    icon: Icons.trending_up_rounded,
+                    background:
+                        widget.isDark
+                            ? widget.accent.withValues(alpha: 0.14)
+                            : BrandPalette.soft(widget.accent),
+                    color: widget.accent,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 6,
+                    child: Text(
+                      'Crescimento',
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  if (!_expanded)
+                    Flexible(
+                      flex: 5,
+                      child: Text(
+                        _collapsedHint,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.end,
+                        style: TextStyle(
+                          color: link,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  const SizedBox(width: 4),
+                  AnimatedRotation(
+                    turns: _expanded ? 0.25 : 0,
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeOutCubic,
+                    child: Icon(
+                      Icons.chevron_right_rounded,
+                      size: 18,
+                      color: link,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        AnimatedCrossFade(
+          firstChild: const SizedBox.shrink(),
+          secondChild: widget.child,
+          crossFadeState:
+              _expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 220),
+          sizeCurve: Curves.easeOutCubic,
+        ),
+      ],
+    );
+  }
+}
+
 class _LeadingIcon extends StatelessWidget {
   final IconData icon;
   final Color background;
