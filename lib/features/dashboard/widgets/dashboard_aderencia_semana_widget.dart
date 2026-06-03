@@ -15,7 +15,13 @@ import '../providers/aderencia_provider.dart';
 import '../utils/dashboard_readability.dart';
 class DashboardAderenciaSemanaWidget extends StatelessWidget {
   final bool isDark;
-  const DashboardAderenciaSemanaWidget({super.key, required this.isDark});
+  final bool retentionFocus;
+
+  const DashboardAderenciaSemanaWidget({
+    super.key,
+    required this.isDark,
+    this.retentionFocus = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -132,9 +138,15 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
                 mute: mute,
                 title: 'Sem check-ins nesta semana',
                 body:
-                    'Quando alunos treinarem, a aderência aparece aqui com ranking automático.',
-                primaryAction: 'Abrir agenda',
-                onPrimary: () => context.go('/agenda'),
+                    retentionFocus
+                        ? 'Priorize contato com alunos em risco antes de abrir a agenda.'
+                        : 'Quando alunos treinarem, a aderência aparece aqui com ranking automático.',
+                primaryAction:
+                    retentionFocus ? 'Ver alunos em risco' : 'Ver agenda',
+                onPrimary:
+                    retentionFocus
+                        ? () => context.go('/alunos?filtro=risco')
+                        : () => context.go('/agenda'),
               );
             }
 
@@ -147,9 +159,13 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
                 title: 'Treinos parados na semana',
                 body:
                     'Acione alunos sem treino esta semana — o foco do dia já está no topo.',
-                primaryAction: 'Ver agenda',
+                primaryAction:
+                    retentionFocus ? 'Revisar base' : 'Ver agenda',
                 secondaryAction: 'Plano retomada',
-                onPrimary: () => context.go('/agenda'),
+                onPrimary:
+                    retentionFocus
+                        ? () => context.push('/retencao')
+                        : () => context.go('/agenda'),
                 onSecondary: () => context.push('/dashboard/qualidade'),
               );
             }

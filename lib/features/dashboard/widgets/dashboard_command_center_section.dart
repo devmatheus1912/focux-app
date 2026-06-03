@@ -18,6 +18,7 @@ import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_haptic.dart';
+import '../utils/dashboard_command_copy.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import 'dashboard_horizontal_scroll_peek.dart';
 
@@ -110,92 +111,19 @@ class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandC
       data: (cc) => cc.filaAcoes,
       orElse: () => const <FilaAcaoResumo>[],
     );
-    final copilotAcoes =
-        filaAcoes.where((a) => a.tipo == 'IA_COPILOTO').toList();
     final cobrancasPendentes = commandAsync.maybeWhen(
       data: (cc) => cc.cobrancasPendentes.length,
       orElse: () => finData?.totalInadimplentes ?? 0,
     );
-    final filaNaoCopilot =
-        filaAcoes.where((a) => a.tipo != 'IA_COPILOTO').toList();
-    final queueAction =
-        filaNaoCopilot.isEmpty
-            ? null
-            : (hideRiskSummary &&
-                    isRiskEchoCopy(
-                      '${filaNaoCopilot.first.titulo} ${filaNaoCopilot.first.descricao}',
-                    )
-                ? null
-                : CommandActionItem(
-                  icon: 'zap',
-                  title: 'Executar próxima ação',
-                  subtitle: filaNaoCopilot.first.descricao,
-                  route:
-                      filaNaoCopilot.first.acaoUrl.startsWith('/')
-                          ? filaNaoCopilot.first.acaoUrl
-                          : '/dashboard/personal',
-                  tone: CommandActionTone.primary,
-                ));
-    final nextActions = <CommandActionItem>[
-      if (copilotAcoes.isNotEmpty)
-        CommandActionItem(
-          icon: 'zap',
-          title:
-              copilotAcoes.first.titulo.isNotEmpty
-                  ? copilotAcoes.first.titulo
-                  : 'Revisar tarefa IA',
-          subtitle: copilotAcoes.first.descricao,
-          route: '/dashboard/command-center/copiloto',
-          tone: CommandActionTone.primary,
-        ),
-      if (unreadCount > 0)
-        CommandActionItem(
-          icon: 'message-circle',
-          title: 'Responder mensagens',
-          subtitle:
-              '$unreadCount conversa${unreadCount == 1 ? '' : 's'} aguardando',
-          route: '/chat/inbox',
-          tone: CommandActionTone.hot,
-        ),
-      if (alunosRisco > 0 && !hideRiskSummary)
-        CommandActionItem(
-          icon: 'alert-triangle',
-          title: 'Contato hoje',
-          subtitle:
-              '$alunosRisco no radar · risco, inadimplência ou pausa no treino',
-          route: '/alunos?filtro=contato',
-          tone: CommandActionTone.hot,
-        ),
-      if (cobrancasPendentes > 0)
-        CommandActionItem(
-          icon: 'dollar-sign',
-          title: 'Cobrar pendências',
-          subtitle:
-              '$cobrancasPendentes mensalidade${cobrancasPendentes == 1 ? '' : 's'} no radar',
-          route: '/financeiro',
-          tone: CommandActionTone.money,
-        ),
-      if (queueAction != null) queueAction,
-      if (agendaHoje > 0)
-        CommandActionItem(
-          icon: 'calendar',
-          title: 'Preparar agenda',
-          subtitle: '$agendaHoje compromisso${agendaHoje == 1 ? '' : 's'} hoje',
-          route: '/agenda',
-          tone: CommandActionTone.primary,
-        ),
-    ];
-    if (nextActions.isEmpty && !isCommandPreparing) {
-      nextActions.add(
-        CommandActionItem(
-          icon: 'plus',
-          title: 'Criar próxima oportunidade',
-          subtitle: 'Cadastre aluno, treino ou lead antes do pico do dia',
-          route: '/alunos/novo',
-          tone: CommandActionTone.primary,
-        ),
-      );
-    }
+    final nextActions = buildDashboardNextActions(
+      filaAcoes: filaAcoes,
+      unreadCount: unreadCount,
+      alunosRisco: alunosRisco,
+      cobrancasPendentes: cobrancasPendentes,
+      agendaHoje: agendaHoje,
+      hideRiskSummary: hideRiskSummary,
+      isCommandPreparing: isCommandPreparing,
+    );
 
     Widget card({
       required double width,
@@ -495,6 +423,134 @@ class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandC
       ],
     );
   }
+}
+
+List<CommandActionItem> buildDashboardNextActions({
+  required List<FilaAcaoResumo> filaAcoes,
+  required int unreadCount,
+  required int alunosRisco,
+  required int cobrancasPendentes,
+  required int agendaHoje,
+  required bool hideRiskSummary,
+  required bool isCommandPreparing,
+}) {
+  final copilotAcoes =
+      filaAcoes.where((a) => a.tipo == 'IA_COPILOTO').toList();
+  final filaNaoCopilot =
+      filaAcoes.where((a) => a.tipo != 'IA_COPILOTO').toList();
+  final queueAction =
+      filaNaoCopilot.isEmpty
+          ? null
+          : (hideRiskSummary &&
+                  isRiskEchoCopy(
+                    '${filaNaoCopilot.first.titulo} ${filaNaoCopilot.first.descricao}',
+                  )
+              ? null
+              : CommandActionItem(
+                icon: 'zap',
+                title: 'Executar próxima ação',
+                subtitle: dashboardFormatActionCopy(
+                  filaNaoCopilot.first.descricao,
+                ),
+                route:
+                    filaNaoCopilot.first.acaoUrl.startsWith('/')
+                        ? filaNaoCopilot.first.acaoUrl
+                        : '/dashboard/personal',
+                tone: CommandActionTone.primary,
+              ));
+
+  final nextActions = <CommandActionItem>[
+    if (copilotAcoes.isNotEmpty)
+      CommandActionItem(
+        icon: 'zap',
+        title: dashboardFormatActionCopy(
+          copilotAcoes.first.titulo.isNotEmpty
+              ? copilotAcoes.first.titulo
+              : 'Revisar tarefa IA',
+        ),
+        subtitle: dashboardFormatActionCopy(copilotAcoes.first.descricao),
+        route: '/dashboard/command-center/copiloto',
+        tone: CommandActionTone.primary,
+      ),
+    if (unreadCount > 0)
+      CommandActionItem(
+        icon: 'message-circle',
+        title: 'Responder mensagens',
+        subtitle:
+            '$unreadCount conversa${unreadCount == 1 ? '' : 's'} aguardando',
+        route: '/chat/inbox',
+        tone: CommandActionTone.hot,
+      ),
+    if (alunosRisco > 0 && !hideRiskSummary)
+      CommandActionItem(
+        icon: 'alert-triangle',
+        title: 'Contato hoje',
+        subtitle:
+            '$alunosRisco no radar · risco, inadimplência ou pausa no treino',
+        route: '/alunos?filtro=contato',
+        tone: CommandActionTone.hot,
+      ),
+    if (cobrancasPendentes > 0)
+      CommandActionItem(
+        icon: 'dollar-sign',
+        title: 'Cobrar pendências',
+        subtitle:
+            '$cobrancasPendentes mensalidade${cobrancasPendentes == 1 ? '' : 's'} no radar',
+        route: '/financeiro',
+        tone: CommandActionTone.money,
+      ),
+    if (queueAction != null) queueAction,
+    if (agendaHoje > 0)
+      CommandActionItem(
+        icon: 'calendar',
+        title: 'Preparar agenda',
+        subtitle: '$agendaHoje compromisso${agendaHoje == 1 ? '' : 's'} hoje',
+        route: '/agenda',
+        tone: CommandActionTone.primary,
+      ),
+  ];
+
+  if (nextActions.isEmpty && !isCommandPreparing) {
+    nextActions.add(
+      const CommandActionItem(
+        icon: 'plus',
+        title: 'Criar próxima oportunidade',
+        subtitle: 'Cadastre aluno, treino ou lead antes do pico do dia',
+        route: '/alunos/novo',
+        tone: CommandActionTone.primary,
+      ),
+    );
+  }
+
+  return nextActions;
+}
+
+List<CommandActionItem> buildDashboardSheetActions({
+  required List<CommandActionItem> curated,
+  required List<FilaAcaoResumo> filaAcoes,
+}) {
+  final seenTitles = curated.map((a) => a.title).toSet();
+  final extras = <CommandActionItem>[];
+  for (final action in filaAcoes) {
+    final title = dashboardFormatActionCopy(
+      action.titulo.isNotEmpty ? action.titulo : 'Prioridade',
+    );
+    if (seenTitles.contains(title)) continue;
+    seenTitles.add(title);
+    extras.add(
+      CommandActionItem(
+        icon: 'zap',
+        title: title,
+        subtitle: dashboardFormatActionCopy(action.descricao),
+        route:
+            action.acaoUrl.startsWith('/')
+                ? action.acaoUrl
+                : '/dashboard/personal',
+        tone: CommandActionTone.primary,
+      ),
+    );
+  }
+  return [...curated, ...extras].take(12).toList();
 }
 
 void showCommandActionsSheet(

@@ -38,7 +38,9 @@ void main() {
     expect(widget, contains('trailingActionLabel: stickyCommandActionsLabel'));
     expect(widget, contains('DashboardCommandCenterStickyHeaderDelegate'));
     expect(widget, contains('SliverPersistentHeader'));
-    expect(widget, contains('Abrir agenda do dia'));
+    expect(widget, contains('Agendar primeiro treino'));
+    expect(widget, isNot(contains('Abrir agenda do dia')));
+    expect(widget, contains('buildDashboardNextActions'));
     expect(widget, isNot(contains('_RiskWaveBanner')));
     expect(widget, contains('DashboardAderenciaSemanaEmptyCard'));
     expect(widget, contains('isRiskEchoCopy'));

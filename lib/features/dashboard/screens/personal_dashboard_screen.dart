@@ -12,6 +12,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../providers/aderencia_provider.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
+import '../../chat/screens/chat_inbox_screen.dart';
 import '../../checkin/providers/checkin_provider.dart';
 import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
@@ -352,32 +353,49 @@ class _PersonalDashboardScreenState
                 context.go('/alunos?filtro=risco');
               }
 
-              final commandFila = commandAsync.maybeWhen(
+              final filaAcoes = commandAsync.maybeWhen(
                 data: (cc) => cc.filaAcoes,
                 orElse: () => const <FilaAcaoResumo>[],
               );
+              final chatAsync = ref.watch(chatInboxProvider);
+              final unreadCount = chatAsync.maybeWhen(
+                data: (items) =>
+                    items.fold<int>(0, (sum, item) => sum + item.naoLidas),
+                orElse: () => 0,
+              );
+              final alunosRiscoCount = commandAsync.maybeWhen(
+                data: (cc) => cc.alunosEmRisco.length,
+                orElse: () => 0,
+              );
+              final cobrancasPendentes =
+                  commandAsync.maybeWhen(
+                    data: (cc) => cc.cobrancasPendentes.length,
+                    orElse: () => _finData?.totalInadimplentes ?? 0,
+                  );
+              final dashboardNextActions = buildDashboardNextActions(
+                filaAcoes: filaAcoes,
+                unreadCount: unreadCount,
+                alunosRisco: alunosRiscoCount,
+                cobrancasPendentes: cobrancasPendentes,
+                agendaHoje: agendaHoje,
+                hideRiskSummary: alunosEmRisco.isNotEmpty,
+                isCommandPreparing: commandAsync.isLoading,
+              );
               final stickyCommandActionsLabel =
-                  commandFila.length > 1 ? 'Ver ${commandFila.length}' : null;
+                  dashboardNextActions.length > 1
+                      ? 'Ver ${dashboardNextActions.length}'
+                      : null;
 
               void openCommandQuickActions() {
-                if (commandFila.length < 2) return;
+                if (dashboardNextActions.length < 2) return;
                 showCommandActionsSheet(
                   context,
                   isDark: themeDark,
                   primary: primary,
-                  actions:
-                      commandFila.take(6).map((action) {
-                        return CommandActionItem(
-                          icon: 'zap',
-                          title: action.titulo,
-                          subtitle: action.descricao,
-                          route:
-                              action.acaoUrl.startsWith('/')
-                                  ? action.acaoUrl
-                                  : '/dashboard/personal',
-                          tone: CommandActionTone.primary,
-                        );
-                      }).toList(),
+                  actions: buildDashboardSheetActions(
+                    curated: dashboardNextActions,
+                    filaAcoes: filaAcoes,
+                  ),
                 );
               }
 
@@ -690,15 +708,12 @@ class _PersonalDashboardScreenState
                                   : () => context.go('/alunos'),
                           showEmptyTrendCta:
                               !checkinsTrend.any((v) => v > 0) &&
-                              alunosAtivos > 0,
-                          emptyTrendCtaLabel:
-                              !(primeiroTreinoCriado || checkinsHoje > 0)
-                                  ? 'Agendar primeiro treino'
-                                  : 'Abrir agenda do dia',
-                          onEmptyTrendCta:
-                              !(primeiroTreinoCriado || checkinsHoje > 0)
-                                  ? () => context.push('/treinos/novo')
-                                  : () => context.go('/agenda'),
+                              alunosAtivos > 0 &&
+                              !dayFocusCoversRetention &&
+                              !primeiroTreinoCriado &&
+                              checkinsHoje == 0,
+                          emptyTrendCtaLabel: 'Agendar primeiro treino',
+                          onEmptyTrendCta: () => context.push('/treinos/novo'),
                         ),
                       ),
                     ),
@@ -713,7 +728,10 @@ class _PersonalDashboardScreenState
                         headerActionLabel: 'Relatório',
                         onHeaderAction:
                             () => context.push('/relatorios/global'),
-                        child: DashboardAderenciaSemanaWidget(isDark: themeDark),
+                        child: DashboardAderenciaSemanaWidget(
+                          isDark: themeDark,
+                          retentionFocus: dayFocusCoversRetention,
+                        ),
                       ),
                     ),
 
