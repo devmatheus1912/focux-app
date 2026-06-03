@@ -36,11 +36,15 @@ void main() {
     expect(widget, contains("collapsedActionLabel: 'Revisar'"));
     expect(widget, contains('collapsedPreview: attentionCollapsedPreview'));
     expect(widget, contains('trailingActionLabel: stickyCommandActionsLabel'));
+    expect(widget, contains("'Ver prioridades'"));
+    expect(widget, contains('showPrioritiesAction: showStickyPrioritiesAction'));
+    expect(widget, contains('_homeScrollOffset >= 80'));
     expect(widget, contains('DashboardCommandCenterStickyHeaderDelegate'));
     expect(widget, contains('SliverPersistentHeader'));
     expect(widget, contains('Agendar primeiro treino'));
     expect(widget, isNot(contains('Abrir agenda do dia')));
     expect(widget, contains('buildDashboardNextActions'));
+    expect(widget, contains("'Abrir Copiloto'"));
     expect(widget, isNot(contains('_RiskWaveBanner')));
     expect(widget, contains('DashboardAderenciaSemanaEmptyCard'));
     expect(widget, contains('isRiskEchoCopy'));

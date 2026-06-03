@@ -30,9 +30,16 @@ try {
         Write-Host "  removido: rive_common .cxx" -ForegroundColor DarkGray
     }
 
+    $gradleEap = $ErrorActionPreference
+    $ErrorActionPreference = 'SilentlyContinue'
     Push-Location (Join-Path $root 'android')
-    & .\gradlew.bat --stop 2>&1 | Out-Null
-    Pop-Location
+    try {
+        # Gradle/Java escreve avisos em stderr; no PowerShell isso não deve falhar o script.
+        & .\gradlew.bat --stop *>$null
+    } finally {
+        Pop-Location
+        $ErrorActionPreference = $gradleEap
+    }
 
     & flutter pub get | Out-Null
 

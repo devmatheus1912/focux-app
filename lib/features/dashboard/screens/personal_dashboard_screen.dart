@@ -57,6 +57,8 @@ class _PersonalDashboardScreenState
     with TickerProviderStateMixin {
   FinanceiroDashboard? _finData;
   bool _loadingFin = true;
+  double _homeScrollOffset = 0;
+  late final ScrollController _homeScrollController;
   int _attentionSectionResetToken = 0;
   String? _lastTrackedLocation;
   VoidCallback? _routeListener;
@@ -102,6 +104,8 @@ class _PersonalDashboardScreenState
       parent: _entryCtrl,
       curve: const Interval(0.08, 0.58, curve: Curves.easeOutCubic),
     );
+    _homeScrollController = ScrollController();
+    _homeScrollController.addListener(_onHomeScroll);
     _loadFinFromHome();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _maybeShowOnboardingWizard();
@@ -120,6 +124,18 @@ class _PersonalDashboardScreenState
     } else {
       _gradientCtrl.repeat();
       _entryCtrl.forward(from: 0);
+    }
+  }
+
+  void _onHomeScroll() {
+    if (!_homeScrollController.hasClients) return;
+    final offset = _homeScrollController.offset;
+    final wasShowingPriorities = _homeScrollOffset >= 80;
+    final showsPriorities = offset >= 80;
+    if (offset == _homeScrollOffset) return;
+    _homeScrollOffset = offset;
+    if (wasShowingPriorities != showsPriorities) {
+      setState(() {});
     }
   }
 
@@ -156,6 +172,8 @@ class _PersonalDashboardScreenState
     if (listener != null && provider != null) {
       provider.removeListener(listener);
     }
+    _homeScrollController.removeListener(_onHomeScroll);
+    _homeScrollController.dispose();
     _gradientCtrl.dispose();
     _counterCtrl.dispose();
     _entryCtrl.dispose();
@@ -381,10 +399,10 @@ class _PersonalDashboardScreenState
                 hideRiskSummary: alunosEmRisco.isNotEmpty,
                 isCommandPreparing: commandAsync.isLoading,
               );
+              final showStickyPrioritiesAction =
+                  dashboardNextActions.length > 1 && _homeScrollOffset >= 80;
               final stickyCommandActionsLabel =
-                  dashboardNextActions.length > 1
-                      ? 'Ver ${dashboardNextActions.length}'
-                      : null;
+                  dashboardNextActions.length > 1 ? 'Ver prioridades' : null;
 
               void openCommandQuickActions() {
                 if (dashboardNextActions.length < 2) return;
@@ -430,6 +448,7 @@ class _PersonalDashboardScreenState
                   }
                 },
                 child: CustomScrollView(
+                  controller: _homeScrollController,
                   physics: const AlwaysScrollableScrollPhysics(),
                   slivers: [
                     const SliverToBoxAdapter(child: TrialCountdownBanner()),
@@ -527,6 +546,7 @@ class _PersonalDashboardScreenState
                         isDark: themeDark,
                         primary: primary,
                         subtitle: commandCenterSubtitle,
+                        showPrioritiesAction: showStickyPrioritiesAction,
                         trailingActionLabel: stickyCommandActionsLabel,
                         onTrailingAction:
                             stickyCommandActionsLabel != null
@@ -742,9 +762,10 @@ class _PersonalDashboardScreenState
                         collapsedHint:
                             receitaAtual > 0
                                 ? 'R\$ ${receitaAtual.toInt()} recebido · toque para expandir'
-                                : 'Receita e meta do mês · toque para expandir',
+                                : 'R\$ 0 recebido · meta do mês · toque para expandir',
                         isDark: themeDark,
-                        initiallyExpanded: !dayFocusCoversRetention,
+                        initiallyExpanded:
+                            !dayFocusCoversRetention && receitaAtual > 0,
                         child: dashboardEntryMotion(
                           context: context,
                           fade: _heroFade,

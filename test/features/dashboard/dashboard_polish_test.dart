@@ -19,6 +19,8 @@ void main() {
 
     expect(screen, contains('dashboardSectionKickerStyle'));
     expect(screen, contains("'Panorama financeiro'"));
+    expect(screen, contains('receitaAtual > 0'));
+    expect(screen, contains(r'R\$ 0 recebido · meta do mês'));
     expect(screen, contains("'Pulso operacional'"));
     expect(screen, contains("'Impacto hoje'"));
     expect(screen, contains('financeInadimplLabel'));

@@ -10,6 +10,7 @@ class DashboardCommandCenterStickyHeaderDelegate
     required this.isDark,
     required this.primary,
     required this.subtitle,
+    this.showPrioritiesAction = false,
     this.trailingActionLabel,
     this.onTrailingAction,
   });
@@ -17,6 +18,7 @@ class DashboardCommandCenterStickyHeaderDelegate
   final bool isDark;
   final Color primary;
   final String subtitle;
+  final bool showPrioritiesAction;
   final String? trailingActionLabel;
   final VoidCallback? onTrailingAction;
 
@@ -108,7 +110,7 @@ class DashboardCommandCenterStickyHeaderDelegate
                     ],
                   ),
                 ),
-                if (hasTrailing && progress < 0.75)
+                if (hasTrailing && showPrioritiesAction)
                   Semantics(
                     button: true,
                     label: trailingActionLabel,
@@ -142,6 +144,7 @@ class DashboardCommandCenterStickyHeaderDelegate
     return oldDelegate.isDark != isDark ||
         oldDelegate.primary != primary ||
         oldDelegate.subtitle != subtitle ||
+        oldDelegate.showPrioritiesAction != showPrioritiesAction ||
         oldDelegate.trailingActionLabel != trailingActionLabel;
   }
 }

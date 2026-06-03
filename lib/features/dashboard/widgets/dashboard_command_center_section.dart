@@ -375,7 +375,7 @@ class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandC
                     title: 'Copiloto',
                     subtitle:
                         copilotAcoes.isEmpty
-                            ? 'Sem tarefas'
+                            ? 'Abrir Copiloto'
                             : '${copilotAcoes.length} aberta${copilotAcoes.length == 1 ? '' : 's'}',
                     onTap:
                         () => context.push('/dashboard/command-center/copiloto'),
