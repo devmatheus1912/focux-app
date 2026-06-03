@@ -66,73 +66,90 @@ class DashboardCommandCenterStickyHeaderDelegate
               ),
             ),
           ),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              TokensStrip.s4,
-              8 - (4 * progress),
-              TokensStrip.s4,
-              8,
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Central de Comando',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.inter(
-                          fontSize: TokensStrip.fontH2 - (2 * progress),
-                          fontWeight: TokensStrip.weightH2,
-                          letterSpacing: TokensStrip.trackingH2,
-                          height: 1.15,
-                          color: heading,
-                        ),
-                      ),
-                      if (showSubtitle) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          subtitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTypography.inter(
-                            fontSize: TokensStrip.fontBodySm,
-                            fontWeight: FontWeight.w400,
-                            height: TokensStrip.leadingBody,
-                            color: mute,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxHeight < 52;
+              final showSubtitleLine = showSubtitle && !compact;
+              final topPad = compact ? 4.0 : (8 - (4 * progress));
+              final bottomPad = compact ? 4.0 : 8.0;
+
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  TokensStrip.s4,
+                  topPad,
+                  TokensStrip.s4,
+                  bottomPad,
                 ),
-                if (hasTrailing && showPrioritiesAction)
-                  Semantics(
-                    button: true,
-                    label: trailingActionLabel,
-                    child: TextButton(
-                      onPressed: onTrailingAction,
-                      style: TextButton.styleFrom(
-                        minimumSize: const Size(48, 40),
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        foregroundColor: link,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Text(
-                        trailingActionLabel!,
-                        style: AppTypography.inter(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w800,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.bottomLeft,
+                        child: ClipRect(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Central de Comando',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.inter(
+                                  fontSize:
+                                      TokensStrip.fontH2 -
+                                      (2 * progress) -
+                                      (compact ? 1 : 0),
+                                  fontWeight: TokensStrip.weightH2,
+                                  letterSpacing: TokensStrip.trackingH2,
+                                  height: compact ? 1.05 : 1.12,
+                                  color: heading,
+                                ),
+                              ),
+                              if (showSubtitleLine) ...[
+                                const SizedBox(height: 1),
+                                Text(
+                                  subtitle,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTypography.inter(
+                                    fontSize: TokensStrip.fontBodySm,
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.2,
+                                    color: mute,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-              ],
-            ),
+                    if (hasTrailing && showPrioritiesAction)
+                      Semantics(
+                        button: true,
+                        label: trailingActionLabel,
+                        child: TextButton(
+                          onPressed: onTrailingAction,
+                          style: TextButton.styleFrom(
+                            minimumSize: Size(48, compact ? 32 : 36),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            foregroundColor: link,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: Text(
+                            trailingActionLabel!,
+                            style: AppTypography.inter(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),
