@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../../../core/auth/session_cache_evictor.dart';
 import '../../../core/config/env.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -225,6 +226,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<String> _postPersonalLoginRedirect(BuildContext context) async {
     final fallback = _postLoginRedirect(context, isAluno: false);
     try {
+      invalidateSessionUserCaches(ref);
       ref.invalidate(perfilProvider);
       prefetchPersonalDashboardHome(ref);
       final perfil = await ref.read(perfilProvider.future);

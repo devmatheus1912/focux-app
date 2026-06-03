@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:dio/dio.dart';
 import 'core/api/api_client.dart';
+import 'core/auth/session_cache_evictor.dart';
 import 'core/fcm/fcm_service.dart';
 import 'core/fcm/plan_sync_coordinator.dart';
 import 'features/subscription/providers/iap_store_health_provider.dart';
@@ -243,9 +244,11 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
     ref.listen<AuthStatus>(authProvider, (previous, next) {
       if (next == AuthStatus.authenticated &&
           previous != AuthStatus.authenticated) {
+        invalidateSessionUserCaches(ref);
         _loadCustomTheme();
       } else if (next == AuthStatus.unauthenticated &&
           previous == AuthStatus.authenticated) {
+        invalidateSessionUserCaches(ref);
         _resetCustomTheme();
       }
     });

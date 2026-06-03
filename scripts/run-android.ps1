@@ -49,6 +49,7 @@ try {
     catch {
         Write-Host 'flutter run failed - running fix-android-build.ps1 and retrying...' -ForegroundColor Yellow
         & $fixScript
+        Start-Sleep -Seconds 2
         Invoke-FlutterRun -DartDefines $defines
     }
 }

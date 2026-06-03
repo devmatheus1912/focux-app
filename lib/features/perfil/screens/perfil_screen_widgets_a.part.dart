@@ -162,10 +162,15 @@ class _PerfilBody extends StatelessWidget {
       dashboard: dashboard,
     );
     final profileScore = readiness.score;
-    final brandSubtitle =
-        (perfil.slogan ?? '').trim().isNotEmpty
-            ? perfil.slogan!.trim()
-            : 'Marca ativa no app';
+    final brandSubtitle = () {
+      final slogan = (perfil.slogan ?? '').trim();
+      if (slogan.isNotEmpty) return slogan;
+      final slug = perfil.slug?.trim();
+      if (slug != null && slug.isNotEmpty) {
+        return Env.landingPageDisplayLabel(slug);
+      }
+      return 'Marca ativa no app';
+    }();
     final bioText =
         (perfil.descricaoProfissional ?? dashboard.descricaoProfissional ?? '')
             .trim();
@@ -507,7 +512,7 @@ class _PerfilBody extends StatelessWidget {
                                   icon: const Icon(Icons.language_outlined),
                                   label: Text(
                                     perfil.slug != null
-                                        ? 'Editor landing · ${Env.landingPageLabel(perfil.slug!)}'
+                                        ? 'Editor landing · ${Env.landingPageDisplayLabel(perfil.slug!)}'
                                         : 'Editor da landing pública',
                                   ),
                                 ),
@@ -541,8 +546,8 @@ class _PerfilBody extends StatelessWidget {
                     ),
                     const SizedBox(height: 14),
                     _CardSection(
-                      title: 'Conta e plano',
-                      subtitle: 'Acesso, billing, IA, documentos e segurança.',
+                      title: 'Operação',
+                      subtitle: 'IA, alunos, carteira e ferramentas de crescimento.',
                       isDark: isDark,
                       accent: accent,
                       actionInk: actionInk,
@@ -551,7 +556,7 @@ class _PerfilBody extends StatelessWidget {
                           _ActionTile(
                             icon: Icons.auto_awesome_outlined,
                             label: 'Copiloto IA',
-                            value: '${perfilPlanSectionLabel(perfil.plano)} ativo',
+                            value: perfilPlanSectionLabel(perfil.plano),
                             accent: accent,
                             actionInk: actionInk,
                             mute: mute,
@@ -596,7 +601,7 @@ class _PerfilBody extends StatelessWidget {
                           _ActionTile(
                             icon: Icons.bolt_outlined,
                             label: 'Migração Focux',
-                            value: 'Importar alunos com IA',
+                            value: 'Importar com IA',
                             accent: accent,
                             actionInk: actionInk,
                             mute: mute,
@@ -629,6 +634,18 @@ class _PerfilBody extends StatelessWidget {
                                   onTap: onTap,
                                 ),
                           ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    _CardSection(
+                      title: 'Conta e segurança',
+                      subtitle: 'Documentos legais, sessão e exclusão LGPD.',
+                      isDark: isDark,
+                      accent: accent,
+                      actionInk: actionInk,
+                      child: Column(
+                        children: [
                           _ActionTile(
                             icon: Icons.description_outlined,
                             label: 'Termos de uso',

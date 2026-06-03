@@ -36,19 +36,19 @@ class GatedProfileShortcuts extends ConsumerWidget {
     (
       Icons.smart_toy_outlined,
       'Automações',
-      'Fluxos e templates',
+      'Fluxos',
       'Automações',
     ),
     (
       Icons.emoji_events_outlined,
       'Desafios',
-      'Ranking da comunidade',
+      'Comunidade',
       'Desafios',
     ),
     (
       Icons.storefront_outlined,
       'Loja digital',
-      'Vitrine e pedidos PIX',
+      'Vitrine PIX',
       'Loja',
     ),
     (

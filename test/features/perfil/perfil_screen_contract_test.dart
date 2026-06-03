@@ -45,6 +45,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
+    expect(find.text('Operação'), findsOneWidget);
+    expect(find.text('Conta e segurança'), findsOneWidget);
     expect(find.text('Carteira e PIX'), findsOneWidget);
     expect(find.text('Meus alunos'), findsOneWidget);
   });

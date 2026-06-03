@@ -5,10 +5,20 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 
 Write-Host "Limpando caches Android/Flutter..." -ForegroundColor Cyan
+Write-Host "  dica: se ink_sparkle.frag falhar de novo, desative Protecao contra ransomware" -ForegroundColor DarkYellow
+Write-Host "  (Windows > Privacidade > Protecao contra ransomware) para esta pasta." -ForegroundColor DarkYellow
 
 Push-Location $root
 try {
-    & flutter clean | Out-Null
+    $gradleEap = $ErrorActionPreference
+    $ErrorActionPreference = 'SilentlyContinue'
+    Push-Location (Join-Path $root 'android')
+    try {
+        & .\gradlew.bat --stop *>$null
+    } finally {
+        Pop-Location
+        $ErrorActionPreference = $gradleEap
+    }
 
     foreach ($path in @('build', '.dart_tool\flutter_build', 'android\.gradle', 'android\app\build')) {
         $full = Join-Path $root $path
@@ -30,16 +40,7 @@ try {
         Write-Host "  removido: rive_common .cxx" -ForegroundColor DarkGray
     }
 
-    $gradleEap = $ErrorActionPreference
-    $ErrorActionPreference = 'SilentlyContinue'
-    Push-Location (Join-Path $root 'android')
-    try {
-        # Gradle/Java escreve avisos em stderr; no PowerShell isso não deve falhar o script.
-        & .\gradlew.bat --stop *>$null
-    } finally {
-        Pop-Location
-        $ErrorActionPreference = $gradleEap
-    }
+    & flutter clean | Out-Null
 
     & flutter pub get | Out-Null
 

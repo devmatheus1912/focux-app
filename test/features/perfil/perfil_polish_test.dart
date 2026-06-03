@@ -16,7 +16,10 @@ void main() {
     expect(screen, contains('Não informado'));
     expect(screen, contains('Política de privacidade'));
     expect(screen, contains('Migração Focux'));
-    expect(screen, contains('segurança'));
+    expect(screen, contains('landingPageDisplayLabel'));
+    expect(screen, contains('Operação'));
+    expect(screen, contains('Conta e segurança'));
+    expect(screen, isNot(contains('Conta e plano')));
     expect(screen, isNot(contains('Nao informado')));
     expect(screen, isNot(contains('Politica de privacidade')));
   });

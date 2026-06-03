@@ -616,8 +616,11 @@ class _ActionTile extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
+              flex: 6,
               child: Text(
                 label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: inkMuted,
                   fontSize: 14,
@@ -627,10 +630,12 @@ class _ActionTile extends StatelessWidget {
             ),
             if (value.isNotEmpty)
               Flexible(
+                flex: 5,
                 child: Text(
                   value,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end,
                   style: TextStyle(
                     color:
                         danger
