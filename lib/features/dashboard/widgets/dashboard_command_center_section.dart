@@ -111,6 +111,8 @@ class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandC
       data: (cc) => cc.filaAcoes,
       orElse: () => const <FilaAcaoResumo>[],
     );
+    final copilotAcoes =
+        filaAcoes.where((a) => a.tipo == 'IA_COPILOTO').toList();
     final cobrancasPendentes = commandAsync.maybeWhen(
       data: (cc) => cc.cobrancasPendentes.length,
       orElse: () => finData?.totalInadimplentes ?? 0,
