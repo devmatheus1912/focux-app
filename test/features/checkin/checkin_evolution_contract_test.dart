@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/checkin/data/checkin_repository.dart';
 
+import '../../support/screen_source_bundle.dart';
+
 void main() {
   test('ExecucaoTreino parses automatic load evolution achievements', () {
     final treino = ExecucaoTreino.fromJson({
@@ -69,9 +71,9 @@ void main() {
   });
 
   test('student dashboard keeps persistent performance evolution card', () {
-    final screen = File(
+    final screen = readScreenSourceBundle(
       'lib/features/dashboard/screens/aluno_dashboard_screen.dart',
-    ).readAsStringSync();
+    );
 
     expect(screen, contains('Evolução real'));
     expect(screen, contains('Volume semana'));

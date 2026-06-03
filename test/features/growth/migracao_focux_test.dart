@@ -11,11 +11,13 @@ import 'package:focux_app/features/planos/data/planos_repository.dart';
 import 'package:focux_app/features/planos/providers/plano_features_provider.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 
+import '../../support/screen_source_bundle.dart';
+
 void main() {
   test('migracao focux usa OCR local e limites de foto', () {
-    final screen = File(
+    final screen = readScreenSourceBundle(
       'lib/features/growth/screens/migracao_magica_screen.dart',
-    ).readAsStringSync();
+    );
 
     expect(screen, contains('Migração Focux'));
     expect(screen, contains('MigracaoOcrService'));

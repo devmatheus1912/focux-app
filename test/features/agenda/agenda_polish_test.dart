@@ -2,10 +2,13 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/screen_source_bundle.dart';
+
 void main() {
   test('agenda usa polish 10/10: rota, semantics, sheets tema', () {
-    final screen =
-        File('lib/features/agenda/screens/agenda_screen.dart').readAsStringSync();
+    final screen = readScreenSourceBundle(
+      'lib/features/agenda/screens/agenda_screen.dart',
+    );
     final router = File('lib/core/router/app_router.dart').readAsStringSync();
 
     expect(screen, contains('NovoAgendamentoScreen'));

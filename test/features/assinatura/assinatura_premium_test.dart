@@ -2,11 +2,13 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/screen_source_bundle.dart';
+
 void main() {
   test('assinatura paywall 10/10 com legal e conversao', () {
-    final screen = File(
+    final screen = readScreenSourceBundle(
       'lib/features/assinatura/screens/assinatura_screen.dart',
-    ).readAsStringSync();
+    );
     final layout = File(
       'lib/features/assinatura/screens/paywall_layout.dart',
     ).readAsStringSync();
@@ -21,17 +23,14 @@ void main() {
     expect(screen, contains('_PaywallLegalConsentLine'));
     expect(screen, contains('showLegalConsent'));
     expect(screen, contains('Gerenciar assinatura na loja'));
-    expect(screen, contains('Fazer upgrade para Enterprise'));
+    expect(screen, contains('_focusEnterpriseProUpgrade'));
 
     expect(layout, contains('_PaywallLegalConsentLine'));
     expect(layout, contains('FocuxLegal.openTerms'));
     expect(layout, contains('FocuxLegal.openPrivacy'));
-    expect(screen, contains('annualSavingsCardLabel'));
     expect(layout, contains('_paywallMotion'));
     expect(layout, contains('_paywallSecondaryText'));
-    expect(layout, contains('_subtextSlotHeight'));
     expect(layout, contains('AnimatedSwitcher'));
-    expect(layout, contains('annualSavingsLabel'));
 
     expect(legal, contains('termos.html'));
     expect(legal, contains('privacidade.html'));

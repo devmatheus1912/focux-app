@@ -2,12 +2,13 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../support/screen_source_bundle.dart';
+
 void main() {
   test('student autonomy center keeps compact mobile layouts safe', () {
-    final screen =
-        File(
-          'lib/features/dashboard/screens/aluno_dashboard_screen.dart',
-        ).readAsStringSync();
+    final screen = readScreenSourceBundle(
+      'lib/features/dashboard/screens/aluno_dashboard_screen.dart',
+    );
 
     expect(screen, contains('class _NextBestTaskPanel'));
     expect(screen, contains('final compact = constraints.maxWidth < 390'));
