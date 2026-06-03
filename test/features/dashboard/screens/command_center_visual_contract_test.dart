@@ -46,6 +46,8 @@ void main() {
     expect(widget, contains("'Prioridades'"));
     expect(widget, contains('DashboardToolRecentStore'));
     expect(widget, contains("'Recentes'"));
+    expect(widget, contains('prioritiesActionLabel'));
+    expect(widget, contains('showPrioritiesLink'));
     expect(widget, contains('DashboardCommandCenterStickyHeaderDelegate'));
     expect(widget, contains('SliverPersistentHeader'));
     expect(widget, contains('Agendar primeiro treino'));

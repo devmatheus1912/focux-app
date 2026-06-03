@@ -22,6 +22,8 @@ class CommandActionPanel extends StatelessWidget {
   final bool loading;
   final bool unavailable;
   final List<CommandActionItem> actions;
+  final String? prioritiesActionLabel;
+  final VoidCallback? onPrioritiesTap;
 
   const CommandActionPanel({
     super.key,
@@ -30,6 +32,8 @@ class CommandActionPanel extends StatelessWidget {
     required this.loading,
     this.unavailable = false,
     required this.actions,
+    this.prioritiesActionLabel,
+    this.onPrioritiesTap,
   });
 
   @override
@@ -51,15 +55,41 @@ class CommandActionPanel extends StatelessWidget {
               ).copyWith(fontSize: 15),
             ),
             const Spacer(),
-            Text(
-              'Impacto hoje',
-              style: TextStyle(
-                color: BrandPalette.sectionLink(primary, dark: isDark),
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.2,
+            if (prioritiesActionLabel != null && onPrioritiesTap != null)
+              Semantics(
+                button: true,
+                label: prioritiesActionLabel,
+                child: TextButton(
+                  onPressed: loading ? null : onPrioritiesTap,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(48, 36),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    foregroundColor: BrandPalette.sectionLink(
+                      primary,
+                      dark: isDark,
+                    ),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Text(
+                    prioritiesActionLabel!,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ),
+              )
+            else
+              Text(
+                'Impacto hoje',
+                style: TextStyle(
+                  color: BrandPalette.sectionLink(primary, dark: isDark),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.2,
+                ),
               ),
-            ),
           ],
         ),
         const SizedBox(height: 12),

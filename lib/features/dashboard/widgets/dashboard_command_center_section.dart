@@ -126,6 +126,12 @@ class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandC
       hideRiskSummary: hideRiskSummary,
       isCommandPreparing: isCommandPreparing,
     );
+    final prioritiesSheetActions = buildDashboardSheetActions(
+      curated: nextActions,
+      filaAcoes: filaAcoes,
+    );
+    final showPrioritiesLink =
+        prioritiesSheetActions.length > 1 && !isCommandPreparing;
 
     Widget card({
       required double width,
@@ -229,19 +235,17 @@ class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandC
                   ],
                 ),
               ),
-              if (nextActions.length > 1)
+              if (showPrioritiesLink)
                 Material(
                   color: Colors.transparent,
                   child: InkWell(
                     onTap:
-                        isCommandPreparing
-                            ? null
-                            : () => showCommandActionsSheet(
-                              context,
-                              isDark: isDark,
-                              primary: primary,
-                              actions: nextActions,
-                            ),
+                        () => showCommandActionsSheet(
+                          context,
+                          isDark: isDark,
+                          primary: primary,
+                          actions: prioritiesSheetActions,
+                        ),
                     borderRadius: BorderRadius.circular(999),
                     child: Ink(
                       padding: const EdgeInsets.symmetric(
@@ -258,7 +262,7 @@ class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandC
                           Text(
                             isCommandPreparing
                                 ? 'lendo sinais'
-                                : 'Ver ${nextActions.length}',
+                                : 'Ver prioridades',
                             style: TextStyle(
                               color: actionColor,
                               fontSize: 11.5,
@@ -287,6 +291,17 @@ class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandC
           loading: isCommandPreparing,
           unavailable: commandUnavailable,
           actions: nextActions.take(2).toList(growable: false),
+          prioritiesActionLabel:
+              showPrioritiesLink ? 'Ver prioridades' : null,
+          onPrioritiesTap:
+              showPrioritiesLink
+                  ? () => showCommandActionsSheet(
+                    context,
+                    isDark: isDark,
+                    primary: primary,
+                    actions: prioritiesSheetActions,
+                  )
+                  : null,
         ),
         const SizedBox(height: 14),
         Material(
