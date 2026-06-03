@@ -23,7 +23,10 @@ import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import '../../../core/theme/tokens_strip.dart';
 
 class FinanceiroScreen extends ConsumerStatefulWidget {
-  const FinanceiroScreen({super.key});
+  const FinanceiroScreen({super.key, this.initialAlunoId});
+
+  final int? initialAlunoId;
+
   @override
   ConsumerState<FinanceiroScreen> createState() => _FinanceiroScreenState();
 }
@@ -44,6 +47,11 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    if (widget.initialAlunoId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _tabController.animateTo(1);
+      });
+    }
   }
 
   @override
@@ -149,20 +157,73 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: const [
-          FinanceiroDashboardScreen(),
-          _MensalidadesTab(),
-          FinanceiroResumoScreen(),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (widget.initialAlunoId != null)
+            _FinanceiroAlunoContextBanner(alunoId: widget.initialAlunoId!),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                const FinanceiroDashboardScreen(),
+                _MensalidadesTab(initialAlunoId: widget.initialAlunoId),
+                const FinanceiroResumoScreen(),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
+class _FinanceiroAlunoContextBanner extends ConsumerWidget {
+  const _FinanceiroAlunoContextBanner({required this.alunoId});
+
+  final int alunoId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final alunoAsync = ref.watch(alunoProvider(alunoId));
+    final nome = alunoAsync.valueOrNull?.nome ?? 'Aluno #$alunoId';
+    final chrome = ShellChrome.of(context);
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: EagleTokens.warn.withValues(alpha: chrome.isDark ? 0.14 : 0.08),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: EagleTokens.warn.withValues(alpha: 0.25)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.person_outline, color: EagleTokens.warn, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Mensalidades de $nome',
+                style: TextStyle(
+                  color: chrome.ink,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 12.5,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _MensalidadesTab extends ConsumerStatefulWidget {
-  const _MensalidadesTab();
+  const _MensalidadesTab({this.initialAlunoId});
+
+  final int? initialAlunoId;
+
   @override
   ConsumerState<_MensalidadesTab> createState() => _MensalidadesTabState();
 }
@@ -226,9 +287,14 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
     try {
       final r =
           await FinanceiroRepository(ref.read(apiClientProvider)).listar();
+      final alunoFilter = widget.initialAlunoId;
+      final filtered =
+          alunoFilter == null
+              ? r
+              : r.where((m) => m.alunoId == alunoFilter).toList();
       setState(() {
         _mensalidades = r;
-        _filtered = r;
+        _filtered = filtered;
         _loading = false;
       });
     } catch (e) {

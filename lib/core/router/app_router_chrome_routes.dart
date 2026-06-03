@@ -434,7 +434,11 @@ RouteBase buildChromeShellRoute() {
           // Financeiro (moved out of dock — accessible via push)
           GoRoute(
             path: '/financeiro',
-            builder: (context, state) => const FinanceiroScreen(),
+            builder: (context, state) {
+              final raw = state.uri.queryParameters['alunoId'];
+              final initialAlunoId = raw == null ? null : int.tryParse(raw);
+              return FinanceiroScreen(initialAlunoId: initialAlunoId);
+            },
           ),
 
           // Perfil

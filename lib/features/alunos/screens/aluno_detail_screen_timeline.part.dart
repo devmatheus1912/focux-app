@@ -135,7 +135,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
           ),
           if (loading) ...[
             const SizedBox(height: 14),
-            FxLoading.sectionBar(context),
+            FxLoading.sectionShimmer(context, height: 140),
           ] else if (error) ...[
             const SizedBox(height: 14),
             Text(

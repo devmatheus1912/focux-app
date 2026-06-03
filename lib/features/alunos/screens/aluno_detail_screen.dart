@@ -22,6 +22,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../health/data/health_repository.dart';
 import '../../health/widgets/recovery_score_ring.dart';
+import '../../avaliacao/data/avaliacao_repository.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -55,9 +56,30 @@ final alunoRecoveryProvider = FutureProvider.family<RecoverySnapshot?, int>((
   ).fetchRecoveryForAluno(alunoId);
 });
 
+/// When true, copilot card loads IA via [alunoCopilotoActionProvider] (refresh).
+final alunoCopilotoForceIaProvider = StateProvider.family<bool, int>(
+  (ref, alunoId) => false,
+);
+
 final alunoCopilotoActionProvider =
     FutureProvider.family<Map<String, dynamic>, int>((ref, alunoId) async {
       return IaRepository(ref.read(apiClientProvider)).proximaAcao(alunoId);
+    });
+
+final alunoMedidasResumoProvider =
+    FutureProvider.family<SnapshotAvaliacao?, int>((ref, alunoId) async {
+      try {
+        final comparativo = await AvaliacaoRepository(
+          ref.read(apiClientProvider),
+        ).comparativo(alunoId);
+        final atual = comparativo.atual;
+        final hasData =
+            atual.percGordura != null ||
+            (atual.massaMuscular != null && atual.massaMuscular! > 0);
+        return hasData ? atual : null;
+      } catch (_) {
+        return null;
+      }
     });
 
 final alunoOpenIaActionsProvider =
@@ -102,8 +124,10 @@ Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
   ref.invalidate(alunoScoreSnapshotsProvider(alunoId));
   ref.invalidate(alunoEvolucaoInteligenteProvider(alunoId));
   ref.invalidate(alunoTimeline360ApiProvider(alunoId));
+  ref.read(alunoCopilotoForceIaProvider(alunoId).notifier).state = false;
   ref.invalidate(alunoCopilotoActionProvider(alunoId));
   ref.invalidate(alunoOpenIaActionsProvider(alunoId));
+  ref.invalidate(alunoMedidasResumoProvider(alunoId));
   ref.invalidate(alunoAderenciaSemanalProvider(alunoId));
   await ref.read(aluno360Provider(alunoId).future);
 }
@@ -495,8 +519,20 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
     final loadingPrimary = aluno360Async.isLoading && !aluno360Async.hasValue;
     final loadingFallback = resolvedAlunoAsync.isLoading && !resolvedAlunoAsync.hasValue;
 
+    final proximaAcao360 = aluno360Async.valueOrNull?.proximaAcao;
+    final showOperacaoSticky = _tabController.index == 0 && resolvedAlunoAsync.hasValue;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
+      bottomNavigationBar:
+          showOperacaoSticky
+              ? _OperacaoStickyCtaBar(
+                aluno: resolvedAlunoAsync.value!,
+                alunoId: alunoId,
+                proximaAcao360: proximaAcao360,
+                isDark: isDark,
+              )
+              : null,
       body: loadingPrimary || loadingFallback
           ? const FxLoading()
           : resolvedAlunoAsync.when(
@@ -669,6 +705,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                         alunoId: alunoId,
                         isDark: isDark,
                         primary: primary,
+                        proximaAcao360: proximaAcao360,
                         recoveryAsync: recoveryAsync,
                         autonomiaResumoAsync: resolvedAutonomiaResumoAsync,
                         onPassword: () => _confirmarGerarSenha(context, ref, aluno),

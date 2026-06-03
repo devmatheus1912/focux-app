@@ -5,20 +5,25 @@ class _MeasurementCard extends StatelessWidget {
   final String value;
   final String unit;
   final bool isDark;
+  final String? emptyHint;
+  final VoidCallback? onTap;
 
   const _MeasurementCard({
     required this.label,
     required this.value,
     required this.unit,
     required this.isDark,
+    this.emptyHint,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
+    final primary = Theme.of(context).colorScheme.primary;
 
-    return Container(
+    final child = Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
       decoration: fxListCardDecoration(context),
       child: Column(
@@ -60,8 +65,26 @@ class _MeasurementCard extends StatelessWidget {
               ),
             ],
           ),
+          if (emptyHint != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              emptyHint!,
+              style: TextStyle(
+                color: primary,
+                fontSize: 9,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
         ],
       ),
+    );
+
+    if (onTap == null) return child;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(TokensStrip.rCard),
+      child: child,
     );
   }
 }

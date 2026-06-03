@@ -1,13 +1,29 @@
 ﻿part of 'aluno_detail_screen.dart';
 
+Map<String, dynamic> _copilotActionFrom360(ProximaAcaoResumo proxima) => {
+  'titulo': proxima.fonte == 'RADAR'
+      ? 'Radar Focux'
+      : proxima.fonte == 'EVOLUCAO'
+          ? 'Evolução inteligente'
+          : proxima.fonte == 'AUTONOMIA'
+              ? 'Autonomia'
+              : 'Próxima melhor ação',
+  'acao': proxima.acao,
+  'motivo': proxima.motivo,
+  'fonte': proxima.fonte,
+  'prioridade': proxima.prioridade,
+};
+
 class _Aluno360CopilotCard extends ConsumerWidget {
   final Aluno aluno;
   final AsyncValue<AlunoAutonomiaResumo> resumoAsync;
+  final ProximaAcaoResumo? proximaAcao360;
   final bool isDark;
 
   const _Aluno360CopilotCard({
     required this.aluno,
     required this.resumoAsync,
+    required this.proximaAcao360,
     required this.isDark,
   });
 
@@ -518,13 +534,19 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
     final line = ShellChrome.of(context).line;
-    final actionAsync = ref.watch(alunoCopilotoActionProvider(aluno.id));
+    final forceIa = ref.watch(alunoCopilotoForceIaProvider(aluno.id));
+    final iaAsync =
+        forceIa ? ref.watch(alunoCopilotoActionProvider(aluno.id)) : null;
     final openActionsAsync = ref.watch(alunoOpenIaActionsProvider(aluno.id));
     final openTask = _firstOpenCopilotAction(openActionsAsync.valueOrNull);
     final resumo = resumoAsync.valueOrNull;
     final profileCompletion = _perfilCompletion(aluno);
     final signals = _signals(context, aluno, resumo);
     final fallback = _fallbackAction(aluno, resumo);
+    final seed360 =
+        proximaAcao360 != null
+            ? _copilotActionFrom360(proximaAcao360!)
+            : null;
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -573,10 +595,13 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                 ),
               ),
               IconButton.filledTonal(
-                onPressed:
-                    () => ref.invalidate(alunoCopilotoActionProvider(aluno.id)),
+                onPressed: () {
+                  ref.read(alunoCopilotoForceIaProvider(aluno.id).notifier).state =
+                      true;
+                  ref.invalidate(alunoCopilotoActionProvider(aluno.id));
+                },
                 icon: const Icon(Icons.refresh_rounded, size: 18),
-                tooltip: 'Atualizar Copiloto',
+                tooltip: 'Atualizar com IA',
               ),
             ],
           ),
@@ -628,40 +653,14 @@ class _Aluno360CopilotCard extends ConsumerWidget {
               borderRadius: BorderRadius.circular(18),
               border: Border.all(color: line),
             ),
-            child: actionAsync.when(
-              loading:
-                  () => SizedBox(
-                    height: 52,
-                    child: Center(child: FxLoading.sectionBar(context)),
-                  ),
-              error:
-                  (_, __) => _CopilotPrescription(
-                    title: 'Sugestão offline',
-                    action: fallback,
-                    reason:
-                        'IA indisponível agora; usando sinais do Aluno 360.',
-                    color: primary,
-                  ),
-              data:
-                  (action) => _CopilotPrescription(
-                    title:
-                        (action['titulo'] ??
-                                action['tipo'] ??
-                                'Próxima melhor ação')
-                            .toString(),
-                    action: _displayAction(
-                      aluno,
-                      (action['acao'] ??
-                              action['mensagem'] ??
-                              action['descricao'] ??
-                              fallback)
-                          .toString(),
-                    ),
-                    reason:
-                        (action['motivo'] ?? 'Baseado nos sinais atuais.')
-                            .toString(),
-                    color: primary,
-                  ),
+            child: _buildPrescriptionBody(
+              context,
+              aluno: aluno,
+              primary: primary,
+              fallback: fallback,
+              seed360: seed360,
+              forceIa: forceIa,
+              iaAsync: iaAsync,
             ),
           ),
           const SizedBox(height: 10),
@@ -686,34 +685,100 @@ class _Aluno360CopilotCard extends ConsumerWidget {
           ),
           if (openActionsAsync.isLoading || openTask != null)
             const SizedBox(height: 10),
-          actionAsync.maybeWhen(
-            data:
-                (action) => _Aluno360ActionRow(
-                  aluno: aluno,
-                  primary: primary,
-                  existingTask: openTask,
-                  acao: _cleanCopilotText(
-                    (action['acao'] ??
-                            action['mensagem'] ??
-                            action['descricao'] ??
-                            fallback)
-                        .toString(),
-                  ),
-                  onAssign: (acao) => _criarTarefaCopiloto(context, ref, acao),
-                  onPrepareMessage: (acao) => _prepararMensagem(context, acao),
-                ),
-            orElse:
-                () => _Aluno360ActionRow(
-                  aluno: aluno,
-                  primary: primary,
-                  existingTask: openTask,
-                  acao: fallback,
-                  onAssign: (acao) => _criarTarefaCopiloto(context, ref, acao),
-                  onPrepareMessage: (acao) => _prepararMensagem(context, acao),
-                ),
+          _Aluno360ActionRow(
+            aluno: aluno,
+            primary: primary,
+            existingTask: openTask,
+            acao: _resolveCopilotAcao(
+              seed360: seed360,
+              forceIa: forceIa,
+              iaAsync: iaAsync,
+              fallback: fallback,
+            ),
+            onAssign: (acao) => _criarTarefaCopiloto(context, ref, acao),
+            onPrepareMessage: (acao) => _prepararMensagem(context, acao),
           ),
         ],
       ),
+    );
+  }
+
+  String _resolveCopilotAcao({
+    required Map<String, dynamic>? seed360,
+    required bool forceIa,
+    required AsyncValue<Map<String, dynamic>>? iaAsync,
+    required String fallback,
+  }) {
+    if (forceIa && iaAsync != null) {
+      return iaAsync.maybeWhen(
+        data:
+            (action) => _cleanCopilotText(
+              (action['acao'] ??
+                      action['mensagem'] ??
+                      action['descricao'] ??
+                      fallback)
+                  .toString(),
+            ),
+        orElse: () => fallback,
+      );
+    }
+    if (seed360 != null) {
+      return _cleanCopilotText((seed360['acao'] ?? fallback).toString());
+    }
+    return fallback;
+  }
+
+  Widget _buildPrescriptionBody(
+    BuildContext context, {
+    required Aluno aluno,
+    required Color primary,
+    required String fallback,
+    required Map<String, dynamic>? seed360,
+    required bool forceIa,
+    required AsyncValue<Map<String, dynamic>>? iaAsync,
+  }) {
+    if (forceIa && iaAsync != null) {
+      return iaAsync.when(
+        loading:
+            () => FxLoading.sectionShimmer(context, height: 72, showHeader: false),
+        error:
+            (_, __) => _CopilotPrescription(
+              title: 'Sugestão offline',
+              action: fallback,
+              reason: 'IA indisponível agora; usando sinais do Aluno 360.',
+              color: primary,
+            ),
+        data: (action) => _prescriptionFromAction(aluno, action, fallback, primary),
+      );
+    }
+    if (seed360 != null) {
+      return _prescriptionFromAction(aluno, seed360, fallback, primary);
+    }
+    return _CopilotPrescription(
+      title: 'Sugestão offline',
+      action: fallback,
+      reason: 'Carregando sinais do Aluno 360…',
+      color: primary,
+    );
+  }
+
+  Widget _prescriptionFromAction(
+    Aluno aluno,
+    Map<String, dynamic> action,
+    String fallback,
+    Color primary,
+  ) {
+    return _CopilotPrescription(
+      title:
+          (action['titulo'] ?? action['tipo'] ?? 'Próxima melhor ação')
+              .toString(),
+      action: _displayAction(
+        aluno,
+        (action['acao'] ?? action['mensagem'] ?? action['descricao'] ?? fallback)
+            .toString(),
+      ),
+      reason: (action['motivo'] ?? 'Baseado nos sinais atuais.').toString(),
+      color: primary,
     );
   }
 }

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
+
+import '../theme/design_tokens.dart';
+import '../theme/tokens_strip.dart';
 
 /// Premium loading indicator — sized, subtle, and consistent.
 /// Drop-in replacement for the banned `Center(child: CircularProgressIndicator())`.
@@ -20,13 +24,68 @@ class FxLoading extends StatelessWidget {
     this.valueColor,
   });
 
-  /// Inline section loading bar — matches dashboard pulse / aluno 360 cards.
+  /// Inline section loading bar — legacy; prefer [sectionShimmer].
   static Widget sectionBar(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     return LinearProgressIndicator(
       minHeight: 2,
       color: primary,
       backgroundColor: primary.withValues(alpha: 0.12),
+    );
+  }
+
+  /// Card-shaped skeleton aligned with ShellChrome / dashboard shimmer.
+  static Widget sectionShimmer(
+    BuildContext context, {
+    double height = 128,
+    bool showHeader = true,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final base = isDark ? EagleTokens.darkCard : TokensStrip.borderDefault;
+    final highlight =
+        isDark ? EagleTokens.darkCardHi : TokensStrip.borderDefault;
+
+    Widget bone(double w, double h, {double radius = 12}) => Container(
+      width: w,
+      height: h,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(radius),
+      ),
+    );
+
+    return Shimmer.fromColors(
+      baseColor: base,
+      highlightColor: highlight,
+      child: SizedBox(
+        height: height,
+        width: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (showHeader) ...[
+              Row(
+                children: [
+                  bone(38, 38, radius: 13),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        bone(140, 13, radius: 8),
+                        const SizedBox(height: 6),
+                        bone(96, 10, radius: 6),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+            ],
+            Expanded(child: bone(double.infinity, double.infinity, radius: 16)),
+          ],
+        ),
+      ),
     );
   }
 

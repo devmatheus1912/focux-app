@@ -60,7 +60,11 @@ void main() {
     expect(screen, contains('class _AlunoDetailOperacaoTab'));
     expect(screen, contains('class _AlunoDetailEvolucaoTab'));
     expect(screen, contains('class _AlunoDetailFerramentasTab'));
-    expect(screen, contains('FxLoading.sectionBar'));
+    expect(screen, contains('FxLoading.sectionShimmer'));
+    expect(screen, contains('alunoCopilotoForceIaProvider'));
+    expect(screen, contains('proximaAcao360'));
+    expect(screen, contains('/financeiro?alunoId='));
+    expect(screen, contains('_OperacaoStickyCtaBar'));
     expect(screen, isNot(contains('Pulso operacional')));
     expect(screen, isNot(contains('Score API')));
   });

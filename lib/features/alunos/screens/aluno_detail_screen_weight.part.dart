@@ -101,8 +101,10 @@ class _AlunoWeightActivityCard extends ConsumerWidget {
             height: 72,
             child: aderenciaAsync.when(
               loading:
-                  () => Center(
-                    child: FxLoading.sectionBar(context),
+                  () => FxLoading.sectionShimmer(
+                    context,
+                    height: 72,
+                    showHeader: false,
                   ),
               error:
                   (_, __) => InkWell(
