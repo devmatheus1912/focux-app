@@ -39,6 +39,7 @@ void main() {
     expect(widget, contains("'Ver prioridades'"));
     expect(widget, contains('showPrioritiesAction: showStickyPrioritiesAction'));
     expect(widget, contains('_homeScrollOffset >= 80'));
+    expect(widget, contains('_commandCenterPrioritiesFloatingMaxOffset'));
     expect(widget, contains('DashboardCommandCenterStickyHeaderDelegate'));
     expect(widget, contains('SliverPersistentHeader'));
     expect(widget, contains('Agendar primeiro treino'));

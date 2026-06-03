@@ -148,7 +148,6 @@ class DashboardToolShortcut {
   ];
 
   static const List<DashboardToolShortcut> roiQuickLinks = [
-    DashboardToolShortcut(icon: 'coin', label: 'Pacotes', route: '/pacotes'),
     DashboardToolShortcut(
       icon: 'message-circle',
       label: 'Captura pública',

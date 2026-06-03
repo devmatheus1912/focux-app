@@ -48,6 +48,81 @@ class DashboardFinancialHeroSection extends StatelessWidget {
   final FinanceiroDashboard? finData;
   final List<double> receitaTrend;
 
+  bool get _compactZeroRevenue => receitaAtual <= 0 && !loadingFin;
+
+  Widget _financeHeroCta(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton(
+        onPressed: () => context.go('/financeiro'),
+        style: FilledButton.styleFrom(
+          minimumSize: const Size.fromHeight(44),
+          backgroundColor: Colors.white,
+          foregroundColor: const Color(0xFF0A2E2E),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(TokensStrip.rButton),
+          ),
+        ),
+        child: const Text('Abrir financeiro'),
+      ),
+    );
+  }
+
+  String _metaLine() {
+    final meta = finData?.previsaoReceita ?? 0;
+    final ticket = finData?.ticketMedio ?? 0;
+    if (meta > 0) {
+      return 'Meta R\$ ${meta.toStringAsFixed(0)}';
+    }
+    if (ticket > 0) {
+      return 'Ticket médio R\$ ${ticket.toStringAsFixed(0)} · defina meta no financeiro';
+    }
+    return 'Defina a meta mensal no financeiro';
+  }
+
+  Widget _receitaAmount(BuildContext context) {
+    if (loadingFin) {
+      return Shimmer.fromColors(
+        baseColor: Colors.white.withValues(alpha: 0.15),
+        highlightColor: Colors.white.withValues(alpha: 0.30),
+        child: Container(
+          width: 160,
+          height: 36,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+    }
+    if (reduceMotion) {
+      return Text(
+        'R\$ ${receitaAtual.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}',
+        style: AppTypography.mono(
+          color: Colors.white,
+          fontSize: 34,
+          fontWeight: FontWeight.w600,
+          letterSpacing: -0.5,
+          height: 1,
+        ),
+      );
+    }
+    return AnimatedBuilder(
+      animation: counterAnim,
+      builder:
+          (ctx, _) => Text(
+            'R\$ ${counterAnim.value.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}',
+            style: AppTypography.mono(
+              color: Colors.white,
+              fontSize: 34,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.5,
+              height: 1,
+            ),
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -94,272 +169,277 @@ class DashboardFinancialHeroSection extends StatelessWidget {
                     ),
                   ],
                 ),
-                padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+                padding: EdgeInsets.fromLTRB(
+                  18,
+                  18,
+                  18,
+                  _compactZeroRevenue ? 14 : 16,
+                ),
                 child: CustomPaint(
                   foregroundPainter: DashboardHeroGridPainter(),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Receita recebida · $mes',
-                        style: TextStyle(
-                          color: dashboardHeroLabelOnTeal(),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.12,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        metaSuperada
-                            ? 'Meta superada · receita acima do previsto.'
-                            : receitaAtual <= 0 && !loadingFin
-                            ? 'Nenhuma receita lançada em $mes. Registre cobranças para acompanhar a meta.'
-                            : pendente > 0
-                            ? 'Recebido agora. Faltam R\$ ${pendente.toInt()} para a meta.'
-                            : 'Recebido agora. Meta do mês sob controle.',
-                        style: TextStyle(
-                          color: dashboardHeroCaptionOnTeal(),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          loadingFin
-                              ? Shimmer.fromColors(
-                                baseColor: Colors.white.withValues(alpha: 0.15),
-                                highlightColor: Colors.white.withValues(
-                                  alpha: 0.30,
-                                ),
-                                child: Container(
-                                  width: 160,
-                                  height: 36,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                              )
-                              : reduceMotion
-                              ? Text(
-                                'R\$ ${receitaAtual.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}',
-                                style: AppTypography.mono(
-                                  color: Colors.white,
-                                  fontSize: 34,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: -0.5,
-                                  height: 1,
-                                ),
-                              )
-                              : AnimatedBuilder(
-                                animation: counterAnim,
-                                builder:
-                                    (ctx, _) => Text(
-                                      'R\$ ${counterAnim.value.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}',
-                                      style: AppTypography.mono(
-                                        color: Colors.white,
-                                        fontSize: 34,
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: -0.5,
-                                        height: 1,
-                                      ),
-                                    ),
-                              ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8, bottom: 5),
-                            child: Text(
-                              'recebido',
-                              style: TextStyle(
-                                color: dashboardHeroLabelOnTeal(),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.1,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 5),
-                      Row(
-                        children: [
-                          Text(
-                            () {
-                              final meta = finData?.previsaoReceita ?? 0;
-                              final ticket = finData?.ticketMedio ?? 0;
-                              if (meta > 0) {
-                                return 'Meta R\$ ${meta.toStringAsFixed(0)}';
-                              }
-                              if (ticket > 0) {
-                                return 'Ticket médio R\$ ${ticket.toStringAsFixed(0)} · defina meta no financeiro';
-                              }
-                              return 'Defina a meta mensal no financeiro';
-                            }(),
-                            style: TextStyle(
-                              color: dashboardHeroMutedOnTeal(),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          if (metaSuperada) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.14),
-                                borderRadius: BorderRadius.circular(
-                                  TokensStrip.rInput,
-                                ),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.28),
-                                ),
-                              ),
-                              child: const Text(
-                                'SUPERADA',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.55,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      if (receitaTrend.isNotEmpty) ...[
-                        Builder(
-                          builder: (ctx) {
-                            final hasReceita = receitaTrend.any((v) => v > 0);
-                            if (!hasReceita) {
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: Text(
-                                  'Histórico mensal aparece ao registrar cobranças',
-                                  style: TextStyle(
-                                    color: dashboardHeroCaptionOnTeal(),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              );
-                            }
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: Semantics(
-                                label:
-                                    'Tendência de receita nos últimos meses',
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      'Receita · últimos meses',
-                                      style: TextStyle(
-                                        color: dashboardHeroCaptionOnTeal(),
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const Spacer(),
-                                    FxSparkline(
-                                      data: receitaTrend,
-                                      color: Colors.white.withValues(
-                                        alpha: 0.92,
-                                      ),
-                                      width: 96,
-                                      height: 26,
-                                      fill: true,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                      DashboardHeroProgressRail(
-                        progress: progressRaw.clamp(0.0, 1.0),
-                        exceeded: metaSuperada,
-                        glow: BrandPalette.accent(heroPrimary),
-                        percentLabel:
-                            receitaAtual <= 0 && !loadingFin
-                                ? 'Primeiro passo: registrar recebimentos'
-                                : financePercentLabel(
-                                  progressRaw,
-                                  exceeded: metaSuperada,
-                                ),
-                        excessBeyondMeta:
-                            metaSuperada
-                                ? math.max(0, progressRaw - 1)
-                                : 0,
-                      ),
-                      if (receitaAtual <= 0 && !loadingFin) ...[
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          width: double.infinity,
-                          child: FilledButton.tonal(
-                            onPressed: () => context.go('/financeiro'),
-                            style: FilledButton.styleFrom(
-                              minimumSize: const Size.fromHeight(44),
-                              backgroundColor: Colors.white.withValues(
-                                alpha: 0.18,
-                              ),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  TokensStrip.rButton,
-                                ),
-                              ),
-                            ),
-                            child: const Text('Abrir financeiro'),
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: TokensStrip.s3),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          DashboardHeroMiniStat(
-                            label: 'Pendente',
-                            value: 'R\$ ${pendente.toInt()}',
-                          ),
-                          Container(
-                            width: 1,
-                            height: 30,
-                            color: Colors.white.withValues(alpha: 0.15),
-                          ),
-                          DashboardHeroMiniStat(
-                            label: financeInadimplLabel(
-                              MediaQuery.sizeOf(context).width,
-                            ),
-                            value: '${finData?.totalInadimplentes ?? 0}',
-                            suffix: ' alunos',
-                          ),
-                          Container(
-                            width: 1,
-                            height: 30,
-                            color: Colors.white.withValues(alpha: 0.15),
-                          ),
-                          DashboardHeroMiniStat(
-                            label: 'Ticket médio',
-                            value:
-                                'R\$ ${finData?.ticketMedio.toStringAsFixed(0) ?? '0'}',
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                  child:
+                      _compactZeroRevenue
+                          ? _buildCompactContent(context)
+                          : _buildFullContent(context),
                 ),
               ),
             ),
           );
         },
       ),
+    );
+  }
+
+  Widget _buildCompactContent(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Receita recebida · $mes',
+          style: TextStyle(
+            color: dashboardHeroLabelOnTeal(),
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.12,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Nenhuma receita lançada em $mes. Registre cobranças para acompanhar a meta.',
+          style: TextStyle(
+            color: dashboardHeroCaptionOnTeal(),
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            _receitaAmount(context),
+            Padding(
+              padding: const EdgeInsets.only(left: 8, bottom: 5),
+              child: Text(
+                'recebido',
+                style: TextStyle(
+                  color: dashboardHeroLabelOnTeal(),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.1,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(
+          _metaLine(),
+          style: TextStyle(
+            color: dashboardHeroMutedOnTeal(),
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 12),
+        _financeHeroCta(context),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            DashboardHeroMiniStat(
+              label: 'Pendente',
+              value: 'R\$ ${pendente.toInt()}',
+            ),
+            Container(
+              width: 1,
+              height: 26,
+              color: Colors.white.withValues(alpha: 0.15),
+            ),
+            DashboardHeroMiniStat(
+              label: financeInadimplLabel(MediaQuery.sizeOf(context).width),
+              value: '${finData?.totalInadimplentes ?? 0}',
+              suffix: ' alunos',
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFullContent(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Receita recebida · $mes',
+          style: TextStyle(
+            color: dashboardHeroLabelOnTeal(),
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.12,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          metaSuperada
+              ? 'Meta superada · receita acima do previsto.'
+              : pendente > 0
+              ? 'Recebido agora. Faltam R\$ ${pendente.toInt()} para a meta.'
+              : 'Recebido agora. Meta do mês sob controle.',
+          style: TextStyle(
+            color: dashboardHeroCaptionOnTeal(),
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            _receitaAmount(context),
+            Padding(
+              padding: const EdgeInsets.only(left: 8, bottom: 5),
+              child: Text(
+                'recebido',
+                style: TextStyle(
+                  color: dashboardHeroLabelOnTeal(),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.1,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 5),
+        Row(
+          children: [
+            Text(
+              _metaLine(),
+              style: TextStyle(
+                color: dashboardHeroMutedOnTeal(),
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            if (metaSuperada) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(
+                    TokensStrip.rInput,
+                  ),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.28),
+                  ),
+                ),
+                child: const Text(
+                  'SUPERADA',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.55,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (receitaTrend.isNotEmpty) ...[
+          Builder(
+            builder: (ctx) {
+              final hasReceita = receitaTrend.any((v) => v > 0);
+              if (!hasReceita) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Text(
+                    'Histórico mensal aparece ao registrar cobranças',
+                    style: TextStyle(
+                      color: dashboardHeroCaptionOnTeal(),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                );
+              }
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Semantics(
+                  label: 'Tendência de receita nos últimos meses',
+                  child: Row(
+                    children: [
+                      Text(
+                        'Receita · últimos meses',
+                        style: TextStyle(
+                          color: dashboardHeroCaptionOnTeal(),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const Spacer(),
+                      FxSparkline(
+                        data: receitaTrend,
+                        color: Colors.white.withValues(alpha: 0.92),
+                        width: 96,
+                        height: 26,
+                        fill: true,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+        DashboardHeroProgressRail(
+          progress: progressRaw.clamp(0.0, 1.0),
+          exceeded: metaSuperada,
+          glow: BrandPalette.accent(heroPrimary),
+          percentLabel: financePercentLabel(
+            progressRaw,
+            exceeded: metaSuperada,
+          ),
+          excessBeyondMeta:
+              metaSuperada ? math.max(0, progressRaw - 1) : 0,
+        ),
+        const SizedBox(height: TokensStrip.s3),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            DashboardHeroMiniStat(
+              label: 'Pendente',
+              value: 'R\$ ${pendente.toInt()}',
+            ),
+            Container(
+              width: 1,
+              height: 30,
+              color: Colors.white.withValues(alpha: 0.15),
+            ),
+            DashboardHeroMiniStat(
+              label: financeInadimplLabel(MediaQuery.sizeOf(context).width),
+              value: '${finData?.totalInadimplentes ?? 0}',
+              suffix: ' alunos',
+            ),
+            Container(
+              width: 1,
+              height: 30,
+              color: Colors.white.withValues(alpha: 0.15),
+            ),
+            DashboardHeroMiniStat(
+              label: 'Ticket médio',
+              value:
+                  'R\$ ${finData?.ticketMedio.toStringAsFixed(0) ?? '0'}',
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

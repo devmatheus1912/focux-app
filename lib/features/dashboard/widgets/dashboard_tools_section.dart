@@ -488,7 +488,11 @@ class DashboardCollapsibleToolsSectionState
           ),
           AnimatedCrossFade(
             firstChild: const SizedBox.shrink(),
-            secondChild: Padding(
+            secondChild: SafeArea(
+              top: true,
+              bottom: false,
+              minimum: const EdgeInsets.only(top: 4),
+              child: Padding(
               padding: const EdgeInsets.only(top: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -558,6 +562,7 @@ class DashboardCollapsibleToolsSectionState
                     ),
                 ],
               ),
+            ),
             ),
             crossFadeState:
                 _expanded

@@ -47,6 +47,8 @@ class DashboardCommandCenterStickyHeaderDelegate
         onTrailingAction != null &&
         trailingActionLabel!.trim().isNotEmpty;
 
+    final showTrailingChip = hasTrailing && showPrioritiesAction;
+
     return Semantics(
       header: true,
       label: showSubtitle
@@ -81,11 +83,11 @@ class DashboardCommandCenterStickyHeaderDelegate
                   bottomPad,
                 ),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
                       child: Align(
-                        alignment: Alignment.bottomLeft,
+                        alignment: Alignment.centerLeft,
                         child: ClipRect(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
@@ -125,23 +127,30 @@ class DashboardCommandCenterStickyHeaderDelegate
                         ),
                       ),
                     ),
-                    if (hasTrailing && showPrioritiesAction)
-                      Semantics(
-                        button: true,
-                        label: trailingActionLabel,
-                        child: TextButton(
-                          onPressed: onTrailingAction,
-                          style: TextButton.styleFrom(
-                            minimumSize: Size(48, compact ? 32 : 36),
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            foregroundColor: link,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: Text(
-                            trailingActionLabel!,
-                            style: AppTypography.inter(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w800,
+                    if (showTrailingChip)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 6),
+                        child: Semantics(
+                          button: true,
+                          label: trailingActionLabel,
+                          child: TextButton(
+                            onPressed: onTrailingAction,
+                            style: TextButton.styleFrom(
+                              minimumSize: Size(48, compact ? 36 : 40),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
+                              foregroundColor: link,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: Text(
+                              trailingActionLabel!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.inter(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                           ),
                         ),

@@ -41,6 +41,15 @@ void main() {
     expect(screen, contains('Buscar ferramenta'));
     expect(screen, contains('dashboardReadableMuted'));
     expect(screen, contains('Abrir financeiro'));
+    expect(screen, contains('_compactZeroRevenue'));
+    expect(screen, contains('backgroundColor: Colors.white'));
+    final shortcutsFile = File(
+      'lib/features/dashboard/data/dashboard_tool_shortcuts.dart',
+    ).readAsStringSync();
+    final roiStart = shortcutsFile.indexOf('roiQuickLinks = [');
+    final roiEnd = shortcutsFile.indexOf('];', roiStart);
+    expect(roiStart, greaterThan(0));
+    expect(shortcutsFile.substring(roiStart, roiEnd), isNot(contains("'Pacotes'")));
 
     final semanticsCount = 'Semantics('.allMatches(screen).length;
     expect(semanticsCount, greaterThanOrEqualTo(10));

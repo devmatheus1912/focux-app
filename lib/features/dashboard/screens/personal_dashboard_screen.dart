@@ -52,6 +52,9 @@ class PersonalDashboardScreen extends ConsumerStatefulWidget {
   ConsumerState<PersonalDashboardScreen> createState() =>
       _PersonalDashboardScreenState();
 }
+/// Scroll offset after which the pinned command-center header shows priorities.
+const _commandCenterPrioritiesFloatingMaxOffset = 360;
+
 class _PersonalDashboardScreenState
     extends ConsumerState<PersonalDashboardScreen>
     with TickerProviderStateMixin {
@@ -430,7 +433,12 @@ class _PersonalDashboardScreenState
                 attentionCollapsedPreview = null;
               }
 
-              return RefreshIndicator(
+              final link = BrandPalette.sectionLink(primary, dark: themeDark);
+
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  RefreshIndicator(
                 onRefresh: () async {
                   ref.invalidate(dashboardHomeProvider);
                   ref.invalidate(alunosProvider);
@@ -646,13 +654,15 @@ class _PersonalDashboardScreenState
                                         horizontal: TokensStrip.s4,
                                       ),
                                       scrollDirection: Axis.horizontal,
+                                      cacheExtent: 280,
                                       itemCount: attentionItemCount,
                                       separatorBuilder:
                                           (_, __) => const SizedBox(width: 12),
                                       itemBuilder: (context, index) {
                                         if (index < attentionRiskItems.length) {
                                           final aluno = attentionRiskItems[index];
-                                          return DashboardAttentionCard(
+                                          return RepaintBoundary(
+                                            child: DashboardAttentionCard(
                                             listIndex: index + 1,
                                             listTotal: attentionItemCount,
                                             nome: aluno.nome,
@@ -671,12 +681,14 @@ class _PersonalDashboardScreenState
                                                 () => context.push(
                                                   '/alunos/${aluno.id}',
                                                 ),
+                                          ),
                                           );
                                         }
                                         final v =
                                             attentionVencItems[index -
                                                 attentionRiskItems.length];
-                                        return DashboardAttentionCard(
+                                        return RepaintBoundary(
+                                          child: DashboardAttentionCard(
                                           listIndex: index + 1,
                                           listTotal: attentionItemCount,
                                           nome: v.alunoNome,
@@ -687,6 +699,7 @@ class _PersonalDashboardScreenState
                                           isDark: themeDark,
                                           onTap:
                                               () => context.go('/financeiro'),
+                                        ),
                                         );
                                       },
                                     ),
@@ -805,6 +818,48 @@ class _PersonalDashboardScreenState
                     ),
                   ],
                 ),
+              ),
+                  if (showStickyPrioritiesAction &&
+                      stickyCommandActionsLabel != null &&
+                      _homeScrollOffset < _commandCenterPrioritiesFloatingMaxOffset)
+                    Positioned(
+                      top: 4,
+                      right: TokensStrip.s4,
+                      child: Semantics(
+                        button: true,
+                        label: stickyCommandActionsLabel,
+                        child: Material(
+                          elevation: 2,
+                          shadowColor: Colors.black.withValues(
+                            alpha: themeDark ? 0.35 : 0.12,
+                          ),
+                          color:
+                              themeDark
+                                  ? EagleTokens.darkCard
+                                  : Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(999),
+                          child: InkWell(
+                            onTap: openCommandQuickActions,
+                            borderRadius: BorderRadius.circular(999),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              child: Text(
+                                stickyCommandActionsLabel,
+                                style: AppTypography.inter(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: link,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               );
             },
           ),
