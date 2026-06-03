@@ -738,7 +738,7 @@ class _PersonalDashboardScreenState
                           hideRiscoChip: alunosEmRisco.isNotEmpty,
                           primary: primary,
                           onAtivos: () => context.go('/alunos?filtro=ativos'),
-                          onCheckins: () => context.go('/agenda'),
+                          onCheckins: () => context.go('/checkin/historico'),
                           onAgenda: () => context.go('/agenda'),
                           onRisco:
                               riscoAlto > 0
