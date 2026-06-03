@@ -19,6 +19,7 @@ import '../providers/dashboard_provider.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_haptic.dart';
 import '../utils/dashboard_command_copy.dart';
+import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import 'dashboard_horizontal_scroll_peek.dart';
 
@@ -497,6 +498,7 @@ List<CommandActionItem> buildDashboardNextActions({
             '$unreadCount conversa${unreadCount == 1 ? '' : 's'} aguardando',
         route: '/chat/inbox',
         tone: CommandActionTone.hot,
+        priorityBadge: 'P1',
       ),
     if (alunosRisco > 0 && !hideRiskSummary)
       CommandActionItem(
@@ -506,6 +508,7 @@ List<CommandActionItem> buildDashboardNextActions({
             '$alunosRisco no radar · risco, inadimplência ou pausa no treino',
         route: '/alunos?filtro=contato',
         tone: CommandActionTone.hot,
+        priorityBadge: 'P0',
       ),
     if (cobrancasPendentes > 0)
       CommandActionItem(
@@ -515,6 +518,7 @@ List<CommandActionItem> buildDashboardNextActions({
             '$cobrancasPendentes mensalidade${cobrancasPendentes == 1 ? '' : 's'} no radar',
         route: '/financeiro',
         tone: CommandActionTone.money,
+        priorityBadge: 'P1',
       ),
     if (queueAction != null) queueAction,
     if (agendaHoje > 0)
@@ -542,32 +546,47 @@ List<CommandActionItem> buildDashboardNextActions({
   return nextActions;
 }
 
+CommandActionItem _sheetItemFromFila(FilaAcaoResumo action) {
+  final rawTitle =
+      action.titulo.isNotEmpty ? action.titulo : 'Prioridade';
+  final radarName = dashboardRadarStudentName(rawTitle);
+  final isRadar = radarName != null;
+  final badge = dashboardPriorityBadgeLabel(
+    prioridade: action.prioridade,
+    sla: action.sla,
+    ctaLabel: action.ctaLabel,
+  );
+  return CommandActionItem(
+    icon: 'zap',
+    title: isRadar ? radarName! : dashboardFormatActionCopy(rawTitle),
+    subtitle: dashboardFormatActionCopy(action.descricao),
+    route:
+        action.acaoUrl.startsWith('/')
+            ? action.acaoUrl
+            : '/dashboard/personal',
+    tone: CommandActionTone.primary,
+    isRadarStudent: isRadar,
+    priorityBadge: badge,
+  );
+}
+
 List<CommandActionItem> buildDashboardSheetActions({
   required List<CommandActionItem> curated,
   required List<FilaAcaoResumo> filaAcoes,
 }) {
-  final seenTitles = curated.map((a) => a.title).toSet();
-  final extras = <CommandActionItem>[];
-  for (final action in filaAcoes) {
-    final title = dashboardFormatActionCopy(
-      action.titulo.isNotEmpty ? action.titulo : 'Prioridade',
-    );
-    if (seenTitles.contains(title)) continue;
-    seenTitles.add(title);
-    extras.add(
-      CommandActionItem(
-        icon: 'zap',
-        title: title,
-        subtitle: dashboardFormatActionCopy(action.descricao),
-        route:
-            action.acaoUrl.startsWith('/')
-                ? action.acaoUrl
-                : '/dashboard/personal',
-        tone: CommandActionTone.primary,
-      ),
-    );
+  final seenKeys = <String>{};
+  for (final item in curated) {
+    seenKeys.add('${item.title}|${item.route}');
   }
-  return [...curated, ...extras].take(12).toList();
+  final merged = <CommandActionItem>[...curated];
+  for (final action in filaAcoes) {
+    final item = _sheetItemFromFila(action);
+    final key = '${item.title}|${item.route}';
+    if (seenKeys.contains(key)) continue;
+    seenKeys.add(key);
+    merged.add(item);
+  }
+  return merged.take(12).toList();
 }
 
 void showCommandActionsSheet(
@@ -576,9 +595,6 @@ void showCommandActionsSheet(
   required Color primary,
   required List<CommandActionItem> actions,
 }) {
-  final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-  final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-
   showModalBottomSheet<void>(
     context: context,
     backgroundColor: Colors.transparent,
@@ -586,112 +602,12 @@ void showCommandActionsSheet(
     isScrollControlled: true,
     useSafeArea: true,
     builder: (sheetContext) {
-      final media = MediaQuery.of(sheetContext);
-      return Padding(
-        padding: EdgeInsets.fromLTRB(
-          14,
-          0,
-          14,
-          math.max(12, media.viewPadding.bottom + 10),
-        ),
-        child: Container(
-          constraints: BoxConstraints(maxHeight: media.size.height * 0.72),
-          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: fxStripCardDecoration(
-            sheetContext,
-            radius: 28,
-            glowStrength: isDark ? 0.28 : 0.48,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 42,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 14),
-                  decoration: BoxDecoration(
-                    color: line.withValues(alpha: 0.9),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-              ),
-              Row(
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: BrandPalette.soft(primary, dark: isDark),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Center(
-                      child: FxIcon(name: 'route', size: 18, color: primary),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Todas as prioridades',
-                          style: TokensStrip.h2(
-                            color: primary,
-                            fontFamily:
-                                Theme.of(sheetContext)
-                                    .textTheme
-                                    .bodyLarge
-                                    ?.fontFamily,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Ordenadas pelo impacto de hoje.',
-                          style: TokensStrip.bodyMuted(
-                            color: mute,
-                            fontFamily:
-                                Theme.of(sheetContext)
-                                    .textTheme
-                                    .bodyLarge
-                                    ?.fontFamily,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.of(sheetContext).pop(),
-                    visualDensity: VisualDensity.compact,
-                    icon: Icon(Icons.close_rounded, size: 18, color: mute),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              Flexible(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: actions.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 8),
-                  itemBuilder: (_, index) {
-                    final item = actions[index];
-                    return CommandActionTile(
-                      item: item,
-                      isDark: isDark,
-                      primary: primary,
-                      onTap: () {
-                        Navigator.of(sheetContext).pop();
-                        context.go(item.route);
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
+      return CommandPrioritiesSheet(
+        parentContext: context,
+        sheetContext: sheetContext,
+        isDark: isDark,
+        primary: primary,
+        actions: actions,
       );
     },
   );

@@ -48,6 +48,10 @@ void main() {
     expect(widget, contains("'Recentes'"));
     expect(widget, contains('prioritiesActionLabel'));
     expect(widget, contains('showPrioritiesLink'));
+    expect(widget, contains('CommandPrioritiesSheet'));
+    expect(widget, contains('Ações por aluno'));
+    expect(widget, contains('isRadarStudent'));
+    expect(widget, contains('priorityBadge'));
     expect(widget, contains('DashboardCommandCenterStickyHeaderDelegate'));
     expect(widget, contains('SliverPersistentHeader'));
     expect(widget, contains('Agendar primeiro treino'));

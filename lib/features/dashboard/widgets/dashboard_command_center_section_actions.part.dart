@@ -6,6 +6,8 @@ class CommandActionItem {
   final String subtitle;
   final String route;
   final CommandActionTone tone;
+  final bool isRadarStudent;
+  final String? priorityBadge;
 
   const CommandActionItem({
     required this.icon,
@@ -13,6 +15,8 @@ class CommandActionItem {
     required this.subtitle,
     required this.route,
     required this.tone,
+    this.isRadarStudent = false,
+    this.priorityBadge,
   });
 }
 
@@ -256,8 +260,9 @@ class CommandActionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final mute = dashboardReadableCaption(context, isDark: isDark);
     final accent = commandToneAccent(item.tone, primary);
+    final badge = item.priorityBadge;
     return Semantics(
       label: '${item.title}. ${item.subtitle}',
       button: true,
@@ -295,15 +300,45 @@ class CommandActionTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      item.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w900,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: ink,
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                        if (badge != null && badge.isNotEmpty) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: accent.withValues(
+                                alpha: isDark ? 0.22 : 0.12,
+                              ),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              badge,
+                              style: TextStyle(
+                                color: accent,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -326,6 +361,221 @@ class CommandActionTile extends StatelessWidget {
         ),
       ),
     ),
+    );
+  }
+}
+
+class CommandPrioritiesSheet extends StatefulWidget {
+  const CommandPrioritiesSheet({
+    super.key,
+    required this.parentContext,
+    required this.sheetContext,
+    required this.isDark,
+    required this.primary,
+    required this.actions,
+  });
+
+  final BuildContext parentContext;
+  final BuildContext sheetContext;
+  final bool isDark;
+  final Color primary;
+  final List<CommandActionItem> actions;
+
+  @override
+  State<CommandPrioritiesSheet> createState() => _CommandPrioritiesSheetState();
+}
+
+class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
+  late bool _radarExpanded;
+
+  @override
+  void initState() {
+    super.initState();
+    final radarCount =
+        widget.actions.where((action) => action.isRadarStudent).length;
+    _radarExpanded = radarCount <= 2;
+  }
+
+  void _openAction(CommandActionItem item) {
+    Navigator.of(widget.sheetContext).pop();
+    widget.parentContext.go(item.route);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = widget.isDark;
+    final primary = widget.primary;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final mute = dashboardReadableCaption(widget.sheetContext, isDark: isDark);
+    final heading = BrandPalette.sectionHeading(primary, dark: isDark);
+    final link = BrandPalette.sectionLink(primary, dark: isDark);
+    final impactActions =
+        widget.actions.where((action) => !action.isRadarStudent).toList();
+    final radarActions =
+        widget.actions.where((action) => action.isRadarStudent).toList();
+    final media = MediaQuery.of(widget.sheetContext);
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        14,
+        0,
+        14,
+        math.max(12, media.viewPadding.bottom + 10),
+      ),
+      child: Container(
+        constraints: BoxConstraints(maxHeight: media.size.height * 0.72),
+        padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+        decoration: fxStripCardDecoration(
+          widget.sheetContext,
+          radius: 28,
+          glowStrength: isDark ? 0.28 : 0.48,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 42,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 14),
+                decoration: BoxDecoration(
+                  color: line.withValues(alpha: 0.9),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: BrandPalette.soft(primary, dark: isDark),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Center(
+                    child: FxIcon(name: 'route', size: 18, color: primary),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Todas as prioridades',
+                        style: TokensStrip.h2(
+                          color: primary,
+                          fontFamily:
+                              Theme.of(widget.sheetContext)
+                                  .textTheme
+                                  .bodyLarge
+                                  ?.fontFamily,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Ordenadas pelo impacto de hoje.',
+                        style: TokensStrip.bodyMuted(
+                          color: mute,
+                          fontFamily:
+                              Theme.of(widget.sheetContext)
+                                  .textTheme
+                                  .bodyLarge
+                                  ?.fontFamily,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.of(widget.sheetContext).pop(),
+                  visualDensity: VisualDensity.compact,
+                  icon: Icon(Icons.close_rounded, size: 18, color: mute),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                physics: const BouncingScrollPhysics(),
+                children: [
+                  for (var index = 0; index < impactActions.length; index++) ...[
+                    if (index > 0) const SizedBox(height: 8),
+                    CommandActionTile(
+                      item: impactActions[index],
+                      isDark: isDark,
+                      primary: primary,
+                      onTap: () => _openAction(impactActions[index]),
+                    ),
+                  ],
+                  if (radarActions.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Semantics(
+                      button: true,
+                      expanded: _radarExpanded,
+                      label:
+                          'Ações por aluno, ${radarActions.length} itens. '
+                          '${_radarExpanded ? 'Expandido' : 'Recolhido'}',
+                      child: InkWell(
+                        onTap: () {
+                          dashboardHapticCollapseToggle();
+                          setState(() => _radarExpanded = !_radarExpanded);
+                        },
+                        borderRadius: BorderRadius.circular(TokensStrip.rInput),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 8,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Ações por aluno (${radarActions.length})',
+                                  style: AppTypography.inter(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                    color: heading,
+                                  ),
+                                ),
+                              ),
+                              AnimatedRotation(
+                                turns: _radarExpanded ? 0.25 : 0,
+                                duration: const Duration(milliseconds: 220),
+                                curve: Curves.easeOutCubic,
+                                child: Icon(
+                                  Icons.chevron_right_rounded,
+                                  size: 22,
+                                  color: link,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (_radarExpanded) ...[
+                      const SizedBox(height: 8),
+                      for (var index = 0; index < radarActions.length; index++) ...[
+                        if (index > 0) const SizedBox(height: 8),
+                        CommandActionTile(
+                          item: radarActions[index],
+                          isDark: isDark,
+                          primary: primary,
+                          onTap: () => _openAction(radarActions[index]),
+                        ),
+                      ],
+                    ],
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -32,3 +32,50 @@ String dashboardFormatActionCopy(String raw) {
 
   return text;
 }
+
+final RegExp _radarFocuxTitlePattern = RegExp(
+  r'^Radar Focux:\s*(.+)$',
+  caseSensitive: false,
+);
+
+bool dashboardIsRadarFocuxTitle(String rawTitle) =>
+    _radarFocuxTitlePattern.hasMatch(rawTitle.trim());
+
+/// Nome do aluno para título do sheet (sem prefixo "Radar Focux").
+String? dashboardRadarStudentName(String rawTitle) {
+  final match = _radarFocuxTitlePattern.firstMatch(rawTitle.trim());
+  if (match == null) return null;
+  return fxTitleCaseName(match.group(1)!.trim());
+}
+
+/// Badge curto para scan (P0, P1, Hoje…).
+String? dashboardPriorityBadgeLabel({
+  required String prioridade,
+  String? sla,
+  String? ctaLabel,
+}) {
+  final p = prioridade.trim().toUpperCase();
+  if (p == 'P0' || p == 'P1' || p == 'P2') return p;
+  final slaNorm = (sla ?? '').trim().toLowerCase();
+  if (slaNorm == 'hoje') return 'Hoje';
+  final cta = (ctaLabel ?? '').trim();
+  if (cta.isNotEmpty && cta.length <= 12) return cta;
+  return null;
+}
+
+/// Subtítulo do radar no sheet: badge + descrição sem repetir o nome.
+String dashboardRadarSheetSubtitle({
+  required String descricao,
+  String? prioridade,
+  String? sla,
+  String? ctaLabel,
+}) {
+  final badge = dashboardPriorityBadgeLabel(
+    prioridade: prioridade ?? '',
+    sla: sla,
+    ctaLabel: ctaLabel,
+  );
+  final body = dashboardFormatActionCopy(descricao);
+  if (badge == null || badge.isEmpty) return body;
+  return '$badge · $body';
+}

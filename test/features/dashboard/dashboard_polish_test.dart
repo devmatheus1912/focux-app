@@ -33,7 +33,10 @@ void main() {
     expect(screen, contains("label: 'Ticket médio'"));
     expect(screen, contains('excessBeyondMeta'));
     expect(screen, contains('BrandPalette.sectionLink'));
-    expect(screen, contains('nextActions.length > 1'));
+    expect(screen, contains('showPrioritiesLink'));
+    expect(screen, contains("'Ver prioridades'"));
+    expect(screen, contains('CommandPrioritiesSheet'));
+    expect(screen, contains('Ações por aluno'));
     expect(screen, contains('dashboardCollapsibleSemanticsLabel'));
     expect(screen, contains('dashboard_entry_motion.dart'));
     expect(screen, contains('DashboardDayFocusBanner'));

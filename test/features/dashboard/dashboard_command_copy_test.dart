@@ -11,5 +11,18 @@ void main() {
       dashboardFormatActionCopy('Radar Focux: thales'),
       'Radar Focux: Thales',
     );
+    expect(dashboardRadarStudentName('Radar Focux: lucas andrade'), 'Lucas Andrade');
+    expect(
+      dashboardPriorityBadgeLabel(prioridade: 'P0', sla: 'Hoje'),
+      'P0',
+    );
+    expect(
+      dashboardRadarSheetSubtitle(
+        descricao: 'Completar mapa corporal',
+        prioridade: 'P1',
+        sla: 'Hoje',
+      ),
+      contains('mapa corporal'),
+    );
   });
 }
