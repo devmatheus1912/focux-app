@@ -187,6 +187,10 @@ class _PersonalDashboardScreenState
     with TickerProviderStateMixin {
   FinanceiroDashboard? _finData;
   bool _loadingFin = true;
+  int _attentionSectionResetToken = 0;
+  String? _lastTrackedLocation;
+  VoidCallback? _routeListener;
+  RouteInformationProvider? _routeInformationProvider;
 
   late AnimationController _gradientCtrl;
   late AnimationController _counterCtrl;
@@ -236,7 +240,25 @@ class _PersonalDashboardScreenState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _entryCtrl.forward(from: 0);
       _maybeShowOnboardingWizard();
+      _bindDashboardReturnListener();
     });
+  }
+
+  void _bindDashboardReturnListener() {
+    if (!mounted || _routeListener != null) return;
+    final router = GoRouter.of(context);
+    _lastTrackedLocation = router.routeInformationProvider.value.uri.path;
+    _routeInformationProvider = router.routeInformationProvider;
+    _routeListener = () {
+      final path = _routeInformationProvider!.value.uri.path;
+      if (_lastTrackedLocation != null &&
+          path == '/dashboard/personal' &&
+          _lastTrackedLocation != '/dashboard/personal') {
+        setState(() => _attentionSectionResetToken++);
+      }
+      _lastTrackedLocation = path;
+    };
+    router.routeInformationProvider.addListener(_routeListener!);
   }
 
   Future<void> _maybeShowOnboardingWizard() async {
@@ -250,6 +272,11 @@ class _PersonalDashboardScreenState
 
   @override
   void dispose() {
+    final listener = _routeListener;
+    final provider = _routeInformationProvider;
+    if (listener != null && provider != null) {
+      provider.removeListener(listener);
+    }
     _gradientCtrl.dispose();
     _counterCtrl.dispose();
     _entryCtrl.dispose();
@@ -583,6 +610,7 @@ class _PersonalDashboardScreenState
                                   : 'Cobranças pendentes · toque para expandir',
                           isDark: themeDark,
                           initiallyExpanded: riscoAlto <= 3,
+                          resetToken: _attentionSectionResetToken,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [

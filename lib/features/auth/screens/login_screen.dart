@@ -234,9 +234,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           perfil.trialUsed != true &&
           (plan == SubscriptionPlan.FREE ||
               plan == SubscriptionPlan.ENTERPRISE && !trialActive);
-      if (shouldOfferTrial ||
-          (plan != SubscriptionPlan.PREMIUM &&
-              plan != SubscriptionPlan.ENTERPRISE)) {
+      if (shouldOfferTrial || plan == SubscriptionPlan.FREE) {
         return '/assinatura';
       }
     } catch (_) {

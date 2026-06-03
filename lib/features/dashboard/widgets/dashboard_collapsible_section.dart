@@ -17,6 +17,7 @@ class DashboardCollapsibleSection extends StatefulWidget {
     required this.isDark,
     required this.child,
     this.initiallyExpanded = false,
+    this.resetToken = 0,
     this.headerActionLabel,
     this.onHeaderAction,
   });
@@ -26,6 +27,7 @@ class DashboardCollapsibleSection extends StatefulWidget {
   final bool isDark;
   final Widget child;
   final bool initiallyExpanded;
+  final int resetToken;
   final String? headerActionLabel;
   final VoidCallback? onHeaderAction;
 
@@ -47,6 +49,10 @@ class _DashboardCollapsibleSectionState
   @override
   void didUpdateWidget(covariant DashboardCollapsibleSection oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.resetToken != widget.resetToken) {
+      _expanded = false;
+      return;
+    }
     if (oldWidget.initiallyExpanded != widget.initiallyExpanded &&
         !oldWidget.initiallyExpanded &&
         widget.initiallyExpanded) {
