@@ -87,4 +87,9 @@ void main() {
       greaterThan(0),
     );
   });
+
+  test('maskEmailForList oculta parte local do e-mail', () {
+    expect(maskEmailForList('joao.silva@academia.com'), 'j***@academia.com');
+    expect(maskEmailForList(''), '—');
+  });
 }

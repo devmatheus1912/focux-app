@@ -9,6 +9,7 @@ import '../../../core/config/env.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../data/aluno_contact_utils.dart';
 import '../data/aluno_followup_store.dart';
+import '../data/aluno_list_preferences_store.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_followup_provider.dart';
 import '../providers/alunos_provider.dart';
@@ -39,6 +40,15 @@ String _mensalidadesPagasMessage(int count) =>
 
 String _alunosAtualizadosMessage(int count) =>
     count == 1 ? '1 aluno atualizado' : '$count alunos atualizados';
+
+/// Texto secundário da lista — contraste WCAG AA em fundos de card.
+Color _alunoListSecondaryInk(bool isDark) =>
+    isDark ? const Color(0xFF9AA8B4) : const Color(0xFF4B5563);
+
+/// Badge «Risco alto» — cores calibradas para leitura em 10px.
+(Color, Color) _riscoAltoBadgeColors(bool isDark) => isDark
+    ? (const Color(0xFFFFB088), const Color(0xFF3D2A18))
+    : (const Color(0xFF8A4F00), const Color(0xFFFFE8CC));
 
 /// Fade na borda direita para indicar scroll horizontal nos filtros.
 class _HorizontalScrollPeek extends StatelessWidget {
@@ -106,6 +116,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   final FocusNode _searchFocusNode = FocusNode();
   String _query = '';
   bool _ignoredDeepLinkFiltro = false;
+  bool _listaCompacta = false;
 
   @override
   void initState() {
@@ -114,6 +125,12 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     _searchFocusNode.addListener(() {
       if (mounted) setState(() {});
     });
+    _loadListPreferences();
+  }
+
+  Future<void> _loadListPreferences() async {
+    final prefs = await AlunoListPreferencesStore.load();
+    if (mounted) setState(() => _listaCompacta = prefs.compact);
   }
 
   @override
@@ -629,6 +646,19 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                   selected: _ordenacao == AlunoOrdenacao.semFoto,
                   onTap:
                       () => setState(() => _ordenacao = AlunoOrdenacao.semFoto),
+                ),
+                const SizedBox(height: 8),
+                option(
+                  title: 'Lista compacta',
+                  subtitle:
+                      'Menos ruído: oculta e-mail na lista e reduz o card.',
+                  icon: Icons.density_small_rounded,
+                  selected: _listaCompacta,
+                  onTap: () async {
+                    final next = !_listaCompacta;
+                    setState(() => _listaCompacta = next);
+                    await AlunoListPreferencesStore.saveCompact(next);
+                  },
                 ),
                 const SizedBox(height: 18),
                 Text(
@@ -1229,6 +1259,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                                     activeFiltro: _filtro,
                                     triageContextActive: triageContextActive,
                                     diasSemTreinoLimite: diasLimite,
+                                    compact: _listaCompacta,
                                   ),
                                 );
                               },
@@ -1625,6 +1656,7 @@ class _AlunoCardFX extends ConsumerStatefulWidget {
   final AlunoFiltro activeFiltro;
   final bool triageContextActive;
   final int diasSemTreinoLimite;
+  final bool compact;
 
   const _AlunoCardFX({
     required this.aluno,
@@ -1635,6 +1667,7 @@ class _AlunoCardFX extends ConsumerStatefulWidget {
     this.activeFiltro = AlunoFiltro.todos,
     this.triageContextActive = false,
     this.diasSemTreinoLimite = AlunoFollowUpStore.diasSemTreinoLimite,
+    this.compact = false,
   });
 
   @override
@@ -1669,7 +1702,9 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
     final chrome = ShellChrome.forDark(isDark);
     final ink = chrome.ink;
     final mute = chrome.mute;
+    final secondaryInk = _alunoListSecondaryInk(isDark);
     final line = chrome.line;
+    final cardPadding = widget.compact ? 10.0 : 14.0;
 
     final aluno = widget.aluno;
     final displayName = fxTitleCaseName(aluno.nome);
@@ -1688,8 +1723,9 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
       statusColor = isDark ? const Color(0xFFE2B46F) : EagleTokens.warn;
       statusText = 'Inativo';
     } else if (aluno.emRisco) {
-      statusBg = isDark ? const Color(0x24FFB77A) : EagleTokens.warnSoft;
-      statusColor = isDark ? const Color(0xFFFFB77A) : EagleTokens.warn;
+      final riscoColors = _riscoAltoBadgeColors(isDark);
+      statusBg = riscoColors.$2;
+      statusColor = riscoColors.$1;
       statusText = 'Risco alto';
     } else {
       statusBg = isDark ? const Color(0x1F6FE296) : EagleTokens.goodSoft;
@@ -1760,7 +1796,7 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
       borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(cardPadding),
         decoration: ShellChrome.forDark(isDark).listCard(
           selected: isSelected,
           primary: primary,
@@ -1861,19 +1897,33 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                       ],
                     ],
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '$objetivo · ${aluno.email.toLowerCase()}',
-                    style: AppTypography.inter(
-                      fontSize: TokensStrip.fontBodySm,
-                      color: mute,
-                      height: 1.25,
+                  if (!widget.compact) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      '$objetivo · ${maskEmailForList(aluno.email)}',
+                      style: AppTypography.inter(
+                        fontSize: TokensStrip.fontBodySm,
+                        color: secondaryInk,
+                        height: 1.25,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  ] else ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      objetivo,
+                      style: AppTypography.inter(
+                        fontSize: TokensStrip.fontBodySm,
+                        color: secondaryInk,
+                        height: 1.25,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
 
-                  const SizedBox(height: 8),
+                  SizedBox(height: widget.compact ? 6 : 8),
                   Row(
                     children: [
                       Container(
@@ -1893,18 +1943,18 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                               hasTreinoRecente
                                   ? FontWeight.w700
                                   : FontWeight.w500,
-                          color: hasTreinoRecente ? aderColor : mute,
+                          color: hasTreinoRecente ? aderColor : secondaryInk,
                           height: 1.1,
                         ),
                       ),
-                      if (adherenceLabel.isNotEmpty) ...[
+                      if (!widget.compact && adherenceLabel.isNotEmpty) ...[
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 6),
                           child: Text(
                             '·',
                             style: AppTypography.inter(
                               fontSize: 11,
-                              color: mute.withValues(alpha: 0.65),
+                              color: secondaryInk.withValues(alpha: 0.85),
                               height: 1.1,
                             ),
                           ),
@@ -1914,7 +1964,7 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                             adherenceLabel,
                             style: AppTypography.inter(
                               fontSize: 11,
-                              color: mute,
+                              color: secondaryInk,
                               height: 1.1,
                             ),
                             maxLines: 1,
@@ -1952,10 +2002,17 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
                     isEmpty: !hasTreinoRecente,
                   ),
                   const SizedBox(height: 6),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    size: 18,
-                    color: mute.withValues(alpha: 0.5),
+                  Semantics(
+                    label: 'Abrir ficha de $displayName',
+                    button: true,
+                    child: Tooltip(
+                      message: 'Ver detalhes',
+                      child: Icon(
+                        Icons.chevron_right_rounded,
+                        size: 18,
+                        color: secondaryInk.withValues(alpha: 0.9),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -2416,20 +2473,24 @@ class _AlunoQuickActionIcon extends StatelessWidget {
     final size = compact ? 24.0 : 28.0;
     final iconSize = compact ? 14.0 : 15.0;
 
-    return Tooltip(
-      message: tooltip,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(999),
-        child: Container(
-          width: size,
-          height: size,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: compact ? 0.1 : 0.12),
-            shape: BoxShape.circle,
+    return Semantics(
+      label: tooltip,
+      button: true,
+      child: Tooltip(
+        message: tooltip,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(999),
+          child: Container(
+            width: size,
+            height: size,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: compact ? 0.1 : 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: iconSize, color: color),
           ),
-          child: Icon(icon, size: iconSize, color: color),
         ),
       ),
     );

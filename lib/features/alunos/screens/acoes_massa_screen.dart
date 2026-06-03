@@ -2,6 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../data/aluno_contact_utils.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -232,7 +233,9 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
                               value: sel,
                               onChanged: (_) => _toggleSelecionado(a.id),
                               title: Text(a.nome),
-                              subtitle: Text('${a.email} · ${a.status}'),
+                              subtitle: Text(
+                                '${maskEmailForList(a.email)} · ${a.status}',
+                              ),
                               secondary: CircleAvatar(
                                 child: Text(a.nome[0].toUpperCase()),
                               ),

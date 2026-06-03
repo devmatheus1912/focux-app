@@ -82,3 +82,16 @@ String formatProximoContato(Aluno aluno) {
   final m = date.month.toString().padLeft(2, '0');
   return '$d/$m';
 }
+
+/// Máscara de e-mail para listas (privacidade). Detalhe do aluno mantém o valor completo.
+String maskEmailForList(String email) {
+  final trimmed = email.trim();
+  if (trimmed.isEmpty) return '—';
+  final at = trimmed.indexOf('@');
+  if (at <= 0) return trimmed;
+  final local = trimmed.substring(0, at);
+  final domain = trimmed.substring(at + 1);
+  if (domain.isEmpty) return trimmed;
+  final visible = local.isEmpty ? '*' : local[0];
+  return '$visible***@$domain';
+}

@@ -19,6 +19,12 @@ void main() {
     expect(screen, contains("label: 'Inativo'"));
     expect(screen, contains("label: 'Bloqueado'"));
     expect(screen, contains('_SheetShortcutChip'));
+    expect(screen, contains('Lista compacta'));
+    expect(screen, contains('AlunoListPreferencesStore'));
+    expect(screen, contains('maskEmailForList'));
+    expect(screen, contains('_riscoAltoBadgeColors'));
+    expect(screen, contains('_alunoListSecondaryInk'));
+    expect(screen, isNot(contains("aluno.email.toLowerCase()")));
     expect(screen, contains('isScrollControlled: true'));
     expect(screen, contains('useSafeArea: true'));
     expect(screen, contains('SingleChildScrollView'));
