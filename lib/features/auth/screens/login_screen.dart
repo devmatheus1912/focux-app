@@ -13,6 +13,7 @@ import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
+import '../../dashboard/utils/dashboard_home_prefetch.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
@@ -225,6 +226,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final fallback = _postLoginRedirect(context, isAluno: false);
     try {
       ref.invalidate(perfilProvider);
+      prefetchPersonalDashboardHome(ref);
       final perfil = await ref.read(perfilProvider.future);
       final plan = subscriptionPlanFromApi(perfil.plano);
       final trialActive =

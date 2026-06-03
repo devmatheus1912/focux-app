@@ -338,9 +338,6 @@ class _PersonalDashboardScreenState
     final heroDeep = BrandPalette.deep(heroPrimary);
     final dashboardAsync = ref.watch(dashboardProvider);
     final commandAsync = ref.watch(commandCenterProvider);
-    final chatAsync = ref.watch(chatInboxProvider);
-    final homeSignalsLoading =
-        commandAsync.isLoading || chatAsync.isLoading;
     final reduceMotion = TokensStrip.prefersReducedMotion(context);
     final themeDark = Theme.of(context).brightness == Brightness.dark;
     final alunosAsync = ref.watch(alunosProvider);
@@ -365,9 +362,6 @@ class _PersonalDashboardScreenState
                 },
               ),
           data: (data) {
-              if (homeSignalsLoading) {
-                return _buildShimmerLoading(context, themeDark);
-              }
               final screenWidth = MediaQuery.sizeOf(context).width;
               final isCompactPhone = screenWidth < 390;
               final shortcutAspectRatio = isCompactPhone ? 2.75 : 3.05;

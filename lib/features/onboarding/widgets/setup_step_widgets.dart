@@ -444,39 +444,41 @@ class SetupWizardSkeleton extends StatelessWidget {
     return Shimmer.fromColors(
       baseColor: base,
       highlightColor: highlight,
-      child: ListView(
+      child: Padding(
         padding: const EdgeInsets.all(TokensStrip.s4),
-        physics: const NeverScrollableScrollPhysics(),
-        children: [
-          Container(
-            width: 180,
-            height: 18,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(6),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Container(
-            width: double.infinity,
-            height: 8,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
-          const SizedBox(height: 18),
-          for (var i = 0; i < (compact ? 3 : 5); i++) ...[
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Container(
-              height: compact ? 44 : 88,
-              margin: const EdgeInsets.only(bottom: TokensStrip.s3),
+              width: 180,
+              height: 18,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                borderRadius: BorderRadius.circular(6),
               ),
             ),
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              height: 8,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            const SizedBox(height: 18),
+            for (var i = 0; i < (compact ? 3 : 5); i++)
+              Container(
+                height: compact ? 44 : 88,
+                margin: const EdgeInsets.only(bottom: TokensStrip.s3),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                ),
+              ),
           ],
-        ],
+        ),
       ),
     );
   }
