@@ -21,9 +21,17 @@ String dashboardCollapsibleSemanticsLabel(
   String title,
   bool expanded, {
   String? collapsedHint,
+  String? collapsedActionLabel,
 }) {
   if (expanded) {
     return '$title, expandido. Toque para recolher';
+  }
+  if (collapsedActionLabel != null && collapsedActionLabel.trim().isNotEmpty) {
+    final hint =
+        collapsedHint != null && collapsedHint.trim().isNotEmpty
+            ? collapsedHint
+            : 'Toque em $collapsedActionLabel para agir ou no ícone para expandir';
+    return '$title, recolhido. $hint';
   }
   if (collapsedHint != null && collapsedHint.trim().isNotEmpty) {
     return '$title, recolhido. $collapsedHint';

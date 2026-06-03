@@ -7,6 +7,7 @@ void main() {
     const paths = [
       'lib/features/dashboard/screens/personal_dashboard_screen.dart',
       'lib/features/dashboard/widgets/dashboard_command_center_section.dart',
+      'lib/features/dashboard/widgets/dashboard_command_center_sticky_header.dart',
       'lib/features/dashboard/widgets/dashboard_command_center_section_actions.part.dart',
       'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
       'lib/features/dashboard/widgets/dashboard_aderencia_semana_widget.dart',
@@ -32,7 +33,9 @@ void main() {
     expect(widget, contains('Pulso operacional'));
     expect(widget, contains('BoxConstraints(minHeight: 48)'));
     expect(widget, contains('hideRiscoChip'));
-    expect(widget, contains('retomada urgente'));
+    expect(widget, contains("collapsedActionLabel: 'Revisar'"));
+    expect(widget, contains('DashboardCommandCenterStickyHeaderDelegate'));
+    expect(widget, contains('SliverPersistentHeader'));
     expect(widget, isNot(contains('_RiskWaveBanner')));
     expect(widget, contains('DashboardAderenciaSemanaEmptyCard'));
     expect(widget, contains('isRiskEchoCopy'));

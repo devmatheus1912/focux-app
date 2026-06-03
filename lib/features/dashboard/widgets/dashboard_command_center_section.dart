@@ -29,6 +29,7 @@ class DashboardCommandCenterSection extends ConsumerStatefulWidget {
   final FinanceiroDashboard? finData;
   final bool hideRiskSummary;
   final String? contextualSubtitle;
+  final bool hideHeader;
 
   const DashboardCommandCenterSection({
     super.key,
@@ -37,6 +38,7 @@ class DashboardCommandCenterSection extends ConsumerStatefulWidget {
     required this.finData,
     this.hideRiskSummary = false,
     this.contextualSubtitle,
+    this.hideHeader = false,
   });
 
   @override
@@ -266,88 +268,89 @@ class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandC
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Central de Comando',
-                    style: AppTypography.inter(
-                      fontSize: TokensStrip.fontH2,
-                      fontWeight: TokensStrip.weightH2,
-                      letterSpacing: TokensStrip.trackingH2,
-                      height: 1.2,
-                      color: heading,
+        if (!widget.hideHeader)
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Central de Comando',
+                      style: AppTypography.inter(
+                        fontSize: TokensStrip.fontH2,
+                        fontWeight: TokensStrip.weightH2,
+                        letterSpacing: TokensStrip.trackingH2,
+                        height: 1.2,
+                        color: heading,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    contextualSubtitle ??
-                        'A melhor próxima ação para proteger receita e aderência.',
-                    style: AppTypography.inter(
-                      fontSize: TokensStrip.fontBodySm,
-                      fontWeight: FontWeight.w400,
-                      height: TokensStrip.leadingBody,
-                      color: mute,
+                    const SizedBox(height: 4),
+                    Text(
+                      contextualSubtitle ??
+                          'A melhor próxima ação para proteger receita e aderência.',
+                      style: AppTypography.inter(
+                        fontSize: TokensStrip.fontBodySm,
+                        fontWeight: FontWeight.w400,
+                        height: TokensStrip.leadingBody,
+                        color: mute,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            if (nextActions.length > 1)
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap:
-                      isCommandPreparing
-                          ? null
-                          : () => showCommandActionsSheet(
-                            context,
-                            isDark: isDark,
-                            primary: primary,
-                            actions: nextActions,
+              if (nextActions.length > 1)
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap:
+                        isCommandPreparing
+                            ? null
+                            : () => showCommandActionsSheet(
+                              context,
+                              isDark: isDark,
+                              primary: primary,
+                              actions: nextActions,
+                            ),
+                    borderRadius: BorderRadius.circular(999),
+                    child: Ink(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 7,
+                      ),
+                      decoration: BoxDecoration(
+                        color: primarySoft,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            isCommandPreparing
+                                ? 'lendo sinais'
+                                : 'Ver ${nextActions.length}',
+                            style: TextStyle(
+                              color: actionColor,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
-                  borderRadius: BorderRadius.circular(999),
-                  child: Ink(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 7,
-                    ),
-                    decoration: BoxDecoration(
-                      color: primarySoft,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          isCommandPreparing
-                              ? 'lendo sinais'
-                              : 'Ver ${nextActions.length}',
-                          style: TextStyle(
-                            color: actionColor,
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        if (!isCommandPreparing) ...[
-                          const SizedBox(width: 4),
-                          FxIcon(
-                            name: 'chevron-right',
-                            size: 13,
-                            color: actionColor,
-                          ),
+                          if (!isCommandPreparing) ...[
+                            const SizedBox(width: 4),
+                            FxIcon(
+                              name: 'chevron-right',
+                              size: 13,
+                              color: actionColor,
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 20),
+            ],
+          ),
+        if (!widget.hideHeader) const SizedBox(height: 20),
         CommandActionPanel(
           isDark: isDark,
           primary: primary,

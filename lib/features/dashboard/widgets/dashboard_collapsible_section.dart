@@ -21,6 +21,8 @@ class DashboardCollapsibleSection extends StatefulWidget {
     this.resetToken = 0,
     this.headerActionLabel,
     this.onHeaderAction,
+    this.collapsedActionLabel,
+    this.onCollapsedAction,
   });
 
   final String title;
@@ -31,6 +33,8 @@ class DashboardCollapsibleSection extends StatefulWidget {
   final int resetToken;
   final String? headerActionLabel;
   final VoidCallback? onHeaderAction;
+  final String? collapsedActionLabel;
+  final VoidCallback? onCollapsedAction;
 
   @override
   State<DashboardCollapsibleSection> createState() =>
@@ -66,6 +70,16 @@ class _DashboardCollapsibleSectionState
     setState(() => _expanded = !_expanded);
   }
 
+  void _onHeaderTap() {
+    if (!_expanded &&
+        widget.onCollapsedAction != null &&
+        widget.collapsedActionLabel != null) {
+      widget.onCollapsedAction!();
+      return;
+    }
+    _toggle();
+  }
+
   @override
   Widget build(BuildContext context) {
     final motionDuration = dashboardMotionDuration(context);
@@ -73,6 +87,10 @@ class _DashboardCollapsibleSectionState
     final heading = BrandPalette.sectionHeading(primary, dark: widget.isDark);
     final mute = dashboardReadableMuted(context, isDark: widget.isDark);
     final link = BrandPalette.sectionLink(primary, dark: widget.isDark);
+    final hasCollapsedAction =
+        !_expanded &&
+        widget.collapsedActionLabel != null &&
+        widget.onCollapsedAction != null;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -93,9 +111,10 @@ class _DashboardCollapsibleSectionState
                 widget.title,
                 _expanded,
                 collapsedHint: widget.collapsedHint,
+                collapsedActionLabel: widget.collapsedActionLabel,
               ),
               child: InkWell(
-                onTap: _toggle,
+                onTap: _onHeaderTap,
                 borderRadius: BorderRadius.circular(TokensStrip.rCard),
                 child: Ink(
                   padding: const EdgeInsets.symmetric(
@@ -137,7 +156,8 @@ class _DashboardCollapsibleSectionState
                           ],
                         ),
                       ),
-                      if (widget.headerActionLabel != null &&
+                      if (_expanded &&
+                          widget.headerActionLabel != null &&
                           widget.onHeaderAction != null)
                         Semantics(
                           button: true,
@@ -153,14 +173,43 @@ class _DashboardCollapsibleSectionState
                             child: Text(widget.headerActionLabel!),
                           ),
                         ),
-                      AnimatedRotation(
-                        turns: _expanded ? 0.25 : 0,
-                        duration: motionDuration,
-                        curve: Curves.easeOutCubic,
-                        child: Icon(
-                          Icons.chevron_right_rounded,
-                          size: 22,
-                          color: link,
+                      if (hasCollapsedAction)
+                        Semantics(
+                          button: true,
+                          label: widget.collapsedActionLabel,
+                          child: TextButton(
+                            onPressed: widget.onCollapsedAction,
+                            style: TextButton.styleFrom(
+                              minimumSize: const Size(48, 48),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                              foregroundColor: link,
+                            ),
+                            child: Text(widget.collapsedActionLabel!),
+                          ),
+                        ),
+                      Semantics(
+                        button: true,
+                        label: _expanded
+                            ? 'Recolher ${widget.title}'
+                            : 'Expandir ${widget.title}',
+                        child: InkWell(
+                          onTap: _toggle,
+                          customBorder: const CircleBorder(),
+                          child: Padding(
+                            padding: const EdgeInsets.all(6),
+                            child: AnimatedRotation(
+                              turns: _expanded ? 0.25 : 0,
+                              duration: motionDuration,
+                              curve: Curves.easeOutCubic,
+                              child: Icon(
+                                Icons.chevron_right_rounded,
+                                size: 22,
+                                color: link,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ],

@@ -40,6 +40,7 @@ import '../widgets/dashboard_shimmer_loading.dart';
 import '../widgets/dashboard_pulse_strip.dart';
 import '../widgets/dashboard_tools_section.dart';
 import '../widgets/dashboard_command_center_section.dart';
+import '../widgets/dashboard_command_center_sticky_header.dart';
 import '../widgets/dashboard_aderencia_semana_widget.dart';
 import '../widgets/dashboard_error_state.dart';
 class PersonalDashboardScreen extends ConsumerStatefulWidget {
@@ -335,6 +336,20 @@ class _PersonalDashboardScreenState
                   (_finData?.vencimentosProximos ?? const []).take(2).toList();
               final attentionItemCount =
                   attentionRiskItems.length + attentionVencItems.length;
+              const commandCenterSubtitle =
+                  'Próximas ações com maior impacto hoje.';
+
+              void openAttentionReview() {
+                if (attentionRiskItems.isNotEmpty) {
+                  context.push('/alunos/${attentionRiskItems.first.id}');
+                  return;
+                }
+                if (attentionVencItems.isNotEmpty) {
+                  context.go('/financeiro');
+                  return;
+                }
+                context.go('/alunos?filtro=risco');
+              }
 
               return RefreshIndicator(
                 onRefresh: () async {
@@ -445,6 +460,14 @@ class _PersonalDashboardScreenState
                     ),
 
                     // CENTRAL DE COMANDO — protagonista do dia
+                    SliverPersistentHeader(
+                      pinned: true,
+                      delegate: DashboardCommandCenterStickyHeaderDelegate(
+                        isDark: themeDark,
+                        primary: primary,
+                        subtitle: commandCenterSubtitle,
+                      ),
+                    ),
                     SliverToBoxAdapter(
                       child: dashboardEntryMotion(
                         context: context,
@@ -461,8 +484,8 @@ class _PersonalDashboardScreenState
                             primary: primary,
                             finData: _finData,
                             hideRiskSummary: alunosEmRisco.isNotEmpty,
-                            contextualSubtitle:
-                                'Próximas ações com maior impacto hoje.',
+                            hideHeader: true,
+                            contextualSubtitle: commandCenterSubtitle,
                           ),
                         ),
                       ),
@@ -486,10 +509,12 @@ class _PersonalDashboardScreenState
                           title: 'Precisa de atenção',
                           collapsedHint:
                               riskDominante
-                                  ? '$riscoAlto de $alunosAtivos · retomada urgente'
+                                  ? '$riscoAlto de $alunosAtivos · toque em Revisar'
                                   : riscoAlto > 0
-                                  ? '$riscoAlto no radar · toque para expandir'
-                                  : 'Cobranças pendentes · toque para expandir',
+                                  ? '$riscoAlto no radar · toque em Revisar'
+                                  : 'Cobranças pendentes · toque em Revisar',
+                          collapsedActionLabel: 'Revisar',
+                          onCollapsedAction: openAttentionReview,
                           isDark: themeDark,
                           initiallyExpanded:
                               !dayFocusCoversRetention && riscoAlto <= 3,
