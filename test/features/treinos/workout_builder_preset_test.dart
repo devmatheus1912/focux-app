@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/treinos/data/workout_builder_preset.dart';
 
+import '../../support/screen_source_bundle.dart';
+
 void main() {
   test('workout builder presets cover common prescription goals', () {
     final ids = workoutBuilderPresets.map((preset) => preset.id).toSet();
@@ -24,10 +26,9 @@ void main() {
         File(
           'lib/features/treinos/data/treino_repository.dart',
         ).readAsStringSync();
-    final screen =
-        File(
-          'lib/features/treinos/screens/add_exercicio_to_treino_screen.dart',
-        ).readAsStringSync();
+    final screen = readScreenSourceBundle(
+      'lib/features/treinos/screens/add_exercicio_to_treino_screen.dart',
+    );
 
     expect(repository, contains('cargaKg'));
     expect(repository, contains('observacoes'));
@@ -41,10 +42,9 @@ void main() {
         File(
           'lib/features/treinos/data/treino_repository.dart',
         ).readAsStringSync();
-    final detail =
-        File(
-          'lib/features/treinos/screens/treino_detail_screen.dart',
-        ).readAsStringSync();
+    final detail = readScreenSourceBundle(
+      'lib/features/treinos/screens/treino_detail_screen.dart',
+    );
 
     expect(repository, contains('reordenarExercicios'));
     expect(repository, contains('/exercicios/ordem'));
@@ -56,10 +56,9 @@ void main() {
   });
 
   test('workout detail persists order through drag reorder', () {
-    final detail =
-        File(
-          'lib/features/treinos/screens/treino_detail_screen.dart',
-        ).readAsStringSync();
+    final detail = readScreenSourceBundle(
+      'lib/features/treinos/screens/treino_detail_screen.dart',
+    );
 
     expect(detail, contains('_TreinoExerciseReorderList'));
     expect(detail, contains('removeAt'));

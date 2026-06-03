@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/exercicios/data/exercicio_repository.dart';
 
+import '../../support/screen_source_bundle.dart';
+
 void main() {
   test('personal uploaded approved video is ready for students', () {
     final exercicio = Exercicio(
@@ -47,18 +49,16 @@ void main() {
   });
 
   test('workout builder and detail expose prescription trust UI', () {
-    final builder =
-        File(
-          'lib/features/treinos/screens/add_exercicio_to_treino_screen.dart',
-        ).readAsStringSync();
+    final builder = readScreenSourceBundle(
+      'lib/features/treinos/screens/add_exercicio_to_treino_screen.dart',
+    );
     final detail =
         File(
           'lib/features/exercicios/screens/exercicio_detail_screen.dart',
         ).readAsStringSync();
-    final treinoDetail =
-        File(
-          'lib/features/treinos/screens/treino_detail_screen.dart',
-        ).readAsStringSync();
+    final treinoDetail = readScreenSourceBundle(
+      'lib/features/treinos/screens/treino_detail_screen.dart',
+    );
 
     expect(builder, contains('_ExercisePickerCard'));
     expect(builder, contains('onUploadVideo'));
