@@ -1,0 +1,924 @@
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shimmer/shimmer.dart';
+
+import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_icon.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../alunos/providers/alunos_provider.dart';
+import '../../chat/screens/chat_inbox_screen.dart';
+import '../../financeiro/data/financeiro_repository.dart';
+import '../data/command_center_data.dart';
+import '../providers/dashboard_provider.dart';
+import '../utils/dashboard_entry_motion.dart';
+import '../utils/dashboard_haptic.dart';
+import '../utils/dashboard_screen_helpers.dart';
+import 'dashboard_horizontal_scroll_peek.dart';
+class DashboardCommandCenterSection extends ConsumerStatefulWidget {
+  final bool isDark;
+  final Color primary;
+  final FinanceiroDashboard? finData;
+  final bool hideRiskSummary;
+  final String? contextualSubtitle;
+
+  const DashboardCommandCenterSection({
+    required this.isDark,
+    required this.primary,
+    required this.finData,
+    this.hideRiskSummary = false,
+    this.contextualSubtitle,
+  });
+
+  @override
+  ConsumerState<DashboardCommandCenterSection> createState() =>
+      DashboardCommandCenterSectionState();
+}
+
+class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandCenterSection> {
+  bool _quickLinksExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = widget.isDark;
+    final primary = widget.primary;
+    final finData = widget.finData;
+    final hideRiskSummary = widget.hideRiskSummary;
+    final contextualSubtitle = widget.contextualSubtitle;
+    final primarySoft = BrandPalette.soft(primary, dark: isDark);
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final heading = BrandPalette.sectionHeading(primary, dark: isDark);
+    final actionColor = BrandPalette.sectionAction(primary, dark: isDark);
+    final rowAccent = BrandPalette.sectionAccent(primary, dark: isDark);
+
+    // Chat inbox — count total unread messages
+    final chatAsync = ref.watch(chatInboxProvider);
+    final commandAsync = ref.watch(commandCenterProvider);
+    final isCommandPreparing = commandAsync.isLoading;
+    final commandUnavailable = commandAsync.hasError;
+    final unreadCount = chatAsync.maybeWhen(
+      data: (items) => items.fold<int>(0, (sum, i) => sum + i.naoLidas),
+      orElse: () => 0,
+    );
+    final totalConversas = chatAsync.maybeWhen(
+      data: (items) => items.length,
+      orElse: () => 0,
+    );
+    final chatSubtitle =
+        unreadCount > 0
+            ? '$unreadCount não lida${unreadCount == 1 ? '' : 's'}'
+            : '$totalConversas conversa${totalConversas == 1 ? '' : 's'}';
+
+    // Alunos — active student count (already in parent but we watch again for isolation)
+    final alunosAsync = ref.watch(alunosProvider);
+    final alunosAtivos = alunosAsync.maybeWhen(
+      data: (alunos) => alunos.where((a) => a.status == 'ATIVO').length,
+      orElse: () => 0,
+    );
+
+    // Agenda today — count from agendaHojeProvider (commandCenterProvider)
+    final agendaHoje = commandAsync.maybeWhen(
+      data: (cc) => cc.agendaHoje.length,
+      orElse: () => 0,
+    );
+    final agendaSubtitle = agendaHoje > 0 ? '$agendaHoje hoje' : 'Sem agenda';
+
+    // Financeiro — monthly revenue from already-loaded _finData
+    final receitaMes = finData?.receitaMes ?? 0;
+    final finSubtitle =
+        receitaMes > 0
+            ? 'R\$ ${receitaMes.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}'
+            : 'Ver finanças';
+
+    final alunosRisco = commandAsync.maybeWhen(
+      data: (cc) => cc.alunosEmRisco.length,
+      orElse: () => 0,
+    );
+    final filaAcoes = commandAsync.maybeWhen(
+      data: (cc) => cc.filaAcoes,
+      orElse: () => const <FilaAcaoResumo>[],
+    );
+    final copilotAcoes =
+        filaAcoes.where((a) => a.tipo == 'IA_COPILOTO').toList();
+    final cobrancasPendentes = commandAsync.maybeWhen(
+      data: (cc) => cc.cobrancasPendentes.length,
+      orElse: () => finData?.totalInadimplentes ?? 0,
+    );
+    final filaNaoCopilot =
+        filaAcoes.where((a) => a.tipo != 'IA_COPILOTO').toList();
+    final queueAction =
+        filaNaoCopilot.isEmpty
+            ? null
+            : (hideRiskSummary &&
+                    isRiskEchoCopy(
+                      '${filaNaoCopilot.first.titulo} ${filaNaoCopilot.first.descricao}',
+                    )
+                ? null
+                : CommandActionItem(
+                  icon: 'zap',
+                  title: 'Executar próxima ação',
+                  subtitle: filaNaoCopilot.first.descricao,
+                  route:
+                      filaNaoCopilot.first.acaoUrl.startsWith('/')
+                          ? filaNaoCopilot.first.acaoUrl
+                          : '/dashboard/personal',
+                  tone: CommandActionTone.primary,
+                ));
+    final nextActions = <CommandActionItem>[
+      if (copilotAcoes.isNotEmpty)
+        CommandActionItem(
+          icon: 'zap',
+          title:
+              copilotAcoes.first.titulo.isNotEmpty
+                  ? copilotAcoes.first.titulo
+                  : 'Revisar tarefa IA',
+          subtitle: copilotAcoes.first.descricao,
+          route: '/dashboard/command-center/copiloto',
+          tone: CommandActionTone.primary,
+        ),
+      if (unreadCount > 0)
+        CommandActionItem(
+          icon: 'message-circle',
+          title: 'Responder mensagens',
+          subtitle:
+              '$unreadCount conversa${unreadCount == 1 ? '' : 's'} aguardando',
+          route: '/chat/inbox',
+          tone: CommandActionTone.hot,
+        ),
+      if (alunosRisco > 0 && !hideRiskSummary)
+        CommandActionItem(
+          icon: 'alert-triangle',
+          title: 'Contato hoje',
+          subtitle:
+              '$alunosRisco no radar · risco, inadimplência ou pausa no treino',
+          route: '/alunos?filtro=contato',
+          tone: CommandActionTone.hot,
+        ),
+      if (cobrancasPendentes > 0)
+        CommandActionItem(
+          icon: 'dollar-sign',
+          title: 'Cobrar pendências',
+          subtitle:
+              '$cobrancasPendentes mensalidade${cobrancasPendentes == 1 ? '' : 's'} no radar',
+          route: '/financeiro',
+          tone: CommandActionTone.money,
+        ),
+      if (queueAction != null) queueAction,
+      if (agendaHoje > 0)
+        CommandActionItem(
+          icon: 'calendar',
+          title: 'Preparar agenda',
+          subtitle: '$agendaHoje compromisso${agendaHoje == 1 ? '' : 's'} hoje',
+          route: '/agenda',
+          tone: CommandActionTone.primary,
+        ),
+    ];
+    if (nextActions.isEmpty && !isCommandPreparing) {
+      nextActions.add(
+        CommandActionItem(
+          icon: 'plus',
+          title: 'Criar próxima oportunidade',
+          subtitle: 'Cadastre aluno, treino ou lead antes do pico do dia',
+          route: '/alunos/novo',
+          tone: CommandActionTone.primary,
+        ),
+      );
+    }
+
+    Widget card({
+      required double width,
+      required String icon,
+      required String title,
+      required String subtitle,
+      required VoidCallback onTap,
+    }) {
+      return SizedBox(
+        width: width,
+        child: Padding(
+          padding: const EdgeInsets.only(right: 10),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(TokensStrip.rCard),
+            child: Container(
+              padding: const EdgeInsets.all(13),
+              decoration: fxStripCardDecoration(
+                context,
+                accent: primary,
+                radius: TokensStrip.rCard,
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: primarySoft,
+                      borderRadius: BorderRadius.circular(13),
+                    ),
+                    child: Center(
+                      child: FxIcon(name: icon, size: 17, color: rowAccent),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 12.8,
+                            fontWeight: FontWeight.w800,
+                            color: ink,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          subtitle,
+                          style: TextStyle(fontSize: 11.2, color: mute),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Central de Comando',
+                    style: AppTypography.inter(
+                      fontSize: TokensStrip.fontH2,
+                      fontWeight: TokensStrip.weightH2,
+                      letterSpacing: TokensStrip.trackingH2,
+                      height: 1.2,
+                      color: heading,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    contextualSubtitle ??
+                        'A melhor próxima ação para proteger receita e aderência.',
+                    style: AppTypography.inter(
+                      fontSize: TokensStrip.fontBodySm,
+                      fontWeight: FontWeight.w400,
+                      height: TokensStrip.leadingBody,
+                      color: mute,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (nextActions.length > 1)
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap:
+                      isCommandPreparing
+                          ? null
+                          : () => showCommandActionsSheet(
+                            context,
+                            isDark: isDark,
+                            primary: primary,
+                            actions: nextActions,
+                          ),
+                  borderRadius: BorderRadius.circular(999),
+                  child: Ink(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: primarySoft,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          isCommandPreparing
+                              ? 'lendo sinais'
+                              : 'Ver ${nextActions.length}',
+                          style: TextStyle(
+                            color: actionColor,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        if (!isCommandPreparing) ...[
+                          const SizedBox(width: 4),
+                          FxIcon(
+                            name: 'chevron-right',
+                            size: 13,
+                            color: actionColor,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        CommandActionPanel(
+          isDark: isDark,
+          primary: primary,
+          loading: isCommandPreparing,
+          unavailable: commandUnavailable,
+          actions: nextActions.take(2).toList(growable: false),
+        ),
+        const SizedBox(height: 14),
+        Material(
+          color: Colors.transparent,
+          child: Semantics(
+            button: true,
+            expanded: _quickLinksExpanded,
+            label:
+                _quickLinksExpanded
+                    ? 'Atalhos rápidos, expandido. Toque para recolher'
+                    : 'Atalhos rápidos, recolhido. Copiloto, mensagens e mais. Toque para expandir',
+            child: InkWell(
+              onTap: () {
+                dashboardHapticCollapseToggle();
+                setState(() => _quickLinksExpanded = !_quickLinksExpanded);
+              },
+              borderRadius: BorderRadius.circular(TokensStrip.rInput),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  children: [
+                    Text(
+                      'Atalhos rápidos',
+                      style: AppTypography.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.2,
+                        color: heading,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: primarySoft,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        '5',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          color: actionColor,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    AnimatedRotation(
+                      turns: _quickLinksExpanded ? 0.25 : 0,
+                      duration: dashboardMotionDuration(context),
+                      curve: Curves.easeOutCubic,
+                      child: FxIcon(
+                        name: 'chevron-right',
+                        size: 16,
+                        color: actionColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        AnimatedCrossFade(
+          firstChild: const SizedBox.shrink(),
+          secondChild: Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: LayoutBuilder(
+          builder: (context, constraints) {
+            final moduleWidth = (constraints.maxWidth * 0.46).clamp(150.0, 188.0);
+            return DashboardHorizontalScrollPeek(
+              showPeek: true,
+              child: SizedBox(
+              height: 82,
+              child: ListView(
+                key: const PageStorageKey('personal-command-modules'),
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                children: [
+                  card(
+                    width: moduleWidth,
+                    icon: 'zap',
+                    title: 'Copiloto',
+                    subtitle:
+                        copilotAcoes.isEmpty
+                            ? 'Sem tarefas'
+                            : '${copilotAcoes.length} aberta${copilotAcoes.length == 1 ? '' : 's'}',
+                    onTap:
+                        () => context.push('/dashboard/command-center/copiloto'),
+                  ),
+                  card(
+                    width: moduleWidth,
+                    icon: 'message-circle',
+                    title: 'Mensagens',
+                    subtitle: chatSubtitle,
+                    onTap: () => context.go('/chat/inbox'),
+                  ),
+                  card(
+                    width: moduleWidth,
+                    icon: 'users',
+                    title: 'Alunos',
+                    subtitle: '$alunosAtivos ativos',
+                    onTap: () => context.go('/alunos'),
+                  ),
+                  card(
+                    width: moduleWidth,
+                    icon: 'calendar',
+                    title: 'Agenda',
+                    subtitle: agendaSubtitle,
+                    onTap: () => context.go('/agenda'),
+                  ),
+                  card(
+                    width: moduleWidth,
+                    icon: 'dollar-sign',
+                    title: 'Financeiro',
+                    subtitle: finSubtitle,
+                    onTap: () => context.go('/financeiro'),
+                  ),
+                ],
+              ),
+            ),
+            );
+          },
+            ),
+          ),
+          crossFadeState:
+              _quickLinksExpanded
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 220),
+          sizeCurve: Curves.easeOutCubic,
+        ),
+      ],
+    );
+  }
+}
+
+void showCommandActionsSheet(
+  BuildContext context, {
+  required bool isDark,
+  required Color primary,
+  required List<CommandActionItem> actions,
+}) {
+  final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+  final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withValues(alpha: isDark ? 0.56 : 0.24),
+    isScrollControlled: true,
+    useSafeArea: true,
+    builder: (sheetContext) {
+      final media = MediaQuery.of(sheetContext);
+      return Padding(
+        padding: EdgeInsets.fromLTRB(
+          14,
+          0,
+          14,
+          math.max(12, media.viewPadding.bottom + 10),
+        ),
+        child: Container(
+          constraints: BoxConstraints(maxHeight: media.size.height * 0.72),
+          padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+          decoration: fxStripCardDecoration(
+            sheetContext,
+            radius: 28,
+            glowStrength: isDark ? 0.28 : 0.48,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 14),
+                  decoration: BoxDecoration(
+                    color: line.withValues(alpha: 0.9),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+              Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: BrandPalette.soft(primary, dark: isDark),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Center(
+                      child: FxIcon(name: 'route', size: 18, color: primary),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Todas as prioridades',
+                          style: TokensStrip.h2(
+                            color: primary,
+                            fontFamily:
+                                Theme.of(sheetContext)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.fontFamily,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Ordenadas pelo impacto de hoje.',
+                          style: TokensStrip.bodyMuted(
+                            color: mute,
+                            fontFamily:
+                                Theme.of(sheetContext)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.fontFamily,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                    visualDensity: VisualDensity.compact,
+                    icon: Icon(Icons.close_rounded, size: 18, color: mute),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: actions.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                  itemBuilder: (_, index) {
+                    final item = actions[index];
+                    return CommandActionTile(
+                      item: item,
+                      isDark: isDark,
+                      primary: primary,
+                      onTap: () {
+                        Navigator.of(sheetContext).pop();
+                        context.go(item.route);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+enum CommandActionTone { primary, hot, money }
+
+Color commandToneAccent(CommandActionTone tone, Color primary) {
+  return switch (tone) {
+    CommandActionTone.hot => Color.lerp(EagleTokens.warn, primary, 0.34)!,
+    CommandActionTone.money => const Color(0xFF0E9F6E),
+    CommandActionTone.primary => primary,
+  };
+}
+
+class CommandActionItem {
+  final String icon;
+  final String title;
+  final String subtitle;
+  final String route;
+  final CommandActionTone tone;
+
+  const CommandActionItem({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.route,
+    required this.tone,
+  });
+}
+
+class CommandActionPanel extends StatelessWidget {
+  final bool isDark;
+  final Color primary;
+  final bool loading;
+  final bool unavailable;
+  final List<CommandActionItem> actions;
+
+  const CommandActionPanel({
+    required this.isDark,
+    required this.primary,
+    required this.loading,
+    this.unavailable = false,
+    required this.actions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final heading = BrandPalette.sectionHeading(primary, dark: isDark);
+    final rowAccent = BrandPalette.sectionAccent(primary, dark: isDark);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            FxIcon(name: 'route', size: 17, color: rowAccent),
+            const SizedBox(width: 8),
+            Text(
+              'Próximas ações',
+              style: TokensStrip.h2(
+                color: heading,
+                fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
+              ).copyWith(fontSize: 15),
+            ),
+            const Spacer(),
+            Text(
+              'Impacto hoje',
+              style: TextStyle(
+                color: BrandPalette.sectionLink(primary, dark: isDark),
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Divider(
+          color:
+              isDark
+                  ? EagleTokens.glassBorder
+                  : TokensStrip.borderDefault.withValues(alpha: 0.85),
+          height: 1,
+        ),
+        const SizedBox(height: 12),
+        if (loading)
+          CommandActionsShimmer(isDark: isDark, primary: primary)
+        else if (unavailable)
+          CommandLoadingTile(
+            isDark: isDark,
+            primary: primary,
+            title: 'Central temporariamente indisponível',
+            subtitle: 'Puxe para atualizar ou tente em instantes.',
+          )
+        else if (actions.isEmpty)
+          CommandLoadingTile(
+            isDark: isDark,
+            primary: primary,
+            title: 'Operação sob controle',
+            subtitle: 'Nenhuma ação crítica para agora.',
+          )
+        else
+          for (var index = 0; index < actions.length; index++) ...[
+            CommandActionTile(
+              item: actions[index],
+              isDark: isDark,
+              primary: primary,
+            ),
+            if (index < actions.length - 1) ...[
+              const SizedBox(height: 10),
+              Divider(
+                color:
+                    isDark
+                        ? EagleTokens.glassBorder.withValues(alpha: 0.65)
+                        : TokensStrip.borderDefault.withValues(alpha: 0.75),
+                height: 1,
+              ),
+              const SizedBox(height: 10),
+            ],
+          ],
+      ],
+    );
+  }
+}
+
+class CommandActionsShimmer extends StatelessWidget {
+  const CommandActionsShimmer({
+    required this.isDark,
+    required this.primary,
+  });
+
+  final bool isDark;
+  final Color primary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: List.generate(2, (index) {
+        return Padding(
+          padding: EdgeInsets.only(bottom: index == 0 ? 10 : 0),
+          child: Shimmer.fromColors(
+            baseColor: primary.withValues(alpha: isDark ? 0.18 : 0.10),
+            highlightColor: primary.withValues(alpha: isDark ? 0.32 : 0.18),
+            child: Container(
+              height: 62,
+              decoration: BoxDecoration(
+                color: primary.withValues(alpha: isDark ? 0.24 : 0.14),
+                borderRadius: BorderRadius.circular(TokensStrip.rCard),
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class CommandLoadingTile extends StatelessWidget {
+  final bool isDark;
+  final Color primary;
+  final String title;
+  final String subtitle;
+
+  const CommandLoadingTile({
+    required this.isDark,
+    required this.primary,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.forDark(isDark);
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: chrome.panel(radius: TokensStrip.rCard, accent: primary),
+      child: Row(
+        children: [
+          Shimmer.fromColors(
+            baseColor: primary.withValues(alpha: isDark ? 0.18 : 0.10),
+            highlightColor: primary.withValues(alpha: isDark ? 0.32 : 0.18),
+            child: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: primary.withValues(alpha: isDark ? 0.24 : 0.14),
+                borderRadius: BorderRadius.circular(15),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: mute, fontSize: 11.6, height: 1.2),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CommandActionTile extends StatelessWidget {
+  final CommandActionItem item;
+  final bool isDark;
+  final Color primary;
+  final VoidCallback? onTap;
+
+  const CommandActionTile({
+    required this.item,
+    required this.isDark,
+    required this.primary,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final accent = commandToneAccent(item.tone, primary);
+    return Semantics(
+      label: '${item.title}. ${item.subtitle}',
+      button: true,
+      child: InkWell(
+      onTap: onTap ?? () => context.go(item.route),
+      borderRadius: BorderRadius.circular(TokensStrip.rCard),
+      child: AnimatedScale(
+        scale: 1,
+        duration: dashboardMotionDuration(
+          context,
+          normal: const Duration(milliseconds: 110),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: fxStripCardDecoration(
+            context,
+            accent: accent,
+            radius: TokensStrip.rCard,
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: isDark ? 0.24 : 0.14),
+                  borderRadius: BorderRadius.circular(TokensStrip.rInput),
+                ),
+                child: Center(
+                  child: FxIcon(name: item.icon, color: accent, size: 18),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      item.subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: mute,
+                        fontSize: 11.6,
+                        height: 1.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              FxIcon(name: 'chevron-right', color: mute, size: 20),
+            ],
+          ),
+        ),
+      ),
+    ),
+    );
+  }
+}

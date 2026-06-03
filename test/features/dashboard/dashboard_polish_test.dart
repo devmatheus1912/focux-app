@@ -4,20 +4,25 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('dashboard hoje usa microcopy, contraste e a11y 10/10', () {
-    final screen =
-        File(
-          'lib/features/dashboard/screens/personal_dashboard_screen.dart',
-        ).readAsStringSync();
+    const paths = [
+      'lib/features/dashboard/screens/personal_dashboard_screen.dart',
+      'lib/features/dashboard/utils/dashboard_screen_helpers.dart',
+      'lib/features/dashboard/widgets/dashboard_horizontal_scroll_peek.dart',
+      'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
+      'lib/features/dashboard/widgets/dashboard_command_center_section.dart',
+      'lib/features/dashboard/widgets/dashboard_tools_section.dart',
+    ];
+    final screen = paths.map((p) => File(p).readAsStringSync()).join('\n');
 
-    expect(screen, contains('_dashboardSectionKickerStyle'));
+    expect(screen, contains('dashboardSectionKickerStyle'));
     expect(screen, contains("'Panorama financeiro'"));
     expect(screen, contains("'Pulso operacional'"));
     expect(screen, contains("'Impacto hoje'"));
-    expect(screen, contains('_financeInadimplLabel'));
-    expect(screen, contains('_financePercentLabel'));
+    expect(screen, contains('financeInadimplLabel'));
+    expect(screen, contains('financePercentLabel'));
     expect(screen, contains('Meta batida'));
-    expect(screen, contains('_pulseCheckinsAccent'));
-    expect(screen, contains('_HorizontalScrollPeek'));
+    expect(screen, contains('pulseCheckinsAccent'));
+    expect(screen, contains('DashboardHorizontalScrollPeek'));
     expect(screen, contains('Deslize horizontalmente para ver mais'));
     expect(screen, contains("label: 'Pendente'"));
     expect(screen, contains("label: 'Ticket médio'"));

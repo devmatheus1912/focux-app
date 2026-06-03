@@ -4,33 +4,37 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('command center autonomy bottlenecks keep compact layout safe', () {
-    final widget =
-        File(
-          'lib/features/dashboard/screens/personal_dashboard_screen.dart',
-        ).readAsStringSync();
+    const paths = [
+      'lib/features/dashboard/screens/personal_dashboard_screen.dart',
+      'lib/features/dashboard/widgets/dashboard_command_center_section.dart',
+      'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
+      'lib/features/dashboard/widgets/dashboard_aderencia_semana_widget.dart',
+      'lib/features/dashboard/utils/dashboard_screen_helpers.dart',
+    ];
+    final widget = paths.map((p) => File(p).readAsStringSync()).join('\n');
 
-    expect(widget, contains('class _CommandCenterSection'));
+    expect(widget, contains('class DashboardCommandCenterSection'));
     expect(widget, contains('commandCenterProvider'));
     expect(widget, contains('chatInboxProvider'));
     expect(widget, contains("'Central de Comando'"));
     expect(widget, contains('A melhor próxima ação'));
-    expect(widget, contains('class _CommandActionPanel'));
-    expect(widget, contains('class _CommandActionTile'));
-    expect(widget, contains('_showCommandActionsSheet'));
+    expect(widget, contains('class CommandActionPanel'));
+    expect(widget, contains('class CommandActionTile'));
+    expect(widget, contains('showCommandActionsSheet'));
     expect(widget, contains("PageStorageKey('personal-command-modules')"));
     expect(widget, contains('scrollDirection: Axis.horizontal'));
     expect(widget, contains('Shimmer.fromColors'));
     expect(widget, contains('maxLines: 2'));
     expect(widget, contains('TextOverflow.ellipsis'));
-    expect(widget, contains('class _DayPulseStrip'));
-    expect(widget, contains('class _PulseChip'));
+    expect(widget, contains('class DashboardDayPulseStrip'));
+    expect(widget, contains('class DashboardPulseChip'));
     expect(widget, contains('Pulso operacional'));
     expect(widget, contains('BoxConstraints(minHeight: 48)'));
     expect(widget, contains('hideRiscoChip'));
     expect(widget, contains('retomada urgente'));
     expect(widget, isNot(contains('_RiskWaveBanner')));
-    expect(widget, contains('_AderenciaSemanaEmptyCard'));
-    expect(widget, contains('_isRiskEchoCopy'));
+    expect(widget, contains('DashboardAderenciaSemanaEmptyCard'));
+    expect(widget, contains('isRiskEchoCopy'));
     expect(widget, contains('BrandPalette.sectionHeading'));
     expect(widget, contains('BrandPalette.sectionAction'));
   });
