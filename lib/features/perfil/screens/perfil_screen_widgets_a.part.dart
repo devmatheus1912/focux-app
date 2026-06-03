@@ -361,20 +361,6 @@ class _PerfilBody extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 14),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: _HeroQuickActions(
-                              onBrand: () => context.push('/identidade-visual'),
-                              onEdit: onEditPerfil,
-                              onWallet: () => context.push('/perfil/wallet'),
-                              onCopilot:
-                                  () => goPersonalShellTab(
-                                    context,
-                                    '/ia/copiloto',
-                                  ),
-                            ),
-                          ),
-                          const SizedBox(height: 14),
                           Container(
                             decoration: BoxDecoration(
                               color: Colors.black.withValues(alpha: 0.16),
