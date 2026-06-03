@@ -4,12 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_sparkline.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_screen_helpers.dart';
-/// Display-only operational metrics live in `OperationalMetricTile` (core/widgets).
+/// Tappable pulse chips reuse [operationalMetricDecoration] from `OperationalMetricTile`
+/// so dashboard KPIs match Aluno 360 visual language (display tiles stay read-only).
 class DashboardDayPulseStrip extends StatelessWidget {
   const DashboardDayPulseStrip({
     super.key,
@@ -277,11 +278,10 @@ class DashboardPulseChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(TokensStrip.rCard),
           child: Ink(
             padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 9),
-            decoration: fxStripCardDecoration(
-              context,
+            decoration: operationalMetricDecoration(
               accent: accent,
+              isDark: isDark,
               radius: TokensStrip.rCard,
-              glowStrength: 0.14,
             ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 48),

@@ -42,17 +42,23 @@ class _MeasurementCard extends StatelessWidget {
           const SizedBox(height: 4),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text(
+              Flexible(
+                child: Text(
                 value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   color: ink,
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   letterSpacing: -0.5,
                 ),
+              ),
               ),
               const SizedBox(width: 2),
               Text(
@@ -150,6 +156,7 @@ class _ModuleTile extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
                     children: [
@@ -168,7 +175,8 @@ class _ModuleTile extends StatelessWidget {
                       ),
                       if (badge != null) ...[
                         const SizedBox(width: 5),
-                        Container(
+                        Flexible(
+                          child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 6,
                             vertical: 2,
@@ -180,12 +188,14 @@ class _ModuleTile extends StatelessWidget {
                           child: Text(
                             badge!,
                             maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: primary,
                               fontSize: 8.8,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
+                        ),
                         ),
                       ],
                     ],

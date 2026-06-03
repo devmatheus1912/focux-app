@@ -173,6 +173,7 @@ class _EvolucaoInteligenteCard extends StatelessWidget {
             ),
         data: (ev) {
           final sigColor = _sinalColor(ev.sinal);
+          final isEmptySignal = ev.sinal == 'SEM_DADOS';
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -219,12 +220,43 @@ class _EvolucaoInteligenteCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 14),
+              if (isEmptySignal) ...[
+                _Aluno360ActionEmptyPanel(
+                  key: const ValueKey('aluno360_evolucao_empty'),
+                  icon: Icons.show_chart_rounded,
+                  title: 'Sem sinais de evolução ainda',
+                  subtitle:
+                      'Peça um check-in ao aluno ou revise o treino para começar a formar o histórico.',
+                  primaryLabel: 'Pedir check-in',
+                  primaryIcon: Icons.message_outlined,
+                  onPrimary: () => _openCheckinMessage(context),
+                  secondaryActions: [
+                    _Aluno360SecondaryAction(
+                      label: 'Abrir chat',
+                      icon: Icons.chat_bubble_outline,
+                      onTap:
+                          () => context.push(
+                            '/alunos/$alunoId/chat',
+                            extra: alunoNome,
+                          ),
+                    ),
+                    _Aluno360SecondaryAction(
+                      label: 'Ver treinos',
+                      icon: Icons.fitness_center_rounded,
+                      onTap:
+                          () => context.push(
+                            '/alunos/$alunoId/treinos-list',
+                            extra: alunoNome,
+                          ),
+                    ),
+                  ],
+                ),
+              ] else ...[
               Text(
                 ev.resumo,
                 style: TextStyle(color: ink, fontSize: 13.2, height: 1.35),
               ),
-              if (ev.sinal != 'SEM_DADOS') ...[
-                const SizedBox(height: 12),
+              const SizedBox(height: 12),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -260,7 +292,6 @@ class _EvolucaoInteligenteCard extends StatelessWidget {
                       ),
                   ],
                 ),
-              ],
               const SizedBox(height: 12),
               Text(
                 'Próxima ação',
@@ -282,18 +313,12 @@ class _EvolucaoInteligenteCard extends StatelessWidget {
                 height: 40,
                 child: OutlinedButton.icon(
                   onPressed:
-                      ev.sinal == 'SEM_DADOS'
-                          ? () => _openCheckinMessage(context)
-                          : () => context.push(
-                            '/alunos/$alunoId/treinos-list',
-                            extra: alunoNome,
-                          ),
+                      () => context.push(
+                        '/alunos/$alunoId/treinos-list',
+                        extra: alunoNome,
+                      ),
                   icon: const Icon(Icons.fitness_center_rounded, size: 16),
-                  label: Text(
-                    ev.sinal == 'SEM_DADOS'
-                        ? 'Pedir check-in'
-                        : 'Ajustar treino',
-                  ),
+                  label: const Text('Ajustar treino'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: primary,
                     side: BorderSide(color: primary.withValues(alpha: 0.32)),
@@ -317,6 +342,7 @@ class _EvolucaoInteligenteCard extends StatelessWidget {
                     ),
                   ],
                 ),
+              ],
               ],
             ],
           );

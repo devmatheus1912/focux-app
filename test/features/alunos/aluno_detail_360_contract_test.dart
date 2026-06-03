@@ -94,10 +94,22 @@ void main() {
     expect(screen, contains("'Módulos'"));
     expect(screen, contains('class _ModuleTile'));
     expect(screen, contains('Abas do perfil do aluno'));
+    expect(screen, contains('ValueKey(\'aluno360_operacao_status\')'));
+    expect(screen, contains('ValueKey(\'aluno360_operacao_sticky_cta\')'));
+    expect(screen, contains('ValueKey(\'aluno360_evolucao_empty\')'));
+    expect(screen, contains('ValueKey(\'aluno360_timeline_empty\')'));
+    expect(screen, contains('ValueKey(\'aluno360_ferramentas_modulos\')'));
+    expect(screen, contains('class _Aluno360ActionEmptyPanel'));
+    expect(screen, contains('Sem sinais de evolução ainda'));
+    expect(screen, contains('Linha do tempo ainda vazia'));
     expect(screen, contains('friendlyError(e, fallback: \'Não foi possível gerar senha.\')'));
     expect(
       File('lib/core/widgets/operational_metric_tile.dart').readAsStringSync(),
       contains('class OperationalMetricTile'),
+    );
+    expect(
+      File('lib/features/dashboard/widgets/dashboard_pulse_strip.dart').readAsStringSync(),
+      contains('operationalMetricDecoration'),
     );
   });
 }

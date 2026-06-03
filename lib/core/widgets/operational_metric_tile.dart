@@ -2,6 +2,20 @@ import 'package:flutter/material.dart';
 
 import 'fx_shell_scaffold.dart';
 
+/// Shared surface styling for operational KPI tiles (Aluno 360 + dashboard pulse).
+/// Dashboard pulse chips remain tappable wrappers — see [DashboardPulseChip].
+BoxDecoration operationalMetricDecoration({
+  required Color accent,
+  required bool isDark,
+  double radius = 12,
+}) {
+  return BoxDecoration(
+    color: accent.withValues(alpha: isDark ? 0.12 : 0.08),
+    borderRadius: BorderRadius.circular(radius),
+    border: Border.all(color: accent.withValues(alpha: isDark ? 0.24 : 0.16)),
+  );
+}
+
 /// Display-only operational KPI tile shared by Aluno 360 and dashboard surfaces.
 class OperationalMetricTile extends StatelessWidget {
   const OperationalMetricTile({
@@ -29,10 +43,9 @@ class OperationalMetricTile extends StatelessWidget {
     final mute = fxScreenMute(context);
     final tile = Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: isDark ? 0.12 : 0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: isDark ? 0.24 : 0.16)),
+      decoration: operationalMetricDecoration(
+        accent: color,
+        isDark: isDark,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

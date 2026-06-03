@@ -334,10 +334,11 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
 
     return SafeArea(
       top: false,
-      child: Semantics(
+        child: Semantics(
         container: true,
         label: 'Ações rápidas da aba operação',
         child: Container(
+        key: const ValueKey('aluno360_operacao_sticky_cta'),
         decoration: BoxDecoration(
           color: ShellChrome.of(context).sheetFill,
           border: Border(top: BorderSide(color: line)),
@@ -441,13 +442,17 @@ class _AlunoDetailFerramentasTab extends ConsumerWidget {
               (_) => LayoutBuilder(
                 builder: (context, constraints) {
                   final crossAxisCount = constraints.maxWidth < 360 ? 2 : 4;
+                  final textScale = MediaQuery.textScalerOf(context).scale(1);
+                  final aspectBase = crossAxisCount == 2 ? 1.45 : 1.1;
+                  final childAspectRatio =
+                      aspectBase / textScale.clamp(1.0, 2.2);
                   return GridView.count(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     crossAxisCount: crossAxisCount,
                     mainAxisSpacing: 8,
                     crossAxisSpacing: 8,
-                    childAspectRatio: crossAxisCount == 2 ? 1.45 : 1.1,
+                    childAspectRatio: childAspectRatio,
                     children: [
                       _MeasurementCard(
                         label: 'Idade',
@@ -499,13 +504,18 @@ class _AlunoDetailFerramentasTab extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 12),
-        GridView.count(
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final textScale = MediaQuery.textScalerOf(context).scale(1);
+            final aspectRatio = 2.55 / textScale.clamp(1.0, 2.2);
+            return GridView.count(
+          key: const ValueKey('aluno360_ferramentas_modulos'),
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           crossAxisCount: 2,
           mainAxisSpacing: 8,
           crossAxisSpacing: 10,
-          childAspectRatio: 2.55,
+          childAspectRatio: aspectRatio,
           children: [
             _ModuleTile(
               icon: Icons.fitness_center,
@@ -622,6 +632,8 @@ class _AlunoDetailFerramentasTab extends ConsumerWidget {
               ),
             ),
           ],
+        );
+          },
         ),
       ],
     );

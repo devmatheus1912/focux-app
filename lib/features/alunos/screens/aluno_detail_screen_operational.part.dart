@@ -22,6 +22,7 @@ class _AlunoOperationalStatusSection extends StatelessWidget {
     final proximoContato = formatProximoContato(aluno);
 
     return Container(
+      key: const ValueKey('aluno360_operacao_status'),
       decoration: fxListCardDecoration(context),
       padding: const EdgeInsets.all(16),
       child: Column(

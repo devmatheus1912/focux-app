@@ -26,10 +26,10 @@ class _AlunoWeightActivityCard extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
+              Expanded(
+                child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -82,10 +82,16 @@ class _AlunoWeightActivityCard extends ConsumerWidget {
                   ),
                 ],
               ),
-              Text(
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
                 aluno.peso == null
                     ? 'Sem medida registrada'
                     : 'Ver evolução completa',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.end,
                 style: TextStyle(
                   color:
                       isDark
@@ -94,6 +100,7 @@ class _AlunoWeightActivityCard extends ConsumerWidget {
                   fontSize: 11.5,
                   fontWeight: FontWeight.w500,
                 ),
+              ),
               ),
             ],
           ),

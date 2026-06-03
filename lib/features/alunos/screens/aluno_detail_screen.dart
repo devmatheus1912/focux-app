@@ -145,6 +145,9 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
         data: (aluno) {
           ref.watch(alertasConfigProvider);
           final perfilCompletion = _perfilCompletion(aluno);
+          final textScale = MediaQuery.textScalerOf(context).scale(1);
+          final heroExpandedHeight =
+              196.0 + ((textScale - 1) * 60).clamp(0.0, 120.0);
 
           return RefreshIndicator(
             onRefresh: () => invalidateAluno360Providers(ref, alunoId),
@@ -152,7 +155,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverAppBar(
-                expandedHeight: 196,
+                expandedHeight: heroExpandedHeight,
                 pinned: true,
                 stretch: true,
                 backgroundColor: Colors.transparent,
