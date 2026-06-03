@@ -12,6 +12,8 @@ void main() {
       'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
       'lib/features/dashboard/widgets/dashboard_aderencia_semana_widget.dart',
       'lib/features/dashboard/utils/dashboard_screen_helpers.dart',
+      'lib/features/dashboard/widgets/dashboard_tools_section.dart',
+      'lib/features/dashboard/utils/dashboard_tool_recent_store.dart',
     ];
     final widget = paths.map((p) => File(p).readAsStringSync()).join('\n');
 
@@ -40,6 +42,10 @@ void main() {
     expect(widget, contains('showPrioritiesAction: showStickyPrioritiesAction'));
     expect(widget, contains('_homeScrollOffset >= 80'));
     expect(widget, contains('_commandCenterPrioritiesFloatingMaxOffset'));
+    expect(widget, contains('_showsFloatingPrioritiesChip'));
+    expect(widget, contains("'Prioridades'"));
+    expect(widget, contains('DashboardToolRecentStore'));
+    expect(widget, contains("'Recentes'"));
     expect(widget, contains('DashboardCommandCenterStickyHeaderDelegate'));
     expect(widget, contains('SliverPersistentHeader'));
     expect(widget, contains('Agendar primeiro treino'));

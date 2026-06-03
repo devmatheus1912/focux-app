@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../utils/dashboard_readability.dart';
 
 class DashboardCommandCenterStickyHeaderDelegate
     extends SliverPersistentHeaderDelegate {
@@ -38,7 +39,7 @@ class DashboardCommandCenterStickyHeaderDelegate
     bool overlapsContent,
   ) {
     final heading = BrandPalette.sectionHeading(primary, dark: isDark);
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final mute = dashboardReadableCaption(context, isDark: isDark);
     final progress = (shrinkOffset / (_maxExtent - _minExtent)).clamp(0.0, 1.0);
     final showSubtitle = progress < 0.55;
     final link = BrandPalette.sectionLink(primary, dark: isDark);
@@ -71,7 +72,12 @@ class DashboardCommandCenterStickyHeaderDelegate
           child: LayoutBuilder(
             builder: (context, constraints) {
               final compact = constraints.maxHeight < 52;
-              final showSubtitleLine = showSubtitle && !compact;
+              final showSubtitleLine =
+                  showSubtitle && !compact && !showPrioritiesAction;
+              final chipLabel =
+                  compact && hasTrailing
+                      ? 'Prioridades'
+                      : trailingActionLabel;
               final topPad = compact ? 4.0 : (8 - (4 * progress));
               final bottomPad = compact ? 4.0 : 8.0;
 
@@ -127,12 +133,12 @@ class DashboardCommandCenterStickyHeaderDelegate
                         ),
                       ),
                     ),
-                    if (showTrailingChip)
+                    if (showTrailingChip && chipLabel != null)
                       Padding(
                         padding: const EdgeInsets.only(left: 6),
                         child: Semantics(
                           button: true,
-                          label: trailingActionLabel,
+                          label: chipLabel,
                           child: TextButton(
                             onPressed: onTrailingAction,
                             style: TextButton.styleFrom(
@@ -144,11 +150,11 @@ class DashboardCommandCenterStickyHeaderDelegate
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
                             child: Text(
-                              trailingActionLabel!,
+                              chipLabel,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTypography.inter(
-                                fontSize: 11.5,
+                                fontSize: compact ? 11 : 11.5,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),

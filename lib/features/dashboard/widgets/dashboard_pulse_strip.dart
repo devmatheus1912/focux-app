@@ -53,10 +53,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
         riscoAlto > 0 ? EagleTokens.warn : TokensStrip.badgeSuccess;
     final tight = MediaQuery.sizeOf(context).width < 400;
     final gap = tight ? 6.0 : TokensStrip.s2;
-    final neutralAccent =
-        isDark
-            ? EagleTokens.darkInkMute.withValues(alpha: 0.72)
-            : TokensStrip.textSecondary.withValues(alpha: 0.82);
+    final neutralAccent = dashboardReadableCaption(context, isDark: isDark);
 
     return dashboardEntryMotion(
       context: context,

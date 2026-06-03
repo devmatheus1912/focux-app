@@ -151,7 +151,10 @@ class _DashboardCollapsibleSectionState
                                 style: AppTypography.inter(
                                   fontSize: TokensStrip.fontBodySm,
                                   fontWeight: FontWeight.w500,
-                                  color: mute,
+                                  color: dashboardReadableCaption(
+                                    context,
+                                    isDark: widget.isDark,
+                                  ),
                                 ),
                               ),
                               if (widget.collapsedPreview != null &&

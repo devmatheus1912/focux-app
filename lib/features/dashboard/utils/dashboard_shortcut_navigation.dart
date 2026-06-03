@@ -9,6 +9,7 @@ import '../../subscription/models/subscription_plan.dart';
 import '../../subscription/utils/landing_editor_access.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../data/dashboard_tool_shortcuts.dart';
+import 'dashboard_tool_recent_store.dart';
 
 /// Navega para o atalho ou abre upgrade contextual (tap explícito = sem cooldown).
 Future<void> openDashboardShortcut(
@@ -54,6 +55,8 @@ Future<void> openDashboardShortcut(
       'plan': features.plano.apiName,
     },
   );
+  await DashboardToolRecentStore.recordRoute(route);
+  if (!context.mounted) return;
   context.push(route);
 }
 

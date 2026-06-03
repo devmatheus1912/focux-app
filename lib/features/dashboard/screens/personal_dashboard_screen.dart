@@ -52,8 +52,8 @@ class PersonalDashboardScreen extends ConsumerStatefulWidget {
   ConsumerState<PersonalDashboardScreen> createState() =>
       _PersonalDashboardScreenState();
 }
-/// Scroll offset after which the pinned command-center header shows priorities.
-const _commandCenterPrioritiesFloatingMaxOffset = 360;
+/// Scroll offset until which the floating priorities chip stays visible (sticky takes over after).
+const _commandCenterPrioritiesFloatingMaxOffset = 220;
 
 class _PersonalDashboardScreenState
     extends ConsumerState<PersonalDashboardScreen>
@@ -130,14 +130,19 @@ class _PersonalDashboardScreenState
     }
   }
 
+  bool _showsFloatingPrioritiesChip(double offset) =>
+      offset >= 80 && offset < _commandCenterPrioritiesFloatingMaxOffset;
+
   void _onHomeScroll() {
     if (!_homeScrollController.hasClients) return;
     final offset = _homeScrollController.offset;
-    final wasShowingPriorities = _homeScrollOffset >= 80;
-    final showsPriorities = offset >= 80;
-    if (offset == _homeScrollOffset) return;
+    if ((offset - _homeScrollOffset).abs() < 2) return;
+    final wasFloating = _showsFloatingPrioritiesChip(_homeScrollOffset);
+    final nowFloating = _showsFloatingPrioritiesChip(offset);
+    final wasStickyChip = _homeScrollOffset >= 80;
+    final nowStickyChip = offset >= 80;
     _homeScrollOffset = offset;
-    if (wasShowingPriorities != showsPriorities) {
+    if (wasFloating != nowFloating || wasStickyChip != nowStickyChip) {
       setState(() {});
     }
   }
@@ -821,9 +826,9 @@ class _PersonalDashboardScreenState
               ),
                   if (showStickyPrioritiesAction &&
                       stickyCommandActionsLabel != null &&
-                      _homeScrollOffset < _commandCenterPrioritiesFloatingMaxOffset)
+                      _showsFloatingPrioritiesChip(_homeScrollOffset))
                     Positioned(
-                      top: 4,
+                      top: MediaQuery.paddingOf(context).top + 4,
                       right: TokensStrip.s4,
                       child: Semantics(
                         button: true,

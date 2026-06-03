@@ -14,6 +14,7 @@ import '../utils/dashboard_haptic.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
 import '../utils/dashboard_tool_groups.dart';
+import '../utils/dashboard_tool_recent_store.dart';
 class DashboardRoiQuickLinksRow extends ConsumerWidget {
   const DashboardRoiQuickLinksRow({super.key, required this.isDark});
 
@@ -381,6 +382,19 @@ class DashboardCollapsibleToolsSectionState
     extends ConsumerState<DashboardCollapsibleToolsSection> {
   bool _expanded = false;
   String _searchQuery = '';
+  List<DashboardToolShortcut> _recentShortcuts = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecentShortcuts();
+  }
+
+  Future<void> _loadRecentShortcuts() async {
+    final recents = await DashboardToolRecentStore.loadRecentShortcuts();
+    if (!mounted) return;
+    setState(() => _recentShortcuts = recents);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -427,7 +441,11 @@ class DashboardCollapsibleToolsSectionState
               child: InkWell(
               onTap: () {
                 dashboardHapticCollapseToggle();
-                setState(() => _expanded = !_expanded);
+                final nextExpanded = !_expanded;
+                setState(() => _expanded = nextExpanded);
+                if (nextExpanded) {
+                  _loadRecentShortcuts();
+                }
               },
               borderRadius: BorderRadius.circular(TokensStrip.rCard),
               child: Ink(
@@ -498,6 +516,43 @@ class DashboardCollapsibleToolsSectionState
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   DashboardRoiQuickLinksRow(isDark: widget.isDark),
+                  if (_recentShortcuts.isNotEmpty && _searchQuery.isEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      'Recentes',
+                      style: dashboardSectionKickerStyle(
+                        context,
+                        isDark: widget.isDark,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          for (final shortcut in _recentShortcuts) ...[
+                            _RoiShortcutChip(
+                              shortcut: shortcut,
+                              isDark: widget.isDark,
+                              locked: !shortcut.isUnlocked(features),
+                              tierLabel:
+                                  shortcut.isUnlocked(features)
+                                      ? null
+                                      : shortcut.tierBadgeLabel(),
+                              linkColor: link,
+                              onTap:
+                                  () => openDashboardShortcut(
+                                    context,
+                                    ref,
+                                    shortcut,
+                                  ),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 12),
                   Semantics(
                     textField: true,
@@ -602,7 +657,7 @@ class _ShortcutBtn extends StatelessWidget {
     final primaryAccent = BrandPalette.accent(primary);
     final rowAccent = BrandPalette.sectionAccent(primary, dark: isDark);
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final mute = dashboardReadableMuted(context, isDark: isDark);
     final iconAccent =
         locked
             ? (isDark ? primaryAccent : rowAccent).withValues(alpha: 0.45)

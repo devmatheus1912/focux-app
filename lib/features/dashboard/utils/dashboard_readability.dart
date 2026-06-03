@@ -8,14 +8,14 @@ Color dashboardReadableMuted(BuildContext context, {required bool isDark}) {
   if (isDark) {
     return EagleTokens.darkInkMute.withValues(alpha: 0.92);
   }
-  return TokensStrip.textPrimary.withValues(alpha: 0.72);
+  return TokensStrip.textPrimary.withValues(alpha: 0.76);
 }
 
 Color dashboardReadableCaption(BuildContext context, {required bool isDark}) {
   if (isDark) {
-    return EagleTokens.darkInkMute.withValues(alpha: 0.85);
+    return EagleTokens.darkInkMute.withValues(alpha: 0.88);
   }
-  return TokensStrip.textPrimary.withValues(alpha: 0.65);
+  return TokensStrip.textPrimary.withValues(alpha: 0.72);
 }
 
 /// Texto secundário sobre gradiente teal (hero financeiro) — ≥4.5:1 WCAG AA.
