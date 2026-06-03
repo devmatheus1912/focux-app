@@ -93,38 +93,56 @@ class _AlunoDetailOperacaoTab extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (financeRisk) ...[
-          _AlunoFinanceiroRiskBanner(alunoId: alunoId, isDark: isDark),
+          FxPremiumEntrance(
+            delay: Duration.zero,
+            child: _AlunoFinanceiroRiskBanner(alunoId: alunoId, isDark: isDark),
+          ),
           const SizedBox(height: TokensStrip.s4),
         ],
-        _AlunoFollowUpCard(aluno: aluno, isDark: isDark),
-        const SizedBox(height: TokensStrip.s4),
-        _Aluno360CopilotCard(
-          aluno: aluno,
-          resumoAsync: autonomiaResumoAsync,
-          proximaAcao360: proximaAcao360,
-          isDark: isDark,
+        FxPremiumEntrance(
+          delay: Duration(milliseconds: financeRisk ? 40 : 0),
+          child: _AlunoFollowUpCard(aluno: aluno, isDark: isDark),
         ),
         const SizedBox(height: TokensStrip.s4),
-        _AlunoOperationalStatusSection(
-          aluno: aluno,
-          isDark: isDark,
-          primary: primary,
+        FxPremiumEntrance(
+          delay: Duration(milliseconds: financeRisk ? 80 : 40),
+          child: _Aluno360CopilotCard(
+            aluno: aluno,
+            resumoAsync: autonomiaResumoAsync,
+            proximaAcao360: proximaAcao360,
+            isDark: isDark,
+          ),
         ),
         const SizedBox(height: TokensStrip.s4),
-        _AlunoRecoveryInsightCard(
-          recoveryAsync: recoveryAsync,
-          isDark: isDark,
-          primary: primary,
+        FxPremiumEntrance(
+          delay: Duration(milliseconds: financeRisk ? 120 : 80),
+          child: _AlunoOperationalStatusSection(
+            aluno: aluno,
+            isDark: isDark,
+            primary: primary,
+          ),
         ),
         const SizedBox(height: TokensStrip.s4),
-        _StudentQuickActions(
-          aluno: aluno,
-          isDark: isDark,
-          primary: primary,
-          onPassword: onPassword,
-          onEdit: onEdit,
-          onMessage: onMessage,
-          onEvolve: onEvolve,
+        FxPremiumEntrance(
+          delay: Duration(milliseconds: financeRisk ? 160 : 120),
+          child: _AlunoRecoveryInsightCard(
+            recoveryAsync: recoveryAsync,
+            isDark: isDark,
+            primary: primary,
+          ),
+        ),
+        const SizedBox(height: TokensStrip.s4),
+        FxPremiumEntrance(
+          delay: Duration(milliseconds: financeRisk ? 200 : 160),
+          child: _StudentQuickActions(
+            aluno: aluno,
+            isDark: isDark,
+            primary: primary,
+            onPassword: onPassword,
+            onEdit: onEdit,
+            onMessage: onMessage,
+            onEvolve: onEvolve,
+          ),
         ),
       ],
     );
@@ -160,17 +178,23 @@ class _AlunoDetailEvolucaoTab extends StatelessWidget {
           isDark: isDark,
         ),
         const SizedBox(height: TokensStrip.s4),
-        _Aluno360TimelineCard(
-          aluno: aluno,
-          timelineApiAsync: timeline360Async,
-          isDark: isDark,
+        FxPremiumEntrance(
+          delay: const Duration(milliseconds: 40),
+          child: _Aluno360TimelineCard(
+            aluno: aluno,
+            timelineApiAsync: timeline360Async,
+            isDark: isDark,
+          ),
         ),
         const SizedBox(height: TokensStrip.s4),
-        _AlunoWeightActivityCard(
-          aluno: aluno,
-          alunoId: alunoId,
-          isDark: isDark,
-          ink: ink,
+        FxPremiumEntrance(
+          delay: const Duration(milliseconds: 80),
+          child: _AlunoWeightActivityCard(
+            aluno: aluno,
+            alunoId: alunoId,
+            isDark: isDark,
+            ink: ink,
+          ),
         ),
       ],
     );
@@ -398,46 +422,54 @@ class _AlunoDetailFerramentasTab extends ConsumerWidget {
               () => FxLoading.sectionShimmer(context, height: 88, showHeader: false),
           error: (_, __) => const SizedBox.shrink(),
           data:
-              (_) => GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 4,
-                mainAxisSpacing: 8,
-                crossAxisSpacing: 8,
-                childAspectRatio: 1.1,
-                children: [
-                  _MeasurementCard(
-                    label: 'Idade',
-                    value: (aluno.idade ?? '—').toString(),
-                    unit: 'anos',
-                    isDark: isDark,
-                  ),
-                  _MeasurementCard(
-                    label: 'Altura',
-                    value: altura.value,
-                    unit: altura.unit,
-                    isDark: isDark,
-                  ),
-                  _MeasurementCard(
-                    label: 'BF',
-                    value: bf ?? '—',
-                    unit: '%',
-                    isDark: isDark,
-                    emptyHint: bf == null ? 'Registrar' : null,
-                    onTap: bf == null ? () => context.push(evolucaoRoute, extra: aluno.nome) : null,
-                  ),
-                  _MeasurementCard(
-                    label: 'M. Magra',
-                    value: massaMagra ?? '—',
-                    unit: 'kg',
-                    isDark: isDark,
-                    emptyHint: massaMagra == null ? 'Registrar' : null,
-                    onTap:
-                        massaMagra == null
-                            ? () => context.push(evolucaoRoute, extra: aluno.nome)
-                            : null,
-                  ),
-                ],
+              (_) => LayoutBuilder(
+                builder: (context, constraints) {
+                  final crossAxisCount = constraints.maxWidth < 360 ? 2 : 4;
+                  return GridView.count(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: crossAxisCount,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    childAspectRatio: crossAxisCount == 2 ? 1.45 : 1.1,
+                    children: [
+                      _MeasurementCard(
+                        label: 'Idade',
+                        value: (aluno.idade ?? '—').toString(),
+                        unit: 'anos',
+                        isDark: isDark,
+                      ),
+                      _MeasurementCard(
+                        label: 'Altura',
+                        value: altura.value,
+                        unit: altura.unit,
+                        isDark: isDark,
+                      ),
+                      _MeasurementCard(
+                        label: 'BF',
+                        value: bf ?? '—',
+                        unit: '%',
+                        isDark: isDark,
+                        emptyHint: bf == null ? 'Registrar' : null,
+                        onTap:
+                            bf == null
+                                ? () => context.push(evolucaoRoute, extra: aluno.nome)
+                                : null,
+                      ),
+                      _MeasurementCard(
+                        label: 'M. Magra',
+                        value: massaMagra ?? '—',
+                        unit: 'kg',
+                        isDark: isDark,
+                        emptyHint: massaMagra == null ? 'Registrar' : null,
+                        onTap:
+                            massaMagra == null
+                                ? () => context.push(evolucaoRoute, extra: aluno.nome)
+                                : null,
+                      ),
+                    ],
+                  );
+                },
               ),
         ),
         const SizedBox(height: 20),

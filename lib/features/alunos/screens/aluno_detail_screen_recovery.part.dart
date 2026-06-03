@@ -40,14 +40,13 @@ class _AlunoRecoveryInsightCard extends StatelessWidget {
             ),
           );
         }
-        return FxPremiumEntrance(
-          child: Container(
-            padding: const EdgeInsets.all(TokensStrip.s4),
-            decoration: chrome.panel(
-              radius: TokensStrip.rCard,
-              accent: primary,
-            ),
-            child: Row(
+        return Container(
+          padding: const EdgeInsets.all(TokensStrip.s4),
+          decoration: chrome.panel(
+            radius: TokensStrip.rCard,
+            accent: primary,
+          ),
+          child: Row(
               children: [
                 RecoveryScoreRing(score: snapshot.recoveryScore, color: primary),
                 const SizedBox(width: 12),
@@ -88,7 +87,6 @@ class _AlunoRecoveryInsightCard extends StatelessWidget {
                 ),
               ],
             ),
-          ),
         );
       },
     );

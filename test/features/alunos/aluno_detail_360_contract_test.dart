@@ -5,13 +5,15 @@ import 'package:flutter_test/flutter_test.dart';
 String _alunoDetailLibrarySource() {
   const dir = 'lib/features/alunos/screens';
   const mainFile = '$dir/aluno_detail_screen.dart';
+  const providersFile = 'lib/features/alunos/providers/aluno_detail_providers.dart';
   final main = File(mainFile).readAsStringSync();
+  final providers = File(providersFile).readAsStringSync();
   final partPattern = RegExp(r"part '([^']+\.part\.dart)';");
   final parts = partPattern
       .allMatches(main)
       .map((m) => File('$dir/${m.group(1)!}').readAsStringSync())
       .join('\n');
-  return '$main\n$parts';
+  return '$main\n$providers\n$parts';
 }
 
 void main() {
@@ -49,8 +51,9 @@ void main() {
     expect(screen, contains('Sinais atualizados para priorizar sua ação'));
     expect(screen, contains('Sugestão offline'));
     expect(screen, contains('invalidateAluno360Providers'));
-    expect(screen, contains('alunoAderenciaSemanalProvider'));
-    expect(screen, contains('class _WeeklyActivitySparkline'));
+    expect(screen, contains('alunoPesoHistoricoProvider'));
+    expect(screen, contains('class _WeightTrendSparkline'));
+    expect(screen, contains('FxSparkline'));
     expect(screen, contains('formatAlturaDisplay'));
     expect(screen, contains('friendlyError'));
     expect(screen, contains('_AlunoDetailTabBarDelegate'));
@@ -67,5 +70,8 @@ void main() {
     expect(screen, contains('_OperacaoStickyCtaBar'));
     expect(screen, isNot(contains('Pulso operacional')));
     expect(screen, isNot(contains('Score API')));
+    expect(screen, contains('part \'aluno_detail_actions.part.dart\';'));
+    expect(screen, contains('_riscoMetricIcon'));
+    expect(screen, contains('CollapseMode.parallax'));
   });
 }

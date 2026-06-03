@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/router/safe_navigation.dart';
@@ -10,6 +10,7 @@ import '../data/aluno_contact_utils.dart';
 import '../data/aluno_followup_store.dart';
 import '../utils/altura_display.dart';
 import '../providers/aluno_followup_provider.dart';
+import '../providers/aluno_detail_providers.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -19,10 +20,10 @@ import '../../dashboard/data/command_center_data.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../ia/data/ia_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../health/data/health_repository.dart';
 import '../../health/widgets/recovery_score_ring.dart';
-import '../../avaliacao/data/avaliacao_repository.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -41,96 +42,7 @@ part 'aluno_detail_screen_operational_metrics.part.dart';
 part 'aluno_detail_screen_follow_up.part.dart';
 part 'aluno_detail_screen_shared.part.dart';
 part 'aluno_detail_screen_tabs.part.dart';
-
-
-final aluno360Provider = FutureProvider.family<Aluno360, int>((ref, alunoId) async {
-  return AlunoRepository(ref.read(apiClientProvider)).buscarAluno360(alunoId);
-});
-
-final alunoRecoveryProvider = FutureProvider.family<RecoverySnapshot?, int>((
-  ref,
-  alunoId,
-) async {
-  return HealthRepository.fromClient(
-    ref.read(apiClientProvider),
-  ).fetchRecoveryForAluno(alunoId);
-});
-
-/// When true, copilot card loads IA via [alunoCopilotoActionProvider] (refresh).
-final alunoCopilotoForceIaProvider = StateProvider.family<bool, int>(
-  (ref, alunoId) => false,
-);
-
-final alunoCopilotoActionProvider =
-    FutureProvider.family<Map<String, dynamic>, int>((ref, alunoId) async {
-      return IaRepository(ref.read(apiClientProvider)).proximaAcao(alunoId);
-    });
-
-final alunoMedidasResumoProvider =
-    FutureProvider.family<SnapshotAvaliacao?, int>((ref, alunoId) async {
-      try {
-        final comparativo = await AvaliacaoRepository(
-          ref.read(apiClientProvider),
-        ).comparativo(alunoId);
-        final atual = comparativo.atual;
-        final hasData =
-            atual.percGordura != null ||
-            (atual.massaMuscular != null && atual.massaMuscular! > 0);
-        return hasData ? atual : null;
-      } catch (_) {
-        return null;
-      }
-    });
-
-final alunoOpenIaActionsProvider =
-    FutureProvider.family<List<FilaAcaoResumo>, int>((ref, alunoId) async {
-      return ref
-          .read(dashboardRepositoryProvider)
-          .getIaCommandActions(status: 'ABERTO', alunoId: alunoId);
-    });
-
-final alunoScoreSnapshotsProvider = FutureProvider.family<
-  List<FocuxScoreSnapshotResumo>,
-  int
->((ref, alunoId) async {
-  return ref.read(dashboardRepositoryProvider).getFocuxScoreSnapshots(alunoId);
-});
-
-final alunoEvolucaoInteligenteProvider =
-    FutureProvider.family<EvolucaoInteligente, int>((ref, alunoId) async {
-      return AlunoRepository(
-        ref.read(apiClientProvider),
-      ).buscarEvolucaoInteligente(alunoId);
-    });
-
-final alunoTimeline360ApiProvider =
-    FutureProvider.family<List<Timeline360Event>, int>((ref, alunoId) async {
-      return AlunoRepository(
-        ref.read(apiClientProvider),
-      ).buscarTimeline360(alunoId);
-    });
-
-final alunoAderenciaSemanalProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, int>((ref, alunoId) async {
-      return ref.read(alunoRepositoryProvider).aderenciaSemanal(alunoId);
-    });
-
-Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
-  ref.invalidate(aluno360Provider(alunoId));
-  ref.invalidate(alunoProvider(alunoId));
-  ref.invalidate(alunoRecoveryProvider(alunoId));
-  ref.invalidate(alunoAutonomiaEventosProvider(alunoId));
-  ref.invalidate(alunoAutonomiaResumoProvider(alunoId));
-  ref.invalidate(alunoScoreSnapshotsProvider(alunoId));
-  ref.invalidate(alunoEvolucaoInteligenteProvider(alunoId));
-  ref.invalidate(alunoTimeline360ApiProvider(alunoId));
-  ref.read(alunoCopilotoForceIaProvider(alunoId).notifier).state = false;
-  ref.invalidate(alunoCopilotoActionProvider(alunoId));
-  ref.invalidate(alunoOpenIaActionsProvider(alunoId));
-  ref.invalidate(alunoMedidasResumoProvider(alunoId));
-  ref.invalidate(alunoAderenciaSemanalProvider(alunoId));
-  await ref.read(aluno360Provider(alunoId).future);
-}
+part 'aluno_detail_actions.part.dart';
 
 class AlunoDetailScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -161,324 +73,6 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
   void dispose() {
     _tabController.dispose();
     super.dispose();
-  }
-
-  Future<void> _confirmarExclusao(
-    BuildContext context,
-    WidgetRef ref,
-    Aluno aluno,
-  ) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Excluir aluno'),
-            content: Text(
-              'Tem certeza que deseja excluir ${aluno.nome}? Esta ação não pode ser desfeita.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: EagleTokens.bad),
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Excluir'),
-              ),
-            ],
-          ),
-    );
-    if (confirm != true || !context.mounted) return;
-    try {
-      await AlunoRepository(ref.read(apiClientProvider)).excluirAluno(aluno.id);
-      if (context.mounted) {
-        FeedbackHelper.showSuccess(context, 'Aluno excluído.');
-        safePopOrGo(context, '/alunos');
-      }
-    } catch (e) {
-      if (context.mounted) {
-        FeedbackHelper.showError(context, 'Erro: $e');
-      }
-    }
-  }
-
-  Future<void> _confirmarGerarSenha(
-    BuildContext context,
-    WidgetRef ref,
-    Aluno aluno,
-  ) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Gerar nova senha?'),
-            content: Text(
-              'A senha atual de ${aluno.nome} deixará de funcionar. Gere apenas se o aluno esqueceu a senha ou precisa recuperar acesso.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-              FxLiquidPrimaryButton(
-                expand: false,
-                icon: Icons.key_rounded,
-                label: 'Gerar senha',
-                onPressed: () => Navigator.pop(ctx, true),
-              ),
-            ],
-          ),
-    );
-    if (confirm != true || !context.mounted) return;
-
-    try {
-      final senha = await AlunoRepository(
-        ref.read(apiClientProvider),
-      ).gerarSenhaProvisoria(aluno.id);
-      ref.invalidate(alunoProvider(aluno.id));
-      if (context.mounted) {
-        _showNovaSenhaSheet(context, aluno, senha);
-      }
-    } catch (e) {
-      if (context.mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text('Não foi possível gerar senha: $e')),
-        );
-      }
-    }
-  }
-
-  void _showNovaSenhaSheet(BuildContext context, Aluno aluno, String senha) {
-    final chrome = ShellChrome.of(context);
-    final primary = Theme.of(context).colorScheme.primary;
-    final ink = chrome.ink;
-    final mute = chrome.mute;
-    final whatsappNumber = (aluno.whatsapp ?? '').replaceAll(RegExp(r'\D'), '');
-    final hasWhatsapp = whatsappNumber.isNotEmpty;
-    final mensagem = _senhaProvisoriaMessage(aluno, senha);
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      builder:
-          (ctx) => Padding(
-            padding: EdgeInsets.fromLTRB(
-              16,
-              8,
-              16,
-              16 + MediaQuery.of(ctx).padding.bottom,
-            ),
-            child: ShellSurface(
-              accent: primary,
-              radius: TokensStrip.rCard,
-              padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 12, 20, 20),
-              child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 42,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: chrome.line,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-                const SizedBox(height: 22),
-                Container(
-                  width: 54,
-                  height: 54,
-                  decoration: BoxDecoration(
-                    color: primary.withValues(alpha: 0.10),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.key_rounded, color: primary, size: 28),
-                ),
-                const SizedBox(height: TokensStrip.s4),
-                Text(
-                  'Nova senha provisória',
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'A senha anterior não funciona mais. ${aluno.nome} deve trocar no primeiro acesso.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: mute,
-                    fontSize: 13.4,
-                    height: 1.35,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(18, 15, 18, 14),
-                  decoration: fxListCardDecoration(
-                    ctx,
-                    accent: primary,
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Senha provisória',
-                        style: TextStyle(
-                          color: mute,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        senha,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 31,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 5.5,
-                        ),
-                      ),
-                      const SizedBox(height: 9),
-                      Text(
-                        'Compartilhe apenas com o aluno.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: mute,
-                          fontSize: 11.8,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 18),
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      HapticFeedback.mediumImpact();
-                      if (hasWhatsapp) {
-                        final uri = Uri.parse(
-                          'https://wa.me/55$whatsappNumber?text=${Uri.encodeComponent(mensagem)}',
-                        );
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(
-                            uri,
-                            mode: LaunchMode.externalApplication,
-                          );
-                          if (ctx.mounted) Navigator.of(ctx).pop();
-                          return;
-                        }
-                      }
-                      await Clipboard.setData(ClipboardData(text: mensagem));
-                      if (ctx.mounted) Navigator.of(ctx).pop();
-                      if (context.mounted) {
-                        FeedbackHelper.showSnackBar(
-                          context,
-                          SnackBar(
-                            content: Text(
-                              hasWhatsapp
-                                  ? 'Mensagem copiada. Abra o WhatsApp e envie ao aluno.'
-                                  : 'Convite copiado.',
-                            ),
-                          ),
-                        );
-                      }
-                    },
-                    icon: Icon(
-                      hasWhatsapp ? Icons.send_rounded : Icons.copy_rounded,
-                      size: 18,
-                    ),
-                    label: Text(
-                      hasWhatsapp ? 'Enviar nova senha' : 'Copiar nova senha',
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                  ),
-                ),
-                if (hasWhatsapp) ...[
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: OutlinedButton.icon(
-                      onPressed: () async {
-                        await Clipboard.setData(ClipboardData(text: mensagem));
-                        HapticFeedback.mediumImpact();
-                        if (ctx.mounted) Navigator.of(ctx).pop();
-                        if (context.mounted) {
-                          FeedbackHelper.showSnackBar(
-                            context,
-                            const SnackBar(content: Text('Convite copiado.')),
-                          );
-                        }
-                      },
-                      icon: Icon(
-                        Icons.copy_rounded,
-                        size: 18,
-                        color: ink,
-                      ),
-                      label: Text(
-                        'Copiar nova senha',
-                        style: TextStyle(color: ink),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: chrome.line),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  height: 44,
-                  child: TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    child: Text(
-                      'Fechar',
-                      style: TextStyle(
-                        color: mute,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            ),
-          ),
-    );
-  }
-
-  String _senhaProvisoriaMessage(Aluno aluno, String senha) {
-    final primeiroNome =
-        aluno.nome.trim().isEmpty
-            ? 'tudo bem'
-            : aluno.nome.trim().split(RegExp(r'\s+')).first;
-    return 'Olá $primeiroNome! Sua senha do Focux foi redefinida.\n\n'
-        'Acesse com seu e-mail: ${aluno.email}\n'
-        'Senha provisória: $senha\n\n'
-        'Troque a senha no primeiro acesso.';
   }
 
   @override
@@ -581,7 +175,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                   ),
                 ),
                 flexibleSpace: FlexibleSpaceBar(
-                  collapseMode: CollapseMode.pin,
+                  collapseMode: CollapseMode.parallax,
                   background: Padding(
                     padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 72, 16, 10),
                     child: Container(
@@ -679,7 +273,6 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                   const SizedBox(width: 8),
                 ],
               ),
-
               SliverPersistentHeader(
                 pinned: true,
                 delegate: _AlunoDetailTabBarDelegate(

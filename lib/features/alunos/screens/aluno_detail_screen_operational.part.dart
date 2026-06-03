@@ -112,6 +112,7 @@ class _AlunoOperationalStatusSection extends StatelessWidget {
                   hint: aluno.emRisco ? 'Em risco' : 'Estável',
                   color: riscoColor,
                   isDark: isDark,
+                  leadingIcon: _riscoMetricIcon(aluno.riscoNivel),
                   semanticsLabel:
                       'Risco ${formatRiscoNivel(aluno.riscoNivel)}',
                 ),

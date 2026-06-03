@@ -1,0 +1,130 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../features/auth/providers/auth_provider.dart';
+import '../../avaliacao/data/avaliacao_repository.dart';
+import '../../dashboard/data/command_center_data.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
+import '../../health/data/health_repository.dart';
+import '../../ia/data/ia_repository.dart';
+import '../data/aluno_repository.dart';
+import 'alunos_provider.dart';
+
+final aluno360Provider = FutureProvider.family<Aluno360, int>((ref, alunoId) async {
+  return AlunoRepository(ref.read(apiClientProvider)).buscarAluno360(alunoId);
+});
+
+final alunoRecoveryProvider = FutureProvider.family<RecoverySnapshot?, int>((
+  ref,
+  alunoId,
+) async {
+  return HealthRepository.fromClient(
+    ref.read(apiClientProvider),
+  ).fetchRecoveryForAluno(alunoId);
+});
+
+/// When true, copilot card loads IA via [alunoCopilotoActionProvider] (refresh).
+final alunoCopilotoForceIaProvider = StateProvider.family<bool, int>(
+  (ref, alunoId) => false,
+);
+
+final alunoCopilotoActionProvider =
+    FutureProvider.family<Map<String, dynamic>, int>((ref, alunoId) async {
+      return IaRepository(ref.read(apiClientProvider)).proximaAcao(alunoId);
+    });
+
+final alunoMedidasResumoProvider =
+    FutureProvider.family<SnapshotAvaliacao?, int>((ref, alunoId) async {
+      try {
+        final comparativo = await AvaliacaoRepository(
+          ref.read(apiClientProvider),
+        ).comparativo(alunoId);
+        final atual = comparativo.atual;
+        final hasData =
+            atual.percGordura != null ||
+            (atual.massaMuscular != null && atual.massaMuscular! > 0);
+        return hasData ? atual : null;
+      } catch (_) {
+        return null;
+      }
+    });
+
+final alunoOpenIaActionsProvider =
+    FutureProvider.family<List<FilaAcaoResumo>, int>((ref, alunoId) async {
+      return ref
+          .read(dashboardRepositoryProvider)
+          .getIaCommandActions(status: 'ABERTO', alunoId: alunoId);
+    });
+
+final alunoScoreSnapshotsProvider = FutureProvider.family<
+  List<FocuxScoreSnapshotResumo>,
+  int
+>((ref, alunoId) async {
+  return ref.read(dashboardRepositoryProvider).getFocuxScoreSnapshots(alunoId);
+});
+
+final alunoEvolucaoInteligenteProvider =
+    FutureProvider.family<EvolucaoInteligente, int>((ref, alunoId) async {
+      return AlunoRepository(
+        ref.read(apiClientProvider),
+      ).buscarEvolucaoInteligente(alunoId);
+    });
+
+final alunoTimeline360ApiProvider =
+    FutureProvider.family<List<Timeline360Event>, int>((ref, alunoId) async {
+      return AlunoRepository(
+        ref.read(apiClientProvider),
+      ).buscarTimeline360(alunoId);
+    });
+
+final alunoAderenciaSemanalProvider =
+    FutureProvider.family<List<Map<String, dynamic>>, int>((ref, alunoId) async {
+      return ref.read(alunoRepositoryProvider).aderenciaSemanal(alunoId);
+    });
+
+/// Last weight measurements from avaliações físicas (up to 7 points, chronological).
+final alunoPesoHistoricoProvider =
+    FutureProvider.family<List<double>, int>((ref, alunoId) async {
+      final avaliacoes = await AvaliacaoRepository(
+        ref.read(apiClientProvider),
+      ).listar(alunoId);
+
+      final dated = avaliacoes
+          .where((a) => a.pesoKg != null)
+          .map(
+            (a) => (
+              date: _avaliacaoSortKey(a.avaliadoEm ?? a.criadoEm),
+              peso: a.pesoKg!,
+            ),
+          )
+          .toList()
+        ..sort((a, b) => a.date.compareTo(b.date));
+
+      final series = dated.map((e) => e.peso).toList();
+      if (series.length <= 7) return series;
+      return series.sublist(series.length - 7);
+    });
+
+DateTime _avaliacaoSortKey(String? raw) {
+  if (raw == null || raw.trim().isEmpty) {
+    return DateTime.fromMillisecondsSinceEpoch(0);
+  }
+  return DateTime.tryParse(raw) ?? DateTime.fromMillisecondsSinceEpoch(0);
+}
+
+Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
+  ref.invalidate(aluno360Provider(alunoId));
+  ref.invalidate(alunoProvider(alunoId));
+  ref.invalidate(alunoRecoveryProvider(alunoId));
+  ref.invalidate(alunoAutonomiaEventosProvider(alunoId));
+  ref.invalidate(alunoAutonomiaResumoProvider(alunoId));
+  ref.invalidate(alunoScoreSnapshotsProvider(alunoId));
+  ref.invalidate(alunoEvolucaoInteligenteProvider(alunoId));
+  ref.invalidate(alunoTimeline360ApiProvider(alunoId));
+  ref.read(alunoCopilotoForceIaProvider(alunoId).notifier).state = false;
+  ref.invalidate(alunoCopilotoActionProvider(alunoId));
+  ref.invalidate(alunoOpenIaActionsProvider(alunoId));
+  ref.invalidate(alunoMedidasResumoProvider(alunoId));
+  ref.invalidate(alunoAderenciaSemanalProvider(alunoId));
+  ref.invalidate(alunoPesoHistoricoProvider(alunoId));
+  await ref.read(aluno360Provider(alunoId).future);
+}

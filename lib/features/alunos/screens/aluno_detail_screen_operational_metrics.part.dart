@@ -8,6 +8,7 @@ class _OperationalMetricTile extends StatelessWidget {
     required this.color,
     required this.isDark,
     this.semanticsLabel,
+    this.leadingIcon,
   });
 
   final String label;
@@ -16,6 +17,7 @@ class _OperationalMetricTile extends StatelessWidget {
   final Color color;
   final bool isDark;
   final String? semanticsLabel;
+  final IconData? leadingIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -41,14 +43,24 @@ class _OperationalMetricTile extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(
-              color: ink,
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.3,
-            ),
+          Row(
+            children: [
+              if (leadingIcon != null) ...[
+                Icon(leadingIcon, size: 17, color: color),
+                const SizedBox(width: 5),
+              ],
+              Flexible(
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+              ),
+            ],
           ),
           Text(hint, style: TextStyle(color: color, fontSize: 10.5)),
         ],
@@ -60,3 +72,12 @@ class _OperationalMetricTile extends StatelessWidget {
   }
 }
 
+IconData _riscoMetricIcon(String? raw) {
+  final value = (raw ?? '').trim().toUpperCase();
+  return switch (value) {
+    'ALTO' || 'HIGH' => Icons.warning_amber_rounded,
+    'MEDIO' || 'MÉDIO' || 'MEDIUM' => Icons.error_outline_rounded,
+    'BAIXO' || 'LOW' => Icons.check_circle_outline_rounded,
+    _ => Icons.help_outline_rounded,
+  };
+}

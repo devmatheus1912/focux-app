@@ -15,8 +15,9 @@ class _AlunoWeightActivityCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final aderenciaAsync = ref.watch(alunoAderenciaSemanalProvider(alunoId));
+    final pesoHistoricoAsync = ref.watch(alunoPesoHistoricoProvider(alunoId));
     final primary = Theme.of(context).colorScheme.primary;
+    final trendColor = primary;
 
     return Container(
       decoration: fxListCardDecoration(context),
@@ -32,7 +33,7 @@ class _AlunoWeightActivityCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'PESO · ÚLTIMAS 7 SEMANAS',
+                    'PESO · TENDÊNCIA',
                     style: TextStyle(
                       color:
                           isDark
@@ -99,7 +100,7 @@ class _AlunoWeightActivityCard extends ConsumerWidget {
           const SizedBox(height: 14),
           SizedBox(
             height: 72,
-            child: aderenciaAsync.when(
+            child: pesoHistoricoAsync.when(
               loading:
                   () => FxLoading.sectionShimmer(
                     context,
@@ -120,8 +121,9 @@ class _AlunoWeightActivityCard extends ConsumerWidget {
                       isDark: isDark,
                     ),
                   ),
-              data: (semana) {
-                if (semana.isEmpty && aluno.peso == null) {
+              data: (series) {
+                final weightSeries = _resolveWeightSeries(series, aluno.peso);
+                if (weightSeries.isEmpty) {
                   return InkWell(
                     borderRadius: BorderRadius.circular(14),
                     onTap:
@@ -136,6 +138,10 @@ class _AlunoWeightActivityCard extends ConsumerWidget {
                     ),
                   );
                 }
+                final delta =
+                    weightSeries.length >= 2
+                        ? weightSeries.last - weightSeries.first
+                        : 0.0;
                 return InkWell(
                   borderRadius: BorderRadius.circular(14),
                   onTap:
@@ -143,18 +149,10 @@ class _AlunoWeightActivityCard extends ConsumerWidget {
                         '/alunos/$alunoId/evolucao',
                         extra: aluno.nome,
                       ),
-                  child: _WeeklyActivitySparkline(
-                    values:
-                        semana
-                            .map(
-                              (e) =>
-                                  (e['checkins'] as num?)?.toDouble() ?? 0.0,
-                            )
-                            .toList(growable: false),
-                    color: EagleTokens.aderenciaColor(
-                      (aluno.aderenciaPercent ?? 0).toDouble(),
-                      isDark: isDark,
-                    ),
+                  child: _WeightTrendSparkline(
+                    values: weightSeries,
+                    deltaKg: delta,
+                    color: trendColor,
                     trackColor: primary.withValues(alpha: isDark ? 0.18 : 0.12),
                     isDark: isDark,
                   ),
@@ -168,15 +166,23 @@ class _AlunoWeightActivityCard extends ConsumerWidget {
   }
 }
 
-class _WeeklyActivitySparkline extends StatelessWidget {
-  const _WeeklyActivitySparkline({
+List<double> _resolveWeightSeries(List<double> avaliacoes, double? currentPeso) {
+  if (avaliacoes.isNotEmpty) return avaliacoes;
+  if (currentPeso == null) return const [];
+  return [currentPeso, currentPeso];
+}
+
+class _WeightTrendSparkline extends StatelessWidget {
+  const _WeightTrendSparkline({
     required this.values,
+    required this.deltaKg,
     required this.color,
     required this.trackColor,
     required this.isDark,
   });
 
   final List<double> values;
+  final double deltaKg;
   final Color color;
   final Color trackColor;
   final bool isDark;
@@ -184,11 +190,20 @@ class _WeeklyActivitySparkline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final maxValue = values.fold<double>(0, (p, v) => v > p ? v : p);
-    final effectiveMax = maxValue <= 0 ? 1.0 : maxValue;
+    final deltaLabel =
+        deltaKg.abs() < 0.05
+            ? 'Estável'
+            : '${deltaKg > 0 ? '+' : ''}${deltaKg.toStringAsFixed(1)} kg';
+    final deltaColor =
+        deltaKg.abs() < 0.05
+            ? mute
+            : deltaKg < 0
+                ? EagleTokens.good
+                : EagleTokens.warn;
 
     return Semantics(
-      label: 'Atividade dos últimos ${values.length} dias',
+      label:
+          'Tendência de peso com ${values.length} medições. Variação $deltaLabel',
       child: Container(
         padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
         decoration: BoxDecoration(
@@ -199,49 +214,41 @@ class _WeeklyActivitySparkline extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Check-ins por dia',
-              style: TextStyle(
-                color: mute,
-                fontSize: 10.5,
-                fontWeight: FontWeight.w600,
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Histórico de avaliações',
+                    style: TextStyle(
+                      color: mute,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Text(
+                  deltaLabel,
+                  style: TextStyle(
+                    color: deltaColor,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  for (var i = 0; i < values.length; i++) ...[
-                    if (i > 0) const SizedBox(width: 6),
-                    Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          final heightFactor = (values[i] / effectiveMax).clamp(
-                            0.08,
-                            1.0,
-                          );
-                          return Align(
-                            alignment: Alignment.bottomCenter,
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 220),
-                              curve: Curves.easeOutCubic,
-                              width: double.infinity,
-                              height: constraints.maxHeight * heightFactor,
-                              decoration: BoxDecoration(
-                                color:
-                                    values[i] > 0
-                                        ? color
-                                        : color.withValues(alpha: 0.22),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ],
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return FxSparkline(
+                    data: values.length >= 2 ? values : [values.first, values.first],
+                    color: color,
+                    width: constraints.maxWidth,
+                    height: constraints.maxHeight,
+                    strokeWidth: 2.2,
+                    fill: true,
+                  );
+                },
               ),
             ),
           ],
@@ -250,4 +257,3 @@ class _WeeklyActivitySparkline extends StatelessWidget {
     );
   }
 }
-
