@@ -79,3 +79,38 @@ String dashboardRadarSheetSubtitle({
   if (badge == null || badge.isEmpty) return body;
   return '$badge · $body';
 }
+
+/// Rótulo com contagem e plural correto em PT (ex.: 1 cobrança pendente / 3 cobranças pendentes).
+String dashboardCountLabel(int count, String singular, String plural) {
+  if (count <= 0) return plural;
+  if (count == 1) return '1 $singular';
+  return '$count $plural';
+}
+
+/// Corrige descrições do backend com contagem + plural (ex. "1 cobranças pendentes").
+String dashboardFormatCountCopy(String raw) {
+  var text = dashboardFormatActionCopy(raw);
+  final cobranca = RegExp(
+    r'^(\d+)\s+cobran[cç]as?\s+pendentes?$',
+    caseSensitive: false,
+  ).firstMatch(text.trim());
+  if (cobranca != null) {
+    final n = int.tryParse(cobranca.group(1)!) ?? 0;
+    return dashboardCountLabel(
+      n,
+      'cobrança pendente',
+      'cobranças pendentes',
+    );
+  }
+  final mensalidade = RegExp(
+    r'^(\d+)\s+mensalidades?\s+',
+    caseSensitive: false,
+  ).firstMatch(text.trim());
+  if (mensalidade != null) {
+    final n = int.tryParse(mensalidade.group(1)!) ?? 0;
+    final rest = text.substring(mensalidade.end).trim();
+    final head = dashboardCountLabel(n, 'mensalidade', 'mensalidades');
+    return rest.isEmpty ? head : '$head $rest';
+  }
+  return text;
+}

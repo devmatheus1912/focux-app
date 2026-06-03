@@ -559,7 +559,7 @@ CommandActionItem _sheetItemFromFila(FilaAcaoResumo action) {
   return CommandActionItem(
     icon: 'zap',
     title: isRadar ? radarName! : dashboardFormatActionCopy(rawTitle),
-    subtitle: dashboardFormatActionCopy(action.descricao),
+    subtitle: dashboardFormatCountCopy(action.descricao),
     route:
         action.acaoUrl.startsWith('/')
             ? action.acaoUrl
@@ -578,8 +578,15 @@ List<CommandActionItem> buildDashboardSheetActions({
   for (final item in curated) {
     seenKeys.add('${item.title}|${item.route}');
   }
+  final hasBillingCurated = curated.any(
+    (item) => item.route == '/financeiro' || item.tone == CommandActionTone.money,
+  );
   final merged = <CommandActionItem>[...curated];
   for (final action in filaAcoes) {
+    if (hasBillingCurated &&
+        (action.actionKey == 'BILLING_PENDING' || action.tipo == 'COBRANCA')) {
+      continue;
+    }
     final item = _sheetItemFromFila(action);
     final key = '${item.title}|${item.route}';
     if (seenKeys.contains(key)) continue;

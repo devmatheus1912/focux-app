@@ -24,5 +24,13 @@ void main() {
       ),
       contains('mapa corporal'),
     );
+    expect(
+      dashboardFormatCountCopy('1 cobranças pendentes'),
+      '1 cobrança pendente',
+    );
+    expect(
+      dashboardFormatCountCopy('3 cobrancas pendentes'),
+      '3 cobranças pendentes',
+    );
   });
 }
