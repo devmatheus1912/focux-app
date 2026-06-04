@@ -244,6 +244,8 @@ class _Aluno360ActionRow extends ConsumerStatefulWidget {
   final Color primary;
   final FilaAcaoResumo? existingTask;
   final bool openTaskHint;
+  /// When true and a task is open, primary CTA lives in the sticky bar only.
+  final bool hidePrimaryCta;
   final String acao;
   final Future<bool> Function(String acao) onAssign;
   final void Function(String acao) onPrepareMessage;
@@ -253,6 +255,7 @@ class _Aluno360ActionRow extends ConsumerStatefulWidget {
     required this.primary,
     required this.existingTask,
     this.openTaskHint = false,
+    this.hidePrimaryCta = false,
     required this.acao,
     required this.onAssign,
     required this.onPrepareMessage,
@@ -285,47 +288,50 @@ class _Aluno360ActionRowState extends ConsumerState<_Aluno360ActionRow> {
   @override
   Widget build(BuildContext context) {
     final hasTask = widget.existingTask != null || widget.openTaskHint || _created;
+    final hidePrimary = widget.hidePrimaryCta && hasTask;
     return Row(
       children: [
-        Expanded(
-          flex: 3,
-          child:
-              hasTask
-                  ? Semantics(
-                    button: true,
-                    label: 'Abrir no Command Center',
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton.icon(
-                        onPressed: _handlePrimary,
-                        icon: Icon(
-                          Icons.open_in_new_rounded,
-                          size: 16,
-                          color: widget.primary,
-                        ),
-                        label: Text(
-                          'Abrir no Command Center',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+        if (!hidePrimary) ...[
+          Expanded(
+            flex: 3,
+            child:
+                hasTask
+                    ? Semantics(
+                      button: true,
+                      label: 'Abrir Command Center',
+                      child: Tooltip(
+                        message: 'Abrir no Command Center',
+                        child: TextButton.icon(
+                          onPressed: _handlePrimary,
+                          icon: Icon(
+                            Icons.open_in_new_rounded,
+                            size: 16,
                             color: widget.primary,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 12.5,
+                          ),
+                          label: Text(
+                            'Command Center',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: widget.primary,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 12.5,
+                            ),
                           ),
                         ),
                       ),
+                    )
+                    : FxLiquidPrimaryButton(
+                      loading: _creating,
+                      icon: Icons.task_alt_rounded,
+                      label: _creating ? 'Criando...' : 'Criar tarefa',
+                      onPressed: _creating ? null : _handlePrimary,
                     ),
-                  )
-                  : FxLiquidPrimaryButton(
-                    loading: _creating,
-                    icon: Icons.task_alt_rounded,
-                    label: _creating ? 'Criando...' : 'Criar tarefa',
-                    onPressed: _creating ? null : _handlePrimary,
-                  ),
-        ),
-        const SizedBox(width: 8),
+          ),
+          const SizedBox(width: 8),
+        ],
         Expanded(
-          flex: 2,
+          flex: hidePrimary ? 1 : 2,
           child: Semantics(
             button: true,
             label: 'Abrir chat com ${widget.aluno.nome}',

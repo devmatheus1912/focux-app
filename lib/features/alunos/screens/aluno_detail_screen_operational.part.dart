@@ -86,36 +86,17 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: Stack(
-                  alignment: Alignment.topRight,
-                  children: [
-                    OperationalMetricTile(
-                      label: 'Aderência',
-                      value:
-                          aluno.aderenciaPercent == null
-                              ? '—'
-                              : '${aluno.aderenciaPercent}%',
-                      hint: 'Semana atual',
-                      color: aderenciaColor,
-                      isDark: isDark,
-                      semanticsLabel:
-                          'Aderência ${aluno.aderenciaPercent ?? 'indisponível'} por cento',
-                    ),
-                    if (sparklineData.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8, right: 8),
-                        child: Semantics(
-                          label: 'Tendência de aderência nos últimos 7 dias',
-                          child: FxSparkline(
-                            data: sparklineData,
-                            color: aderenciaColor,
-                            width: 52,
-                            height: 20,
-                            strokeWidth: 1.6,
-                          ),
-                        ),
-                      ),
-                  ],
+                child: OperationalMetricTile(
+                  label: 'Aderência',
+                  value:
+                      aluno.aderenciaPercent == null
+                          ? '—'
+                          : '${aluno.aderenciaPercent}%',
+                  hint: 'Semana atual',
+                  color: aderenciaColor,
+                  isDark: isDark,
+                  semanticsLabel:
+                      'Aderência ${aluno.aderenciaPercent ?? 'indisponível'} por cento',
                 ),
               ),
             ],
@@ -165,6 +146,33 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
             isDark: isDark,
             semanticsLabel: 'Próximo contato $proximoContato',
           ),
+          if (sparklineData.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Text(
+              'Aderência · últimos 7 dias',
+              style: TextStyle(
+                color: mute,
+                fontSize: 10.5,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.35,
+              ),
+            ),
+            const SizedBox(height: 8),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return Semantics(
+                  label: 'Tendência de aderência nos últimos 7 dias',
+                  child: FxSparkline(
+                    data: sparklineData,
+                    color: aderenciaColor,
+                    width: constraints.maxWidth,
+                    height: 32,
+                    strokeWidth: 2,
+                  ),
+                );
+              },
+            ),
+          ],
         ],
       ),
     );

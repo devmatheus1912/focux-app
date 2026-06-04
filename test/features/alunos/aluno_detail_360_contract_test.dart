@@ -55,7 +55,8 @@ void main() {
     expect(screen, contains('alunoAderenciaSemanalProvider'));
     expect(screen, contains('AnimatedSwitcher'));
     expect(screen, contains('hasOpenCopilotTask'));
-    expect(screen, contains('Abrir no Command Center'));
+    expect(screen, contains('hidePrimaryCta'));
+    expect(screen, contains('Aderência · últimos 7 dias'));
     expect(screen, contains('class _WeightTrendSparkline'));
     expect(screen, contains('FxSparkline'));
     expect(screen, contains('formatAlturaDisplay'));

@@ -687,6 +687,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
             primary: primary,
             existingTask: openTask,
             openTaskHint: hasOpenCopilotTask360 && openTask == null,
+            hidePrimaryCta: hasOpenTask,
             acao: _resolveCopilotAcao(
               seed360: seed360,
               forceIa: forceIa,
