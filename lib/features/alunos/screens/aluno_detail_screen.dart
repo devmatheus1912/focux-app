@@ -172,10 +172,19 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                 expandedHeight: heroExpandedHeight,
                 pinned: true,
                 stretch: false,
-                backgroundColor: chrome.sheetFill,
-                surfaceTintColor: Colors.transparent,
+                backgroundColor: Colors.transparent,
+                surfaceTintColor: chrome.sheetFill,
                 elevation: 0,
-                scrolledUnderElevation: 2,
+                scrolledUnderElevation: 1,
+                shadowColor: Colors.black.withValues(alpha: isDark ? 0.35 : 0.12),
+                forceMaterialTransparency: true,
+                systemOverlayStyle: SystemUiOverlayStyle(
+                  statusBarColor: Colors.transparent,
+                  statusBarIconBrightness:
+                      isDark ? Brightness.light : Brightness.dark,
+                  statusBarBrightness:
+                      isDark ? Brightness.dark : Brightness.light,
+                ),
                 leading: Padding(
                   padding: const EdgeInsets.only(left: 4),
                   child: IconButton(
@@ -194,33 +203,41 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                 ),
                 flexibleSpace: FlexibleSpaceBar(
                   collapseMode: CollapseMode.pin,
-                  background: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          isDark
-                              ? primary.withValues(alpha: 0.18)
-                              : BrandPalette.softer(primary),
-                          chrome.sheetFill,
-                        ],
-                        stops: const [0.55, 1.0],
+                  background: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              isDark
+                                  ? const Color(0xFF128989)
+                                  : primary.withValues(alpha: 0.72),
+                              isDark
+                                  ? primary.withValues(alpha: 0.16)
+                                  : BrandPalette.softer(primary),
+                              chrome.sheetFill,
+                            ],
+                            stops: const [0.0, 0.42, 1.0],
+                          ),
+                        ),
                       ),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        TokensStrip.s4,
-                        MediaQuery.paddingOf(context).top + kToolbarHeight + 2,
-                        TokensStrip.s4,
-                        6,
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          MediaQuery.paddingOf(context).top + kToolbarHeight + 2,
+                          TokensStrip.s4,
+                          6,
+                        ),
+                        child: AlunoDetailHeroCard(
+                          aluno: aluno,
+                          isDark: isDark,
+                          primary: primary,
+                        ),
                       ),
-                      child: AlunoDetailHeroCard(
-                        aluno: aluno,
-                        isDark: isDark,
-                        primary: primary,
-                      ),
-                    ),
+                    ],
                   ),
                 ),
                 actions: [
