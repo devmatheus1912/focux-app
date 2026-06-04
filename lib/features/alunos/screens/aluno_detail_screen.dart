@@ -30,7 +30,6 @@ import '../../health/widgets/recovery_score_ring.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/theme_provider.dart';
 import '../constants/aluno_360_layout.dart';
 import '../widgets/aluno_detail_hero_card.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -200,85 +199,60 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                 systemOverlayStyle: SystemUiOverlayStyle(
                   statusBarColor: Colors.transparent,
                   statusBarIconBrightness:
-                      _headerOnHero
-                          ? Brightness.light
-                          : (isDark ? Brightness.light : Brightness.dark),
+                      isDark ? Brightness.light : Brightness.dark,
                   statusBarBrightness:
-                      _headerOnHero
-                          ? Brightness.dark
-                          : (isDark ? Brightness.dark : Brightness.light),
+                      isDark ? Brightness.dark : Brightness.light,
                 ),
+                title:
+                    _headerOnHero
+                        ? null
+                        : Text(
+                          displayName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
                 leading: Padding(
                   padding: const EdgeInsets.only(left: 4),
-                  child: _Aluno360HeaderIconButton(
-                    onHero: _headerOnHero,
+                  child: IconButton(
                     tooltip: 'Voltar',
                     onPressed: () => safePopOrGo(context, '/alunos'),
-                    icon: Icons.arrow_back_ios_new,
-                    iconSize: 16,
+                    icon: Container(
+                      width: 38,
+                      height: 38,
+                      decoration: chrome.headerAction(radius: 12),
+                      child: Icon(
+                        Icons.arrow_back_ios_new,
+                        size: 16,
+                        color: ink,
+                      ),
+                    ),
                   ),
                 ),
                 flexibleSpace: FlexibleSpaceBar(
                   collapseMode: CollapseMode.parallax,
-                  centerTitle: false,
-                  titlePadding: const EdgeInsets.only(left: 56, bottom: 14),
-                  title: Text(
-                    displayName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: ink,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.2,
+                  background: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      TokensStrip.s4,
+                      MediaQuery.paddingOf(context).top + kToolbarHeight + 2,
+                      TokensStrip.s4,
+                      4,
                     ),
-                  ),
-                  background: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              isDark
-                                  ? const Color(0xFF0F7A7A)
-                                  : BrandPalette.deep(primary),
-                              isDark
-                                  ? const Color(0xFF128989)
-                                  : primary,
-                              isDark
-                                  ? primary.withValues(alpha: 0.14)
-                                  : BrandPalette.softer(primary),
-                              chrome.sheetFill,
-                            ],
-                            stops: const [0.0, 0.28, 0.52, 1.0],
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          TokensStrip.s4,
-                          MediaQuery.paddingOf(context).top + kToolbarHeight + 2,
-                          TokensStrip.s4,
-                          4,
-                        ),
-                        child: AlunoDetailHeroCard(
-                          aluno: aluno,
-                          isDark: isDark,
-                          primary: primary,
-                        ),
-                      ),
-                    ],
+                    child: AlunoDetailHeroCard(
+                      aluno: aluno,
+                      isDark: isDark,
+                      primary: primary,
+                    ),
                   ),
                 ),
                 actions: [
                   PopupMenuButton<String>(
-                    icon: Icon(
-                      Icons.more_horiz_rounded,
-                      color: _headerOnHero ? Colors.white : ink,
-                    ),
+                    icon: Icon(Icons.more_horiz_rounded, color: ink),
                     tooltip: 'Mais opções',
                     onSelected: (value) async {
                       if (value == 'excluir') {
@@ -303,18 +277,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                           ),
                         ],
                   ),
-                  const SizedBox(width: 4),
-                  _Aluno360HeaderIconButton(
-                    onHero: _headerOnHero,
-                    tooltip: isDark ? 'Modo claro' : 'Modo escuro',
-                    onPressed:
-                        () => ref.read(themeModeProvider.notifier).toggle(),
-                    icon:
-                        isDark
-                            ? Icons.light_mode_outlined
-                            : Icons.dark_mode_outlined,
-                    iconSize: 18,
-                  ),
+                  const ShellThemeToggle(size: 38),
                   const SizedBox(width: 8),
                 ],
               ),
