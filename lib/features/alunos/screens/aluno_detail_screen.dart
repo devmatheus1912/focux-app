@@ -56,6 +56,7 @@ class AlunoDetailScreen extends ConsumerStatefulWidget {
 class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  bool _entrancePlayed = false;
 
   int get alunoId => widget.alunoId;
 
@@ -80,10 +81,23 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
   Widget build(BuildContext context) {
     final aluno360Async = ref.watch(aluno360Provider(alunoId));
     final alunoAsync = ref.watch(alunoProvider(alunoId));
-    final autonomiaResumoAsync = ref.watch(alunoAutonomiaResumoProvider(alunoId));
-    final evolucaoGranularAsync = ref.watch(alunoEvolucaoInteligenteProvider(alunoId));
-    final timelineGranularAsync = ref.watch(alunoTimeline360ApiProvider(alunoId));
-    final recoveryAsync = ref.watch(alunoRecoveryProvider(alunoId));
+    final tabIndex = _tabController.index;
+    final autonomiaResumoAsync =
+        tabIndex == 0 && !aluno360Async.hasValue
+            ? ref.watch(alunoAutonomiaResumoProvider(alunoId))
+            : const AsyncValue<AlunoAutonomiaResumo>.loading();
+    final evolucaoGranularAsync =
+        tabIndex == 1 && !aluno360Async.hasValue
+            ? ref.watch(alunoEvolucaoInteligenteProvider(alunoId))
+            : const AsyncValue<EvolucaoInteligente>.loading();
+    final timelineGranularAsync =
+        tabIndex == 1 && !aluno360Async.hasValue
+            ? ref.watch(alunoTimeline360ApiProvider(alunoId))
+            : const AsyncValue<List<Timeline360Event>>.loading();
+    final recoveryAsync =
+        tabIndex == 0
+            ? ref.watch(alunoRecoveryProvider(alunoId))
+            : const AsyncValue<RecoverySnapshot?>.data(null);
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
@@ -217,7 +231,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      aluno.nome,
+                                      fxTitleCaseName(aluno.nome),
                                       style: TextStyle(
                                         color: ink,
                                         fontSize: 21,
@@ -294,17 +308,28 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                     right: 16,
                     bottom: 118,
                   ),
-                  child: IndexedStack(
-                    index: _tabController.index,
-                    children: [
-                      _AlunoDetailOperacaoTab(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 150),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
+                    child: switch (tabIndex) {
+                      0 => _AlunoDetailOperacaoTab(
+                        key: const ValueKey('aluno360_tab_operacao'),
                         aluno: aluno,
                         alunoId: alunoId,
                         isDark: isDark,
                         primary: primary,
                         proximaAcao360: proximaAcao360,
+                        hasOpenCopilotTask360:
+                            aluno360Async.valueOrNull?.hasOpenCopilotTask ?? false,
                         recoveryAsync: recoveryAsync,
                         autonomiaResumoAsync: resolvedAutonomiaResumoAsync,
+                        animateEntrance: !_entrancePlayed,
+                        onEntrancePlayed: () {
+                          if (!_entrancePlayed) {
+                            setState(() => _entrancePlayed = true);
+                          }
+                        },
                         onPassword: () => _confirmarGerarSenha(context, ref, aluno),
                         onEdit: () async {
                           final updated = await context.push<bool>(
@@ -324,22 +349,36 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                           extra: aluno.nome,
                         ),
                       ),
-                      _AlunoDetailEvolucaoTab(
+                      1 => _AlunoDetailEvolucaoTab(
+                        key: const ValueKey('aluno360_tab_evolucao'),
                         aluno: aluno,
                         alunoId: alunoId,
                         isDark: isDark,
                         ink: ink,
                         evolucaoAsync: resolvedEvolucaoAsync,
                         timeline360Async: resolvedTimelineAsync,
+                        animateEntrance: !_entrancePlayed,
+                        onEntrancePlayed: () {
+                          if (!_entrancePlayed) {
+                            setState(() => _entrancePlayed = true);
+                          }
+                        },
                       ),
-                      _AlunoDetailFerramentasTab(
+                      _ => _AlunoDetailFerramentasTab(
+                        key: const ValueKey('aluno360_tab_ferramentas'),
                         aluno: aluno,
                         alunoId: alunoId,
                         isDark: isDark,
                         primary: primary,
                         perfilCompletion: perfilCompletion,
+                        animateEntrance: !_entrancePlayed,
+                        onEntrancePlayed: () {
+                          if (!_entrancePlayed) {
+                            setState(() => _entrancePlayed = true);
+                          }
+                        },
                       ),
-                    ],
+                    },
                   ),
                 ),
               ),

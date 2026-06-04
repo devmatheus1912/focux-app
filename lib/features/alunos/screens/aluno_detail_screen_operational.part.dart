@@ -1,20 +1,36 @@
 ﻿part of 'aluno_detail_screen.dart';
 
-class _AlunoOperationalStatusSection extends StatelessWidget {
+class _AlunoOperationalStatusSection extends ConsumerWidget {
   const _AlunoOperationalStatusSection({
+    required this.alunoId,
     required this.aluno,
     required this.isDark,
     required this.primary,
   });
 
+  final int alunoId;
   final Aluno aluno;
   final bool isDark;
   final Color primary;
 
+  List<double> _aderenciaSparkline(List<Map<String, dynamic>> raw) {
+    return raw
+        .map((point) => (point['checkins'] as num?)?.toDouble() ?? 0)
+        .toList();
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
+    final aderenciaAsync = ref.watch(alunoAderenciaSemanalProvider(alunoId));
+    final sparklineData = aderenciaAsync.valueOrNull == null
+        ? const <double>[]
+        : _aderenciaSparkline(aderenciaAsync.valueOrNull!);
+    final aderenciaColor = EagleTokens.aderenciaColor(
+      (aluno.aderenciaPercent ?? 0).toDouble(),
+      isDark: isDark,
+    );
     final riscoColor =
         aluno.emRisco
             ? (isDark ? const Color(0xFFFFB77A) : EagleTokens.warn)
@@ -32,12 +48,16 @@ class _AlunoOperationalStatusSection extends StatelessWidget {
             children: [
               Icon(Icons.insights_rounded, size: 18, color: primary),
               const SizedBox(width: 8),
-              Text(
-                'Status operacional',
-                style: TextStyle(
-                  color: ink,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
+              Expanded(
+                child: Text(
+                  'Status operacional',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ],
@@ -66,20 +86,36 @@ class _AlunoOperationalStatusSection extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: OperationalMetricTile(
-                  label: 'Aderência',
-                  value:
-                      aluno.aderenciaPercent == null
-                          ? '—'
-                          : '${aluno.aderenciaPercent}%',
-                  hint: 'Semana atual',
-                  color: EagleTokens.aderenciaColor(
-                    (aluno.aderenciaPercent ?? 0).toDouble(),
-                    isDark: isDark,
-                  ),
-                  isDark: isDark,
-                  semanticsLabel:
-                      'Aderência ${aluno.aderenciaPercent ?? 'indisponível'} por cento',
+                child: Stack(
+                  alignment: Alignment.topRight,
+                  children: [
+                    OperationalMetricTile(
+                      label: 'Aderência',
+                      value:
+                          aluno.aderenciaPercent == null
+                              ? '—'
+                              : '${aluno.aderenciaPercent}%',
+                      hint: 'Semana atual',
+                      color: aderenciaColor,
+                      isDark: isDark,
+                      semanticsLabel:
+                          'Aderência ${aluno.aderenciaPercent ?? 'indisponível'} por cento',
+                    ),
+                    if (sparklineData.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8, right: 8),
+                        child: Semantics(
+                          label: 'Tendência de aderência nos últimos 7 dias',
+                          child: FxSparkline(
+                            data: sparklineData,
+                            color: aderenciaColor,
+                            width: 52,
+                            height: 20,
+                            strokeWidth: 1.6,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ],

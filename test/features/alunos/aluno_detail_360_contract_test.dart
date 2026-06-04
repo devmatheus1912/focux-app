@@ -52,6 +52,10 @@ void main() {
     expect(screen, contains('Sugestão offline'));
     expect(screen, contains('invalidateAluno360Providers'));
     expect(screen, contains('alunoPesoHistoricoProvider'));
+    expect(screen, contains('alunoAderenciaSemanalProvider'));
+    expect(screen, contains('AnimatedSwitcher'));
+    expect(screen, contains('hasOpenCopilotTask'));
+    expect(screen, contains('Abrir no Command Center'));
     expect(screen, contains('class _WeightTrendSparkline'));
     expect(screen, contains('FxSparkline'));
     expect(screen, contains('formatAlturaDisplay'));

@@ -1,32 +1,80 @@
 part of 'aluno_detail_screen.dart';
 
 extension _AlunoDetailActions on _AlunoDetailScreenState {
+  String _deleteConfirmToken(String nome) {
+    final trimmed = nome.trim();
+    if (trimmed.isEmpty) return 'aluno';
+    if (trimmed.length <= 3) return trimmed.toLowerCase();
+    return trimmed.substring(0, 3).toLowerCase();
+  }
+
   Future<void> _confirmarExclusao(
     BuildContext context,
     WidgetRef ref,
     Aluno aluno,
   ) async {
+    final confirmToken = _deleteConfirmToken(aluno.nome);
+    final controller = TextEditingController();
+    var inputMatches = false;
+
     final confirm = await showDialog<bool>(
       context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Excluir aluno'),
-            content: Text(
-              'Tem certeza que deseja excluir ${aluno.nome}? Esta ação não pode ser desfeita.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Excluir aluno'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Tem certeza que deseja excluir ${aluno.nome}? Esta ação não pode ser desfeita.',
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    'Digite "$confirmToken" para confirmar:',
+                    style: TextStyle(
+                      color: fxScreenMute(context),
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: controller,
+                    autofocus: true,
+                    textInputAction: TextInputAction.done,
+                    decoration: const InputDecoration(
+                      hintText: 'Confirmação',
+                      isDense: true,
+                    ),
+                    onChanged: (value) {
+                      setDialogState(
+                        () => inputMatches =
+                            value.trim().toLowerCase() == confirmToken,
+                      );
+                    },
+                  ),
+                ],
               ),
-              FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: EagleTokens.bad),
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Excluir'),
-              ),
-            ],
-          ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Text('Cancelar'),
+                ),
+                FilledButton(
+                  style: FilledButton.styleFrom(backgroundColor: EagleTokens.bad),
+                  onPressed: inputMatches ? () => Navigator.pop(ctx, true) : null,
+                  child: const Text('Excluir'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
+    controller.dispose();
     if (confirm != true || !context.mounted) return;
     try {
       await AlunoRepository(ref.read(apiClientProvider)).excluirAluno(aluno.id);

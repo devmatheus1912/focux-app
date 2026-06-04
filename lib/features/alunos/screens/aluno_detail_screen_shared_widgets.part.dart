@@ -38,7 +38,14 @@ class _Aluno360SignalTile extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    return Container(
+    final semanticsLabel =
+        '${signal.label}: ${signal.value}. ${signal.detail}';
+    return Semantics(
+      label: semanticsLabel,
+      button: signal.detail.isNotEmpty,
+      child: Tooltip(
+        message: signal.detail,
+        child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
         color: signal.color.withValues(alpha: isDark ? 0.14 : 0.08),
@@ -50,7 +57,7 @@ class _Aluno360SignalTile extends StatelessWidget {
         children: [
           Container(
             width: 4,
-            height: 30,
+            height: 40,
             decoration: BoxDecoration(
               color: signal.color,
               borderRadius: BorderRadius.circular(999),
@@ -83,10 +90,26 @@ class _Aluno360SignalTile extends StatelessWidget {
                     fontWeight: FontWeight.w900,
                   ),
                 ),
+                if (signal.detail.isNotEmpty) ...[
+                  const SizedBox(height: 1),
+                  Text(
+                    signal.detail,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: mute,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w600,
+                      height: 1.2,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
         ],
+      ),
+    ),
       ),
     );
   }
@@ -216,10 +239,11 @@ class _CopilotTaskStatus extends StatelessWidget {
   }
 }
 
-class _Aluno360ActionRow extends StatefulWidget {
+class _Aluno360ActionRow extends ConsumerStatefulWidget {
   final Aluno aluno;
   final Color primary;
   final FilaAcaoResumo? existingTask;
+  final bool openTaskHint;
   final String acao;
   final Future<bool> Function(String acao) onAssign;
   final void Function(String acao) onPrepareMessage;
@@ -228,27 +252,30 @@ class _Aluno360ActionRow extends StatefulWidget {
     required this.aluno,
     required this.primary,
     required this.existingTask,
+    this.openTaskHint = false,
     required this.acao,
     required this.onAssign,
     required this.onPrepareMessage,
   });
 
   @override
-  State<_Aluno360ActionRow> createState() => _Aluno360ActionRowState();
+  ConsumerState<_Aluno360ActionRow> createState() => _Aluno360ActionRowState();
 }
 
-class _Aluno360ActionRowState extends State<_Aluno360ActionRow> {
+class _Aluno360ActionRowState extends ConsumerState<_Aluno360ActionRow> {
   bool _creating = false;
   bool _created = false;
 
   Future<void> _handlePrimary() async {
-    if (widget.existingTask != null || _created) {
+    if (widget.existingTask != null || widget.openTaskHint || _created) {
       context.push('/dashboard/command-center/copiloto');
       return;
     }
+    ref.read(alunoCopilotCreatingProvider(widget.aluno.id).notifier).state = true;
     setState(() => _creating = true);
     final created = await widget.onAssign(widget.acao);
     if (!mounted) return;
+    ref.read(alunoCopilotCreatingProvider(widget.aluno.id).notifier).state = false;
     setState(() {
       _creating = false;
       _created = created;
@@ -257,27 +284,54 @@ class _Aluno360ActionRowState extends State<_Aluno360ActionRow> {
 
   @override
   Widget build(BuildContext context) {
-    final hasTask = widget.existingTask != null || _created;
-    final primaryLabel =
-        hasTask ? 'Ver tarefa' : (_creating ? 'Criando...' : 'Criar tarefa');
+    final hasTask = widget.existingTask != null || widget.openTaskHint || _created;
     return Row(
       children: [
         Expanded(
-          child: FxLiquidPrimaryButton(
-            loading: _creating,
-            icon:
-                hasTask
-                    ? Icons.open_in_new_rounded
-                    : Icons.task_alt_rounded,
-            label: primaryLabel,
-            onPressed: _creating ? null : _handlePrimary,
-          ),
+          flex: 3,
+          child:
+              hasTask
+                  ? Semantics(
+                    button: true,
+                    label: 'Abrir no Command Center',
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: _handlePrimary,
+                        icon: Icon(
+                          Icons.open_in_new_rounded,
+                          size: 16,
+                          color: widget.primary,
+                        ),
+                        label: Text(
+                          'Abrir no Command Center',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: widget.primary,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 12.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                  : FxLiquidPrimaryButton(
+                    loading: _creating,
+                    icon: Icons.task_alt_rounded,
+                    label: _creating ? 'Criando...' : 'Criar tarefa',
+                    onPressed: _creating ? null : _handlePrimary,
+                  ),
         ),
         const SizedBox(width: 8),
-        SizedBox(
-          width: 112,
-          height: 44,
-          child: InkWell(
+        Expanded(
+          flex: 2,
+          child: Semantics(
+            button: true,
+            label: 'Abrir chat com ${widget.aluno.nome}',
+            child: SizedBox(
+            height: 44,
+            child: InkWell(
             onTap: () {
               widget.onPrepareMessage(widget.acao);
             },
@@ -298,18 +352,24 @@ class _Aluno360ActionRowState extends State<_Aluno360ActionRow> {
                     size: 15,
                     color: widget.primary,
                   ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Abrir chat',
-                    style: TextStyle(
-                      color: widget.primary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w900,
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      'Abrir chat',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: widget.primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
+          ),
+          ),
           ),
         ),
       ],

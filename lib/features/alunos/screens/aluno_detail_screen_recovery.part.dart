@@ -16,7 +16,27 @@ class _AlunoRecoveryInsightCard extends StatelessWidget {
     final chrome = ShellChrome.forDark(isDark);
     return recoveryAsync.when(
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      error:
+          (_, __) => Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: chrome.panel(radius: TokensStrip.rCard),
+            child: Row(
+              children: [
+                Icon(Icons.watch_off_outlined, color: EagleTokens.warn, size: 18),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Wearable indisponível',
+                    style: TextStyle(
+                      color: chrome.mute,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
       data: (snapshot) {
         if (snapshot == null) {
           return Container(
@@ -55,7 +75,7 @@ class _AlunoRecoveryInsightCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Prontidao wearable',
+                        'Prontidão wearable',
                         style: TextStyle(
                           color: chrome.mute,
                           fontSize: 11.5,

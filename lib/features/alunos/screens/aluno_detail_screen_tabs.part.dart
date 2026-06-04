@@ -1,5 +1,26 @@
 part of 'aluno_detail_screen.dart';
 
+class _Aluno360Entrance extends StatelessWidget {
+  const _Aluno360Entrance({
+    required this.enabled,
+    required this.delay,
+    required this.child,
+    this.onPlayed,
+  });
+
+  final bool enabled;
+  final Duration delay;
+  final Widget child;
+  final VoidCallback? onPlayed;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!enabled) return child;
+    WidgetsBinding.instance.addPostFrameCallback((_) => onPlayed?.call());
+    return FxPremiumEntrance(delay: delay, child: child);
+  }
+}
+
 class _AlunoDetailTabBarDelegate extends SliverPersistentHeaderDelegate {
   const _AlunoDetailTabBarDelegate({
     required this.tabController,
@@ -59,13 +80,17 @@ class _AlunoDetailTabBarDelegate extends SliverPersistentHeaderDelegate {
 
 class _AlunoDetailOperacaoTab extends StatelessWidget {
   const _AlunoDetailOperacaoTab({
+    super.key,
     required this.aluno,
     required this.alunoId,
     required this.isDark,
     required this.primary,
     required this.proximaAcao360,
+    required this.hasOpenCopilotTask360,
     required this.recoveryAsync,
     required this.autonomiaResumoAsync,
+    required this.animateEntrance,
+    required this.onEntrancePlayed,
     required this.onPassword,
     required this.onEdit,
     required this.onMessage,
@@ -77,8 +102,11 @@ class _AlunoDetailOperacaoTab extends StatelessWidget {
   final bool isDark;
   final Color primary;
   final ProximaAcaoResumo? proximaAcao360;
+  final bool hasOpenCopilotTask360;
   final AsyncValue<RecoverySnapshot?> recoveryAsync;
   final AsyncValue<AlunoAutonomiaResumo> autonomiaResumoAsync;
+  final bool animateEntrance;
+  final VoidCallback onEntrancePlayed;
   final VoidCallback onPassword;
   final VoidCallback onEdit;
   final VoidCallback onMessage;
@@ -93,38 +121,50 @@ class _AlunoDetailOperacaoTab extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (financeRisk) ...[
-          FxPremiumEntrance(
+          _Aluno360Entrance(
+            enabled: animateEntrance,
             delay: Duration.zero,
+            onPlayed: onEntrancePlayed,
             child: _AlunoFinanceiroRiskBanner(alunoId: alunoId, isDark: isDark),
           ),
           const SizedBox(height: TokensStrip.s4),
         ],
-        FxPremiumEntrance(
+        _Aluno360Entrance(
+          enabled: animateEntrance,
           delay: Duration(milliseconds: financeRisk ? 40 : 0),
+          onPlayed: onEntrancePlayed,
           child: _AlunoFollowUpCard(aluno: aluno, isDark: isDark),
         ),
         const SizedBox(height: TokensStrip.s4),
-        FxPremiumEntrance(
+        _Aluno360Entrance(
+          enabled: animateEntrance,
           delay: Duration(milliseconds: financeRisk ? 80 : 40),
-          child: _Aluno360CopilotCard(
-            aluno: aluno,
-            resumoAsync: autonomiaResumoAsync,
-            proximaAcao360: proximaAcao360,
-            isDark: isDark,
-          ),
-        ),
-        const SizedBox(height: TokensStrip.s4),
-        FxPremiumEntrance(
-          delay: Duration(milliseconds: financeRisk ? 120 : 80),
+          onPlayed: onEntrancePlayed,
           child: _AlunoOperationalStatusSection(
+            alunoId: alunoId,
             aluno: aluno,
             isDark: isDark,
             primary: primary,
           ),
         ),
         const SizedBox(height: TokensStrip.s4),
-        FxPremiumEntrance(
+        _Aluno360Entrance(
+          enabled: animateEntrance,
+          delay: Duration(milliseconds: financeRisk ? 120 : 80),
+          onPlayed: onEntrancePlayed,
+          child: _Aluno360CopilotCard(
+            aluno: aluno,
+            resumoAsync: autonomiaResumoAsync,
+            proximaAcao360: proximaAcao360,
+            hasOpenCopilotTask360: hasOpenCopilotTask360,
+            isDark: isDark,
+          ),
+        ),
+        const SizedBox(height: TokensStrip.s4),
+        _Aluno360Entrance(
+          enabled: animateEntrance,
           delay: Duration(milliseconds: financeRisk ? 160 : 120),
+          onPlayed: onEntrancePlayed,
           child: _AlunoRecoveryInsightCard(
             recoveryAsync: recoveryAsync,
             isDark: isDark,
@@ -132,8 +172,10 @@ class _AlunoDetailOperacaoTab extends StatelessWidget {
           ),
         ),
         const SizedBox(height: TokensStrip.s4),
-        FxPremiumEntrance(
+        _Aluno360Entrance(
+          enabled: animateEntrance,
           delay: Duration(milliseconds: financeRisk ? 200 : 160),
+          onPlayed: onEntrancePlayed,
           child: _StudentQuickActions(
             aluno: aluno,
             isDark: isDark,
@@ -151,12 +193,15 @@ class _AlunoDetailOperacaoTab extends StatelessWidget {
 
 class _AlunoDetailEvolucaoTab extends StatelessWidget {
   const _AlunoDetailEvolucaoTab({
+    super.key,
     required this.aluno,
     required this.alunoId,
     required this.isDark,
     required this.ink,
     required this.evolucaoAsync,
     required this.timeline360Async,
+    required this.animateEntrance,
+    required this.onEntrancePlayed,
   });
 
   final Aluno aluno;
@@ -165,6 +210,8 @@ class _AlunoDetailEvolucaoTab extends StatelessWidget {
   final Color ink;
   final AsyncValue<EvolucaoInteligente> evolucaoAsync;
   final AsyncValue<List<Timeline360Event>> timeline360Async;
+  final bool animateEntrance;
+  final VoidCallback onEntrancePlayed;
 
   @override
   Widget build(BuildContext context) {
@@ -178,8 +225,10 @@ class _AlunoDetailEvolucaoTab extends StatelessWidget {
           isDark: isDark,
         ),
         const SizedBox(height: TokensStrip.s4),
-        FxPremiumEntrance(
+        _Aluno360Entrance(
+          enabled: animateEntrance,
           delay: const Duration(milliseconds: 40),
+          onPlayed: onEntrancePlayed,
           child: _Aluno360TimelineCard(
             aluno: aluno,
             timelineApiAsync: timeline360Async,
@@ -187,8 +236,10 @@ class _AlunoDetailEvolucaoTab extends StatelessWidget {
           ),
         ),
         const SizedBox(height: TokensStrip.s4),
-        FxPremiumEntrance(
+        _Aluno360Entrance(
+          enabled: animateEntrance,
           delay: const Duration(milliseconds: 80),
+          onPlayed: onEntrancePlayed,
           child: _AlunoWeightActivityCard(
             aluno: aluno,
             alunoId: alunoId,
@@ -280,6 +331,9 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final primary = Theme.of(context).colorScheme.primary;
     final line = ShellChrome.of(context).line;
+    final creating = ref.watch(alunoCopilotCreatingProvider(alunoId));
+    final aluno360Async = ref.watch(aluno360Provider(alunoId));
+    final hasOpenFrom360 = aluno360Async.valueOrNull?.hasOpenCopilotTask ?? false;
     final openActionsAsync = ref.watch(alunoOpenIaActionsProvider(alunoId));
     FilaAcaoResumo? existingOpenTask;
     for (final item in openActionsAsync.valueOrNull ?? const <FilaAcaoResumo>[]) {
@@ -314,7 +368,7 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
       context.push('/dashboard/command-center/copiloto');
     }
 
-    final hasOpenTask = existingOpenTask != null;
+    final hasOpenTask = existingOpenTask != null || hasOpenFrom360;
     final primaryLabel =
         hasOpenTask
             ? 'Ver tarefa'
@@ -360,7 +414,9 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
                 child: FxLiquidPrimaryButton(
                 icon: primaryIcon,
                 label: primaryLabel,
-                onPressed: onPrimary,
+                loading: creating,
+                loadingLabel: 'Criando…',
+                onPressed: creating ? null : onPrimary,
                 ),
               ),
             ),
@@ -403,11 +459,14 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
 
 class _AlunoDetailFerramentasTab extends ConsumerWidget {
   const _AlunoDetailFerramentasTab({
+    super.key,
     required this.aluno,
     required this.alunoId,
     required this.isDark,
     required this.primary,
     required this.perfilCompletion,
+    required this.animateEntrance,
+    required this.onEntrancePlayed,
   });
 
   final Aluno aluno;
@@ -415,6 +474,8 @@ class _AlunoDetailFerramentasTab extends ConsumerWidget {
   final bool isDark;
   final Color primary;
   final int perfilCompletion;
+  final bool animateEntrance;
+  final VoidCallback onEntrancePlayed;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

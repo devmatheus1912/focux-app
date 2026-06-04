@@ -173,7 +173,13 @@ void main() {
       expect(find.byKey(const ValueKey('aluno360_ferramentas_modulos')), findsOneWidget);
       expect(find.text('Módulos'), findsOneWidget);
       expect(find.text('Treinos'), findsOneWidget);
-      expect(find.text('Chat'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('aluno360_ferramentas_modulos')),
+          matching: find.text('Chat'),
+        ),
+        findsOneWidget,
+      );
       if (scale == 1.0) {
         expect(tester.takeException(), isNull);
       }

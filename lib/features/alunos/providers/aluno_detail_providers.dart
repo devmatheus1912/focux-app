@@ -27,6 +27,11 @@ final alunoCopilotoForceIaProvider = StateProvider.family<bool, int>(
   (ref, alunoId) => false,
 );
 
+/// True while Aluno 360 is creating a Command Center task (disables sticky CTA).
+final alunoCopilotCreatingProvider = StateProvider.family<bool, int>(
+  (ref, alunoId) => false,
+);
+
 final alunoCopilotoActionProvider =
     FutureProvider.family<Map<String, dynamic>, int>((ref, alunoId) async {
       return IaRepository(ref.read(apiClientProvider)).proximaAcao(alunoId);

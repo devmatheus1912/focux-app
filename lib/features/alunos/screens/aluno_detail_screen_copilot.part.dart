@@ -18,12 +18,14 @@ class _Aluno360CopilotCard extends ConsumerWidget {
   final Aluno aluno;
   final AsyncValue<AlunoAutonomiaResumo> resumoAsync;
   final ProximaAcaoResumo? proximaAcao360;
+  final bool hasOpenCopilotTask360;
   final bool isDark;
 
   const _Aluno360CopilotCard({
     required this.aluno,
     required this.resumoAsync,
     required this.proximaAcao360,
+    required this.hasOpenCopilotTask360,
     required this.isDark,
   });
 
@@ -418,7 +420,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
           FeedbackHelper.showSnackBar(
             context,
             SnackBar(
-              content: const Text('Tarefa ja aberta no Command Center.'),
+              content: const Text('Tarefa já aberta no Command Center.'),
               action: SnackBarAction(
                 label: 'Ver',
                 onPressed:
@@ -539,6 +541,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
         forceIa ? ref.watch(alunoCopilotoActionProvider(aluno.id)) : null;
     final openActionsAsync = ref.watch(alunoOpenIaActionsProvider(aluno.id));
     final openTask = _firstOpenCopilotAction(openActionsAsync.valueOrNull);
+    final hasOpenTask = openTask != null || hasOpenCopilotTask360;
     final resumo = resumoAsync.valueOrNull;
     final profileCompletion = _perfilCompletion(aluno);
     final signals = _signals(context, aluno, resumo);
@@ -547,9 +550,10 @@ class _Aluno360CopilotCard extends ConsumerWidget {
         proximaAcao360 != null
             ? _copilotActionFrom360(proximaAcao360!)
             : null;
+    final cardPadding = hasOpenTask ? 10.0 : 14.0;
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(cardPadding),
       decoration: fxListCardDecoration(
         context,
         accent: primary,
@@ -605,20 +609,22 @@ class _Aluno360CopilotCard extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-            childAspectRatio: 3.4,
-            children:
-                signals
-                    .map((signal) => _Aluno360SignalTile(signal: signal))
-                    .toList(),
-          ),
-          const SizedBox(height: 10),
+          if (!hasOpenTask) ...[
+            const SizedBox(height: 10),
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              childAspectRatio: 1.35,
+              children:
+                  signals
+                      .map((signal) => _Aluno360SignalTile(signal: signal))
+                      .toList(),
+            ),
+          ],
+          if (!hasOpenTask) const SizedBox(height: 10),
           if (profileCompletion < 80) ...[
             SizedBox(
               width: double.infinity,
@@ -664,31 +670,23 @@ class _Aluno360CopilotCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 10),
-          openActionsAsync.maybeWhen(
-            loading:
-                () => const _CopilotTaskStatus(
-                  icon: Icons.sync_rounded,
-                  title: 'Sincronizando tarefas',
-                  subtitle: 'Checando Command Center antes de criar.',
-                ),
-            data:
-                (_) =>
-                    openTask == null
-                        ? const SizedBox.shrink()
-                        : const _CopilotTaskStatus(
-                          icon: Icons.task_alt_rounded,
-                          title: 'Tarefa aberta',
-                          subtitle:
-                              'Já existe no Command Center. Sem duplicar.',
-                        ),
-            orElse: () => const SizedBox.shrink(),
-          ),
-          if (openActionsAsync.isLoading || openTask != null)
+          if (!hasOpenTask)
+            openActionsAsync.maybeWhen(
+              loading:
+                  () => const _CopilotTaskStatus(
+                    icon: Icons.sync_rounded,
+                    title: 'Sincronizando tarefas',
+                    subtitle: 'Checando Command Center antes de criar.',
+                  ),
+              orElse: () => const SizedBox.shrink(),
+            ),
+          if (!hasOpenTask && openActionsAsync.isLoading)
             const SizedBox(height: 10),
           _Aluno360ActionRow(
             aluno: aluno,
             primary: primary,
             existingTask: openTask,
+            openTaskHint: hasOpenCopilotTask360 && openTask == null,
             acao: _resolveCopilotAcao(
               seed360: seed360,
               forceIa: forceIa,

@@ -287,6 +287,7 @@ class Aluno360 {
   final List<Timeline360Event> timelinePreview;
   final ProximaAcaoResumo proximaAcao;
   final EvolucaoInteligente evolucaoInteligente;
+  final bool? hasOpenCopilotTask;
 
   const Aluno360({
     required this.aluno,
@@ -294,6 +295,7 @@ class Aluno360 {
     required this.timelinePreview,
     required this.proximaAcao,
     required this.evolucaoInteligente,
+    this.hasOpenCopilotTask,
   });
 
   factory Aluno360.fromJson(Map<String, dynamic> json) => Aluno360(
@@ -310,6 +312,7 @@ class Aluno360 {
     evolucaoInteligente: EvolucaoInteligente.fromJson(
       json['evolucaoInteligente'] as Map<String, dynamic>,
     ),
+    hasOpenCopilotTask: json['hasOpenCopilotTask'] as bool?,
   );
 }
 

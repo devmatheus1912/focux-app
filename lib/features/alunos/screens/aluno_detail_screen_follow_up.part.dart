@@ -53,12 +53,16 @@ class _AlunoFollowUpCard extends ConsumerWidget {
             children: [
               Icon(Icons.event_available_rounded, size: 18, color: primary),
               const SizedBox(width: 8),
-              Text(
-                'Follow-up do personal',
-                style: TextStyle(
-                  color: ink,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
+              Expanded(
+                child: Text(
+                  'Follow-up do personal',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ],
@@ -89,68 +93,153 @@ class _AlunoFollowUpCard extends ConsumerWidget {
             ),
           ],
           const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              Semantics(
-                label: 'Definir data de próximo contato para ${aluno.nome}',
-                button: true,
-                child: OutlinedButton.icon(
-                onPressed: () => _pickFollowUpDate(context, ref),
-                icon: const Icon(Icons.calendar_month_rounded, size: 16),
-                label: const Text('Definir data'),
-              ),
-              ),
-              OutlinedButton.icon(
-                onPressed: () async {
-                  await actions.snooze(aluno.id);
-                  if (context.mounted) {
-                    FeedbackHelper.showSuccess(context, 'Adiado por 24h');
-                  }
-                },
-                icon: const Icon(Icons.snooze_rounded, size: 16),
-                label: const Text('Adiar 24h'),
-              ),
-              OutlinedButton.icon(
-                onPressed: () async {
-                  await actions.snooze(aluno.id, duration: const Duration(days: 3));
-                  if (context.mounted) {
-                    FeedbackHelper.showSuccess(context, 'Adiado por 3 dias');
-                  }
-                },
-                icon: const Icon(Icons.schedule_rounded, size: 16),
-                label: const Text('Adiar 3d'),
-              ),
-              Semantics(
-                label: 'Registrar contato realizado com ${aluno.nome}',
-                button: true,
-                child: FilledButton.icon(
-                onPressed: () async {
-                  await actions.markContactDone(aluno.id);
-                  if (context.mounted) {
-                    FeedbackHelper.showSuccess(context, 'Contato registrado');
-                  }
-                },
-                icon: const Icon(Icons.check_rounded, size: 16),
-                label: const Text('Contato feito'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: primary,
-                  foregroundColor: Colors.white,
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final narrow = constraints.maxWidth < 360;
+              final primaryActions = [
+                Semantics(
+                  label: 'Registrar contato realizado com ${aluno.nome}',
+                  button: true,
+                  child: FilledButton.icon(
+                    onPressed: () async {
+                      await actions.markContactDone(aluno.id);
+                      if (context.mounted) {
+                        FeedbackHelper.showSuccess(context, 'Contato registrado');
+                      }
+                    },
+                    icon: const Icon(Icons.check_rounded, size: 16),
+                    label: const Text('Contato feito'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: primary,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
                 ),
-              ),
-              ),
-              if (followUpDate != null || isSnoozed)
-                TextButton(
-                  onPressed: () async {
-                    await actions.clearFollowUp(aluno.id);
-                    if (context.mounted) {
-                      FeedbackHelper.showSuccess(context, 'Follow-up limpo');
-                    }
-                  },
-                  child: const Text('Limpar'),
+                Semantics(
+                  label: 'Definir data de próximo contato para ${aluno.nome}',
+                  button: true,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _pickFollowUpDate(context, ref),
+                    icon: const Icon(Icons.calendar_month_rounded, size: 16),
+                    label: const Text('Definir data'),
+                  ),
                 ),
-            ],
+              ];
+
+              if (narrow) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ...primaryActions.map(
+                      (action) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: SizedBox(width: double.infinity, child: action),
+                      ),
+                    ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: PopupMenuButton<String>(
+                        tooltip: 'Adiar follow-up',
+                        onSelected: (value) async {
+                          if (value == '24h') {
+                            await actions.snooze(aluno.id);
+                            if (context.mounted) {
+                              FeedbackHelper.showSuccess(context, 'Adiado por 24h');
+                            }
+                          } else if (value == '3d') {
+                            await actions.snooze(
+                              aluno.id,
+                              duration: const Duration(days: 3),
+                            );
+                            if (context.mounted) {
+                              FeedbackHelper.showSuccess(context, 'Adiado por 3 dias');
+                            }
+                          }
+                        },
+                        itemBuilder:
+                            (_) => const [
+                              PopupMenuItem(value: '24h', child: Text('Adiar 24h')),
+                              PopupMenuItem(value: '3d', child: Text('Adiar 3 dias')),
+                            ],
+                        child: Semantics(
+                          label: 'Adiar follow-up de ${aluno.nome}',
+                          button: true,
+                          child: IgnorePointer(
+                            child: OutlinedButton.icon(
+                              onPressed: () {},
+                              icon: const Icon(Icons.snooze_rounded, size: 16),
+                              label: const Text('Adiar'),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (followUpDate != null || isSnoozed)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          onPressed: () async {
+                            await actions.clearFollowUp(aluno.id);
+                            if (context.mounted) {
+                              FeedbackHelper.showSuccess(context, 'Follow-up limpo');
+                            }
+                          },
+                          child: const Text('Limpar'),
+                        ),
+                      ),
+                  ],
+                );
+              }
+
+              return Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  ...primaryActions,
+                  Semantics(
+                    label: 'Adiar follow-up de ${aluno.nome} por 24 horas',
+                    button: true,
+                    child: OutlinedButton.icon(
+                      onPressed: () async {
+                        await actions.snooze(aluno.id);
+                        if (context.mounted) {
+                          FeedbackHelper.showSuccess(context, 'Adiado por 24h');
+                        }
+                      },
+                      icon: const Icon(Icons.snooze_rounded, size: 16),
+                      label: const Text('Adiar 24h'),
+                    ),
+                  ),
+                  Semantics(
+                    label: 'Adiar follow-up de ${aluno.nome} por 3 dias',
+                    button: true,
+                    child: OutlinedButton.icon(
+                      onPressed: () async {
+                        await actions.snooze(
+                          aluno.id,
+                          duration: const Duration(days: 3),
+                        );
+                        if (context.mounted) {
+                          FeedbackHelper.showSuccess(context, 'Adiado por 3 dias');
+                        }
+                      },
+                      icon: const Icon(Icons.schedule_rounded, size: 16),
+                      label: const Text('Adiar 3d'),
+                    ),
+                  ),
+                  if (followUpDate != null || isSnoozed)
+                    TextButton(
+                      onPressed: () async {
+                        await actions.clearFollowUp(aluno.id);
+                        if (context.mounted) {
+                          FeedbackHelper.showSuccess(context, 'Follow-up limpo');
+                        }
+                      },
+                      child: const Text('Limpar'),
+                    ),
+                ],
+              );
+            },
           ),
         ],
       ),
