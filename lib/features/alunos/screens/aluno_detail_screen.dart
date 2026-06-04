@@ -194,15 +194,27 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                 ),
                 flexibleSpace: FlexibleSpaceBar(
                   collapseMode: CollapseMode.pin,
-                  background: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
-                      MediaQuery.paddingOf(context).top + kToolbarHeight + 4,
-                      TokensStrip.s4,
-                      8,
+                  background: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          isDark
+                              ? primary.withValues(alpha: 0.18)
+                              : BrandPalette.softer(primary),
+                          chrome.sheetFill,
+                        ],
+                        stops: const [0.55, 1.0],
+                      ),
                     ),
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        TokensStrip.s4,
+                        MediaQuery.paddingOf(context).top + kToolbarHeight + 4,
+                        TokensStrip.s4,
+                        8,
+                      ),
                       child: AlunoDetailHeroCard(
                         aluno: aluno,
                         isDark: isDark,

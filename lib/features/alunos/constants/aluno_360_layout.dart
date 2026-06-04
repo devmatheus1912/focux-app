@@ -6,9 +6,17 @@ abstract final class Aluno360Layout {
 
   static const double stickyBarContentHeight = 64;
 
+  /// Approximate hero card body (matches [AlunoDetailHeroCard] at textScale ≤ 1.25).
+  static double heroBodyHeight(BuildContext context) {
+    final textScale =
+        MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 1.25);
+    return 178 + ((textScale - 1) * 56);
+  }
+
+  /// Toolbar inset + hero card + bottom padding — no dead gap above the card.
   static double heroExpandedHeight(BuildContext context) {
-    final textScale = MediaQuery.textScalerOf(context).scale(1);
-    return 318 + ((textScale - 1) * 180).clamp(0.0, 280.0);
+    final top = MediaQuery.paddingOf(context).top;
+    return top + kToolbarHeight + 4 + heroBodyHeight(context) + 8;
   }
 
   /// Bottom padding so Operação content clears the sticky CTA bar.
