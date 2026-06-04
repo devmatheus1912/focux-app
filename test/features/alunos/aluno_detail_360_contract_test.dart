@@ -82,7 +82,9 @@ void main() {
     expect(screen, contains('copySensitiveToClipboard'));
     expect(screen, isNot(contains('Erro: \$e')));
     expect(screen, isNot(contains('operational_metrics.part.dart')));
-    expect(screen, contains('CollapseMode.parallax'));
+    expect(screen, contains('CollapseMode.pin'));
+    expect(screen, contains('layoutBuilder:'));
+    expect(screen, contains('chrome.sheetFill'));
   });
 
   test('aluno 360 fase 3: tabs, semantics, friendly errors, shared tile', () {

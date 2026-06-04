@@ -17,7 +17,9 @@ class _Aluno360Entrance extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!enabled) return child;
     WidgetsBinding.instance.addPostFrameCallback((_) => onPlayed?.call());
-    return FxPremiumEntrance(delay: delay, child: child);
+    return ClipRect(
+      child: FxPremiumEntrance(delay: delay, child: child),
+    );
   }
 }
 
@@ -42,11 +44,15 @@ class _AlunoDetailTabBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    final chrome = ShellChrome.of(context);
     return Material(
-      color: Colors.transparent,
+      color: chrome.sheetFill,
+      elevation: overlapsContent ? 2 : 0,
+      shadowColor: Colors.black.withValues(alpha: chrome.isDark ? 0.45 : 0.12),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: line.withValues(alpha: 0.6))),
+          color: chrome.sheetFill,
+          border: Border(bottom: BorderSide(color: line.withValues(alpha: 0.65))),
         ),
         child: Semantics(
           container: true,
@@ -56,8 +62,17 @@ class _AlunoDetailTabBarDelegate extends SliverPersistentHeaderDelegate {
             indicatorColor: primary,
             labelColor: primary,
             unselectedLabelColor: mute,
-            indicatorWeight: 2.5,
+            indicatorWeight: 2,
             dividerColor: Colors.transparent,
+            labelStyle: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.2,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
             tabs: const [
               Tab(text: 'Operação'),
               Tab(text: 'Evolução'),

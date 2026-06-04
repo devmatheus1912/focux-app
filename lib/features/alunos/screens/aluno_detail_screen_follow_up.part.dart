@@ -73,6 +73,8 @@ class _AlunoFollowUpCard extends ConsumerWidget {
                 ? 'Sem data definida · sincronizado com a nuvem'
                 : 'Próximo contato: ${_formatDate(followUpDate)}',
             style: TextStyle(color: mute, fontSize: 12, height: 1.35),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
           if (aluno.ultimoContatoDate != null) ...[
             const SizedBox(height: 4),

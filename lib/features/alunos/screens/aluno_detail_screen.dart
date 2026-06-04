@@ -161,7 +161,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
           final perfilCompletion = _perfilCompletion(aluno);
           final textScale = MediaQuery.textScalerOf(context).scale(1);
           final heroExpandedHeight =
-              196.0 + ((textScale - 1) * 60).clamp(0.0, 120.0);
+              168.0 + ((textScale - 1) * 48).clamp(0.0, 96.0);
 
           return RefreshIndicator(
             onRefresh: () => invalidateAluno360Providers(ref, alunoId),
@@ -171,11 +171,11 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
               SliverAppBar(
                 expandedHeight: heroExpandedHeight,
                 pinned: true,
-                stretch: true,
-                backgroundColor: Colors.transparent,
+                stretch: false,
+                backgroundColor: chrome.sheetFill.withValues(alpha: 0.92),
                 surfaceTintColor: Colors.transparent,
                 elevation: 0,
-                scrolledUnderElevation: 0,
+                scrolledUnderElevation: 0.5,
                 leading: Padding(
                   padding: const EdgeInsets.only(left: 4),
                   child: IconButton(
@@ -193,69 +193,78 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                   ),
                 ),
                 flexibleSpace: FlexibleSpaceBar(
-                  collapseMode: CollapseMode.parallax,
+                  collapseMode: CollapseMode.pin,
                   background: Padding(
-                    padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 72, 16, 10),
-                    child: Container(
-                      decoration: chrome.panel(
-                        radius: TokensStrip.rCard,
-                        accent: primary,
-                      ),
-                      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 14, 16, 14),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 56,
-                                height: 56,
-                                decoration: BoxDecoration(
-                                  color: BrandPalette.soft(primary, dark: isDark),
-                                  shape: BoxShape.circle,
+                    padding: EdgeInsets.fromLTRB(
+                      TokensStrip.s4,
+                      MediaQuery.paddingOf(context).top + kToolbarHeight + 4,
+                      TokensStrip.s4,
+                      8,
+                    ),
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        width: double.infinity,
+                        decoration: chrome.panel(
+                          radius: TokensStrip.rCard,
+                          accent: primary,
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: TokensStrip.s4,
+                          vertical: 14,
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 52,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: BrandPalette.soft(primary, dark: isDark),
+                                shape: BoxShape.circle,
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                fxInitials(aluno.nome),
+                                style: TextStyle(
+                                  color: primary,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
                                 ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  fxInitials(aluno.nome),
-                                  style: TextStyle(
-                                    color: primary,
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    fxTitleCaseName(aluno.nome),
+                                    style: TextStyle(
+                                      color: ink,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -0.4,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      fxTitleCaseName(aluno.nome),
-                                      style: TextStyle(
-                                        color: ink,
-                                        fontSize: 21,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: -0.5,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    aluno.objetivo ?? 'Emagrecimento',
+                                    style: TextStyle(
+                                      color: mute,
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.w600,
                                     ),
-                                    const SizedBox(height: 3),
-                                    Text(
-                                      aluno.objetivo ?? 'Emagrecimento',
-                                      style: TextStyle(
-                                        color: mute,
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                        ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -302,16 +311,17 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
               ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.only(
-                    top: 16,
+                  padding: EdgeInsets.only(
+                    top: 12,
                     left: 16,
                     right: 16,
-                    bottom: 118,
+                    bottom: showOperacaoSticky ? 118 : 24,
                   ),
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 150),
                     switchInCurve: Curves.easeOut,
                     switchOutCurve: Curves.easeIn,
+                    layoutBuilder: (current, _) => current ?? const SizedBox.shrink(),
                     child: switch (tabIndex) {
                       0 => _AlunoDetailOperacaoTab(
                         key: const ValueKey('aluno360_tab_operacao'),
