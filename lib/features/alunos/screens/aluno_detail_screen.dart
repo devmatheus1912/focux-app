@@ -15,6 +15,7 @@ import '../providers/aluno_followup_provider.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
+import '../../../core/config/env.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/utils/fx_utils.dart';
@@ -161,7 +162,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
           final perfilCompletion = _perfilCompletion(aluno);
           final textScale = MediaQuery.textScalerOf(context).scale(1);
           final heroExpandedHeight =
-              168.0 + ((textScale - 1) * 48).clamp(0.0, 96.0);
+              242.0 + ((textScale - 1) * 108).clamp(0.0, 168.0);
 
           return RefreshIndicator(
             onRefresh: () => invalidateAluno360Providers(ref, alunoId),
@@ -203,69 +204,13 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                     ),
                     child: Align(
                       alignment: Alignment.bottomCenter,
-                      child: Container(
-                        width: double.infinity,
-                        decoration: chrome.panel(
-                          radius: TokensStrip.rCard,
-                          accent: primary,
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: TokensStrip.s4,
-                          vertical: 14,
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 52,
-                              height: 52,
-                              decoration: BoxDecoration(
-                                color: BrandPalette.soft(primary, dark: isDark),
-                                shape: BoxShape.circle,
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                fxInitials(aluno.nome),
-                                style: TextStyle(
-                                  color: primary,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    fxTitleCaseName(aluno.nome),
-                                    style: TextStyle(
-                                      color: ink,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: -0.4,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    aluno.objetivo ?? 'Emagrecimento',
-                                    style: TextStyle(
-                                      color: mute,
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: _AlunoDetailHeroCard(
+                      aluno: aluno,
+                      isDark: isDark,
+                      primary: primary,
+                      ink: ink,
+                      mute: mute,
+                    ),
                     ),
                   ),
                 ),
