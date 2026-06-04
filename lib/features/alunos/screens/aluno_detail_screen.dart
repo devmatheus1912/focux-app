@@ -211,9 +211,9 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                     child: Padding(
                       padding: EdgeInsets.fromLTRB(
                         TokensStrip.s4,
-                        MediaQuery.paddingOf(context).top + kToolbarHeight + 4,
+                        MediaQuery.paddingOf(context).top + kToolbarHeight + 2,
                         TokensStrip.s4,
-                        8,
+                        6,
                       ),
                       child: AlunoDetailHeroCard(
                         aluno: aluno,

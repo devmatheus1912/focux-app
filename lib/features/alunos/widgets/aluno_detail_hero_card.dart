@@ -129,7 +129,7 @@ class _HeroShellState extends State<_HeroShell>
           key: const ValueKey('aluno360_hero_card'),
           width: double.infinity,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(20),
             gradient: LinearGradient(
               colors:
                   widget.isDark
@@ -147,9 +147,9 @@ class _HeroShellState extends State<_HeroShell>
                 color: widget.primary.withValues(
                   alpha: widget.isDark ? 0.22 : 0.16,
                 ),
-                blurRadius: widget.isDark ? 32 : 26,
-                offset: const Offset(0, 14),
-                spreadRadius: widget.isDark ? -12 : -16,
+                blurRadius: widget.isDark ? 24 : 20,
+                offset: const Offset(0, 10),
+                spreadRadius: widget.isDark ? -10 : -14,
               ),
             ],
           ),
@@ -157,7 +157,7 @@ class _HeroShellState extends State<_HeroShell>
           child: CustomPaint(
             foregroundPainter: DashboardHeroGridPainter(),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
@@ -170,7 +170,7 @@ class _HeroShellState extends State<_HeroShell>
                         photoUrl: widget.photoUrl,
                         variant: AlunoAvatarVariant.hero,
                       ),
-                      const SizedBox(width: 11),
+                      const SizedBox(width: 9),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,12 +183,12 @@ class _HeroShellState extends State<_HeroShell>
                                     widget.displayName,
                                     style: const TextStyle(
                                       color: Colors.white,
-                                      fontSize: 18,
+                                      fontSize: 16,
                                       fontWeight: FontWeight.w900,
-                                      letterSpacing: -0.4,
-                                      height: 1.1,
+                                      letterSpacing: -0.35,
+                                      height: 1.05,
                                     ),
-                                    maxLines: 2,
+                                    maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
@@ -200,11 +200,11 @@ class _HeroShellState extends State<_HeroShell>
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: 4),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
+                                horizontal: 7,
+                                vertical: 2,
                               ),
                               decoration: BoxDecoration(
                                 color: Colors.white.withValues(alpha: 0.12),
@@ -242,7 +242,7 @@ class _HeroShellState extends State<_HeroShell>
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 6),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -254,35 +254,35 @@ class _HeroShellState extends State<_HeroShell>
                               widget.signal.label,
                               style: TextStyle(
                                 color: dashboardHeroLabelOnTeal(),
-                                fontSize: 10.5,
+                                fontSize: 10,
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 0.1,
                               ),
                             ),
-                            const SizedBox(height: 2),
                             Text(
                               widget.caption,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: dashboardHeroCaptionOnTeal(),
-                                fontSize: 11,
+                                fontSize: 10.5,
                                 fontWeight: FontWeight.w500,
-                                height: 1.2,
+                                height: 1.15,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 4),
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
                         children: [
                           Text(
                             widget.signal.value,
                             style: AppTypography.mono(
                               color: Colors.white,
-                              fontSize: 34,
+                              fontSize: 28,
                               fontWeight: FontWeight.w600,
                               letterSpacing: -0.5,
                               height: 1,
@@ -290,15 +290,12 @@ class _HeroShellState extends State<_HeroShell>
                           ),
                           if (widget.signal.suffix != null)
                             Padding(
-                              padding: const EdgeInsets.only(
-                                left: 4,
-                                bottom: 5,
-                              ),
+                              padding: const EdgeInsets.only(left: 3),
                               child: Text(
                                 widget.signal.suffix!,
                                 style: TextStyle(
                                   color: dashboardHeroLabelOnTeal(),
-                                  fontSize: 11.5,
+                                  fontSize: 10.5,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -331,7 +328,7 @@ class _HeroStatusPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(999),

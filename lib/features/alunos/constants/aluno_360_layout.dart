@@ -10,13 +10,13 @@ abstract final class Aluno360Layout {
   static double heroBodyHeight(BuildContext context) {
     final textScale =
         MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 1.25);
-    return 178 + ((textScale - 1) * 56);
+    return 118 + ((textScale - 1) * 36);
   }
 
   /// Toolbar inset + hero card + bottom padding — no dead gap above the card.
   static double heroExpandedHeight(BuildContext context) {
     final top = MediaQuery.paddingOf(context).top;
-    return top + kToolbarHeight + 4 + heroBodyHeight(context) + 8;
+    return top + kToolbarHeight + 2 + heroBodyHeight(context) + 6;
   }
 
   /// Bottom padding so Operação content clears the sticky CTA bar.
