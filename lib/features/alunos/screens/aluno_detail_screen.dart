@@ -7,7 +7,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
-import '../../../core/utils/fx_utils.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../data/aluno_contact_utils.dart';
@@ -195,17 +194,6 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                 ),
                 flexibleSpace: FlexibleSpaceBar(
                   collapseMode: CollapseMode.pin,
-                  centerTitle: false,
-                  titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
-                  title: Text(
-                    fxTitleCaseName(aluno.nome),
-                    style: TextStyle(
-                      color: ink,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.2,
-                    ),
-                  ),
                   background: Padding(
                     padding: EdgeInsets.fromLTRB(
                       TokensStrip.s4,
