@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/brand_palette.dart';
-
 /// Human-readable objective label for cards and hero.
 String prettyAlunoObjective(String? value) {
   final raw = (value ?? '').trim();
@@ -52,8 +50,4 @@ Color alunoAvatarFallbackColor(String name, bool isDark) {
           ];
   final hash = name.isNotEmpty ? name.codeUnitAt(0) : 0;
   return palette[hash % palette.length];
-}
-
-Color alunoAvatarFallbackSoft(Color primary, String name, bool isDark) {
-  return BrandPalette.soft(primary, dark: isDark);
 }

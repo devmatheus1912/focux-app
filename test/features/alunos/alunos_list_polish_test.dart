@@ -34,6 +34,7 @@ void main() {
     expect(screen, contains('alunoRiscoAltoBadgeColors'));
     expect(screen, contains('alunoListSecondaryInk'));
     expect(screen, contains('AlunoAvatar'));
+    expect(screen, contains("part 'alunos_list_screen_state.part.dart'"));
     expect(screen, contains("part 'alunos_list_screen_cards.part.dart'"));
     expect(screen, isNot(contains("aluno.email.toLowerCase()")));
     expect(screen, contains('isScrollControlled: true'));
