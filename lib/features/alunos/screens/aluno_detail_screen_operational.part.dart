@@ -40,7 +40,7 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
     return Container(
       key: const ValueKey('aluno360_operacao_status'),
       decoration: fxListCardDecoration(context),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(Aluno360Layout.cardPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -64,10 +64,10 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Sinais atualizados para priorizar sua ação',
-            style: TextStyle(color: mute, fontSize: 11.5, height: 1.3),
+            'Use estes sinais para decidir o próximo contato',
+            style: TextStyle(color: mute, fontSize: 11, height: 1.3),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(

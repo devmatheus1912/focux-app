@@ -37,17 +37,17 @@ class _AlunoDetailTabBarDelegate extends SliverPersistentHeaderDelegate {
   final Color line;
 
   @override
-  double get minExtent => 48;
+  double get minExtent => Aluno360Layout.tabBarHeight;
 
   @override
-  double get maxExtent => 48;
+  double get maxExtent => Aluno360Layout.tabBarHeight;
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final chrome = ShellChrome.of(context);
     return Material(
       color: chrome.sheetFill,
-      elevation: overlapsContent ? 2 : 0,
+      elevation: overlapsContent ? 3 : 0,
       shadowColor: Colors.black.withValues(alpha: chrome.isDark ? 0.45 : 0.12),
       child: DecoratedBox(
         decoration: BoxDecoration(
@@ -65,12 +65,12 @@ class _AlunoDetailTabBarDelegate extends SliverPersistentHeaderDelegate {
             indicatorWeight: 2,
             dividerColor: Colors.transparent,
             labelStyle: const TextStyle(
-              fontSize: 13,
+              fontSize: 12.5,
               fontWeight: FontWeight.w800,
-              letterSpacing: -0.2,
+              letterSpacing: -0.15,
             ),
             unselectedLabelStyle: const TextStyle(
-              fontSize: 13,
+              fontSize: 12.5,
               fontWeight: FontWeight.w600,
             ),
             tabs: const [
@@ -140,7 +140,7 @@ class _AlunoDetailOperacaoTab extends StatelessWidget {
             onPlayed: onEntrancePlayed,
             child: _AlunoFinanceiroRiskBanner(alunoId: alunoId, isDark: isDark),
           ),
-          const SizedBox(height: TokensStrip.s4),
+          const SizedBox(height: Aluno360Layout.sectionGap),
         ],
         _Aluno360Entrance(
           enabled: animateEntrance,
@@ -148,7 +148,7 @@ class _AlunoDetailOperacaoTab extends StatelessWidget {
           onPlayed: onEntrancePlayed,
           child: _AlunoFollowUpCard(aluno: aluno, isDark: isDark),
         ),
-        const SizedBox(height: TokensStrip.s4),
+        const SizedBox(height: Aluno360Layout.sectionGap),
         _Aluno360Entrance(
           enabled: animateEntrance,
           delay: Duration(milliseconds: financeRisk ? 80 : 40),
@@ -160,7 +160,7 @@ class _AlunoDetailOperacaoTab extends StatelessWidget {
             primary: primary,
           ),
         ),
-        const SizedBox(height: TokensStrip.s4),
+        const SizedBox(height: Aluno360Layout.sectionGap),
         _Aluno360Entrance(
           enabled: animateEntrance,
           delay: Duration(milliseconds: financeRisk ? 120 : 80),
@@ -173,7 +173,7 @@ class _AlunoDetailOperacaoTab extends StatelessWidget {
             isDark: isDark,
           ),
         ),
-        const SizedBox(height: TokensStrip.s4),
+        const SizedBox(height: Aluno360Layout.sectionGap),
         _Aluno360Entrance(
           enabled: animateEntrance,
           delay: Duration(milliseconds: financeRisk ? 160 : 120),
@@ -184,7 +184,7 @@ class _AlunoDetailOperacaoTab extends StatelessWidget {
             primary: primary,
           ),
         ),
-        const SizedBox(height: TokensStrip.s4),
+        const SizedBox(height: Aluno360Layout.sectionGap),
         _Aluno360Entrance(
           enabled: animateEntrance,
           delay: Duration(milliseconds: financeRisk ? 200 : 160),
@@ -236,7 +236,7 @@ class _AlunoDetailEvolucaoTab extends StatelessWidget {
           evolucaoAsync: evolucaoAsync,
           isDark: isDark,
         ),
-        const SizedBox(height: TokensStrip.s4),
+        const SizedBox(height: Aluno360Layout.sectionGap),
         _Aluno360Entrance(
           enabled: animateEntrance,
           delay: const Duration(milliseconds: 40),
@@ -247,7 +247,7 @@ class _AlunoDetailEvolucaoTab extends StatelessWidget {
             isDark: isDark,
           ),
         ),
-        const SizedBox(height: TokensStrip.s4),
+        const SizedBox(height: Aluno360Layout.sectionGap),
         _Aluno360Entrance(
           enabled: animateEntrance,
           delay: const Duration(milliseconds: 80),
@@ -416,7 +416,7 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
             ),
           ],
         ),
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
         child: Row(
           children: [
             Expanded(

@@ -129,7 +129,7 @@ class _HeroShellState extends State<_HeroShell>
           key: const ValueKey('aluno360_hero_card'),
           width: double.infinity,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(18),
             gradient: LinearGradient(
               colors:
                   widget.isDark
@@ -157,7 +157,7 @@ class _HeroShellState extends State<_HeroShell>
           child: CustomPaint(
             foregroundPainter: DashboardHeroGridPainter(),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+              padding: const EdgeInsets.fromLTRB(11, 8, 11, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
@@ -242,7 +242,7 @@ class _HeroShellState extends State<_HeroShell>
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 5),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -282,7 +282,7 @@ class _HeroShellState extends State<_HeroShell>
                             widget.signal.value,
                             style: AppTypography.mono(
                               color: Colors.white,
-                              fontSize: 28,
+                              fontSize: 26,
                               fontWeight: FontWeight.w600,
                               letterSpacing: -0.5,
                               height: 1,

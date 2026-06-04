@@ -45,7 +45,7 @@ class _AlunoFollowUpCard extends ConsumerWidget {
 
     return Container(
       decoration: fxListCardDecoration(context),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(Aluno360Layout.cardPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -94,10 +94,24 @@ class _AlunoFollowUpCard extends ConsumerWidget {
               ),
             ),
           ],
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           LayoutBuilder(
             builder: (context, constraints) {
               final narrow = constraints.maxWidth < 360;
+              final compactFilled = FilledButton.styleFrom(
+                minimumSize: const Size(0, 40),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                visualDensity: VisualDensity.compact,
+                backgroundColor: primary,
+                foregroundColor: Colors.white,
+              );
+              final compactOutlined = OutlinedButton.styleFrom(
+                minimumSize: const Size(0, 40),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                visualDensity: VisualDensity.compact,
+                foregroundColor: primary,
+                side: BorderSide(color: primary.withValues(alpha: 0.28)),
+              );
               final primaryActions = [
                 Semantics(
                   label: 'Registrar contato realizado com ${aluno.nome}',
@@ -111,10 +125,7 @@ class _AlunoFollowUpCard extends ConsumerWidget {
                     },
                     icon: const Icon(Icons.check_rounded, size: 16),
                     label: const Text('Contato feito'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: primary,
-                      foregroundColor: Colors.white,
-                    ),
+                    style: compactFilled,
                   ),
                 ),
                 Semantics(
@@ -124,6 +135,7 @@ class _AlunoFollowUpCard extends ConsumerWidget {
                     onPressed: () => _pickFollowUpDate(context, ref),
                     icon: const Icon(Icons.calendar_month_rounded, size: 16),
                     label: const Text('Definir data'),
+                    style: compactOutlined,
                   ),
                 ),
               ];
@@ -134,7 +146,7 @@ class _AlunoFollowUpCard extends ConsumerWidget {
                   children: [
                     ...primaryActions.map(
                       (action) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.only(bottom: 6),
                         child: SizedBox(width: double.infinity, child: action),
                       ),
                     ),
@@ -171,6 +183,7 @@ class _AlunoFollowUpCard extends ConsumerWidget {
                               onPressed: () {},
                               icon: const Icon(Icons.snooze_rounded, size: 16),
                               label: const Text('Adiar'),
+                              style: compactOutlined,
                             ),
                           ),
                         ),
@@ -210,6 +223,7 @@ class _AlunoFollowUpCard extends ConsumerWidget {
                       },
                       icon: const Icon(Icons.snooze_rounded, size: 16),
                       label: const Text('Adiar 24h'),
+                      style: compactOutlined,
                     ),
                   ),
                   Semantics(
@@ -227,6 +241,7 @@ class _AlunoFollowUpCard extends ConsumerWidget {
                       },
                       icon: const Icon(Icons.schedule_rounded, size: 16),
                       label: const Text('Adiar 3d'),
+                      style: compactOutlined,
                     ),
                   ),
                   if (followUpDate != null || isSnoozed)

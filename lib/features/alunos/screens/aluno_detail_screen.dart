@@ -8,6 +8,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../data/aluno_contact_utils.dart';
 import '../data/aluno_followup_store.dart';
@@ -29,6 +30,7 @@ import '../../health/widgets/recovery_score_ring.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../constants/aluno_360_layout.dart';
 import '../widgets/aluno_detail_hero_card.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -59,6 +61,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _entrancePlayed = false;
+  bool _headerOnHero = true;
 
   int get alunoId => widget.alunoId;
 
@@ -162,47 +165,74 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
           ref.watch(alertasConfigProvider);
           final perfilCompletion = _perfilCompletion(aluno);
           final heroExpandedHeight = Aluno360Layout.heroExpandedHeight(context);
+          final displayName = fxTitleCaseName(aluno.nome);
+          final collapseThreshold =
+              (heroExpandedHeight -
+                      MediaQuery.paddingOf(context).top -
+                      kToolbarHeight)
+                  .clamp(24.0, 120.0);
 
           return RefreshIndicator(
             onRefresh: () => invalidateAluno360Providers(ref, alunoId),
-            child: CustomScrollView(
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (!notification.metrics.hasPixels) return false;
+                final onHero = notification.metrics.pixels < collapseThreshold;
+                if (onHero != _headerOnHero) {
+                  setState(() => _headerOnHero = onHero);
+                }
+                return false;
+              },
+              child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverAppBar(
                 expandedHeight: heroExpandedHeight,
                 pinned: true,
                 stretch: false,
-                backgroundColor: Colors.transparent,
+                backgroundColor:
+                    _headerOnHero ? Colors.transparent : chrome.sheetFill,
                 surfaceTintColor: chrome.sheetFill,
                 elevation: 0,
-                scrolledUnderElevation: 1,
+                scrolledUnderElevation: _headerOnHero ? 0 : 1,
                 shadowColor: Colors.black.withValues(alpha: isDark ? 0.35 : 0.12),
-                forceMaterialTransparency: true,
+                forceMaterialTransparency: _headerOnHero,
                 systemOverlayStyle: SystemUiOverlayStyle(
                   statusBarColor: Colors.transparent,
                   statusBarIconBrightness:
-                      isDark ? Brightness.light : Brightness.dark,
+                      _headerOnHero
+                          ? Brightness.light
+                          : (isDark ? Brightness.light : Brightness.dark),
                   statusBarBrightness:
-                      isDark ? Brightness.dark : Brightness.light,
+                      _headerOnHero
+                          ? Brightness.dark
+                          : (isDark ? Brightness.dark : Brightness.light),
                 ),
                 leading: Padding(
                   padding: const EdgeInsets.only(left: 4),
-                  child: IconButton(
+                  child: _Aluno360HeaderIconButton(
+                    onHero: _headerOnHero,
+                    tooltip: 'Voltar',
                     onPressed: () => safePopOrGo(context, '/alunos'),
-                    icon: Container(
-                      width: 38,
-                      height: 38,
-                      decoration: chrome.headerAction(radius: 12),
-                      child: Icon(
-                        Icons.arrow_back_ios_new,
-                        size: 16,
-                        color: ink,
-                      ),
-                    ),
+                    icon: Icons.arrow_back_ios_new,
+                    iconSize: 16,
                   ),
                 ),
                 flexibleSpace: FlexibleSpaceBar(
-                  collapseMode: CollapseMode.pin,
+                  collapseMode: CollapseMode.parallax,
+                  centerTitle: false,
+                  titlePadding: const EdgeInsets.only(left: 56, bottom: 14),
+                  title: Text(
+                    displayName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
                   background: Stack(
                     fit: StackFit.expand,
                     children: [
@@ -213,14 +243,17 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                             end: Alignment.bottomCenter,
                             colors: [
                               isDark
-                                  ? const Color(0xFF128989)
-                                  : primary.withValues(alpha: 0.72),
+                                  ? const Color(0xFF0F7A7A)
+                                  : BrandPalette.deep(primary),
                               isDark
-                                  ? primary.withValues(alpha: 0.16)
+                                  ? const Color(0xFF128989)
+                                  : primary,
+                              isDark
+                                  ? primary.withValues(alpha: 0.14)
                                   : BrandPalette.softer(primary),
                               chrome.sheetFill,
                             ],
-                            stops: const [0.0, 0.42, 1.0],
+                            stops: const [0.0, 0.28, 0.52, 1.0],
                           ),
                         ),
                       ),
@@ -229,7 +262,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                           TokensStrip.s4,
                           MediaQuery.paddingOf(context).top + kToolbarHeight + 2,
                           TokensStrip.s4,
-                          6,
+                          4,
                         ),
                         child: AlunoDetailHeroCard(
                           aluno: aluno,
@@ -242,7 +275,10 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                 ),
                 actions: [
                   PopupMenuButton<String>(
-                    icon: Icon(Icons.more_horiz_rounded, color: ink),
+                    icon: Icon(
+                      Icons.more_horiz_rounded,
+                      color: _headerOnHero ? Colors.white : ink,
+                    ),
                     tooltip: 'Mais opções',
                     onSelected: (value) async {
                       if (value == 'excluir') {
@@ -267,7 +303,18 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                           ),
                         ],
                   ),
-                  const ShellThemeToggle(size: 38),
+                  const SizedBox(width: 4),
+                  _Aluno360HeaderIconButton(
+                    onHero: _headerOnHero,
+                    tooltip: isDark ? 'Modo claro' : 'Modo escuro',
+                    onPressed:
+                        () => ref.read(themeModeProvider.notifier).toggle(),
+                    icon:
+                        isDark
+                            ? Icons.light_mode_outlined
+                            : Icons.dark_mode_outlined,
+                    iconSize: 18,
+                  ),
                   const SizedBox(width: 8),
                 ],
               ),
@@ -283,9 +330,9 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
               SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.only(
-                    top: 12,
-                    left: 16,
-                    right: 16,
+                    top: Aluno360Layout.sectionGap,
+                    left: Aluno360Layout.screenPadding,
+                    right: Aluno360Layout.screenPadding,
                     bottom: showOperacaoSticky
                         ? Aluno360Layout.operacaoScrollBottomReserve(context)
                         : 24,
@@ -363,6 +410,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
               ),
             ],
           ),
+            ),
           );
         },
       ),

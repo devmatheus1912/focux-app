@@ -4,25 +4,34 @@ import 'package:flutter/material.dart';
 abstract final class Aluno360Layout {
   Aluno360Layout._();
 
-  static const double stickyBarContentHeight = 64;
+  static const double screenPadding = 16;
+  static const double sectionGap = 10;
+  static const double cardPadding = 14;
+  static const double tabBarHeight = 44;
+  static const double stickyBarContentHeight = 56;
 
   /// Approximate hero card body (matches [AlunoDetailHeroCard] at textScale ≤ 1.25).
   static double heroBodyHeight(BuildContext context) {
     final textScale =
         MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 1.25);
-    return 118 + ((textScale - 1) * 36);
+    return 106 + ((textScale - 1) * 28);
   }
 
   /// Toolbar inset + hero card + bottom padding — no dead gap above the card.
   static double heroExpandedHeight(BuildContext context) {
     final top = MediaQuery.paddingOf(context).top;
-    return top + kToolbarHeight + 2 + heroBodyHeight(context) + 6;
+    return top + kToolbarHeight + 2 + heroBodyHeight(context) + 4;
+  }
+
+  /// Pinned toolbar + tab bar (content should not scroll under this stack).
+  static double pinnedHeaderHeight(BuildContext context) {
+    return MediaQuery.paddingOf(context).top + kToolbarHeight + tabBarHeight;
   }
 
   /// Bottom padding so Operação content clears the sticky CTA bar.
   static double operacaoScrollBottomReserve(BuildContext context) {
     return stickyBarContentHeight +
         MediaQuery.paddingOf(context).bottom +
-        48;
+        40;
   }
 }

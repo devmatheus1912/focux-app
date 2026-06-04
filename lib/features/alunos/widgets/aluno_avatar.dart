@@ -23,7 +23,7 @@ class AlunoAvatar extends StatelessWidget {
 
   bool get _onHero => variant == AlunoAvatarVariant.hero;
 
-  double get _size => _onHero ? 44 : 46;
+  double get _size => _onHero ? 40 : 46;
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +80,7 @@ class AlunoAvatar extends StatelessWidget {
 
     return _AlunoAvatarInitials(
       name: name,
-      size: _onHero ? 44 : 44,
+      size: _onHero ? 40 : 44,
       onHero: _onHero,
       primary: primary,
       isDark: isDark,
