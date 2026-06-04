@@ -1,3 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../../core/widgets/feedback_helper.dart';
 import 'aluno_followup_store.dart';
 import 'aluno_repository.dart';
 
@@ -94,4 +99,32 @@ String maskEmailForList(String email) {
   if (domain.isEmpty) return trimmed;
   final visible = local.isEmpty ? '*' : local[0];
   return '$visible***@$domain';
+}
+
+Future<void> openAlunoWhatsappOutreach(
+  BuildContext context, {
+  required String displayName,
+  required String whatsappNumber,
+  required bool emRisco,
+}) async {
+  HapticFeedback.selectionClick();
+  final firstName = displayName.split(' ').first;
+  final mensagem =
+      emRisco
+          ? 'Oi $firstName, tudo bem? Vi que faz um tempo sem registrarmos treino. Posso te ajudar a retomar a rotina?'
+          : 'Oi $firstName, tudo bem? Passando para alinhar sua mensalidade pendente.';
+  final uri = Uri.parse(
+    'https://wa.me/55$whatsappNumber?text=${Uri.encodeComponent(mensagem)}',
+  );
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+    return;
+  }
+  await Clipboard.setData(ClipboardData(text: mensagem));
+  if (context.mounted) {
+    FeedbackHelper.showSnackBar(
+      context,
+      const SnackBar(content: Text('Mensagem copiada para a área de transferência')),
+    );
+  }
 }

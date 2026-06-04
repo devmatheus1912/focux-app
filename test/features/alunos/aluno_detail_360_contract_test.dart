@@ -6,14 +6,16 @@ String _alunoDetailLibrarySource() {
   const dir = 'lib/features/alunos/screens';
   const mainFile = '$dir/aluno_detail_screen.dart';
   const providersFile = 'lib/features/alunos/providers/aluno_detail_providers.dart';
+  const heroWidgetFile = 'lib/features/alunos/widgets/aluno_detail_hero_card.dart';
   final main = File(mainFile).readAsStringSync();
   final providers = File(providersFile).readAsStringSync();
+  final heroWidget = File(heroWidgetFile).readAsStringSync();
   final partPattern = RegExp(r"part '([^']+\.part\.dart)';");
   final parts = partPattern
       .allMatches(main)
       .map((m) => File('$dir/${m.group(1)!}').readAsStringSync())
       .join('\n');
-  return '$main\n$providers\n$parts';
+  return '$main\n$providers\n$heroWidget\n$parts';
 }
 
 void main() {
@@ -82,9 +84,10 @@ void main() {
     expect(screen, contains('copySensitiveToClipboard'));
     expect(screen, isNot(contains('Erro: \$e')));
     expect(screen, isNot(contains('operational_metrics.part.dart')));
-    expect(screen, contains('class _AlunoDetailHeroCard'));
+    expect(screen, contains('class AlunoDetailHeroCard'));
     expect(screen, contains('aluno360_hero_card'));
-    expect(screen, contains('CollapseMode.pin'));
+    expect(screen, contains('Aluno360Layout'));
+    expect(screen, contains('operacaoScrollBottomReserve'));
     expect(screen, contains('layoutBuilder:'));
     expect(screen, contains('chrome.sheetFill'));
   });

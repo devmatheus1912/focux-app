@@ -30,7 +30,10 @@ import '../../health/widgets/recovery_score_ring.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../constants/aluno_360_layout.dart';
+import '../widgets/aluno_detail_hero_card.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/fx_motion.dart';
 part 'aluno_detail_screen_hero.part.dart';
 part 'aluno_detail_screen_copilot.part.dart';
@@ -160,9 +163,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
         data: (aluno) {
           ref.watch(alertasConfigProvider);
           final perfilCompletion = _perfilCompletion(aluno);
-          final textScale = MediaQuery.textScalerOf(context).scale(1);
-          final heroExpandedHeight =
-              242.0 + ((textScale - 1) * 108).clamp(0.0, 168.0);
+          final heroExpandedHeight = Aluno360Layout.heroExpandedHeight(context);
 
           return RefreshIndicator(
             onRefresh: () => invalidateAluno360Providers(ref, alunoId),
@@ -204,13 +205,15 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                     ),
                     child: Align(
                       alignment: Alignment.bottomCenter,
-                      child: _AlunoDetailHeroCard(
-                      aluno: aluno,
-                      isDark: isDark,
-                      primary: primary,
-                      ink: ink,
-                      mute: mute,
-                    ),
+                      child: AlunoDetailHeroCard(
+                        aluno: aluno,
+                        isDark: isDark,
+                        primary: primary,
+                        onChat: () => context.push(
+                          '/alunos/${aluno.id}/chat',
+                          extra: aluno.nome,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -260,7 +263,9 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                     top: 12,
                     left: 16,
                     right: 16,
-                    bottom: showOperacaoSticky ? 118 : 24,
+                    bottom: showOperacaoSticky
+                        ? Aluno360Layout.operacaoScrollBottomReserve(context)
+                        : 24,
                   ),
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 150),

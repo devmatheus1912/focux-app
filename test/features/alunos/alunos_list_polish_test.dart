@@ -2,15 +2,24 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+String _alunosListLibrarySource() {
+  const dir = 'lib/features/alunos/screens';
+  const mainFile = '$dir/alunos_list_screen.dart';
+  final main = File(mainFile).readAsStringSync();
+  final partPattern = RegExp(r"part '([^']+\.part\.dart)';");
+  final parts = partPattern
+      .allMatches(main)
+      .map((m) => File('$dir/${m.group(1)!}').readAsStringSync())
+      .join('\n');
+  return '$main\n$parts';
+}
+
 void main() {
   test('alunos list usa microcopy, chips de status e scroll peek 10/10', () {
-    final screen =
-        File(
-          'lib/features/alunos/screens/alunos_list_screen.dart',
-        ).readAsStringSync();
+    final screen = _alunosListLibrarySource();
 
-    expect(screen, contains('_alunosSelectionTitle'));
-    expect(screen, contains('_mensalidadesPagasMessage'));
+    expect(screen, contains('alunosSelectionTitle'));
+    expect(screen, contains('mensalidadesPagasMessage'));
     expect(screen, contains('_HorizontalScrollPeek'));
     expect(screen, contains('Deslize horizontalmente para ver mais filtros'));
     expect(screen, contains("statusText = 'Risco alto'"));
@@ -22,8 +31,10 @@ void main() {
     expect(screen, contains('Lista compacta'));
     expect(screen, contains('AlunoListPreferencesStore'));
     expect(screen, contains('maskEmailForList'));
-    expect(screen, contains('_riscoAltoBadgeColors'));
-    expect(screen, contains('_alunoListSecondaryInk'));
+    expect(screen, contains('alunoRiscoAltoBadgeColors'));
+    expect(screen, contains('alunoListSecondaryInk'));
+    expect(screen, contains('AlunoAvatar'));
+    expect(screen, contains("part 'alunos_list_screen_cards.part.dart'"));
     expect(screen, isNot(contains("aluno.email.toLowerCase()")));
     expect(screen, contains('isScrollControlled: true'));
     expect(screen, contains('useSafeArea: true'));

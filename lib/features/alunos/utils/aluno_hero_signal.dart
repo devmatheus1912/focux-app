@@ -1,0 +1,116 @@
+import 'package:flutter/material.dart';
+
+import '../data/aluno_followup_store.dart';
+import '../data/aluno_repository.dart';
+
+class AlunoHeroPrimarySignal {
+  const AlunoHeroPrimarySignal({
+    required this.label,
+    required this.value,
+    this.suffix,
+  });
+
+  final String label;
+  final String value;
+  final String? suffix;
+}
+
+class AlunoHeroStatusVisual {
+  const AlunoHeroStatusVisual({
+    required this.label,
+    required this.background,
+    required this.foreground,
+  });
+
+  final String label;
+  final Color background;
+  final Color foreground;
+}
+
+AlunoHeroStatusVisual alunoHeroStatusVisual(Aluno aluno) {
+  if (aluno.statusFinanceiro == 'INADIMPLENTE' || aluno.inadimplente) {
+    return AlunoHeroStatusVisual(
+      label: 'Inadimplente',
+      background: Colors.white.withValues(alpha: 0.14),
+      foreground: const Color(0xFFFFB4B4),
+    );
+  }
+  if (aluno.status == 'INATIVO') {
+    return AlunoHeroStatusVisual(
+      label: 'Inativo',
+      background: Colors.white.withValues(alpha: 0.14),
+      foreground: const Color(0xFFFFD59A),
+    );
+  }
+  if (aluno.emRisco) {
+    return AlunoHeroStatusVisual(
+      label: 'Em risco',
+      background: Colors.white.withValues(alpha: 0.14),
+      foreground: const Color(0xFFFFC98A),
+    );
+  }
+  return AlunoHeroStatusVisual(
+    label: 'Ativo',
+    background: Colors.white.withValues(alpha: 0.14),
+    foreground: const Color(0xFF9CF0C0),
+  );
+}
+
+AlunoHeroPrimarySignal alunoHeroPrimarySignal(Aluno aluno) {
+  final dias = aluno.diasSemTreino;
+  final ader = aluno.aderenciaPercent;
+  final diasCritico =
+      dias != null && dias >= AlunoFollowUpStore.diasSemTreinoLimite;
+  final priorizarDias =
+      aluno.emRisco ||
+      aluno.inadimplente ||
+      aluno.statusFinanceiro == 'INADIMPLENTE' ||
+      diasCritico ||
+      (dias != null && dias >= 3);
+
+  if (priorizarDias && dias != null) {
+    return AlunoHeroPrimarySignal(
+      label: 'Sem treino',
+      value: '$dias',
+      suffix: dias == 1 ? ' dia' : ' dias',
+    );
+  }
+  if (ader != null) {
+    return AlunoHeroPrimarySignal(
+      label: 'Aderência semanal',
+      value: '$ader',
+      suffix: '%',
+    );
+  }
+  if (dias != null) {
+    return AlunoHeroPrimarySignal(
+      label: 'Sem treino',
+      value: '$dias',
+      suffix: dias == 1 ? ' dia' : ' dias',
+    );
+  }
+  return AlunoHeroPrimarySignal(
+    label: 'Prontidão',
+    value: aluno.scoreProntidao == null ? '—' : '${aluno.scoreProntidao}',
+  );
+}
+
+String alunoHeroCaption(Aluno aluno, AlunoHeroPrimarySignal signal) {
+  if (signal.label == 'Sem treino') {
+    final dias = aluno.diasSemTreino ?? 0;
+    if (dias >= AlunoFollowUpStore.diasSemTreinoLimite) {
+      return 'Parado há $dias dias — contato hoje';
+    }
+    if (dias >= 3) {
+      return '$dias dias parado — vale check-in';
+    }
+    return 'Rotina em dia';
+  }
+  if (signal.label == 'Aderência semanal') {
+    final ader = aluno.aderenciaPercent ?? 0;
+    if (ader < 50) return 'Aderência baixa — reforce hábito';
+    if (ader < 70) return 'Aderência moderada';
+    return 'Aderência saudável';
+  }
+  return 'Índice operacional consolidado';
+}
