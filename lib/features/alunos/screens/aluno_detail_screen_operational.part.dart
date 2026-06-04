@@ -146,34 +146,153 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
             isDark: isDark,
             semanticsLabel: 'Próximo contato $proximoContato',
           ),
-          if (sparklineData.isNotEmpty) ...[
+          if (aderenciaAsync.isLoading) ...[
             const SizedBox(height: 14),
-            Text(
-              'Aderência · últimos 7 dias',
-              style: TextStyle(
-                color: mute,
-                fontSize: 10.5,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.35,
+            FxLoading.sectionShimmer(context, height: 52, showHeader: false),
+          ] else if (sparklineData.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+              decoration: BoxDecoration(
+                color: aderenciaColor.withValues(alpha: isDark ? 0.1 : 0.06),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: aderenciaColor.withValues(alpha: isDark ? 0.22 : 0.14),
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                return Semantics(
-                  label: 'Tendência de aderência nos últimos 7 dias',
-                  child: FxSparkline(
-                    data: sparklineData,
-                    color: aderenciaColor,
-                    width: constraints.maxWidth,
-                    height: 32,
-                    strokeWidth: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Aderência · últimos 7 dias',
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        sparklineData.every((v) => v <= 0)
+                            ? 'Sem check-ins'
+                            : '${sparklineData.fold<double>(0, (a, b) => a + b).round()} check-ins',
+                        style: TextStyle(
+                          color: mute,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
-                );
-              },
+                  const SizedBox(height: 10),
+                  Semantics(
+                    label: 'Check-ins dos últimos 7 dias',
+                    child: _AdherenceWeekBars(
+                      checkins: sparklineData,
+                      activeColor: aderenciaColor,
+                      idleColor: aderenciaColor.withValues(alpha: isDark ? 0.28 : 0.2),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _AdherenceWeekBars extends StatelessWidget {
+  const _AdherenceWeekBars({
+    required this.checkins,
+    required this.activeColor,
+    required this.idleColor,
+  });
+
+  final List<double> checkins;
+  final Color activeColor;
+  final Color idleColor;
+
+  static const _barMaxHeight = 34.0;
+  static const _minFraction = 0.14;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxVal = checkins.fold<double>(
+      1,
+      (prev, v) => v > prev ? v : prev,
+    );
+
+    return SizedBox(
+      height: _barMaxHeight,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          for (var i = 0; i < checkins.length; i++) ...[
+            if (i > 0) const SizedBox(width: 5),
+            Expanded(
+              child: _AdherenceWeekBar(
+                value: checkins[i],
+                maxVal: maxVal,
+                activeColor: activeColor,
+                idleColor: idleColor,
+                barMaxHeight: _barMaxHeight,
+                minFraction: _minFraction,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _AdherenceWeekBar extends StatelessWidget {
+  const _AdherenceWeekBar({
+    required this.value,
+    required this.maxVal,
+    required this.activeColor,
+    required this.idleColor,
+    required this.barMaxHeight,
+    required this.minFraction,
+  });
+
+  final double value;
+  final double maxVal;
+  final Color activeColor;
+  final Color idleColor;
+  final double barMaxHeight;
+  final double minFraction;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasActivity = value > 0;
+    final fraction =
+        hasActivity
+            ? (value / maxVal).clamp(minFraction, 1.0)
+            : minFraction;
+
+    return Semantics(
+      label:
+          hasActivity
+              ? '${value.round()} check-in${value == 1 ? '' : 's'}'
+              : 'Sem check-in',
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          height: barMaxHeight * fraction,
+          decoration: BoxDecoration(
+            color: hasActivity ? activeColor : idleColor,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
       ),
     );
   }
