@@ -667,6 +667,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
               seed360: seed360,
               forceIa: forceIa,
               iaAsync: iaAsync,
+              resumoLoading: resumoAsync.isLoading && !resumoAsync.hasValue,
             ),
           ),
           const SizedBox(height: 10),
@@ -735,11 +736,11 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     required Map<String, dynamic>? seed360,
     required bool forceIa,
     required AsyncValue<Map<String, dynamic>>? iaAsync,
+    required bool resumoLoading,
   }) {
     if (forceIa && iaAsync != null) {
       return iaAsync.when(
-        loading:
-            () => FxLoading.sectionShimmer(context, height: 72, showHeader: false),
+        loading: () => _CopilotPrescriptionLoading(color: primary),
         error:
             (_, __) => _CopilotPrescription(
               title: 'Sugestão offline',
@@ -753,10 +754,13 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     if (seed360 != null) {
       return _prescriptionFromAction(aluno, seed360, fallback, primary);
     }
+    if (resumoLoading) {
+      return _CopilotPrescriptionLoading(color: primary);
+    }
     return _CopilotPrescription(
       title: 'Sugestão offline',
       action: fallback,
-      reason: 'Carregando sinais do Aluno 360…',
+      reason: 'Baseado nos sinais atuais do perfil.',
       color: primary,
     );
   }

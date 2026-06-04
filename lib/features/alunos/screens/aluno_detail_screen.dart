@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
+import '../../../core/utils/fx_utils.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../data/aluno_contact_utils.dart';
@@ -171,10 +173,10 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                 expandedHeight: heroExpandedHeight,
                 pinned: true,
                 stretch: false,
-                backgroundColor: chrome.sheetFill.withValues(alpha: 0.92),
+                backgroundColor: chrome.sheetFill,
                 surfaceTintColor: Colors.transparent,
                 elevation: 0,
-                scrolledUnderElevation: 0.5,
+                scrolledUnderElevation: 2,
                 leading: Padding(
                   padding: const EdgeInsets.only(left: 4),
                   child: IconButton(
@@ -193,6 +195,17 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                 ),
                 flexibleSpace: FlexibleSpaceBar(
                   collapseMode: CollapseMode.pin,
+                  centerTitle: false,
+                  titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
+                  title: Text(
+                    fxTitleCaseName(aluno.nome),
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
                   background: Padding(
                     padding: EdgeInsets.fromLTRB(
                       TokensStrip.s4,
@@ -206,10 +219,6 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                         aluno: aluno,
                         isDark: isDark,
                         primary: primary,
-                        onChat: () => context.push(
-                          '/alunos/${aluno.id}/chat',
-                          extra: aluno.nome,
-                        ),
                       ),
                     ),
                   ),
@@ -297,10 +306,6 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                             invalidateAluno360Providers(ref, alunoId);
                           }
                         },
-                        onMessage: () => context.push(
-                          '/alunos/${aluno.id}/chat',
-                          extra: aluno.nome,
-                        ),
                         onEvolve: () => context.push(
                           '/alunos/${aluno.id}/ia/progressao',
                           extra: aluno.nome,

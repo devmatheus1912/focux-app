@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_typography.dart';
@@ -17,13 +19,11 @@ class AlunoDetailHeroCard extends StatelessWidget {
     required this.aluno,
     required this.isDark,
     required this.primary,
-    required this.onChat,
   });
 
   final Aluno aluno;
   final bool isDark;
   final Color primary;
-  final VoidCallback onChat;
 
   @override
   Widget build(BuildContext context) {
@@ -49,14 +49,13 @@ class AlunoDetailHeroCard extends StatelessWidget {
           status: status,
           signal: signal,
           caption: caption,
-          onChat: onChat,
         ),
       ),
     );
   }
 }
 
-class _HeroShell extends StatelessWidget {
+class _HeroShell extends StatefulWidget {
   const _HeroShell({
     required this.isDark,
     required this.primary,
@@ -66,7 +65,6 @@ class _HeroShell extends StatelessWidget {
     required this.status,
     required this.signal,
     required this.caption,
-    required this.onChat,
   });
 
   final bool isDark;
@@ -77,216 +75,244 @@ class _HeroShell extends StatelessWidget {
   final AlunoHeroStatusVisual status;
   final AlunoHeroPrimarySignal signal;
   final String caption;
-  final VoidCallback onChat;
+
+  @override
+  State<_HeroShell> createState() => _HeroShellState();
+}
+
+class _HeroShellState extends State<_HeroShell>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _gradientCtrl;
+  bool _motionConfigured = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _gradientCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 8),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_motionConfigured) return;
+    _motionConfigured = true;
+    if (TokensStrip.prefersReducedMotion(context)) {
+      _gradientCtrl.stop();
+    } else {
+      _gradientCtrl.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _gradientCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final heroDeep = BrandPalette.deep(primary);
+    final heroDeep = BrandPalette.deep(widget.primary);
+    final reduceMotion = TokensStrip.prefersReducedMotion(context);
 
-    return Container(
-        key: const ValueKey('aluno360_hero_card'),
-        width: double.infinity,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          gradient: LinearGradient(
-            colors:
-                isDark
-                    ? const [Color(0xFF128989), Color(0xFF0A2E2E)]
-                    : [primary, heroDeep],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+    return AnimatedBuilder(
+      animation: _gradientCtrl,
+      builder: (context, _) {
+        final angle =
+            reduceMotion ? 0.0 : _gradientCtrl.value * 2 * math.pi;
+        final begin = Alignment(-math.cos(angle), -math.sin(angle));
+        final end = Alignment(math.cos(angle), math.sin(angle));
+
+        return Container(
+          key: const ValueKey('aluno360_hero_card'),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            gradient: LinearGradient(
+              colors:
+                  widget.isDark
+                      ? const [Color(0xFF128989), Color(0xFF0A2E2E)]
+                      : [widget.primary, heroDeep],
+              begin: begin,
+              end: end,
+            ),
+            boxShadow: [
+              ...TokensStrip.coloredDepthGlow(
+                widget.primary,
+                strength: widget.isDark ? 0.28 : 0.34,
+              ),
+              BoxShadow(
+                color: widget.primary.withValues(
+                  alpha: widget.isDark ? 0.22 : 0.16,
+                ),
+                blurRadius: widget.isDark ? 32 : 26,
+                offset: const Offset(0, 14),
+                spreadRadius: widget.isDark ? -12 : -16,
+              ),
+            ],
           ),
-          boxShadow: [
-            ...TokensStrip.coloredDepthGlow(
-              primary,
-              strength: isDark ? 0.28 : 0.34,
-            ),
-            BoxShadow(
-              color: primary.withValues(alpha: isDark ? 0.22 : 0.16),
-              blurRadius: isDark ? 32 : 26,
-              offset: const Offset(0, 14),
-              spreadRadius: isDark ? -12 : -16,
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: CustomPaint(
-          foregroundPainter: DashboardHeroGridPainter(),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AlunoAvatar(
-                      name: displayName,
-                      photoUrl: photoUrl,
-                      variant: AlunoAvatarVariant.hero,
-                    ),
-                    const SizedBox(width: 11),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  displayName,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: -0.4,
-                                    height: 1.1,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              _HeroStatusPill(
-                                label: status.label,
-                                background: status.background,
-                                foreground: status.foreground,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(999),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.22),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
+          clipBehavior: Clip.antiAlias,
+          child: CustomPaint(
+            foregroundPainter: DashboardHeroGridPainter(),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AlunoAvatar(
+                        name: widget.displayName,
+                        photoUrl: widget.photoUrl,
+                        variant: AlunoAvatarVariant.hero,
+                      ),
+                      const SizedBox(width: 11),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(
-                                  Icons.fitness_center_rounded,
-                                  size: 11,
-                                  color: dashboardHeroLabelOnTeal(),
-                                ),
-                                const SizedBox(width: 4),
-                                Flexible(
+                                Expanded(
                                   child: Text(
-                                    objective,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: dashboardHeroCaptionOnTeal(),
-                                      fontSize: 10.5,
-                                      fontWeight: FontWeight.w700,
+                                    widget.displayName,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: -0.4,
+                                      height: 1.1,
                                     ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
+                                ),
+                                const SizedBox(width: 6),
+                                _HeroStatusPill(
+                                  label: widget.status.label,
+                                  background: widget.status.background,
+                                  foreground: widget.status.foreground,
                                 ),
                               ],
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            signal.label,
-                            style: TextStyle(
-                              color: dashboardHeroLabelOnTeal(),
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.1,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            caption,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: dashboardHeroCaptionOnTeal(),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                              height: 1.2,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          signal.value,
-                          style: AppTypography.mono(
-                            color: Colors.white,
-                            fontSize: 34,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -0.5,
-                            height: 1,
-                          ),
-                        ),
-                        if (signal.suffix != null)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 4, bottom: 5),
-                            child: Text(
-                              signal.suffix!,
-                              style: TextStyle(
-                                color: dashboardHeroLabelOnTeal(),
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w600,
+                            const SizedBox(height: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(999),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.22),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.fitness_center_rounded,
+                                    size: 11,
+                                    color: dashboardHeroLabelOnTeal(),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      widget.objective,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: dashboardHeroCaptionOnTeal(),
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(width: 8),
-                    TextButton.icon(
-                      onPressed: onChat,
-                      icon: const Icon(
-                        Icons.chat_bubble_outline_rounded,
-                        size: 15,
-                      ),
-                      label: const Text('Chat'),
-                      style: TextButton.styleFrom(
-                        minimumSize: const Size(0, 34),
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        foregroundColor: Colors.white,
-                        backgroundColor: Colors.white.withValues(alpha: 0.12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            TokensStrip.rButton,
-                          ),
-                          side: BorderSide(
-                            color: Colors.white.withValues(alpha: 0.28),
-                          ),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.signal.label,
+                              style: TextStyle(
+                                color: dashboardHeroLabelOnTeal(),
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.1,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              widget.caption,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: dashboardHeroCaptionOnTeal(),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                height: 1.2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            widget.signal.value,
+                            style: AppTypography.mono(
+                              color: Colors.white,
+                              fontSize: 34,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: -0.5,
+                              height: 1,
+                            ),
+                          ),
+                          if (widget.signal.suffix != null)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                left: 4,
+                                bottom: 5,
+                              ),
+                              child: Text(
+                                widget.signal.suffix!,
+                                style: TextStyle(
+                                  color: dashboardHeroLabelOnTeal(),
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
+        );
+      },
     );
   }
 }

@@ -5,7 +5,6 @@ class _StudentQuickActions extends StatelessWidget {
     required this.aluno,
     required this.isDark,
     required this.primary,
-    required this.onMessage,
     required this.onPassword,
     required this.onEdit,
     required this.onEvolve,
@@ -14,7 +13,6 @@ class _StudentQuickActions extends StatelessWidget {
   final Aluno aluno;
   final bool isDark;
   final Color primary;
-  final VoidCallback onMessage;
   final VoidCallback onPassword;
   final VoidCallback onEdit;
   final VoidCallback onEvolve;
@@ -54,7 +52,7 @@ class _StudentQuickActions extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Contato, acesso e evolução de ${aluno.nome.split(' ').first}',
+                      'Acesso e evolução de ${aluno.nome.split(' ').first}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -73,12 +71,6 @@ class _StudentQuickActions extends StatelessWidget {
             builder: (context, constraints) {
               final narrow = constraints.maxWidth < 360;
               final pills = [
-                _QuickActionPill(
-                  icon: Icons.chat_bubble_outline_rounded,
-                  label: 'Chat',
-                  primary: primary,
-                  onTap: onMessage,
-                ),
                 _QuickActionPill(
                   icon: Icons.key_outlined,
                   label: 'Senha',

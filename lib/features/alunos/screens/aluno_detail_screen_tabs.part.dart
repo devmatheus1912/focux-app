@@ -108,7 +108,6 @@ class _AlunoDetailOperacaoTab extends StatelessWidget {
     required this.onEntrancePlayed,
     required this.onPassword,
     required this.onEdit,
-    required this.onMessage,
     required this.onEvolve,
   });
 
@@ -124,7 +123,6 @@ class _AlunoDetailOperacaoTab extends StatelessWidget {
   final VoidCallback onEntrancePlayed;
   final VoidCallback onPassword;
   final VoidCallback onEdit;
-  final VoidCallback onMessage;
   final VoidCallback onEvolve;
 
   @override
@@ -197,7 +195,6 @@ class _AlunoDetailOperacaoTab extends StatelessWidget {
             primary: primary,
             onPassword: onPassword,
             onEdit: onEdit,
-            onMessage: onMessage,
             onEvolve: onEvolve,
           ),
         ),

@@ -178,6 +178,60 @@ class _CopilotPrescription extends StatelessWidget {
   }
 }
 
+class _CopilotPrescriptionLoading extends StatelessWidget {
+  const _CopilotPrescriptionLoading({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final base =
+        isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : color.withValues(alpha: 0.12);
+    final highlight =
+        isDark
+            ? Colors.white.withValues(alpha: 0.22)
+            : color.withValues(alpha: 0.28);
+
+    Widget bone(double w, double h, {double radius = 8}) => Container(
+      width: w,
+      height: h,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(radius),
+      ),
+    );
+
+    return Semantics(
+      label: 'Carregando sugestão do Copiloto',
+      child: Shimmer.fromColors(
+        baseColor: base,
+        highlightColor: highlight,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                bone(17, 17, radius: 4),
+                const SizedBox(width: 7),
+                Expanded(child: bone(double.infinity, 12, radius: 6)),
+              ],
+            ),
+            const SizedBox(height: 10),
+            bone(double.infinity, 14, radius: 6),
+            const SizedBox(height: 6),
+            bone(220, 14, radius: 6),
+            const SizedBox(height: 8),
+            bone(180, 11, radius: 6),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _CopilotTaskStatus extends StatelessWidget {
   final IconData icon;
   final String title;

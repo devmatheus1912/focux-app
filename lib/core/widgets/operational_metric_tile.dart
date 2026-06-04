@@ -40,7 +40,8 @@ class OperationalMetricTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ink = fxScreenInk(context);
-    final mute = fxScreenMute(context);
+    final labelColor = Color.lerp(ink, color, isDark ? 0.38 : 0.52)!;
+    final hintColor = color.withValues(alpha: isDark ? 0.95 : 0.82);
     final tile = Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: operationalMetricDecoration(
@@ -53,7 +54,7 @@ class OperationalMetricTile extends StatelessWidget {
           Text(
             label.toUpperCase(),
             style: TextStyle(
-              color: mute,
+              color: labelColor,
               fontSize: 10,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.4,
@@ -79,7 +80,14 @@ class OperationalMetricTile extends StatelessWidget {
               ),
             ],
           ),
-          Text(hint, style: TextStyle(color: color, fontSize: 10.5)),
+          Text(
+            hint,
+            style: TextStyle(
+              color: hintColor,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );
