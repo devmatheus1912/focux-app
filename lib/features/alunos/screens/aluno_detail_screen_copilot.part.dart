@@ -414,7 +414,6 @@ class _Aluno360CopilotCard extends ConsumerWidget {
       aluno: aluno,
       proximaAcaoRaw: proximaAcao360?.acao,
     );
-    final iaRefreshing = forceIa && (iaAsync?.isLoading ?? false);
     final cardPadding = hasOpenTask ? 10.0 : 14.0;
 
     return Container(
@@ -469,30 +468,9 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                   primary: primary,
                   iconOnly: true,
                 ),
-              IconButton.filledTonal(
-                onPressed:
-                    iaRefreshing
-                        ? null
-                        : () {
-                          ref
-                              .read(
-                                alunoCopilotoForceIaProvider(aluno.id).notifier,
-                              )
-                              .state = true;
-                          ref.invalidate(alunoCopilotoActionProvider(aluno.id));
-                        },
-                icon:
-                    iaRefreshing
-                        ? SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: primary,
-                          ),
-                        )
-                        : const Icon(Icons.refresh_rounded, size: 18),
-                tooltip: iaRefreshing ? 'Atualizando…' : 'Atualizar com IA',
+              _CopilotIaRefreshButton(
+                alunoId: aluno.id,
+                primary: primary,
               ),
             ],
           ),
@@ -592,6 +570,61 @@ class _Aluno360CopilotCard extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _CopilotIaRefreshButton extends ConsumerStatefulWidget {
+  const _CopilotIaRefreshButton({
+    required this.alunoId,
+    required this.primary,
+  });
+
+  final int alunoId;
+  final Color primary;
+
+  @override
+  ConsumerState<_CopilotIaRefreshButton> createState() =>
+      _CopilotIaRefreshButtonState();
+}
+
+class _CopilotIaRefreshButtonState extends ConsumerState<_CopilotIaRefreshButton> {
+  var _refreshing = false;
+
+  Future<void> _refreshIa() async {
+    if (_refreshing) return;
+    setState(() => _refreshing = true);
+    ref.read(alunoCopilotoForceIaProvider(widget.alunoId).notifier).state = true;
+    try {
+      await ref.refresh(alunoCopilotoActionProvider(widget.alunoId).future);
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showWarn(
+          context,
+          friendlyError(e, fallback: 'IA indisponível agora.'),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _refreshing = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton.filledTonal(
+      onPressed: _refreshing ? null : _refreshIa,
+      icon:
+          _refreshing
+              ? SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: widget.primary,
+                ),
+              )
+              : const Icon(Icons.refresh_rounded, size: 18),
+      tooltip: _refreshing ? 'Atualizando…' : 'Atualizar com IA',
     );
   }
 }

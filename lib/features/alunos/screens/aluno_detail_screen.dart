@@ -17,6 +17,7 @@ import '../providers/aluno_followup_provider.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../dashboard/data/command_center_data.dart';
@@ -304,25 +305,37 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                   PopupMenuButton<String>(
                     icon: Icon(Icons.more_horiz_rounded, color: ink),
                     tooltip: 'Mais opções',
+                    offset: const Offset(0, 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                     onSelected: (value) async {
                       if (value == 'excluir') {
                         await _confirmarExclusao(context, ref, aluno);
                       }
                     },
                     itemBuilder:
-                        (ctx) => const [
-                          PopupMenuItem(
+                        (ctx) => [
+                          PopupMenuItem<String>(
                             value: 'excluir',
-                            child: ListTile(
-                              leading: Icon(
-                                Icons.delete_outline,
-                                color: EagleTokens.bad,
-                              ),
-                              title: Text(
-                                'Excluir aluno',
-                                style: TextStyle(color: EagleTokens.bad),
-                              ),
-                              contentPadding: EdgeInsets.zero,
+                            height: 44,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.delete_outline_rounded,
+                                  size: 20,
+                                  color: EagleTokens.bad,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  'Excluir aluno',
+                                  style: AppTypography.inter(
+                                    color: EagleTokens.bad,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
