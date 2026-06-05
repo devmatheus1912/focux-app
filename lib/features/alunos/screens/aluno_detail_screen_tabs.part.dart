@@ -505,6 +505,14 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
     final line = ShellChrome.of(context).line;
     final creating = ref.watch(alunoCopilotCreatingProvider(alunoId));
     final openActions = ref.watch(alunoOpenIaActionsProvider(alunoId));
+    final forceIa = ref.watch(alunoCopilotoForceIaProvider(alunoId));
+    final iaAsync =
+        forceIa ? ref.watch(alunoCopilotoActionProvider(alunoId)) : null;
+    final effectiveProxima = resolveCopilotProximaAcaoResumo(
+      proximaAcao360: proximaAcao360,
+      forceIa: forceIa,
+      iaAsync: iaAsync,
+    );
     final hasOpenTask =
         findOpenCopilotTask(openActions.valueOrNull ?? const []) != null ||
         hasOpenCopilotTask360;
@@ -520,7 +528,7 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
 
     final sticky = resolveOperacaoStickyAction(
       aluno: aluno,
-      proximaAcao: proximaAcao360,
+      proximaAcao: effectiveProxima,
       hasOpenTask: hasOpenTask,
       followUpDue: followUpDue,
     );
@@ -549,7 +557,7 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
       sticky: sticky,
       hasOpenTask: hasOpenTask,
       followUpDue: followUpDue,
-      proximaAcaoText: proximaAcao360?.acao,
+      proximaAcaoText: effectiveProxima?.acao,
     );
     final showSecondaryCommandCenter = shouldShowStickySecondaryCommandCenter(
       sticky: sticky,

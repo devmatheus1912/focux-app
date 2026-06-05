@@ -347,6 +347,44 @@ void main() {
     });
   });
 
+  group('shouldShowCopilotPrescriptionBlock', () {
+    test('shows prescription during IA refresh even when sticky matches 360', () {
+      final aluno = _aluno();
+      const sticky = OperacaoStickyAction(
+        label: 'Completar mapa corporal',
+        icon: Icons.accessibility_new_rounded,
+        destination: OperacaoStickyDestination.evolucao,
+      );
+      expect(
+        shouldShowCopilotPrescriptionBlock(
+          forceIa: true,
+          sticky: sticky,
+          aluno: aluno,
+          proximaAcaoRaw: 'Completar mapa corporal no radar',
+        ),
+        isTrue,
+      );
+    });
+
+    test('hides duplicate when not forcing IA', () {
+      final aluno = _aluno();
+      const sticky = OperacaoStickyAction(
+        label: 'Completar mapa corporal',
+        icon: Icons.accessibility_new_rounded,
+        destination: OperacaoStickyDestination.evolucao,
+      );
+      expect(
+        shouldShowCopilotPrescriptionBlock(
+          forceIa: false,
+          sticky: sticky,
+          aluno: aluno,
+          proximaAcaoRaw: 'Completar mapa corporal no radar',
+        ),
+        isFalse,
+      );
+    });
+  });
+
   group('shouldHideCopilotPrescriptionWhenMatchesSticky', () {
     test('hides when sticky label matches proxima acao', () {
       final aluno = _aluno();

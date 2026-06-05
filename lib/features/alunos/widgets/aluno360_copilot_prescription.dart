@@ -197,7 +197,11 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
             ),
         data:
             (action) => _fromContent(
-              resolveCopilotPrescriptionFromAction(aluno, action, fallback),
+              resolveCopilotPrescriptionFromAction(
+                aluno,
+                copilotActionFromIa(action),
+                fallback,
+              ),
             ),
       );
     }

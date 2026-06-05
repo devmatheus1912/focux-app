@@ -393,10 +393,15 @@ class _Aluno360CopilotCard extends ConsumerWidget {
         proximaAcao360 != null
             ? copilotActionFrom360(proximaAcao360!)
             : null;
+    final effectiveProxima = resolveCopilotProximaAcaoResumo(
+      proximaAcao360: proximaAcao360,
+      forceIa: forceIa,
+      iaAsync: iaAsync,
+    );
     final followUpDue = isAlunoFollowUpDue(aluno);
     final stickyAction = resolveOperacaoStickyAction(
       aluno: aluno,
-      proximaAcao: proximaAcao360,
+      proximaAcao: effectiveProxima,
       hasOpenTask: hasOpenTask,
       followUpDue: followUpDue,
     );
@@ -404,16 +409,20 @@ class _Aluno360CopilotCard extends ConsumerWidget {
       sticky: stickyAction,
       hasOpenTask: hasOpenTask,
     );
-    final hideCopilotPrescription = shouldHideCopilotPrescriptionWhenMatchesSticky(
+    final showCopilotPrescription = shouldShowCopilotPrescriptionBlock(
+      forceIa: forceIa,
       sticky: stickyAction,
       aluno: aluno,
       proximaAcaoRaw: proximaAcao360?.acao,
     );
-    final hideCopilotPrimary = shouldHideCopilotPrimaryCtaWhenMatchesSticky(
-      sticky: stickyAction,
-      aluno: aluno,
-      proximaAcaoRaw: proximaAcao360?.acao,
-    );
+    final hideCopilotPrimary =
+        forceIa
+            ? false
+            : shouldHideCopilotPrimaryCtaWhenMatchesSticky(
+              sticky: stickyAction,
+              aluno: aluno,
+              proximaAcaoRaw: proximaAcao360?.acao,
+            );
     final cardPadding = hasOpenTask ? 10.0 : 14.0;
 
     return Container(
@@ -515,7 +524,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
             ),
             const SizedBox(height: 10),
           ],
-          if (!hideCopilotPrescription) ...[
+          if (showCopilotPrescription) ...[
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
@@ -597,16 +606,45 @@ class _CopilotIaRefreshButtonState extends ConsumerState<_CopilotIaRefreshButton
     ref.read(alunoCopilotoForceIaProvider(widget.alunoId).notifier).state = true;
     try {
       await ref.refresh(alunoCopilotoActionProvider(widget.alunoId).future);
-    } catch (e) {
       if (mounted) {
+        FeedbackHelper.showSnackBar(
+          context,
+          const SnackBar(content: Text('Sugestão atualizada com IA')),
+        );
+      }
+    } catch (e) {
+      ref.read(alunoCopilotoForceIaProvider(widget.alunoId).notifier).state =
+          false;
+      if (!mounted) return;
+      if (_shouldSurfaceIaRefreshError(e)) {
         FeedbackHelper.showWarn(
           context,
           friendlyError(e, fallback: 'IA indisponível agora.'),
+        );
+      } else {
+        FeedbackHelper.showSnackBar(
+          context,
+          SnackBar(
+            content: Text(
+              friendlyError(
+                e,
+                fallback:
+                    'IA indisponível agora — mantendo sugestão do Aluno 360.',
+              ),
+            ),
+          ),
         );
       }
     } finally {
       if (mounted) setState(() => _refreshing = false);
     }
+  }
+
+  bool _shouldSurfaceIaRefreshError(Object error) {
+    if (error is IaOperationalException) {
+      return error.quotaExhausted || error.planUpgradeRequired;
+    }
+    return false;
   }
 
   @override

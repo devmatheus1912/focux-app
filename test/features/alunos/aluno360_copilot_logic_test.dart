@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_copilot_logic.dart';
@@ -27,6 +28,54 @@ Aluno _aluno({
 }
 
 void main() {
+  group('copilotActionFromIa', () {
+    test('maps IA payload to display action', () {
+      final action = copilotActionFromIa(const {
+        'acao': 'Enviar mensagem curta pedindo retorno ao treino',
+        'motivo': '14 dias sem atividade',
+      });
+      expect(action['titulo'], 'Sugestão IA');
+      expect(action['fonte'], 'IA');
+      expect(action['acao'], contains('mensagem'));
+    });
+  });
+
+  group('resolveCopilotProximaAcaoResumo', () {
+    test('prefers IA action when forceIa succeeds', () {
+      const seed = ProximaAcaoResumo(
+        acao: 'Completar mapa corporal no radar',
+        motivo: '360',
+        fonte: 'RADAR',
+        prioridade: 'P1',
+      );
+      final merged = resolveCopilotProximaAcaoResumo(
+        proximaAcao360: seed,
+        forceIa: true,
+        iaAsync: const AsyncValue.data({
+          'acao': 'Retomar contato com mensagem objetiva sobre aderência',
+          'motivo': 'Baixa frequência nos últimos 14 dias',
+        }),
+      );
+      expect(merged?.fonte, 'IA');
+      expect(merged?.acao, contains('Retomar contato'));
+    });
+
+    test('falls back to 360 when forceIa is false', () {
+      const seed = ProximaAcaoResumo(
+        acao: 'Completar mapa corporal no radar',
+        motivo: '360',
+        fonte: 'RADAR',
+        prioridade: 'P1',
+      );
+      final merged = resolveCopilotProximaAcaoResumo(
+        proximaAcao360: seed,
+        forceIa: false,
+        iaAsync: null,
+      );
+      expect(merged, seed);
+    });
+  });
+
   group('copilotProfileCompletion', () {
     test('returns 100 when all profile fields filled', () {
       expect(

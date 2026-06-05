@@ -73,12 +73,57 @@ Map<String, dynamic> copilotActionFrom360(ProximaAcaoResumo proxima) => {
           ? 'Evolução inteligente'
           : proxima.fonte == 'AUTONOMIA'
               ? 'Autonomia'
-              : 'Próxima melhor ação',
+              : proxima.fonte == 'IA'
+                  ? 'Sugestão IA'
+                  : 'Próxima melhor ação',
   'acao': proxima.acao,
   'motivo': proxima.motivo,
   'fonte': proxima.fonte,
   'prioridade': proxima.prioridade,
 };
+
+Map<String, dynamic> copilotActionFromIa(Map<String, dynamic> action) {
+  final acao =
+      (action['acao'] ?? action['mensagem'] ?? action['descricao'] ?? '')
+          .toString();
+  return {
+    'titulo': 'Sugestão IA',
+    'acao': acao,
+    'motivo':
+        (action['motivo'] ?? 'Gerado com base nos sinais atuais do aluno.')
+            .toString(),
+    'fonte': 'IA',
+  };
+}
+
+/// Merges IA refresh result over Aluno 360 seed for sticky + prescription.
+ProximaAcaoResumo? resolveCopilotProximaAcaoResumo({
+  required ProximaAcaoResumo? proximaAcao360,
+  required bool forceIa,
+  required AsyncValue<Map<String, dynamic>>? iaAsync,
+}) {
+  if (forceIa && iaAsync != null) {
+    return iaAsync.maybeWhen(
+      data: (action) {
+        final acao = cleanCopilotText(
+          (action['acao'] ?? action['mensagem'] ?? action['descricao'] ?? '')
+              .toString(),
+        );
+        if (acao.isEmpty) return proximaAcao360;
+        return ProximaAcaoResumo(
+          acao: acao,
+          motivo:
+              (action['motivo'] ?? 'Gerado com base nos sinais atuais do aluno.')
+                  .toString(),
+          fonte: 'IA',
+          prioridade: 'P1',
+        );
+      },
+      orElse: () => proximaAcao360,
+    );
+  }
+  return proximaAcao360;
+}
 
 String cleanCopilotText(String value) {
   return value

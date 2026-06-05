@@ -348,6 +348,21 @@ bool shouldShowCopilotProfileGapsButton(
   return true;
 }
 
+/// Prescription block stays visible during IA refresh even if sticky matches 360.
+bool shouldShowCopilotPrescriptionBlock({
+  required bool forceIa,
+  required OperacaoStickyAction sticky,
+  required Aluno aluno,
+  String? proximaAcaoRaw,
+}) {
+  if (forceIa) return true;
+  return !shouldHideCopilotPrescriptionWhenMatchesSticky(
+    sticky: sticky,
+    aluno: aluno,
+    proximaAcaoRaw: proximaAcaoRaw,
+  );
+}
+
 /// Hide copilot prescription block when sticky already shows the same CTA.
 bool shouldHideCopilotPrescriptionWhenMatchesSticky({
   required OperacaoStickyAction sticky,
