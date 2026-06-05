@@ -147,9 +147,26 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
               )
               : null,
       body: loadingPrimary || loadingFallback
-          ? const FxLoading()
+          ? _AlunoDetailLoadingSkeleton(
+              tabController: _tabController,
+              isDark: isDark,
+              primary: primary,
+              ink: ink,
+              mute: mute,
+              line: chrome.line,
+              sheetFill: chrome.sheetFill,
+            )
           : resolvedAlunoAsync.when(
-        loading: () => const FxLoading(),
+        loading:
+            () => _AlunoDetailLoadingSkeleton(
+              tabController: _tabController,
+              isDark: isDark,
+              primary: primary,
+              ink: ink,
+              mute: mute,
+              line: chrome.line,
+              sheetFill: chrome.sheetFill,
+            ),
         error:
             (e, _) => _AlunoDetailErrorState(
               message: friendlyError(

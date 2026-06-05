@@ -72,6 +72,10 @@ void main() {
     expect(screen, contains('class _AlunoDetailEvolucaoTab'));
     expect(screen, contains('class _AlunoDetailFerramentasTab'));
     expect(screen, contains('FxLoading.sectionShimmer'));
+    expect(screen, contains('class _AlunoDetailLoadingSkeleton'));
+    expect(screen, contains('aluno360_hero_skeleton'));
+    expect(screen, contains('_collapsedLines = 3'));
+    expect(screen, contains('Ver mais'));
     expect(screen, contains('alunoCopilotoForceIaProvider'));
     expect(screen, contains('proximaAcao360'));
     expect(screen, contains('/financeiro?alunoId='));

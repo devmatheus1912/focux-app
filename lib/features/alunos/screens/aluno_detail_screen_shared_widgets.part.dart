@@ -115,7 +115,7 @@ class _Aluno360SignalTile extends StatelessWidget {
   }
 }
 
-class _CopilotPrescription extends StatelessWidget {
+class _CopilotPrescription extends StatefulWidget {
   final String title;
   final String action;
   final String reason;
@@ -129,51 +129,88 @@ class _CopilotPrescription extends StatelessWidget {
   });
 
   @override
+  State<_CopilotPrescription> createState() => _CopilotPrescriptionState();
+}
+
+class _CopilotPrescriptionState extends State<_CopilotPrescription> {
+  static const _collapsedLines = 3;
+  bool _expanded = false;
+
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.auto_awesome, color: color, size: 17),
-            const SizedBox(width: 7),
-            Expanded(
-              child: Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: color,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
+    final reason = widget.reason.trim();
+    final showExpand = reason.length > 72;
+
+    return Semantics(
+      label:
+          '${widget.title}. ${widget.action}. $reason'
+          '${showExpand && !_expanded ? '. Toque para ver texto completo' : ''}',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.auto_awesome, color: widget.color, size: 17),
+              const SizedBox(width: 7),
+              Expanded(
+                child: Text(
+                  widget.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: widget.color,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 7),
-        Text(
-          action,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: ink,
-            fontSize: 14,
-            fontWeight: FontWeight.w800,
-            height: 1.28,
+            ],
           ),
-        ),
-        const SizedBox(height: 5),
-        Text(
-          reason,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: mute, fontSize: 12, height: 1.25),
-        ),
-      ],
+          const SizedBox(height: 7),
+          Text(
+            widget.action,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: ink,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              height: 1.28,
+            ),
+          ),
+          if (reason.isNotEmpty) ...[
+            const SizedBox(height: 5),
+            GestureDetector(
+              onTap:
+                  showExpand
+                      ? () => setState(() => _expanded = !_expanded)
+                      : null,
+              behavior: HitTestBehavior.opaque,
+              child: Text(
+                reason,
+                maxLines: _expanded ? null : _collapsedLines,
+                overflow: _expanded ? null : TextOverflow.ellipsis,
+                style: TextStyle(color: mute, fontSize: 12, height: 1.25),
+              ),
+            ),
+            if (showExpand && !_expanded)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  'Ver mais',
+                  style: TextStyle(
+                    color: widget.color,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+          ],
+        ],
+      ),
     );
   }
 }
@@ -636,6 +673,191 @@ class _Aluno360ActionEmptyPanel extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _AlunoDetailLoadingSkeleton extends StatelessWidget {
+  const _AlunoDetailLoadingSkeleton({
+    required this.tabController,
+    required this.isDark,
+    required this.primary,
+    required this.ink,
+    required this.mute,
+    required this.line,
+    required this.sheetFill,
+  });
+
+  final TabController tabController;
+  final bool isDark;
+  final Color primary;
+  final Color ink;
+  final Color mute;
+  final Color line;
+  final Color sheetFill;
+
+  @override
+  Widget build(BuildContext context) {
+    final heroExpandedHeight = Aluno360Layout.heroExpandedHeight(context);
+
+    return CustomScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      slivers: [
+        SliverAppBar(
+          expandedHeight: heroExpandedHeight,
+          pinned: true,
+          backgroundColor: sheetFill,
+          surfaceTintColor: sheetFill,
+          elevation: 0,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 4),
+            child: IconButton(
+              tooltip: 'Voltar',
+              onPressed: () => safePopOrGo(context, '/alunos'),
+              icon: Container(
+                width: 38,
+                height: 38,
+                decoration: ShellChrome.of(context).headerAction(radius: 12),
+                child: Icon(Icons.arrow_back_ios_new, size: 16, color: ink),
+              ),
+            ),
+          ),
+          flexibleSpace: FlexibleSpaceBar(
+            collapseMode: CollapseMode.parallax,
+            background: Padding(
+              padding: EdgeInsets.fromLTRB(
+                TokensStrip.s4,
+                MediaQuery.paddingOf(context).top + kToolbarHeight + 2,
+                TokensStrip.s4,
+                4,
+              ),
+              child: Semantics(
+                label: 'Carregando perfil do aluno',
+                child: _AlunoDetailHeroSkeleton(isDark: isDark, primary: primary),
+              ),
+            ),
+          ),
+          actions: [
+            IconButton(
+              onPressed: null,
+              icon: Icon(Icons.more_horiz_rounded, color: ink.withValues(alpha: 0.45)),
+            ),
+            const ShellThemeToggle(size: 38),
+            const SizedBox(width: 8),
+          ],
+        ),
+        SliverPersistentHeader(
+          pinned: true,
+          delegate: _AlunoDetailTabBarDelegate(
+            tabController: tabController,
+            primary: primary,
+            mute: mute,
+            line: line,
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              Aluno360Layout.screenPadding,
+              Aluno360Layout.sectionGap,
+              Aluno360Layout.screenPadding,
+              24,
+            ),
+            child: Column(
+              children: [
+                Semantics(
+                  label: 'Carregando follow-up',
+                  child: FxLoading.sectionShimmer(context, height: 168),
+                ),
+                const SizedBox(height: Aluno360Layout.sectionGap),
+                Semantics(
+                  label: 'Carregando status operacional',
+                  child: FxLoading.sectionShimmer(context, height: 248),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AlunoDetailHeroSkeleton extends StatelessWidget {
+  const _AlunoDetailHeroSkeleton({
+    required this.isDark,
+    required this.primary,
+  });
+
+  final bool isDark;
+  final Color primary;
+
+  @override
+  Widget build(BuildContext context) {
+    final base =
+        isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : primary.withValues(alpha: 0.12);
+    final highlight =
+        isDark
+            ? Colors.white.withValues(alpha: 0.22)
+            : primary.withValues(alpha: 0.22);
+
+    Widget bone(double w, double h, {double radius = 12}) => Container(
+      width: w,
+      height: h,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(radius),
+      ),
+    );
+
+    return Shimmer.fromColors(
+      baseColor: base,
+      highlightColor: highlight,
+      child: Container(
+        key: const ValueKey('aluno360_hero_skeleton'),
+        width: double.infinity,
+        height: Aluno360Layout.heroBodyHeight(context),
+        padding: const EdgeInsets.fromLTRB(11, 8, 11, 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          color: Colors.white.withValues(alpha: isDark ? 0.06 : 0.35),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            bone(52, 52, radius: 26),
+            const SizedBox(width: 9),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: bone(120, 16, radius: 8)),
+                      const SizedBox(width: 8),
+                      bone(64, 22, radius: 11),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  bone(double.infinity, 28, radius: 10),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(child: bone(80, 10, radius: 6)),
+                      const SizedBox(width: 12),
+                      bone(48, 22, radius: 8),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  bone(160, 10, radius: 6),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
