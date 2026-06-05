@@ -42,11 +42,13 @@ class CopilotPrescriptionContent {
     required this.title,
     required this.action,
     required this.reason,
+    this.fullAction,
   });
 
   final String title;
   final String action;
   final String reason;
+  final String? fullAction;
 }
 
 int copilotProfileCompletion(Aluno aluno) {
@@ -219,7 +221,7 @@ String copilotCardSubtitle({
     return iaAsync.when(
       loading: () => 'Gerando sugestão com IA…',
       error: (_, __) => 'Sugestão do Aluno 360 · IA indisponível agora',
-      data: (_) => 'Atualizado com IA · toque ↻ para regenerar',
+      data: (_) => 'Atualizado com IA · toque em atualizar para regenerar',
     );
   }
   if (resumoLoading) return 'Carregando sinais do perfil…';
@@ -250,6 +252,43 @@ String copilotDisplayAction(Aluno aluno, String acao) {
   }
   if (normalized.length <= 140 && normalized.isNotEmpty) return normalized;
   return 'Retomar contato e ajustar plano com base na resposta.';
+}
+
+bool copilotAcaoMencionaWearable(String acao) {
+  final lower = normalizeIaCopilotAcao(acao).toLowerCase();
+  return lower.contains('wearable') ||
+      lower.contains('apple health') ||
+      lower.contains('google fit') ||
+      lower.contains('sincroniz') ||
+      lower.contains('garmin') ||
+      lower.contains('terra');
+}
+
+String copilotPrescriptionFullAction(Aluno aluno, String rawAcao) {
+  final normalized = normalizeIaCopilotAcao(rawAcao);
+  if (normalized.isNotEmpty) return normalized;
+  return copilotDisplayAction(aluno, rawAcao);
+}
+
+String copilotPrescriptionDisplayAction(Aluno aluno, String rawAcao) {
+  final full = copilotPrescriptionFullAction(aluno, rawAcao);
+  final lower = full.toLowerCase();
+
+  if (acaoSugereChat(full) && copilotAcaoMencionaWearable(full)) {
+    return 'Retomar contato e pedir sync do wearable.';
+  }
+  if (acaoSugereChat(full)) {
+    if (full.length <= 88) return full;
+    if (lower.contains('reaviv') || lower.contains('aderência') || lower.contains('aderencia')) {
+      return 'Retomar contato · mensagem curta para reengajar.';
+    }
+    return '${copilotChatActionLabel(full)} · mensagem objetiva e direta.';
+  }
+
+  final templated = copilotDisplayAction(aluno, rawAcao);
+  if (templated != full && full.length > 88) return templated;
+  if (full.length <= 96) return full;
+  return templated;
 }
 
 const _stickyLabelMax = 32;
@@ -425,11 +464,14 @@ CopilotPrescriptionContent resolveCopilotPrescriptionFromAction(
   final motivoRaw = (action['motivo'] ?? 'Baseado nos sinais atuais.')
       .toString();
   final isIa = (action['fonte'] ?? '').toString().toUpperCase() == 'IA';
+  final fullAction = copilotPrescriptionFullAction(aluno, rawAcao);
+  final displayAction = copilotPrescriptionDisplayAction(aluno, rawAcao);
   return CopilotPrescriptionContent(
     title:
         (action['titulo'] ?? action['tipo'] ?? 'Próxima melhor ação')
             .toString(),
-    action: copilotDisplayAction(aluno, rawAcao),
+    action: displayAction,
+    fullAction: fullAction == displayAction ? null : fullAction,
     reason: isIa ? formatCopilotIaMotivo(motivoRaw) : motivoRaw,
   );
 }

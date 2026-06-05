@@ -220,7 +220,7 @@ void main() {
           iaAsync: const AsyncValue.data({'acao': 'Teste'}),
           resumoLoading: false,
         ),
-        'Atualizado com IA · toque ↻ para regenerar',
+        'Atualizado com IA · toque em atualizar para regenerar',
       );
     });
 
@@ -233,6 +233,38 @@ void main() {
         ),
         'Sugestão com base no perfil de hoje.',
       );
+    });
+  });
+
+  group('copilotPrescriptionDisplayAction', () {
+    test('shortens contact plus wearable IA paragraph', () {
+      final aluno = _aluno();
+      const raw =
+          'Entre em contato com Beatriz Carvalho para reavivar o interesse no treinamento e solicitar a sincronização dos dados do wearable.';
+      expect(
+        copilotPrescriptionDisplayAction(aluno, raw),
+        'Retomar contato e pedir sync do wearable.',
+      );
+      expect(
+        copilotPrescriptionFullAction(aluno, raw),
+        contains('Beatriz Carvalho'),
+      );
+    });
+
+    test('resolveCopilotPrescriptionFromAction keeps full IA text for expand', () {
+      final aluno = _aluno();
+      const raw =
+          'Entre em contato com Beatriz Carvalho para reavivar o interesse no treinamento e solicitar a sincronização dos dados do wearable.';
+      final content = resolveCopilotPrescriptionFromAction(
+        aluno,
+        copilotActionFromIa(const {
+          'acao': raw,
+          'motivo': 'Última atividade há 999 dia(s), aderência de 0%',
+        }),
+        'fallback',
+      );
+      expect(content.action, 'Retomar contato e pedir sync do wearable.');
+      expect(content.fullAction, contains('sincronização'));
     });
   });
 

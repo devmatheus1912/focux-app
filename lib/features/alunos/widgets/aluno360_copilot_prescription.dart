@@ -17,6 +17,7 @@ class Aluno360CopilotPrescription extends StatefulWidget {
     required this.action,
     required this.reason,
     required this.color,
+    this.fullAction,
     this.isIaSuggestion = false,
   });
 
@@ -24,6 +25,7 @@ class Aluno360CopilotPrescription extends StatefulWidget {
   final String action;
   final String reason;
   final Color color;
+  final String? fullAction;
   final bool isIaSuggestion;
 
   @override
@@ -43,12 +45,15 @@ class _Aluno360CopilotPrescriptionState
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final caption = isDark ? EagleTokens.darkInkMute : const Color(0xFF475569);
     final reason = widget.reason.trim();
-    final showExpandAction = widget.action.trim().length > 72;
+    final expandedActionText = widget.fullAction ?? widget.action;
+    final showExpandAction =
+        expandedActionText.trim() != widget.action.trim() ||
+        expandedActionText.trim().length > 72;
     final showExpandReason = reason.length > 72;
 
     return Semantics(
       label:
-          '${widget.title}. ${widget.action}. $reason'
+          '${widget.title}. ${expandedActionText}. $reason'
           '${showExpandAction && !_expandedAction ? '. Toque para ver ação completa' : ''}'
           '${showExpandReason && !_expandedReason ? '. Toque para ver contexto completo' : ''}',
       child: Column(
@@ -81,8 +86,8 @@ class _Aluno360CopilotPrescriptionState
                     : null,
             behavior: HitTestBehavior.opaque,
             child: Text(
-              widget.action,
-              maxLines: _expandedAction ? null : _collapsedLines,
+              _expandedAction ? expandedActionText : widget.action,
+              maxLines: _expandedAction ? null : 2,
               overflow: _expandedAction ? null : TextOverflow.ellipsis,
               style: TextStyle(
                 color: ink,
@@ -308,6 +313,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
     return Aluno360CopilotPrescription(
       title: content.title,
       action: content.action,
+      fullAction: content.fullAction,
       reason: content.reason,
       color: primary,
       isIaSuggestion: isIaSuggestion,
