@@ -34,6 +34,7 @@ import '../constants/aluno_360_layout.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../utils/aluno_display_utils.dart';
 import '../widgets/aluno_detail_hero_card.dart';
+import '../widgets/aluno_operacao_adherence_bars.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
 part 'aluno_detail_screen_hero.part.dart';

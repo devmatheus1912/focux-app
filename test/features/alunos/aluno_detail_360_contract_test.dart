@@ -58,6 +58,8 @@ void main() {
     expect(screen, contains('Próximo contato:'));
     expect(screen, contains('alunoOperacaoFocusModeProvider'));
     expect(screen, contains('resolveOperacaoStickyAction'));
+    expect(screen, contains('resolveOperacaoDominantMetric'));
+    expect(screen, contains('_OperacaoFocusModeToggle'));
     expect(screen, contains('Sugestão offline'));
     expect(screen, contains('invalidateAluno360Providers'));
     expect(screen, contains('alunoPesoHistoricoProvider'));
@@ -65,8 +67,8 @@ void main() {
     expect(screen, contains('AnimatedSwitcher'));
     expect(screen, contains('hasOpenCopilotTask'));
     expect(screen, contains('hidePrimaryCta'));
-    expect(screen, contains('class _AdherenceWeekBars'));
-    expect(screen, contains('Sem check-ins'));
+    expect(screen, contains('AlunoOperacaoAdherenceBars'));
+    expect(screen, contains('summarizeAderenciaWeek'));
     expect(screen, contains('class _WeightTrendSparkline'));
     expect(screen, contains('FxSparkline'));
     expect(screen, contains('formatAlturaDisplay'));
