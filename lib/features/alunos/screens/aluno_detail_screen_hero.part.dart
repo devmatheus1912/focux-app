@@ -134,7 +134,10 @@ class _QuickActionPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return Semantics(
+      button: true,
+      label: label,
+      child: InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
       child: Container(
@@ -164,6 +167,7 @@ class _QuickActionPill extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

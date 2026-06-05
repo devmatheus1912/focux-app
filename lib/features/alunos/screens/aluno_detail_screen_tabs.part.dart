@@ -93,7 +93,7 @@ class _AlunoDetailTabBarDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
-class _AlunoDetailOperacaoTab extends StatelessWidget {
+class _AlunoDetailOperacaoTab extends ConsumerWidget {
   const _AlunoDetailOperacaoTab({
     super.key,
     required this.aluno,
@@ -102,6 +102,7 @@ class _AlunoDetailOperacaoTab extends StatelessWidget {
     required this.primary,
     required this.proximaAcao360,
     required this.hasOpenCopilotTask360,
+    required this.aderenciaSemanal,
     required this.recoveryAsync,
     required this.autonomiaResumoAsync,
     required this.animateEntrance,
@@ -117,6 +118,7 @@ class _AlunoDetailOperacaoTab extends StatelessWidget {
   final Color primary;
   final ProximaAcaoResumo? proximaAcao360;
   final bool hasOpenCopilotTask360;
+  final List<Map<String, dynamic>>? aderenciaSemanal;
   final AsyncValue<RecoverySnapshot?> recoveryAsync;
   final AsyncValue<AlunoAutonomiaResumo> autonomiaResumoAsync;
   final bool animateEntrance;
@@ -126,13 +128,78 @@ class _AlunoDetailOperacaoTab extends StatelessWidget {
   final VoidCallback onEvolve;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final financeRisk =
         aluno.statusFinanceiro == 'INADIMPLENTE' || aluno.inadimplente;
+    final focusMode = ref.watch(alunoOperacaoFocusModeProvider(alunoId));
+    final ink = fxScreenInk(context);
+
+    Widget focusToggle() {
+      return Align(
+        alignment: Alignment.centerRight,
+        child: Semantics(
+          button: true,
+          label:
+              focusMode
+                  ? 'Desativar modo foco'
+                  : 'Ativar modo foco — mostra só follow-up e copiloto',
+          child: FilterChip(
+            selected: focusMode,
+            showCheckmark: false,
+            avatar: Icon(
+              focusMode ? Icons.center_focus_strong : Icons.center_focus_weak,
+              size: 16,
+              color: focusMode ? primary : ink.withValues(alpha: 0.7),
+            ),
+            label: Text(
+              focusMode ? 'Modo foco' : 'Ver diagnóstico completo',
+              style: TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w800,
+                color: focusMode ? primary : ink.withValues(alpha: 0.85),
+              ),
+            ),
+            onSelected:
+                (selected) =>
+                    ref
+                        .read(alunoOperacaoFocusModeProvider(alunoId).notifier)
+                        .state = selected,
+            selectedColor: primary.withValues(alpha: 0.12),
+            side: BorderSide(color: primary.withValues(alpha: 0.22)),
+          ),
+        ),
+      );
+    }
+
+    Widget operationalSection() {
+      return _AlunoOperationalStatusSection(
+        aluno: aluno,
+        isDark: isDark,
+        primary: primary,
+        aderenciaSemanal: aderenciaSemanal,
+      );
+    }
+
+    Widget copilotSection() {
+      return _Aluno360CopilotCard(
+        aluno: aluno,
+        resumoAsync: autonomiaResumoAsync,
+        proximaAcao360: proximaAcao360,
+        hasOpenCopilotTask360: hasOpenCopilotTask360,
+        isDark: isDark,
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _Aluno360Entrance(
+          enabled: animateEntrance,
+          delay: Duration.zero,
+          onPlayed: onEntrancePlayed,
+          child: focusToggle(),
+        ),
+        const SizedBox(height: Aluno360Layout.sectionGap),
         if (financeRisk) ...[
           _Aluno360Entrance(
             enabled: animateEntrance,
@@ -149,55 +216,80 @@ class _AlunoDetailOperacaoTab extends StatelessWidget {
           child: _AlunoFollowUpCard(aluno: aluno, isDark: isDark),
         ),
         const SizedBox(height: Aluno360Layout.sectionGap),
-        _Aluno360Entrance(
-          enabled: animateEntrance,
-          delay: Duration(milliseconds: financeRisk ? 80 : 40),
-          onPlayed: onEntrancePlayed,
-          child: _AlunoOperationalStatusSection(
-            alunoId: alunoId,
-            aluno: aluno,
-            isDark: isDark,
-            primary: primary,
+        if (!focusMode) ...[
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final wide = constraints.maxWidth >= 600;
+              if (wide) {
+                return _Aluno360Entrance(
+                  enabled: animateEntrance,
+                  delay: Duration(milliseconds: financeRisk ? 80 : 40),
+                  onPlayed: onEntrancePlayed,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: operationalSection()),
+                      const SizedBox(width: Aluno360Layout.sectionGap),
+                      Expanded(child: copilotSection()),
+                    ],
+                  ),
+                );
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _Aluno360Entrance(
+                    enabled: animateEntrance,
+                    delay: Duration(milliseconds: financeRisk ? 80 : 40),
+                    onPlayed: onEntrancePlayed,
+                    child: operationalSection(),
+                  ),
+                  const SizedBox(height: Aluno360Layout.sectionGap),
+                  _Aluno360Entrance(
+                    enabled: animateEntrance,
+                    delay: Duration(milliseconds: financeRisk ? 120 : 80),
+                    onPlayed: onEntrancePlayed,
+                    child: copilotSection(),
+                  ),
+                ],
+              );
+            },
           ),
-        ),
-        const SizedBox(height: Aluno360Layout.sectionGap),
-        _Aluno360Entrance(
-          enabled: animateEntrance,
-          delay: Duration(milliseconds: financeRisk ? 120 : 80),
-          onPlayed: onEntrancePlayed,
-          child: _Aluno360CopilotCard(
-            aluno: aluno,
-            resumoAsync: autonomiaResumoAsync,
-            proximaAcao360: proximaAcao360,
-            hasOpenCopilotTask360: hasOpenCopilotTask360,
-            isDark: isDark,
+        ] else ...[
+          _Aluno360Entrance(
+            enabled: animateEntrance,
+            delay: Duration(milliseconds: financeRisk ? 80 : 40),
+            onPlayed: onEntrancePlayed,
+            child: copilotSection(),
           ),
-        ),
-        const SizedBox(height: Aluno360Layout.sectionGap),
-        _Aluno360Entrance(
-          enabled: animateEntrance,
-          delay: Duration(milliseconds: financeRisk ? 160 : 120),
-          onPlayed: onEntrancePlayed,
-          child: _AlunoRecoveryInsightCard(
-            recoveryAsync: recoveryAsync,
-            isDark: isDark,
-            primary: primary,
+        ],
+        if (!focusMode) ...[
+          const SizedBox(height: Aluno360Layout.sectionGap),
+          _Aluno360Entrance(
+            enabled: animateEntrance,
+            delay: Duration(milliseconds: financeRisk ? 160 : 120),
+            onPlayed: onEntrancePlayed,
+            child: _AlunoRecoveryInsightCard(
+              recoveryAsync: recoveryAsync,
+              isDark: isDark,
+              primary: primary,
+            ),
           ),
-        ),
-        const SizedBox(height: Aluno360Layout.sectionGap),
-        _Aluno360Entrance(
-          enabled: animateEntrance,
-          delay: Duration(milliseconds: financeRisk ? 200 : 160),
-          onPlayed: onEntrancePlayed,
-          child: _StudentQuickActions(
-            aluno: aluno,
-            isDark: isDark,
-            primary: primary,
-            onPassword: onPassword,
-            onEdit: onEdit,
-            onEvolve: onEvolve,
+          const SizedBox(height: Aluno360Layout.sectionGap),
+          _Aluno360Entrance(
+            enabled: animateEntrance,
+            delay: Duration(milliseconds: financeRisk ? 200 : 160),
+            onPlayed: onEntrancePlayed,
+            child: _StudentQuickActions(
+              aluno: aluno,
+              isDark: isDark,
+              primary: primary,
+              onPassword: onPassword,
+              onEdit: onEdit,
+              onEvolve: onEvolve,
+            ),
           ),
-        ),
+        ],
       ],
     );
   }
@@ -331,12 +423,14 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
     required this.aluno,
     required this.alunoId,
     required this.proximaAcao360,
+    required this.hasOpenCopilotTask360,
     required this.isDark,
   });
 
   final Aluno aluno;
   final int alunoId;
   final ProximaAcaoResumo? proximaAcao360;
+  final bool hasOpenCopilotTask360;
   final bool isDark;
 
   @override
@@ -344,8 +438,6 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final line = ShellChrome.of(context).line;
     final creating = ref.watch(alunoCopilotCreatingProvider(alunoId));
-    final aluno360Async = ref.watch(aluno360Provider(alunoId));
-    final hasOpenFrom360 = aluno360Async.valueOrNull?.hasOpenCopilotTask ?? false;
     final openActionsAsync = ref.watch(alunoOpenIaActionsProvider(alunoId));
     FilaAcaoResumo? existingOpenTask;
     for (final item in openActionsAsync.valueOrNull ?? const <FilaAcaoResumo>[]) {
@@ -364,14 +456,6 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
         aluno.followUpDate != null &&
         !aluno.followUpDate!.isAfter(DateTime.now());
 
-    final acao360 = proximaAcao360?.acao.trim() ?? '';
-    final lower = acao360.toLowerCase();
-    final preferChat =
-        followUpDue ||
-        lower.contains('contato') ||
-        lower.contains('chat') ||
-        lower.contains('mensagem');
-
     void openChat() {
       context.push('/alunos/$alunoId/chat', extra: aluno.nome);
     }
@@ -380,23 +464,20 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
       context.push('/dashboard/command-center/copiloto');
     }
 
-    final hasOpenTask = existingOpenTask != null || hasOpenFrom360;
-    final primaryLabel =
-        hasOpenTask
-            ? 'Ver tarefa'
-            : preferChat
-                ? 'Abrir chat'
-                : 'Ver tarefa';
-    final primaryIcon =
-        hasOpenTask || !preferChat
-            ? Icons.open_in_new_rounded
-            : Icons.chat_bubble_outline_rounded;
+    final hasOpenTask = existingOpenTask != null || hasOpenCopilotTask360;
+    final sticky = resolveOperacaoStickyAction(
+      proximaAcao: proximaAcao360,
+      hasOpenTask: hasOpenTask,
+      followUpDue: followUpDue,
+    );
     final VoidCallback onPrimary =
         hasOpenTask
             ? openCommandCenter
-            : preferChat
+            : sticky.isChatAction
                 ? openChat
                 : openCommandCenter;
+    final showSecondaryChat =
+        !hasOpenTask && !sticky.isChatAction && sticky.label != 'Abrir chat';
 
     return SafeArea(
       top: false,
@@ -422,17 +503,17 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
             Expanded(
               child: Semantics(
                 button: true,
-                label: primaryLabel,
+                label: sticky.label,
                 child: FxLiquidPrimaryButton(
-                icon: primaryIcon,
-                label: primaryLabel,
+                icon: sticky.icon,
+                label: sticky.label,
                 loading: creating,
                 loadingLabel: 'Criando…',
                 onPressed: creating ? null : onPrimary,
                 ),
               ),
             ),
-            if (!preferChat && !hasOpenTask) ...[
+            if (showSecondaryChat) ...[
               const SizedBox(width: 8),
               Semantics(
                 button: true,

@@ -1,6 +1,6 @@
 ﻿part of 'aluno_detail_screen.dart';
 
-class _AlunoRecoveryInsightCard extends StatelessWidget {
+class _AlunoRecoveryInsightCard extends StatefulWidget {
   const _AlunoRecoveryInsightCard({
     required this.recoveryAsync,
     required this.isDark,
@@ -12,12 +12,22 @@ class _AlunoRecoveryInsightCard extends StatelessWidget {
   final Color primary;
 
   @override
+  State<_AlunoRecoveryInsightCard> createState() =>
+      _AlunoRecoveryInsightCardState();
+}
+
+class _AlunoRecoveryInsightCardState extends State<_AlunoRecoveryInsightCard> {
+  bool _expanded = false;
+
+  @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
-    return recoveryAsync.when(
+    final chrome = ShellChrome.forDark(widget.isDark);
+    return widget.recoveryAsync.when(
       loading: () => const SizedBox.shrink(),
       error:
-          (_, __) => Container(
+          (_, __) => Semantics(
+            label: 'Wearable indisponível',
+            child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: chrome.panel(radius: TokensStrip.rCard),
             child: Row(
@@ -37,38 +47,71 @@ class _AlunoRecoveryInsightCard extends StatelessWidget {
               ],
             ),
           ),
+          ),
       data: (snapshot) {
         if (snapshot == null) {
-          return Container(
-            padding: const EdgeInsets.all(14),
-            decoration: chrome.panel(radius: TokensStrip.rCard),
-            child: Row(
-              children: [
-                Icon(Icons.watch_outlined, color: primary, size: 18),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'Sem dados de wearable hoje — peça ao aluno conectar Apple Health ou Google Fit.',
-                    style: TextStyle(
-                      color: chrome.mute,
-                      fontSize: 12.5,
-                      height: 1.35,
-                    ),
+          return Semantics(
+            button: true,
+            label:
+                _expanded
+                    ? 'Recolher wearable sem dados'
+                    : 'Wearable sem dados — toque para expandir',
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => setState(() => _expanded = !_expanded),
+                borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: chrome.panel(radius: TokensStrip.rCard),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.watch_outlined,
+                        color: widget.primary.withValues(alpha: 0.75),
+                        size: 18,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _expanded
+                              ? 'Sem dados de wearable hoje — peça ao aluno conectar Apple Health ou Google Fit.'
+                              : 'Wearable · sem dados hoje',
+                          style: TextStyle(
+                            color: chrome.mute,
+                            fontSize: 12.5,
+                            height: 1.35,
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        _expanded
+                            ? Icons.expand_less_rounded
+                            : Icons.expand_more_rounded,
+                        color: chrome.mute,
+                        size: 20,
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
           );
         }
-        return Container(
+        return Semantics(
+          label: 'Prontidão wearable ${snapshot.recoveryLabel}',
+          child: Container(
           padding: const EdgeInsets.all(TokensStrip.s4),
           decoration: chrome.panel(
             radius: TokensStrip.rCard,
-            accent: primary,
+            accent: widget.primary,
           ),
           child: Row(
               children: [
-                RecoveryScoreRing(score: snapshot.recoveryScore, color: primary),
+                RecoveryScoreRing(
+                  score: snapshot.recoveryScore,
+                  color: widget.primary,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -107,6 +150,7 @@ class _AlunoRecoveryInsightCard extends StatelessWidget {
                 ),
               ],
             ),
+        ),
         );
       },
     );

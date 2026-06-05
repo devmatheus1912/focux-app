@@ -55,7 +55,9 @@ void main() {
     expect(screen, contains('class _AlunoOperationalStatusSection'));
     expect(screen, contains('Status operacional'));
     expect(screen, contains('Índice operacional'));
-    expect(screen, contains('Use estes sinais para decidir o próximo contato'));
+    expect(screen, contains('Próximo contato:'));
+    expect(screen, contains('alunoOperacaoFocusModeProvider'));
+    expect(screen, contains('resolveOperacaoStickyAction'));
     expect(screen, contains('Sugestão offline'));
     expect(screen, contains('invalidateAluno360Providers'));
     expect(screen, contains('alunoPesoHistoricoProvider'));

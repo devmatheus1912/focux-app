@@ -143,7 +143,7 @@ void main() {
       expect(find.text('Status operacional'), findsOneWidget);
       expect(find.byType(OperationalMetricTile), findsWidgets);
       expect(find.byKey(const ValueKey('aluno360_operacao_sticky_cta')), findsOneWidget);
-      expect(find.text('Abrir chat'), findsWidgets);
+      expect(find.text('Enviar mensagem de follow-up'), findsWidgets);
       if (scale == 1.0) {
         expect(tester.takeException(), isNull);
       }

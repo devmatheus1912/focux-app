@@ -2,20 +2,27 @@
 
 class _AlunoOperationalStatusSection extends ConsumerWidget {
   const _AlunoOperationalStatusSection({
-    required this.alunoId,
     required this.aluno,
     required this.isDark,
     required this.primary,
+    required this.aderenciaSemanal,
   });
 
-  final int alunoId;
   final Aluno aluno;
   final bool isDark;
   final Color primary;
+  final List<Map<String, dynamic>>? aderenciaSemanal;
 
-  List<double> _aderenciaSparkline(List<Map<String, dynamic>> raw) {
+  List<({double checkins, String? date})> _aderenciaPoints(
+    List<Map<String, dynamic>> raw,
+  ) {
     return raw
-        .map((point) => (point['checkins'] as num?)?.toDouble() ?? 0)
+        .map(
+          (point) => (
+            checkins: (point['checkins'] as num?)?.toDouble() ?? 0,
+            date: point['data'] as String?,
+          ),
+        )
         .toList();
   }
 
@@ -23,10 +30,13 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
-    final aderenciaAsync = ref.watch(alunoAderenciaSemanalProvider(alunoId));
-    final sparklineData = aderenciaAsync.valueOrNull == null
-        ? const <double>[]
-        : _aderenciaSparkline(aderenciaAsync.valueOrNull!);
+    final configAsync = ref.watch(alertasConfigProvider);
+    final diasLimite =
+        configAsync.valueOrNull?.diasSemTreino ??
+        AlunoFollowUpStore.diasSemTreinoLimite;
+    final points =
+        aderenciaSemanal == null ? const <({double checkins, String? date})>[]
+            : _aderenciaPoints(aderenciaSemanal!);
     final aderenciaColor = EagleTokens.aderenciaColor(
       (aluno.aderenciaPercent ?? 0).toDouble(),
       isDark: isDark,
@@ -36,6 +46,10 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
             ? (isDark ? const Color(0xFFFFB77A) : EagleTokens.warn)
             : (isDark ? const Color(0xFF6FE296) : EagleTokens.good);
     final proximoContato = formatProximoContato(aluno);
+    final neutralIdle =
+        isDark
+            ? const Color(0xFF374151).withValues(alpha: 0.35)
+            : const Color(0xFFE5E7EB);
 
     return Container(
       key: const ValueKey('aluno360_operacao_status'),
@@ -64,10 +78,42 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Use estes sinais para decidir o próximo contato',
+            'Próximo contato: $proximoContato',
             style: Aluno360Layout.captionStyle(context),
           ),
           const SizedBox(height: 12),
+          OperationalMetricTile(
+            label:
+                aluno.emRisco
+                    ? 'Foco do dia'
+                    : aluno.aderenciaPercent != null
+                        ? 'Aderência semanal'
+                        : 'Prontidão',
+            value:
+                aluno.emRisco
+                    ? formatRiscoNivel(aluno.riscoNivel)
+                    : aluno.aderenciaPercent != null
+                        ? '${aluno.aderenciaPercent}%'
+                        : aluno.scoreProntidao == null
+                            ? '—'
+                            : '${aluno.scoreProntidao}',
+            hint:
+                aluno.emRisco
+                    ? 'Em risco · priorize contato'
+                    : aluno.aderenciaPercent != null
+                        ? 'Métrica dominante da semana'
+                        : 'Índice operacional',
+            color: aluno.emRisco ? riscoColor : aderenciaColor,
+            isDark: isDark,
+            leadingIcon: aluno.emRisco ? riscoMetricIcon(aluno.riscoNivel) : null,
+            semanticsLabel:
+                aluno.emRisco
+                    ? 'Risco ${formatRiscoNivel(aluno.riscoNivel)}'
+                    : aluno.aderenciaPercent != null
+                        ? 'Aderência ${aluno.aderenciaPercent} por cento'
+                        : 'Prontidão ${aluno.scoreProntidao ?? 'indisponível'}',
+          ),
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
@@ -96,7 +142,9 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
                   color: aderenciaColor,
                   isDark: isDark,
                   semanticsLabel:
-                      'Aderência ${aluno.aderenciaPercent ?? 'indisponível'} por cento',
+                      aluno.aderenciaPercent == null
+                          ? 'Aderência indisponível'
+                          : 'Aderência ${aluno.aderenciaPercent} por cento',
                 ),
               ),
             ],
@@ -113,13 +161,14 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
                           : '${aluno.diasSemTreino}d',
                   hint: 'Dias parados',
                   color:
-                      (aluno.diasSemTreino ?? 0) >=
-                              AlunoFollowUpStore.diasSemTreinoLimite
+                      (aluno.diasSemTreino ?? 0) >= diasLimite
                           ? EagleTokens.warn
                           : mute,
                   isDark: isDark,
                   semanticsLabel:
-                      'Sem treino ${aluno.diasSemTreino ?? 'indisponível'} dias',
+                      aluno.diasSemTreino == null
+                          ? 'Sem treino indisponível'
+                          : 'Sem treino ${aluno.diasSemTreino} dias',
                 ),
               ),
               const SizedBox(width: 8),
@@ -137,19 +186,7 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          OperationalMetricTile(
-            label: 'Contato',
-            value: proximoContato,
-            hint: 'Próximo follow-up',
-            color: primary,
-            isDark: isDark,
-            semanticsLabel: 'Próximo contato $proximoContato',
-          ),
-          if (aderenciaAsync.isLoading) ...[
-            const SizedBox(height: 14),
-            FxLoading.sectionShimmer(context, height: 52, showHeader: false),
-          ] else if (sparklineData.isNotEmpty) ...[
+          if (points.isNotEmpty) ...[
             const SizedBox(height: 14),
             Container(
               width: double.infinity,
@@ -176,9 +213,9 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
                         ),
                       ),
                       Text(
-                        sparklineData.every((v) => v <= 0)
+                        points.every((p) => p.checkins <= 0)
                             ? 'Sem check-ins'
-                            : '${sparklineData.fold<double>(0, (a, b) => a + b).round()} check-ins',
+                            : '${points.fold<double>(0, (a, p) => a + p.checkins).round()} check-ins',
                         style: Aluno360Layout.metaStyle(context).copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -189,9 +226,9 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
                   Semantics(
                     label: 'Check-ins dos últimos 7 dias',
                     child: _AdherenceWeekBars(
-                      checkins: sparklineData,
+                      points: points,
                       activeColor: aderenciaColor,
-                      idleColor: aderenciaColor.withValues(alpha: isDark ? 0.28 : 0.2),
+                      idleColor: neutralIdle,
                     ),
                   ),
                 ],
@@ -206,12 +243,12 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
 
 class _AdherenceWeekBars extends StatelessWidget {
   const _AdherenceWeekBars({
-    required this.checkins,
+    required this.points,
     required this.activeColor,
     required this.idleColor,
   });
 
-  final List<double> checkins;
+  final List<({double checkins, String? date})> points;
   final Color activeColor;
   final Color idleColor;
 
@@ -220,25 +257,31 @@ class _AdherenceWeekBars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final maxVal = checkins.fold<double>(
+    final maxVal = points.fold<double>(
       1,
-      (prev, v) => v > prev ? v : prev,
+      (prev, p) => p.checkins > prev ? p.checkins : prev,
     );
+    final mute = fxScreenMute(context);
+    final labelBand =
+        14.0 * MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 1.5);
 
     return SizedBox(
-      height: _barMaxHeight,
+      height: _barMaxHeight + labelBand,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          for (var i = 0; i < checkins.length; i++) ...[
+          for (var i = 0; i < points.length; i++) ...[
             if (i > 0) const SizedBox(width: 5),
             Expanded(
               child: _AdherenceWeekBar(
-                value: checkins[i],
+                value: points[i].checkins,
+                dayLabel: weekdayLetterFromIso(points[i].date),
                 maxVal: maxVal,
                 activeColor: activeColor,
                 idleColor: idleColor,
+                labelColor: mute,
                 barMaxHeight: _barMaxHeight,
+                labelBand: labelBand,
                 minFraction: _minFraction,
               ),
             ),
@@ -252,18 +295,24 @@ class _AdherenceWeekBars extends StatelessWidget {
 class _AdherenceWeekBar extends StatelessWidget {
   const _AdherenceWeekBar({
     required this.value,
+    required this.dayLabel,
     required this.maxVal,
     required this.activeColor,
     required this.idleColor,
+    required this.labelColor,
     required this.barMaxHeight,
+    required this.labelBand,
     required this.minFraction,
   });
 
   final double value;
+  final String dayLabel;
   final double maxVal;
   final Color activeColor;
   final Color idleColor;
+  final Color labelColor;
   final double barMaxHeight;
+  final double labelBand;
   final double minFraction;
 
   @override
@@ -273,23 +322,51 @@ class _AdherenceWeekBar extends StatelessWidget {
         hasActivity
             ? (value / maxVal).clamp(minFraction, 1.0)
             : minFraction;
+    final semanticsValue =
+        hasActivity
+            ? '${value.round()} check-in${value == 1 ? '' : 's'}'
+            : 'Sem check-in';
 
     return Semantics(
       label:
-          hasActivity
-              ? '${value.round()} check-in${value == 1 ? '' : 's'}'
-              : 'Sem check-in',
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
-          height: barMaxHeight * fraction,
-          decoration: BoxDecoration(
-            color: hasActivity ? activeColor : idleColor,
-            borderRadius: BorderRadius.circular(4),
+          dayLabel.isEmpty
+              ? semanticsValue
+              : '$dayLabel · $semanticsValue',
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          SizedBox(
+            height: barMaxHeight,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                height: barMaxHeight * fraction,
+                decoration: BoxDecoration(
+                  color: hasActivity ? activeColor : idleColor,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
           ),
-        ),
+          SizedBox(
+            height: labelBand,
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  dayLabel,
+                  style: TextStyle(
+                    color: labelColor,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../data/aluno_contact_utils.dart';
 import '../data/aluno_followup_store.dart';
 import '../data/aluno_repository.dart';
 
@@ -68,6 +69,13 @@ AlunoHeroPrimarySignal alunoHeroPrimarySignal(Aluno aluno) {
       diasCritico ||
       (dias != null && dias >= 3);
 
+  if (aluno.emRisco && (dias == null || dias == 0) && (ader == null || ader == 0)) {
+    return AlunoHeroPrimarySignal(
+      label: 'Risco operacional',
+      value: formatRiscoNivel(aluno.riscoNivel),
+    );
+  }
+
   if (priorizarDias && dias != null) {
     return AlunoHeroPrimarySignal(
       label: 'Sem treino',
@@ -111,6 +119,9 @@ String alunoHeroCaption(Aluno aluno, AlunoHeroPrimarySignal signal) {
     if (ader < 50) return 'Aderência baixa — reforce hábito';
     if (ader < 70) return 'Aderência moderada';
     return 'Aderência saudável';
+  }
+  if (signal.label == 'Risco operacional') {
+    return aluno.emRisco ? 'Priorize contato e reengajamento' : 'Monitorar sinais';
   }
   return 'Índice operacional consolidado';
 }

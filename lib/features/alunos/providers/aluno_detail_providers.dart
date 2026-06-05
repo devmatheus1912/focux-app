@@ -32,6 +32,11 @@ final alunoCopilotCreatingProvider = StateProvider.family<bool, int>(
   (ref, alunoId) => false,
 );
 
+/// Operação tab focus mode — hides secondary diagnostics (status grid, wearable, quick actions).
+final alunoOperacaoFocusModeProvider = StateProvider.family<bool, int>(
+  (ref, alunoId) => false,
+);
+
 final alunoCopilotoActionProvider =
     FutureProvider.family<Map<String, dynamic>, int>((ref, alunoId) async {
       return IaRepository(ref.read(apiClientProvider)).proximaAcao(alunoId);

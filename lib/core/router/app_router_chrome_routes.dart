@@ -4,6 +4,7 @@ import '../../features/alunos/data/aluno_repository.dart';
 import '../../features/dashboard/screens/copilot_actions_screen.dart';
 import '../../features/alunos/screens/add_aluno_screen.dart';
 import '../../features/alunos/screens/aluno_detail_screen.dart';
+import '../../features/alunos/utils/aluno360_operacao_logic.dart';
 import '../../features/alunos/screens/aluno_equipamentos_screen.dart';
 import '../../features/perfil/data/perfil_repository.dart';
 import '../../features/perfil/screens/perfil_screen.dart';
@@ -129,8 +130,12 @@ RouteBase buildChromeShellRoute() {
                 (context, state) =>
                     intPathParam(state, 'id') == null ? '/alunos' : null,
             builder:
-                (context, state) =>
-                    AlunoDetailScreen(alunoId: intPathParam(state, 'id')!),
+                (context, state) => AlunoDetailScreen(
+                  alunoId: intPathParam(state, 'id')!,
+                  initialTabIndex: parseAlunoDetailTabIndex(
+                    state.uri.queryParameters['tab'],
+                  ),
+                ),
           ),
           GoRoute(
             path: '/alunos/:id/editar',

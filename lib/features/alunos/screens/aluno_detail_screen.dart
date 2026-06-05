@@ -31,6 +31,7 @@ import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../constants/aluno_360_layout.dart';
+import '../utils/aluno360_operacao_logic.dart';
 import '../utils/aluno_display_utils.dart';
 import '../widgets/aluno_detail_hero_card.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -51,7 +52,13 @@ part 'aluno_detail_actions.part.dart';
 
 class AlunoDetailScreen extends ConsumerStatefulWidget {
   final int alunoId;
-  const AlunoDetailScreen({super.key, required this.alunoId});
+  final int? initialTabIndex;
+
+  const AlunoDetailScreen({
+    super.key,
+    required this.alunoId,
+    this.initialTabIndex,
+  });
 
   @override
   ConsumerState<AlunoDetailScreen> createState() => _AlunoDetailScreenState();
@@ -74,6 +81,14 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
         setState(() {});
       }
     });
+    final tab = widget.initialTabIndex;
+    if (tab != null && tab >= 0 && tab < 3) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _tabController.index != tab) {
+          _tabController.index = tab;
+        }
+      });
+    }
   }
 
   @override
@@ -144,6 +159,8 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                 aluno: resolvedAlunoAsync.value!,
                 alunoId: alunoId,
                 proximaAcao360: proximaAcao360,
+                hasOpenCopilotTask360:
+                    aluno360Async.valueOrNull?.hasOpenCopilotTask ?? false,
                 isDark: isDark,
               )
               : null,
@@ -345,6 +362,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                         proximaAcao360: proximaAcao360,
                         hasOpenCopilotTask360:
                             aluno360Async.valueOrNull?.hasOpenCopilotTask ?? false,
+                        aderenciaSemanal: aluno360Async.valueOrNull?.aderenciaSemanal,
                         recoveryAsync: recoveryAsync,
                         autonomiaResumoAsync: resolvedAutonomiaResumoAsync,
                         animateEntrance: !_entrancePlayed,
