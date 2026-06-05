@@ -308,10 +308,18 @@ Duration operacaoSectionDelay({
 bool operacaoHeroShowsRisco(Aluno aluno) =>
     alunoHeroPrimarySignal(aluno).label == 'Risco operacional';
 
-/// Hide copilot "Resolver lacunas" when hero already prompts objective setup.
-bool shouldShowCopilotProfileGapsButton(Aluno aluno, int profileCompletion) {
+/// Hide copilot lacunas when hero/sticky already covers the same action.
+bool shouldShowCopilotProfileGapsButton(
+  Aluno aluno,
+  int profileCompletion, {
+  OperacaoStickyAction? sticky,
+}) {
   if (profileCompletion >= 80) return false;
-  return copilotProfileGapsForCard(aluno).isNotEmpty;
+  if (copilotProfileGapsForCard(aluno).isEmpty) return false;
+  if (sticky == null) return true;
+  if (sticky.destination == OperacaoStickyDestination.evolucao) return false;
+  if (sticky.destination == OperacaoStickyDestination.editAluno) return false;
+  return true;
 }
 
 /// Sticky primary opens chat — hide duplicate chat CTA in copilot card.

@@ -245,6 +245,46 @@ void main() {
         isTrue,
       );
     });
+
+    test('hides when sticky already routes to evolucao (mapa corporal)', () {
+      expect(
+        shouldShowCopilotProfileGapsButton(
+          Aluno(
+            id: 1,
+            nome: 'Beatriz',
+            email: 'b@test.com',
+            status: 'ATIVO',
+          ),
+          50,
+          sticky: const OperacaoStickyAction(
+            label: 'Completar mapa corporal',
+            icon: Icons.accessibility_new_rounded,
+            destination: OperacaoStickyDestination.evolucao,
+          ),
+        ),
+        isFalse,
+      );
+    });
+
+    test('hides when sticky routes to edit for perfil gaps', () {
+      expect(
+        shouldShowCopilotProfileGapsButton(
+          Aluno(
+            id: 1,
+            nome: 'Teste',
+            email: 't@test.com',
+            status: 'ATIVO',
+          ),
+          50,
+          sticky: const OperacaoStickyAction(
+            label: 'Definir objetivo',
+            icon: Icons.edit_outlined,
+            destination: OperacaoStickyDestination.editAluno,
+          ),
+        ),
+        isFalse,
+      );
+    });
   });
 
   group('operacaoHeroShowsRisco', () {

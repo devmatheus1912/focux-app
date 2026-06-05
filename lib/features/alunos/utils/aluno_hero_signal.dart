@@ -46,8 +46,8 @@ AlunoHeroStatusVisual alunoHeroStatusVisual(Aluno aluno) {
   if (aluno.emRisco) {
     return AlunoHeroStatusVisual(
       label: 'Em risco',
-      background: Colors.white.withValues(alpha: 0.14),
-      foreground: const Color(0xFFFFC98A),
+      background: const Color(0xFF9A3412).withValues(alpha: 0.88),
+      foreground: Colors.white,
     );
   }
   return AlunoHeroStatusVisual(

@@ -247,56 +247,107 @@ class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
                 );
               }
 
-              return Wrap(
-                spacing: 8,
-                runSpacing: 8,
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  ...primaryActions,
                   Semantics(
-                    label: 'Adiar follow-up de ${aluno.nome} por 24 horas',
+                    label: 'Registrar contato realizado com ${aluno.nome}',
                     button: true,
-                    child: OutlinedButton.icon(
+                    child: FilledButton.icon(
                       onPressed:
                           _busy
                               ? null
                               : () => _runAction(
-                                () => actions.snooze(aluno.id),
-                                'Follow-up adiado por 24h',
+                                () => actions.markContactDone(aluno.id),
+                                'Contato registrado',
                               ),
-                      icon: const Icon(Icons.snooze_rounded, size: 16),
-                      label: const Text('Adiar 24h'),
-                      style: compactOutlined,
+                      icon:
+                          _busy
+                              ? SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: FxLoading(
+                                  size: 16,
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                              : const Icon(Icons.check_rounded, size: 16),
+                      label: const Text('Contato feito'),
+                      style: compactFilled,
                     ),
                   ),
-                  Semantics(
-                    label: 'Adiar follow-up de ${aluno.nome} por 3 dias',
-                    button: true,
-                    child: OutlinedButton.icon(
-                      onPressed:
-                          _busy
-                              ? null
-                              : () => _runAction(
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Semantics(
+                          label:
+                              'Definir data de próximo contato para ${aluno.nome}',
+                          button: true,
+                          child: OutlinedButton.icon(
+                            onPressed: _busy ? null : _pickFollowUpDate,
+                            icon: const Icon(Icons.calendar_month_rounded, size: 16),
+                            label: const Text('Definir data'),
+                            style: compactOutlined,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: PopupMenuButton<String>(
+                          tooltip: 'Adiar follow-up',
+                          enabled: !_busy,
+                          onSelected: (value) async {
+                            if (value == '24h') {
+                              await _runAction(
+                                () => actions.snooze(aluno.id),
+                                'Follow-up adiado por 24h',
+                              );
+                            } else if (value == '3d') {
+                              await _runAction(
                                 () => actions.snooze(
                                   aluno.id,
                                   duration: const Duration(days: 3),
                                 ),
                                 'Follow-up adiado por 3 dias',
+                              );
+                            }
+                          },
+                          itemBuilder:
+                              (_) => const [
+                                PopupMenuItem(value: '24h', child: Text('Adiar 24h')),
+                                PopupMenuItem(value: '3d', child: Text('Adiar 3 dias')),
+                              ],
+                          child: Semantics(
+                            label: 'Adiar follow-up de ${aluno.nome}',
+                            button: true,
+                            child: IgnorePointer(
+                              child: OutlinedButton.icon(
+                                onPressed: () {},
+                                icon: const Icon(Icons.snooze_rounded, size: 16),
+                                label: const Text('Adiar'),
+                                style: compactOutlined,
                               ),
-                      icon: const Icon(Icons.schedule_rounded, size: 16),
-                      label: const Text('Adiar 3d'),
-                      style: compactOutlined,
-                    ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   if (followUpDate != null || isSnoozed)
-                    TextButton(
-                      onPressed:
-                          _busy
-                              ? null
-                              : () => _runAction(
-                                () => actions.clearFollowUp(aluno.id),
-                                'Follow-up limpo',
-                              ),
-                      child: const Text('Limpar'),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton(
+                        onPressed:
+                            _busy
+                                ? null
+                                : () => _runAction(
+                                  () => actions.clearFollowUp(aluno.id),
+                                  'Follow-up limpo',
+                                ),
+                        child: const Text('Limpar'),
+                      ),
                     ),
                 ],
               );

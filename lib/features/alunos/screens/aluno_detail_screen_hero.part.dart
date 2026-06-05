@@ -67,51 +67,35 @@ class _StudentQuickActions extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final narrow = constraints.maxWidth < 360;
-              final pills = [
-                _QuickActionPill(
+          Row(
+            children: [
+              Expanded(
+                child: _QuickActionPill(
                   icon: Icons.key_outlined,
                   label: 'Senha',
                   primary: primary,
                   onTap: onPassword,
                 ),
-                _QuickActionPill(
+              ),
+              const SizedBox(width: 7),
+              Expanded(
+                child: _QuickActionPill(
                   icon: Icons.trending_up_rounded,
                   label: 'Evoluir',
                   primary: primary,
                   onTap: onEvolve,
                 ),
-                _QuickActionPill(
+              ),
+              const SizedBox(width: 7),
+              Expanded(
+                child: _QuickActionPill(
                   icon: Icons.edit_outlined,
                   label: 'Editar',
                   primary: primary,
                   onTap: onEdit,
                 ),
-              ];
-
-              if (narrow) {
-                final itemWidth = (constraints.maxWidth - 7) / 2;
-                return Wrap(
-                  spacing: 7,
-                  runSpacing: 7,
-                  children: [
-                    for (final pill in pills)
-                      SizedBox(width: itemWidth, child: pill),
-                  ],
-                );
-              }
-
-              return Row(
-                children: [
-                  for (var i = 0; i < pills.length; i++) ...[
-                    if (i > 0) const SizedBox(width: 7),
-                    Expanded(child: pills[i]),
-                  ],
-                ],
-              );
-            },
+              ),
+            ],
           ),
         ],
       ),

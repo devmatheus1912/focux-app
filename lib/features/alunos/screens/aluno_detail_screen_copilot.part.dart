@@ -32,7 +32,8 @@ class _Aluno360CopilotCard extends ConsumerWidget {
   }
 
   Future<void> _completeProfile(BuildContext context, Aluno aluno) async {
-    final gaps = resolveCopilotProfileGaps(aluno);
+    final gaps = copilotProfileGapsForCard(aluno);
+    if (gaps.isEmpty) return;
     if (gaps.length == 1) {
       await _openProfileGap(context, aluno, gaps.first);
       return;
@@ -378,7 +379,6 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     final hasOpenTask = openTask != null || hasOpenCopilotTask360;
     final resumo = resumoAsync.valueOrNull;
     final profileCompletion = copilotProfileCompletion(aluno);
-    final profileGaps = copilotProfileGapsForCard(aluno);
     final signals = resolveCopilotSignals(
       aluno: aluno,
       resumo: resumo,
@@ -475,7 +475,11 @@ class _Aluno360CopilotCard extends ConsumerWidget {
             ),
           ],
           if (!hasOpenTask) const SizedBox(height: 10),
-          if (shouldShowCopilotProfileGapsButton(aluno, profileCompletion)) ...[
+          if (shouldShowCopilotProfileGapsButton(
+            aluno,
+            profileCompletion,
+            sticky: stickyAction,
+          )) ...[
             SizedBox(
               width: double.infinity,
               height: 40,

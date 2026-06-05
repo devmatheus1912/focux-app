@@ -248,13 +248,16 @@ class _OperacaoFocusModeToggle extends ConsumerWidget {
             focusMode
                 ? 'Desativar modo foco'
                 : 'Ativar modo foco — mostra só follow-up e copiloto',
-        child: FilterChip(
-          selected: focusMode,
-          showCheckmark: false,
-          avatar: Icon(
+        child: OutlinedButton.icon(
+          onPressed:
+              () =>
+                  ref
+                      .read(alunoOperacaoFocusModeProvider(alunoId).notifier)
+                      .state = !focusMode,
+          icon: Icon(
             focusMode ? Icons.center_focus_strong : Icons.center_focus_weak,
             size: 16,
-            color: focusMode ? primary : ink.withValues(alpha: 0.7),
+            color: focusMode ? primary : ink.withValues(alpha: 0.75),
           ),
           label: Text(
             focusMode ? 'Modo foco' : 'Ver diagnóstico completo',
@@ -264,13 +267,20 @@ class _OperacaoFocusModeToggle extends ConsumerWidget {
               color: focusMode ? primary : ink.withValues(alpha: 0.85),
             ),
           ),
-          onSelected:
-              (selected) =>
-                  ref
-                      .read(alunoOperacaoFocusModeProvider(alunoId).notifier)
-                      .state = selected,
-          selectedColor: primary.withValues(alpha: 0.12),
-          side: BorderSide(color: primary.withValues(alpha: 0.22)),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(0, 34),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            visualDensity: VisualDensity.compact,
+            foregroundColor: focusMode ? primary : ink.withValues(alpha: 0.85),
+            side: BorderSide(
+              color: primary.withValues(alpha: focusMode ? 0.32 : 0.22),
+            ),
+            backgroundColor:
+                focusMode ? primary.withValues(alpha: 0.08) : Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
         ),
       ),
     );
