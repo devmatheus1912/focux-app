@@ -58,7 +58,8 @@ void main() {
     expect(screen, contains('Próximo contato:'));
     expect(screen, contains('alunoOperacaoFocusModeProvider'));
     expect(screen, contains('resolveOperacaoStickyAction'));
-    expect(screen, contains('resolveOperacaoDominantMetric'));
+    expect(screen, contains('operacaoHeroShowsRisco'));
+    expect(screen, contains('shouldShowCopilotProfileGapsButton'));
     expect(screen, contains('_OperacaoFocusModeToggle'));
     expect(screen, contains('Sugestão offline'));
     expect(screen, contains('invalidateAluno360Providers'));

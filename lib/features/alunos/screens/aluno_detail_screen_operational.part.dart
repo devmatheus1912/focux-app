@@ -34,6 +34,7 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
         configAsync.valueOrNull?.diasSemTreino ??
         AlunoFollowUpStore.diasSemTreinoLimite;
     final week = summarizeAderenciaWeek(parseAderenciaSemanal(aderenciaSemanal));
+    final heroShowsRisco = operacaoHeroShowsRisco(aluno);
     final dominant = resolveOperacaoDominantMetric(aluno);
     final aderenciaColor = EagleTokens.aderenciaColor(
       (aluno.aderenciaPercent ?? 0).toDouble(),
@@ -75,10 +76,13 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Próximo contato: ${formatProximoContato(aluno)}',
+            heroShowsRisco
+                ? 'Próximo contato: ${formatProximoContato(aluno)} · risco no hero'
+                : 'Próximo contato: ${formatProximoContato(aluno)}',
             style: Aluno360Layout.captionStyle(context),
           ),
           const SizedBox(height: 12),
+          if (!heroShowsRisco) ...[
           OperationalMetricTile(
             label: dominant.label,
             value: dominant.value,
@@ -92,6 +96,7 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
             semanticsLabel: dominant.semanticsLabel,
           ),
           const SizedBox(height: 8),
+          ],
           Row(
             children: [
               Expanded(
@@ -149,6 +154,7 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
                           : 'Sem treino ${aluno.diasSemTreino} dias',
                 ),
               ),
+              if (!heroShowsRisco) ...[
               const SizedBox(width: 8),
               Expanded(
                 child: OperationalMetricTile(
@@ -162,6 +168,7 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
                       'Risco ${formatRiscoNivel(aluno.riscoNivel)}',
                 ),
               ),
+              ],
             ],
           ),
           if (week.points.isNotEmpty) ...[

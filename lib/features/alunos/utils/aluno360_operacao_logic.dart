@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../dashboard/data/command_center_data.dart';
 import '../data/aluno_contact_utils.dart';
 import '../data/aluno_repository.dart';
+import '../utils/aluno_display_utils.dart';
+import 'aluno_hero_signal.dart';
 
 /// Sticky bar action resolved from 360 payload and queue state.
 class OperacaoStickyAction {
@@ -108,7 +110,16 @@ OperacaoStickyAction resolveOperacaoStickyAction({
   required bool hasOpenTask,
   required bool followUpDue,
 }) {
+  final acao = proximaAcao?.acao.trim() ?? '';
+
   if (hasOpenTask) {
+    if (acao.isNotEmpty) {
+      return OperacaoStickyAction(
+        label: truncateStickyLabel(acao),
+        icon: Icons.open_in_new_rounded,
+        isChatAction: false,
+      );
+    }
     return const OperacaoStickyAction(
       label: 'Ver tarefa',
       icon: Icons.open_in_new_rounded,
@@ -116,7 +127,6 @@ OperacaoStickyAction resolveOperacaoStickyAction({
     );
   }
 
-  final acao = proximaAcao?.acao.trim() ?? '';
   if (acao.isNotEmpty) {
     final chat = acaoSugereChat(acao) || followUpDue;
     return OperacaoStickyAction(
@@ -251,4 +261,30 @@ Duration operacaoSectionDelay({
   final table = financeRisk ? withFinance : withoutFinance;
   final index = stepIndex.clamp(0, table.length - 1);
   return Duration(milliseconds: table[index]);
+}
+
+/// True when hero already surfaces operational risk (skip duplicate tiles).
+bool operacaoHeroShowsRisco(Aluno aluno) =>
+    alunoHeroPrimarySignal(aluno).label == 'Risco operacional';
+
+/// Hide copilot "Resolver lacunas" when hero already prompts objective setup.
+bool shouldShowCopilotProfileGapsButton(Aluno aluno, int profileCompletion) {
+  if (profileCompletion >= 80) return false;
+
+  final hasContactGap =
+      (aluno.telefone ?? '').trim().isEmpty &&
+      (aluno.whatsapp ?? '').trim().isEmpty;
+  final hasObjectiveGap = !alunoObjectiveIsDefined(aluno.objetivo);
+  final hasProfileGap =
+      (aluno.genero ?? '').trim().isEmpty ||
+      (aluno.tipoConsultoria ?? '').trim().isEmpty;
+
+  final gapCount =
+      (hasContactGap ? 1 : 0) +
+      (hasObjectiveGap ? 1 : 0) +
+      (hasProfileGap ? 1 : 0);
+
+  if (gapCount == 0) return false;
+  if (gapCount == 1 && hasObjectiveGap) return false;
+  return true;
 }

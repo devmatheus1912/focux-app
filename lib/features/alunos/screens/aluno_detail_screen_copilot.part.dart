@@ -625,7 +625,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
             ),
           ],
           if (!hasOpenTask) const SizedBox(height: 10),
-          if (profileCompletion < 80) ...[
+          if (shouldShowCopilotProfileGapsButton(aluno, profileCompletion)) ...[
             SizedBox(
               width: double.infinity,
               height: 40,

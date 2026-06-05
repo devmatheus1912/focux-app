@@ -41,10 +41,25 @@ FilaAcaoResumo _openCopilotAction() {
 
 void main() {
   group('resolveOperacaoStickyAction', () {
-    test('open task wins over proxima acao', () {
+    test('open task with proxima acao mirrors radar label', () {
       final action = resolveOperacaoStickyAction(
         proximaAcao: const ProximaAcaoResumo(
-          acao: 'Enviar mensagem',
+          acao: 'Retomar contato e ajustar plano',
+          motivo: 'Radar',
+          fonte: 'RADAR',
+          prioridade: 'P1',
+        ),
+        hasOpenTask: true,
+        followUpDue: false,
+      );
+      expect(action.label, 'Retomar contato e ajustar plano');
+      expect(action.isChatAction, isFalse);
+    });
+
+    test('open task without proxima acao falls back to Ver tarefa', () {
+      final action = resolveOperacaoStickyAction(
+        proximaAcao: const ProximaAcaoResumo(
+          acao: '',
           motivo: 'x',
           fonte: 'PADRAO',
           prioridade: 'P2',
@@ -53,7 +68,6 @@ void main() {
         followUpDue: false,
       );
       expect(action.label, 'Ver tarefa');
-      expect(action.isChatAction, isFalse);
     });
 
     test('uses proxima acao label when no open task', () {
@@ -154,6 +168,52 @@ void main() {
       final now = DateTime(2026, 6, 4, 12);
       final aluno = _aluno(proximoContato: '2026-06-04');
       expect(isAlunoFollowUpDue(aluno, now: now), isTrue);
+    });
+  });
+
+  group('shouldShowCopilotProfileGapsButton', () {
+    test('hides when only objective gap and hero covers it', () {
+      expect(
+        shouldShowCopilotProfileGapsButton(
+          Aluno(
+            id: 1,
+            nome: 'Beatriz',
+            email: 'b@test.com',
+            status: 'ATIVO',
+            telefone: '11999999999',
+            genero: 'F',
+            tipoConsultoria: 'PRESENCIAL',
+          ),
+          70,
+        ),
+        isFalse,
+      );
+    });
+
+    test('shows when multiple profile gaps exist', () {
+      expect(
+        shouldShowCopilotProfileGapsButton(
+          Aluno(
+            id: 1,
+            nome: 'Teste',
+            email: 't@test.com',
+            status: 'ATIVO',
+          ),
+          50,
+        ),
+        isTrue,
+      );
+    });
+  });
+
+  group('operacaoHeroShowsRisco', () {
+    test('true for em risco with zero adherence', () {
+      expect(
+        operacaoHeroShowsRisco(
+          _aluno(emRisco: true, riscoNivel: 'ALTO', aderenciaPercent: 0),
+        ),
+        isTrue,
+      );
     });
   });
 
