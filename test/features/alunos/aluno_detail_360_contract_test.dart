@@ -47,6 +47,11 @@ void main() {
   test('aluno 360 polish: tabs, unified status, refresh, altura, sparkline', () {
     final screen = _alunoDetailLibrarySource();
 
+    expect(screen, contains('class _AlunoFollowUpCard'));
+    expect(screen, contains('ConsumerState<_AlunoFollowUpCard>'));
+    expect(screen, contains('Contato registrado · sincronizado'));
+    expect(screen, contains('Aluno360Layout.captionStyle'));
+    expect(screen, contains('aluno360Provider(alunoId)'));
     expect(screen, contains('class _AlunoOperationalStatusSection'));
     expect(screen, contains('Status operacional'));
     expect(screen, contains('Índice operacional'));

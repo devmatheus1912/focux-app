@@ -1,10 +1,19 @@
 ﻿part of 'aluno_detail_screen.dart';
 
-class _AlunoFollowUpCard extends ConsumerWidget {
+class _AlunoFollowUpCard extends ConsumerStatefulWidget {
   const _AlunoFollowUpCard({required this.aluno, required this.isDark});
 
   final Aluno aluno;
   final bool isDark;
+
+  @override
+  ConsumerState<_AlunoFollowUpCard> createState() => _AlunoFollowUpCardState();
+}
+
+class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
+  bool _busy = false;
+
+  Aluno get aluno => widget.aluno;
 
   String _formatDate(DateTime date) {
     final d = date.day.toString().padLeft(2, '0');
@@ -12,7 +21,31 @@ class _AlunoFollowUpCard extends ConsumerWidget {
     return '$d/$m/${date.year}';
   }
 
-  Future<void> _pickFollowUpDate(BuildContext context, WidgetRef ref) async {
+  Future<void> _runAction(
+    Future<void> Function() action,
+    String successMessage,
+  ) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await action();
+      if (mounted) {
+        FeedbackHelper.showSuccess(context, successMessage);
+      }
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(
+          context,
+          friendlyError(e, fallback: 'Não foi possível salvar o follow-up.'),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _pickFollowUpDate() async {
+    if (_busy) return;
     final now = DateTime.now();
     final current = aluno.followUpDate;
     final picked = await showDatePicker(
@@ -23,19 +56,15 @@ class _AlunoFollowUpCard extends ConsumerWidget {
       helpText: 'Próximo contato',
     );
     if (picked == null) return;
-    await ref.read(alunoFollowUpActionsProvider).setFollowUpDate(aluno.id, picked);
-    if (context.mounted) {
-      FeedbackHelper.showSuccess(
-        context,
-        'Follow-up definido para ${_formatDate(picked)}',
-      );
-    }
+    await _runAction(
+      () => ref.read(alunoFollowUpActionsProvider).setFollowUpDate(aluno.id, picked),
+      'Follow-up definido para ${_formatDate(picked)}',
+    );
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final ink = fxScreenInk(context);
-    final mute = fxScreenMute(context);
     final primary = Theme.of(context).colorScheme.primary;
     final followUpDate = aluno.followUpDate;
     final snoozedUntil = aluno.snoozedUntilDate;
@@ -72,7 +101,7 @@ class _AlunoFollowUpCard extends ConsumerWidget {
             followUpDate == null
                 ? 'Sem data definida · sincronizado com a nuvem'
                 : 'Próximo contato: ${_formatDate(followUpDate)}',
-            style: TextStyle(color: mute, fontSize: 12, height: 1.35),
+            style: Aluno360Layout.captionStyle(context),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -80,17 +109,15 @@ class _AlunoFollowUpCard extends ConsumerWidget {
             const SizedBox(height: 4),
             Text(
               'Último contato: ${_formatDate(aluno.ultimoContatoDate!)}',
-              style: TextStyle(color: mute, fontSize: 11.5),
+              style: Aluno360Layout.metaStyle(context),
             ),
           ],
           if (isSnoozed) ...[
             const SizedBox(height: 6),
             Text(
               'Adiado até ${_formatDate(snoozedUntil)} ${_formatTime(snoozedUntil)}',
-              style: TextStyle(
+              style: Aluno360Layout.metaStyle(context).copyWith(
                 color: EagleTokens.warn,
-                fontSize: 11.5,
-                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -117,13 +144,25 @@ class _AlunoFollowUpCard extends ConsumerWidget {
                   label: 'Registrar contato realizado com ${aluno.nome}',
                   button: true,
                   child: FilledButton.icon(
-                    onPressed: () async {
-                      await actions.markContactDone(aluno.id);
-                      if (context.mounted) {
-                        FeedbackHelper.showSuccess(context, 'Contato registrado');
-                      }
-                    },
-                    icon: const Icon(Icons.check_rounded, size: 16),
+                    onPressed:
+                        _busy
+                            ? null
+                            : () => _runAction(
+                              () => actions.markContactDone(aluno.id),
+                              'Contato registrado · sincronizado',
+                            ),
+                    icon:
+                        _busy
+                            ? SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: FxLoading(
+                                size: 16,
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                            : const Icon(Icons.check_rounded, size: 16),
                     label: const Text('Contato feito'),
                     style: compactFilled,
                   ),
@@ -132,7 +171,7 @@ class _AlunoFollowUpCard extends ConsumerWidget {
                   label: 'Definir data de próximo contato para ${aluno.nome}',
                   button: true,
                   child: OutlinedButton.icon(
-                    onPressed: () => _pickFollowUpDate(context, ref),
+                    onPressed: _busy ? null : _pickFollowUpDate,
                     icon: const Icon(Icons.calendar_month_rounded, size: 16),
                     label: const Text('Definir data'),
                     style: compactOutlined,
@@ -154,20 +193,21 @@ class _AlunoFollowUpCard extends ConsumerWidget {
                       width: double.infinity,
                       child: PopupMenuButton<String>(
                         tooltip: 'Adiar follow-up',
+                        enabled: !_busy,
                         onSelected: (value) async {
                           if (value == '24h') {
-                            await actions.snooze(aluno.id);
-                            if (context.mounted) {
-                              FeedbackHelper.showSuccess(context, 'Adiado por 24h');
-                            }
-                          } else if (value == '3d') {
-                            await actions.snooze(
-                              aluno.id,
-                              duration: const Duration(days: 3),
+                            await _runAction(
+                              () => actions.snooze(aluno.id),
+                              'Follow-up adiado por 24h',
                             );
-                            if (context.mounted) {
-                              FeedbackHelper.showSuccess(context, 'Adiado por 3 dias');
-                            }
+                          } else if (value == '3d') {
+                            await _runAction(
+                              () => actions.snooze(
+                                aluno.id,
+                                duration: const Duration(days: 3),
+                              ),
+                              'Follow-up adiado por 3 dias',
+                            );
                           }
                         },
                         itemBuilder:
@@ -193,12 +233,13 @@ class _AlunoFollowUpCard extends ConsumerWidget {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: TextButton(
-                          onPressed: () async {
-                            await actions.clearFollowUp(aluno.id);
-                            if (context.mounted) {
-                              FeedbackHelper.showSuccess(context, 'Follow-up limpo');
-                            }
-                          },
+                          onPressed:
+                              _busy
+                                  ? null
+                                  : () => _runAction(
+                                    () => actions.clearFollowUp(aluno.id),
+                                    'Follow-up limpo',
+                                  ),
                           child: const Text('Limpar'),
                         ),
                       ),
@@ -215,12 +256,13 @@ class _AlunoFollowUpCard extends ConsumerWidget {
                     label: 'Adiar follow-up de ${aluno.nome} por 24 horas',
                     button: true,
                     child: OutlinedButton.icon(
-                      onPressed: () async {
-                        await actions.snooze(aluno.id);
-                        if (context.mounted) {
-                          FeedbackHelper.showSuccess(context, 'Adiado por 24h');
-                        }
-                      },
+                      onPressed:
+                          _busy
+                              ? null
+                              : () => _runAction(
+                                () => actions.snooze(aluno.id),
+                                'Follow-up adiado por 24h',
+                              ),
                       icon: const Icon(Icons.snooze_rounded, size: 16),
                       label: const Text('Adiar 24h'),
                       style: compactOutlined,
@@ -230,15 +272,16 @@ class _AlunoFollowUpCard extends ConsumerWidget {
                     label: 'Adiar follow-up de ${aluno.nome} por 3 dias',
                     button: true,
                     child: OutlinedButton.icon(
-                      onPressed: () async {
-                        await actions.snooze(
-                          aluno.id,
-                          duration: const Duration(days: 3),
-                        );
-                        if (context.mounted) {
-                          FeedbackHelper.showSuccess(context, 'Adiado por 3 dias');
-                        }
-                      },
+                      onPressed:
+                          _busy
+                              ? null
+                              : () => _runAction(
+                                () => actions.snooze(
+                                  aluno.id,
+                                  duration: const Duration(days: 3),
+                                ),
+                                'Follow-up adiado por 3 dias',
+                              ),
                       icon: const Icon(Icons.schedule_rounded, size: 16),
                       label: const Text('Adiar 3d'),
                       style: compactOutlined,
@@ -246,12 +289,13 @@ class _AlunoFollowUpCard extends ConsumerWidget {
                   ),
                   if (followUpDate != null || isSnoozed)
                     TextButton(
-                      onPressed: () async {
-                        await actions.clearFollowUp(aluno.id);
-                        if (context.mounted) {
-                          FeedbackHelper.showSuccess(context, 'Follow-up limpo');
-                        }
-                      },
+                      onPressed:
+                          _busy
+                              ? null
+                              : () => _runAction(
+                                () => actions.clearFollowUp(aluno.id),
+                                'Follow-up limpo',
+                              ),
                       child: const Text('Limpar'),
                     ),
                 ],

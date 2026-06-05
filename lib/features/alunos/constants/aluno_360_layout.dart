@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/design_tokens.dart';
 /// Layout tokens for Aluno 360 (hero, sticky CTA, scroll insets).
 abstract final class Aluno360Layout {
   Aluno360Layout._();
@@ -33,5 +34,27 @@ abstract final class Aluno360Layout {
     return stickyBarContentHeight +
         MediaQuery.paddingOf(context).bottom +
         40;
+  }
+
+  /// WCAG-friendly caption for cards (min 12px, gray-700 on light).
+  static TextStyle captionStyle(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return TextStyle(
+      fontSize: 12,
+      height: 1.35,
+      fontWeight: FontWeight.w500,
+      color:
+          isDark
+              ? EagleTokens.darkInk.withValues(alpha: 0.82)
+              : const Color(0xFF374151),
+    );
+  }
+
+  /// Secondary metadata — still ≥11.5px with stronger contrast.
+  static TextStyle metaStyle(BuildContext context) {
+    return captionStyle(context).copyWith(
+      fontSize: 11.5,
+      fontWeight: FontWeight.w600,
+    );
   }
 }

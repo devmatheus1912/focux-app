@@ -63,6 +63,9 @@ class FeedbackHelper {
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final snackFill = isDark ? EagleTokens.darkCardHi : EagleTokens.ink;
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final hasBottomBar = Scaffold.maybeOf(context)?.widget.bottomNavigationBar != null;
+    final bottomMargin = bottomInset + (hasBottomBar ? 88 : 16);
 
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -96,7 +99,7 @@ class FeedbackHelper {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(EagleTokens.radiusMd),
         ),
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        margin: EdgeInsets.fromLTRB(16, 0, 16, bottomMargin),
         duration: const Duration(seconds: 3),
         elevation: 0,
       ),

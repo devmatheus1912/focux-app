@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../alertas/data/alertas_repository.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/aluno_repository.dart';
+import 'aluno_detail_providers.dart';
 import 'alunos_provider.dart';
 
 final alertasConfigProvider = FutureProvider<AlertasConfiguracao>((ref) async {
@@ -57,6 +58,7 @@ class AlunoFollowUpActions {
     _ref.invalidate(alunosProvider);
     _ref.invalidate(alunosStatsProvider);
     _ref.invalidate(alunoProvider(alunoId));
+    _ref.invalidate(aluno360Provider(alunoId));
   }
 }
 

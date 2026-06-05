@@ -14,7 +14,7 @@ class ShellPalette {
 
   Color get ink => isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
   Color get mute =>
-      isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+      isDark ? EagleTokens.darkInkMute : const Color(0xFF374151);
   Color get line => isDark ? EagleTokens.darkLine : EagleTokens.lineSoft;
   Color get lineStrong => isDark ? EagleTokens.glassBorder : EagleTokens.line;
 

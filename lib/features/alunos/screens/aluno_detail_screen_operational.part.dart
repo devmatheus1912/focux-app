@@ -65,7 +65,7 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(
             'Use estes sinais para decidir o próximo contato',
-            style: TextStyle(color: mute, fontSize: 11, height: 1.3),
+            style: Aluno360Layout.captionStyle(context),
           ),
           const SizedBox(height: 12),
           Row(
@@ -169,9 +169,8 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           'Aderência · últimos 7 dias',
-                          style: TextStyle(
+                          style: Aluno360Layout.metaStyle(context).copyWith(
                             color: ink,
-                            fontSize: 11,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -180,9 +179,7 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
                         sparklineData.every((v) => v <= 0)
                             ? 'Sem check-ins'
                             : '${sparklineData.fold<double>(0, (a, b) => a + b).round()} check-ins',
-                        style: TextStyle(
-                          color: mute,
-                          fontSize: 10.5,
+                        style: Aluno360Layout.metaStyle(context).copyWith(
                           fontWeight: FontWeight.w700,
                         ),
                       ),

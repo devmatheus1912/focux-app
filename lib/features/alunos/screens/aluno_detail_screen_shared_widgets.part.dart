@@ -140,7 +140,7 @@ class _CopilotPrescriptionState extends State<_CopilotPrescription> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final caption = isDark ? EagleTokens.darkInkMute : const Color(0xFF374151);
     final reason = widget.reason.trim();
     final showExpand = reason.length > 72;
 
@@ -161,7 +161,7 @@ class _CopilotPrescriptionState extends State<_CopilotPrescription> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: widget.color,
+                    color: ink,
                     fontSize: 12,
                     fontWeight: FontWeight.w900,
                   ),
@@ -193,7 +193,7 @@ class _CopilotPrescriptionState extends State<_CopilotPrescription> {
                 reason,
                 maxLines: _expanded ? null : _collapsedLines,
                 overflow: _expanded ? null : TextOverflow.ellipsis,
-                style: TextStyle(color: mute, fontSize: 12, height: 1.25),
+                style: TextStyle(color: caption, fontSize: 12, height: 1.25),
               ),
             ),
             if (showExpand && !_expanded)
