@@ -66,11 +66,11 @@ class _Aluno360SignalTile extends StatelessWidget {
                   const SizedBox(height: 1),
                   Text(
                     signal.detail,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: mute,
-                      fontSize: 9,
+                      fontSize: 11,
                       fontWeight: FontWeight.w600,
                       height: 1.2,
                     ),

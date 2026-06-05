@@ -55,7 +55,7 @@ void main() {
     expect(screen, contains("'Copiar'"));
     expect(screen, contains("'Mensagem sugerida'"));
     expect(screen, contains("'Abrir chat'"));
-    expect(screen, contains('perfil, autonomia e financeiro'));
+    expect(screen, contains('Sugestão com base no perfil de hoje.'));
   });
 
   test('aluno 360 polish: tabs, unified status, refresh, altura, sparkline', () {
@@ -63,7 +63,7 @@ void main() {
 
     expect(screen, contains('class _AlunoFollowUpCard'));
     expect(screen, contains('ConsumerState<_AlunoFollowUpCard>'));
-    expect(screen, contains('Contato registrado'));
+    expect(screen, contains('Contato salvo · follow-up atualizado'));
     expect(screen, contains('Aluno360Layout.captionStyle'));
     expect(screen, contains('aderenciaSemanal'));
     expect(screen, contains('class _AlunoOperationalStatusSection'));

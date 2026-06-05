@@ -30,7 +30,11 @@ class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
     try {
       await action();
       if (mounted) {
-        FeedbackHelper.showSuccess(context, successMessage);
+        FeedbackHelper.showSuccess(
+          context,
+          successMessage,
+          reserveBottom: Aluno360Layout.snackbarStickyReserve,
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -99,7 +103,7 @@ class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
           const SizedBox(height: 6),
           Text(
             followUpDate == null
-                ? 'Sem data definida · sincronizado com a nuvem'
+                ? 'Agendar próximo contato · sincronizado com a nuvem'
                 : 'Próximo contato: ${_formatDate(followUpDate)}',
             style: Aluno360Layout.captionStyle(context),
             maxLines: 2,
@@ -149,7 +153,7 @@ class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
                             ? null
                             : () => _runAction(
                               () => actions.markContactDone(aluno.id),
-                              'Contato registrado',
+                              'Contato salvo · follow-up atualizado',
                             ),
                     icon:
                         _busy
@@ -259,7 +263,7 @@ class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
                               ? null
                               : () => _runAction(
                                 () => actions.markContactDone(aluno.id),
-                                'Contato registrado',
+                                'Contato salvo · follow-up atualizado',
                               ),
                       icon:
                           _busy

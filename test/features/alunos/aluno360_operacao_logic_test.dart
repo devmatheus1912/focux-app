@@ -167,7 +167,7 @@ void main() {
     test('summarize empty week', () {
       final summary = summarizeAderenciaWeek(const []);
       expect(summary.hasAnyCheckin, isFalse);
-      expect(summary.caption, 'Nenhum check-in esta semana');
+      expect(summary.caption, 'Sem dados');
     });
 
     test('summarize checkins total', () {
@@ -178,7 +178,7 @@ void main() {
         ]),
       );
       expect(summary.totalCheckins, 2);
-      expect(summary.caption, '2 check-ins');
+      expect(summary.caption, '2 check-ins · 1 de 2 dias');
     });
   });
 
@@ -379,6 +379,33 @@ void main() {
           proximaAcaoRaw: 'Completar mapa corporal no radar',
         ),
         isFalse,
+      );
+    });
+  });
+
+  group('shouldHideCopilotPrimaryCtaWhenMatchesSticky', () {
+    test('hides when sticky command center matches proxima acao', () {
+      final aluno = _aluno();
+      const acao = 'Reforçar aderência semanal do aluno';
+      final sticky = resolveOperacaoStickyAction(
+        aluno: aluno,
+        proximaAcao: ProximaAcaoResumo(
+          acao: acao,
+          motivo: 'teste',
+          fonte: 'PADRAO',
+          prioridade: 'MEDIA',
+        ),
+        hasOpenTask: false,
+        followUpDue: false,
+      );
+      expect(sticky.destination, OperacaoStickyDestination.commandCenter);
+      expect(
+        shouldHideCopilotPrimaryCtaWhenMatchesSticky(
+          sticky: sticky,
+          aluno: aluno,
+          proximaAcaoRaw: acao,
+        ),
+        isTrue,
       );
     });
   });

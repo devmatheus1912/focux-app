@@ -42,6 +42,7 @@ class AlunoOperacaoAdherenceBars extends StatelessWidget {
               child: _AdherenceDayBar(
                 value: points[i].checkins,
                 dayLabel: weekdayLetterFromIso(points[i].date),
+                isoDate: points[i].date,
                 maxVal: maxVal,
                 activeColor: activeColor,
                 idleColor: idleColor,
@@ -62,6 +63,7 @@ class _AdherenceDayBar extends StatelessWidget {
   const _AdherenceDayBar({
     required this.value,
     required this.dayLabel,
+    required this.isoDate,
     required this.maxVal,
     required this.activeColor,
     required this.idleColor,
@@ -73,6 +75,7 @@ class _AdherenceDayBar extends StatelessWidget {
 
   final double value;
   final String dayLabel;
+  final String? isoDate;
   final double maxVal;
   final Color activeColor;
   final Color idleColor;
@@ -93,46 +96,56 @@ class _AdherenceDayBar extends StatelessWidget {
             ? '${value.round()} check-in${value == 1 ? '' : 's'}'
             : 'Sem check-in';
 
+    final weekday = weekdayNameFromIso(isoDate);
+    final tooltip =
+        weekday.isEmpty
+            ? semanticsValue
+            : '$weekday · $semanticsValue';
+
     return Semantics(
       label:
           dayLabel.isEmpty
               ? semanticsValue
               : '$dayLabel · $semanticsValue',
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          SizedBox(
-            height: barMaxHeight,
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 220),
-                curve: Curves.easeOutCubic,
-                height: barMaxHeight * fraction,
-                decoration: BoxDecoration(
-                  color: hasActivity ? activeColor : idleColor,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-            ),
-          ),
-          SizedBox(
-            height: labelBand,
-            child: Center(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  dayLabel,
-                  style: TextStyle(
-                    color: labelColor,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
+      button: true,
+      child: Tooltip(
+        message: tooltip,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            SizedBox(
+              height: barMaxHeight,
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOutCubic,
+                  height: barMaxHeight * fraction,
+                  decoration: BoxDecoration(
+                    color: hasActivity ? activeColor : idleColor,
+                    borderRadius: BorderRadius.circular(4),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+            SizedBox(
+              height: labelBand,
+              child: Center(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    dayLabel,
+                    style: TextStyle(
+                      color: labelColor,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

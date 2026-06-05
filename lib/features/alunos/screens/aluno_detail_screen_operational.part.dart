@@ -114,7 +114,7 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
               _OperacaoFocusModeToggle(
                 alunoId: alunoId,
                 primary: primary,
-                compact: true,
+                iconOnly: true,
               ),
             ],
           ),
@@ -200,34 +200,46 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
           ],
           if (week.points.isNotEmpty) ...[
             const SizedBox(height: 14),
-            Container(
+            Builder(
+              builder: (context) {
+                final sparkMute = fxScreenMute(context);
+                final sparkAccent =
+                    week.hasAnyCheckin ? aderenciaColor : sparkMute;
+                return Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
               decoration: BoxDecoration(
-                color: aderenciaColor.withValues(alpha: isDark ? 0.1 : 0.06),
+                color: sparkAccent.withValues(alpha: isDark ? 0.1 : 0.06),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: aderenciaColor.withValues(alpha: isDark ? 0.22 : 0.14),
+                  color: sparkAccent.withValues(alpha: isDark ? 0.22 : 0.14),
                 ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: Text(
-                          'Aderência · últimos 7 dias',
-                          style: Aluno360Layout.metaStyle(context).copyWith(
-                            color: ink,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        week.caption,
-                        style: Aluno360Layout.metaStyle(context).copyWith(
-                          fontWeight: FontWeight.w700,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Aderência · últimos 7 dias',
+                              style: Aluno360Layout.metaStyle(context).copyWith(
+                                color: ink,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              week.caption,
+                              style: Aluno360Layout.metaStyle(context).copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -278,6 +290,8 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
                   ],
                 ],
               ),
+            );
+              },
             ),
           ],
         ],

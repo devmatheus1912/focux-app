@@ -151,10 +151,12 @@ class _AlunoDetailOperacaoTab extends ConsumerWidget {
     );
     final copilot = _Aluno360CopilotCard(
       aluno: aluno,
+      alunoId: alunoId,
       resumoAsync: autonomiaResumoAsync,
       proximaAcao360: proximaAcao360,
       hasOpenCopilotTask360: hasOpenCopilotTask360,
       isDark: isDark,
+      showFocusToggle: true,
     );
 
     Widget diagnosticBody() {
@@ -194,40 +196,46 @@ class _AlunoDetailOperacaoTab extends ConsumerWidget {
         ],
         section(1, _AlunoFollowUpCard(aluno: aluno, isDark: isDark)),
         const SizedBox(height: Aluno360Layout.sectionGap),
-        if (!focusMode) ...[
-          section(2, diagnosticBody()),
-          const SizedBox(height: Aluno360Layout.sectionGap),
-          section(
-            4,
-            _AlunoRecoveryInsightCard(
-              recoveryAsync: recoveryAsync,
-              isDark: isDark,
-              primary: primary,
-            ),
-          ),
-          const SizedBox(height: Aluno360Layout.sectionGap),
-          section(
-            5,
-            _StudentQuickActions(
-              aluno: aluno,
-              isDark: isDark,
-              primary: primary,
-              onPassword: onPassword,
-              onEdit: onEdit,
-              onEvolve: onEvolve,
-            ),
-          ),
-        ] else ...[
-          Align(
-            alignment: Alignment.centerRight,
-            child: section(
-              2,
-              _OperacaoFocusModeToggle(alunoId: alunoId, primary: primary),
-            ),
-          ),
-          const SizedBox(height: Aluno360Layout.sectionGap),
-          section(3, copilot),
-        ],
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          alignment: Alignment.topCenter,
+          child:
+              focusMode
+                  ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      section(3, copilot),
+                    ],
+                  )
+                  : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      section(2, diagnosticBody()),
+                      const SizedBox(height: Aluno360Layout.sectionGap),
+                      section(
+                        4,
+                        _AlunoRecoveryInsightCard(
+                          recoveryAsync: recoveryAsync,
+                          isDark: isDark,
+                          primary: primary,
+                        ),
+                      ),
+                      const SizedBox(height: Aluno360Layout.sectionGap),
+                      section(
+                        5,
+                        _StudentQuickActions(
+                          aluno: aluno,
+                          isDark: isDark,
+                          primary: primary,
+                          onPassword: onPassword,
+                          onEdit: onEdit,
+                          onEvolve: onEvolve,
+                        ),
+                      ),
+                    ],
+                  ),
+        ),
       ],
     );
   }
@@ -238,16 +246,42 @@ class _OperacaoFocusModeToggle extends ConsumerWidget {
     required this.alunoId,
     required this.primary,
     this.compact = false,
+    this.iconOnly = false,
   });
 
   final int alunoId;
   final Color primary;
   final bool compact;
+  final bool iconOnly;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final focusMode = ref.watch(alunoOperacaoFocusModeProvider(alunoId));
     final ink = fxScreenInk(context);
+
+    if (iconOnly) {
+      return Semantics(
+        button: true,
+        label:
+            focusMode
+                ? 'Desativar modo foco'
+                : 'Ativar modo foco — mostra só follow-up e copiloto',
+        child: IconButton.filledTonal(
+          onPressed:
+              () =>
+                  ref
+                      .read(alunoOperacaoFocusModeProvider(alunoId).notifier)
+                      .toggle(),
+          icon: Icon(
+            focusMode ? Icons.center_focus_strong : Icons.center_focus_weak,
+            size: 18,
+            color: focusMode ? primary : ink.withValues(alpha: 0.78),
+          ),
+          tooltip: focusMode ? 'Modo foco ativo' : 'Modo foco',
+          visualDensity: VisualDensity.compact,
+        ),
+      );
+    }
 
     if (compact && !focusMode) {
       return Semantics(

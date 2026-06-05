@@ -237,32 +237,51 @@ class _HeroShellState extends State<_HeroShell>
                             const SizedBox(width: 6),
                             Padding(
                               padding: const EdgeInsets.only(right: 2),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.baseline,
-                                textBaseline: TextBaseline.alphabetic,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
-                                    widget.signal.value,
-                                    style: AppTypography.mono(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: -0.4,
-                                      height: 1,
-                                    ),
-                                  ),
-                                  if (widget.signal.suffix != null)
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 2),
-                                      child: Text(
-                                        widget.signal.suffix!,
-                                        style: TextStyle(
-                                          color: dashboardHeroLabelOnTeal(),
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w700,
-                                        ),
+                                  if (widget.signal.label == 'Risco operacional')
+                                    Text(
+                                      'Risco',
+                                      style: TextStyle(
+                                        color: dashboardHeroLabelOnTeal(),
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w800,
+                                        height: 1,
                                       ),
                                     ),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.baseline,
+                                    textBaseline: TextBaseline.alphabetic,
+                                    children: [
+                                      Text(
+                                        widget.signal.value,
+                                        style: AppTypography.mono(
+                                          color: Colors.white,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: -0.4,
+                                          height: 1,
+                                        ),
+                                      ),
+                                      if (widget.signal.suffix != null)
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            left: 2,
+                                          ),
+                                          child: Text(
+                                            widget.signal.suffix!,
+                                            style: TextStyle(
+                                              color: dashboardHeroLabelOnTeal(),
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),

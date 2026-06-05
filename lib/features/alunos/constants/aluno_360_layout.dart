@@ -6,10 +6,11 @@ abstract final class Aluno360Layout {
   Aluno360Layout._();
 
   static const double screenPadding = 16;
-  static const double sectionGap = 10;
+  static const double sectionGap = 12;
   static const double cardPadding = 14;
   static const double tabBarHeight = 44;
   static const double stickyBarContentHeight = 56;
+  static const double snackbarStickyReserve = 72;
 
   /// Approximate hero card body (matches [AlunoDetailHeroCard] at textScale ≤ 1.25).
   static double heroBodyHeight(BuildContext context) {

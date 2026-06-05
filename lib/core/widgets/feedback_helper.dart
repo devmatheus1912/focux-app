@@ -15,23 +15,33 @@ class FeedbackHelper {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  static void showSuccess(BuildContext context, String message) {
+  static void showSuccess(
+    BuildContext context,
+    String message, {
+    double reserveBottom = 0,
+  }) {
     HapticFeedback.mediumImpact();
     _showSnackbar(
       context,
       message,
       fill: EagleTokens.good,
       icon: Icons.check_circle_rounded,
+      reserveBottom: reserveBottom,
     );
   }
 
-  static void showError(BuildContext context, String message) {
+  static void showError(
+    BuildContext context,
+    String message, {
+    double reserveBottom = 0,
+  }) {
     HapticFeedback.heavyImpact();
     _showSnackbar(
       context,
       message,
       fill: EagleTokens.bad,
       icon: Icons.error_outline_rounded,
+      reserveBottom: reserveBottom,
     );
   }
 
@@ -60,12 +70,13 @@ class FeedbackHelper {
     String message, {
     required Color fill,
     required IconData icon,
+    double reserveBottom = 0,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final snackFill = isDark ? EagleTokens.darkCardHi : EagleTokens.ink;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     final hasBottomBar = Scaffold.maybeOf(context)?.widget.bottomNavigationBar != null;
-    final bottomMargin = bottomInset + (hasBottomBar ? 88 : 16);
+    final bottomMargin = bottomInset + (hasBottomBar ? 88 : 16) + reserveBottom;
 
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(

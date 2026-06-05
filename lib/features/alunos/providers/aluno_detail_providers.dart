@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../features/auth/providers/auth_provider.dart';
@@ -54,10 +56,15 @@ class AlunoOperacaoFocusModeController extends StateNotifier<bool> {
   }
 
   Future<void> setFocus(bool value) async {
+    if (state == value) return;
     state = value;
     try {
       await AlunoOperacaoFocusStore.save(alunoId, value);
     } catch (_) {}
+    SemanticsService.announce(
+      value ? 'Modo foco ativado' : 'Modo foco desativado',
+      TextDirection.ltr,
+    );
   }
 
   Future<void> toggle() async => setFocus(!state);

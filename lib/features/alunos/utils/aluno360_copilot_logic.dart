@@ -231,7 +231,7 @@ List<Aluno360CopilotSignal> resolveCopilotSignals({
       detail:
           profile >= 80
               ? 'dados bons para prescrição'
-              : 'faltam dados que melhoram decisão',
+              : 'perfil incompleto',
       color: profile >= 80 ? EagleTokens.good : primary,
     ),
     Aluno360CopilotSignal(

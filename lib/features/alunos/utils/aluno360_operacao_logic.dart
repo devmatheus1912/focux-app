@@ -68,8 +68,15 @@ class AderenciaWeekSummary {
   final int totalCheckins;
   final bool hasAnyCheckin;
 
-  String get caption =>
-      hasAnyCheckin ? '$totalCheckins check-ins' : 'Nenhum check-in esta semana';
+  String get caption {
+    if (points.isEmpty) return 'Sem dados';
+    final daysWith =
+        points.where((p) => p.checkins > 0).length;
+    if (!hasAnyCheckin) {
+      return '0 de ${points.length} dias';
+    }
+    return '$totalCheckins check-ins · $daysWith de ${points.length} dias';
+  }
 }
 
 enum AlunoDetailTab { operacao, evolucao, ferramentas }
@@ -294,6 +301,23 @@ String weekdayLetterFromIso(String? isoDate) {
   return labels[parsed.weekday % 7];
 }
 
+/// Full weekday name for sparkline tooltips (Seg, Ter, …).
+String weekdayNameFromIso(String? isoDate) {
+  if (isoDate == null || isoDate.isEmpty) return '';
+  final parsed = DateTime.tryParse(isoDate);
+  if (parsed == null) return '';
+  const labels = [
+    'Dom',
+    'Seg',
+    'Ter',
+    'Qua',
+    'Qui',
+    'Sex',
+    'Sáb',
+  ];
+  return labels[parsed.weekday % 7];
+}
+
 /// Staggered entrance delay for Operação sections (finance banner shifts timeline).
 Duration operacaoSectionDelay({
   required bool financeRisk,
@@ -333,6 +357,22 @@ bool shouldHideCopilotPrescriptionWhenMatchesSticky({
   final raw = proximaAcaoRaw?.trim() ?? '';
   if (raw.isEmpty) return false;
   return sticky.label == copilotStickyLabel(aluno, raw);
+}
+
+/// Hide copilot primary CTA when sticky already covers Command Center action.
+bool shouldHideCopilotPrimaryCtaWhenMatchesSticky({
+  required OperacaoStickyAction sticky,
+  required Aluno aluno,
+  String? proximaAcaoRaw,
+}) {
+  if (sticky.destination != OperacaoStickyDestination.commandCenter) {
+    return false;
+  }
+  return shouldHideCopilotPrescriptionWhenMatchesSticky(
+    sticky: sticky,
+    aluno: aluno,
+    proximaAcaoRaw: proximaAcaoRaw,
+  );
 }
 
 /// Sticky primary opens chat — hide duplicate chat CTA in copilot card.
