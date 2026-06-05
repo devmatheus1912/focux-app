@@ -439,14 +439,17 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
       hasOpenTask: hasOpenTask,
       followUpDue: followUpDue,
     );
-    final VoidCallback onPrimary =
-        hasOpenTask
-            ? openCommandCenter
-            : sticky.isChatAction
-                ? openChat
-                : openCommandCenter;
-    final showSecondaryChat =
-        !hasOpenTask && !sticky.isChatAction && sticky.label != 'Abrir chat';
+    final onPrimary = sticky.isChatAction ? openChat : openCommandCenter;
+    final showSecondaryChat = shouldShowStickySecondaryChat(
+      sticky: sticky,
+      hasOpenTask: hasOpenTask,
+      followUpDue: followUpDue,
+      proximaAcaoText: proximaAcao360?.acao,
+    );
+    final showSecondaryCommandCenter = shouldShowStickySecondaryCommandCenter(
+      sticky: sticky,
+      hasOpenTask: hasOpenTask,
+    );
 
     return SafeArea(
       top: false,
@@ -482,6 +485,35 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
                 ),
               ),
             ),
+            if (showSecondaryCommandCenter) ...[
+              const SizedBox(width: 8),
+              Semantics(
+                button: true,
+                label: 'Abrir Command Center',
+                child: SizedBox(
+                  width: 112,
+                  height: 44,
+                  child: OutlinedButton.icon(
+                    onPressed: openCommandCenter,
+                    icon: Icon(Icons.open_in_new_rounded, size: 16, color: primary),
+                    label: Text(
+                      'Tarefa',
+                      style: TextStyle(
+                        color: primary,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: primary.withValues(alpha: 0.28)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
             if (showSecondaryChat) ...[
               const SizedBox(width: 8),
               Semantics(

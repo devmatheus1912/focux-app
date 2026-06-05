@@ -149,7 +149,7 @@ class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
                             ? null
                             : () => _runAction(
                               () => actions.markContactDone(aluno.id),
-                              'Contato registrado · sincronizado',
+                              'Contato registrado',
                             ),
                     icon:
                         _busy

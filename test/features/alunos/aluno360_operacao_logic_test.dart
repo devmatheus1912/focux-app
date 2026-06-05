@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_operacao_logic.dart';
@@ -53,7 +54,7 @@ void main() {
         followUpDue: false,
       );
       expect(action.label, 'Retomar contato e ajustar plano');
-      expect(action.isChatAction, isFalse);
+      expect(action.isChatAction, isTrue);
     });
 
     test('open task without proxima acao falls back to Ver tarefa', () {
@@ -68,6 +69,7 @@ void main() {
         followUpDue: false,
       );
       expect(action.label, 'Ver tarefa');
+      expect(action.isChatAction, isFalse);
     });
 
     test('uses proxima acao label when no open task', () {
@@ -211,6 +213,52 @@ void main() {
       expect(
         operacaoHeroShowsRisco(
           _aluno(emRisco: true, riscoNivel: 'ALTO', aderenciaPercent: 0),
+        ),
+        isTrue,
+      );
+    });
+  });
+
+  group('operacao sticky secondary CTAs', () {
+    test('hides copilot chat when sticky is chat action', () {
+      const sticky = OperacaoStickyAction(
+        label: 'Abrir chat',
+        icon: Icons.chat_bubble_outline_rounded,
+        isChatAction: true,
+      );
+      expect(
+        shouldHideCopilotChatCta(sticky: sticky, hasOpenTask: false),
+        isTrue,
+      );
+    });
+
+    test('shows secondary command center when task open and chat primary', () {
+      const sticky = OperacaoStickyAction(
+        label: 'Retomar contato',
+        icon: Icons.chat_bubble_outline_rounded,
+        isChatAction: true,
+      );
+      expect(
+        shouldShowStickySecondaryCommandCenter(
+          sticky: sticky,
+          hasOpenTask: true,
+        ),
+        isTrue,
+      );
+    });
+
+    test('shows secondary chat on open task when follow-up due and CC primary', () {
+      const sticky = OperacaoStickyAction(
+        label: 'Ver tarefa',
+        icon: Icons.open_in_new_rounded,
+        isChatAction: false,
+      );
+      expect(
+        shouldShowStickySecondaryChat(
+          sticky: sticky,
+          hasOpenTask: true,
+          followUpDue: true,
+          proximaAcaoText: null,
         ),
         isTrue,
       );

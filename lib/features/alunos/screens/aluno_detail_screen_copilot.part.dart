@@ -550,6 +550,16 @@ class _Aluno360CopilotCard extends ConsumerWidget {
         proximaAcao360 != null
             ? _copilotActionFrom360(proximaAcao360!)
             : null;
+    final followUpDue = isAlunoFollowUpDue(aluno);
+    final stickyAction = resolveOperacaoStickyAction(
+      proximaAcao: proximaAcao360,
+      hasOpenTask: hasOpenTask,
+      followUpDue: followUpDue,
+    );
+    final hideCopilotChat = shouldHideCopilotChatCta(
+      sticky: stickyAction,
+      hasOpenTask: hasOpenTask,
+    );
     final cardPadding = hasOpenTask ? 10.0 : 14.0;
 
     return Container(
@@ -683,12 +693,14 @@ class _Aluno360CopilotCard extends ConsumerWidget {
             ),
           if (!hasOpenTask && openActionsAsync.isLoading)
             const SizedBox(height: 10),
-          _Aluno360ActionRow(
+          if (!hasOpenTask)
+            _Aluno360ActionRow(
             aluno: aluno,
             primary: primary,
             existingTask: openTask,
             openTaskHint: hasOpenCopilotTask360 && openTask == null,
             hidePrimaryCta: hasOpenTask,
+            hideChatCta: hideCopilotChat,
             acao: _resolveCopilotAcao(
               seed360: seed360,
               forceIa: forceIa,

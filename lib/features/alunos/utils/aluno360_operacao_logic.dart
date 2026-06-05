@@ -114,10 +114,14 @@ OperacaoStickyAction resolveOperacaoStickyAction({
 
   if (hasOpenTask) {
     if (acao.isNotEmpty) {
+      final chat = acaoSugereChat(acao) || followUpDue;
       return OperacaoStickyAction(
         label: truncateStickyLabel(acao),
-        icon: Icons.open_in_new_rounded,
-        isChatAction: false,
+        icon:
+            chat
+                ? Icons.chat_bubble_outline_rounded
+                : Icons.open_in_new_rounded,
+        isChatAction: chat,
       );
     }
     return const OperacaoStickyAction(
@@ -288,3 +292,33 @@ bool shouldShowCopilotProfileGapsButton(Aluno aluno, int profileCompletion) {
   if (gapCount == 1 && hasObjectiveGap) return false;
   return true;
 }
+
+/// Sticky primary opens chat — hide duplicate chat CTA in copilot card.
+bool shouldHideCopilotChatCta({
+  required OperacaoStickyAction sticky,
+  required bool hasOpenTask,
+}) {
+  if (sticky.isChatAction) return true;
+  if (hasOpenTask) return true;
+  return false;
+}
+
+/// Outline chat on sticky when primary is Command Center but contact is due.
+bool shouldShowStickySecondaryChat({
+  required OperacaoStickyAction sticky,
+  required bool hasOpenTask,
+  required bool followUpDue,
+  required String? proximaAcaoText,
+}) {
+  if (sticky.isChatAction) return false;
+  if (sticky.label == 'Abrir chat') return false;
+  if (hasOpenTask) return followUpDue;
+  return followUpDue || acaoSugereChat(proximaAcaoText ?? '');
+}
+
+/// Outline Command Center on sticky when chat is primary but a task is open.
+bool shouldShowStickySecondaryCommandCenter({
+  required OperacaoStickyAction sticky,
+  required bool hasOpenTask,
+}) =>
+    hasOpenTask && sticky.isChatAction;

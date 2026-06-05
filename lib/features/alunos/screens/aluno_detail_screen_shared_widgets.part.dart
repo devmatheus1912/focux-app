@@ -337,6 +337,8 @@ class _Aluno360ActionRow extends ConsumerStatefulWidget {
   final bool openTaskHint;
   /// When true and a task is open, primary CTA lives in the sticky bar only.
   final bool hidePrimaryCta;
+  /// When true, chat CTA lives in the sticky bar only.
+  final bool hideChatCta;
   final String acao;
   final Future<bool> Function(String acao) onAssign;
   final void Function(String acao) onPrepareMessage;
@@ -347,6 +349,7 @@ class _Aluno360ActionRow extends ConsumerStatefulWidget {
     required this.existingTask,
     this.openTaskHint = false,
     this.hidePrimaryCta = false,
+    this.hideChatCta = false,
     required this.acao,
     required this.onAssign,
     required this.onPrepareMessage,
@@ -380,11 +383,14 @@ class _Aluno360ActionRowState extends ConsumerState<_Aluno360ActionRow> {
   Widget build(BuildContext context) {
     final hasTask = widget.existingTask != null || widget.openTaskHint || _created;
     final hidePrimary = widget.hidePrimaryCta && hasTask;
+    if (hidePrimary && widget.hideChatCta) {
+      return const SizedBox.shrink();
+    }
     return Row(
       children: [
         if (!hidePrimary) ...[
           Expanded(
-            flex: 3,
+            flex: widget.hideChatCta ? 1 : 3,
             child:
                 hasTask
                     ? Semantics(
@@ -421,6 +427,7 @@ class _Aluno360ActionRowState extends ConsumerState<_Aluno360ActionRow> {
           ),
           const SizedBox(width: 8),
         ],
+        if (!widget.hideChatCta)
         Expanded(
           flex: hidePrimary ? 1 : 2,
           child: Semantics(

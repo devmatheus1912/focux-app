@@ -134,6 +134,12 @@ class _QuickActionPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final pillInk = Color.lerp(
+      primary,
+      isDark ? Colors.white : Colors.black,
+      isDark ? 0.12 : 0.42,
+    )!;
     return Semantics(
       button: true,
       label: label,
@@ -144,13 +150,13 @@ class _QuickActionPill extends StatelessWidget {
         height: 42,
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
-          color: primary.withValues(alpha: 0.07),
+          color: primary.withValues(alpha: isDark ? 0.12 : 0.09),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: primary.withValues(alpha: 0.18)),
+          border: Border.all(color: primary.withValues(alpha: isDark ? 0.32 : 0.38)),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 15, color: primary),
+            Icon(icon, size: 15, color: pillInk),
             const SizedBox(width: 5),
             Expanded(
               child: Text(
@@ -158,7 +164,7 @@ class _QuickActionPill extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: primary,
+                  color: pillInk,
                   fontSize: 10.5,
                   fontWeight: FontWeight.w900,
                 ),

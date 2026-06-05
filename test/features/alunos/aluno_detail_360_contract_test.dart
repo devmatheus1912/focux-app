@@ -49,7 +49,7 @@ void main() {
 
     expect(screen, contains('class _AlunoFollowUpCard'));
     expect(screen, contains('ConsumerState<_AlunoFollowUpCard>'));
-    expect(screen, contains('Contato registrado · sincronizado'));
+    expect(screen, contains('Contato registrado'));
     expect(screen, contains('Aluno360Layout.captionStyle'));
     expect(screen, contains('aderenciaSemanal'));
     expect(screen, contains('class _AlunoOperationalStatusSection'));
@@ -68,6 +68,8 @@ void main() {
     expect(screen, contains('AnimatedSwitcher'));
     expect(screen, contains('hasOpenCopilotTask'));
     expect(screen, contains('hidePrimaryCta'));
+    expect(screen, contains('hideChatCta'));
+    expect(screen, contains('shouldHideCopilotChatCta'));
     expect(screen, contains('AlunoOperacaoAdherenceBars'));
     expect(screen, contains('summarizeAderenciaWeek'));
     expect(screen, contains('class _WeightTrendSparkline'));
