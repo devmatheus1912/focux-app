@@ -19,15 +19,18 @@ class AlunoDetailHeroCard extends StatelessWidget {
     required this.aluno,
     required this.isDark,
     required this.primary,
+    this.onDefineObjective,
   });
 
   final Aluno aluno;
   final bool isDark;
   final Color primary;
+  final VoidCallback? onDefineObjective;
 
   @override
   Widget build(BuildContext context) {
     final displayName = fxTitleCaseName(aluno.nome);
+    final objectiveDefined = alunoObjectiveIsDefined(aluno.objetivo);
     final objective = prettyAlunoObjective(aluno.objetivo);
     final status = alunoHeroStatusVisual(aluno);
     final signal = alunoHeroPrimarySignal(aluno);
@@ -46,6 +49,8 @@ class AlunoDetailHeroCard extends StatelessWidget {
           photoUrl: aluno.fotoUrl,
           displayName: displayName,
           objective: objective,
+          objectiveDefined: objectiveDefined,
+          onDefineObjective: onDefineObjective,
           status: status,
           signal: signal,
           caption: caption,
@@ -62,9 +67,11 @@ class _HeroShell extends StatefulWidget {
     required this.photoUrl,
     required this.displayName,
     required this.objective,
+    required this.objectiveDefined,
     required this.status,
     required this.signal,
     required this.caption,
+    this.onDefineObjective,
   });
 
   final bool isDark;
@@ -72,6 +79,8 @@ class _HeroShell extends StatefulWidget {
   final String? photoUrl;
   final String displayName;
   final String objective;
+  final bool objectiveDefined;
+  final VoidCallback? onDefineObjective;
   final AlunoHeroStatusVisual status;
   final AlunoHeroPrimarySignal signal;
   final String caption;
@@ -201,41 +210,10 @@ class _HeroShellState extends State<_HeroShell>
                               ],
                             ),
                             const SizedBox(height: 4),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(999),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.22),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.fitness_center_rounded,
-                                    size: 11,
-                                    color: dashboardHeroLabelOnTeal(),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Flexible(
-                                    child: Text(
-                                      widget.objective,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        color: dashboardHeroCaptionOnTeal(),
-                                        fontSize: 10.5,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            _HeroObjectiveRow(
+                              label: widget.objective,
+                              defined: widget.objectiveDefined,
+                              onDefineObjective: widget.onDefineObjective,
                             ),
                           ],
                         ),
@@ -310,6 +288,124 @@ class _HeroShellState extends State<_HeroShell>
           ),
         );
       },
+    );
+  }
+}
+
+class _HeroObjectiveRow extends StatelessWidget {
+  const _HeroObjectiveRow({
+    required this.label,
+    required this.defined,
+    this.onDefineObjective,
+  });
+
+  final String label;
+  final bool defined;
+  final VoidCallback? onDefineObjective;
+
+  @override
+  Widget build(BuildContext context) {
+    if (defined) {
+      return Semantics(
+        label: 'Objetivo: $label',
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.fitness_center_rounded,
+                size: 11,
+                color: dashboardHeroLabelOnTeal(),
+              ),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: dashboardHeroCaptionOnTeal(),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Row(
+      children: [
+        Semantics(
+          label: 'Objetivo pendente de definição',
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.28),
+                strokeAlign: BorderSide.strokeAlignInside,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.flag_outlined,
+                  size: 11,
+                  color: Colors.white.withValues(alpha: 0.72),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.78),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (onDefineObjective != null) ...[
+          const SizedBox(width: 2),
+          Semantics(
+            button: true,
+            label: 'Definir objetivo do aluno',
+            child: TextButton(
+              onPressed: onDefineObjective,
+              style: TextButton.styleFrom(
+                minimumSize: Size.zero,
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text(
+                'Definir',
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w800,
+                  decoration: TextDecoration.underline,
+                  decorationThickness: 1.2,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

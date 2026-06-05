@@ -11,7 +11,10 @@ void main() {
     });
 
     test('objetivo vazio', () {
-      expect(prettyAlunoObjective(null), 'Objetivo não definido');
+      expect(prettyAlunoObjective(null), 'Objetivo pendente');
+      expect(alunoObjectiveIsDefined(null), isFalse);
+      expect(alunoObjectiveIsDefined('  '), isFalse);
+      expect(alunoObjectiveIsDefined('Hipertrofia'), isTrue);
     });
   });
 

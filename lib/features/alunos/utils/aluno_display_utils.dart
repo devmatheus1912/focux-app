@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
+/// Whether the student has a prescription objective on file.
+bool alunoObjectiveIsDefined(String? value) => (value ?? '').trim().isNotEmpty;
+
 /// Human-readable objective label for cards and hero.
 String prettyAlunoObjective(String? value) {
   final raw = (value ?? '').trim();
-  if (raw.isEmpty) return 'Objetivo não definido';
+  if (raw.isEmpty) return 'Objetivo pendente';
 
   final normalized =
       raw
@@ -12,7 +15,7 @@ String prettyAlunoObjective(String? value) {
           .replaceAll('-', ' ')
           .replaceAll(RegExp(r'\s+'), ' ')
           .trim();
-  if (normalized.isEmpty) return 'Objetivo não definido';
+  if (normalized.isEmpty) return 'Objetivo pendente';
 
   return switch (normalized) {
     'musculacao' || 'musculaçao' => 'Musculação',

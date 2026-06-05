@@ -31,6 +31,7 @@ import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../constants/aluno_360_layout.dart';
+import '../utils/aluno_display_utils.dart';
 import '../widgets/aluno_detail_hero_card.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -264,6 +265,18 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                       aluno: aluno,
                       isDark: isDark,
                       primary: primary,
+                      onDefineObjective:
+                          alunoObjectiveIsDefined(aluno.objetivo)
+                              ? null
+                              : () async {
+                                final updated = await context.push<bool>(
+                                  '/alunos/$alunoId/editar',
+                                  extra: aluno,
+                                );
+                                if (updated == true) {
+                                  invalidateAluno360Providers(ref, alunoId);
+                                }
+                              },
                     ),
                   ),
                 ),

@@ -90,6 +90,9 @@ void main() {
     expect(screen, isNot(contains('operational_metrics.part.dart')));
     expect(screen, contains('class AlunoDetailHeroCard'));
     expect(screen, contains('aluno360_hero_card'));
+    expect(screen, contains('class _HeroObjectiveRow'));
+    expect(screen, contains('alunoObjectiveIsDefined'));
+    expect(screen, contains('onDefineObjective'));
     expect(screen, contains('Aluno360Layout'));
     expect(screen, contains('operacaoScrollBottomReserve'));
     expect(screen, contains('layoutBuilder:'));
