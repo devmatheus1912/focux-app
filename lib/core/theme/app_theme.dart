@@ -223,7 +223,7 @@ class AppTheme {
       ),
 
       // ── Cards: TOKENS STRIP 12px + soft shadow ───────────────────────
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: dark ? EagleTokens.darkCard : surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
@@ -351,7 +351,7 @@ class AppTheme {
 
       dividerTheme: DividerThemeData(color: outline, thickness: 0.5, space: 0),
 
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(EagleTokens.radiusXl),
         ),
@@ -456,7 +456,7 @@ class AppTheme {
       ),
 
       // ── TabBar: refined with brand accent ───────────────────────────
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         labelColor: primary,
         unselectedLabelColor: onSurfMute,
         indicatorColor: primary,
