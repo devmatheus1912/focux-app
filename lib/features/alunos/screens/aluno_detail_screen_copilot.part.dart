@@ -461,7 +461,12 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      'Sugestão com base no perfil de hoje.',
+                      copilotCardSubtitle(
+                        forceIa: forceIa,
+                        iaAsync: iaAsync,
+                        resumoLoading:
+                            resumoAsync.isLoading && !resumoAsync.hasValue,
+                      ),
                       style: TextStyle(
                         color: mute,
                         fontSize: 12.5,
@@ -525,26 +530,14 @@ class _Aluno360CopilotCard extends ConsumerWidget {
             const SizedBox(height: 10),
           ],
           if (showCopilotPrescription) ...[
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color:
-                    isDark
-                        ? Colors.white.withValues(alpha: 0.04)
-                        : BrandPalette.softer(primary),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: line),
-              ),
-              child: Aluno360CopilotPrescriptionBody(
-                aluno: aluno,
-                primary: primary,
-                fallback: fallback,
-                seed360: seed360,
-                forceIa: forceIa,
-                iaAsync: iaAsync,
-                resumoLoading: resumoAsync.isLoading && !resumoAsync.hasValue,
-              ),
+            Aluno360CopilotPrescriptionBody(
+              aluno: aluno,
+              primary: primary,
+              fallback: fallback,
+              seed360: seed360,
+              forceIa: forceIa,
+              iaAsync: iaAsync,
+              resumoLoading: resumoAsync.isLoading && !resumoAsync.hasValue,
             ),
             const SizedBox(height: 10),
           ],

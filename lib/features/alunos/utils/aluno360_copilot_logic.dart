@@ -210,6 +210,22 @@ String copilotMensagemPronta(Aluno aluno, String acao) {
   return 'Oi, $primeiroNome. Notei que você se afastou um pouco dos treinos. Quer retomar? Me responde por aqui que eu ajusto o plano.';
 }
 
+String copilotCardSubtitle({
+  required bool forceIa,
+  required AsyncValue<Map<String, dynamic>>? iaAsync,
+  required bool resumoLoading,
+}) {
+  if (forceIa && iaAsync != null) {
+    return iaAsync.when(
+      loading: () => 'Gerando sugestão com IA…',
+      error: (_, __) => 'Sugestão do Aluno 360 · IA indisponível agora',
+      data: (_) => 'Atualizado com IA · toque ↻ para regenerar',
+    );
+  }
+  if (resumoLoading) return 'Carregando sinais do perfil…';
+  return 'Sugestão com base no perfil de hoje.';
+}
+
 String copilotDisplayAction(Aluno aluno, String acao) {
   final normalized = normalizeIaCopilotAcao(acao);
   final lower = normalized.toLowerCase();

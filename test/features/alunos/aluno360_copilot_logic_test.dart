@@ -201,6 +201,41 @@ void main() {
     });
   });
 
+  group('copilotCardSubtitle', () {
+    test('shows IA loading copy', () {
+      expect(
+        copilotCardSubtitle(
+          forceIa: true,
+          iaAsync: const AsyncValue.loading(),
+          resumoLoading: false,
+        ),
+        'Gerando sugestão com IA…',
+      );
+    });
+
+    test('shows IA success copy', () {
+      expect(
+        copilotCardSubtitle(
+          forceIa: true,
+          iaAsync: const AsyncValue.data({'acao': 'Teste'}),
+          resumoLoading: false,
+        ),
+        'Atualizado com IA · toque ↻ para regenerar',
+      );
+    });
+
+    test('falls back to profile copy', () {
+      expect(
+        copilotCardSubtitle(
+          forceIa: false,
+          iaAsync: null,
+          resumoLoading: false,
+        ),
+        'Sugestão com base no perfil de hoje.',
+      );
+    });
+  });
+
   group('normalizeIaCopilotAcao', () {
     test('strips LLM preamble and capitalizes action', () {
       expect(

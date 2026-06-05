@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_copilot_logic.dart';
@@ -39,7 +41,7 @@ class _Aluno360CopilotPrescriptionState
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final caption = isDark ? EagleTokens.darkInkMute : const Color(0xFF374151);
+    final caption = isDark ? EagleTokens.darkInkMute : const Color(0xFF475569);
     final reason = widget.reason.trim();
     final showExpandAction = widget.action.trim().length > 72;
     final showExpandReason = reason.length > 72;
@@ -54,7 +56,7 @@ class _Aluno360CopilotPrescriptionState
         children: [
           Row(
             children: [
-              Icon(Icons.auto_awesome, color: widget.color, size: 17),
+              Icon(Icons.auto_awesome_rounded, color: widget.color, size: 17),
               const SizedBox(width: 7),
               Expanded(
                 child: Text(
@@ -65,32 +67,13 @@ class _Aluno360CopilotPrescriptionState
                     color: ink,
                     fontSize: 12,
                     fontWeight: FontWeight.w900,
+                    letterSpacing: 0.2,
                   ),
                 ),
               ),
-              if (widget.isIaSuggestion)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 7,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: widget.color.withValues(alpha: isDark ? 0.18 : 0.12),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    'IA',
-                    style: TextStyle(
-                      color: widget.color,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.4,
-                    ),
-                  ),
-                ),
             ],
           ),
-          const SizedBox(height: 7),
+          const SizedBox(height: 8),
           GestureDetector(
             onTap:
                 showExpandAction
@@ -103,9 +86,9 @@ class _Aluno360CopilotPrescriptionState
               overflow: _expandedAction ? null : TextOverflow.ellipsis,
               style: TextStyle(
                 color: ink,
-                fontSize: 14,
+                fontSize: 15,
                 fontWeight: FontWeight.w800,
-                height: 1.32,
+                height: 1.34,
               ),
             ),
           ),
@@ -122,23 +105,36 @@ class _Aluno360CopilotPrescriptionState
               ),
             ),
           if (reason.isNotEmpty) ...[
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             GestureDetector(
               onTap:
                   showExpandReason
                       ? () => setState(() => _expandedReason = !_expandedReason)
                       : null,
               behavior: HitTestBehavior.opaque,
-              child: Text(
-                reason,
-                maxLines: _expandedReason ? null : _collapsedLines,
-                overflow: _expandedReason ? null : TextOverflow.ellipsis,
-                style: TextStyle(color: caption, fontSize: 12, height: 1.28),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.insights_outlined, size: 14, color: caption),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      reason,
+                      maxLines: _expandedReason ? null : _collapsedLines,
+                      overflow: _expandedReason ? null : TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: caption,
+                        fontSize: 12,
+                        height: 1.32,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             if (showExpandReason && !_expandedReason)
               Padding(
-                padding: const EdgeInsets.only(top: 4),
+                padding: const EdgeInsets.only(top: 4, left: 20),
                 child: Text(
                   'Ver contexto',
                   style: TextStyle(
@@ -232,8 +228,14 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final line = ShellChrome.of(context).line;
+    final isIaLoading = forceIa && (iaAsync?.isLoading ?? false);
+    final isIaData = forceIa && (iaAsync?.hasValue ?? false);
+
+    late final Widget child;
     if (forceIa && iaAsync != null) {
-      return iaAsync!.when(
+      child = iaAsync!.when(
         loading: () => Aluno360CopilotPrescriptionLoading(color: primary),
         error:
             (_, __) => _fromContent(
@@ -250,16 +252,53 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
               isIaSuggestion: true,
             ),
       );
-    }
-    if (seed360 != null) {
-      return _fromContent(
+    } else if (seed360 != null) {
+      child = _fromContent(
         resolveCopilotPrescriptionFromAction(aluno, seed360!, fallback),
       );
+    } else if (resumoLoading) {
+      child = Aluno360CopilotPrescriptionLoading(color: primary);
+    } else {
+      child = _fromContent(offlineCopilotPrescription(fallback));
     }
-    if (resumoLoading) {
-      return Aluno360CopilotPrescriptionLoading(color: primary);
-    }
-    return _fromContent(offlineCopilotPrescription(fallback));
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      decoration: BoxDecoration(
+        color:
+            isDark
+                ? Colors.white.withValues(alpha: 0.04)
+                : BrandPalette.softer(primary),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isIaData ? primary.withValues(alpha: 0.28) : line,
+        ),
+        boxShadow:
+            isIaData
+                ? [
+                  BoxShadow(
+                    color: primary.withValues(alpha: isDark ? 0.12 : 0.08),
+                    blurRadius: 14,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+                : null,
+      ),
+      foregroundDecoration:
+          isIaData || isIaLoading
+              ? BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                border: Border(
+                  left: BorderSide(
+                    color: primary.withValues(alpha: 0.85),
+                    width: 3,
+                  ),
+                ),
+              )
+              : null,
+      child: child,
+    );
   }
 
   Widget _fromContent(
