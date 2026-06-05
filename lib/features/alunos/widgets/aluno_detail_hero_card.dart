@@ -166,7 +166,7 @@ class _HeroShellState extends State<_HeroShell>
           child: CustomPaint(
             foregroundPainter: DashboardHeroGridPainter(),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(11, 8, 11, 8),
+              padding: const EdgeInsets.fromLTRB(11, 6, 11, 6),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
@@ -220,7 +220,7 @@ class _HeroShellState extends State<_HeroShell>
                       ),
                     ],
                   ),
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 4),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -344,44 +344,47 @@ class _HeroObjectiveRow extends StatelessWidget {
 
     return Row(
       children: [
-        Semantics(
-          label: 'Objetivo pendente de definição',
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.06),
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.28),
-                strokeAlign: BorderSide.strokeAlignInside,
+        Flexible(
+          child: Semantics(
+            label: 'Objetivo pendente de definição',
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.28),
+                  strokeAlign: BorderSide.strokeAlignInside,
+                ),
               ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.flag_outlined,
-                  size: 11,
-                  color: Colors.white.withValues(alpha: 0.72),
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.78),
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w600,
-                    fontStyle: FontStyle.italic,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.flag_outlined,
+                    size: 11,
+                    color: Colors.white.withValues(alpha: 0.72),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.78),
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w600,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-        if (onDefineObjective != null) ...[
-          const SizedBox(width: 2),
+        if (onDefineObjective != null)
           Semantics(
             button: true,
             label: 'Definir objetivo do aluno',
@@ -404,7 +407,6 @@ class _HeroObjectiveRow extends StatelessWidget {
               ),
             ),
           ),
-        ],
       ],
     );
   }

@@ -25,6 +25,7 @@ final _alunoFixture = Aluno(
   proximoContato: '2026-06-10',
   dataNascimento: '1995-03-15',
   altura: 1.68,
+  objetivo: 'Hipertrofia',
 );
 
 final _emptyEvolucaoFixture = EvolucaoInteligente(
@@ -53,6 +54,15 @@ final _aluno360Fixture = Aluno360(
     prioridade: 'P2',
   ),
   evolucaoInteligente: _emptyEvolucaoFixture,
+  aderenciaSemanal: const [
+    {'data': '2026-05-29', 'checkins': 1},
+    {'data': '2026-05-30', 'checkins': 0},
+    {'data': '2026-05-31', 'checkins': 2},
+    {'data': '2026-06-01', 'checkins': 1},
+    {'data': '2026-06-02', 'checkins': 0},
+    {'data': '2026-06-03', 'checkins': 1},
+    {'data': '2026-06-04', 'checkins': 0},
+  ],
 );
 
 List<Override> _aluno360Overrides() {
@@ -63,7 +73,6 @@ List<Override> _aluno360Overrides() {
     alunoOpenIaActionsProvider(_alunoId).overrideWith((ref) async => const []),
     alunoMedidasResumoProvider(_alunoId).overrideWith((ref) async => null),
     alunoPesoHistoricoProvider(_alunoId).overrideWith((ref) async => const []),
-    alunoAderenciaSemanalProvider(_alunoId).overrideWith((ref) async => const []),
     alunoCopilotoActionProvider(_alunoId).overrideWith((ref) async => const {}),
     alertasConfigProvider.overrideWith(
       (ref) async => AlertasConfiguracao(

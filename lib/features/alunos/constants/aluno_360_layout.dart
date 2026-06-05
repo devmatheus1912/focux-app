@@ -15,7 +15,7 @@ abstract final class Aluno360Layout {
   static double heroBodyHeight(BuildContext context) {
     final textScale =
         MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 1.25);
-    return 106 + ((textScale - 1) * 28);
+    return 118 + ((textScale - 1) * 28);
   }
 
   /// Toolbar inset + hero card + bottom padding — no dead gap above the card.

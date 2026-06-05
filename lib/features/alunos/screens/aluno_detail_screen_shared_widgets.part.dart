@@ -833,26 +833,20 @@ class _AlunoDetailHeroSkeleton extends StatelessWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
                     children: [
-                      Expanded(child: bone(120, 16, radius: 8)),
+                      Expanded(child: bone(120, 14, radius: 8)),
                       const SizedBox(width: 8),
-                      bone(64, 22, radius: 11),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  bone(double.infinity, 28, radius: 10),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(child: bone(80, 10, radius: 6)),
-                      const SizedBox(width: 12),
-                      bone(48, 22, radius: 8),
+                      bone(64, 20, radius: 11),
                     ],
                   ),
                   const SizedBox(height: 6),
-                  bone(160, 10, radius: 6),
+                  bone(double.infinity, 22, radius: 10),
+                  const SizedBox(height: 6),
+                  bone(140, 9, radius: 6),
                 ],
               ),
             ),

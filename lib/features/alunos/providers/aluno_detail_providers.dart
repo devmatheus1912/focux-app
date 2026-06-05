@@ -83,7 +83,8 @@ final alunoTimeline360ApiProvider =
 
 final alunoAderenciaSemanalProvider =
     FutureProvider.family<List<Map<String, dynamic>>, int>((ref, alunoId) async {
-      return ref.read(alunoRepositoryProvider).aderenciaSemanal(alunoId);
+      final aluno360 = await ref.watch(aluno360Provider(alunoId).future);
+      return aluno360.aderenciaSemanal;
     });
 
 /// Last weight measurements from avaliações físicas (up to 7 points, chronological).

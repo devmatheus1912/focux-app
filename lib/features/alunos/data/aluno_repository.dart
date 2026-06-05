@@ -288,6 +288,7 @@ class Aluno360 {
   final ProximaAcaoResumo proximaAcao;
   final EvolucaoInteligente evolucaoInteligente;
   final bool? hasOpenCopilotTask;
+  final List<Map<String, dynamic>> aderenciaSemanal;
 
   const Aluno360({
     required this.aluno,
@@ -296,6 +297,7 @@ class Aluno360 {
     required this.proximaAcao,
     required this.evolucaoInteligente,
     this.hasOpenCopilotTask,
+    this.aderenciaSemanal = const [],
   });
 
   factory Aluno360.fromJson(Map<String, dynamic> json) => Aluno360(
@@ -313,6 +315,10 @@ class Aluno360 {
       json['evolucaoInteligente'] as Map<String, dynamic>,
     ),
     hasOpenCopilotTask: json['hasOpenCopilotTask'] as bool?,
+    aderenciaSemanal:
+        (json['aderenciaSemanal'] as List<dynamic>? ?? const [])
+            .map((e) => Map<String, dynamic>.from(e as Map))
+            .toList(),
   );
 }
 
