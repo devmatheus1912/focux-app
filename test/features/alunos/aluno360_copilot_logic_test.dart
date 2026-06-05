@@ -201,7 +201,55 @@ void main() {
     });
   });
 
+  group('normalizeIaCopilotAcao', () {
+    test('strips LLM preamble and capitalizes action', () {
+      expect(
+        normalizeIaCopilotAcao(
+          'A próxima ação mais importante é enviar uma mensagem de contato.',
+        ),
+        'Enviar uma mensagem de contato.',
+      );
+    });
+  });
+
+  group('formatCopilotIaMotivo', () {
+    test('humanizes 999 days without treino', () {
+      expect(
+        formatCopilotIaMotivo('Última atividade há 999 dia(s), aderência de 0%'),
+        contains('Sem treinos recentes'),
+      );
+    });
+
+    test('humanizes recent inactivity', () {
+      expect(
+        formatCopilotIaMotivo('Última atividade há 14 dia(s), aderência de 0%'),
+        'Sem treino há 14 dias · aderência de 0%.',
+      );
+    });
+  });
+
+  group('copilotChatActionLabel', () {
+    test('returns short sticky label for chat actions', () {
+      expect(
+        copilotChatActionLabel(
+          'A próxima ação mais importante é enviar mensagem de contato',
+        ),
+        'Enviar mensagem',
+      );
+    });
+  });
+
   group('copilotStickyLabel', () {
+    test('uses short label instead of truncated IA preamble', () {
+      expect(
+        copilotStickyLabel(
+          _aluno(),
+          'A próxima ação mais importante é enviar mensagem de contato',
+        ),
+        'Enviar mensagem',
+      );
+    });
+
     test('aligns sticky and prescription for mapa corporal', () {
       expect(
         copilotStickyLabel(_aluno(), 'Completar mapa corporal'),

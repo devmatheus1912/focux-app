@@ -83,15 +83,17 @@ Map<String, dynamic> copilotActionFrom360(ProximaAcaoResumo proxima) => {
 };
 
 Map<String, dynamic> copilotActionFromIa(Map<String, dynamic> action) {
-  final acao =
+  final raw =
       (action['acao'] ?? action['mensagem'] ?? action['descricao'] ?? '')
+          .toString();
+  final acao = normalizeIaCopilotAcao(raw);
+  final motivoRaw =
+      (action['motivo'] ?? 'Gerado com base nos sinais atuais do aluno.')
           .toString();
   return {
     'titulo': 'Sugestão IA',
-    'acao': acao,
-    'motivo':
-        (action['motivo'] ?? 'Gerado com base nos sinais atuais do aluno.')
-            .toString(),
+    'acao': acao.isEmpty ? cleanCopilotText(raw) : acao,
+    'motivo': formatCopilotIaMotivo(motivoRaw),
     'fonte': 'IA',
   };
 }
@@ -105,16 +107,18 @@ ProximaAcaoResumo? resolveCopilotProximaAcaoResumo({
   if (forceIa && iaAsync != null) {
     return iaAsync.maybeWhen(
       data: (action) {
-        final acao = cleanCopilotText(
-          (action['acao'] ?? action['mensagem'] ?? action['descricao'] ?? '')
-              .toString(),
-        );
-        if (acao.isEmpty) return proximaAcao360;
+        final raw =
+            (action['acao'] ?? action['mensagem'] ?? action['descricao'] ?? '')
+                .toString();
+        final acao = normalizeIaCopilotAcao(raw);
+        if (acao.isEmpty && raw.trim().isEmpty) return proximaAcao360;
         return ProximaAcaoResumo(
-          acao: acao,
-          motivo:
-              (action['motivo'] ?? 'Gerado com base nos sinais atuais do aluno.')
-                  .toString(),
+          acao: acao.isEmpty ? cleanCopilotText(raw) : acao,
+          motivo: formatCopilotIaMotivo(
+            (action['motivo'] ??
+                    'Gerado com base nos sinais atuais do aluno.')
+                .toString(),
+          ),
           fonte: 'IA',
           prioridade: 'P1',
         );
@@ -131,6 +135,61 @@ String cleanCopilotText(String value) {
       .replaceAll(RegExp(r'^\s*[-•]\s*', multiLine: true), '')
       .replaceAll(RegExp(r'\s+'), ' ')
       .trim();
+}
+
+/// Strips LLM preambles so UI shows the actionable sentence, not boilerplate.
+String normalizeIaCopilotAcao(String raw) {
+  var text = cleanCopilotText(raw);
+  if (text.isEmpty) return text;
+
+  const preambles = [
+    r'^a próxima ação mais importante é\s*',
+    r'^a próxima ação mais importante:\s*',
+    r'^a próxima melhor ação é\s*',
+    r'^próxima ação:\s*',
+    r'^sugiro que você\s*',
+    r'^recomendo que você\s*',
+    r'^recomendo\s*',
+  ];
+  for (final pattern in preambles) {
+    text = text.replaceFirst(RegExp(pattern, caseSensitive: false), '');
+  }
+  text = text.trim();
+  if (text.isEmpty) return cleanCopilotText(raw);
+  return text[0].toUpperCase() + text.substring(1);
+}
+
+String formatCopilotIaMotivo(String motivo) {
+  final trimmed = motivo.trim();
+  if (trimmed.isEmpty) {
+    return 'Gerado com base nos sinais atuais do aluno.';
+  }
+
+  final match = RegExp(
+    r'[Úú]ltima atividade há (\d+) dia\(s\), aderência de (\d+)%',
+    caseSensitive: false,
+  ).firstMatch(trimmed);
+  if (match != null) {
+    final dias = int.tryParse(match.group(1)!) ?? 0;
+    final aderencia = match.group(2)!;
+    if (dias >= 90 || dias == 999) {
+      return 'Sem treinos recentes · aderência de $aderencia% nos últimos 30 dias.';
+    }
+    if (dias == 0) return 'Treinou hoje · aderência de $aderencia%.';
+    if (dias == 1) return 'Último treino ontem · aderência de $aderencia%.';
+    return 'Sem treino há $dias dias · aderência de $aderencia%.';
+  }
+  return trimmed;
+}
+
+String copilotChatActionLabel(String acao) {
+  final lower = normalizeIaCopilotAcao(acao).toLowerCase();
+  if (lower.contains('whatsapp')) return 'Enviar WhatsApp';
+  if (lower.contains('mensagem')) return 'Enviar mensagem';
+  if (lower.contains('contato') || lower.contains('retomar')) {
+    return 'Retomar contato';
+  }
+  return 'Abrir chat';
 }
 
 String copilotMensagemPronta(Aluno aluno, String acao) {
@@ -152,7 +211,8 @@ String copilotMensagemPronta(Aluno aluno, String acao) {
 }
 
 String copilotDisplayAction(Aluno aluno, String acao) {
-  final lower = cleanCopilotText(acao).toLowerCase();
+  final normalized = normalizeIaCopilotAcao(acao);
+  final lower = normalized.toLowerCase();
   if (lower.contains('mapa') || lower.contains('corporal')) {
     return 'Completar mapa corporal para orientar a prescrição.';
   }
@@ -168,9 +228,11 @@ String copilotDisplayAction(Aluno aluno, String acao) {
   if (lower.contains('treino') || lower.contains('carga')) {
     return 'Ajustar treino e orientar próximo check-in.';
   }
-  if (acaoSugereChat(acao)) {
-    return truncateCopilotStickyLabel(acao);
+  if (acaoSugereChat(normalized)) {
+    if (normalized.length <= 140) return normalized;
+    return '${copilotChatActionLabel(normalized)} com mensagem objetiva.';
   }
+  if (normalized.length <= 140 && normalized.isNotEmpty) return normalized;
   return 'Retomar contato e ajustar plano com base na resposta.';
 }
 
@@ -194,14 +256,14 @@ bool acaoSugereChat(String acao) {
 
 /// Short label shared by sticky bar and prescription action line.
 String copilotStickyLabel(Aluno aluno, String acao) {
-  final cleaned = cleanCopilotText(acao);
+  final cleaned = normalizeIaCopilotAcao(acao);
   if (cleaned.isEmpty) return 'Ver próxima ação';
   final lower = cleaned.toLowerCase();
   if (lower.contains('mapa') || lower.contains('corporal')) {
     return 'Completar mapa corporal';
   }
   if (lower.contains('objetivo')) return 'Definir objetivo';
-  if (acaoSugereChat(cleaned)) return truncateCopilotStickyLabel(cleaned);
+  if (acaoSugereChat(cleaned)) return copilotChatActionLabel(cleaned);
   return truncateCopilotStickyLabel(copilotDisplayAction(aluno, cleaned));
 }
 
@@ -317,14 +379,16 @@ String resolveCopilotAcao({
 }) {
   if (forceIa && iaAsync != null) {
     return iaAsync.maybeWhen(
-      data:
-          (action) => cleanCopilotText(
+      data: (action) {
+        final raw =
             (action['acao'] ??
                     action['mensagem'] ??
                     action['descricao'] ??
                     fallback)
-                .toString(),
-          ),
+                .toString();
+        final normalized = normalizeIaCopilotAcao(raw);
+        return cleanCopilotText(normalized.isEmpty ? raw : normalized);
+      },
       orElse: () => fallback,
     );
   }
@@ -339,16 +403,18 @@ CopilotPrescriptionContent resolveCopilotPrescriptionFromAction(
   Map<String, dynamic> action,
   String fallback,
 ) {
+  final rawAcao =
+      (action['acao'] ?? action['mensagem'] ?? action['descricao'] ?? fallback)
+          .toString();
+  final motivoRaw = (action['motivo'] ?? 'Baseado nos sinais atuais.')
+      .toString();
+  final isIa = (action['fonte'] ?? '').toString().toUpperCase() == 'IA';
   return CopilotPrescriptionContent(
     title:
         (action['titulo'] ?? action['tipo'] ?? 'Próxima melhor ação')
             .toString(),
-    action: copilotDisplayAction(
-      aluno,
-      (action['acao'] ?? action['mensagem'] ?? action['descricao'] ?? fallback)
-          .toString(),
-    ),
-    reason: (action['motivo'] ?? 'Baseado nos sinais atuais.').toString(),
+    action: copilotDisplayAction(aluno, rawAcao),
+    reason: isIa ? formatCopilotIaMotivo(motivoRaw) : motivoRaw,
   );
 }
 

@@ -15,12 +15,14 @@ class Aluno360CopilotPrescription extends StatefulWidget {
     required this.action,
     required this.reason,
     required this.color,
+    this.isIaSuggestion = false,
   });
 
   final String title;
   final String action;
   final String reason;
   final Color color;
+  final bool isIaSuggestion;
 
   @override
   State<Aluno360CopilotPrescription> createState() =>
@@ -30,7 +32,8 @@ class Aluno360CopilotPrescription extends StatefulWidget {
 class _Aluno360CopilotPrescriptionState
     extends State<Aluno360CopilotPrescription> {
   static const _collapsedLines = 3;
-  bool _expanded = false;
+  bool _expandedAction = false;
+  bool _expandedReason = false;
 
   @override
   Widget build(BuildContext context) {
@@ -38,12 +41,14 @@ class _Aluno360CopilotPrescriptionState
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final caption = isDark ? EagleTokens.darkInkMute : const Color(0xFF374151);
     final reason = widget.reason.trim();
-    final showExpand = reason.length > 72;
+    final showExpandAction = widget.action.trim().length > 72;
+    final showExpandReason = reason.length > 72;
 
     return Semantics(
       label:
           '${widget.title}. ${widget.action}. $reason'
-          '${showExpand && !_expanded ? '. Toque para ver texto completo' : ''}',
+          '${showExpandAction && !_expandedAction ? '. Toque para ver ação completa' : ''}'
+          '${showExpandReason && !_expandedReason ? '. Toque para ver contexto completo' : ''}',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -63,40 +68,79 @@ class _Aluno360CopilotPrescriptionState
                   ),
                 ),
               ),
+              if (widget.isIaSuggestion)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: widget.color.withValues(alpha: isDark ? 0.18 : 0.12),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    'IA',
+                    style: TextStyle(
+                      color: widget.color,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 7),
-          Text(
-            widget.action,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: ink,
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              height: 1.28,
+          GestureDetector(
+            onTap:
+                showExpandAction
+                    ? () => setState(() => _expandedAction = !_expandedAction)
+                    : null,
+            behavior: HitTestBehavior.opaque,
+            child: Text(
+              widget.action,
+              maxLines: _expandedAction ? null : _collapsedLines,
+              overflow: _expandedAction ? null : TextOverflow.ellipsis,
+              style: TextStyle(
+                color: ink,
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                height: 1.32,
+              ),
             ),
           ),
+          if (showExpandAction && !_expandedAction)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                'Ver ação completa',
+                style: TextStyle(
+                  color: widget.color,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
           if (reason.isNotEmpty) ...[
-            const SizedBox(height: 5),
+            const SizedBox(height: 6),
             GestureDetector(
               onTap:
-                  showExpand
-                      ? () => setState(() => _expanded = !_expanded)
+                  showExpandReason
+                      ? () => setState(() => _expandedReason = !_expandedReason)
                       : null,
               behavior: HitTestBehavior.opaque,
               child: Text(
                 reason,
-                maxLines: _expanded ? null : _collapsedLines,
-                overflow: _expanded ? null : TextOverflow.ellipsis,
-                style: TextStyle(color: caption, fontSize: 12, height: 1.25),
+                maxLines: _expandedReason ? null : _collapsedLines,
+                overflow: _expandedReason ? null : TextOverflow.ellipsis,
+                style: TextStyle(color: caption, fontSize: 12, height: 1.28),
               ),
             ),
-            if (showExpand && !_expanded)
+            if (showExpandReason && !_expandedReason)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(
-                  'Ver mais',
+                  'Ver contexto',
                   style: TextStyle(
                     color: widget.color,
                     fontSize: 11,
@@ -194,6 +238,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
         error:
             (_, __) => _fromContent(
               iaErrorCopilotPrescription(fallback),
+              isIaSuggestion: false,
             ),
         data:
             (action) => _fromContent(
@@ -202,6 +247,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
                 copilotActionFromIa(action),
                 fallback,
               ),
+              isIaSuggestion: true,
             ),
       );
     }
@@ -216,12 +262,16 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
     return _fromContent(offlineCopilotPrescription(fallback));
   }
 
-  Widget _fromContent(CopilotPrescriptionContent content) {
+  Widget _fromContent(
+    CopilotPrescriptionContent content, {
+    bool isIaSuggestion = false,
+  }) {
     return Aluno360CopilotPrescription(
       title: content.title,
       action: content.action,
       reason: content.reason,
       color: primary,
+      isIaSuggestion: isIaSuggestion,
     );
   }
 }

@@ -54,7 +54,7 @@ void main() {
         hasOpenTask: true,
         followUpDue: false,
       );
-      expect(action.label, 'Retomar contato e ajustar plano');
+      expect(action.label, 'Retomar contato');
       expect(action.destination, OperacaoStickyDestination.chat);
     });
 
@@ -86,7 +86,7 @@ void main() {
         hasOpenTask: false,
         followUpDue: false,
       );
-      expect(action.label, 'Enviar mensagem de follow-up');
+      expect(action.label, 'Enviar mensagem');
       expect(action.destination, OperacaoStickyDestination.chat);
     });
 
