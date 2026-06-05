@@ -82,82 +82,10 @@ class _Aluno360TimelineCard extends StatelessWidget {
   }
 
   void _openTimelineCheckin(BuildContext context) {
-    final firstName =
-        aluno.nome.trim().isEmpty ? 'aluno' : aluno.nome.trim().split(' ').first;
-    final message =
-        'Oi, $firstName. Como foi seu último treino? Me manda carga, repetições e qualquer sensação fora do normal.';
-    final primary = Theme.of(context).colorScheme.primary;
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder:
-          (sheetContext) => SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 4, 20, 20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Mensagem de check-in',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-                  ),
-                  const SizedBox(height: TokensStrip.s4),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: primary.withValues(alpha: 0.06),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: primary.withValues(alpha: 0.16),
-                      ),
-                    ),
-                    child: Text(message, style: const TextStyle(height: 1.35)),
-                  ),
-                  const SizedBox(height: TokensStrip.s4),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () async {
-                            await Clipboard.setData(
-                              ClipboardData(text: message),
-                            );
-                            if (sheetContext.mounted) {
-                              Navigator.of(sheetContext).pop();
-                              FeedbackHelper.showSnackBar(
-                                context,
-                                const SnackBar(
-                                  content: Text('Mensagem copiada.'),
-                                ),
-                              );
-                            }
-                          },
-                          icon: const Icon(Icons.copy_rounded, size: 16),
-                          label: const Text('Copiar'),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: FxLiquidPrimaryButton(
-                          icon: Icons.chat_bubble_outline,
-                          label: 'Abrir chat',
-                          onPressed: () {
-                            Navigator.of(sheetContext).pop();
-                            context.push(
-                              '/alunos/${aluno.id}/chat',
-                              extra: aluno.nome,
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
+    showAlunoCheckinMessageSheet(
+      context,
+      alunoId: aluno.id,
+      alunoNome: aluno.nome,
     );
   }
 

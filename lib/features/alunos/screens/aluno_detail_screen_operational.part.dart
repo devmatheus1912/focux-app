@@ -260,9 +260,10 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
                       height: 36,
                       child: OutlinedButton.icon(
                         onPressed:
-                            () => context.push(
-                              '/alunos/$alunoId/chat',
-                              extra: aluno.nome,
+                            () => showAlunoCheckinMessageSheet(
+                              context,
+                              alunoId: alunoId,
+                              alunoNome: aluno.nome,
                             ),
                         icon: Icon(
                           Icons.message_outlined,

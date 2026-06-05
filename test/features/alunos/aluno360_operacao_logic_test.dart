@@ -106,6 +106,23 @@ void main() {
       expect(action.destination, OperacaoStickyDestination.evolucao);
     });
 
+    test('maps IA contate phrasing to chat sticky', () {
+      final action = resolveOperacaoStickyAction(
+        aluno: _aluno(),
+        proximaAcao: const ProximaAcaoResumo(
+          acao:
+              'Contate Beatriz para entender os motivos de sua inatividade e incentivá-la a sincronizar s',
+          motivo: 'Radar',
+          fonte: 'IA',
+          prioridade: 'P1',
+        ),
+        hasOpenTask: false,
+        followUpDue: false,
+      );
+      expect(action.label, 'Retomar contato · wearable');
+      expect(action.destination, OperacaoStickyDestination.chat);
+    });
+
     test('truncates long labels', () {
       final action = resolveOperacaoStickyAction(
         aluno: _aluno(),
@@ -460,6 +477,114 @@ void main() {
   group('weekdayLetterFromIso', () {
     test('returns D for Sunday', () {
       expect(weekdayLetterFromIso('2026-06-07'), 'D');
+    });
+  });
+
+  group('checkinMensagemPronta', () {
+    test('uses first name in outreach copy', () {
+      expect(
+        checkinMensagemPronta('Beatriz Carvalho'),
+        contains('Oi, Beatriz.'),
+      );
+    });
+
+    test('falls back when name is empty', () {
+      expect(checkinMensagemPronta(''), contains('Oi, aluno.'));
+    });
+  });
+
+  group('alunoChatRouteExtra', () {
+    test('includes draft for chat route', () {
+      expect(
+        alunoChatRouteExtra(nome: 'Ana', draft: 'Oi, Ana.'),
+        {'nome': 'Ana', 'draft': 'Oi, Ana.'},
+      );
+    });
+
+    test('omits empty draft', () {
+      expect(
+        alunoChatRouteExtra(nome: 'Ana', draft: '  '),
+        {'nome': 'Ana'},
+      );
+    });
+  });
+
+  group('resolveStickyDisplayLabel', () {
+    test('uses compact backend label when secondary visible', () {
+      final label = resolveStickyDisplayLabel(
+        sticky: const OperacaoStickyAction(
+          label: 'Retomar contato · wearable',
+          icon: Icons.chat,
+          destination: OperacaoStickyDestination.chat,
+        ),
+        compact: true,
+        proximaAcao: const ProximaAcaoResumo(
+          acao: 'Contate aluno',
+          motivo: 'x',
+          fonte: 'IA',
+          prioridade: 'P1',
+          stickyLabelCompact: 'Contato',
+        ),
+      );
+      expect(label, 'Contato');
+    });
+
+    test('falls back to compact map for contact labels', () {
+      expect(
+        stickyLabelCompactFallback('Retomar contato · wearable'),
+        'Contato',
+      );
+    });
+  });
+
+  group('isOperacaoContatoPrioritario', () {
+    test('true when em risco', () {
+      expect(
+        isOperacaoContatoPrioritario(
+          aluno: _aluno(emRisco: true),
+          proximaAcao: null,
+        ),
+        isTrue,
+      );
+    });
+
+    test('true for wearable tipo from backend', () {
+      expect(
+        isOperacaoContatoPrioritario(
+          aluno: _aluno(),
+          proximaAcao: const ProximaAcaoResumo(
+            acao: 'Sync wearable',
+            motivo: 'x',
+            fonte: 'IA',
+            prioridade: 'P1',
+            tipoAcao: 'WEARABLE',
+          ),
+        ),
+        isTrue,
+      );
+    });
+  });
+
+  group('resolveAluno360OperacaoSnapshot', () {
+    test('hides task row when contact is priority without open task', () {
+      final snapshot = resolveAluno360OperacaoSnapshot(
+        aluno: _aluno(emRisco: true),
+        proximaAcao360: const ProximaAcaoResumo(
+          acao: 'Contate Beatriz para sync wearable',
+          motivo: 'Sem treinos',
+          fonte: 'IA',
+          prioridade: 'P1',
+          mensagemSugerida: 'Oi, Beatriz. Mensagem backend.',
+        ),
+        forceIa: false,
+        iaAsync: null,
+        hasOpenTask: false,
+        followUpDue: false,
+      );
+      expect(snapshot.contactPriority, isTrue);
+      expect(snapshot.hideCopilotTaskRow, isTrue);
+      expect(snapshot.showPrepareMessage, isTrue);
+      expect(snapshot.outreachMessage, 'Oi, Beatriz. Mensagem backend.');
     });
   });
 }

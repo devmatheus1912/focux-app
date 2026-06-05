@@ -19,6 +19,7 @@ class Aluno360CopilotPrescription extends StatefulWidget {
     required this.color,
     this.fullAction,
     this.isIaSuggestion = false,
+    this.onPrepareMessage,
   });
 
   final String title;
@@ -27,6 +28,7 @@ class Aluno360CopilotPrescription extends StatefulWidget {
   final Color color;
   final String? fullAction;
   final bool isIaSuggestion;
+  final VoidCallback? onPrepareMessage;
 
   @override
   State<Aluno360CopilotPrescription> createState() =>
@@ -98,17 +100,60 @@ class _Aluno360CopilotPrescriptionState
             ),
           ),
           if (showExpandAction && !_expandedAction)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                'Ver ação completa',
-                style: TextStyle(
-                  color: widget.color,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
+            Semantics(
+              button: true,
+              label: 'Ver ação completa da sugestão',
+              child: Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  'Ver ação completa',
+                  style: TextStyle(
+                    color: widget.color,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w800,
+                    decoration: TextDecoration.underline,
+                    decorationColor: widget.color.withValues(alpha: 0.45),
+                  ),
                 ),
               ),
             ),
+          if (widget.onPrepareMessage != null) ...[
+            const SizedBox(height: 10),
+            Semantics(
+              button: true,
+              label: 'Preparar mensagem para o aluno',
+              child: SizedBox(
+                width: double.infinity,
+                height: 40,
+                child: OutlinedButton.icon(
+                  onPressed: widget.onPrepareMessage,
+                  icon: Icon(
+                    Icons.chat_bubble_outline_rounded,
+                    size: 16,
+                    color: widget.color,
+                  ),
+                  label: Text(
+                    'Preparar mensagem',
+                    style: TextStyle(
+                      color: widget.color,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: widget.color,
+                    backgroundColor: widget.color.withValues(alpha: 0.06),
+                    side: BorderSide(
+                      color: widget.color.withValues(alpha: 0.28),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
           if (reason.isNotEmpty) ...[
             const SizedBox(height: 8),
             GestureDetector(
@@ -221,6 +266,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
     required this.forceIa,
     required this.iaAsync,
     required this.resumoLoading,
+    this.onPrepareMessage,
   });
 
   final Aluno aluno;
@@ -230,6 +276,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
   final bool forceIa;
   final AsyncValue<Map<String, dynamic>>? iaAsync;
   final bool resumoLoading;
+  final VoidCallback? onPrepareMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -317,6 +364,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
       reason: content.reason,
       color: primary,
       isIaSuggestion: isIaSuggestion,
+      onPrepareMessage: onPrepareMessage,
     );
   }
 }

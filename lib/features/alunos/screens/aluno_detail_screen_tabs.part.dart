@@ -508,30 +508,45 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
     final forceIa = ref.watch(alunoCopilotoForceIaProvider(alunoId));
     final iaAsync =
         forceIa ? ref.watch(alunoCopilotoActionProvider(alunoId)) : null;
-    final effectiveProxima = resolveCopilotProximaAcaoResumo(
-      proximaAcao360: proximaAcao360,
-      forceIa: forceIa,
-      iaAsync: iaAsync,
-    );
     final hasOpenTask =
         findOpenCopilotTask(openActions.valueOrNull ?? const []) != null ||
         hasOpenCopilotTask360;
     final followUpDue = isAlunoFollowUpDue(aluno);
+    final operacao = resolveAluno360OperacaoSnapshot(
+      aluno: aluno,
+      proximaAcao360: proximaAcao360,
+      forceIa: forceIa,
+      iaAsync: iaAsync,
+      hasOpenTask: hasOpenTask,
+      followUpDue: followUpDue,
+    );
+    final sticky = operacao.stickyAction;
+    final effectiveProxima = operacao.effectiveProxima;
 
-    void openChat() {
+    void openOutreach() {
+      showAlunoOutreachMessageSheet(
+        context,
+        alunoId: alunoId,
+        alunoNome: aluno.nome,
+        message: operacao.outreachMessage,
+        title: 'Mensagem sugerida',
+        subtitle: 'Copiloto · revise antes de enviar.',
+        icon: Icons.auto_awesome_rounded,
+      );
+    }
+
+    void openChat({String? acao}) {
+      final actionText = acao?.trim() ?? effectiveProxima?.acao.trim() ?? '';
+      if (actionText.isNotEmpty && acaoSugereChat(actionText)) {
+        openOutreach();
+        return;
+      }
       context.push('/alunos/$alunoId/chat', extra: aluno.nome);
     }
 
     void openCommandCenter() {
       context.push('/dashboard/command-center/copiloto');
     }
-
-    final sticky = resolveOperacaoStickyAction(
-      aluno: aluno,
-      proximaAcao: effectiveProxima,
-      hasOpenTask: hasOpenTask,
-      followUpDue: followUpDue,
-    );
 
     void openEvolucao() {
       context.push('/alunos/$alunoId/evolucao', extra: aluno.nome);
@@ -544,7 +559,7 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
     void onPrimary() {
       switch (sticky.destination) {
         case OperacaoStickyDestination.chat:
-          openChat();
+          openChat(acao: effectiveProxima?.acao);
         case OperacaoStickyDestination.commandCenter:
           openCommandCenter();
         case OperacaoStickyDestination.evolucao:
@@ -563,6 +578,8 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
       sticky: sticky,
       hasOpenTask: hasOpenTask,
     );
+    final hasSecondary =
+        showSecondaryCommandCenter || showSecondaryChat;
 
     return SafeArea(
       top: false,
@@ -582,83 +599,108 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
             ),
           ],
         ),
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
+              flex: hasSecondary ? 5 : 1,
               child: Semantics(
                 button: true,
-                label: sticky.label,
+                label: operacao.stickyDisplayLabel,
                 child: FxLiquidPrimaryButton(
-                icon: sticky.icon,
-                label: sticky.label,
-                loading: creating,
-                loadingLabel: 'Criando…',
-                onPressed: creating ? null : onPrimary,
+                  icon: sticky.icon,
+                  label: operacao.stickyDisplayLabel,
+                  loading: creating,
+                  loadingLabel: 'Criando…',
+                  onPressed: creating ? null : onPrimary,
                 ),
               ),
             ),
-            if (showSecondaryCommandCenter) ...[
-              const SizedBox(width: 8),
-              Semantics(
-                button: true,
-                label: 'Abrir Command Center',
-                child: SizedBox(
-                  width: 112,
-                  height: 44,
-                  child: OutlinedButton.icon(
+              if (showSecondaryCommandCenter) ...[
+                const SizedBox(width: 10),
+                Expanded(
+                  flex: 2,
+                  child: _OperacaoStickySecondaryButton(
+                    label: 'Tarefa',
+                    icon: Icons.task_alt_rounded,
+                    primary: primary,
+                    semanticsLabel: 'Abrir tarefa no Command Center',
                     onPressed: openCommandCenter,
-                    icon: Icon(Icons.open_in_new_rounded, size: 16, color: primary),
-                    label: Text(
-                      'Tarefa',
-                      style: TextStyle(
-                        color: primary,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 12,
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: primary.withValues(alpha: 0.28)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
                   ),
+                ),
+              ],
+              if (showSecondaryChat) ...[
+                const SizedBox(width: 10),
+                Expanded(
+                  flex: 2,
+                  child: _OperacaoStickySecondaryButton(
+                    label: 'Chat',
+                    icon: Icons.chat_bubble_outline_rounded,
+                    primary: primary,
+                    semanticsLabel: 'Abrir chat com aluno',
+                    onPressed:
+                        () => openChat(acao: effectiveProxima?.acao),
+                  ),
+                ),
+              ],
+            ],
+          ),
+      ),
+      ),
+    );
+  }
+}
+
+class _OperacaoStickySecondaryButton extends StatelessWidget {
+  const _OperacaoStickySecondaryButton({
+    required this.label,
+    required this.icon,
+    required this.primary,
+    required this.semanticsLabel,
+    required this.onPressed,
+  });
+
+  final String label;
+  final IconData icon;
+  final Color primary;
+  final String semanticsLabel;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: semanticsLabel,
+      child: OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: primary,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          side: BorderSide(color: primary.withValues(alpha: 0.28)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 16, color: primary),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.inter(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w800,
+                  color: primary,
                 ),
               ),
-            ],
-            if (showSecondaryChat) ...[
-              const SizedBox(width: 8),
-              Semantics(
-                button: true,
-                label: 'Abrir chat com aluno',
-                child: SizedBox(
-                width: 112,
-                height: 44,
-                child: OutlinedButton.icon(
-                  onPressed: openChat,
-                  icon: Icon(Icons.chat_bubble_outline, size: 16, color: primary),
-                  label: Text(
-                    'Chat',
-                    style: TextStyle(
-                      color: primary,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 12,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: primary.withValues(alpha: 0.28)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                ),
-                ),
-              ),
-            ],
+            ),
           ],
         ),
-      ),
       ),
     );
   }

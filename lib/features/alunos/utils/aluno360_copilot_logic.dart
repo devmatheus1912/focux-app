@@ -108,27 +108,48 @@ ProximaAcaoResumo? resolveCopilotProximaAcaoResumo({
 }) {
   if (forceIa && iaAsync != null) {
     return iaAsync.maybeWhen(
-      data: (action) {
-        final raw =
-            (action['acao'] ?? action['mensagem'] ?? action['descricao'] ?? '')
-                .toString();
-        final acao = normalizeIaCopilotAcao(raw);
-        if (acao.isEmpty && raw.trim().isEmpty) return proximaAcao360;
-        return ProximaAcaoResumo(
-          acao: acao.isEmpty ? cleanCopilotText(raw) : acao,
-          motivo: formatCopilotIaMotivo(
-            (action['motivo'] ??
-                    'Gerado com base nos sinais atuais do aluno.')
-                .toString(),
-          ),
-          fonte: 'IA',
-          prioridade: 'P1',
-        );
-      },
+      data: (action) => proximaAcaoResumoFromIaPayload(
+        action,
+        fallback: proximaAcao360,
+      ),
       orElse: () => proximaAcao360,
     );
   }
   return proximaAcao360;
+}
+
+ProximaAcaoResumo? proximaAcaoResumoFromIaPayload(
+  Map<String, dynamic> action, {
+  ProximaAcaoResumo? fallback,
+}) {
+  final raw =
+      (action['acao'] ?? action['mensagem'] ?? action['descricao'] ?? '')
+          .toString();
+  final acao = normalizeIaCopilotAcao(raw);
+  if (acao.isEmpty && raw.trim().isEmpty) return fallback;
+  return ProximaAcaoResumo(
+    acao: acao.isEmpty ? cleanCopilotText(raw) : acao,
+    motivo: formatCopilotIaMotivo(
+      (action['motivo'] ?? 'Gerado com base nos sinais atuais do aluno.')
+          .toString(),
+    ),
+    fonte: 'IA',
+    prioridade: 'P1',
+    tipoAcao: action['tipoAcao'] as String?,
+    mensagemSugerida: action['mensagemSugerida'] as String?,
+    stickyLabel: action['stickyLabel'] as String?,
+    stickyLabelCompact: action['stickyLabelCompact'] as String?,
+  );
+}
+
+String resolveOutreachMessage(
+  Aluno aluno, {
+  required String acao,
+  String? backendMessage,
+}) {
+  final trimmed = backendMessage?.trim();
+  if (trimmed != null && trimmed.isNotEmpty) return trimmed;
+  return copilotMensagemPronta(aluno, acao);
 }
 
 String cleanCopilotText(String value) {
@@ -188,7 +209,14 @@ String copilotChatActionLabel(String acao) {
   final lower = normalizeIaCopilotAcao(acao).toLowerCase();
   if (lower.contains('whatsapp')) return 'Enviar WhatsApp';
   if (lower.contains('mensagem')) return 'Enviar mensagem';
-  if (lower.contains('contato') || lower.contains('retomar')) {
+  if (copilotAcaoMencionaWearable(acao)) return 'Retomar contato';
+  if (lower.contains('contato') ||
+      lower.contains('contate') ||
+      lower.contains('contatar') ||
+      lower.contains('contactar') ||
+      lower.contains('retomar') ||
+      lower.contains('inativid') ||
+      lower.contains('incentiv')) {
     return 'Retomar contato';
   }
   return 'Abrir chat';
@@ -208,6 +236,15 @@ String copilotMensagemPronta(Aluno aluno, String acao) {
   }
   if (lower.contains('treino') || lower.contains('carga')) {
     return 'Oi, $primeiroNome. Quero ajustar seu treino para o próximo passo com segurança. Me responde por aqui?';
+  }
+  if (copilotAcaoMencionaWearable(acao) || lower.contains('sincroniz')) {
+    return 'Oi, $primeiroNome. Vi que seu wearable não sincronizou. Consegue abrir o app e me dar um ok por aqui?';
+  }
+  if (lower.contains('inativid') ||
+      lower.contains('incentiv') ||
+      lower.contains('contate') ||
+      lower.contains('contatar')) {
+    return 'Oi, $primeiroNome. Notei sua ausência nos treinos. Quer retomar juntos? Me responde por aqui que eu ajusto o plano.';
   }
   return 'Oi, $primeiroNome. Notei que você se afastou um pouco dos treinos. Quer retomar? Me responde por aqui que eu ajusto o plano.';
 }
@@ -260,6 +297,8 @@ bool copilotAcaoMencionaWearable(String acao) {
       lower.contains('apple health') ||
       lower.contains('google fit') ||
       lower.contains('sincroniz') ||
+      lower.contains(' sync') ||
+      lower.startsWith('sync') ||
       lower.contains('garmin') ||
       lower.contains('terra');
 }
@@ -304,6 +343,14 @@ bool acaoSugereChat(String acao) {
   return lower.contains('chat') ||
       lower.contains('mensagem') ||
       lower.contains('contato') ||
+      lower.contains('contate') ||
+      lower.contains('contatar') ||
+      lower.contains('contactar') ||
+      lower.contains('falar com') ||
+      lower.contains('inativid') ||
+      lower.contains('incentiv') ||
+      lower.contains('reengaj') ||
+      lower.contains('retomar') ||
       lower.contains('follow-up') ||
       lower.contains('follow up') ||
       lower.contains('whatsapp');
@@ -318,7 +365,21 @@ String copilotStickyLabel(Aluno aluno, String acao) {
     return 'Completar mapa corporal';
   }
   if (lower.contains('objetivo')) return 'Definir objetivo';
-  if (acaoSugereChat(cleaned)) return copilotChatActionLabel(cleaned);
+  if (lower.contains('financeir') || lower.contains('inadimpl')) {
+    return 'Alinhar financeiro';
+  }
+  if (acaoSugereChat(cleaned)) {
+    if (copilotAcaoMencionaWearable(cleaned)) {
+      return 'Retomar contato · wearable';
+    }
+    return copilotChatActionLabel(cleaned);
+  }
+  if (lower.contains('treino') || lower.contains('carga')) {
+    return 'Ajustar treino';
+  }
+  if (lower.contains('perfil') || lower.contains('lacuna')) {
+    return 'Completar perfil';
+  }
   return truncateCopilotStickyLabel(copilotDisplayAction(aluno, cleaned));
 }
 

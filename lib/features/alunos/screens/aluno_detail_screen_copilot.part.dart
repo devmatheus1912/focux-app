@@ -213,72 +213,23 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     );
   }
 
-  void _prepararMensagem(BuildContext context, String acao) {
-    final message = copilotMensagemPronta(aluno, acao);
-    final primary = Theme.of(context).colorScheme.primary;
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder:
-          (sheetContext) => SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 4, 20, 20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    'Mensagem sugerida',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-                  ),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: BrandPalette.softer(primary),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(message, style: const TextStyle(height: 1.35)),
-                  ),
-                  const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () {
-                            Clipboard.setData(ClipboardData(text: message));
-                            Navigator.pop(sheetContext);
-                            FeedbackHelper.showSnackBar(
-                              context,
-                              const SnackBar(
-                                content: Text('Mensagem copiada.'),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.copy_rounded, size: 16),
-                          label: const Text('Copiar'),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: FxLiquidPrimaryButton(
-                          icon: Icons.chat_bubble_outline_rounded,
-                          label: 'Abrir chat',
-                          onPressed: () {
-                            Navigator.pop(sheetContext);
-                            context.push(
-                              '/alunos/${aluno.id}/chat',
-                              extra: {'nome': aluno.nome},
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
+  void _prepararMensagem(
+    BuildContext context,
+    String acao, {
+    String? backendMessage,
+  }) {
+    showAlunoOutreachMessageSheet(
+      context,
+      alunoId: aluno.id,
+      alunoNome: aluno.nome,
+      message: resolveOutreachMessage(
+        aluno,
+        acao: acao,
+        backendMessage: backendMessage,
+      ),
+      title: 'Mensagem sugerida',
+      subtitle: 'Copiloto IA · revise antes de enviar.',
+      icon: Icons.auto_awesome_rounded,
     );
   }
 
@@ -393,22 +344,17 @@ class _Aluno360CopilotCard extends ConsumerWidget {
         proximaAcao360 != null
             ? copilotActionFrom360(proximaAcao360!)
             : null;
-    final effectiveProxima = resolveCopilotProximaAcaoResumo(
+    final operacao = resolveAluno360OperacaoSnapshot(
+      aluno: aluno,
       proximaAcao360: proximaAcao360,
       forceIa: forceIa,
       iaAsync: iaAsync,
-    );
-    final followUpDue = isAlunoFollowUpDue(aluno);
-    final stickyAction = resolveOperacaoStickyAction(
-      aluno: aluno,
-      proximaAcao: effectiveProxima,
       hasOpenTask: hasOpenTask,
-      followUpDue: followUpDue,
+      followUpDue: isAlunoFollowUpDue(aluno),
     );
-    final hideCopilotChat = shouldHideCopilotChatCta(
-      sticky: stickyAction,
-      hasOpenTask: hasOpenTask,
-    );
+    final stickyAction = operacao.stickyAction;
+    final effectiveProxima = operacao.effectiveProxima;
+    final hideCopilotChat = operacao.hideCopilotChatRow;
     final showCopilotPrescription = shouldShowCopilotPrescriptionBlock(
       forceIa: forceIa,
       sticky: stickyAction,
@@ -416,13 +362,19 @@ class _Aluno360CopilotCard extends ConsumerWidget {
       proximaAcaoRaw: proximaAcao360?.acao,
     );
     final hideCopilotPrimary =
-        forceIa
-            ? false
-            : shouldHideCopilotPrimaryCtaWhenMatchesSticky(
-              sticky: stickyAction,
-              aluno: aluno,
-              proximaAcaoRaw: proximaAcao360?.acao,
-            );
+        operacao.hideCopilotTaskRow ||
+        shouldHideCopilotPrimaryCtaWhenMatchesSticky(
+          sticky: stickyAction,
+          aluno: aluno,
+          proximaAcaoRaw: proximaAcao360?.acao,
+        );
+    final resolvedAcao = resolveCopilotAcao(
+      seed360: seed360,
+      forceIa: forceIa,
+      iaAsync: iaAsync,
+      fallback: fallback,
+    );
+    final showPrepareInPrescription = operacao.showPrepareMessage;
     final cardPadding = hasOpenTask ? 10.0 : 14.0;
 
     return Container(
@@ -461,12 +413,14 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      copilotCardSubtitle(
-                        forceIa: forceIa,
-                        iaAsync: iaAsync,
-                        resumoLoading:
-                            resumoAsync.isLoading && !resumoAsync.hasValue,
-                      ),
+                      operacao.contactPriority
+                          ? '${copilotCardSubtitle(forceIa: forceIa, iaAsync: iaAsync, resumoLoading: resumoAsync.isLoading && !resumoAsync.hasValue)} · priorize contato'
+                          : copilotCardSubtitle(
+                            forceIa: forceIa,
+                            iaAsync: iaAsync,
+                            resumoLoading:
+                                resumoAsync.isLoading && !resumoAsync.hasValue,
+                          ),
                       style: TextStyle(
                         color: mute,
                         fontSize: 12.5,
@@ -538,6 +492,14 @@ class _Aluno360CopilotCard extends ConsumerWidget {
               forceIa: forceIa,
               iaAsync: iaAsync,
               resumoLoading: resumoAsync.isLoading && !resumoAsync.hasValue,
+              onPrepareMessage:
+                  showPrepareInPrescription
+                      ? () => _prepararMensagem(
+                        context,
+                        resolvedAcao,
+                        backendMessage: effectiveProxima?.mensagemSugerida,
+                      )
+                      : null,
             ),
             const SizedBox(height: 10),
           ],
@@ -561,12 +523,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
             openTaskHint: hasOpenCopilotTask360 && openTask == null,
             hidePrimaryCta: hasOpenTask || hideCopilotPrimary,
             hideChatCta: hideCopilotChat,
-            acao: resolveCopilotAcao(
-              seed360: seed360,
-              forceIa: forceIa,
-              iaAsync: iaAsync,
-              fallback: fallback,
-            ),
+            acao: resolvedAcao,
             onAssign: (acao) => _criarTarefaCopiloto(context, ref, acao),
             onPrepareMessage: (acao) => _prepararMensagem(context, acao),
           ),

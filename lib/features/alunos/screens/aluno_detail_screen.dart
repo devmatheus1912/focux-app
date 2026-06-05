@@ -38,6 +38,7 @@ import '../utils/aluno_display_utils.dart';
 import '../widgets/aluno_detail_hero_card.dart';
 import '../widgets/aluno_operacao_adherence_bars.dart';
 import '../widgets/aluno360_copilot_prescription.dart';
+import '../widgets/aluno_outreach_message_sheet.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
 part 'aluno_detail_screen_hero.part.dart';

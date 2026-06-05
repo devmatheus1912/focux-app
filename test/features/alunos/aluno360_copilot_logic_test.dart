@@ -323,6 +323,45 @@ void main() {
         'Completar mapa corporal',
       );
     });
+
+    test('maps IA contate phrasing to Retomar contato', () {
+      expect(
+        copilotStickyLabel(
+          _aluno(),
+          'Contate Beatriz para entender os motivos de sua inatividade e incentivá-la a sincronizar s',
+        ),
+        'Retomar contato · wearable',
+      );
+    });
+  });
+
+  group('resolveOutreachMessage', () {
+    test('prefers backend mensagem sugerida', () {
+      expect(
+        resolveOutreachMessage(
+          _aluno(),
+          acao: 'Contate Beatriz',
+          backendMessage: 'Oi, Beatriz. Mensagem do servidor.',
+        ),
+        'Oi, Beatriz. Mensagem do servidor.',
+      );
+    });
+  });
+
+  group('proximaAcaoResumoFromIaPayload', () {
+    test('parses enrichment fields from IA API', () {
+      final resumo = proximaAcaoResumoFromIaPayload({
+        'acao': 'Contate Beatriz para sync wearable',
+        'motivo': 'Sem treinos recentes',
+        'tipoAcao': 'WEARABLE',
+        'mensagemSugerida': 'Oi, Beatriz. Sync.',
+        'stickyLabel': 'Retomar contato · wearable',
+        'stickyLabelCompact': 'Contato',
+      });
+      expect(resumo?.tipoAcao, 'WEARABLE');
+      expect(resumo?.mensagemSugerida, 'Oi, Beatriz. Sync.');
+      expect(resumo?.stickyLabelCompact, 'Contato');
+    });
   });
 
   group('copilotProfileGapsForCard', () {

@@ -264,12 +264,20 @@ class ProximaAcaoResumo {
   final String motivo;
   final String fonte;
   final String prioridade;
+  final String? tipoAcao;
+  final String? mensagemSugerida;
+  final String? stickyLabel;
+  final String? stickyLabelCompact;
 
   const ProximaAcaoResumo({
     required this.acao,
     required this.motivo,
     required this.fonte,
     required this.prioridade,
+    this.tipoAcao,
+    this.mensagemSugerida,
+    this.stickyLabel,
+    this.stickyLabelCompact,
   });
 
   factory ProximaAcaoResumo.fromJson(Map<String, dynamic> json) =>
@@ -278,6 +286,10 @@ class ProximaAcaoResumo {
         motivo: json['motivo'] as String? ?? '',
         fonte: json['fonte'] as String? ?? 'PADRAO',
         prioridade: json['prioridade'] as String? ?? 'P2',
+        tipoAcao: json['tipoAcao'] as String?,
+        mensagemSugerida: json['mensagemSugerida'] as String?,
+        stickyLabel: json['stickyLabel'] as String?,
+        stickyLabelCompact: json['stickyLabelCompact'] as String?,
       );
 }
 

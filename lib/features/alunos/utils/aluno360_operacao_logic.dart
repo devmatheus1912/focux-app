@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../dashboard/data/command_center_data.dart';
 import '../data/aluno_contact_utils.dart';
@@ -89,16 +90,6 @@ String truncateStickyLabel(String raw) {
   return '${trimmed.substring(0, _stickyLabelMax - 1)}…';
 }
 
-bool acaoSugereChat(String acao) {
-  final lower = acao.toLowerCase();
-  return lower.contains('chat') ||
-      lower.contains('mensagem') ||
-      lower.contains('contato') ||
-      lower.contains('follow-up') ||
-      lower.contains('follow up') ||
-      lower.contains('whatsapp');
-}
-
 bool isAlunoFollowUpDue(Aluno aluno, {DateTime? now}) {
   final followUp = aluno.followUpDate;
   if (followUp == null) return false;
@@ -187,8 +178,13 @@ OperacaoStickyAction resolveOperacaoStickyAction({
     acao,
     followUpDue: followUpDue,
   );
+  final backendLabel = proximaAcao?.stickyLabel?.trim();
+  final label =
+      backendLabel != null && backendLabel.isNotEmpty
+          ? backendLabel
+          : copilotStickyLabel(aluno, acao);
   return OperacaoStickyAction(
-    label: copilotStickyLabel(aluno, acao),
+    label: label,
     icon: stickyIconForDestination(destination),
     destination: destination,
   );
@@ -419,3 +415,163 @@ bool shouldShowStickySecondaryCommandCenter({
   required bool hasOpenTask,
 }) =>
     hasOpenTask && sticky.isChatAction;
+
+String alunoPrimeiroNome(String nomeAluno) {
+  final trimmed = nomeAluno.trim();
+  if (trimmed.isEmpty) return 'aluno';
+  return trimmed.split(' ').first;
+}
+
+/// Mensagem sugerida ao pedir check-in pelo Aluno 360.
+String checkinMensagemPronta(String nomeAluno) {
+  final firstName = alunoPrimeiroNome(nomeAluno);
+  return 'Oi, $firstName. Como foi seu último treino? '
+      'Me manda carga, repetições e qualquer sensação fora do normal.';
+}
+
+/// Extra do GoRouter para `/alunos/:id/chat` com rascunho opcional.
+Map<String, String> alunoChatRouteExtra({
+  required String nome,
+  String? draft,
+}) {
+  final extra = <String, String>{
+    'nome': nome.trim().isEmpty ? 'Aluno' : nome.trim(),
+  };
+  final trimmedDraft = draft?.trim();
+  if (trimmedDraft != null && trimmedDraft.isNotEmpty) {
+    extra['draft'] = trimmedDraft;
+  }
+  return extra;
+}
+
+/// Label curto para sticky quando há botão secundário (evita truncamento).
+String stickyLabelCompactFallback(String label) {
+  final lower = label.toLowerCase();
+  if (lower.contains('contato') || lower.contains('wearable')) return 'Contato';
+  if (lower.contains('mapa') || lower.contains('corporal')) return 'Mapa';
+  if (lower.contains('objetivo')) return 'Objetivo';
+  if (lower.contains('treino')) return 'Treino';
+  if (lower.contains('financeir')) return 'Financeiro';
+  if (lower.contains('perfil')) return 'Perfil';
+  if (label.length <= 14) return label;
+  return truncateStickyLabel(label);
+}
+
+String resolveStickyDisplayLabel({
+  required OperacaoStickyAction sticky,
+  required bool compact,
+  ProximaAcaoResumo? proximaAcao,
+}) {
+  if (compact) {
+    final backend = proximaAcao?.stickyLabelCompact?.trim();
+    if (backend != null && backend.isNotEmpty) return backend;
+    return stickyLabelCompactFallback(sticky.label);
+  }
+  return sticky.label;
+}
+
+bool isOperacaoContatoPrioritario({
+  required Aluno aluno,
+  ProximaAcaoResumo? proximaAcao,
+}) {
+  if (aluno.emRisco) return true;
+  final acao = proximaAcao?.acao ?? '';
+  if (acaoSugereChat(acao)) return true;
+  final tipo = proximaAcao?.tipoAcao?.toUpperCase();
+  if (tipo == 'CONTATO' || tipo == 'WEARABLE') return true;
+  final aderencia = aluno.aderenciaPercent;
+  if (aderencia != null && aderencia <= 0) return true;
+  return false;
+}
+
+bool shouldHideCopilotTaskRowWhenContactPriority({
+  required bool contactPriority,
+  required bool hasOpenTask,
+}) =>
+    contactPriority && !hasOpenTask;
+
+/// Snapshot unificado da aba Operação (sticky + copilot + outreach).
+class Aluno360OperacaoSnapshot {
+  const Aluno360OperacaoSnapshot({
+    required this.effectiveProxima,
+    required this.stickyAction,
+    required this.stickyDisplayLabel,
+    required this.contactPriority,
+    required this.showPrepareMessage,
+    required this.hideCopilotTaskRow,
+    required this.hideCopilotChatRow,
+    required this.outreachMessage,
+  });
+
+  final ProximaAcaoResumo? effectiveProxima;
+  final OperacaoStickyAction stickyAction;
+  final String stickyDisplayLabel;
+  final bool contactPriority;
+  final bool showPrepareMessage;
+  final bool hideCopilotTaskRow;
+  final bool hideCopilotChatRow;
+  final String outreachMessage;
+}
+
+Aluno360OperacaoSnapshot resolveAluno360OperacaoSnapshot({
+  required Aluno aluno,
+  required ProximaAcaoResumo? proximaAcao360,
+  required bool forceIa,
+  required AsyncValue<Map<String, dynamic>>? iaAsync,
+  required bool hasOpenTask,
+  required bool followUpDue,
+}) {
+  final effectiveProxima = resolveCopilotProximaAcaoResumo(
+    proximaAcao360: proximaAcao360,
+    forceIa: forceIa,
+    iaAsync: iaAsync,
+  );
+  final sticky = resolveOperacaoStickyAction(
+    aluno: aluno,
+    proximaAcao: effectiveProxima,
+    hasOpenTask: hasOpenTask,
+    followUpDue: followUpDue,
+  );
+  final stickyCompact =
+      shouldShowStickySecondaryCommandCenter(
+        sticky: sticky,
+        hasOpenTask: hasOpenTask,
+      ) ||
+      shouldShowStickySecondaryChat(
+        sticky: sticky,
+        hasOpenTask: hasOpenTask,
+        followUpDue: followUpDue,
+        proximaAcaoText: effectiveProxima?.acao,
+      );
+  final stickyDisplayLabel = resolveStickyDisplayLabel(
+    sticky: sticky,
+    compact: stickyCompact,
+    proximaAcao: effectiveProxima,
+  );
+  final acao = effectiveProxima?.acao ?? '';
+  final contactPriority = isOperacaoContatoPrioritario(
+    aluno: aluno,
+    proximaAcao: effectiveProxima,
+  );
+  final showPrepareMessage = acaoSugereChat(acao);
+  final hideCopilotChatRow =
+      shouldHideCopilotChatCta(sticky: sticky, hasOpenTask: hasOpenTask) ||
+      showPrepareMessage;
+  return Aluno360OperacaoSnapshot(
+    effectiveProxima: effectiveProxima,
+    stickyAction: sticky,
+    stickyDisplayLabel: stickyDisplayLabel,
+    contactPriority: contactPriority,
+    showPrepareMessage: showPrepareMessage,
+    hideCopilotTaskRow: shouldHideCopilotTaskRowWhenContactPriority(
+      contactPriority: contactPriority,
+      hasOpenTask: hasOpenTask,
+    ),
+    hideCopilotChatRow: hideCopilotChatRow,
+    outreachMessage: resolveOutreachMessage(
+      aluno,
+      acao: acao,
+      backendMessage: effectiveProxima?.mensagemSugerida,
+    ),
+  );
+}
