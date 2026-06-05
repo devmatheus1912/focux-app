@@ -40,8 +40,9 @@ class OperationalMetricTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ink = fxScreenInk(context);
-    final labelColor = Color.lerp(ink, color, isDark ? 0.38 : 0.52)!;
-    final hintColor = color.withValues(alpha: isDark ? 0.95 : 0.82);
+    final mute = fxScreenMute(context);
+    final labelColor = Color.lerp(ink, color, isDark ? 0.22 : 0.18)!;
+    final hintColor = Color.lerp(mute, ink, isDark ? 0.55 : 0.72)!;
     final tile = Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: operationalMetricDecoration(

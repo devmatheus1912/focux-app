@@ -137,5 +137,42 @@ void main() {
       expect(content.action, contains('Retomar contato'));
       expect(content.reason, 'Aluno em risco');
     });
+
+    test('maps mapa corporal to specific copy', () {
+      final content = resolveCopilotPrescriptionFromAction(
+        _aluno(),
+        const {
+          'titulo': 'Radar Focux',
+          'acao': 'Completar mapa corporal',
+          'motivo': 'Ação humana hoje',
+        },
+        'fallback',
+      );
+      expect(content.action, contains('mapa corporal'));
+    });
+  });
+
+  group('copilotStickyLabel', () {
+    test('aligns sticky and prescription for mapa corporal', () {
+      expect(
+        copilotStickyLabel(_aluno(), 'Completar mapa corporal'),
+        'Completar mapa corporal',
+      );
+    });
+  });
+
+  group('copilotProfileGapsForCard', () {
+    test('drops objective gap when hero already prompts it', () {
+      final gaps = copilotProfileGapsForCard(
+        Aluno(
+          id: 1,
+          nome: 'Beatriz',
+          email: 'b@test.com',
+          status: 'ATIVO',
+        ),
+      );
+      expect(gaps.any((g) => g.title == 'Objetivo'), isFalse);
+      expect(gaps.any((g) => g.title == 'Contato'), isTrue);
+    });
   });
 }

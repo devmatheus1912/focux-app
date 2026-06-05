@@ -42,8 +42,9 @@ FilaAcaoResumo _openCopilotAction() {
 
 void main() {
   group('resolveOperacaoStickyAction', () {
-    test('open task with proxima acao mirrors radar label', () {
+    test('open task with contact acao opens chat destination', () {
       final action = resolveOperacaoStickyAction(
+        aluno: _aluno(),
         proximaAcao: const ProximaAcaoResumo(
           acao: 'Retomar contato e ajustar plano',
           motivo: 'Radar',
@@ -54,11 +55,12 @@ void main() {
         followUpDue: false,
       );
       expect(action.label, 'Retomar contato e ajustar plano');
-      expect(action.isChatAction, isTrue);
+      expect(action.destination, OperacaoStickyDestination.chat);
     });
 
     test('open task without proxima acao falls back to Ver tarefa', () {
       final action = resolveOperacaoStickyAction(
+        aluno: _aluno(),
         proximaAcao: const ProximaAcaoResumo(
           acao: '',
           motivo: 'x',
@@ -69,11 +71,12 @@ void main() {
         followUpDue: false,
       );
       expect(action.label, 'Ver tarefa');
-      expect(action.isChatAction, isFalse);
+      expect(action.destination, OperacaoStickyDestination.commandCenter);
     });
 
-    test('uses proxima acao label when no open task', () {
+    test('uses chat destination for follow-up message', () {
       final action = resolveOperacaoStickyAction(
+        aluno: _aluno(),
         proximaAcao: const ProximaAcaoResumo(
           acao: 'Enviar mensagem de follow-up',
           motivo: 'Contato pendente',
@@ -84,11 +87,28 @@ void main() {
         followUpDue: false,
       );
       expect(action.label, 'Enviar mensagem de follow-up');
-      expect(action.isChatAction, isTrue);
+      expect(action.destination, OperacaoStickyDestination.chat);
+    });
+
+    test('routes mapa corporal to evolucao with aligned label', () {
+      final action = resolveOperacaoStickyAction(
+        aluno: _aluno(),
+        proximaAcao: const ProximaAcaoResumo(
+          acao: 'Completar mapa corporal',
+          motivo: 'Radar',
+          fonte: 'RADAR',
+          prioridade: 'P1',
+        ),
+        hasOpenTask: false,
+        followUpDue: false,
+      );
+      expect(action.label, 'Completar mapa corporal');
+      expect(action.destination, OperacaoStickyDestination.evolucao);
     });
 
     test('truncates long labels', () {
       final action = resolveOperacaoStickyAction(
+        aluno: _aluno(),
         proximaAcao: ProximaAcaoResumo(
           acao: 'A' * 40,
           motivo: 'x',
@@ -100,6 +120,25 @@ void main() {
       );
       expect(action.label.length, lessThanOrEqualTo(32));
       expect(action.label.endsWith('…'), isTrue);
+    });
+  });
+
+  group('operacaoStatusSubtitle', () {
+    test('uses human copy when hero shows risk', () {
+      expect(
+        operacaoStatusSubtitle(
+          _aluno(emRisco: true),
+          heroShowsRisco: true,
+        ),
+        contains('priorize contato'),
+      );
+      expect(
+        operacaoStatusSubtitle(
+          _aluno(emRisco: true),
+          heroShowsRisco: true,
+        ),
+        isNot(contains('hero')),
+      );
     });
   });
 
@@ -125,7 +164,7 @@ void main() {
     test('summarize empty week', () {
       final summary = summarizeAderenciaWeek(const []);
       expect(summary.hasAnyCheckin, isFalse);
-      expect(summary.caption, 'Sem check-ins');
+      expect(summary.caption, 'Nenhum check-in esta semana');
     });
 
     test('summarize checkins total', () {
@@ -192,7 +231,7 @@ void main() {
       );
     });
 
-    test('shows when multiple profile gaps exist', () {
+    test('shows when contact gap remains after hero objective cta', () {
       expect(
         shouldShowCopilotProfileGapsButton(
           Aluno(
@@ -224,7 +263,7 @@ void main() {
       const sticky = OperacaoStickyAction(
         label: 'Abrir chat',
         icon: Icons.chat_bubble_outline_rounded,
-        isChatAction: true,
+        destination: OperacaoStickyDestination.chat,
       );
       expect(
         shouldHideCopilotChatCta(sticky: sticky, hasOpenTask: false),
@@ -236,7 +275,7 @@ void main() {
       const sticky = OperacaoStickyAction(
         label: 'Retomar contato',
         icon: Icons.chat_bubble_outline_rounded,
-        isChatAction: true,
+        destination: OperacaoStickyDestination.chat,
       );
       expect(
         shouldShowStickySecondaryCommandCenter(
@@ -251,7 +290,7 @@ void main() {
       const sticky = OperacaoStickyAction(
         label: 'Ver tarefa',
         icon: Icons.open_in_new_rounded,
-        isChatAction: false,
+        destination: OperacaoStickyDestination.commandCenter,
       );
       expect(
         shouldShowStickySecondaryChat(

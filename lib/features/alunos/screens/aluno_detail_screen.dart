@@ -273,7 +273,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                   ),
                 ),
                 flexibleSpace: FlexibleSpaceBar(
-                  collapseMode: CollapseMode.parallax,
+                  collapseMode: CollapseMode.pin,
                   background: Padding(
                     padding: EdgeInsets.fromLTRB(
                       TokensStrip.s4,

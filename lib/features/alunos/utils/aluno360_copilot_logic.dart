@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../dashboard/data/command_center_data.dart';
 import '../data/aluno_repository.dart';
+import '../utils/aluno_display_utils.dart';
 
 /// Signal chip shown in the copilot decision grid.
 class Aluno360CopilotSignal {
@@ -107,6 +108,12 @@ String copilotMensagemPronta(Aluno aluno, String acao) {
 
 String copilotDisplayAction(Aluno aluno, String acao) {
   final lower = cleanCopilotText(acao).toLowerCase();
+  if (lower.contains('mapa') || lower.contains('corporal')) {
+    return 'Completar mapa corporal para orientar a prescrição.';
+  }
+  if (lower.contains('objetivo')) {
+    return 'Definir objetivo para alinhar prescrição e Copiloto.';
+  }
   if (lower.contains('financeir') || lower.contains('inadimpl')) {
     return 'Alinhar pendência financeira antes de qualquer ajuste.';
   }
@@ -116,7 +123,54 @@ String copilotDisplayAction(Aluno aluno, String acao) {
   if (lower.contains('treino') || lower.contains('carga')) {
     return 'Ajustar treino e orientar próximo check-in.';
   }
+  if (acaoSugereChat(acao)) {
+    return truncateCopilotStickyLabel(acao);
+  }
   return 'Retomar contato e ajustar plano com base na resposta.';
+}
+
+const _stickyLabelMax = 32;
+
+String truncateCopilotStickyLabel(String raw) {
+  final trimmed = raw.trim();
+  if (trimmed.length <= _stickyLabelMax) return trimmed;
+  return '${trimmed.substring(0, _stickyLabelMax - 1)}…';
+}
+
+bool acaoSugereChat(String acao) {
+  final lower = acao.toLowerCase();
+  return lower.contains('chat') ||
+      lower.contains('mensagem') ||
+      lower.contains('contato') ||
+      lower.contains('follow-up') ||
+      lower.contains('follow up') ||
+      lower.contains('whatsapp');
+}
+
+/// Short label shared by sticky bar and prescription action line.
+String copilotStickyLabel(Aluno aluno, String acao) {
+  final cleaned = cleanCopilotText(acao);
+  if (cleaned.isEmpty) return 'Ver próxima ação';
+  final lower = cleaned.toLowerCase();
+  if (lower.contains('mapa') || lower.contains('corporal')) {
+    return 'Completar mapa corporal';
+  }
+  if (lower.contains('objetivo')) return 'Definir objetivo';
+  if (acaoSugereChat(cleaned)) return truncateCopilotStickyLabel(cleaned);
+  return truncateCopilotStickyLabel(copilotDisplayAction(aluno, cleaned));
+}
+
+List<CopilotProfileGap> copilotProfileGapsForCard(Aluno aluno) {
+  final gaps = resolveCopilotProfileGaps(aluno);
+  if (alunoObjectiveIsDefined(aluno.objetivo)) return gaps;
+  return gaps.where((gap) => gap.title != 'Objetivo').toList(growable: false);
+}
+
+String copilotProfileGapsButtonLabel(Aluno aluno) {
+  final gaps = copilotProfileGapsForCard(aluno);
+  if (gaps.length > 1) return 'Resolver lacunas';
+  if (gaps.isEmpty) return 'Completar perfil';
+  return 'Completar ${gaps.first.title.toLowerCase()}';
 }
 
 String copilotFallbackAction(Aluno aluno, AlunoAutonomiaResumo? resumo) {

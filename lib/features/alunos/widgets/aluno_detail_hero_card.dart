@@ -166,121 +166,102 @@ class _HeroShellState extends State<_HeroShell>
           child: CustomPaint(
             foregroundPainter: DashboardHeroGridPainter(),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(11, 6, 11, 6),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
+              padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AlunoAvatar(
-                        name: widget.displayName,
-                        photoUrl: widget.photoUrl,
-                        variant: AlunoAvatarVariant.hero,
-                      ),
-                      const SizedBox(width: 9),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  AlunoAvatar(
+                    name: widget.displayName,
+                    photoUrl: widget.photoUrl,
+                    variant: AlunoAvatarVariant.hero,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
+                            Expanded(
+                              child: Text(
+                                widget.displayName,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.3,
+                                  height: 1.05,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            _HeroStatusPill(
+                              label: widget.status.label,
+                              background: widget.status.background,
+                              foreground: widget.status.foreground,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 3),
+                        _HeroObjectiveRow(
+                          label: widget.objective,
+                          defined: widget.objectiveDefined,
+                          onDefineObjective: widget.onDefineObjective,
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '${widget.signal.label} · ${widget.caption}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: dashboardHeroCaptionOnTeal(),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.15,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
                             Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                              textBaseline: TextBaseline.alphabetic,
                               children: [
-                                Expanded(
-                                  child: Text(
-                                    widget.displayName,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: -0.35,
-                                      height: 1.05,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                Text(
+                                  widget.signal.value,
+                                  style: AppTypography.mono(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -0.4,
+                                    height: 1,
                                   ),
                                 ),
-                                const SizedBox(width: 6),
-                                _HeroStatusPill(
-                                  label: widget.status.label,
-                                  background: widget.status.background,
-                                  foreground: widget.status.foreground,
-                                ),
+                                if (widget.signal.suffix != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 2),
+                                    child: Text(
+                                      widget.signal.suffix!,
+                                      style: TextStyle(
+                                        color: dashboardHeroLabelOnTeal(),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
                               ],
                             ),
-                            const SizedBox(height: 4),
-                            _HeroObjectiveRow(
-                              label: widget.objective,
-                              defined: widget.objectiveDefined,
-                              onDefineObjective: widget.onDefineObjective,
-                            ),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.signal.label,
-                              style: TextStyle(
-                                color: dashboardHeroLabelOnTeal(),
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.1,
-                              ),
-                            ),
-                            Text(
-                              widget.caption,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: dashboardHeroCaptionOnTeal(),
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w500,
-                                height: 1.15,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          Text(
-                            widget.signal.value,
-                            style: AppTypography.mono(
-                              color: Colors.white,
-                              fontSize: 26,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: -0.5,
-                              height: 1,
-                            ),
-                          ),
-                          if (widget.signal.suffix != null)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 3),
-                              child: Text(
-                                widget.signal.suffix!,
-                                style: TextStyle(
-                                  color: dashboardHeroLabelOnTeal(),
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),

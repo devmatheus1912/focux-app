@@ -4,19 +4,29 @@ import '../../dashboard/data/command_center_data.dart';
 import '../data/aluno_contact_utils.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno_display_utils.dart';
+import 'aluno360_copilot_logic.dart';
 import 'aluno_hero_signal.dart';
+
+enum OperacaoStickyDestination {
+  chat,
+  commandCenter,
+  evolucao,
+  editAluno,
+}
 
 /// Sticky bar action resolved from 360 payload and queue state.
 class OperacaoStickyAction {
   const OperacaoStickyAction({
     required this.label,
     required this.icon,
-    required this.isChatAction,
+    required this.destination,
   });
 
   final String label;
   final IconData icon;
-  final bool isChatAction;
+  final OperacaoStickyDestination destination;
+
+  bool get isChatAction => destination == OperacaoStickyDestination.chat;
 }
 
 enum OperacaoDominantMetricKind { risco, aderencia, prontidao }
@@ -59,7 +69,7 @@ class AderenciaWeekSummary {
   final bool hasAnyCheckin;
 
   String get caption =>
-      hasAnyCheckin ? '$totalCheckins check-ins' : 'Sem check-ins';
+      hasAnyCheckin ? '$totalCheckins check-ins' : 'Nenhum check-in esta semana';
 }
 
 enum AlunoDetailTab { operacao, evolucao, ferramentas }
@@ -105,57 +115,84 @@ FilaAcaoResumo? findOpenCopilotTask(List<FilaAcaoResumo> actions) {
   return null;
 }
 
+OperacaoStickyDestination resolveOperacaoStickyDestination(
+  String acao, {
+  required bool followUpDue,
+}) {
+  final lower = cleanCopilotText(acao).toLowerCase();
+  if (lower.contains('mapa') ||
+      lower.contains('corporal') ||
+      lower.contains('medida')) {
+    return OperacaoStickyDestination.evolucao;
+  }
+  if (acaoSugereChat(acao) || (followUpDue && acao.trim().isEmpty)) {
+    return OperacaoStickyDestination.chat;
+  }
+  if (lower.contains('objetivo') ||
+      lower.contains('perfil') ||
+      lower.contains('lacuna')) {
+    return OperacaoStickyDestination.editAluno;
+  }
+  return OperacaoStickyDestination.commandCenter;
+}
+
+IconData stickyIconForDestination(OperacaoStickyDestination destination) {
+  return switch (destination) {
+    OperacaoStickyDestination.chat => Icons.chat_bubble_outline_rounded,
+    OperacaoStickyDestination.evolucao => Icons.accessibility_new_rounded,
+    OperacaoStickyDestination.editAluno => Icons.edit_outlined,
+    OperacaoStickyDestination.commandCenter => Icons.open_in_new_rounded,
+  };
+}
+
 OperacaoStickyAction resolveOperacaoStickyAction({
+  required Aluno aluno,
   required ProximaAcaoResumo? proximaAcao,
   required bool hasOpenTask,
   required bool followUpDue,
 }) {
   final acao = proximaAcao?.acao.trim() ?? '';
 
-  if (hasOpenTask) {
-    if (acao.isNotEmpty) {
-      final chat = acaoSugereChat(acao) || followUpDue;
+  if (hasOpenTask && acao.isEmpty) {
+    return OperacaoStickyAction(
+      label: 'Ver tarefa',
+      icon: stickyIconForDestination(OperacaoStickyDestination.commandCenter),
+      destination: OperacaoStickyDestination.commandCenter,
+    );
+  }
+
+  if (acao.isEmpty) {
+    if (followUpDue) {
       return OperacaoStickyAction(
-        label: truncateStickyLabel(acao),
-        icon:
-            chat
-                ? Icons.chat_bubble_outline_rounded
-                : Icons.open_in_new_rounded,
-        isChatAction: chat,
+        label: 'Abrir chat',
+        icon: stickyIconForDestination(OperacaoStickyDestination.chat),
+        destination: OperacaoStickyDestination.chat,
       );
     }
-    return const OperacaoStickyAction(
-      label: 'Ver tarefa',
-      icon: Icons.open_in_new_rounded,
-      isChatAction: false,
-    );
-  }
-
-  if (acao.isNotEmpty) {
-    final chat = acaoSugereChat(acao) || followUpDue;
     return OperacaoStickyAction(
-      label: truncateStickyLabel(acao),
-      icon:
-          chat
-              ? Icons.chat_bubble_outline_rounded
-              : Icons.play_arrow_rounded,
-      isChatAction: chat,
+      label: 'Ver próxima ação',
+      icon: stickyIconForDestination(OperacaoStickyDestination.commandCenter),
+      destination: OperacaoStickyDestination.commandCenter,
     );
   }
 
-  if (followUpDue) {
-    return const OperacaoStickyAction(
-      label: 'Abrir chat',
-      icon: Icons.chat_bubble_outline_rounded,
-      isChatAction: true,
-    );
-  }
-
-  return const OperacaoStickyAction(
-    label: 'Ver próxima ação',
-    icon: Icons.open_in_new_rounded,
-    isChatAction: false,
+  final destination = resolveOperacaoStickyDestination(
+    acao,
+    followUpDue: followUpDue,
   );
+  return OperacaoStickyAction(
+    label: copilotStickyLabel(aluno, acao),
+    icon: stickyIconForDestination(destination),
+    destination: destination,
+  );
+}
+
+String operacaoStatusSubtitle(Aluno aluno, {required bool heroShowsRisco}) {
+  final contato = formatProximoContato(aluno);
+  if (heroShowsRisco) {
+    return 'Próximo contato: $contato · risco alto · priorize contato';
+  }
+  return 'Próximo contato: $contato';
 }
 
 OperacaoDominantMetric resolveOperacaoDominantMetric(Aluno aluno) {
@@ -274,23 +311,7 @@ bool operacaoHeroShowsRisco(Aluno aluno) =>
 /// Hide copilot "Resolver lacunas" when hero already prompts objective setup.
 bool shouldShowCopilotProfileGapsButton(Aluno aluno, int profileCompletion) {
   if (profileCompletion >= 80) return false;
-
-  final hasContactGap =
-      (aluno.telefone ?? '').trim().isEmpty &&
-      (aluno.whatsapp ?? '').trim().isEmpty;
-  final hasObjectiveGap = !alunoObjectiveIsDefined(aluno.objetivo);
-  final hasProfileGap =
-      (aluno.genero ?? '').trim().isEmpty ||
-      (aluno.tipoConsultoria ?? '').trim().isEmpty;
-
-  final gapCount =
-      (hasContactGap ? 1 : 0) +
-      (hasObjectiveGap ? 1 : 0) +
-      (hasProfileGap ? 1 : 0);
-
-  if (gapCount == 0) return false;
-  if (gapCount == 1 && hasObjectiveGap) return false;
-  return true;
+  return copilotProfileGapsForCard(aluno).isNotEmpty;
 }
 
 /// Sticky primary opens chat — hide duplicate chat CTA in copilot card.

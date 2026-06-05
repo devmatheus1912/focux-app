@@ -110,8 +110,9 @@ void main() {
       contains('_collapsedLines = 3'),
     );
     expect(screen, contains('Aluno360CopilotPrescriptionBody'));
-    expect(screen, contains('resolveCopilotProfileGaps'));
-    expect(screen, contains('copilotProfileCompletion'));
+    expect(screen, contains('operacaoStatusSubtitle'));
+    expect(screen, contains('copilotProfileGapsForCard'));
+    expect(screen, contains('copilotProfileGapsButtonLabel'));
     expect(
       File('lib/features/alunos/widgets/aluno360_copilot_prescription.dart')
           .readAsStringSync(),

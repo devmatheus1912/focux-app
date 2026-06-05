@@ -435,11 +435,32 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
     }
 
     final sticky = resolveOperacaoStickyAction(
+      aluno: aluno,
       proximaAcao: proximaAcao360,
       hasOpenTask: hasOpenTask,
       followUpDue: followUpDue,
     );
-    final onPrimary = sticky.isChatAction ? openChat : openCommandCenter;
+
+    void openEvolucao() {
+      context.push('/alunos/$alunoId/evolucao', extra: aluno.nome);
+    }
+
+    void openEditAluno() {
+      context.push('/alunos/$alunoId/editar', extra: aluno);
+    }
+
+    void onPrimary() {
+      switch (sticky.destination) {
+        case OperacaoStickyDestination.chat:
+          openChat();
+        case OperacaoStickyDestination.commandCenter:
+          openCommandCenter();
+        case OperacaoStickyDestination.evolucao:
+          openEvolucao();
+        case OperacaoStickyDestination.editAluno:
+          openEditAluno();
+      }
+    }
     final showSecondaryChat = shouldShowStickySecondaryChat(
       sticky: sticky,
       hasOpenTask: hasOpenTask,

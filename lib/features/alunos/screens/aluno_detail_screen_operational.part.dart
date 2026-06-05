@@ -76,9 +76,7 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            heroShowsRisco
-                ? 'Próximo contato: ${formatProximoContato(aluno)} · risco no hero'
-                : 'Próximo contato: ${formatProximoContato(aluno)}',
+            operacaoStatusSubtitle(aluno, heroShowsRisco: heroShowsRisco),
             style: Aluno360Layout.captionStyle(context),
           ),
           const SizedBox(height: 12),

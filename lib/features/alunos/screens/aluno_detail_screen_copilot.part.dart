@@ -378,7 +378,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     final hasOpenTask = openTask != null || hasOpenCopilotTask360;
     final resumo = resumoAsync.valueOrNull;
     final profileCompletion = copilotProfileCompletion(aluno);
-    final profileGaps = resolveCopilotProfileGaps(aluno);
+    final profileGaps = copilotProfileGapsForCard(aluno);
     final signals = resolveCopilotSignals(
       aluno: aluno,
       resumo: resumo,
@@ -391,6 +391,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
             : null;
     final followUpDue = isAlunoFollowUpDue(aluno);
     final stickyAction = resolveOperacaoStickyAction(
+      aluno: aluno,
       proximaAcao: proximaAcao360,
       hasOpenTask: hasOpenTask,
       followUpDue: followUpDue,
@@ -482,9 +483,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                 onPressed: () => _completeProfile(context, aluno),
                 icon: const Icon(Icons.person_add_alt_1_rounded, size: 16),
                 label: Text(
-                  profileGaps.length > 1
-                      ? 'Resolver lacunas'
-                      : 'Completar perfil',
+                  copilotProfileGapsButtonLabel(aluno),
                 ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: primary,
