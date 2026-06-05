@@ -124,21 +124,24 @@ void main() {
   });
 
   group('operacaoStatusSubtitle', () {
-    test('uses human copy when hero shows risk', () {
-      expect(
-        operacaoStatusSubtitle(
-          _aluno(emRisco: true),
-          heroShowsRisco: true,
-        ),
-        contains('priorize contato'),
+    test('omits duplicate risk copy when hero already shows risk', () {
+      final subtitle = operacaoStatusSubtitle(
+        _aluno(emRisco: true),
+        heroShowsRisco: true,
       );
-      expect(
-        operacaoStatusSubtitle(
-          _aluno(emRisco: true),
-          heroShowsRisco: true,
-        ),
-        isNot(contains('hero')),
-      );
+      expect(subtitle, contains('Próximo contato'));
+      expect(subtitle, isNot(contains('priorize contato')));
+      expect(subtitle, isNot(contains('risco alto')));
+    });
+  });
+
+  group('formatDiasSemTreinoDisplay', () {
+    test('null shows sem registro', () {
+      expect(formatDiasSemTreinoDisplay(null), 'Sem registro');
+    });
+
+    test('zero shows 0d', () {
+      expect(formatDiasSemTreinoDisplay(0), '0d');
     });
   });
 

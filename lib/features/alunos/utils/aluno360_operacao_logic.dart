@@ -188,11 +188,13 @@ OperacaoStickyAction resolveOperacaoStickyAction({
 }
 
 String operacaoStatusSubtitle(Aluno aluno, {required bool heroShowsRisco}) {
-  final contato = formatProximoContato(aluno);
-  if (heroShowsRisco) {
-    return 'Próximo contato: $contato · risco alto · priorize contato';
-  }
-  return 'Próximo contato: $contato';
+  return 'Próximo contato: ${formatProximoContato(aluno)}';
+}
+
+/// Human-readable idle days for operational tiles.
+String formatDiasSemTreinoDisplay(int? dias) {
+  if (dias == null) return 'Sem registro';
+  return '${dias}d';
 }
 
 OperacaoDominantMetric resolveOperacaoDominantMetric(Aluno aluno) {

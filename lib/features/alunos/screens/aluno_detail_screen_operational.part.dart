@@ -3,12 +3,14 @@
 class _AlunoOperationalStatusSection extends ConsumerWidget {
   const _AlunoOperationalStatusSection({
     required this.aluno,
+    required this.alunoId,
     required this.isDark,
     required this.primary,
     required this.aderenciaSemanal,
   });
 
   final Aluno aluno;
+  final int alunoId;
   final bool isDark;
   final Color primary;
   final List<Map<String, dynamic>>? aderenciaSemanal;
@@ -25,10 +27,46 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
     };
   }
 
+  Widget _semTreinoTile({
+    required Color mute,
+    required int diasLimite,
+  }) {
+    final dias = aluno.diasSemTreino;
+    final display = formatDiasSemTreinoDisplay(dias);
+    return OperationalMetricTile(
+      label: 'Sem treino',
+      value: display,
+      hint: dias == null ? 'Sem histórico recente' : 'Dias parados',
+      color:
+          (dias ?? 0) >= diasLimite ? EagleTokens.warn : mute,
+      isDark: isDark,
+      semanticsLabel:
+          dias == null
+              ? 'Sem treino, sem registro'
+              : 'Sem treino $dias dias',
+    );
+  }
+
+  Widget _aderenciaTile({required Color aderenciaColor}) {
+    return OperationalMetricTile(
+      label: 'Aderência',
+      value:
+          aluno.aderenciaPercent == null
+              ? '—'
+              : '${aluno.aderenciaPercent}%',
+      hint: 'Semana atual',
+      color: aderenciaColor,
+      isDark: isDark,
+      semanticsLabel:
+          aluno.aderenciaPercent == null
+              ? 'Aderência indisponível'
+              : 'Aderência ${aluno.aderenciaPercent} por cento',
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ink = fxScreenInk(context);
-    final mute = fxScreenMute(context);
     final configAsync = ref.watch(alertasConfigProvider);
     final diasLimite =
         configAsync.valueOrNull?.diasSemTreino ??
@@ -57,6 +95,7 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(Icons.insights_rounded, size: 18, color: primary),
               const SizedBox(width: 8),
@@ -72,6 +111,11 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
                   ),
                 ),
               ),
+              _OperacaoFocusModeToggle(
+                alunoId: alunoId,
+                primary: primary,
+                compact: true,
+              ),
             ],
           ),
           const SizedBox(height: 4),
@@ -81,94 +125,79 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           if (!heroShowsRisco) ...[
-          OperationalMetricTile(
-            label: dominant.label,
-            value: dominant.value,
-            hint: dominant.hint,
-            color: _dominantColor(dominant, aderenciaColor, riscoColor),
-            isDark: isDark,
-            leadingIcon:
-                dominant.kind == OperacaoDominantMetricKind.risco
-                    ? riscoMetricIcon(dominant.riscoNivel)
-                    : null,
-            semanticsLabel: dominant.semanticsLabel,
-          ),
-          const SizedBox(height: 8),
+            OperationalMetricTile(
+              label: dominant.label,
+              value: dominant.value,
+              hint: dominant.hint,
+              color: _dominantColor(dominant, aderenciaColor, riscoColor),
+              isDark: isDark,
+              leadingIcon:
+                  dominant.kind == OperacaoDominantMetricKind.risco
+                      ? riscoMetricIcon(dominant.riscoNivel)
+                      : null,
+              semanticsLabel: dominant.semanticsLabel,
+            ),
+            const SizedBox(height: 8),
           ],
-          Row(
-            children: [
-              Expanded(
-                child: OperationalMetricTile(
-                  label: 'Prontidão',
-                  value:
-                      aluno.scoreProntidao == null
-                          ? '—'
-                          : '${aluno.scoreProntidao}',
-                  hint: 'Índice operacional',
-                  color: primary,
-                  isDark: isDark,
-                  semanticsLabel:
-                      'Prontidão ${aluno.scoreProntidao ?? 'indisponível'}',
+          if (heroShowsRisco)
+            Row(
+              children: [
+                Expanded(child: _aderenciaTile(aderenciaColor: aderenciaColor)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _semTreinoTile(
+                    mute: fxScreenMute(context),
+                    diasLimite: diasLimite,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OperationalMetricTile(
-                  label: 'Aderência',
-                  value:
-                      aluno.aderenciaPercent == null
-                          ? '—'
-                          : '${aluno.aderenciaPercent}%',
-                  hint: 'Semana atual',
-                  color: aderenciaColor,
-                  isDark: isDark,
-                  semanticsLabel:
-                      aluno.aderenciaPercent == null
-                          ? 'Aderência indisponível'
-                          : 'Aderência ${aluno.aderenciaPercent} por cento',
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: OperationalMetricTile(
-                  label: 'Sem treino',
-                  value:
-                      aluno.diasSemTreino == null
-                          ? '—'
-                          : '${aluno.diasSemTreino}d',
-                  hint: 'Dias parados',
-                  color:
-                      (aluno.diasSemTreino ?? 0) >= diasLimite
-                          ? EagleTokens.warn
-                          : mute,
-                  isDark: isDark,
-                  semanticsLabel:
-                      aluno.diasSemTreino == null
-                          ? 'Sem treino indisponível'
-                          : 'Sem treino ${aluno.diasSemTreino} dias',
-                ),
-              ),
-              if (!heroShowsRisco) ...[
-              const SizedBox(width: 8),
-              Expanded(
-                child: OperationalMetricTile(
-                  label: 'Risco',
-                  value: formatRiscoNivel(aluno.riscoNivel),
-                  hint: aluno.emRisco ? 'Em risco' : 'Estável',
-                  color: riscoColor,
-                  isDark: isDark,
-                  leadingIcon: riscoMetricIcon(aluno.riscoNivel),
-                  semanticsLabel:
-                      'Risco ${formatRiscoNivel(aluno.riscoNivel)}',
-                ),
-              ),
               ],
-            ],
-          ),
+            )
+          else ...[
+            Row(
+              children: [
+                Expanded(
+                  child: OperationalMetricTile(
+                    label: 'Prontidão',
+                    value:
+                        aluno.scoreProntidao == null
+                            ? '—'
+                            : '${aluno.scoreProntidao}',
+                    hint: 'Índice operacional',
+                    color: primary,
+                    isDark: isDark,
+                    semanticsLabel:
+                        'Prontidão ${aluno.scoreProntidao ?? 'indisponível'}',
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(child: _aderenciaTile(aderenciaColor: aderenciaColor)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: _semTreinoTile(
+                    mute: fxScreenMute(context),
+                    diasLimite: diasLimite,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OperationalMetricTile(
+                    label: 'Risco',
+                    value: formatRiscoNivel(aluno.riscoNivel),
+                    hint: aluno.emRisco ? 'Em risco' : 'Estável',
+                    color: riscoColor,
+                    isDark: isDark,
+                    leadingIcon: riscoMetricIcon(aluno.riscoNivel),
+                    semanticsLabel:
+                        'Risco ${formatRiscoNivel(aluno.riscoNivel)}',
+                  ),
+                ),
+              ],
+            ),
+          ],
           if (week.points.isNotEmpty) ...[
             const SizedBox(height: 14),
             Container(

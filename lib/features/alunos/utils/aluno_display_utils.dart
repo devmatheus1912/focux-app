@@ -54,3 +54,19 @@ Color alunoAvatarFallbackColor(String name, bool isDark) {
   final hash = name.isNotEmpty ? name.codeUnitAt(0) : 0;
   return palette[hash % palette.length];
 }
+
+/// Vivid fallback on teal hero — avoids blending with gradient.
+Color alunoAvatarHeroFallbackColor(String name) {
+  const palette = [
+    Color(0xFF7C3AED),
+    Color(0xFFDB2777),
+    Color(0xFFEA580C),
+    Color(0xFF2563EB),
+    Color(0xFFB45309),
+  ];
+  final hash =
+      name.isEmpty
+          ? 0
+          : name.codeUnits.fold<int>(0, (sum, unit) => sum + unit);
+  return palette[hash % palette.length];
+}

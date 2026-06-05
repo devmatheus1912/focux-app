@@ -28,6 +28,17 @@ class AlunoHeroStatusVisual {
   final Color foreground;
 }
 
+/// Hide status badge when the dominant metric already communicates risk.
+bool alunoHeroShouldShowStatusBadge({
+  required AlunoHeroPrimarySignal signal,
+  required AlunoHeroStatusVisual status,
+}) {
+  if (signal.label == 'Risco operacional' && status.label == 'Em risco') {
+    return false;
+  }
+  return true;
+}
+
 AlunoHeroStatusVisual alunoHeroStatusVisual(Aluno aluno) {
   if (aluno.statusFinanceiro == 'INADIMPLENTE' || aluno.inadimplente) {
     return AlunoHeroStatusVisual(
@@ -121,7 +132,7 @@ String alunoHeroCaption(Aluno aluno, AlunoHeroPrimarySignal signal) {
     return 'Aderência saudável';
   }
   if (signal.label == 'Risco operacional') {
-    return aluno.emRisco ? 'Priorize contato e reengajamento' : 'Monitorar sinais';
+    return aluno.emRisco ? 'Priorize contato hoje' : 'Monitorar sinais';
   }
   return 'Índice operacional consolidado';
 }

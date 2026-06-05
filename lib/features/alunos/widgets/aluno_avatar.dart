@@ -16,6 +16,9 @@ class AlunoAvatar extends StatelessWidget {
     this.fallbackColor,
   });
 
+  static const double heroSize = 48;
+  static const double listSize = 48;
+
   final String name;
   final String? photoUrl;
   final AlunoAvatarVariant variant;
@@ -25,8 +28,8 @@ class AlunoAvatar extends StatelessWidget {
 
   double get _size =>
       switch (variant) {
-        AlunoAvatarVariant.hero => 36,
-        AlunoAvatarVariant.list => 46,
+        AlunoAvatarVariant.hero => heroSize,
+        AlunoAvatarVariant.list => listSize,
       };
 
   @override
@@ -36,26 +39,27 @@ class AlunoAvatar extends StatelessWidget {
     final resolvedUrl = resolveAlunoPhotoUrl(photoUrl);
     final ringColor =
         _onHero
-            ? Colors.white.withValues(alpha: 0.88)
+            ? Colors.white.withValues(alpha: 0.94)
             : BrandPalette.accent(primary).withValues(
               alpha: isDark ? 0.96 : 0.88,
             );
     final glowColor =
         _onHero
-            ? Colors.white.withValues(alpha: 0.22)
+            ? Colors.black.withValues(alpha: 0.28)
             : ringColor.withValues(alpha: isDark ? 0.42 : 0.36);
 
+    Widget avatar;
     if (resolvedUrl != null) {
-      return Container(
+      avatar = Container(
         width: _size,
         height: _size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: ringColor, width: 2),
+          border: Border.all(color: ringColor, width: _onHero ? 2.5 : 2),
           boxShadow: [
             BoxShadow(
               color: glowColor,
-              blurRadius: _onHero ? 12 : (isDark ? 14 : 12),
+              blurRadius: _onHero ? 14 : (isDark ? 14 : 12),
               offset: Offset(0, _onHero ? 4 : 0),
             ),
           ],
@@ -80,15 +84,23 @@ class AlunoAvatar extends StatelessWidget {
           ),
         ),
       );
+    } else {
+      avatar = _AlunoAvatarInitials(
+        name: name,
+        size: _size,
+        onHero: _onHero,
+        primary: primary,
+        isDark: isDark,
+        fallbackColor: fallbackColor,
+      );
     }
 
-    return _AlunoAvatarInitials(
-      name: name,
-      size: _onHero ? 36 : 44,
-      onHero: _onHero,
-      primary: primary,
-      isDark: isDark,
-      fallbackColor: fallbackColor,
+    return Semantics(
+      label:
+          resolvedUrl != null
+              ? 'Foto de $name'
+              : 'Avatar de $name, ${fxInitials(name)}',
+      child: avatar,
     );
   }
 }
@@ -112,19 +124,30 @@ class _AlunoAvatarInitials extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fallback =
+        fallbackColor ??
+        (onHero
+            ? alunoAvatarHeroFallbackColor(name)
+            : alunoAvatarFallbackColor(name, isDark));
+
     if (onHero) {
       return Container(
         width: size,
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white.withValues(alpha: 0.14),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
+          color: fallback,
+          border: Border.all(color: Colors.white.withValues(alpha: 0.94), width: 2.5),
           boxShadow: [
             BoxShadow(
-              color: Colors.white.withValues(alpha: 0.12),
-              blurRadius: 10,
+              color: Colors.black.withValues(alpha: 0.28),
+              blurRadius: 14,
               offset: const Offset(0, 4),
+            ),
+            BoxShadow(
+              color: Colors.white.withValues(alpha: 0.18),
+              blurRadius: 8,
+              offset: const Offset(0, 1),
             ),
           ],
         ),
@@ -133,15 +156,14 @@ class _AlunoAvatarInitials extends StatelessWidget {
           fxInitials(name),
           style: TextStyle(
             color: Colors.white,
-            fontSize: size * 0.35,
+            fontSize: size * 0.36,
             fontWeight: FontWeight.w800,
+            letterSpacing: -0.2,
           ),
         ),
       );
     }
 
-    final fallback =
-        fallbackColor ?? alunoAvatarFallbackColor(name, isDark);
     return Container(
       width: size,
       height: size,

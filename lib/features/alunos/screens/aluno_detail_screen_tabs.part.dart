@@ -144,6 +144,7 @@ class _AlunoDetailOperacaoTab extends ConsumerWidget {
 
     final operational = _AlunoOperationalStatusSection(
       aluno: aluno,
+      alunoId: alunoId,
       isDark: isDark,
       primary: primary,
       aderenciaSemanal: aderenciaSemanal,
@@ -184,8 +185,6 @@ class _AlunoDetailOperacaoTab extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        section(0, _OperacaoFocusModeToggle(alunoId: alunoId, primary: primary)),
-        const SizedBox(height: Aluno360Layout.sectionGap),
         if (financeRisk) ...[
           section(
             0,
@@ -219,7 +218,15 @@ class _AlunoDetailOperacaoTab extends ConsumerWidget {
             ),
           ),
         ] else ...[
-          section(2, copilot),
+          Align(
+            alignment: Alignment.centerRight,
+            child: section(
+              2,
+              _OperacaoFocusModeToggle(alunoId: alunoId, primary: primary),
+            ),
+          ),
+          const SizedBox(height: Aluno360Layout.sectionGap),
+          section(3, copilot),
         ],
       ],
     );
@@ -230,15 +237,48 @@ class _OperacaoFocusModeToggle extends ConsumerWidget {
   const _OperacaoFocusModeToggle({
     required this.alunoId,
     required this.primary,
+    this.compact = false,
   });
 
   final int alunoId;
   final Color primary;
+  final bool compact;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final focusMode = ref.watch(alunoOperacaoFocusModeProvider(alunoId));
     final ink = fxScreenInk(context);
+
+    if (compact && !focusMode) {
+      return Semantics(
+        button: true,
+        label: 'Ativar modo foco — mostra só follow-up e copiloto',
+        child: TextButton(
+          onPressed:
+              () =>
+                  ref
+                      .read(alunoOperacaoFocusModeProvider(alunoId).notifier)
+                      .state = true,
+          style: TextButton.styleFrom(
+            minimumSize: const Size(0, 32),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            foregroundColor: ink.withValues(alpha: 0.78),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.center_focus_weak, size: 15, color: primary),
+              const SizedBox(width: 4),
+              const Text(
+                'Modo foco',
+                style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Align(
       alignment: Alignment.centerRight,
@@ -260,7 +300,7 @@ class _OperacaoFocusModeToggle extends ConsumerWidget {
             color: focusMode ? primary : ink.withValues(alpha: 0.75),
           ),
           label: Text(
-            focusMode ? 'Modo foco' : 'Ver diagnóstico completo',
+            focusMode ? 'Modo foco ativo' : 'Ver diagnóstico completo',
             style: TextStyle(
               fontSize: 11.5,
               fontWeight: FontWeight.w800,
