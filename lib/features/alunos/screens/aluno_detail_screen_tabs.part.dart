@@ -508,6 +508,9 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
     final forceIa = ref.watch(alunoCopilotoForceIaProvider(alunoId));
     final iaAsync =
         forceIa ? ref.watch(alunoCopilotoActionProvider(alunoId)) : null;
+    final wearableRelevant = alunoTemHistoricoWearable(
+      ref.watch(alunoRecoveryProvider(alunoId)).valueOrNull,
+    );
     final hasOpenTask =
         findOpenCopilotTask(openActions.valueOrNull ?? const []) != null ||
         hasOpenCopilotTask360;
@@ -519,6 +522,7 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
       iaAsync: iaAsync,
       hasOpenTask: hasOpenTask,
       followUpDue: followUpDue,
+      wearableRelevant: wearableRelevant,
     );
     final sticky = operacao.stickyAction;
     final effectiveProxima = operacao.effectiveProxima;
@@ -537,7 +541,8 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
 
     void openChat({String? acao}) {
       final actionText = acao?.trim() ?? effectiveProxima?.acao.trim() ?? '';
-      if (actionText.isNotEmpty && acaoSugereChat(actionText)) {
+      if (sticky.isChatAction ||
+          (actionText.isNotEmpty && acaoSugereChat(actionText))) {
         openOutreach();
         return;
       }

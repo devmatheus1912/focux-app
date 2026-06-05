@@ -148,6 +148,7 @@ OperacaoStickyAction resolveOperacaoStickyAction({
   required ProximaAcaoResumo? proximaAcao,
   required bool hasOpenTask,
   required bool followUpDue,
+  bool wearableRelevant = true,
 }) {
   final acao = proximaAcao?.acao.trim() ?? '';
 
@@ -182,7 +183,11 @@ OperacaoStickyAction resolveOperacaoStickyAction({
   final label =
       backendLabel != null && backendLabel.isNotEmpty
           ? backendLabel
-          : copilotStickyLabel(aluno, acao);
+          : copilotStickyLabel(
+            aluno,
+            acao,
+            wearableRelevant: wearableRelevant,
+          );
   return OperacaoStickyAction(
     label: label,
     icon: stickyIconForDestination(destination),
@@ -490,6 +495,26 @@ bool shouldHideCopilotTaskRowWhenContactPriority({
 }) =>
     contactPriority && !hasOpenTask;
 
+/// Quando o hero pede contato mas o 360 ainda sugere mapa/perfil, o sticky alinha ao contato.
+OperacaoStickyAction applyContactPriorityStickyOverride({
+  required OperacaoStickyAction sticky,
+  required bool contactPriority,
+  required bool hasOpenTask,
+  required ProximaAcaoResumo? proximaAcao,
+}) {
+  if (!contactPriority || sticky.isChatAction) return sticky;
+  if (hasOpenTask &&
+      proximaAcao?.acao.trim().isEmpty == true &&
+      sticky.destination == OperacaoStickyDestination.commandCenter) {
+    return sticky;
+  }
+  return OperacaoStickyAction(
+    label: 'Retomar contato',
+    icon: stickyIconForDestination(OperacaoStickyDestination.chat),
+    destination: OperacaoStickyDestination.chat,
+  );
+}
+
 /// Snapshot unificado da aba Operação (sticky + copilot + outreach).
 class Aluno360OperacaoSnapshot {
   const Aluno360OperacaoSnapshot({
@@ -520,17 +545,37 @@ Aluno360OperacaoSnapshot resolveAluno360OperacaoSnapshot({
   required AsyncValue<Map<String, dynamic>>? iaAsync,
   required bool hasOpenTask,
   required bool followUpDue,
+  bool wearableRelevant = true,
 }) {
-  final effectiveProxima = resolveCopilotProximaAcaoResumo(
+  var effectiveProxima = resolveCopilotProximaAcaoResumo(
     proximaAcao360: proximaAcao360,
     forceIa: forceIa,
     iaAsync: iaAsync,
   );
-  final sticky = resolveOperacaoStickyAction(
+  if (effectiveProxima != null) {
+    effectiveProxima = sanitizeProximaAcaoWearable(
+      aluno,
+      effectiveProxima,
+      wearableRelevant: wearableRelevant,
+    );
+  }
+  var sticky = resolveOperacaoStickyAction(
     aluno: aluno,
     proximaAcao: effectiveProxima,
     hasOpenTask: hasOpenTask,
     followUpDue: followUpDue,
+    wearableRelevant: wearableRelevant,
+  );
+  final acao = effectiveProxima?.acao ?? '';
+  final contactPriority = isOperacaoContatoPrioritario(
+    aluno: aluno,
+    proximaAcao: effectiveProxima,
+  );
+  sticky = applyContactPriorityStickyOverride(
+    sticky: sticky,
+    contactPriority: contactPriority,
+    hasOpenTask: hasOpenTask,
+    proximaAcao: effectiveProxima,
   );
   final stickyCompact =
       shouldShowStickySecondaryCommandCenter(
@@ -548,12 +593,11 @@ Aluno360OperacaoSnapshot resolveAluno360OperacaoSnapshot({
     compact: stickyCompact,
     proximaAcao: effectiveProxima,
   );
-  final acao = effectiveProxima?.acao ?? '';
-  final contactPriority = isOperacaoContatoPrioritario(
-    aluno: aluno,
-    proximaAcao: effectiveProxima,
-  );
-  final showPrepareMessage = acaoSugereChat(acao);
+  final outreachAcao =
+      contactPriority && !acaoSugereChat(acao)
+          ? contactPriorityOutreachAcao()
+          : acao;
+  final showPrepareMessage = acaoSugereChat(acao) || contactPriority;
   final hideCopilotChatRow =
       shouldHideCopilotChatCta(sticky: sticky, hasOpenTask: hasOpenTask) ||
       showPrepareMessage;
@@ -570,8 +614,9 @@ Aluno360OperacaoSnapshot resolveAluno360OperacaoSnapshot({
     hideCopilotChatRow: hideCopilotChatRow,
     outreachMessage: resolveOutreachMessage(
       aluno,
-      acao: acao,
+      acao: outreachAcao,
       backendMessage: effectiveProxima?.mensagemSugerida,
+      wearableRelevant: wearableRelevant,
     ),
   );
 }

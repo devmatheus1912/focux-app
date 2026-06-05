@@ -54,15 +54,16 @@ class _AlunoRecoveryInsightCardState extends State<_AlunoRecoveryInsightCard> {
             button: true,
             label:
                 _expanded
-                    ? 'Recolher wearable sem dados'
-                    : 'Wearable sem dados — toque para expandir',
+                    ? 'Recolher wearable não conectado'
+                    : 'Wearable não conectado — toque para expandir',
             child: Material(
               color: Colors.transparent,
               child: InkWell(
                 onTap: () => setState(() => _expanded = !_expanded),
                 borderRadius: BorderRadius.circular(TokensStrip.rCard),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  constraints: const BoxConstraints(minHeight: 52),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                   decoration: chrome.panel(radius: TokensStrip.rCard),
                   child: Row(
                     children: [
@@ -75,8 +76,8 @@ class _AlunoRecoveryInsightCardState extends State<_AlunoRecoveryInsightCard> {
                       Expanded(
                         child: Text(
                           _expanded
-                              ? 'Sem dados de wearable hoje — peça ao aluno conectar Apple Health ou Google Fit.'
-                              : 'Wearable · sem dados hoje',
+                              ? 'Aluno ainda não conectou Apple Health ou Google Fit. Peça para conectar no app se fizer sentido.'
+                              : 'Wearable · não conectado',
                           style: TextStyle(
                             color: chrome.mute,
                             fontSize: 12.5,

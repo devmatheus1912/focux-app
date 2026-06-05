@@ -91,11 +91,11 @@ class _Aluno360CopilotPrescriptionState
               _expandedAction ? expandedActionText : widget.action,
               maxLines: _expandedAction ? null : 2,
               overflow: _expandedAction ? null : TextOverflow.ellipsis,
-              style: TextStyle(
+              style: AppTypography.inter(
                 color: ink,
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
-                height: 1.34,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w700,
+                height: 1.38,
               ),
             ),
           ),
@@ -118,36 +118,34 @@ class _Aluno360CopilotPrescriptionState
               ),
             ),
           if (widget.onPrepareMessage != null) ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             Semantics(
               button: true,
               label: 'Preparar mensagem para o aluno',
               child: SizedBox(
                 width: double.infinity,
-                height: 40,
-                child: OutlinedButton.icon(
+                height: 44,
+                child: FilledButton.icon(
                   onPressed: widget.onPrepareMessage,
                   icon: Icon(
                     Icons.chat_bubble_outline_rounded,
-                    size: 16,
+                    size: 17,
                     color: widget.color,
                   ),
                   label: Text(
                     'Preparar mensagem',
                     style: TextStyle(
                       color: widget.color,
-                      fontSize: 13,
+                      fontSize: 13.5,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  style: OutlinedButton.styleFrom(
+                  style: FilledButton.styleFrom(
+                    elevation: 0,
                     foregroundColor: widget.color,
-                    backgroundColor: widget.color.withValues(alpha: 0.06),
-                    side: BorderSide(
-                      color: widget.color.withValues(alpha: 0.28),
-                    ),
+                    backgroundColor: widget.color.withValues(alpha: 0.10),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(13),
                     ),
                   ),
                 ),
@@ -267,6 +265,8 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
     required this.iaAsync,
     required this.resumoLoading,
     this.onPrepareMessage,
+    this.preferContactPriority = false,
+    this.wearableRelevant = true,
   });
 
   final Aluno aluno;
@@ -277,6 +277,8 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
   final AsyncValue<Map<String, dynamic>>? iaAsync;
   final bool resumoLoading;
   final VoidCallback? onPrepareMessage;
+  final bool preferContactPriority;
+  final bool wearableRelevant;
 
   @override
   Widget build(BuildContext context) {
@@ -300,13 +302,24 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
                 aluno,
                 copilotActionFromIa(action),
                 fallback,
+                wearableRelevant: wearableRelevant,
               ),
               isIaSuggestion: true,
             ),
       );
     } else if (seed360 != null) {
+      final seedAcao = (seed360!['acao'] ?? '').toString();
+      final useContactPriority =
+          preferContactPriority && !forceIa && !acaoSugereChat(seedAcao);
       child = _fromContent(
-        resolveCopilotPrescriptionFromAction(aluno, seed360!, fallback),
+        useContactPriority
+            ? contactPriorityPrescriptionContent(aluno)
+            : resolveCopilotPrescriptionFromAction(
+              aluno,
+              seed360!,
+              fallback,
+              wearableRelevant: wearableRelevant,
+            ),
       );
     } else if (resumoLoading) {
       child = Aluno360CopilotPrescriptionLoading(color: primary);

@@ -217,18 +217,21 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     BuildContext context,
     String acao, {
     String? backendMessage,
+    String? outreachMessage,
   }) {
     showAlunoOutreachMessageSheet(
       context,
       alunoId: aluno.id,
       alunoNome: aluno.nome,
-      message: resolveOutreachMessage(
-        aluno,
-        acao: acao,
-        backendMessage: backendMessage,
-      ),
+      message:
+          outreachMessage ??
+          resolveOutreachMessage(
+            aluno,
+            acao: acao,
+            backendMessage: backendMessage,
+          ),
       title: 'Mensagem sugerida',
-      subtitle: 'Copiloto IA · revise antes de enviar.',
+      subtitle: 'Copiloto · revise antes de enviar.',
       icon: Icons.auto_awesome_rounded,
     );
   }
@@ -329,6 +332,9 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     final forceIa = ref.watch(alunoCopilotoForceIaProvider(aluno.id));
     final iaAsync =
         forceIa ? ref.watch(alunoCopilotoActionProvider(aluno.id)) : null;
+    final wearableRelevant = alunoTemHistoricoWearable(
+      ref.watch(alunoRecoveryProvider(aluno.id)).valueOrNull,
+    );
     final openActionsAsync = ref.watch(alunoOpenIaActionsProvider(aluno.id));
     final openTask = findOpenCopilotTask(openActionsAsync.valueOrNull ?? const []);
     final hasOpenTask = openTask != null || hasOpenCopilotTask360;
@@ -351,6 +357,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
       iaAsync: iaAsync,
       hasOpenTask: hasOpenTask,
       followUpDue: isAlunoFollowUpDue(aluno),
+      wearableRelevant: wearableRelevant,
     );
     final stickyAction = operacao.stickyAction;
     final effectiveProxima = operacao.effectiveProxima;
@@ -412,20 +419,28 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 3),
-                    Text(
-                      operacao.contactPriority
-                          ? '${copilotCardSubtitle(forceIa: forceIa, iaAsync: iaAsync, resumoLoading: resumoAsync.isLoading && !resumoAsync.hasValue)} · priorize contato'
-                          : copilotCardSubtitle(
-                            forceIa: forceIa,
-                            iaAsync: iaAsync,
-                            resumoLoading:
-                                resumoAsync.isLoading && !resumoAsync.hasValue,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            copilotCardSubtitle(
+                              forceIa: forceIa,
+                              iaAsync: iaAsync,
+                              resumoLoading:
+                                  resumoAsync.isLoading && !resumoAsync.hasValue,
+                            ),
+                            style: TextStyle(
+                              color: mute,
+                              fontSize: 12.5,
+                              height: 1.3,
+                            ),
                           ),
-                      style: TextStyle(
-                        color: mute,
-                        fontSize: 12.5,
-                        height: 1.3,
-                      ),
+                        ),
+                        if (operacao.contactPriority) ...[
+                          const SizedBox(width: 8),
+                          _ContactPriorityBadge(primary: primary),
+                        ],
+                      ],
                     ),
                   ],
                 ),
@@ -492,12 +507,15 @@ class _Aluno360CopilotCard extends ConsumerWidget {
               forceIa: forceIa,
               iaAsync: iaAsync,
               resumoLoading: resumoAsync.isLoading && !resumoAsync.hasValue,
+              preferContactPriority: operacao.contactPriority,
+              wearableRelevant: wearableRelevant,
               onPrepareMessage:
                   showPrepareInPrescription
                       ? () => _prepararMensagem(
                         context,
                         resolvedAcao,
                         backendMessage: effectiveProxima?.mensagemSugerida,
+                        outreachMessage: operacao.outreachMessage,
                       )
                       : null,
             ),
@@ -557,9 +575,9 @@ class _CopilotIaRefreshButtonState extends ConsumerState<_CopilotIaRefreshButton
     try {
       await ref.refresh(alunoCopilotoActionProvider(widget.alunoId).future);
       if (mounted) {
-        FeedbackHelper.showSnackBar(
+        FeedbackHelper.showSuccess(
           context,
-          const SnackBar(content: Text('Sugestão atualizada com IA')),
+          'Sugestão atualizada com IA',
         );
       }
     } catch (e) {
@@ -613,6 +631,33 @@ class _CopilotIaRefreshButtonState extends ConsumerState<_CopilotIaRefreshButton
               )
               : const Icon(Icons.refresh_rounded, size: 18),
       tooltip: _refreshing ? 'Atualizando…' : 'Atualizar com IA',
+    );
+  }
+}
+
+class _ContactPriorityBadge extends StatelessWidget {
+  const _ContactPriorityBadge({required this.primary});
+
+  final Color primary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: EagleTokens.bad.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: EagleTokens.bad.withValues(alpha: 0.22)),
+      ),
+      child: Text(
+        'Contato',
+        style: TextStyle(
+          color: EagleTokens.bad,
+          fontSize: 10.5,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0.2,
+        ),
+      ),
     );
   }
 }

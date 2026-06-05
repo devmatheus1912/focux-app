@@ -586,5 +586,25 @@ void main() {
       expect(snapshot.showPrepareMessage, isTrue);
       expect(snapshot.outreachMessage, 'Oi, Beatriz. Mensagem backend.');
     });
+
+    test('overrides mapa corporal sticky when em risco', () {
+      final snapshot = resolveAluno360OperacaoSnapshot(
+        aluno: _aluno(emRisco: true),
+        proximaAcao360: const ProximaAcaoResumo(
+          acao: 'Completar mapa corporal',
+          motivo: 'Sem medidas',
+          fonte: 'RADAR',
+          prioridade: 'P2',
+        ),
+        forceIa: false,
+        iaAsync: null,
+        hasOpenTask: false,
+        followUpDue: false,
+      );
+      expect(snapshot.stickyAction.isChatAction, isTrue);
+      expect(snapshot.stickyAction.label, 'Retomar contato');
+      expect(snapshot.showPrepareMessage, isTrue);
+      expect(snapshot.outreachMessage, contains('Teste'));
+    });
   });
 }

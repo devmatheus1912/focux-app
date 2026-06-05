@@ -12,6 +12,8 @@ Aluno _aluno({
   String? genero,
   String? tipoConsultoria,
   String statusFinanceiro = 'ATIVO',
+  bool emRisco = false,
+  int? aderenciaPercent,
 }) {
   return Aluno(
     id: 1,
@@ -24,6 +26,8 @@ Aluno _aluno({
     genero: genero,
     tipoConsultoria: tipoConsultoria,
     statusFinanceiro: statusFinanceiro,
+    emRisco: emRisco,
+    aderenciaPercent: aderenciaPercent,
   );
 }
 
@@ -333,6 +337,52 @@ void main() {
         'Retomar contato · wearable',
       );
     });
+
+    test('drops wearable label when aluno never connected', () {
+      expect(
+        copilotStickyLabel(
+          _aluno(),
+          'Pedir sync do wearable ao aluno',
+          wearableRelevant: false,
+        ),
+        'Retomar contato',
+      );
+    });
+  });
+
+  group('sanitizeProximaAcaoWearable', () {
+    test('rewrites wearable IA payload when no history', () {
+      final sanitized = sanitizeProximaAcaoWearable(
+        _aluno(),
+        const ProximaAcaoResumo(
+          acao: 'Pedir sync do wearable',
+          motivo: 'Sem treinos',
+          fonte: 'IA',
+          prioridade: 'P1',
+          tipoAcao: 'WEARABLE',
+          mensagemSugerida: 'Oi, Beatriz. Vi que seu wearable não sincronizou.',
+          stickyLabel: 'Retomar contato · wearable',
+          stickyLabelCompact: 'Contato',
+        ),
+        wearableRelevant: false,
+      );
+      expect(sanitized.tipoAcao, 'CONTATO');
+      expect(sanitized.stickyLabel, 'Retomar contato');
+      expect(sanitized.mensagemSugerida, isNot(contains('wearable')));
+    });
+  });
+
+  group('copilotPrescriptionDisplayAction', () {
+    test('uses contact copy instead of wearable when no history', () {
+      expect(
+        copilotPrescriptionDisplayAction(
+          _aluno(),
+          'Pedir sync do wearable',
+          wearableRelevant: false,
+        ),
+        'Retomar contato e checar como está o treino.',
+      );
+    });
   });
 
   group('resolveOutreachMessage', () {
@@ -345,6 +395,17 @@ void main() {
         ),
         'Oi, Beatriz. Mensagem do servidor.',
       );
+    });
+  });
+
+  group('contactPriorityPrescriptionContent', () {
+    test('surfaces risk and adherence in reason', () {
+      final content = contactPriorityPrescriptionContent(
+        _aluno(emRisco: true, aderenciaPercent: 0),
+      );
+      expect(content.title, 'Prioridade do dia');
+      expect(content.action, contains('Retomar contato'));
+      expect(content.reason, contains('Risco operacional'));
     });
   });
 

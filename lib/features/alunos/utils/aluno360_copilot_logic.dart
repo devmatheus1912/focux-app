@@ -5,6 +5,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../dashboard/data/command_center_data.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno_display_utils.dart';
+import '../../health/data/health_repository.dart';
 
 /// Signal chip shown in the copilot decision grid.
 class Aluno360CopilotSignal {
@@ -146,10 +147,65 @@ String resolveOutreachMessage(
   Aluno aluno, {
   required String acao,
   String? backendMessage,
+  bool wearableRelevant = true,
 }) {
   final trimmed = backendMessage?.trim();
-  if (trimmed != null && trimmed.isNotEmpty) return trimmed;
-  return copilotMensagemPronta(aluno, acao);
+  if (trimmed != null && trimmed.isNotEmpty) {
+    if (!wearableRelevant && _mensagemMencionaWearable(trimmed)) {
+      return copilotMensagemPronta(
+        aluno,
+        contactPriorityOutreachAcao(),
+        wearableRelevant: false,
+      );
+    }
+    return trimmed;
+  }
+  return copilotMensagemPronta(
+    aluno,
+    acao,
+    wearableRelevant: wearableRelevant,
+  );
+}
+
+String contactPriorityOutreachAcao() => 'Contate o aluno para retomar treino.';
+
+bool alunoTemHistoricoWearable(RecoverySnapshot? recovery) => recovery != null;
+
+bool _mensagemMencionaWearable(String text) => copilotAcaoMencionaWearable(text);
+
+ProximaAcaoResumo sanitizeProximaAcaoWearable(
+  Aluno aluno,
+  ProximaAcaoResumo resumo, {
+  required bool wearableRelevant,
+}) {
+  if (wearableRelevant) return resumo;
+  final tipo = resumo.tipoAcao?.toUpperCase();
+  if (tipo != 'WEARABLE' && !copilotAcaoMencionaWearable(resumo.acao)) {
+    return resumo;
+  }
+  final acao = sanitizeCopilotAcaoWearable(resumo.acao, wearableRelevant: false);
+  return ProximaAcaoResumo(
+    acao: acao,
+    motivo: resumo.motivo,
+    fonte: resumo.fonte,
+    prioridade: resumo.prioridade,
+    tipoAcao: 'CONTATO',
+    mensagemSugerida: copilotMensagemPronta(
+      aluno,
+      contactPriorityOutreachAcao(),
+      wearableRelevant: false,
+    ),
+    stickyLabel: 'Retomar contato',
+    stickyLabelCompact: 'Contato',
+  );
+}
+
+String sanitizeCopilotAcaoWearable(
+  String acao, {
+  required bool wearableRelevant,
+}) {
+  if (wearableRelevant || !copilotAcaoMencionaWearable(acao)) return acao;
+  return 'Retomar contato e checar como está o treino.';
 }
 
 String cleanCopilotText(String value) {
@@ -222,7 +278,11 @@ String copilotChatActionLabel(String acao) {
   return 'Abrir chat';
 }
 
-String copilotMensagemPronta(Aluno aluno, String acao) {
+String copilotMensagemPronta(
+  Aluno aluno,
+  String acao, {
+  bool wearableRelevant = true,
+}) {
   final primeiroNome =
       aluno.nome.trim().isEmpty
           ? 'tudo bem'
@@ -237,7 +297,8 @@ String copilotMensagemPronta(Aluno aluno, String acao) {
   if (lower.contains('treino') || lower.contains('carga')) {
     return 'Oi, $primeiroNome. Quero ajustar seu treino para o próximo passo com segurança. Me responde por aqui?';
   }
-  if (copilotAcaoMencionaWearable(acao) || lower.contains('sincroniz')) {
+  if (wearableRelevant &&
+      (copilotAcaoMencionaWearable(acao) || lower.contains('sincroniz'))) {
     return 'Oi, $primeiroNome. Vi que seu wearable não sincronizou. Consegue abrir o app e me dar um ok por aqui?';
   }
   if (lower.contains('inativid') ||
@@ -309,22 +370,34 @@ String copilotPrescriptionFullAction(Aluno aluno, String rawAcao) {
   return copilotDisplayAction(aluno, rawAcao);
 }
 
-String copilotPrescriptionDisplayAction(Aluno aluno, String rawAcao) {
-  final full = copilotPrescriptionFullAction(aluno, rawAcao);
+String copilotPrescriptionDisplayAction(
+  Aluno aluno,
+  String rawAcao, {
+  bool wearableRelevant = true,
+}) {
+  final sanitized = sanitizeCopilotAcaoWearable(
+    rawAcao,
+    wearableRelevant: wearableRelevant,
+  );
+  final full = copilotPrescriptionFullAction(aluno, sanitized);
   final lower = full.toLowerCase();
 
-  if (acaoSugereChat(full) && copilotAcaoMencionaWearable(full)) {
+  if (wearableRelevant &&
+      acaoSugereChat(full) &&
+      copilotAcaoMencionaWearable(full)) {
     return 'Retomar contato e pedir sync do wearable.';
   }
   if (acaoSugereChat(full)) {
     if (full.length <= 88) return full;
-    if (lower.contains('reaviv') || lower.contains('aderência') || lower.contains('aderencia')) {
+    if (lower.contains('reaviv') ||
+        lower.contains('aderência') ||
+        lower.contains('aderencia')) {
       return 'Retomar contato · mensagem curta para reengajar.';
     }
     return '${copilotChatActionLabel(full)} · mensagem objetiva e direta.';
   }
 
-  final templated = copilotDisplayAction(aluno, rawAcao);
+  final templated = copilotDisplayAction(aluno, sanitized);
   if (templated != full && full.length > 88) return templated;
   if (full.length <= 96) return full;
   return templated;
@@ -357,9 +430,16 @@ bool acaoSugereChat(String acao) {
 }
 
 /// Short label shared by sticky bar and prescription action line.
-String copilotStickyLabel(Aluno aluno, String acao) {
+String copilotStickyLabel(
+  Aluno aluno,
+  String acao, {
+  bool wearableRelevant = true,
+}) {
   final cleaned = normalizeIaCopilotAcao(acao);
   if (cleaned.isEmpty) return 'Ver próxima ação';
+  if (!wearableRelevant && copilotAcaoMencionaWearable(cleaned)) {
+    return 'Retomar contato';
+  }
   final lower = cleaned.toLowerCase();
   if (lower.contains('mapa') || lower.contains('corporal')) {
     return 'Completar mapa corporal';
@@ -369,7 +449,7 @@ String copilotStickyLabel(Aluno aluno, String acao) {
     return 'Alinhar financeiro';
   }
   if (acaoSugereChat(cleaned)) {
-    if (copilotAcaoMencionaWearable(cleaned)) {
+    if (wearableRelevant && copilotAcaoMencionaWearable(cleaned)) {
       return 'Retomar contato · wearable';
     }
     return copilotChatActionLabel(cleaned);
@@ -394,6 +474,24 @@ String copilotProfileGapsButtonLabel(Aluno aluno) {
   if (gaps.length > 1) return 'Resolver lacunas';
   if (gaps.isEmpty) return 'Completar perfil';
   return 'Completar ${gaps.first.title.toLowerCase()}';
+}
+
+CopilotPrescriptionContent contactPriorityPrescriptionContent(Aluno aluno) {
+  final firstName = aluno.nome.trim().isEmpty
+      ? 'o aluno'
+      : aluno.nome.trim().split(' ').first;
+  final aderencia = aluno.aderenciaPercent;
+  final reason =
+      aluno.emRisco
+          ? 'Risco operacional · aderência ${aderencia ?? 0}% nos últimos 7 dias.'
+          : aderencia != null && aderencia <= 0
+              ? 'Sem check-ins recentes · priorize contato antes de evoluir o plano.'
+              : 'Sinais do perfil pedem contato direto hoje.';
+  return CopilotPrescriptionContent(
+    title: 'Prioridade do dia',
+    action: 'Retomar contato com $firstName e checar como está.',
+    reason: reason,
+  );
 }
 
 String copilotFallbackAction(Aluno aluno, AlunoAutonomiaResumo? resumo) {
@@ -517,16 +615,25 @@ String resolveCopilotAcao({
 CopilotPrescriptionContent resolveCopilotPrescriptionFromAction(
   Aluno aluno,
   Map<String, dynamic> action,
-  String fallback,
-) {
+  String fallback, {
+  bool wearableRelevant = true,
+}) {
   final rawAcao =
       (action['acao'] ?? action['mensagem'] ?? action['descricao'] ?? fallback)
           .toString();
   final motivoRaw = (action['motivo'] ?? 'Baseado nos sinais atuais.')
       .toString();
   final isIa = (action['fonte'] ?? '').toString().toUpperCase() == 'IA';
-  final fullAction = copilotPrescriptionFullAction(aluno, rawAcao);
-  final displayAction = copilotPrescriptionDisplayAction(aluno, rawAcao);
+  final sanitizedAcao = sanitizeCopilotAcaoWearable(
+    rawAcao,
+    wearableRelevant: wearableRelevant,
+  );
+  final fullAction = copilotPrescriptionFullAction(aluno, sanitizedAcao);
+  final displayAction = copilotPrescriptionDisplayAction(
+    aluno,
+    sanitizedAcao,
+    wearableRelevant: wearableRelevant,
+  );
   return CopilotPrescriptionContent(
     title:
         (action['titulo'] ?? action['tipo'] ?? 'Próxima melhor ação')
