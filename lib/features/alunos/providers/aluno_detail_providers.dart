@@ -6,6 +6,7 @@ import '../../dashboard/data/command_center_data.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../health/data/health_repository.dart';
 import '../../ia/data/ia_repository.dart';
+import '../data/aluno_operacao_focus_store.dart';
 import '../data/aluno_repository.dart';
 import 'alunos_provider.dart';
 
@@ -33,9 +34,34 @@ final alunoCopilotCreatingProvider = StateProvider.family<bool, int>(
 );
 
 /// Operação tab focus mode — hides secondary diagnostics (status grid, wearable, quick actions).
-final alunoOperacaoFocusModeProvider = StateProvider.family<bool, int>(
-  (ref, alunoId) => false,
+final alunoOperacaoFocusModeProvider =
+    StateNotifierProvider.family<AlunoOperacaoFocusModeController, bool, int>(
+  (ref, alunoId) => AlunoOperacaoFocusModeController(alunoId),
 );
+
+class AlunoOperacaoFocusModeController extends StateNotifier<bool> {
+  AlunoOperacaoFocusModeController(this.alunoId) : super(false) {
+    _restore();
+  }
+
+  final int alunoId;
+
+  Future<void> _restore() async {
+    try {
+      final saved = await AlunoOperacaoFocusStore.load(alunoId);
+      if (saved != state) state = saved;
+    } catch (_) {}
+  }
+
+  Future<void> setFocus(bool value) async {
+    state = value;
+    try {
+      await AlunoOperacaoFocusStore.save(alunoId, value);
+    } catch (_) {}
+  }
+
+  Future<void> toggle() async => setFocus(!state);
+}
 
 final alunoCopilotoActionProvider =
     FutureProvider.family<Map<String, dynamic>, int>((ref, alunoId) async {

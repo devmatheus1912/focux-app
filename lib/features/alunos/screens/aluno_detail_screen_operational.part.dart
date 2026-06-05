@@ -241,6 +241,41 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
                       idleColor: neutralIdle,
                     ),
                   ),
+                  if (!week.hasAnyCheckin) ...[
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 36,
+                      child: OutlinedButton.icon(
+                        onPressed:
+                            () => context.push(
+                              '/alunos/$alunoId/chat',
+                              extra: aluno.nome,
+                            ),
+                        icon: Icon(
+                          Icons.message_outlined,
+                          size: 16,
+                          color: primary,
+                        ),
+                        label: const Text(
+                          'Pedir check-in',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: primary,
+                          side: BorderSide(
+                            color: primary.withValues(alpha: isDark ? 0.28 : 0.22),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

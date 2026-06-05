@@ -400,6 +400,11 @@ class _Aluno360CopilotCard extends ConsumerWidget {
       sticky: stickyAction,
       hasOpenTask: hasOpenTask,
     );
+    final hideCopilotPrescription = shouldHideCopilotPrescriptionWhenMatchesSticky(
+      sticky: stickyAction,
+      aluno: aluno,
+      proximaAcaoRaw: proximaAcao360?.acao,
+    );
     final cardPadding = hasOpenTask ? 10.0 : 14.0;
 
     return Container(
@@ -500,28 +505,30 @@ class _Aluno360CopilotCard extends ConsumerWidget {
             ),
             const SizedBox(height: 10),
           ],
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color:
-                  isDark
-                      ? Colors.white.withValues(alpha: 0.04)
-                      : BrandPalette.softer(primary),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: line),
+          if (!hideCopilotPrescription) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color:
+                    isDark
+                        ? Colors.white.withValues(alpha: 0.04)
+                        : BrandPalette.softer(primary),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: line),
+              ),
+              child: Aluno360CopilotPrescriptionBody(
+                aluno: aluno,
+                primary: primary,
+                fallback: fallback,
+                seed360: seed360,
+                forceIa: forceIa,
+                iaAsync: iaAsync,
+                resumoLoading: resumoAsync.isLoading && !resumoAsync.hasValue,
+              ),
             ),
-            child: Aluno360CopilotPrescriptionBody(
-              aluno: aluno,
-              primary: primary,
-              fallback: fallback,
-              seed360: seed360,
-              forceIa: forceIa,
-              iaAsync: iaAsync,
-              resumoLoading: resumoAsync.isLoading && !resumoAsync.hasValue,
-            ),
-          ),
-          const SizedBox(height: 10),
+            const SizedBox(height: 10),
+          ],
           if (!hasOpenTask)
             openActionsAsync.maybeWhen(
               loading:

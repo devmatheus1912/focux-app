@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'fx_shell_scaffold.dart';
+import '../theme/app_typography.dart';
 
 /// Shared surface styling for operational KPI tiles (Aluno 360 + dashboard pulse).
 /// Dashboard pulse chips remain tappable wrappers — see [DashboardPulseChip].
@@ -71,11 +73,11 @@ class OperationalMetricTile extends StatelessWidget {
               Flexible(
                 child: Text(
                   value,
-                  style: TextStyle(
+                  style: AppTypography.condensed(
                     color: ink,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.3,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
                   ),
                 ),
               ),

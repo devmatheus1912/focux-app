@@ -324,6 +324,17 @@ bool shouldShowCopilotProfileGapsButton(
   return true;
 }
 
+/// Hide copilot prescription block when sticky already shows the same CTA.
+bool shouldHideCopilotPrescriptionWhenMatchesSticky({
+  required OperacaoStickyAction sticky,
+  required Aluno aluno,
+  String? proximaAcaoRaw,
+}) {
+  final raw = proximaAcaoRaw?.trim() ?? '';
+  if (raw.isEmpty) return false;
+  return sticky.label == copilotStickyLabel(aluno, raw);
+}
+
 /// Sticky primary opens chat — hide duplicate chat CTA in copilot card.
 bool shouldHideCopilotChatCta({
   required OperacaoStickyAction sticky,

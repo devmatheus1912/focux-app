@@ -258,7 +258,7 @@ class _OperacaoFocusModeToggle extends ConsumerWidget {
               () =>
                   ref
                       .read(alunoOperacaoFocusModeProvider(alunoId).notifier)
-                      .state = true,
+                      .setFocus(true),
           style: TextButton.styleFrom(
             minimumSize: const Size(0, 32),
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
@@ -293,7 +293,7 @@ class _OperacaoFocusModeToggle extends ConsumerWidget {
               () =>
                   ref
                       .read(alunoOperacaoFocusModeProvider(alunoId).notifier)
-                      .state = !focusMode,
+                      .toggle(),
           icon: Icon(
             focusMode ? Icons.center_focus_strong : Icons.center_focus_weak,
             size: 16,
