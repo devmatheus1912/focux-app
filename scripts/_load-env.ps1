@@ -19,26 +19,20 @@ Get-Content $envFile | ForEach-Object {
     if ($_ -match '^\s*([^#=][^=]*)=(.*)$') {
         $name = $matches[1].Trim()
         $value = $matches[2].Trim().Trim('"').Trim("'")
-        if ($value -and $value -notmatch '^X+$') {
+        if ($value -and $value -notmatch '^X+$' -and $value -notmatch '^your-') {
             Set-Item -Path "env:$name" -Value $value
         }
     }
 }
 
 if (-not $env:GOOGLE_WEB_CLIENT_ID) {
-    $env:GOOGLE_WEB_CLIENT_ID =
-        '868715549357-kjut1ja3ab79j6pp3pquk2nha48atbcs.apps.googleusercontent.com'
-    Write-Host 'GOOGLE_WEB_CLIENT_ID ausente no .env.local — usando default de producao.' -ForegroundColor Yellow
+    throw 'GOOGLE_WEB_CLIENT_ID ausente. Copie .env.local.example para .env.local e preencha.'
 }
 
 if (-not $env:API_URL) {
-    $env:API_URL = 'https://focux-backend-production.up.railway.app'
+    throw 'API_URL ausente. Copie .env.local.example para .env.local e preencha.'
 }
 
 if (-not $env:PUBLIC_WEB_URL) {
     $env:PUBLIC_WEB_URL = $env:API_URL
-}
-
-if (-not $env:VERCEL_PROJECT) {
-    $env:VERCEL_PROJECT = 'focux-personal'
 }

@@ -18,11 +18,6 @@ migrate_working_dir/
 *.iws
 .idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
 # Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id
@@ -50,6 +45,7 @@ app.*.map.json
 # Local environment and signing material
 .env
 .env.*
+.env.local
 !.env.example
 !.env.*.example
 android/key.properties
@@ -59,9 +55,17 @@ android/signing.txt
 *.p12
 *.pem
 
-# Firebase configuration is generated/provided per environment.
+# Firebase / Google — never commit real config (use *.example templates)
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
+**/firebase-adminsdk*.json
+**/serviceAccount*.json
+**/service-account*.json
+
+# E2E (Playwright) — sessions and local env
+e2e/.auth/
+e2e/.env
+e2e/.env.local
 
 # Local design exports and generated archives
 *.zip
@@ -81,4 +85,3 @@ focux_app.iml
 # Android local SDK path (per machine)
 android/local.properties
 .vercel
-.env*
