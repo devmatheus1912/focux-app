@@ -34,9 +34,23 @@ void main() {
     expect(screen, contains('salvarAcaoCopiloto'));
     expect(screen, contains('commandCenterProvider'));
     expect(screen, contains('class _Aluno360SignalTile'));
-    expect(screen, contains('class _CopilotPrescription'));
+    expect(
+      File('lib/features/alunos/widgets/aluno360_copilot_prescription.dart')
+          .readAsStringSync(),
+      contains('class Aluno360CopilotPrescription'),
+    );
+    expect(
+      File('lib/features/alunos/utils/aluno360_copilot_logic.dart')
+          .readAsStringSync(),
+      contains('resolveCopilotAcao'),
+    );
+    expect(
+      File('lib/features/alunos/utils/aluno360_copilot_logic.dart')
+          .readAsStringSync(),
+      contains('copilotMensagemPronta'),
+    );
     expect(screen, contains('Clipboard.setData'));
-    expect(screen, contains('_mensagemPronta'));
+    expect(screen, contains('copilotMensagemPronta'));
     expect(screen, contains("'Criar tarefa'"));
     expect(screen, contains("'Copiar'"));
     expect(screen, contains("'Mensagem sugerida'"));
@@ -61,7 +75,11 @@ void main() {
     expect(screen, contains('operacaoHeroShowsRisco'));
     expect(screen, contains('shouldShowCopilotProfileGapsButton'));
     expect(screen, contains('_OperacaoFocusModeToggle'));
-    expect(screen, contains('Sugestão offline'));
+    expect(
+      File('lib/features/alunos/utils/aluno360_copilot_logic.dart')
+          .readAsStringSync(),
+      contains('Sugestão offline'),
+    );
     expect(screen, contains('invalidateAluno360Providers'));
     expect(screen, contains('alunoPesoHistoricoProvider'));
     expect(screen, contains('alunoAderenciaSemanalProvider'));
@@ -86,8 +104,19 @@ void main() {
     expect(screen, contains('FxLoading.sectionShimmer'));
     expect(screen, contains('class _AlunoDetailLoadingSkeleton'));
     expect(screen, contains('aluno360_hero_skeleton'));
-    expect(screen, contains('_collapsedLines = 3'));
-    expect(screen, contains('Ver mais'));
+    expect(
+      File('lib/features/alunos/widgets/aluno360_copilot_prescription.dart')
+          .readAsStringSync(),
+      contains('_collapsedLines = 3'),
+    );
+    expect(screen, contains('Aluno360CopilotPrescriptionBody'));
+    expect(screen, contains('resolveCopilotProfileGaps'));
+    expect(screen, contains('copilotProfileCompletion'));
+    expect(
+      File('lib/features/alunos/widgets/aluno360_copilot_prescription.dart')
+          .readAsStringSync(),
+      contains('Ver mais'),
+    );
     expect(screen, contains('alunoCopilotoForceIaProvider'));
     expect(screen, contains('proximaAcao360'));
     expect(screen, contains('/financeiro?alunoId='));

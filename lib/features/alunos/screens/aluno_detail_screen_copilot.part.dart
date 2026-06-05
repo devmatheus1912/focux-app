@@ -1,19 +1,5 @@
 ﻿part of 'aluno_detail_screen.dart';
 
-Map<String, dynamic> _copilotActionFrom360(ProximaAcaoResumo proxima) => {
-  'titulo': proxima.fonte == 'RADAR'
-      ? 'Radar Focux'
-      : proxima.fonte == 'EVOLUCAO'
-          ? 'Evolução inteligente'
-          : proxima.fonte == 'AUTONOMIA'
-              ? 'Autonomia'
-              : 'Próxima melhor ação',
-  'acao': proxima.acao,
-  'motivo': proxima.motivo,
-  'fonte': proxima.fonte,
-  'prioridade': proxima.prioridade,
-};
-
 class _Aluno360CopilotCard extends ConsumerWidget {
   final Aluno aluno;
   final AsyncValue<AlunoAutonomiaResumo> resumoAsync;
@@ -29,107 +15,10 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     required this.isDark,
   });
 
-  List<_Aluno360Signal> _signals(
-    BuildContext context,
-    Aluno aluno,
-    AlunoAutonomiaResumo? resumo,
-  ) {
-    final profile = _perfilCompletion(aluno);
-    final financeiroOk = aluno.statusFinanceiro != 'INADIMPLENTE';
-    final hasAutonomyFriction =
-        resumo != null && resumo.cliques > resumo.concluidos;
-    final hasEquipment = aluno.equipamentosDisponiveis.isNotEmpty;
-    return [
-      _Aluno360Signal(
-        label: 'Perfil',
-        value: '$profile%',
-        detail:
-            profile >= 80
-                ? 'dados bons para prescrição'
-                : 'faltam dados que melhoram decisão',
-        color:
-            profile >= 80
-                ? EagleTokens.good
-                : Theme.of(context).colorScheme.primary,
-      ),
-      _Aluno360Signal(
-        label: 'Financeiro',
-        value: financeiroOk ? 'OK' : 'Atenção',
-        detail: financeiroOk ? 'sem bloqueio operacional' : 'pendência ativa',
-        color: financeiroOk ? EagleTokens.good : EagleTokens.bad,
-      ),
-      _Aluno360Signal(
-        label: 'Autonomia',
-        value:
-            resumo == null
-                ? '--'
-                : '${(resumo.concluidos / (resumo.cliques == 0 ? 1 : resumo.cliques) * 100).clamp(0, 100).round()}%',
-        detail:
-            hasAutonomyFriction
-                ? 'clicou e ainda não fechou'
-                : 'sem gargalo aberto forte',
-        color:
-            hasAutonomyFriction
-                ? EagleTokens.warn
-                : Theme.of(context).colorScheme.primary,
-      ),
-      _Aluno360Signal(
-        label: 'Contexto',
-        value: hasEquipment ? 'Rico' : 'Base',
-        detail:
-            hasEquipment
-                ? '${aluno.equipamentosDisponiveis.length} equipamentos'
-                : 'equipamentos não definidos',
-        color: Theme.of(context).colorScheme.primary,
-      ),
-    ];
-  }
-
-  String _fallbackAction(Aluno aluno, AlunoAutonomiaResumo? resumo) {
-    if (aluno.statusFinanceiro == 'INADIMPLENTE') {
-      return 'Regularizar financeiro antes que isso vire atrito de acesso.';
-    }
-    if (_perfilCompletion(aluno) < 80) {
-      return 'Completar perfil do aluno e remover lacunas de prescrição.';
-    }
-    if (resumo != null && resumo.cliques > resumo.concluidos) {
-      return 'Resolver o gargalo de autonomia: ${resumo.gargaloTitulo ?? "tarefa aberta"}.';
-    }
-    return 'Revisar treino e propor a próxima evolução de ${aluno.objetivo ?? "objetivo"}.';
-  }
-
-  List<_ProfileGap> _profileGaps(Aluno aluno) {
-    return [
-      if ((aluno.telefone ?? '').trim().isEmpty &&
-          (aluno.whatsapp ?? '').trim().isEmpty)
-        const _ProfileGap(
-          icon: Icons.call_outlined,
-          title: 'Contato',
-          detail: 'Telefone ou WhatsApp para acionar o aluno.',
-          route: 'edit',
-        ),
-      if ((aluno.objetivo ?? '').trim().isEmpty)
-        const _ProfileGap(
-          icon: Icons.flag_outlined,
-          title: 'Objetivo',
-          detail: 'Define foco da prescrição e do Copiloto.',
-          route: 'edit',
-        ),
-      if ((aluno.genero ?? '').trim().isEmpty ||
-          (aluno.tipoConsultoria ?? '').trim().isEmpty)
-        const _ProfileGap(
-          icon: Icons.badge_outlined,
-          title: 'Perfil do aluno',
-          detail: 'Gênero e consultoria usados no atendimento.',
-          route: 'edit',
-        ),
-    ];
-  }
-
   Future<void> _openProfileGap(
     BuildContext context,
     Aluno aluno,
-    _ProfileGap gap,
+    CopilotProfileGap gap,
   ) async {
     if (gap.route == 'measures') {
       await context.push('/alunos/${aluno.id}/evolucao', extra: aluno.nome);
@@ -143,7 +32,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
   }
 
   Future<void> _completeProfile(BuildContext context, Aluno aluno) async {
-    final gaps = _profileGaps(aluno);
+    final gaps = resolveCopilotProfileGaps(aluno);
     if (gaps.length == 1) {
       await _openProfileGap(context, aluno, gaps.first);
       return;
@@ -154,13 +43,13 @@ class _Aluno360CopilotCard extends ConsumerWidget {
   Future<void> _showProfileGapSheet(
     BuildContext context,
     Aluno aluno,
-    List<_ProfileGap> gaps,
+    List<CopilotProfileGap> gaps,
   ) async {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
 
-    Future<void> go(_ProfileGap gap, BuildContext sheetContext) async {
+    Future<void> go(CopilotProfileGap gap, BuildContext sheetContext) async {
       Navigator.of(sheetContext).pop();
       await _openProfileGap(context, aluno, gap);
     }
@@ -320,7 +209,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
   }
 
   void _prepararMensagem(BuildContext context, String acao) {
-    final message = _mensagemPronta(aluno, acao);
+    final message = copilotMensagemPronta(aluno, acao);
     final primary = Theme.of(context).colorScheme.primary;
     showModalBottomSheet<void>(
       context: context,
@@ -388,28 +277,13 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     );
   }
 
-  FilaAcaoResumo? _firstOpenCopilotAction(List<FilaAcaoResumo>? actions) {
-    for (final item in actions ?? const <FilaAcaoResumo>[]) {
-      if (item.status.toUpperCase() != 'ABERTO') continue;
-      final source = (item.source ?? '').toUpperCase();
-      final mode = (item.sourceMode ?? '').toUpperCase();
-      if (item.tipo == 'IA_COPILOTO' ||
-          source == 'ALUNO_360' ||
-          mode == 'ALUNO_360' ||
-          item.createdFromInsight) {
-        return item;
-      }
-    }
-    return null;
-  }
-
   Future<bool> _criarTarefaCopiloto(
     BuildContext context,
     WidgetRef ref,
     String acao,
   ) async {
     try {
-      final existing = _firstOpenCopilotAction(
+      final existing = findOpenCopilotTask(
         await ref
             .read(dashboardRepositoryProvider)
             .getIaCommandActions(status: 'ABERTO', alunoId: aluno.id),
@@ -490,46 +364,6 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     }
   }
 
-  String _mensagemPronta(Aluno aluno, String acao) {
-    final primeiroNome =
-        aluno.nome.trim().isEmpty
-            ? 'tudo bem'
-            : aluno.nome.trim().split(' ').first;
-    final lower = _cleanCopilotText(acao).toLowerCase();
-    if (lower.contains('financeir') || lower.contains('inadimpl')) {
-      return 'Oi, $primeiroNome. Preciso alinhar uma pendência rápida para manter seu acesso sem bloqueio. Me responde por aqui?';
-    }
-    if (lower.contains('perfil') || lower.contains('medida')) {
-      return 'Oi, $primeiroNome. Quero completar alguns dados seus para ajustar melhor o plano. Me responde por aqui?';
-    }
-    if (lower.contains('treino') || lower.contains('carga')) {
-      return 'Oi, $primeiroNome. Quero ajustar seu treino para o próximo passo com segurança. Me responde por aqui?';
-    }
-    return 'Oi, $primeiroNome. Notei que você se afastou um pouco dos treinos. Quer retomar? Me responde por aqui que eu ajusto o plano.';
-  }
-
-  String _displayAction(Aluno aluno, String acao) {
-    final lower = _cleanCopilotText(acao).toLowerCase();
-    if (lower.contains('financeir') || lower.contains('inadimpl')) {
-      return 'Alinhar pendência financeira antes de qualquer ajuste.';
-    }
-    if (lower.contains('perfil') || lower.contains('medida')) {
-      return 'Completar dados do perfil para melhorar a prescrição.';
-    }
-    if (lower.contains('treino') || lower.contains('carga')) {
-      return 'Ajustar treino e orientar próximo check-in.';
-    }
-    return 'Retomar contato e ajustar plano com base na resposta.';
-  }
-
-  String _cleanCopilotText(String value) {
-    return value
-        .replaceAll(RegExp(r'\*\*|__|`'), '')
-        .replaceAll(RegExp(r'^\s*[-•]\s*', multiLine: true), '')
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim();
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final primary = Theme.of(context).colorScheme.primary;
@@ -540,15 +374,20 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     final iaAsync =
         forceIa ? ref.watch(alunoCopilotoActionProvider(aluno.id)) : null;
     final openActionsAsync = ref.watch(alunoOpenIaActionsProvider(aluno.id));
-    final openTask = _firstOpenCopilotAction(openActionsAsync.valueOrNull);
+    final openTask = findOpenCopilotTask(openActionsAsync.valueOrNull ?? const []);
     final hasOpenTask = openTask != null || hasOpenCopilotTask360;
     final resumo = resumoAsync.valueOrNull;
-    final profileCompletion = _perfilCompletion(aluno);
-    final signals = _signals(context, aluno, resumo);
-    final fallback = _fallbackAction(aluno, resumo);
+    final profileCompletion = copilotProfileCompletion(aluno);
+    final profileGaps = resolveCopilotProfileGaps(aluno);
+    final signals = resolveCopilotSignals(
+      aluno: aluno,
+      resumo: resumo,
+      primary: primary,
+    );
+    final fallback = copilotFallbackAction(aluno, resumo);
     final seed360 =
         proximaAcao360 != null
-            ? _copilotActionFrom360(proximaAcao360!)
+            ? copilotActionFrom360(proximaAcao360!)
             : null;
     final followUpDue = isAlunoFollowUpDue(aluno);
     final stickyAction = resolveOperacaoStickyAction(
@@ -643,7 +482,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                 onPressed: () => _completeProfile(context, aluno),
                 icon: const Icon(Icons.person_add_alt_1_rounded, size: 16),
                 label: Text(
-                  _profileGaps(aluno).length > 1
+                  profileGaps.length > 1
                       ? 'Resolver lacunas'
                       : 'Completar perfil',
                 ),
@@ -669,8 +508,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
               borderRadius: BorderRadius.circular(18),
               border: Border.all(color: line),
             ),
-            child: _buildPrescriptionBody(
-              context,
+            child: Aluno360CopilotPrescriptionBody(
               aluno: aluno,
               primary: primary,
               fallback: fallback,
@@ -701,7 +539,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
             openTaskHint: hasOpenCopilotTask360 && openTask == null,
             hidePrimaryCta: hasOpenTask,
             hideChatCta: hideCopilotChat,
-            acao: _resolveCopilotAcao(
+            acao: resolveCopilotAcao(
               seed360: seed360,
               forceIa: forceIa,
               iaAsync: iaAsync,
@@ -712,88 +550,6 @@ class _Aluno360CopilotCard extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-
-  String _resolveCopilotAcao({
-    required Map<String, dynamic>? seed360,
-    required bool forceIa,
-    required AsyncValue<Map<String, dynamic>>? iaAsync,
-    required String fallback,
-  }) {
-    if (forceIa && iaAsync != null) {
-      return iaAsync.maybeWhen(
-        data:
-            (action) => _cleanCopilotText(
-              (action['acao'] ??
-                      action['mensagem'] ??
-                      action['descricao'] ??
-                      fallback)
-                  .toString(),
-            ),
-        orElse: () => fallback,
-      );
-    }
-    if (seed360 != null) {
-      return _cleanCopilotText((seed360['acao'] ?? fallback).toString());
-    }
-    return fallback;
-  }
-
-  Widget _buildPrescriptionBody(
-    BuildContext context, {
-    required Aluno aluno,
-    required Color primary,
-    required String fallback,
-    required Map<String, dynamic>? seed360,
-    required bool forceIa,
-    required AsyncValue<Map<String, dynamic>>? iaAsync,
-    required bool resumoLoading,
-  }) {
-    if (forceIa && iaAsync != null) {
-      return iaAsync.when(
-        loading: () => _CopilotPrescriptionLoading(color: primary),
-        error:
-            (_, __) => _CopilotPrescription(
-              title: 'Sugestão offline',
-              action: fallback,
-              reason: 'IA indisponível agora; usando sinais do Aluno 360.',
-              color: primary,
-            ),
-        data: (action) => _prescriptionFromAction(aluno, action, fallback, primary),
-      );
-    }
-    if (seed360 != null) {
-      return _prescriptionFromAction(aluno, seed360, fallback, primary);
-    }
-    if (resumoLoading) {
-      return _CopilotPrescriptionLoading(color: primary);
-    }
-    return _CopilotPrescription(
-      title: 'Sugestão offline',
-      action: fallback,
-      reason: 'Baseado nos sinais atuais do perfil.',
-      color: primary,
-    );
-  }
-
-  Widget _prescriptionFromAction(
-    Aluno aluno,
-    Map<String, dynamic> action,
-    String fallback,
-    Color primary,
-  ) {
-    return _CopilotPrescription(
-      title:
-          (action['titulo'] ?? action['tipo'] ?? 'Próxima melhor ação')
-              .toString(),
-      action: _displayAction(
-        aluno,
-        (action['acao'] ?? action['mensagem'] ?? action['descricao'] ?? fallback)
-            .toString(),
-      ),
-      reason: (action['motivo'] ?? 'Baseado nos sinais atuais.').toString(),
-      color: primary,
     );
   }
 }

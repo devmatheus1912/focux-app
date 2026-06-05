@@ -32,9 +32,11 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../constants/aluno_360_layout.dart';
 import '../utils/aluno360_operacao_logic.dart';
+import '../utils/aluno360_copilot_logic.dart';
 import '../utils/aluno_display_utils.dart';
 import '../widgets/aluno_detail_hero_card.dart';
 import '../widgets/aluno_operacao_adherence_bars.dart';
+import '../widgets/aluno360_copilot_prescription.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
 part 'aluno_detail_screen_hero.part.dart';
@@ -198,7 +200,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
             ),
         data: (aluno) {
           ref.watch(alertasConfigProvider);
-          final perfilCompletion = _perfilCompletion(aluno);
+          final perfilCompletion = copilotProfileCompletion(aluno);
           final heroExpandedHeight = Aluno360Layout.heroExpandedHeight(context);
           final displayName = fxTitleCaseName(aluno.nome);
           final collapseThreshold =
@@ -428,21 +430,4 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
       ),
     );
   }
-}
-
-int _perfilCompletion(Aluno aluno) {
-  final fields = [
-    aluno.nome,
-    aluno.email,
-    aluno.telefone,
-    aluno.whatsapp,
-    aluno.objetivo,
-    aluno.genero,
-    aluno.tipoConsultoria,
-  ];
-  final filled = fields.where((value) {
-    if (value == null) return false;
-    return value.trim().isNotEmpty;
-  }).length;
-  return ((filled / fields.length) * 100).round().clamp(0, 100);
 }
