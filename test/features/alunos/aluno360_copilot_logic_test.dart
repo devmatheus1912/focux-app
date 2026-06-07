@@ -324,6 +324,18 @@ void main() {
     });
   });
 
+  group('normalizeIaCopilotAcao', () {
+    test('fixes english leak in expanded IA action', () {
+      final text = normalizeIaCopilotAcao(
+        'Contate Beatriz para understanding os motivos da interrupção nos treinos '
+        'e discutir um plano de retomada personalizado.',
+      );
+      expect(text.toLowerCase(), isNot(contains('understanding')));
+      expect(text.toLowerCase(), contains('entender'));
+      expect(text.toLowerCase(), contains('personalizado'));
+    });
+  });
+
   group('copilotCardTitle', () {
     test('uses Prioridade do dia when contact priority', () {
       expect(copilotCardTitle(contactPriority: true), 'Prioridade do dia');

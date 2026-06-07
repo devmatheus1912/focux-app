@@ -221,9 +221,37 @@ String cleanCopilotText(String value) {
       .trim();
 }
 
+/// Fixes common English words leaked by LLMs into PT-BR coach copy.
+String sanitizeCopilotIaLanguage(String text) {
+  var result = text;
+  const leaks = {
+    'understanding': 'entender',
+    'understand': 'entender',
+    'personalized': 'personalizado',
+    'customized': 'personalizado',
+    'engagement': 'engajamento',
+    'workout': 'treino',
+    'training': 'treino',
+    'schedule': 'cronograma',
+    'interruption': 'interrupção',
+    'discuss': 'discutir',
+    'feedback': 'retorno',
+    'follow-up': 'follow-up',
+    'follow up': 'follow-up',
+    'check in': 'check-in',
+  };
+  for (final entry in leaks.entries) {
+    result = result.replaceAll(
+      RegExp('\\b${RegExp.escape(entry.key)}\\b', caseSensitive: false),
+      entry.value,
+    );
+  }
+  return result;
+}
+
 /// Strips LLM preambles so UI shows the actionable sentence, not boilerplate.
 String normalizeIaCopilotAcao(String raw) {
-  var text = cleanCopilotText(raw);
+  var text = sanitizeCopilotIaLanguage(cleanCopilotText(raw));
   if (text.isEmpty) return text;
 
   const preambles = [
