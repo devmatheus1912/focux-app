@@ -69,6 +69,9 @@ int copilotProfileCompletion(Aluno aluno) {
   return ((filled / fields.length) * 100).round().clamp(0, 100);
 }
 
+String copilotCardTitle({required bool contactPriority}) =>
+    contactPriority ? 'Prioridade do dia' : 'Próxima melhor ação';
+
 Map<String, dynamic> copilotActionFrom360(ProximaAcaoResumo proxima) => {
   'titulo': proxima.fonte == 'RADAR'
       ? 'Radar Focux'

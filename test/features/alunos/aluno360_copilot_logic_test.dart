@@ -283,6 +283,16 @@ void main() {
     });
   });
 
+  group('copilotCardTitle', () {
+    test('uses Prioridade do dia when contact priority', () {
+      expect(copilotCardTitle(contactPriority: true), 'Prioridade do dia');
+    });
+
+    test('uses Próxima melhor ação otherwise', () {
+      expect(copilotCardTitle(contactPriority: false), 'Próxima melhor ação');
+    });
+  });
+
   group('formatCopilotIaMotivo', () {
     test('humanizes 999 days without treino', () {
       expect(

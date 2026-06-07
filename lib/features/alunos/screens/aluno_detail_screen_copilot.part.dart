@@ -425,7 +425,9 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Próxima melhor ação',
+                      copilotCardTitle(
+                        contactPriority: operacao.contactPriority,
+                      ),
                       style: TextStyle(
                         color: ink,
                         fontSize: 17,
@@ -450,7 +452,10 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        if (operacao.contactPriority) ...[
+                        if (shouldShowCopilotContactBadge(
+                          contactPriority: operacao.contactPriority,
+                          sticky: stickyAction,
+                        )) ...[
                           const SizedBox(width: 8),
                           _ContactPriorityBadge(primary: primary),
                         ],
@@ -671,7 +676,7 @@ class _CopilotIaRefreshButtonState extends ConsumerState<_CopilotIaRefreshButton
                 ),
               )
               : const Icon(Icons.refresh_rounded, size: 18),
-      tooltip: _refreshing ? 'Atualizando…' : 'Atualizar com IA',
+      tooltip: _refreshing ? 'Atualizando…' : 'Regenerar sugestão com IA',
     ),
     );
   }

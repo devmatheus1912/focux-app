@@ -214,6 +214,36 @@ void main() {
     });
   });
 
+  group('shouldShowCopilotContactBadge', () {
+    test('shows when contact priority and sticky is not chat', () {
+      expect(
+        shouldShowCopilotContactBadge(
+          contactPriority: true,
+          sticky: const OperacaoStickyAction(
+            label: 'Completar mapa',
+            icon: Icons.person_outline,
+            destination: OperacaoStickyDestination.evolucao,
+          ),
+        ),
+        isTrue,
+      );
+    });
+
+    test('hides when sticky already opens chat', () {
+      expect(
+        shouldShowCopilotContactBadge(
+          contactPriority: true,
+          sticky: const OperacaoStickyAction(
+            label: 'Contato',
+            icon: Icons.chat_rounded,
+            destination: OperacaoStickyDestination.chat,
+          ),
+        ),
+        isFalse,
+      );
+    });
+  });
+
   group('resolveOperacaoDominantMetric', () {
     test('prioritizes risk when em risco', () {
       final metric = resolveOperacaoDominantMetric(

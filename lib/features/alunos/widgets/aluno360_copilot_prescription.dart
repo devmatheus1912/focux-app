@@ -20,6 +20,7 @@ class Aluno360CopilotPrescription extends StatefulWidget {
     this.fullAction,
     this.isIaSuggestion = false,
     this.onPrepareMessage,
+    this.showTitle = true,
   });
 
   final String title;
@@ -29,6 +30,7 @@ class Aluno360CopilotPrescription extends StatefulWidget {
   final String? fullAction;
   final bool isIaSuggestion;
   final VoidCallback? onPrepareMessage;
+  final bool showTitle;
 
   @override
   State<Aluno360CopilotPrescription> createState() =>
@@ -37,9 +39,51 @@ class Aluno360CopilotPrescription extends StatefulWidget {
 
 class _Aluno360CopilotPrescriptionState
     extends State<Aluno360CopilotPrescription> {
-  static const _collapsedLines = 3;
+  static const _collapsedLines = 2;
   bool _expandedAction = false;
   bool _expandedReason = false;
+  bool _actionTruncated = false;
+  String? _lastOverflowText;
+  double? _lastOverflowWidth;
+
+  TextStyle _actionStyle(Color ink) => AppTypography.inter(
+    color: ink,
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    height: 1.38,
+  );
+
+  void _scheduleActionOverflowCheck({
+    required String text,
+    required double maxWidth,
+    required TextStyle style,
+  }) {
+    if (_lastOverflowText == text && _lastOverflowWidth == maxWidth) return;
+    _lastOverflowText = text;
+    _lastOverflowWidth = maxWidth;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final painter = TextPainter(
+        text: TextSpan(text: text, style: style),
+        maxLines: _collapsedLines,
+        textDirection: Directionality.of(context),
+      )..layout(maxWidth: maxWidth);
+      final truncated = painter.didExceedMaxLines;
+      if (truncated != _actionTruncated && mounted) {
+        setState(() => _actionTruncated = truncated);
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant Aluno360CopilotPrescription oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.action != widget.action) {
+      _actionTruncated = false;
+      _lastOverflowText = null;
+      _lastOverflowWidth = null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,76 +92,86 @@ class _Aluno360CopilotPrescriptionState
     final caption = isDark ? EagleTokens.darkInkMute : const Color(0xFF475569);
     final reason = widget.reason.trim();
     final expandedActionText = widget.fullAction ?? widget.action;
-    final showExpandAction =
-        expandedActionText.trim() != widget.action.trim() ||
-        expandedActionText.trim().length > 72;
+    final hasDistinctFullAction =
+        widget.fullAction != null &&
+        widget.fullAction!.trim().isNotEmpty &&
+        widget.fullAction!.trim() != widget.action.trim();
+    final actionStyle = _actionStyle(ink);
     final showExpandReason = reason.length > 72;
 
-    return Semantics(
-      label:
-          '${widget.title}. ${expandedActionText}. $reason'
-          '${showExpandAction && !_expandedAction ? '. Toque para ver ação completa' : ''}'
-          '${showExpandReason && !_expandedReason ? '. Toque para ver contexto completo' : ''}',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (!_expandedAction) {
+          _scheduleActionOverflowCheck(
+            text: widget.action,
+            maxWidth: constraints.maxWidth,
+            style: actionStyle,
+          );
+        }
+        final showExpandAction = hasDistinctFullAction || _actionTruncated;
+
+        return Semantics(
+          label:
+              '${widget.showTitle ? '${widget.title}. ' : ''}${expandedActionText}. $reason'
+              '${showExpandAction && !_expandedAction ? '. Toque para ver ação completa' : ''}'
+              '${showExpandReason && !_expandedReason ? '. Toque para ver contexto completo' : ''}',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.auto_awesome_rounded, color: widget.color, size: 17),
-              const SizedBox(width: 7),
-              Expanded(
+              if (widget.showTitle) ...[
+                Row(
+                  children: [
+                    Icon(Icons.auto_awesome_rounded, color: widget.color, size: 17),
+                    const SizedBox(width: 7),
+                    Expanded(
+                      child: Text(
+                        widget.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: ink,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+              ],
+              GestureDetector(
+                onTap:
+                    showExpandAction
+                        ? () => setState(() => _expandedAction = !_expandedAction)
+                        : null,
+                behavior: HitTestBehavior.opaque,
                 child: Text(
-                  widget.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.2,
-                  ),
+                  _expandedAction ? expandedActionText : widget.action,
+                  maxLines: _expandedAction ? null : _collapsedLines,
+                  overflow: _expandedAction ? null : TextOverflow.ellipsis,
+                  style: actionStyle,
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          GestureDetector(
-            onTap:
-                showExpandAction
-                    ? () => setState(() => _expandedAction = !_expandedAction)
-                    : null,
-            behavior: HitTestBehavior.opaque,
-            child: Text(
-              _expandedAction ? expandedActionText : widget.action,
-              maxLines: _expandedAction ? null : 2,
-              overflow: _expandedAction ? null : TextOverflow.ellipsis,
-              style: AppTypography.inter(
-                color: ink,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                height: 1.38,
-              ),
-            ),
-          ),
-          if (showExpandAction && !_expandedAction)
-            Semantics(
-              button: true,
-              label: 'Ver ação completa da sugestão',
-              child: Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  'Ver ação completa',
-                  style: TextStyle(
-                    color: widget.color,
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w800,
-                    decoration: TextDecoration.underline,
-                    decorationColor: widget.color.withValues(alpha: 0.45),
+              if (showExpandAction && !_expandedAction)
+                Semantics(
+                  button: true,
+                  label: 'Ver ação completa da sugestão',
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      'Ver ação completa',
+                      style: TextStyle(
+                        color: widget.color,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w800,
+                        decoration: TextDecoration.underline,
+                        decorationColor: widget.color.withValues(alpha: 0.45),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          if (widget.onPrepareMessage != null) ...[
+              if (widget.onPrepareMessage != null) ...[
             const SizedBox(height: 12),
             Semantics(
               button: true,
@@ -193,8 +247,10 @@ class _Aluno360CopilotPrescriptionState
                 ),
               ),
           ],
-        ],
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -382,6 +438,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
       color: primary,
       isIaSuggestion: isIaSuggestion,
       onPrepareMessage: onPrepareMessage,
+      showTitle: !contactPriority,
     );
   }
 }

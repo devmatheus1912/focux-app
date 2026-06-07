@@ -290,7 +290,10 @@ class _OperacaoFocusModeToggle extends ConsumerWidget {
             size: 18,
             color: focusMode ? primary : ink.withValues(alpha: 0.78),
           ),
-          tooltip: focusMode ? 'Modo foco ativo' : 'Modo foco',
+          tooltip:
+              focusMode
+                  ? 'Modo foco ativo — toque para ver métricas'
+                  : 'Modo foco — esconde métricas e destaca contato',
           visualDensity: VisualDensity.compact,
         ),
       );

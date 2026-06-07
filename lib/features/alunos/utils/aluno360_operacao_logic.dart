@@ -396,6 +396,15 @@ bool shouldHideCopilotPrimaryCtaWhenMatchesSticky({
   );
 }
 
+/// Hide contact badge when sticky already surfaces the same CTA.
+bool shouldShowCopilotContactBadge({
+  required bool contactPriority,
+  required OperacaoStickyAction sticky,
+}) {
+  if (!contactPriority) return false;
+  return !sticky.isChatAction;
+}
+
 /// Hide check-in CTA when copilot/sticky already owns contact outreach.
 bool shouldShowOperacaoCheckinCta({
   required Aluno360OperacaoSnapshot? operacao,
