@@ -30,12 +30,13 @@ class AlunoOperacaoAdherenceLegend extends StatelessWidget {
             color: activeColor,
             label: 'Check-in',
             mute: mute,
+            filled: true,
           ),
           _LegendItem(
             color: missColor,
             label: 'Sem registro',
             mute: mute,
-            solidMiss: true,
+            hollow: true,
           ),
           _LegendItem(
             color: todayRingColor,
@@ -55,14 +56,16 @@ class _LegendItem extends StatelessWidget {
     required this.color,
     required this.label,
     required this.mute,
-    this.solidMiss = false,
+    this.filled = false,
+    this.hollow = false,
     this.ring = false,
   });
 
   final Color color;
   final String label;
   final Color mute;
-  final bool solidMiss;
+  final bool filled;
+  final bool hollow;
   final bool ring;
 
   @override
@@ -71,21 +74,32 @@ class _LegendItem extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: ring ? 12 : 8,
-          height: ring ? 12 : 8,
+          width: ring ? 12 : 10,
+          height: ring ? 12 : 10,
           decoration: BoxDecoration(
             color:
-                solidMiss
-                    ? color.withValues(alpha: 0.92)
-                    : ring
+                filled
+                    ? color.withValues(alpha: 0.95)
+                    : ring || hollow
                     ? Colors.transparent
                     : color.withValues(alpha: 0.9),
             shape: BoxShape.circle,
             border:
-                ring
-                    ? Border.all(color: color, width: 1.5)
+                ring || hollow
+                    ? Border.all(
+                      color: color.withValues(alpha: hollow ? 0.92 : 1),
+                      width: hollow ? 2 : 1.5,
+                    )
                     : null,
           ),
+          child:
+              filled
+                  ? Icon(
+                    Icons.check_rounded,
+                    size: 7,
+                    color: Colors.white.withValues(alpha: 0.96),
+                  )
+                  : null,
         ),
         const SizedBox(width: 5),
         Flexible(

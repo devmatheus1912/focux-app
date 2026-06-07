@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../constants/aluno_360_layout.dart';
 import '../providers/aluno_detail_providers.dart';
 
 /// Toggle for Operação focus mode (hides metrics, highlights contact + copilot).
@@ -72,9 +73,9 @@ class Aluno360OperacaoFocusModeToggle extends ConsumerWidget {
             children: [
               Icon(Icons.visibility_outlined, size: 15, color: primary),
               const SizedBox(width: 4),
-              const Text(
+              Text(
                 'Modo foco',
-                style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800),
+                style: Aluno360Layout.chipLabelStyle(context),
               ),
             ],
           ),
@@ -103,9 +104,8 @@ class Aluno360OperacaoFocusModeToggle extends ConsumerWidget {
           ),
           label: Text(
             focusMode ? 'Modo foco ativo' : 'Ver diagnóstico completo',
-            style: TextStyle(
-              fontSize: 11.5,
-              fontWeight: FontWeight.w800,
+            style: Aluno360Layout.chipLabelStyle(
+              context,
               color: focusMode ? primary : ink.withValues(alpha: 0.85),
             ),
           ),

@@ -89,7 +89,7 @@ class OperationalMetricTile extends StatelessWidget {
                   label.toUpperCase(),
                   style: AppTypography.inter(
                     color: labelColor,
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.4,
                   ),
@@ -118,7 +118,7 @@ class OperationalMetricTile extends StatelessWidget {
                   hint,
                   style: AppTypography.inter(
                     color: hintColor,
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

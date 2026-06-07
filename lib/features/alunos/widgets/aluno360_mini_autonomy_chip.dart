@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../constants/aluno_360_layout.dart';
+
 class Aluno360MiniAutonomyChip extends StatelessWidget {
   const Aluno360MiniAutonomyChip({
     super.key,
@@ -14,11 +16,7 @@ class Aluno360MiniAutonomyChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: TextStyle(
-        color: color,
-        fontSize: 11.5,
-        fontWeight: FontWeight.w700,
-      ),
+      style: Aluno360Layout.chipLabelStyle(context, color: color),
     );
   }
 }

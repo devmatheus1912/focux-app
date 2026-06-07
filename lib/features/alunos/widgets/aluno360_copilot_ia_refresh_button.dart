@@ -48,10 +48,9 @@ class Aluno360CopilotIaRefreshButtonState
     try {
       await ref.refresh(alunoCopilotoActionProvider(widget.alunoId).future);
       if (mounted) {
-        FeedbackHelper.showSuccess(
+        FeedbackHelper.showOperacaoSuccess(
           context,
           'Sugestão atualizada com IA',
-          reserveBottom: Aluno360Layout.snackbarStickyReserve,
         );
       }
     } catch (e) {
@@ -59,10 +58,9 @@ class Aluno360CopilotIaRefreshButtonState
           false;
       if (!mounted) return;
       if (_shouldSurfaceIaRefreshError(e)) {
-        FeedbackHelper.showWarn(
+        FeedbackHelper.showOperacaoWarn(
           context,
           friendlyError(e, fallback: 'IA indisponível agora.'),
-          reserveBottom: Aluno360Layout.snackbarStickyReserve,
         );
       } else {
         FeedbackHelper.showSnackBar(
@@ -76,7 +74,7 @@ class Aluno360CopilotIaRefreshButtonState
               ),
             ),
           ),
-          reserveBottom: Aluno360Layout.snackbarStickyReserve,
+          placement: FeedbackPlacement.operacaoTop,
         );
       }
     } finally {
@@ -125,9 +123,8 @@ class Aluno360CopilotIaRefreshButtonState
                   : Icon(Icons.refresh_rounded, size: iconSize),
           label: Text(
             _refreshing ? 'Atualizando…' : 'Atualizar',
-            style: const TextStyle(
-              fontSize: 11.5,
-              fontWeight: FontWeight.w800,
+            style: Aluno360Layout.chipLabelStyle(context).copyWith(
+              color: widget.primary,
             ),
           ),
         ),

@@ -12,6 +12,8 @@ import 'package:focux_app/features/alunos/widgets/aluno360_copilot_prescription.
 import 'package:focux_app/features/alunos/widgets/aluno360_operational_status_section.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_operacao_focus_toggle.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_student_quick_actions.dart';
+import 'package:focux_app/features/alunos/utils/aluno360_operacao_logic.dart';
+import 'package:focux_app/features/alunos/widgets/aluno360_operacao_sticky_cta.dart';
 import 'package:focux_app/features/alunos/widgets/aluno_operacao_adherence_legend.dart';
 
 void main() {
@@ -364,6 +366,73 @@ void main() {
     await expectLater(
       find.byType(AlunoOperacaoAdherenceLegend),
       matchesGoldenFile('goldens/aluno360_adherence_legend_390.png'),
+    );
+  });
+
+  testWidgets('sticky CTA bar golden contact plus task at 390px', (tester) async {
+    final stickyAluno = Aluno(
+      id: 42,
+      nome: 'Beatriz Costa',
+      email: 'beatriz@test.com',
+      status: 'ATIVO',
+      emRisco: true,
+      riscoNivel: 'ALTO',
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          alunoOpenIaActionsProvider(42).overrideWith((ref) async => const []),
+          alunoRecoveryProvider(42).overrideWith((ref) async => null),
+          alunoCopilotoForceIaProvider(42).overrideWith((ref) => false),
+          alunoCopilotCreatingProvider(42).overrideWith((ref) => false),
+          aluno360OperacaoProvider(42).overrideWith(
+            (ref) => resolveAluno360OperacaoSnapshot(
+              aluno: stickyAluno,
+              proximaAcao360: const ProximaAcaoResumo(
+                acao: 'Contate aluno sobre check-in',
+                motivo: 'Sem resposta',
+                fonte: 'IA',
+                prioridade: 'P1',
+                stickyLabel: 'Retomar contato',
+                stickyLabelCompact: 'Contato',
+              ),
+              forceIa: false,
+              iaAsync: null,
+              hasOpenTask: true,
+              followUpDue: false,
+            ),
+          ),
+        ],
+        child: MaterialApp(
+          theme: ThemeData(useMaterial3: true, brightness: Brightness.light),
+          home: MediaQuery(
+            data: const MediaQueryData(size: Size(390, 844)),
+            child: Scaffold(
+              bottomNavigationBar: Aluno360OperacaoStickyCtaBar(
+                aluno: stickyAluno,
+                alunoId: 42,
+                proximaAcao360: const ProximaAcaoResumo(
+                  acao: 'Contate aluno sobre check-in',
+                  motivo: 'Sem resposta',
+                  fonte: 'IA',
+                  prioridade: 'P1',
+                  stickyLabel: 'Retomar contato',
+                  stickyLabelCompact: 'Contato',
+                ),
+                hasOpenCopilotTask360: true,
+                isDark: false,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await expectLater(
+      find.byKey(const ValueKey('aluno360_operacao_sticky_cta')),
+      matchesGoldenFile('goldens/aluno360_sticky_cta_contact_task_390.png'),
     );
   });
 }

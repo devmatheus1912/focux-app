@@ -130,18 +130,13 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
     try {
       await action();
       if (mounted) {
-        FeedbackHelper.showSuccess(
-          context,
-          successMessage,
-          reserveBottom: Aluno360Layout.snackbarStickyReserve,
-        );
+        FeedbackHelper.showOperacaoSuccess(context, successMessage);
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showError(
+        FeedbackHelper.showOperacaoError(
           context,
           friendlyError(e, fallback: 'Não foi possível salvar o follow-up.'),
-          reserveBottom: Aluno360Layout.snackbarStickyReserve,
         );
       }
     } finally {

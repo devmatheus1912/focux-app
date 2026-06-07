@@ -26,6 +26,7 @@ class AlunoOperacaoAdherenceBars extends StatelessWidget {
   final bool emptyWeek;
 
   static const _barMaxHeight = 36.0;
+  static const _markerBand = 14.0;
   static const _minFraction = 0.14;
   static const _emptyWeekMinFraction = 0.14;
 
@@ -46,8 +47,9 @@ class AlunoOperacaoAdherenceBars extends StatelessWidget {
     final labelBand =
         14.0 * MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 1.5);
 
+    final markerBand = emptyWeek ? _markerBand : 0.0;
     return SizedBox(
-      height: _barMaxHeight + labelBand,
+      height: _barMaxHeight + markerBand + labelBand,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -65,6 +67,7 @@ class AlunoOperacaoAdherenceBars extends StatelessWidget {
                 todayRingColor: todayRingColor,
                 labelColor: labelColor,
                 barMaxHeight: _barMaxHeight,
+                markerBand: markerBand,
                 labelBand: labelBand,
                 minFraction: emptyWeek ? _emptyWeekMinFraction : _minFraction,
                 outlineIdle: emptyWeek,
@@ -89,6 +92,7 @@ class _AdherenceDayBar extends StatelessWidget {
     required this.todayRingColor,
     required this.labelColor,
     required this.barMaxHeight,
+    required this.markerBand,
     required this.labelBand,
     required this.minFraction,
     this.outlineIdle = false,
@@ -104,6 +108,7 @@ class _AdherenceDayBar extends StatelessWidget {
   final Color todayRingColor;
   final Color labelColor;
   final double barMaxHeight;
+  final double markerBand;
   final double labelBand;
   final double minFraction;
   final bool outlineIdle;
@@ -135,7 +140,9 @@ class _AdherenceDayBar extends StatelessWidget {
                 : missColor.withValues(alpha: 0.38));
     final barBorder =
         outlineIdle && !hasActivity
-            ? Border.all(color: missColor.withValues(alpha: 0.55), width: 1)
+            ? Border.all(color: missColor.withValues(alpha: 0.65), width: 1.5)
+            : hasActivity
+            ? Border.all(color: activeColor.withValues(alpha: 0.35), width: 1)
             : null;
 
     return Semantics(
@@ -161,23 +168,41 @@ class _AdherenceDayBar extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   SizedBox(
-                    height: barMaxHeight,
+                    height: barMaxHeight + markerBand,
                     child: Align(
                       alignment: Alignment.bottomCenter,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          if (outlineIdle && !hasActivity) ...[
+                          if (markerBand > 0 && outlineIdle && !hasActivity)
                             Container(
-                              width: 7,
-                              height: 7,
+                              width: 10,
+                              height: 10,
                               margin: const EdgeInsets.only(bottom: 4),
                               decoration: BoxDecoration(
-                                color: missColor.withValues(alpha: 0.92),
+                                color: Colors.transparent,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: missColor.withValues(alpha: 0.92),
+                                  width: 2,
+                                ),
+                              ),
+                            )
+                          else if (markerBand > 0 && hasActivity)
+                            Container(
+                              width: 10,
+                              height: 10,
+                              margin: const EdgeInsets.only(bottom: 4),
+                              decoration: BoxDecoration(
+                                color: activeColor.withValues(alpha: 0.95),
                                 shape: BoxShape.circle,
                               ),
+                              child: Icon(
+                                Icons.check_rounded,
+                                size: 7,
+                                color: Colors.white.withValues(alpha: 0.96),
+                              ),
                             ),
-                          ],
                           AnimatedContainer(
                             duration: Duration(
                               milliseconds:

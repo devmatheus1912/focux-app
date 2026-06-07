@@ -285,7 +285,7 @@ class _IdentityMetricChip extends StatelessWidget {
 
   Color _accentColor() {
     return switch (signal.label) {
-      'Risco operacional' => EagleTokens.warn,
+      'Risco operacional' => EagleTokens.bad,
       'Aderência semanal' => EagleTokens.aderenciaColor(
         double.tryParse(signal.value) ?? 0,
         isDark: isDark,
@@ -306,11 +306,15 @@ class _IdentityMetricChip extends StatelessWidget {
             : OperationalMetricEmphasis.normal;
     final eyebrowColor =
         emphasis == OperationalMetricEmphasis.alert
-            ? (isDark ? accent : Color.lerp(accent, Colors.black, 0.42)!)
+            ? (isDark
+                ? accent.withValues(alpha: 0.95)
+                : Color.lerp(accent, const Color(0xFF7F1D1D), 0.35)!)
             : Color.lerp(ink, accent, 0.35)!;
     final valueColor =
         emphasis == OperationalMetricEmphasis.alert
-            ? (isDark ? ink : Color.lerp(ink, Colors.black, 0.15)!)
+            ? (isDark
+                ? ink
+                : Color.lerp(accent, const Color(0xFF450A0A), 0.55)!)
             : ink;
 
     return Semantics(
@@ -332,7 +336,7 @@ class _IdentityMetricChip extends StatelessWidget {
               eyebrow.toUpperCase(),
               style: AppTypography.inter(
                 color: eyebrowColor,
-                fontSize: 9,
+                fontSize: 10,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0.35,
                 height: 1,

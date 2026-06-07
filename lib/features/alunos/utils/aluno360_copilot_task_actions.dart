@@ -7,7 +7,6 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../ia/data/ia_repository.dart';
-import '../constants/aluno_360_layout.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
@@ -39,7 +38,7 @@ Future<bool> criarTarefaCopilotoFromAluno360({
                   () => context.push('/dashboard/command-center/copiloto'),
             ),
           ),
-          reserveBottom: Aluno360Layout.snackbarStickyReserve,
+          placement: FeedbackPlacement.operacaoTop,
         );
       }
       return true;
@@ -89,7 +88,7 @@ Future<bool> criarTarefaCopilotoFromAluno360({
                   )
                   : null,
         ),
-        reserveBottom: Aluno360Layout.snackbarStickyReserve,
+        placement: FeedbackPlacement.operacaoTop,
       );
     }
     return persisted;
@@ -102,7 +101,7 @@ Future<bool> criarTarefaCopilotoFromAluno360({
             'Não foi possível criar tarefa: ${friendlyError(e)}',
           ),
         ),
-        reserveBottom: Aluno360Layout.snackbarStickyReserve,
+        placement: FeedbackPlacement.operacaoTop,
       );
     }
     return false;

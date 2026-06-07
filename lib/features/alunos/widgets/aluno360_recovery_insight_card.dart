@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../constants/aluno_360_layout.dart';
 import '../../health/data/health_repository.dart';
 import '../../health/widgets/recovery_score_ring.dart';
 
@@ -129,9 +130,8 @@ class _Aluno360RecoveryInsightCardState
                     children: [
                       Text(
                         'Prontidão wearable',
-                        style: TextStyle(
+                        style: Aluno360Layout.captionStyle(context).copyWith(
                           color: chrome.mute,
-                          fontSize: 11.5,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

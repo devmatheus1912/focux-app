@@ -141,9 +141,8 @@ class Aluno360CopilotTaskStatus extends StatelessWidget {
                   subtitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: Aluno360Layout.captionStyle(context).copyWith(
                     color: mute,
-                    fontSize: 11.5,
                     fontWeight: FontWeight.w700,
                   ),
                 ),

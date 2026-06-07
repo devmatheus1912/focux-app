@@ -85,10 +85,9 @@ class _Aluno360CopilotPrescriptionState
   }
 
   TextStyle _expandLinkStyle({required bool active}) {
-    return TextStyle(
+    return Aluno360Layout.captionStyle(context).copyWith(
       color: widget.color.withValues(alpha: active ? 0.92 : 0.68),
-      fontSize: 11,
-      fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.w700,
       decoration: active ? TextDecoration.underline : TextDecoration.none,
       decorationColor: widget.color.withValues(alpha: 0.45),
     );
@@ -312,28 +311,27 @@ class _Aluno360CopilotPrescriptionState
               child: SizedBox(
                 width: double.infinity,
                 height: 44,
-                child: FilledButton.icon(
+                child: OutlinedButton.icon(
                   onPressed: widget.onPrepareMessage,
                   icon: Icon(
                     Icons.chat_bubble_outline_rounded,
                     size: 17,
-                    color: widget.color,
                   ),
-                  label: Text(
-                    'Preparar mensagem',
-                    style: TextStyle(
-                      color: widget.color,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  style: FilledButton.styleFrom(
-                    elevation: 0,
-                    foregroundColor: widget.color,
-                    backgroundColor: widget.color.withValues(alpha: 0.14),
-                    side: BorderSide(color: widget.color.withValues(alpha: 0.32)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(13),
+                  label: const Text('Preparar mensagem'),
+                  style: Aluno360Layout.operacaoOutlinedButtonStyle(
+                    context,
+                    widget.color,
+                  ).copyWith(
+                    textStyle: WidgetStateProperty.all(
+                      Aluno360Layout.chipLabelStyle(context).copyWith(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Aluno360Layout.operacaoOutlinedForeground(
+                          widget.color,
+                          isDark:
+                              Theme.of(context).brightness == Brightness.dark,
+                        ),
+                      ),
                     ),
                   ),
                 ),

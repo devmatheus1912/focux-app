@@ -14,7 +14,24 @@ abstract final class Aluno360Layout {
   static const double tabContentGap = 12;
   static const double stickyBarContentHeight = 60;
   static const double snackbarStickyReserve = 76;
+  static const double operacaoTopSnackHeight = 52;
   static const double operacaoMaxContentWidth = 720;
+
+  /// Pins floating snackbar below pinned toolbar + tabs (scroll-safe).
+  static EdgeInsets operacaoTopSnackMargin(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    final top =
+        MediaQuery.paddingOf(context).top +
+        kToolbarHeight +
+        tabBarHeight +
+        8;
+    return EdgeInsets.fromLTRB(
+      screenPadding,
+      0,
+      screenPadding,
+      size.height - top - operacaoTopSnackHeight,
+    );
+  }
 
   /// Identity strip height (compact strip + padding at textScale ≤ 1.25).
   static double heroBodyHeight(
@@ -142,6 +159,16 @@ abstract final class Aluno360Layout {
     return captionStyle(context).copyWith(
       fontSize: 12,
       fontWeight: FontWeight.w600,
+    );
+  }
+
+  /// Chip / button labels inside Operação cards (min 12px).
+  static TextStyle chipLabelStyle(BuildContext context, {Color? color}) {
+    return captionStyle(context).copyWith(
+      color: color,
+      fontSize: 12,
+      fontWeight: FontWeight.w800,
+      height: 1.2,
     );
   }
 

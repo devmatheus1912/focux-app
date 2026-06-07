@@ -67,9 +67,8 @@ class Aluno360StudentQuickActions extends StatelessWidget {
                         'Acesso e evolução de ${aluno.nome.split(' ').first}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: Aluno360Layout.captionStyle(context).copyWith(
                           color: mute,
-                          fontSize: 11.5,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

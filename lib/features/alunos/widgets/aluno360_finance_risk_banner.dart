@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../constants/aluno_360_layout.dart';
 
 /// Finance delinquency banner on the Operação tab.
 class Aluno360FinanceRiskBanner extends StatelessWidget {
@@ -55,7 +56,9 @@ class Aluno360FinanceRiskBanner extends StatelessWidget {
                         ),
                         Text(
                           'Abrir mensalidades deste aluno',
-                          style: TextStyle(color: mute, fontSize: 11.5),
+                          style: Aluno360Layout.captionStyle(context).copyWith(
+                            color: mute,
+                          ),
                         ),
                       ],
                     ),

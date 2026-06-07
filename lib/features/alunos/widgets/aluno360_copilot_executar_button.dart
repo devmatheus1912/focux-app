@@ -83,25 +83,16 @@ class _Aluno360CopilotExecutarAcaoButtonState
       _invalidateAfterExecutar(spec.backendTipo);
       if (!mounted) return;
       if (resp.ok) {
-        FeedbackHelper.showSuccess(
-          context,
-          resp.mensagem,
-          reserveBottom: Aluno360Layout.snackbarStickyReserve,
-        );
+        FeedbackHelper.showOperacaoSuccess(context, resp.mensagem);
       } else {
-        FeedbackHelper.showWarn(
-          context,
-          resp.mensagem,
-          reserveBottom: Aluno360Layout.snackbarStickyReserve,
-        );
+        FeedbackHelper.showOperacaoWarn(context, resp.mensagem);
       }
     } catch (e) {
       if (!mounted) return;
       if (_shouldSurfaceIaError(e)) {
-        FeedbackHelper.showWarn(
+        FeedbackHelper.showOperacaoWarn(
           context,
           friendlyError(e, fallback: 'IA indisponível agora.'),
-          reserveBottom: Aluno360Layout.snackbarStickyReserve,
         );
       } else {
         FeedbackHelper.showSnackBar(
@@ -111,7 +102,7 @@ class _Aluno360CopilotExecutarAcaoButtonState
               friendlyError(e, fallback: 'Não foi possível aplicar a ação.'),
             ),
           ),
-          reserveBottom: Aluno360Layout.snackbarStickyReserve,
+          placement: FeedbackPlacement.operacaoTop,
         );
       }
     } finally {
