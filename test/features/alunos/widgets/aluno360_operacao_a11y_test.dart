@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_operacao_focus_toggle.dart';
+import 'package:focux_app/features/alunos/utils/aluno360_operacao_logic.dart';
+import 'package:focux_app/features/alunos/widgets/aluno360_operacao_sticky_cta.dart';
 import 'package:focux_app/features/ia/data/ia_repository.dart';
 
 void main() {
@@ -70,6 +73,76 @@ void main() {
       expect(
         tester.getSemantics(find.byType(Aluno360OperacaoFocusModeToggle)),
         matchesSemantics(isButton: true, label: 'Desativar modo foco'),
+      );
+    });
+  });
+
+  group('Aluno360OperacaoStickyCtaBar TalkBack labels', () {
+    testWidgets('sticky bar exposes operacao actions container label', (
+      tester,
+    ) async {
+      final aluno = Aluno(
+        id: 42,
+        nome: 'Beatriz',
+        email: 'b@test.com',
+        status: 'ATIVO',
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            alunoOpenIaActionsProvider(42).overrideWith((ref) async => const []),
+            alunoRecoveryProvider(42).overrideWith((ref) async => null),
+            alunoCopilotoForceIaProvider(42).overrideWith((ref) => false),
+            aluno360OperacaoProvider(42).overrideWith(
+              (ref) => resolveAluno360OperacaoSnapshot(
+                aluno: aluno,
+                proximaAcao360: ProximaAcaoResumo(
+                  acao: 'Retomar contato',
+                  motivo: 'Sem check-ins',
+                  fonte: 'PADRAO',
+                  prioridade: 'P1',
+                  tipoAcao: 'CONTATO',
+                  mensagemSugerida: 'Oi, Beatriz.',
+                ),
+                forceIa: false,
+                iaAsync: null,
+                hasOpenTask: false,
+                followUpDue: false,
+                wearableRelevant: false,
+              ),
+            ),
+          ],
+          child: MaterialApp(
+            home: Scaffold(
+              body: Aluno360OperacaoStickyCtaBar(
+                aluno: aluno,
+                alunoId: 42,
+                proximaAcao360: ProximaAcaoResumo(
+                  acao: 'Retomar contato',
+                  motivo: 'Sem check-ins',
+                  fonte: 'PADRAO',
+                  prioridade: 'P1',
+                  tipoAcao: 'CONTATO',
+                  mensagemSugerida: 'Oi, Beatriz.',
+                ),
+                hasOpenCopilotTask360: false,
+                isDark: false,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.byKey(const ValueKey('aluno360_operacao_sticky_cta')), findsOneWidget);
+      final semanticsNodes = tester.widgetList<Semantics>(find.byType(Semantics));
+      expect(
+        semanticsNodes.any(
+          (node) =>
+              node.properties.label == 'Ações rápidas da aba operação',
+        ),
+        isTrue,
       );
     });
   });

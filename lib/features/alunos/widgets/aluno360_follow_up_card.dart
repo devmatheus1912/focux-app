@@ -1,7 +1,22 @@
-﻿part of 'aluno_detail_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class _AlunoFollowUpCard extends ConsumerStatefulWidget {
-  const _AlunoFollowUpCard({
+import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/motion_preferences.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../constants/aluno_360_layout.dart';
+import '../data/aluno_repository.dart';
+import '../providers/aluno_followup_provider.dart';
+import '../utils/aluno360_operacao_logic.dart';
+
+class Aluno360FollowUpCard extends ConsumerStatefulWidget {
+  const Aluno360FollowUpCard({
     required this.aluno,
     required this.isDark,
     this.compactContactPriority = false,
@@ -12,10 +27,11 @@ class _AlunoFollowUpCard extends ConsumerStatefulWidget {
   final bool compactContactPriority;
 
   @override
-  ConsumerState<_AlunoFollowUpCard> createState() => _AlunoFollowUpCardState();
+  ConsumerState<Aluno360FollowUpCard> createState() =>
+      _Aluno360FollowUpCardState();
 }
 
-class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
+class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
   bool _busy = false;
   bool _expanded = false;
 

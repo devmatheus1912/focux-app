@@ -214,22 +214,133 @@ String sanitizeCopilotAcaoWearable(
 }
 
 /// Maps copilot UI action types to backend executar endpoint values.
+class CopilotExecutarAcaoSpec {
+  const CopilotExecutarAcaoSpec({
+    required this.backendTipo,
+    required this.label,
+    required this.icon,
+    required this.executingLabel,
+    required this.executingSemantics,
+    this.parametros,
+  });
+
+  final String backendTipo;
+  final String label;
+  final IconData icon;
+  final String executingLabel;
+  final String executingSemantics;
+  final String? parametros;
+}
+
+CopilotExecutarAcaoSpec? resolveCopilotExecutarAcao({
+  required String? tipoAcao,
+  required Aluno aluno,
+  ProximaAcaoResumo? proxima,
+  String? outreachMessage,
+}) {
+  final tipo = tipoAcao?.toUpperCase();
+  if (tipo == 'TREINO') {
+    return const CopilotExecutarAcaoSpec(
+      backendTipo: 'REDUZIR_CARGA',
+      label: 'Aplicar ajuste de carga (−15%)',
+      icon: Icons.fitness_center_rounded,
+      executingLabel: 'Aplicando…',
+      executingSemantics: 'Aplicando ajuste de carga',
+    );
+  }
+
+  final pushMessage = _copilotExecutarPushMessage(
+    proxima: proxima,
+    outreachMessage: outreachMessage,
+    aluno: aluno,
+    acao: proxima?.acao,
+  );
+
+  if (tipo == 'CONTATO' || tipo == 'WEARABLE') {
+    if (pushMessage != null) {
+      return CopilotExecutarAcaoSpec(
+        backendTipo: 'ENVIAR_PUSH',
+        parametros: pushMessage,
+        label: 'Enviar push ao aluno',
+        icon: Icons.notifications_active_outlined,
+        executingLabel: 'Enviando…',
+        executingSemantics: 'Enviando push ao aluno',
+      );
+    }
+    if (aluno.emRisco) {
+      return const CopilotExecutarAcaoSpec(
+        backendTipo: 'MARCAR_RISCO',
+        label: 'Sinalizar risco e enviar push',
+        icon: Icons.warning_amber_rounded,
+        executingLabel: 'Sinalizando…',
+        executingSemantics: 'Sinalizando risco operacional',
+      );
+    }
+  }
+
+  if (aluno.emRisco && (tipo == 'GERAL' || tipo == null)) {
+    return const CopilotExecutarAcaoSpec(
+      backendTipo: 'MARCAR_RISCO',
+      label: 'Sinalizar risco e enviar push',
+      icon: Icons.warning_amber_rounded,
+      executingLabel: 'Sinalizando…',
+      executingSemantics: 'Sinalizando risco operacional',
+    );
+  }
+
+  return null;
+}
+
+String? _copilotExecutarPushMessage({
+  ProximaAcaoResumo? proxima,
+  String? outreachMessage,
+  required Aluno aluno,
+  String? acao,
+}) {
+  final backend = proxima?.mensagemSugerida?.trim();
+  if (backend != null && backend.isNotEmpty) return backend;
+  final outreach = outreachMessage?.trim();
+  if (outreach != null && outreach.isNotEmpty) return outreach;
+  final action = acao?.trim();
+  if (action != null && action.isNotEmpty) {
+    return resolveOutreachMessage(aluno, acao: action);
+  }
+  return null;
+}
+
 String? copilotExecutarBackendTipo(String? tipoAcao) {
   switch (tipoAcao?.toUpperCase()) {
     case 'TREINO':
       return 'REDUZIR_CARGA';
+    case 'CONTATO':
+    case 'WEARABLE':
+      return 'ENVIAR_PUSH';
     default:
       return null;
   }
 }
 
-bool shouldShowCopilotExecutarAcao(String? tipoAcao) =>
-    copilotExecutarBackendTipo(tipoAcao) != null;
+bool shouldShowCopilotExecutarAcao({
+  required String? tipoAcao,
+  required Aluno aluno,
+  ProximaAcaoResumo? proxima,
+  String? outreachMessage,
+}) =>
+    resolveCopilotExecutarAcao(
+      tipoAcao: tipoAcao,
+      aluno: aluno,
+      proxima: proxima,
+      outreachMessage: outreachMessage,
+    ) !=
+    null;
 
 String copilotExecutarAcaoLabel(String? tipoAcao) {
   switch (tipoAcao?.toUpperCase()) {
     case 'TREINO':
       return 'Aplicar ajuste de carga (−15%)';
+    case 'CONTATO':
+    case 'WEARABLE':
+      return 'Enviar push ao aluno';
     default:
       return 'Aplicar ajuste';
   }

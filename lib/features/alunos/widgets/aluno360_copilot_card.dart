@@ -19,7 +19,9 @@ import '../../ia/data/ia_repository.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_copilot_ia_cache_store.dart';
 import '../data/aluno_repository.dart';
+import '../../treinos/providers/treinos_provider.dart';
 import '../providers/aluno_detail_providers.dart';
+import '../providers/alunos_provider.dart';
 import '../utils/aluno360_copilot_logic.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../widgets/aluno360_copilot_prescription.dart';
@@ -596,10 +598,20 @@ class Aluno360CopilotCard extends ConsumerWidget {
           if (!hasOpenTask && openActionsAsync.isLoading)
             const SizedBox(height: 10),
           if (!hasOpenTask &&
-              shouldShowCopilotExecutarAcao(effectiveProxima?.tipoAcao)) ...[
+              shouldShowCopilotExecutarAcao(
+                tipoAcao: effectiveProxima?.tipoAcao,
+                aluno: aluno,
+                proxima: effectiveProxima,
+                outreachMessage: operacao.outreachMessage,
+              )) ...[
             Aluno360CopilotExecutarAcaoButton(
               alunoId: aluno.id,
-              tipoAcao: effectiveProxima!.tipoAcao!,
+              spec: resolveCopilotExecutarAcao(
+                tipoAcao: effectiveProxima?.tipoAcao,
+                aluno: aluno,
+                proxima: effectiveProxima,
+                outreachMessage: operacao.outreachMessage,
+              )!,
               primary: primary,
             ),
             const SizedBox(height: 10),
@@ -626,12 +638,12 @@ class Aluno360CopilotExecutarAcaoButton extends ConsumerStatefulWidget {
   const Aluno360CopilotExecutarAcaoButton({
     super.key,
     required this.alunoId,
-    required this.tipoAcao,
+    required this.spec,
     required this.primary,
   });
 
   final int alunoId;
-  final String tipoAcao;
+  final CopilotExecutarAcaoSpec spec;
   final Color primary;
 
   @override
@@ -643,16 +655,31 @@ class _Aluno360CopilotExecutarAcaoButtonState
     extends ConsumerState<Aluno360CopilotExecutarAcaoButton> {
   var _executing = false;
 
+  void _invalidateAfterExecutar(String backendTipo) {
+    ref.invalidate(aluno360Provider(widget.alunoId));
+    ref.invalidate(alunoProvider(widget.alunoId));
+    if (backendTipo == 'REDUZIR_CARGA') {
+      ref.invalidate(treinosDoAlunoProvider(widget.alunoId));
+    }
+  }
+
+  bool _shouldSurfaceIaError(Object error) {
+    if (error is IaOperationalException) {
+      return error.quotaExhausted || error.planUpgradeRequired;
+    }
+    return false;
+  }
+
   Future<void> _executar() async {
-    final backendTipo = copilotExecutarBackendTipo(widget.tipoAcao);
-    if (backendTipo == null || _executing) return;
+    final spec = widget.spec;
+    if (_executing) return;
     setState(() => _executing = true);
     unawaited(
       AnalyticsService.instance.track(
         ProductEvents.aluno360CopilotExecutarAcao,
         props: {
           'aluno_id': widget.alunoId,
-          'tipo_acao': backendTipo,
+          'tipo_acao': spec.backendTipo,
         },
       ),
     );
@@ -661,9 +688,10 @@ class _Aluno360CopilotExecutarAcaoButtonState
         ref.read(apiClientProvider),
       ).executarAcaoCopiloto(
         alunoId: widget.alunoId,
-        tipoAcao: backendTipo,
+        tipoAcao: spec.backendTipo,
+        parametros: spec.parametros,
       );
-      ref.invalidate(aluno360Provider(widget.alunoId));
+      _invalidateAfterExecutar(spec.backendTipo);
       if (!mounted) return;
       if (resp.ok) {
         FeedbackHelper.showSuccess(context, resp.mensagem);
@@ -671,12 +699,18 @@ class _Aluno360CopilotExecutarAcaoButtonState
         FeedbackHelper.showWarn(context, resp.mensagem);
       }
     } catch (e) {
-      if (mounted) {
+      if (!mounted) return;
+      if (_shouldSurfaceIaError(e)) {
+        FeedbackHelper.showWarn(
+          context,
+          friendlyError(e, fallback: 'IA indisponível agora.'),
+        );
+      } else {
         FeedbackHelper.showSnackBar(
           context,
           SnackBar(
             content: Text(
-              friendlyError(e, fallback: 'Não foi possível aplicar o ajuste.'),
+              friendlyError(e, fallback: 'Não foi possível aplicar a ação.'),
             ),
           ),
         );
@@ -688,10 +722,10 @@ class _Aluno360CopilotExecutarAcaoButtonState
 
   @override
   Widget build(BuildContext context) {
-    final label = copilotExecutarAcaoLabel(widget.tipoAcao);
+    final spec = widget.spec;
     return Semantics(
       button: true,
-      label: _executing ? 'Aplicando ajuste de carga' : label,
+      label: _executing ? spec.executingSemantics : spec.label,
       child: SizedBox(
         width: double.infinity,
         height: 40,
@@ -707,9 +741,9 @@ class _Aluno360CopilotExecutarAcaoButtonState
                       color: widget.primary,
                     ),
                   )
-                  : Icon(Icons.fitness_center_rounded, size: 16),
+                  : Icon(spec.icon, size: 16),
           label: Text(
-            _executing ? 'Aplicando…' : label,
+            _executing ? spec.executingLabel : spec.label,
             style: const TextStyle(
               fontSize: 12.5,
               fontWeight: FontWeight.w800,

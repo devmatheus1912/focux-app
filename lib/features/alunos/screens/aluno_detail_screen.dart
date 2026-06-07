@@ -41,6 +41,8 @@ import '../utils/aluno_display_utils.dart';
 import '../widgets/aluno360_composite_header.dart';
 import '../widgets/aluno360_copilot_card.dart';
 import '../widgets/aluno360_operacao_tab.dart';
+import '../widgets/aluno360_follow_up_card.dart';
+import '../widgets/aluno360_operacao_sticky_cta.dart';
 import '../widgets/aluno360_operational_status_section.dart';
 import '../widgets/aluno_detail_hero_card.dart';
 import '../widgets/aluno_operacao_adherence_bars.dart';
@@ -56,7 +58,6 @@ part 'aluno_detail_screen_shared_widgets.part.dart';
 part 'aluno_detail_screen_modules.part.dart';
 part 'aluno_detail_screen_recovery.part.dart';
 part 'aluno_detail_screen_weight.part.dart';
-part 'aluno_detail_screen_follow_up.part.dart';
 part 'aluno_detail_screen_shared.part.dart';
 part 'aluno_detail_screen_tabs.part.dart';
 part 'aluno_detail_actions.part.dart';
@@ -165,7 +166,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
       backgroundColor: Colors.transparent,
       bottomNavigationBar:
           showOperacaoSticky
-              ? _OperacaoStickyCtaBar(
+              ? Aluno360OperacaoStickyCtaBar(
                 aluno: resolvedAlunoAsync.value!,
                 alunoId: alunoId,
                 proximaAcao360: proximaAcao360,

@@ -606,14 +606,72 @@ void main() {
     });
   });
 
-  group('copilotExecutarBackendTipo', () {
-    test('maps TREINO to REDUZIR_CARGA for executar endpoint', () {
+  group('resolveCopilotExecutarAcao', () {
+    final aluno = Aluno(
+      id: 1,
+      nome: 'Beatriz',
+      email: 'b@test.com',
+      status: 'ATIVO',
+    );
+
+    test('maps TREINO to REDUZIR_CARGA', () {
       expect(copilotExecutarBackendTipo('TREINO'), 'REDUZIR_CARGA');
-      expect(copilotExecutarBackendTipo('treino'), 'REDUZIR_CARGA');
-      expect(copilotExecutarBackendTipo('CONTATO'), isNull);
-      expect(shouldShowCopilotExecutarAcao('TREINO'), isTrue);
-      expect(shouldShowCopilotExecutarAcao('CONTATO'), isFalse);
+      final spec = resolveCopilotExecutarAcao(
+        tipoAcao: 'TREINO',
+        aluno: aluno,
+      );
+      expect(spec?.backendTipo, 'REDUZIR_CARGA');
+      expect(
+        shouldShowCopilotExecutarAcao(tipoAcao: 'TREINO', aluno: aluno),
+        isTrue,
+      );
       expect(copilotExecutarAcaoLabel('TREINO'), contains('15%'));
+    });
+
+    test('maps CONTATO with mensagem to ENVIAR_PUSH', () {
+      expect(copilotExecutarBackendTipo('CONTATO'), 'ENVIAR_PUSH');
+      final spec = resolveCopilotExecutarAcao(
+        tipoAcao: 'CONTATO',
+        aluno: aluno,
+        proxima: const ProximaAcaoResumo(
+          acao: 'Retomar contato',
+          motivo: 'Sem check-ins',
+          fonte: 'PADRAO',
+          prioridade: 'P1',
+          mensagemSugerida: 'Oi, Beatriz.',
+        ),
+      );
+      expect(spec?.backendTipo, 'ENVIAR_PUSH');
+      expect(spec?.parametros, 'Oi, Beatriz.');
+      expect(
+        shouldShowCopilotExecutarAcao(
+          tipoAcao: 'CONTATO',
+          aluno: aluno,
+          proxima: const ProximaAcaoResumo(
+            acao: 'Retomar contato',
+            motivo: 'Sem check-ins',
+            fonte: 'PADRAO',
+            prioridade: 'P1',
+            mensagemSugerida: 'Oi, Beatriz.',
+          ),
+        ),
+        isTrue,
+      );
+    });
+
+    test('maps em risco sem mensagem to MARCAR_RISCO', () {
+      final emRisco = Aluno(
+        id: 1,
+        nome: 'Beatriz',
+        email: 'b@test.com',
+        status: 'ATIVO',
+        emRisco: true,
+      );
+      final spec = resolveCopilotExecutarAcao(
+        tipoAcao: 'CONTATO',
+        aluno: emRisco,
+      );
+      expect(spec?.backendTipo, 'MARCAR_RISCO');
     });
   });
 }
