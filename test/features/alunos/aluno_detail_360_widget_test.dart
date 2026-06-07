@@ -167,6 +167,8 @@ void main() {
 
     expect(find.byKey(const ValueKey('aluno360_timeline_empty')), findsOneWidget);
     expect(find.text('Linha do tempo ainda vazia'), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 300));
   });
 
   for (final scale in [1.0, 1.3, 2.0]) {

@@ -549,20 +549,28 @@ void main() {
         _aluno(emRisco: true, aderenciaPercent: 0),
         statusMetricsVisible: true,
       );
-      expect(content.reason, isNot(contains('Risco operacional')));
-      expect(content.reason, isNot(contains('aderência')));
-      expect(content.reason, contains('contato'));
+      expect(content.reason, isEmpty);
     });
   });
 
   group('sanitizeCopilotPrescriptionReason', () {
-    test('strips adherence bullets when status visible', () {
+    test('returns empty when all segments duplicate status grid', () {
       expect(
         sanitizeCopilotPrescriptionReason(
-          'Priorize contato · sem registro · aderência 0%',
+          'Risco operacional · aderência 0% nos últimos 7 dias.',
           statusMetricsVisible: true,
         ),
-        'Priorize contato · sem registro',
+        isEmpty,
+      );
+    });
+
+    test('keeps unique segments when status visible', () {
+      expect(
+        sanitizeCopilotPrescriptionReason(
+          'Wearable desconectado · priorize contato',
+          statusMetricsVisible: true,
+        ),
+        'Wearable desconectado',
       );
     });
   });

@@ -828,4 +828,17 @@ void main() {
       expect(snapshot.outreachMessage, contains('Teste'));
     });
   });
+
+  group('operacaoSectionDelay', () {
+    test('skips stagger for contact priority', () {
+      expect(
+        operacaoSectionDelay(
+          financeRisk: true,
+          stepIndex: 4,
+          contactPriority: true,
+        ),
+        Duration.zero,
+      );
+    });
+  });
 }

@@ -381,8 +381,12 @@ class _AlunoDetailOperacaoTab extends ConsumerWidget {
 
     Widget section(int step, Widget child) {
       return _Aluno360Entrance(
-        enabled: animateEntrance,
-        delay: operacaoSectionDelay(financeRisk: financeRisk, stepIndex: step),
+        enabled: animateEntrance && !contactPriority,
+        delay: operacaoSectionDelay(
+          financeRisk: financeRisk,
+          stepIndex: step,
+          contactPriority: contactPriority,
+        ),
         onPlayed: onEntrancePlayed,
         child: child,
       );

@@ -369,7 +369,9 @@ String weekdayNameFromIso(String? isoDate) {
 Duration operacaoSectionDelay({
   required bool financeRisk,
   required int stepIndex,
+  bool contactPriority = false,
 }) {
+  if (contactPriority) return Duration.zero;
   const withFinance = [0, 40, 80, 120, 160, 200];
   const withoutFinance = [0, 0, 40, 80, 120, 160];
   final table = financeRisk ? withFinance : withoutFinance;

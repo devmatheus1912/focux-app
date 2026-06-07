@@ -258,14 +258,32 @@ List<String> copilotPrescriptionReasonSegments(String reason) {
       .toList(growable: false);
 }
 
-bool isRedundantCopilotReasonSegment(String segment) {
-  final lower = segment.toLowerCase();
-  return lower.contains('aderência') ||
+bool isRedundantCopilotReasonSegment(
+  String segment, {
+  bool statusMetricsVisible = false,
+}) {
+  final lower = segment.toLowerCase().trim();
+  if (lower.isEmpty) return true;
+
+  final metricNoise =
+      lower.contains('aderência') ||
       lower.contains('aderencia') ||
       lower.contains('risco operacional') ||
       lower.contains('sem check-in') ||
       lower.contains('check-ins recentes') ||
+      lower.contains('sem registro') ||
+      lower.contains('últimos 7 dias') ||
+      lower.contains('ultimos 7 dias') ||
+      lower.contains('0 de 7') ||
       (lower.contains('priorize contato') && lower.contains('ader'));
+
+  if (metricNoise) return true;
+
+  if (!statusMetricsVisible) return false;
+
+  return lower.startsWith('priorize contato') ||
+      lower.contains('evoluir o plano') ||
+      lower.contains('contato direto hoje');
 }
 
 /// Hides metric bullets already visible in the status grid (non-focus mode).
@@ -276,11 +294,14 @@ String sanitizeCopilotPrescriptionReason(
   if (!statusMetricsVisible || reason.trim().isEmpty) return reason;
   final segments =
       copilotPrescriptionReasonSegments(reason)
-          .where((segment) => !isRedundantCopilotReasonSegment(segment))
+          .where(
+            (segment) => !isRedundantCopilotReasonSegment(
+              segment,
+              statusMetricsVisible: true,
+            ),
+          )
           .toList(growable: false);
-  if (segments.isEmpty) {
-    return 'Sinais do perfil pedem contato direto hoje.';
-  }
+  if (segments.isEmpty) return '';
   return segments.join(' · ');
 }
 
