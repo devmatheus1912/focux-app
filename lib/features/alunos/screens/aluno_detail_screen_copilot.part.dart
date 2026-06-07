@@ -8,6 +8,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
   final bool hasOpenCopilotTask360;
   final bool isDark;
   final bool showFocusToggle;
+  final bool focusMode;
 
   const _Aluno360CopilotCard({
     required this.aluno,
@@ -17,6 +18,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     required this.hasOpenCopilotTask360,
     required this.isDark,
     this.showFocusToggle = false,
+    this.focusMode = false,
   });
 
   Future<void> _openProfileGap(
@@ -541,6 +543,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
               preferContactPriority: operacao.contactPriority,
               wearableRelevant: wearableRelevant,
               contactPriority: operacao.contactPriority,
+              statusMetricsVisible: !focusMode,
               onPrepareMessage:
                   showPrepareInPrescription
                       ? () => _prepararMensagem(

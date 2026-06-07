@@ -45,16 +45,16 @@ final alunoOperacaoFocusModeProvider =
 );
 
 class AlunoOperacaoFocusModeController extends StateNotifier<bool> {
-  AlunoOperacaoFocusModeController(this.alunoId) : super(false) {
-    _restore();
-  }
+  AlunoOperacaoFocusModeController(this.alunoId) : super(false);
 
   final int alunoId;
 
-  Future<void> _restore() async {
+  /// Applies contact-priority auto-default unless the personal toggled focus manually.
+  Future<void> syncAutoDefault({required bool autoDefault}) async {
     try {
-      final saved = await AlunoOperacaoFocusStore.load(alunoId);
-      if (saved != state) state = saved;
+      final explicit = await AlunoOperacaoFocusStore.loadExplicit(alunoId);
+      final next = explicit ?? autoDefault;
+      if (state != next) state = next;
     } catch (_) {}
   }
 
@@ -62,7 +62,7 @@ class AlunoOperacaoFocusModeController extends StateNotifier<bool> {
     if (state == value) return;
     state = value;
     try {
-      await AlunoOperacaoFocusStore.save(alunoId, value);
+      await AlunoOperacaoFocusStore.saveExplicit(alunoId, value);
     } catch (_) {}
     SemanticsService.announce(
       value ? 'Modo foco ativado' : 'Modo foco desativado',

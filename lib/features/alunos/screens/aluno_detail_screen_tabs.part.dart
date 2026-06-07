@@ -403,6 +403,7 @@ class _AlunoDetailOperacaoTab extends ConsumerWidget {
       hasOpenCopilotTask360: hasOpenCopilotTask360,
       isDark: isDark,
       showFocusToggle: true,
+      focusMode: focusMode,
     );
 
     Widget diagnosticBody() {

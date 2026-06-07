@@ -258,6 +258,32 @@ List<String> copilotPrescriptionReasonSegments(String reason) {
       .toList(growable: false);
 }
 
+bool isRedundantCopilotReasonSegment(String segment) {
+  final lower = segment.toLowerCase();
+  return lower.contains('aderência') ||
+      lower.contains('aderencia') ||
+      lower.contains('risco operacional') ||
+      lower.contains('sem check-in') ||
+      lower.contains('check-ins recentes') ||
+      (lower.contains('priorize contato') && lower.contains('ader'));
+}
+
+/// Hides metric bullets already visible in the status grid (non-focus mode).
+String sanitizeCopilotPrescriptionReason(
+  String reason, {
+  required bool statusMetricsVisible,
+}) {
+  if (!statusMetricsVisible || reason.trim().isEmpty) return reason;
+  final segments =
+      copilotPrescriptionReasonSegments(reason)
+          .where((segment) => !isRedundantCopilotReasonSegment(segment))
+          .toList(growable: false);
+  if (segments.isEmpty) {
+    return 'Sinais do perfil pedem contato direto hoje.';
+  }
+  return segments.join(' · ');
+}
+
 /// Strips LLM preambles so UI shows the actionable sentence, not boilerplate.
 String normalizeIaCopilotAcao(String raw) {
   var text = sanitizeCopilotIaLanguage(cleanCopilotText(raw));
@@ -614,17 +640,22 @@ String copilotProfileGapsButtonLabel(Aluno aluno) {
   return 'Completar ${gaps.first.title.toLowerCase()}';
 }
 
-CopilotPrescriptionContent contactPriorityPrescriptionContent(Aluno aluno) {
+CopilotPrescriptionContent contactPriorityPrescriptionContent(
+  Aluno aluno, {
+  bool statusMetricsVisible = false,
+}) {
   final firstName = aluno.nome.trim().isEmpty
       ? 'o aluno'
       : aluno.nome.trim().split(' ').first;
   final aderencia = aluno.aderenciaPercent;
-  final reason =
-      aluno.emRisco
-          ? 'Risco operacional · aderência ${aderencia ?? 0}% nos últimos 7 dias.'
-          : aderencia != null && aderencia <= 0
-              ? 'Sem check-ins recentes · priorize contato antes de evoluir o plano.'
-              : 'Sinais do perfil pedem contato direto hoje.';
+  final reason = sanitizeCopilotPrescriptionReason(
+    aluno.emRisco
+        ? 'Risco operacional · aderência ${aderencia ?? 0}% nos últimos 7 dias.'
+        : aderencia != null && aderencia <= 0
+            ? 'Sem check-ins recentes · priorize contato antes de evoluir o plano.'
+            : 'Sinais do perfil pedem contato direto hoje.',
+    statusMetricsVisible: statusMetricsVisible,
+  );
   return CopilotPrescriptionContent(
     title: 'Prioridade do dia',
     action: 'Retomar contato com $firstName e checar como está.',
@@ -756,6 +787,7 @@ CopilotPrescriptionContent resolveCopilotPrescriptionFromAction(
   String fallback, {
   bool wearableRelevant = true,
   bool contactPriority = false,
+  bool statusMetricsVisible = false,
 }) {
   final rawAcao =
       (action['acao'] ?? action['mensagem'] ?? action['descricao'] ?? fallback)
@@ -773,6 +805,10 @@ CopilotPrescriptionContent resolveCopilotPrescriptionFromAction(
     sanitizedAcao,
     wearableRelevant: wearableRelevant,
   );
+  final reason = sanitizeCopilotPrescriptionReason(
+    isIa ? formatCopilotIaMotivo(motivoRaw) : motivoRaw,
+    statusMetricsVisible: statusMetricsVisible,
+  );
   return CopilotPrescriptionContent(
     title:
         contactPriority
@@ -784,7 +820,7 @@ CopilotPrescriptionContent resolveCopilotPrescriptionFromAction(
         copilotPrescriptionActionsEquivalent(fullAction, displayAction)
             ? null
             : fullAction,
-    reason: isIa ? formatCopilotIaMotivo(motivoRaw) : motivoRaw,
+    reason: reason,
   );
 }
 

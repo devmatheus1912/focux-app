@@ -535,13 +535,35 @@ void main() {
   });
 
   group('contactPriorityPrescriptionContent', () {
-    test('surfaces risk and adherence in reason', () {
+    test('surfaces risk and adherence in reason when status hidden', () {
       final content = contactPriorityPrescriptionContent(
         _aluno(emRisco: true, aderenciaPercent: 0),
       );
       expect(content.title, 'Prioridade do dia');
       expect(content.action, contains('Retomar contato'));
       expect(content.reason, contains('Risco operacional'));
+    });
+
+    test('dedupes metrics when status grid is visible', () {
+      final content = contactPriorityPrescriptionContent(
+        _aluno(emRisco: true, aderenciaPercent: 0),
+        statusMetricsVisible: true,
+      );
+      expect(content.reason, isNot(contains('Risco operacional')));
+      expect(content.reason, isNot(contains('aderência')));
+      expect(content.reason, contains('contato'));
+    });
+  });
+
+  group('sanitizeCopilotPrescriptionReason', () {
+    test('strips adherence bullets when status visible', () {
+      expect(
+        sanitizeCopilotPrescriptionReason(
+          'Priorize contato · sem registro · aderência 0%',
+          statusMetricsVisible: true,
+        ),
+        'Priorize contato · sem registro',
+      );
     });
   });
 

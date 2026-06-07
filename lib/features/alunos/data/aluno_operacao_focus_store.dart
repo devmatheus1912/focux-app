@@ -4,12 +4,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AlunoOperacaoFocusStore {
   static String _key(int alunoId) => 'aluno360_operacao_focus_$alunoId';
 
-  static Future<bool> load(int alunoId) async {
+  /// Null when the personal never toggled focus for this aluno (auto-default applies).
+  static Future<bool?> loadExplicit(int alunoId) async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_key(alunoId)) ?? false;
+    if (!prefs.containsKey(_key(alunoId))) return null;
+    return prefs.getBool(_key(alunoId));
   }
 
-  static Future<void> save(int alunoId, bool focusMode) async {
+  static Future<void> saveExplicit(int alunoId, bool focusMode) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_key(alunoId), focusMode);
   }

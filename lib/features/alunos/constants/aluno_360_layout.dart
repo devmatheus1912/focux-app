@@ -10,19 +10,19 @@ abstract final class Aluno360Layout {
   static const double sectionGap = 12;
   static const double cardPadding = 14;
   static const double tabBarHeight = 44;
-  static const double tabContentGap = 4;
+  static const double tabContentGap = 0;
   static const double stickyBarContentHeight = 56;
   static const double snackbarStickyReserve = 72;
 
-  /// Approximate identity strip body (matches [AlunoDetailHeroCard] at textScale ≤ 1.25).
+  /// Identity strip height (compact strip + padding at textScale ≤ 1.25).
   static double heroBodyHeight(
     BuildContext context, {
     bool compactContactPriority = false,
   }) {
     final textScale =
         MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0);
-    final base = compactContactPriority ? 56.0 : 72.0;
-    return base + ((textScale - 1) * 22);
+    final base = compactContactPriority ? 52.0 : 70.0;
+    return base + ((textScale - 1) * 20);
   }
 
   /// Status bar + toolbar + tab bar (header collapsed).

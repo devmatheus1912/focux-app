@@ -386,6 +386,16 @@ bool shouldCompactFollowUpForContactPriority({
 }) =>
     contactPriority;
 
+/// Auto-enable focus mode for contact-priority profiles with zero adherence.
+bool shouldDefaultOperacaoFocusMode({
+  required Aluno aluno,
+  required bool contactPriority,
+}) {
+  if (!contactPriority) return false;
+  final aderencia = aluno.aderenciaPercent ?? 0;
+  return aderencia <= 0 || aluno.emRisco;
+}
+
 /// Hide copilot lacunas when hero/sticky already covers the same action.
 bool shouldShowCopilotProfileGapsButton(
   Aluno aluno,

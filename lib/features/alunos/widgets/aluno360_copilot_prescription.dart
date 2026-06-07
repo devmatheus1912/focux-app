@@ -425,6 +425,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
     this.preferContactPriority = false,
     this.wearableRelevant = true,
     this.contactPriority = false,
+    this.statusMetricsVisible = false,
   });
 
   final Aluno aluno;
@@ -438,6 +439,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
   final bool preferContactPriority;
   final bool wearableRelevant;
   final bool contactPriority;
+  final bool statusMetricsVisible;
 
   @override
   Widget build(BuildContext context) {
@@ -462,6 +464,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
                 fallback,
                 wearableRelevant: wearableRelevant,
                 contactPriority: contactPriority,
+                statusMetricsVisible: statusMetricsVisible,
               ),
               isIaSuggestion: true,
             ),
@@ -472,13 +475,17 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
           preferContactPriority && !forceIa && !acaoSugereChat(seedAcao);
       child = _fromContent(
         useContactPriority
-            ? contactPriorityPrescriptionContent(aluno)
+            ? contactPriorityPrescriptionContent(
+              aluno,
+              statusMetricsVisible: statusMetricsVisible,
+            )
             : resolveCopilotPrescriptionFromAction(
               aluno,
               seed360!,
               fallback,
               wearableRelevant: wearableRelevant,
               contactPriority: contactPriority,
+              statusMetricsVisible: statusMetricsVisible,
             ),
       );
     } else if (resumoLoading) {

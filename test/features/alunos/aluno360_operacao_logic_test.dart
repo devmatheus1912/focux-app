@@ -764,6 +764,28 @@ void main() {
     });
   });
 
+  group('shouldDefaultOperacaoFocusMode', () {
+    test('enabled for contact priority with zero adherence', () {
+      expect(
+        shouldDefaultOperacaoFocusMode(
+          aluno: _aluno(aderenciaPercent: 0),
+          contactPriority: true,
+        ),
+        isTrue,
+      );
+    });
+
+    test('disabled without contact priority', () {
+      expect(
+        shouldDefaultOperacaoFocusMode(
+          aluno: _aluno(aderenciaPercent: 0, emRisco: true),
+          contactPriority: false,
+        ),
+        isFalse,
+      );
+    });
+  });
+
   group('resolveAluno360OperacaoSnapshot', () {
     test('hides task row when contact is priority without open task', () {
       final snapshot = resolveAluno360OperacaoSnapshot(

@@ -217,6 +217,21 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
             compactContactPriority: compactHero,
           );
           final displayName = fxTitleCaseName(aluno.nome);
+          final contactPriority =
+              operacao?.contactPriority ??
+              isOperacaoContatoPrioritario(aluno: aluno);
+
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            ref
+                .read(alunoOperacaoFocusModeProvider(alunoId).notifier)
+                .syncAutoDefault(
+                  autoDefault: shouldDefaultOperacaoFocusMode(
+                    aluno: aluno,
+                    contactPriority: contactPriority,
+                  ),
+                );
+          });
 
           return RefreshIndicator(
             onRefresh: () => invalidateAluno360Providers(ref, alunoId),
