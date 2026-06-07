@@ -532,7 +532,7 @@ class _AlunoDetailLoadingSkeleton extends StatelessWidget {
       slivers: [
         SliverPersistentHeader(
           pinned: true,
-          delegate: _Aluno360CompositeHeaderDelegate(
+          delegate: Aluno360CompositeHeaderDelegate(
             topInset: topInset,
             heroBodyHeight: heroBodyHeight,
             heroChild: _AlunoDetailHeroSkeleton(

@@ -7,15 +7,27 @@ String _alunoDetailLibrarySource() {
   const mainFile = '$dir/aluno_detail_screen.dart';
   const providersFile = 'lib/features/alunos/providers/aluno_detail_providers.dart';
   const heroWidgetFile = 'lib/features/alunos/widgets/aluno_detail_hero_card.dart';
+  const headerWidgetFile =
+      'lib/features/alunos/widgets/aluno360_composite_header.dart';
+  const operacaoLogicFile =
+      'lib/features/alunos/utils/aluno360_operacao_logic.dart';
+  const copilotLogicFile =
+      'lib/features/alunos/utils/aluno360_copilot_logic.dart';
+  const outreachSheetFile =
+      'lib/features/alunos/widgets/aluno_outreach_message_sheet.dart';
   final main = File(mainFile).readAsStringSync();
   final providers = File(providersFile).readAsStringSync();
   final heroWidget = File(heroWidgetFile).readAsStringSync();
+  final headerWidget = File(headerWidgetFile).readAsStringSync();
+  final operacaoLogic = File(operacaoLogicFile).readAsStringSync();
+  final copilotLogic = File(copilotLogicFile).readAsStringSync();
+  final outreachSheet = File(outreachSheetFile).readAsStringSync();
   final partPattern = RegExp(r"part '([^']+\.part\.dart)';");
   final parts = partPattern
       .allMatches(main)
       .map((m) => File('$dir/${m.group(1)!}').readAsStringSync())
       .join('\n');
-  return '$main\n$providers\n$heroWidget\n$parts';
+  return '$main\n$providers\n$heroWidget\n$headerWidget\n$operacaoLogic\n$copilotLogic\n$outreachSheet\n$parts';
 }
 
 void main() {
@@ -50,9 +62,8 @@ void main() {
       contains('copilotMensagemPronta'),
     );
     expect(screen, contains('Clipboard.setData'));
-    expect(screen, contains('copilotMensagemPronta'));
     expect(screen, contains("'Criar tarefa'"));
-    expect(screen, contains("'Copiar'"));
+    expect(screen, contains("'Copiar mensagem'"));
     expect(screen, contains("'Mensagem sugerida'"));
     expect(screen, contains("'Abrir chat'"));
     expect(screen, contains('Sugestão com base no perfil de hoje.'));
@@ -94,7 +105,7 @@ void main() {
     expect(screen, contains('FxSparkline'));
     expect(screen, contains('formatAlturaDisplay'));
     expect(screen, contains('friendlyError'));
-    expect(screen, contains('_AlunoDetailTabBarDelegate'));
+    expect(screen, contains('class Aluno360CompositeHeaderDelegate'));
     expect(screen, contains("Tab(text: 'Operação')"));
     expect(screen, contains("Tab(text: 'Evolução')"));
     expect(screen, contains("Tab(text: 'Ferramentas')"));
@@ -107,7 +118,7 @@ void main() {
     expect(
       File('lib/features/alunos/widgets/aluno360_copilot_prescription.dart')
           .readAsStringSync(),
-      contains('_collapsedLines = 3'),
+      contains('_collapsedLines = 2'),
     );
     expect(screen, contains('Aluno360CopilotPrescriptionBody'));
     expect(screen, contains('operacaoStatusSubtitle'));
@@ -116,7 +127,7 @@ void main() {
     expect(
       File('lib/features/alunos/widgets/aluno360_copilot_prescription.dart')
           .readAsStringSync(),
-      contains('Ver mais'),
+      contains('Ver contexto'),
     );
     expect(screen, contains('alunoCopilotoForceIaProvider'));
     expect(screen, contains('proximaAcao360'));
@@ -132,7 +143,7 @@ void main() {
     expect(screen, isNot(contains('operational_metrics.part.dart')));
     expect(screen, contains('class AlunoDetailHeroCard'));
     expect(screen, contains('aluno360_hero_card'));
-    expect(screen, contains('class _HeroObjectiveRow'));
+    expect(screen, contains('class _IdentityObjectiveRow'));
     expect(screen, contains('alunoObjectiveIsDefined'));
     expect(screen, contains('onDefineObjective'));
     expect(screen, contains('Aluno360Layout'));

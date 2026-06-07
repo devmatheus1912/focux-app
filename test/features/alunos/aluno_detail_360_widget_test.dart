@@ -10,8 +10,104 @@ import 'package:focux_app/features/alunos/providers/alunos_provider.dart';
 import 'package:focux_app/features/alunos/screens/aluno_detail_screen.dart';
 import 'package:focux_app/features/dashboard/data/command_center_data.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const _alunoId = 42;
+const _contactPriorityAlunoId = 7;
+
+final _emptyEvolucaoFixture = EvolucaoInteligente(
+  sinal: 'SEM_DADOS',
+  resumo: '',
+  volumeSemanal: 0,
+  volumeMensal: 0,
+  proximaAcao: '',
+  sugerirCopiloto: false,
+);
+
+final _beatrizFixture = Aluno(
+  id: _contactPriorityAlunoId,
+  nome: 'Beatriz',
+  email: 'beatriz@test.com',
+  status: 'ATIVO',
+  emRisco: true,
+  riscoNivel: 'ALTO',
+  aderenciaPercent: 0,
+  diasSemTreino: 14,
+  objetivo: 'Hipertrofia',
+);
+
+final _beatriz360Fixture = Aluno360(
+  aluno: _beatrizFixture,
+  autonomiaResumo: AlunoAutonomiaResumo(
+    alunoId: _contactPriorityAlunoId,
+    totalEventos: 0,
+    vistos: 0,
+    cliques: 0,
+    concluidos: 0,
+  ),
+  timelinePreview: const [],
+  proximaAcao: ProximaAcaoResumo(
+    acao: 'Retomar contato com Beatriz',
+    motivo: 'Sem check-ins recentes',
+    fonte: 'PADRAO',
+    prioridade: 'P1',
+  ),
+  evolucaoInteligente: _emptyEvolucaoFixture,
+  aderenciaSemanal: List.generate(
+    7,
+    (_) => {'data': '2026-06-01', 'checkins': 0},
+  ),
+);
+
+List<Override> _beatrizOverrides() {
+  return [
+    aluno360Provider(_contactPriorityAlunoId)
+        .overrideWith((ref) async => _beatriz360Fixture),
+    alunoProvider(_contactPriorityAlunoId)
+        .overrideWith((ref) async => _beatrizFixture),
+    alunoRecoveryProvider(_contactPriorityAlunoId).overrideWith((ref) async => null),
+    alunoOpenIaActionsProvider(_contactPriorityAlunoId)
+        .overrideWith((ref) async => const []),
+    alunoMedidasResumoProvider(_contactPriorityAlunoId).overrideWith((ref) async => null),
+    alunoPesoHistoricoProvider(_contactPriorityAlunoId)
+        .overrideWith((ref) async => const []),
+    alunoCopilotoActionProvider(_contactPriorityAlunoId)
+        .overrideWith((ref) async => const {}),
+    alertasConfigProvider.overrideWith(
+      (ref) async => AlertasConfiguracao(
+        diasSemTreino: 7,
+        aderenciaMinima: 70,
+      ),
+    ),
+  ];
+}
+
+Widget _wrapBeatrizDetail() {
+  final router = GoRouter(
+    initialLocation: '/alunos/$_contactPriorityAlunoId',
+    routes: [
+      GoRoute(
+        path: '/alunos',
+        builder: (_, __) => const SizedBox(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder:
+                (_, state) => AlunoDetailScreen(
+                  alunoId: int.parse(state.pathParameters['id']!),
+                ),
+          ),
+        ],
+      ),
+    ],
+  );
+
+  return ProviderScope(
+    overrides: _beatrizOverrides(),
+    child: MaterialApp.router(routerConfig: router),
+  );
+}
+
 
 final _alunoFixture = Aluno(
   id: _alunoId,
@@ -26,15 +122,6 @@ final _alunoFixture = Aluno(
   dataNascimento: '1995-03-15',
   altura: 1.68,
   objetivo: 'Hipertrofia',
-);
-
-final _emptyEvolucaoFixture = EvolucaoInteligente(
-  sinal: 'SEM_DADOS',
-  resumo: '',
-  volumeSemanal: 0,
-  volumeMensal: 0,
-  proximaAcao: '',
-  sugerirCopiloto: false,
 );
 
 final _aluno360Fixture = Aluno360(
@@ -133,6 +220,8 @@ Future<void> _pumpAlunoDetail(WidgetTester tester, {double textScale = 1.0}) asy
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   for (final scale in [1.0, 1.3, 2.0]) {
     testWidgets('Operação tab status + sticky CTA at textScaler $scale', (
       tester,
@@ -149,6 +238,28 @@ void main() {
       }
     });
   }
+
+  testWidgets('contact priority auto-enables focus mode and hides status grid', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    tester.view.physicalSize = const Size(390, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(_wrapBeatrizDetail());
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Prioridade do dia'), findsOneWidget);
+    expect(find.byKey(const ValueKey('aluno360_operacao_status')), findsNothing);
+    expect(find.text('Status operacional'), findsNothing);
+    expect(find.byIcon(Icons.center_focus_strong), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 300));
+  });
 
   testWidgets('Evolução tab empty state shows actionable CTAs', (tester) async {
     await _pumpAlunoDetail(tester);

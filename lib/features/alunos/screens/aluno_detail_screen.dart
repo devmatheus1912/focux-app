@@ -40,6 +40,7 @@ import '../constants/aluno_360_layout.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../utils/aluno360_copilot_logic.dart';
 import '../utils/aluno_display_utils.dart';
+import '../widgets/aluno360_composite_header.dart';
 import '../widgets/aluno_detail_hero_card.dart';
 import '../widgets/aluno_operacao_adherence_bars.dart';
 import '../widgets/aluno360_copilot_prescription.dart';
@@ -240,7 +241,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
             slivers: [
               SliverPersistentHeader(
                 pinned: true,
-                delegate: _Aluno360CompositeHeaderDelegate(
+                delegate: Aluno360CompositeHeaderDelegate(
                   topInset: topInset,
                   heroBodyHeight: heroBodyHeight,
                   heroChild: AlunoDetailHeroCard(
