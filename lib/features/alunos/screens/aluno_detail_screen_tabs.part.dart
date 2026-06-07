@@ -213,15 +213,17 @@ class _AlunoDetailOperacaoTab extends ConsumerWidget {
                     children: [
                       section(2, diagnosticBody()),
                       const SizedBox(height: Aluno360Layout.sectionGap),
-                      section(
-                        4,
-                        _AlunoRecoveryInsightCard(
-                          recoveryAsync: recoveryAsync,
-                          isDark: isDark,
-                          primary: primary,
+                      if (alunoTemHistoricoWearable(recoveryAsync.valueOrNull))
+                        section(
+                          4,
+                          _AlunoRecoveryInsightCard(
+                            recoveryAsync: recoveryAsync,
+                            isDark: isDark,
+                            primary: primary,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: Aluno360Layout.sectionGap),
+                      if (alunoTemHistoricoWearable(recoveryAsync.valueOrNull))
+                        const SizedBox(height: Aluno360Layout.sectionGap),
                       section(
                         5,
                         _StudentQuickActions(

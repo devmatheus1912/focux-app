@@ -133,7 +133,7 @@ class _AlunoOutreachMessageSheet extends StatelessWidget {
                       Text(
                         title,
                         style: AppTypography.inter(
-                          fontSize: 20,
+                          fontSize: 17,
                           fontWeight: FontWeight.w800,
                           color: ink,
                           height: 1.15,

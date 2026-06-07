@@ -509,6 +509,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
               resumoLoading: resumoAsync.isLoading && !resumoAsync.hasValue,
               preferContactPriority: operacao.contactPriority,
               wearableRelevant: wearableRelevant,
+              contactPriority: operacao.contactPriority,
               onPrepareMessage:
                   showPrepareInPrescription
                       ? () => _prepararMensagem(

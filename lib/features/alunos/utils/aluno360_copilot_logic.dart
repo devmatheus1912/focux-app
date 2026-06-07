@@ -346,7 +346,7 @@ String copilotDisplayAction(Aluno aluno, String acao) {
   }
   if (acaoSugereChat(normalized)) {
     if (normalized.length <= 140) return normalized;
-    return '${copilotChatActionLabel(normalized)} com mensagem objetiva.';
+    return '${copilotChatActionLabel(normalized)} com o aluno.';
   }
   if (normalized.length <= 140 && normalized.isNotEmpty) return normalized;
   return 'Retomar contato e ajustar plano com base na resposta.';
@@ -389,12 +389,23 @@ String copilotPrescriptionDisplayAction(
   }
   if (acaoSugereChat(full)) {
     if (full.length <= 88) return full;
-    if (lower.contains('reaviv') ||
+    if (lower.contains('inativid') ||
+        lower.contains('reengaj') ||
+        lower.contains('ausên') ||
+        lower.contains('ausen') ||
+        lower.contains('reaviv') ||
         lower.contains('aderência') ||
         lower.contains('aderencia')) {
-      return 'Retomar contato · mensagem curta para reengajar.';
+      return 'Retomar contato e checar como está o treino.';
     }
-    return '${copilotChatActionLabel(full)} · mensagem objetiva e direta.';
+    if (lower.contains('check-in') || lower.contains('check in')) {
+      return 'Pedir check-in e entender como foi a semana.';
+    }
+    final label = copilotChatActionLabel(full);
+    if (label != 'Abrir chat' && label != 'Retomar contato') {
+      return '$label com o aluno.';
+    }
+    return 'Retomar contato e checar como está o treino.';
   }
 
   final templated = copilotDisplayAction(aluno, sanitized);
@@ -617,6 +628,7 @@ CopilotPrescriptionContent resolveCopilotPrescriptionFromAction(
   Map<String, dynamic> action,
   String fallback, {
   bool wearableRelevant = true,
+  bool contactPriority = false,
 }) {
   final rawAcao =
       (action['acao'] ?? action['mensagem'] ?? action['descricao'] ?? fallback)
@@ -636,8 +648,10 @@ CopilotPrescriptionContent resolveCopilotPrescriptionFromAction(
   );
   return CopilotPrescriptionContent(
     title:
-        (action['titulo'] ?? action['tipo'] ?? 'Próxima melhor ação')
-            .toString(),
+        contactPriority
+            ? 'Prioridade do dia'
+            : (action['titulo'] ?? action['tipo'] ?? 'Próxima melhor ação')
+                .toString(),
     action: displayAction,
     fullAction: fullAction == displayAction ? null : fullAction,
     reason: isIa ? formatCopilotIaMotivo(motivoRaw) : motivoRaw,

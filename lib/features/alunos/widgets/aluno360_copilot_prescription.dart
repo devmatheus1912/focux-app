@@ -267,6 +267,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
     this.onPrepareMessage,
     this.preferContactPriority = false,
     this.wearableRelevant = true,
+    this.contactPriority = false,
   });
 
   final Aluno aluno;
@@ -279,6 +280,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
   final VoidCallback? onPrepareMessage;
   final bool preferContactPriority;
   final bool wearableRelevant;
+  final bool contactPriority;
 
   @override
   Widget build(BuildContext context) {
@@ -303,6 +305,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
                 copilotActionFromIa(action),
                 fallback,
                 wearableRelevant: wearableRelevant,
+                contactPriority: contactPriority,
               ),
               isIaSuggestion: true,
             ),
@@ -319,6 +322,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
               seed360!,
               fallback,
               wearableRelevant: wearableRelevant,
+              contactPriority: contactPriority,
             ),
       );
     } else if (resumoLoading) {
