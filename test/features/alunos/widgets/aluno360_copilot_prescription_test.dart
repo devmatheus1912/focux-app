@@ -36,4 +36,28 @@ void main() {
     expect(find.text(longAction), findsOneWidget);
     expect(find.text('Ver ação completa'), findsNothing);
   });
+
+  testWidgets('reason footer stacks segments on narrow width', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 300,
+            child: Aluno360CopilotPrescription(
+              title: 'Prioridade do dia',
+              action: 'Retomar contato.',
+              reason: 'Priorize contato · sem registro recente · aderência 0%',
+              color: Colors.teal,
+              showTitle: false,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Priorize contato'), findsOneWidget);
+    expect(find.text('sem registro recente'), findsOneWidget);
+    expect(find.text('aderência 0%'), findsOneWidget);
+  });
 }

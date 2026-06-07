@@ -249,6 +249,15 @@ String sanitizeCopilotIaLanguage(String text) {
   return result;
 }
 
+/// Splits copilot prescription footer into scannable segments.
+List<String> copilotPrescriptionReasonSegments(String reason) {
+  return reason
+      .split(' · ')
+      .map((segment) => segment.trim())
+      .where((segment) => segment.isNotEmpty)
+      .toList(growable: false);
+}
+
 /// Strips LLM preambles so UI shows the actionable sentence, not boilerplate.
 String normalizeIaCopilotAcao(String raw) {
   var text = sanitizeCopilotIaLanguage(cleanCopilotText(raw));

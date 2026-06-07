@@ -83,6 +83,134 @@ class _Aluno360CopilotPrescriptionState
     setState(() => _expandedAction = !_expandedAction);
   }
 
+  TextStyle _expandLinkStyle({required bool active}) {
+    return TextStyle(
+      color: widget.color.withValues(alpha: active ? 0.92 : 0.68),
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
+      decoration: active ? TextDecoration.underline : TextDecoration.none,
+      decorationColor: widget.color.withValues(alpha: 0.45),
+    );
+  }
+
+  Widget _buildExpandLink({
+    required String label,
+    required String semanticsLabel,
+    required VoidCallback onTap,
+    required bool active,
+    EdgeInsets padding = const EdgeInsets.only(top: 4),
+  }) {
+    return Semantics(
+      button: true,
+      label: semanticsLabel,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(6),
+          child: Padding(
+            padding: padding,
+            child: Text(label, style: _expandLinkStyle(active: active)),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReasonFooter({
+    required String reason,
+    required Color caption,
+    required double maxWidth,
+    required bool showExpandReason,
+  }) {
+    final segments = copilotPrescriptionReasonSegments(reason);
+    final stackSegments = maxWidth < 340 && segments.length > 1;
+
+    Widget reasonBody;
+    if (stackSegments && !_expandedReason) {
+      reasonBody = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (var i = 0; i < segments.length; i++)
+            Padding(
+              padding: EdgeInsets.only(top: i == 0 ? 0 : 3),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '•',
+                    style: TextStyle(
+                      color: caption.withValues(alpha: 0.72),
+                      fontSize: 12,
+                      height: 1.32,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      segments[i],
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: caption,
+                        fontSize: 12,
+                        height: 1.32,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      );
+    } else {
+      reasonBody = Text(
+        reason,
+        maxLines: _expandedReason ? null : _collapsedLines,
+        overflow: _expandedReason ? null : TextOverflow.ellipsis,
+        style: TextStyle(
+          color: caption,
+          fontSize: 12,
+          height: 1.32,
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: showExpandReason ? _toggleExpandedReason : null,
+          behavior: HitTestBehavior.opaque,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.insights_outlined, size: 14, color: caption),
+              const SizedBox(width: 6),
+              Expanded(child: reasonBody),
+            ],
+          ),
+        ),
+        if (showExpandReason && !_expandedReason)
+          _buildExpandLink(
+            label: 'Ver contexto',
+            semanticsLabel: 'Ver contexto completo da sugestão',
+            onTap: _toggleExpandedReason,
+            active: false,
+            padding: const EdgeInsets.only(top: 4, left: 20),
+          ),
+        if (showExpandReason && _expandedReason)
+          _buildExpandLink(
+            label: 'Ocultar',
+            semanticsLabel: 'Ocultar contexto da sugestão',
+            onTap: _toggleExpandedReason,
+            active: true,
+            padding: const EdgeInsets.only(top: 4, left: 20),
+          ),
+      ],
+    );
+  }
+
   @override
   void didUpdateWidget(covariant Aluno360CopilotPrescription oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -162,51 +290,21 @@ class _Aluno360CopilotPrescriptionState
                 ),
               ),
               if (showExpandAction && !_expandedAction)
-                Semantics(
-                  button: true,
-                  label: 'Ver ação completa da sugestão',
-                  child: GestureDetector(
-                    onTap: _toggleExpandedAction,
-                    behavior: HitTestBehavior.opaque,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        'Ver ação completa',
-                        style: TextStyle(
-                          color: widget.color,
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w800,
-                          decoration: TextDecoration.underline,
-                          decorationColor: widget.color.withValues(alpha: 0.45),
-                        ),
-                      ),
-                    ),
-                  ),
+                _buildExpandLink(
+                  label: 'Ver ação completa',
+                  semanticsLabel: 'Ver ação completa da sugestão',
+                  onTap: _toggleExpandedAction,
+                  active: false,
                 ),
               if (showExpandAction && _expandedAction)
-                Semantics(
-                  button: true,
-                  label: 'Ocultar ação completa da sugestão',
-                  child: GestureDetector(
-                    onTap: _toggleExpandedAction,
-                    behavior: HitTestBehavior.opaque,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        'Ocultar',
-                        style: TextStyle(
-                          color: widget.color,
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
-                          decoration: TextDecoration.underline,
-                          decorationColor: widget.color.withValues(alpha: 0.45),
-                        ),
-                      ),
-                    ),
-                  ),
+                _buildExpandLink(
+                  label: 'Ocultar',
+                  semanticsLabel: 'Ocultar ação completa da sugestão',
+                  onTap: _toggleExpandedAction,
+                  active: true,
                 ),
               if (widget.onPrepareMessage != null) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: showExpandAction ? 16 : 12),
             Semantics(
               button: true,
               label: 'Preparar mensagem para o aluno',
@@ -242,73 +340,12 @@ class _Aluno360CopilotPrescriptionState
           ],
           if (reason.isNotEmpty) ...[
             const SizedBox(height: 8),
-            GestureDetector(
-              onTap: showExpandReason ? _toggleExpandedReason : null,
-              behavior: HitTestBehavior.opaque,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.insights_outlined, size: 14, color: caption),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      reason,
-                      maxLines: _expandedReason ? null : _collapsedLines,
-                      overflow: _expandedReason ? null : TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: caption,
-                        fontSize: 12,
-                        height: 1.32,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            _buildReasonFooter(
+              reason: reason,
+              caption: caption,
+              maxWidth: constraints.maxWidth,
+              showExpandReason: showExpandReason,
             ),
-            if (showExpandReason && !_expandedReason)
-              Semantics(
-                button: true,
-                label: 'Ver contexto completo da sugestão',
-                child: GestureDetector(
-                  onTap: _toggleExpandedReason,
-                  behavior: HitTestBehavior.opaque,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 4, left: 20),
-                    child: Text(
-                      'Ver contexto',
-                      style: TextStyle(
-                        color: widget.color,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        decoration: TextDecoration.underline,
-                        decorationColor: widget.color.withValues(alpha: 0.45),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            if (showExpandReason && _expandedReason)
-              Semantics(
-                button: true,
-                label: 'Ocultar contexto da sugestão',
-                child: GestureDetector(
-                  onTap: _toggleExpandedReason,
-                  behavior: HitTestBehavior.opaque,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 4, left: 20),
-                    child: Text(
-                      'Ocultar',
-                      style: TextStyle(
-                        color: widget.color,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        decoration: TextDecoration.underline,
-                        decorationColor: widget.color.withValues(alpha: 0.45),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
           ],
             ],
           ),

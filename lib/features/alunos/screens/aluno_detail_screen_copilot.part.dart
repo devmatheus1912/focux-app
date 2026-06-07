@@ -657,6 +657,45 @@ class _CopilotIaRefreshButtonState extends ConsumerState<_CopilotIaRefreshButton
 
   @override
   Widget build(BuildContext context) {
+    final wideHeader = MediaQuery.sizeOf(context).width >= 400;
+    final iconSize = wideHeader ? 20.0 : 18.0;
+
+    if (wideHeader) {
+      return Semantics(
+        button: true,
+        label:
+            _refreshing
+                ? 'Atualizando sugestão com IA'
+                : 'Atualizar sugestão com IA',
+        child: TextButton.icon(
+          onPressed: _refreshing ? null : _refreshIa,
+          style: TextButton.styleFrom(
+            visualDensity: VisualDensity.compact,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            foregroundColor: widget.primary,
+          ),
+          icon:
+              _refreshing
+                  ? SizedBox(
+                    width: iconSize,
+                    height: iconSize,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: widget.primary,
+                    ),
+                  )
+                  : Icon(Icons.refresh_rounded, size: iconSize),
+          label: Text(
+            _refreshing ? 'Atualizando…' : 'Atualizar',
+            style: const TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+      );
+    }
+
     return Semantics(
       button: true,
       label:
@@ -668,14 +707,14 @@ class _CopilotIaRefreshButtonState extends ConsumerState<_CopilotIaRefreshButton
       icon:
           _refreshing
               ? SizedBox(
-                width: 18,
-                height: 18,
+                width: iconSize,
+                height: iconSize,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   color: widget.primary,
                 ),
               )
-              : const Icon(Icons.refresh_rounded, size: 18),
+              : Icon(Icons.refresh_rounded, size: iconSize),
       tooltip: _refreshing ? 'Atualizando…' : 'Regenerar sugestão com IA',
     ),
     );

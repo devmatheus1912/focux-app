@@ -313,6 +313,21 @@ void main() {
     });
   });
 
+  group('copilotPrescriptionReasonSegments', () {
+    test('splits footer motivo on middle dots', () {
+      expect(
+        copilotPrescriptionReasonSegments(
+          'Priorize contato · sem registro recente · aderência 0%',
+        ),
+        [
+          'Priorize contato',
+          'sem registro recente',
+          'aderência 0%',
+        ],
+      );
+    });
+  });
+
   group('normalizeIaCopilotAcao', () {
     test('strips LLM preamble and capitalizes action', () {
       expect(
@@ -322,9 +337,7 @@ void main() {
         'Enviar uma mensagem de contato.',
       );
     });
-  });
 
-  group('normalizeIaCopilotAcao', () {
     test('fixes english leak in expanded IA action', () {
       final text = normalizeIaCopilotAcao(
         'Contate Beatriz para understanding os motivos da interrupção nos treinos '
