@@ -75,6 +75,14 @@ class _Aluno360CopilotPrescriptionState
     });
   }
 
+  void _toggleExpandedReason() {
+    setState(() => _expandedReason = !_expandedReason);
+  }
+
+  void _toggleExpandedAction() {
+    setState(() => _expandedAction = !_expandedAction);
+  }
+
   @override
   void didUpdateWidget(covariant Aluno360CopilotPrescription oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -144,10 +152,7 @@ class _Aluno360CopilotPrescriptionState
                 const SizedBox(height: 8),
               ],
               GestureDetector(
-                onTap:
-                    showExpandAction
-                        ? () => setState(() => _expandedAction = !_expandedAction)
-                        : null,
+                onTap: showExpandAction ? _toggleExpandedAction : null,
                 behavior: HitTestBehavior.opaque,
                 child: Text(
                   _expandedAction ? expandedActionText : widget.action,
@@ -160,16 +165,42 @@ class _Aluno360CopilotPrescriptionState
                 Semantics(
                   button: true,
                   label: 'Ver ação completa da sugestão',
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      'Ver ação completa',
-                      style: TextStyle(
-                        color: widget.color,
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w800,
-                        decoration: TextDecoration.underline,
-                        decorationColor: widget.color.withValues(alpha: 0.45),
+                  child: GestureDetector(
+                    onTap: _toggleExpandedAction,
+                    behavior: HitTestBehavior.opaque,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        'Ver ação completa',
+                        style: TextStyle(
+                          color: widget.color,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w800,
+                          decoration: TextDecoration.underline,
+                          decorationColor: widget.color.withValues(alpha: 0.45),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              if (showExpandAction && _expandedAction)
+                Semantics(
+                  button: true,
+                  label: 'Ocultar ação completa da sugestão',
+                  child: GestureDetector(
+                    onTap: _toggleExpandedAction,
+                    behavior: HitTestBehavior.opaque,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        'Ocultar',
+                        style: TextStyle(
+                          color: widget.color,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                          decoration: TextDecoration.underline,
+                          decorationColor: widget.color.withValues(alpha: 0.45),
+                        ),
                       ),
                     ),
                   ),
@@ -212,10 +243,7 @@ class _Aluno360CopilotPrescriptionState
           if (reason.isNotEmpty) ...[
             const SizedBox(height: 8),
             GestureDetector(
-              onTap:
-                  showExpandReason
-                      ? () => setState(() => _expandedReason = !_expandedReason)
-                      : null,
+              onTap: showExpandReason ? _toggleExpandedReason : null,
               behavior: HitTestBehavior.opaque,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -238,14 +266,46 @@ class _Aluno360CopilotPrescriptionState
               ),
             ),
             if (showExpandReason && !_expandedReason)
-              Padding(
-                padding: const EdgeInsets.only(top: 4, left: 20),
-                child: Text(
-                  'Ver contexto',
-                  style: TextStyle(
-                    color: widget.color,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
+              Semantics(
+                button: true,
+                label: 'Ver contexto completo da sugestão',
+                child: GestureDetector(
+                  onTap: _toggleExpandedReason,
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 4, left: 20),
+                    child: Text(
+                      'Ver contexto',
+                      style: TextStyle(
+                        color: widget.color,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        decoration: TextDecoration.underline,
+                        decorationColor: widget.color.withValues(alpha: 0.45),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            if (showExpandReason && _expandedReason)
+              Semantics(
+                button: true,
+                label: 'Ocultar contexto da sugestão',
+                child: GestureDetector(
+                  onTap: _toggleExpandedReason,
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 4, left: 20),
+                    child: Text(
+                      'Ocultar',
+                      style: TextStyle(
+                        color: widget.color,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        decoration: TextDecoration.underline,
+                        decorationColor: widget.color.withValues(alpha: 0.45),
+                      ),
+                    ),
                   ),
                 ),
               ),
