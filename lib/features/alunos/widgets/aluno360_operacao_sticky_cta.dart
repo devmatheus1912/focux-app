@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -95,6 +96,7 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
     }
 
     void onPrimary() {
+      HapticFeedback.lightImpact();
       switch (sticky.destination) {
         case OperacaoStickyDestination.chat:
           openChat(acao: effectiveProxima?.acao);
@@ -212,12 +214,9 @@ class Aluno360OperacaoStickySecondaryButton extends StatelessWidget {
       label: semanticsLabel,
       child: OutlinedButton(
         onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          foregroundColor: primary,
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          side: BorderSide(color: primary.withValues(alpha: 0.28)),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+        style: Aluno360Layout.operacaoOutlinedButtonStyle(context, primary).copyWith(
+          padding: WidgetStateProperty.all(
+            const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           ),
         ),
         child: Row(

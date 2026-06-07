@@ -112,13 +112,13 @@ class Aluno360CopilotCard extends ConsumerWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
-    final line = ShellChrome.of(context).line;
     final forceIa = ref.watch(alunoCopilotoForceIaProvider(aluno.id));
     final iaAsync =
         forceIa ? ref.watch(alunoCopilotoActionProvider(aluno.id)) : null;
     final openActionsAsync = ref.watch(alunoOpenIaActionsProvider(aluno.id));
     final openTask = findOpenCopilotTask(openActionsAsync.valueOrNull ?? const []);
     final hasOpenTask = openTask != null || hasOpenCopilotTask360;
+    final bundle = ref.watch(aluno360Provider(aluno.id)).valueOrNull;
     final operacao =
         ref.watch(aluno360OperacaoProvider(aluno.id)) ??
         resolveAluno360OperacaoSnapshot(
@@ -128,9 +128,9 @@ class Aluno360CopilotCard extends ConsumerWidget {
           iaAsync: iaAsync,
           hasOpenTask: hasOpenTask,
           followUpDue: isAlunoFollowUpDue(aluno),
-          wearableRelevant: alunoTemHistoricoWearable(
-            ref.watch(alunoRecoveryProvider(aluno.id)).valueOrNull,
-          ),
+          wearableRelevant:
+              bundle?.hasWearableHistory ??
+              alunoTemHistoricoWearable(bundle?.recoverySnapshot),
         );
     final iaRefreshing = ref.watch(alunoCopilotIaRefreshingProvider(aluno.id));
     final iaLoading =
@@ -174,12 +174,14 @@ class Aluno360CopilotCard extends ConsumerWidget {
     final cardPadding = hasOpenTask ? 10.0 : 14.0;
     final wearableRelevant =
         effectiveProxima?.wearableRelevant ??
-        alunoTemHistoricoWearable(
-          ref.watch(alunoRecoveryProvider(aluno.id)).valueOrNull,
-        );
+        bundle?.hasWearableHistory ??
+        alunoTemHistoricoWearable(bundle?.recoverySnapshot);
     final compactSubtitle = MediaQuery.sizeOf(context).width < 400;
 
-    return Container(
+    return Semantics(
+      container: true,
+      label: 'Prioridade do dia, copiloto operacional',
+      child: Container(
       padding: EdgeInsets.all(cardPadding),
       decoration: Aluno360Layout.operacaoInsetSectionDecoration(
         context,
@@ -210,11 +212,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
                       copilotCardTitle(
                         contactPriority: operacao.contactPriority,
                       ),
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w900,
-                      ),
+                      style: Aluno360Layout.sectionTitleStyle(context, ink),
                     ),
                     const SizedBox(height: 3),
                     Row(
@@ -228,9 +226,8 @@ class Aluno360CopilotCard extends ConsumerWidget {
                                   resumoAsync.isLoading && !resumoAsync.hasValue,
                               compact: compactSubtitle,
                             ),
-                            style: TextStyle(
+                            style: Aluno360Layout.captionStyle(context).copyWith(
                               color: mute,
-                              fontSize: 12.5,
                               height: 1.3,
                             ),
                           ),
@@ -278,7 +275,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
               crossAxisCount: 2,
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
-              childAspectRatio: 1.15,
+              childAspectRatio: 1.38,
               children:
                   signals
                       .map((signal) => Aluno360CopilotSignalTile(signal: signal))
@@ -293,21 +290,13 @@ class Aluno360CopilotCard extends ConsumerWidget {
           )) ...[
             SizedBox(
               width: double.infinity,
-              height: 40,
               child: OutlinedButton.icon(
                 onPressed: () => _completeProfile(context, aluno),
                 icon: const Icon(Icons.person_add_alt_1_rounded, size: 16),
                 label: Text(
                   copilotProfileGapsButtonLabel(aluno),
                 ),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: primary,
-                  side: Aluno360Layout.operacaoOutlineSide(primary, isDark: isDark),
-                  minimumSize: const Size(0, 48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(13),
-                  ),
-                ),
+                style: Aluno360Layout.operacaoOutlinedButtonStyle(context, primary),
               ),
             ),
             const SizedBox(height: 10),
@@ -390,6 +379,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }
@@ -401,7 +391,9 @@ class Aluno360ContactPriorityBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Semantics(
+      label: 'Prioridade de contato',
+      child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: EagleTokens.bad.withValues(alpha: 0.10),
@@ -410,13 +402,13 @@ class Aluno360ContactPriorityBadge extends StatelessWidget {
       ),
       child: Text(
         'Contato',
-        style: TextStyle(
+        style: Aluno360Layout.metaStyle(context).copyWith(
           color: EagleTokens.bad,
-          fontSize: 10.5,
           fontWeight: FontWeight.w900,
           letterSpacing: 0.2,
         ),
       ),
+    ),
     );
   }
 }

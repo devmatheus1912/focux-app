@@ -53,9 +53,11 @@ final _beatriz360Fixture = Aluno360(
     prioridade: 'P1',
   ),
   evolucaoInteligente: _emptyEvolucaoFixture,
-  aderenciaSemanal: List.generate(
-    7,
-    (_) => {'data': '2026-06-01', 'checkins': 0},
+  aderenciaSemanal: AderenciaSemanalBundle.fromLegacyList(
+    List.generate(
+      7,
+      (_) => {'data': '2026-06-01', 'checkins': 0},
+    ),
   ),
 );
 
@@ -141,7 +143,7 @@ final _aluno360Fixture = Aluno360(
     prioridade: 'P2',
   ),
   evolucaoInteligente: _emptyEvolucaoFixture,
-  aderenciaSemanal: const [
+  aderenciaSemanal: AderenciaSemanalBundle.fromLegacyList(const [
     {'data': '2026-05-29', 'checkins': 1},
     {'data': '2026-05-30', 'checkins': 0},
     {'data': '2026-05-31', 'checkins': 2},
@@ -149,7 +151,7 @@ final _aluno360Fixture = Aluno360(
     {'data': '2026-06-02', 'checkins': 0},
     {'data': '2026-06-03', 'checkins': 1},
     {'data': '2026-06-04', 'checkins': 0},
-  ],
+  ]),
 );
 
 List<Override> _aluno360Overrides() {

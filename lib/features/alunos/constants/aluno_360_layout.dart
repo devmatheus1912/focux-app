@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
+
 /// Layout tokens for Aluno 360 (hero, sticky CTA, scroll insets).
 abstract final class Aluno360Layout {
   Aluno360Layout._();
@@ -10,9 +11,10 @@ abstract final class Aluno360Layout {
   static const double sectionGap = 12;
   static const double cardPadding = 14;
   static const double tabBarHeight = 44;
-  static const double tabContentGap = 0;
-  static const double stickyBarContentHeight = 56;
-  static const double snackbarStickyReserve = 72;
+  static const double tabContentGap = 12;
+  static const double stickyBarContentHeight = 60;
+  static const double snackbarStickyReserve = 76;
+  static const double operacaoMaxContentWidth = 720;
 
   /// Identity strip height (compact strip + padding at textScale ≤ 1.25).
   static double heroBodyHeight(
@@ -62,6 +64,17 @@ abstract final class Aluno360Layout {
     return stickyBarContentHeight +
         MediaQuery.paddingOf(context).bottom +
         40;
+  }
+
+  /// Centers Operação tab content on wide screens.
+  static Widget operacaoContentWidthLimiter({required Widget child}) {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: operacaoMaxContentWidth),
+        child: child,
+      ),
+    );
   }
 
   /// Nested prescription block inside the copilot card (inset + optional IA accent).
@@ -124,11 +137,21 @@ abstract final class Aluno360Layout {
     );
   }
 
-  /// Secondary metadata — still ≥11.5px with stronger contrast.
+  /// Secondary metadata — min 12px with stronger contrast.
   static TextStyle metaStyle(BuildContext context) {
     return captionStyle(context).copyWith(
-      fontSize: 11.5,
+      fontSize: 12,
       fontWeight: FontWeight.w600,
+    );
+  }
+
+  /// Section titles inside Operação cards.
+  static TextStyle sectionTitleStyle(BuildContext context, Color ink) {
+    return TextStyle(
+      color: ink,
+      fontSize: 17,
+      fontWeight: FontWeight.w900,
+      letterSpacing: -0.2,
     );
   }
 
@@ -140,15 +163,34 @@ abstract final class Aluno360Layout {
     );
   }
 
+  static Color operacaoOutlinedForeground(Color primary, {required bool isDark}) {
+    return isDark ? primary : Color.lerp(primary, Colors.black, 0.32)!;
+  }
+
   static ButtonStyle operacaoOutlinedButtonStyle(
     BuildContext context,
     Color primary,
   ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final fg = operacaoOutlinedForeground(primary, isDark: isDark);
     return OutlinedButton.styleFrom(
-      foregroundColor: isDark ? primary : Color.lerp(primary, Colors.black, 0.28)!,
+      foregroundColor: fg,
       minimumSize: const Size(0, 48),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       side: operacaoOutlineSide(primary, isDark: isDark),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+    );
+  }
+
+  static ButtonStyle operacaoFilledButtonStyle(
+    BuildContext context,
+    Color primary,
+  ) {
+    return FilledButton.styleFrom(
+      minimumSize: const Size(0, 48),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      backgroundColor: primary,
+      foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
     );
   }

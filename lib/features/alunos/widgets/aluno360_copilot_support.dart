@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../constants/aluno_360_layout.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -49,15 +50,14 @@ class Aluno360CopilotSignalTile extends StatelessWidget {
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       signal.label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: mute,
-                        fontSize: 9.5,
+                      style: Aluno360Layout.metaStyle(context).copyWith(
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -66,9 +66,8 @@ class Aluno360CopilotSignalTile extends StatelessWidget {
                       signal.value,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: Aluno360Layout.captionStyle(context).copyWith(
                         color: ink,
-                        fontSize: 13.5,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
@@ -76,12 +75,10 @@ class Aluno360CopilotSignalTile extends StatelessWidget {
                       const SizedBox(height: 1),
                       Text(
                         signal.detail,
-                        maxLines: 2,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: Aluno360Layout.metaStyle(context).copyWith(
                           color: mute,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
                           height: 1.2,
                         ),
                       ),

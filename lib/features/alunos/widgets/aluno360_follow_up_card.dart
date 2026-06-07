@@ -37,6 +37,84 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
 
   Aluno get aluno => widget.aluno;
 
+  Future<void> _confirmClearFollowUp(dynamic actions) async {
+    if (_busy) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Limpar follow-up?'),
+            content: Text(
+              'Remove a data de próximo contato de ${aluno.nome}. '
+              'Você pode definir outra data depois.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Limpar'),
+              ),
+            ],
+          ),
+    );
+    if (confirmed != true) return;
+    await _runAction(
+      () => actions.clearFollowUp(aluno.id),
+      'Follow-up limpo',
+    );
+  }
+
+  Widget _snoozeMenuButton({
+    required BuildContext context,
+    required Color primary,
+    required dynamic actions,
+    required bool fullWidth,
+  }) {
+    return MenuAnchor(
+      menuChildren: [
+        MenuItemButton(
+          onPressed:
+              _busy
+                  ? null
+                  : () => _runAction(
+                    () => actions.snooze(aluno.id),
+                    'Follow-up adiado por 24h',
+                  ),
+          child: const Text('Adiar 24h'),
+        ),
+        MenuItemButton(
+          onPressed:
+              _busy
+                  ? null
+                  : () => _runAction(
+                    () => actions.snooze(
+                      aluno.id,
+                      duration: const Duration(days: 3),
+                    ),
+                    'Follow-up adiado por 3 dias',
+                  ),
+          child: const Text('Adiar 3 dias'),
+        ),
+      ],
+      builder: (context, controller, _) {
+        final button = OutlinedButton.icon(
+          onPressed: _busy ? null : controller.open,
+          icon: const Icon(Icons.snooze_rounded, size: 16),
+          label: const Text('Adiar'),
+          style: Aluno360Layout.operacaoOutlinedButtonStyle(context, primary),
+        );
+        return Semantics(
+          label: 'Adiar follow-up de ${aluno.nome}',
+          button: true,
+          child: fullWidth ? SizedBox(width: double.infinity, child: button) : button,
+        );
+      },
+    );
+  }
+
   String _formatDate(DateTime date) {
     final d = date.day.toString().padLeft(2, '0');
     final m = date.month.toString().padLeft(2, '0');
@@ -287,7 +365,12 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
     }
 
     return Container(
-      decoration: fxListCardDecoration(context),
+      key: const ValueKey('aluno360_follow_up'),
+      decoration: Aluno360Layout.operacaoInsetSectionDecoration(
+        context,
+        primary: primary,
+        isDark: widget.isDark,
+      ),
       padding: const EdgeInsets.all(Aluno360Layout.cardPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -364,21 +447,24 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
     return LayoutBuilder(
             builder: (context, constraints) {
               final narrow = constraints.maxWidth < 360;
-              final compactFilled = FilledButton.styleFrom(
-                minimumSize: const Size(0, 40),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                visualDensity: VisualDensity.compact,
-                backgroundColor: primary,
-                foregroundColor: Colors.white,
+              final filledStyle = Aluno360Layout.operacaoFilledButtonStyle(
+                context,
+                primary,
               );
-              final compactOutlined = OutlinedButton.styleFrom(
-                minimumSize: const Size(0, 40),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                visualDensity: VisualDensity.compact,
-                foregroundColor: primary,
-                side: BorderSide(color: primary.withValues(alpha: 0.28)),
+              final outlinedStyle = Aluno360Layout.operacaoOutlinedButtonStyle(
+                context,
+                primary,
               );
               Widget contactDoneButton({required bool fullWidth}) {
+                final loadingIcon = SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: FxLoading(
+                    size: 16,
+                    strokeWidth: 2,
+                    color: contactPrimaryOutlined ? primary : Colors.white,
+                  ),
+                );
                 final child = Semantics(
                   label: 'Registrar contato realizado com ${aluno.nome}',
                   button: true,
@@ -392,9 +478,9 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
                                       () => actions.markContactDone(aluno.id),
                                       'Contato salvo · follow-up atualizado',
                                     ),
-                            icon: const Icon(Icons.check_rounded, size: 16),
+                            icon: _busy ? loadingIcon : const Icon(Icons.check_rounded, size: 16),
                             label: const Text('Contato feito'),
-                            style: compactOutlined,
+                            style: outlinedStyle,
                           )
                           : FilledButton.icon(
                             onPressed:
@@ -404,20 +490,9 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
                                       () => actions.markContactDone(aluno.id),
                                       'Contato salvo · follow-up atualizado',
                                     ),
-                            icon:
-                                _busy
-                                    ? SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: FxLoading(
-                                        size: 16,
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                    : const Icon(Icons.check_rounded, size: 16),
+                            icon: _busy ? loadingIcon : const Icon(Icons.check_rounded, size: 16),
                             label: const Text('Contato feito'),
-                            style: compactFilled,
+                            style: filledStyle,
                           ),
                 );
                 return fullWidth
@@ -434,7 +509,7 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
                     onPressed: _busy ? null : _pickFollowUpDate,
                     icon: const Icon(Icons.calendar_month_rounded, size: 16),
                     label: const Text('Definir data'),
-                    style: compactOutlined,
+                    style: outlinedStyle,
                   ),
                 ),
               ];
@@ -451,57 +526,18 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
                         child: SizedBox(width: double.infinity, child: action),
                       ),
                     ),
-                    SizedBox(
-                      width: double.infinity,
-                      child: PopupMenuButton<String>(
-                        tooltip: 'Adiar follow-up',
-                        enabled: !_busy,
-                        onSelected: (value) async {
-                          if (value == '24h') {
-                            await _runAction(
-                              () => actions.snooze(aluno.id),
-                              'Follow-up adiado por 24h',
-                            );
-                          } else if (value == '3d') {
-                            await _runAction(
-                              () => actions.snooze(
-                                aluno.id,
-                                duration: const Duration(days: 3),
-                              ),
-                              'Follow-up adiado por 3 dias',
-                            );
-                          }
-                        },
-                        itemBuilder:
-                            (_) => const [
-                              PopupMenuItem(value: '24h', child: Text('Adiar 24h')),
-                              PopupMenuItem(value: '3d', child: Text('Adiar 3 dias')),
-                            ],
-                        child: Semantics(
-                          label: 'Adiar follow-up de ${aluno.nome}',
-                          button: true,
-                          child: IgnorePointer(
-                            child: OutlinedButton.icon(
-                              onPressed: () {},
-                              icon: const Icon(Icons.snooze_rounded, size: 16),
-                              label: const Text('Adiar'),
-                              style: compactOutlined,
-                            ),
-                          ),
-                        ),
-                      ),
+                    _snoozeMenuButton(
+                      context: context,
+                      primary: primary,
+                      actions: actions,
+                      fullWidth: true,
                     ),
                     if (followUpDate != null || isSnoozed)
                       Align(
                         alignment: Alignment.centerLeft,
                         child: TextButton(
                           onPressed:
-                              _busy
-                                  ? null
-                                  : () => _runAction(
-                                    () => actions.clearFollowUp(aluno.id),
-                                    'Follow-up limpo',
-                                  ),
+                              _busy ? null : () => _confirmClearFollowUp(actions),
                           child: const Text('Limpar'),
                         ),
                       ),
@@ -521,42 +557,11 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: PopupMenuButton<String>(
-                          tooltip: 'Adiar follow-up',
-                          enabled: !_busy,
-                          onSelected: (value) async {
-                            if (value == '24h') {
-                              await _runAction(
-                                () => actions.snooze(aluno.id),
-                                'Follow-up adiado por 24h',
-                              );
-                            } else if (value == '3d') {
-                              await _runAction(
-                                () => actions.snooze(
-                                  aluno.id,
-                                  duration: const Duration(days: 3),
-                                ),
-                                'Follow-up adiado por 3 dias',
-                              );
-                            }
-                          },
-                          itemBuilder:
-                              (_) => const [
-                                PopupMenuItem(value: '24h', child: Text('Adiar 24h')),
-                                PopupMenuItem(value: '3d', child: Text('Adiar 3 dias')),
-                              ],
-                          child: Semantics(
-                            label: 'Adiar follow-up de ${aluno.nome}',
-                            button: true,
-                            child: IgnorePointer(
-                              child: OutlinedButton.icon(
-                                onPressed: () {},
-                                icon: const Icon(Icons.snooze_rounded, size: 16),
-                                label: const Text('Adiar'),
-                                style: compactOutlined,
-                              ),
-                            ),
-                          ),
+                        child: _snoozeMenuButton(
+                          context: context,
+                          primary: primary,
+                          actions: actions,
+                          fullWidth: false,
                         ),
                       ),
                     ],
@@ -566,12 +571,7 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
                       alignment: Alignment.centerLeft,
                       child: TextButton(
                         onPressed:
-                            _busy
-                                ? null
-                                : () => _runAction(
-                                  () => actions.clearFollowUp(aluno.id),
-                                  'Follow-up limpo',
-                                ),
+                            _busy ? null : () => _confirmClearFollowUp(actions),
                         child: const Text('Limpar'),
                       ),
                     ),
@@ -587,5 +587,3 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
     return '$h:$m';
   }
 }
-
-// removed duplicate _formatTime and old LayoutBuilder block below

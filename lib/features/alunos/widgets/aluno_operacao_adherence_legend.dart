@@ -20,7 +20,7 @@ class AlunoOperacaoAdherenceLegend extends StatelessWidget {
   Widget build(BuildContext context) {
     final mute = fxScreenMute(context);
     return Semantics(
-      label: 'Legenda: verde check-in, vermelho sem registro, anel indica hoje',
+      label: 'Legenda: check-in, sem registro, hoje',
       child: ExcludeSemantics(
         child: Wrap(
         spacing: 12,
@@ -35,7 +35,7 @@ class AlunoOperacaoAdherenceLegend extends StatelessWidget {
             color: missColor,
             label: 'Sem registro',
             mute: mute,
-            hollow: true,
+            solidMiss: true,
           ),
           _LegendItem(
             color: todayRingColor,
@@ -55,14 +55,14 @@ class _LegendItem extends StatelessWidget {
     required this.color,
     required this.label,
     required this.mute,
-    this.hollow = false,
+    this.solidMiss = false,
     this.ring = false,
   });
 
   final Color color;
   final String label;
   final Color mute;
-  final bool hollow;
+  final bool solidMiss;
   final bool ring;
 
   @override
@@ -74,23 +74,29 @@ class _LegendItem extends StatelessWidget {
           width: ring ? 12 : 8,
           height: ring ? 12 : 8,
           decoration: BoxDecoration(
-            color: hollow ? Colors.transparent : color.withValues(alpha: 0.9),
+            color:
+                solidMiss
+                    ? color.withValues(alpha: 0.92)
+                    : ring
+                    ? Colors.transparent
+                    : color.withValues(alpha: 0.9),
             shape: BoxShape.circle,
             border:
                 ring
                     ? Border.all(color: color, width: 1.5)
-                    : hollow
-                    ? Border.all(color: color.withValues(alpha: 0.75), width: 1.2)
                     : null,
           ),
         ),
         const SizedBox(width: 5),
-        Text(
-          label,
-          style: Aluno360Layout.captionStyle(context).copyWith(
-            color: mute,
-            fontSize: 10.5,
-            fontWeight: FontWeight.w700,
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Aluno360Layout.captionStyle(context).copyWith(
+              color: mute,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ],

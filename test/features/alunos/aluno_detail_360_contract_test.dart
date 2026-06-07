@@ -69,6 +69,7 @@ String _alunoDetailLibrarySource() {
       'lib/features/alunos/widgets/aluno_detail_error_state.dart';
   const detailLoadingSkeletonFile =
       'lib/features/alunos/widgets/aluno_detail_loading_skeleton.dart';
+  const alunoRepositoryFile = 'lib/features/alunos/data/aluno_repository.dart';
   final main = File(mainFile).readAsStringSync();
   final providers = File(providersFile).readAsStringSync();
   final heroWidget = File(heroWidgetFile).readAsStringSync();
@@ -104,7 +105,8 @@ String _alunoDetailLibrarySource() {
   final emptyMiniState = File(emptyMiniStateFile).readAsStringSync();
   final detailErrorState = File(detailErrorStateFile).readAsStringSync();
   final detailLoadingSkeleton = File(detailLoadingSkeletonFile).readAsStringSync();
-  return '$main\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$outreachSheet\n$copilotCard\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$actionEmptyPanel\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$emptyMiniState\n$detailErrorState\n$detailLoadingSkeleton';
+  final alunoRepository = File(alunoRepositoryFile).readAsStringSync();
+  return '$main\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$outreachSheet\n$copilotCard\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$actionEmptyPanel\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$emptyMiniState\n$detailErrorState\n$detailLoadingSkeleton\n$alunoRepository';
 }
 
 void main() {
@@ -300,6 +302,12 @@ void main() {
     expect(screen, contains('class Aluno360ActionEmptyPanel'));
     expect(screen, contains('class Aluno360StudentQuickActions'));
     expect(screen, contains('AlunoOperacaoAdherenceLegend'));
+    expect(screen, contains('fonteLabel'));
+    expect(screen, contains('AderenciaSemanalBundle'));
+    expect(screen, contains('recoverySnapshot'));
+    expect(screen, contains('operacaoFilledButtonStyle'));
+    expect(screen, contains('operacaoContentWidthLimiter'));
+    expect(screen, contains('ValueKey(\'aluno360_follow_up\')'));
     expect(screen, contains('alunoCopilotIaRefreshingProvider'));
     expect(screen, contains('operacaoOutlinedButtonStyle'));
     expect(screen, contains('class Aluno360EvolucaoInteligenteCard'));

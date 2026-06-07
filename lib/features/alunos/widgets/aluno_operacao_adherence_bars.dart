@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 
+import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../constants/aluno_360_layout.dart';
 import '../utils/aluno360_operacao_logic.dart';
 
 /// Weekly check-in bars with D–S labels for the Operação status card.
@@ -39,7 +41,7 @@ class AlunoOperacaoAdherenceBars extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final labelColor =
         emptyWeek
-            ? Color.lerp(fxScreenMute(context), ink, isDark ? 0.70 : 0.83)!
+            ? Color.lerp(fxScreenMute(context), ink, isDark ? 0.78 : 0.80)!
             : fxScreenMute(context);
     final labelBand =
         14.0 * MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 1.5);
@@ -137,11 +139,11 @@ class _AdherenceDayBar extends StatelessWidget {
             : null;
 
     return Semantics(
-      button: true,
       label:
           dayLabel.isEmpty
               ? semanticsValue
               : '$dayLabel · $semanticsValue${isToday ? ' · hoje' : ''}',
+      hint: 'Ouvir detalhes do dia',
       child: Tooltip(
         message: tooltip,
         child: Material(
@@ -177,7 +179,10 @@ class _AdherenceDayBar extends StatelessWidget {
                             ),
                           ],
                           AnimatedContainer(
-                            duration: const Duration(milliseconds: 220),
+                            duration: Duration(
+                              milliseconds:
+                                  reduceMotionOf(context) ? 0 : 220,
+                            ),
                             curve: Curves.easeOutCubic,
                             height: barMaxHeight * fraction,
                             width: double.infinity,
@@ -214,9 +219,8 @@ class _AdherenceDayBar extends StatelessWidget {
                             fit: BoxFit.scaleDown,
                             child: Text(
                               dayLabel,
-                              style: TextStyle(
+                              style: Aluno360Layout.metaStyle(context).copyWith(
                                 color: isToday ? todayRingColor : labelColor,
-                                fontSize: outlineIdle ? 10.5 : 10,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: outlineIdle ? 0.2 : 0,
                               ),

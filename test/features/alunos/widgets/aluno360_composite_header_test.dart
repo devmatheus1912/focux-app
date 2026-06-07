@@ -64,7 +64,7 @@ void main() {
     final gap = tabTop - heroBottom;
 
     expect(gap, lessThanOrEqualTo(1.0));
-    expect(Aluno360Layout.tabContentGap, 0);
+    expect(Aluno360Layout.tabContentGap, 12);
 
     await expectLater(
       find.byType(CustomScrollView),

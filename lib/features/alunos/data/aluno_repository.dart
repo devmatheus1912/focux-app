@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../exercicios/data/enums.dart';
+import '../../health/data/health_repository.dart';
 
 class Aluno {
   final int id;
@@ -264,10 +265,12 @@ class ProximaAcaoResumo {
   final String motivo;
   final String fonte;
   final String prioridade;
+  final String? fonteLabel;
   final String? tipoAcao;
   final String? mensagemSugerida;
   final String? stickyLabel;
   final String? stickyLabelCompact;
+  final String? ctaLabel;
   final bool? wearableRelevant;
 
   const ProximaAcaoResumo({
@@ -275,10 +278,12 @@ class ProximaAcaoResumo {
     required this.motivo,
     required this.fonte,
     required this.prioridade,
+    this.fonteLabel,
     this.tipoAcao,
     this.mensagemSugerida,
     this.stickyLabel,
     this.stickyLabelCompact,
+    this.ctaLabel,
     this.wearableRelevant,
   });
 
@@ -288,12 +293,57 @@ class ProximaAcaoResumo {
         motivo: json['motivo'] as String? ?? '',
         fonte: json['fonte'] as String? ?? 'PADRAO',
         prioridade: json['prioridade'] as String? ?? 'P2',
+        fonteLabel: json['fonteLabel'] as String?,
         tipoAcao: json['tipoAcao'] as String?,
         mensagemSugerida: json['mensagemSugerida'] as String?,
         stickyLabel: json['stickyLabel'] as String?,
         stickyLabelCompact: json['stickyLabelCompact'] as String?,
+        ctaLabel: json['ctaLabel'] as String?,
         wearableRelevant: json['wearableRelevant'] as bool?,
       );
+}
+
+class AderenciaSemanalBundle {
+  final List<Map<String, dynamic>> dias;
+  final int totalSemana;
+  final int streakAtual;
+  final int diasComCheckin;
+  final String resumo;
+
+  const AderenciaSemanalBundle({
+    this.dias = const [],
+    this.totalSemana = 0,
+    this.streakAtual = 0,
+    this.diasComCheckin = 0,
+    this.resumo = '',
+  });
+
+  factory AderenciaSemanalBundle.fromJson(Map<String, dynamic> json) =>
+      AderenciaSemanalBundle(
+        dias:
+            (json['dias'] as List<dynamic>? ?? const [])
+                .map((e) => Map<String, dynamic>.from(e as Map))
+                .toList(),
+        totalSemana: (json['totalSemana'] as num?)?.toInt() ?? 0,
+        streakAtual: (json['streakAtual'] as num?)?.toInt() ?? 0,
+        diasComCheckin: (json['diasComCheckin'] as num?)?.toInt() ?? 0,
+        resumo: json['resumo'] as String? ?? '',
+      );
+
+  factory AderenciaSemanalBundle.fromLegacyList(List<dynamic> raw) =>
+      AderenciaSemanalBundle(
+        dias: raw.map((e) => Map<String, dynamic>.from(e as Map)).toList(),
+      );
+
+  static AderenciaSemanalBundle parse(dynamic raw) {
+    if (raw is Map<String, dynamic>) {
+      return AderenciaSemanalBundle.fromJson(raw);
+    }
+    if (raw is List) {
+      return AderenciaSemanalBundle.fromLegacyList(raw);
+    }
+    return const AderenciaSemanalBundle();
+  }
 }
 
 class Aluno360 {
@@ -303,7 +353,9 @@ class Aluno360 {
   final ProximaAcaoResumo proximaAcao;
   final EvolucaoInteligente evolucaoInteligente;
   final bool? hasOpenCopilotTask;
-  final List<Map<String, dynamic>> aderenciaSemanal;
+  final AderenciaSemanalBundle aderenciaSemanal;
+  final bool? hasWearableHistory;
+  final RecoverySnapshot? recoverySnapshot;
 
   const Aluno360({
     required this.aluno,
@@ -312,7 +364,9 @@ class Aluno360 {
     required this.proximaAcao,
     required this.evolucaoInteligente,
     this.hasOpenCopilotTask,
-    this.aderenciaSemanal = const [],
+    this.aderenciaSemanal = const AderenciaSemanalBundle(),
+    this.hasWearableHistory,
+    this.recoverySnapshot,
   });
 
   factory Aluno360.fromJson(Map<String, dynamic> json) => Aluno360(
@@ -330,10 +384,14 @@ class Aluno360 {
       json['evolucaoInteligente'] as Map<String, dynamic>,
     ),
     hasOpenCopilotTask: json['hasOpenCopilotTask'] as bool?,
-    aderenciaSemanal:
-        (json['aderenciaSemanal'] as List<dynamic>? ?? const [])
-            .map((e) => Map<String, dynamic>.from(e as Map))
-            .toList(),
+    aderenciaSemanal: AderenciaSemanalBundle.parse(json['aderenciaSemanal']),
+    hasWearableHistory: json['hasWearableHistory'] as bool?,
+    recoverySnapshot:
+        json['recoverySnapshot'] != null
+            ? RecoverySnapshot.fromJson(
+              json['recoverySnapshot'] as Map<String, dynamic>,
+            )
+            : null,
   );
 }
 
@@ -488,7 +546,24 @@ class AlunoRepository {
 
   Future<List<Map<String, dynamic>>> aderenciaSemanal(int id) async {
     final response = await _dio.get('/api/alunos/$id/aderencia-semanal');
-    return List<Map<String, dynamic>>.from(response.data);
+    final data = response.data;
+    if (data is List) {
+      return List<Map<String, dynamic>>.from(data);
+    }
+    return AderenciaSemanalBundle.fromJson(
+      Map<String, dynamic>.from(data as Map),
+    ).dias;
+  }
+
+  Future<AderenciaSemanalBundle> aderenciaSemanalBundle(int id) async {
+    final response = await _dio.get('/api/alunos/$id/aderencia-semanal');
+    final data = response.data;
+    if (data is List) {
+      return AderenciaSemanalBundle.fromLegacyList(data);
+    }
+    return AderenciaSemanalBundle.fromJson(
+      Map<String, dynamic>.from(data as Map),
+    );
   }
 
   Future<List<AlunoAutonomiaEvento>> listarAutonomiaEventos(int alunoId) async {

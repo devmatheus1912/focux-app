@@ -261,7 +261,8 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                         proximaAcao360: proximaAcao360,
                         hasOpenCopilotTask360:
                             aluno360Async.valueOrNull?.hasOpenCopilotTask ?? false,
-                        aderenciaSemanal: aluno360Async.valueOrNull?.aderenciaSemanal,
+                        aderenciaSemanal:
+                            aluno360Async.valueOrNull?.aderenciaSemanal.dias,
                         recoveryAsync: recoveryAsync,
                         autonomiaResumoAsync: resolvedAutonomiaResumoAsync,
                         animateEntrance: !_entrancePlayed,

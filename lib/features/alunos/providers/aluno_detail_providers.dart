@@ -23,6 +23,8 @@ final alunoRecoveryProvider = FutureProvider.family<RecoverySnapshot?, int>((
   ref,
   alunoId,
 ) async {
+  final bundled = ref.watch(aluno360Provider(alunoId)).valueOrNull?.recoverySnapshot;
+  if (bundled != null) return bundled;
   return HealthRepository.fromClient(
     ref.read(apiClientProvider),
   ).fetchRecoveryForAluno(alunoId);
@@ -114,10 +116,11 @@ final aluno360OperacaoProvider =
           findOpenCopilotTask(openActions) != null ||
           (bundle.hasOpenCopilotTask ?? false);
       final backendWearable = iaAsync?.valueOrNull?['wearableRelevant'];
+      final bundledWearable = bundle.hasWearableHistory;
       final wearableRelevant =
           backendWearable is bool
               ? backendWearable
-              : alunoTemHistoricoWearable(recovery);
+              : (bundledWearable ?? alunoTemHistoricoWearable(recovery));
       return resolveAluno360OperacaoSnapshot(
         aluno: aluno,
         proximaAcao360: bundle.proximaAcao,
@@ -176,7 +179,7 @@ final alunoTimeline360ApiProvider =
 final alunoAderenciaSemanalProvider =
     FutureProvider.family<List<Map<String, dynamic>>, int>((ref, alunoId) async {
       final aluno360 = await ref.watch(aluno360Provider(alunoId).future);
-      return aluno360.aderenciaSemanal;
+      return aluno360.aderenciaSemanal.dias;
     });
 
 /// Last weight measurements from avaliações físicas (up to 7 points, chronological).
@@ -220,6 +223,7 @@ Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
   ref.invalidate(alunoTimeline360ApiProvider(alunoId));
   ref.read(alunoCopilotoForceIaProvider(alunoId).notifier).state = false;
   ref.read(alunoCopilotIaSkipCacheProvider(alunoId).notifier).state = false;
+  ref.read(alunoCopilotIaRefreshingProvider(alunoId).notifier).state = false;
   ref.invalidate(alunoCopilotoActionProvider(alunoId));
   ref.invalidate(alunoOpenIaActionsProvider(alunoId));
   ref.invalidate(alunoMedidasResumoProvider(alunoId));

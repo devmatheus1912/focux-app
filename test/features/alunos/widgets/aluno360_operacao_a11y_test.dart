@@ -166,7 +166,7 @@ void main() {
       expect(
         tester.getSemantics(find.byType(AlunoOperacaoAdherenceLegend)),
         matchesSemantics(
-          label: 'Legenda: verde check-in, vermelho sem registro, anel indica hoje',
+          label: 'Legenda: check-in, sem registro, hoje',
         ),
       );
     });

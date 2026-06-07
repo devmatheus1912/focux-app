@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/motion_preferences.dart';
@@ -8,7 +9,7 @@ import '../providers/aluno_detail_providers.dart';
 import '../utils/aluno360_operacao_logic.dart';
 
 /// Staggered entrance wrapper for Operação sections.
-class Aluno360OperacaoEntrance extends StatelessWidget {
+class Aluno360OperacaoEntrance extends StatefulWidget {
   const Aluno360OperacaoEntrance({
     super.key,
     required this.enabled,
@@ -23,11 +24,27 @@ class Aluno360OperacaoEntrance extends StatelessWidget {
   final VoidCallback? onPlayed;
 
   @override
+  State<Aluno360OperacaoEntrance> createState() =>
+      _Aluno360OperacaoEntranceState();
+}
+
+class _Aluno360OperacaoEntranceState extends State<Aluno360OperacaoEntrance> {
+  var _played = false;
+
+  @override
   Widget build(BuildContext context) {
-    if (!enabled || reduceMotionOf(context)) return child;
-    WidgetsBinding.instance.addPostFrameCallback((_) => onPlayed?.call());
+    if (!_played && widget.enabled && widget.onPlayed != null) {
+      _played = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) widget.onPlayed?.call();
+      });
+    }
+    if (!widget.enabled || reduceMotionOf(context)) return widget.child;
     return ClipRect(
-      child: FxPremiumEntrance(delay: delay, child: child),
+      child: FxPremiumEntrance(
+        delay: widget.delay,
+        child: widget.child,
+      ),
     );
   }
 }
@@ -103,7 +120,13 @@ class Aluno360OperacaoTab extends ConsumerWidget {
       );
     }
 
-    return Column(
+    final motionMs = reduceMotionOf(context) ? 0 : 200;
+
+    return Semantics(
+      container: true,
+      label: 'Conteúdo da aba operação',
+      child: Aluno360Layout.operacaoContentWidthLimiter(
+        child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (showFinanceRisk && financeRiskBanner != null) ...[
@@ -113,7 +136,7 @@ class Aluno360OperacaoTab extends ConsumerWidget {
         section(1, followUpCard),
         const SizedBox(height: Aluno360Layout.sectionGap),
         AnimatedSize(
-          duration: const Duration(milliseconds: 200),
+          duration: Duration(milliseconds: motionMs),
           curve: Curves.easeOutCubic,
           alignment: Alignment.topCenter,
           child:
@@ -138,6 +161,8 @@ class Aluno360OperacaoTab extends ConsumerWidget {
                   ),
         ),
       ],
+    ),
+      ),
     );
   }
 }
