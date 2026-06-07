@@ -586,6 +586,27 @@ void main() {
     });
   });
 
+  group('copilotExecutarConfirmBody', () {
+    test('returns distinct copy per backend tipo', () {
+      expect(
+        copilotExecutarConfirmBody('REDUZIR_CARGA'),
+        contains('15%'),
+      );
+      expect(
+        copilotExecutarConfirmBody('ENVIAR_PUSH'),
+        contains('notificação'),
+      );
+      expect(
+        copilotExecutarConfirmBody('MARCAR_RISCO'),
+        contains('contato prioritário'),
+      );
+      expect(
+        copilotExecutarConfirmBody('UNKNOWN'),
+        contains('Confirme'),
+      );
+    });
+  });
+
   group('proximaAcaoResumoFromIaPayload', () {
     test('parses enrichment fields from IA API', () {
       final resumo = proximaAcaoResumoFromIaPayload({

@@ -137,9 +137,9 @@ OperacaoStickyDestination resolveOperacaoStickyDestination(
 IconData stickyIconForDestination(OperacaoStickyDestination destination) {
   return switch (destination) {
     OperacaoStickyDestination.chat => Icons.chat_bubble_outline_rounded,
-    OperacaoStickyDestination.evolucao => Icons.accessibility_new_rounded,
+    OperacaoStickyDestination.evolucao => Icons.monitor_weight_outlined,
     OperacaoStickyDestination.editAluno => Icons.edit_outlined,
-    OperacaoStickyDestination.commandCenter => Icons.open_in_new_rounded,
+    OperacaoStickyDestination.commandCenter => Icons.dashboard_outlined,
   };
 }
 

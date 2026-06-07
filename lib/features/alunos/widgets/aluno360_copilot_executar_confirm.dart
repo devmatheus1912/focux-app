@@ -15,20 +15,7 @@ Future<bool> showCopilotExecutarConfirmSheet(
   final mute = fxScreenMute(context);
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
-  String body;
-  switch (spec.backendTipo) {
-    case 'REDUZIR_CARGA':
-      body =
-          'Reduziremos ~15% das cargas do treino ativo e avisaremos o aluno por push.';
-    case 'ENVIAR_PUSH':
-      body =
-          'Enviaremos uma notificação push ao aluno. Revise a mensagem antes de confirmar.';
-    case 'MARCAR_RISCO':
-      body =
-          'Sinalizaremos risco operacional e enviaremos push pedindo contato do aluno.';
-    default:
-      body = 'Confirme para aplicar esta ação no perfil do aluno.';
-  }
+  final body = copilotExecutarConfirmBody(spec.backendTipo);
 
   return showModalBottomSheet<bool>(
     context: context,
@@ -108,21 +95,29 @@ Future<bool> showCopilotExecutarConfirmSheet(
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.of(sheetContext).pop(false),
-                        child: const Text('Cancelar'),
+                      child: Semantics(
+                        button: true,
+                        label: 'Cancelar ação',
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.of(sheetContext).pop(false),
+                          child: const Text('Cancelar'),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       flex: 2,
-                      child: FilledButton.icon(
-                        onPressed: () => Navigator.of(sheetContext).pop(true),
-                        icon: Icon(spec.icon, size: 17),
-                        label: const Text('Confirmar'),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: primary,
-                          foregroundColor: Colors.white,
+                      child: Semantics(
+                        button: true,
+                        label: 'Confirmar ${spec.label}',
+                        child: FilledButton.icon(
+                          onPressed: () => Navigator.of(sheetContext).pop(true),
+                          icon: Icon(spec.icon, size: 17),
+                          label: const Text('Confirmar'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: primary,
+                            foregroundColor: Colors.white,
+                          ),
                         ),
                       ),
                     ),

@@ -90,6 +90,25 @@ void main() {
     expect(screen, contains("'Abrir chat'"));
     expect(screen, contains('executarAcaoCopiloto'));
     expect(screen, contains('resolveCopilotExecutarAcao'));
+    expect(
+      File('lib/features/alunos/widgets/aluno360_copilot_executar_confirm.dart')
+          .readAsStringSync(),
+      contains('showCopilotExecutarConfirmSheet'),
+    );
+    expect(
+      File('lib/features/alunos/widgets/aluno360_finance_risk_banner.dart')
+          .readAsStringSync(),
+      contains('class Aluno360FinanceRiskBanner'),
+    );
+    expect(
+      File('lib/features/alunos/utils/aluno360_copilot_logic.dart')
+          .readAsStringSync(),
+      contains('copilotExecutarConfirmBody'),
+    );
+    expect(
+      File('lib/core/widgets/feedback_helper.dart').readAsStringSync(),
+      contains('reserveBottom'),
+    );
   });
 
   test('aluno 360 polish: tabs, unified status, refresh, altura, sparkline', () {

@@ -10,9 +10,33 @@ class FeedbackHelper {
     return ScaffoldMessenger.of(context);
   }
 
-  static void showSnackBar(BuildContext context, SnackBar snackBar) {
+  static void showSnackBar(
+    BuildContext context,
+    SnackBar snackBar, {
+    double reserveBottom = 0,
+  }) {
+    if (reserveBottom <= 0) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return;
+    }
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final hasBottomBar =
+        Scaffold.maybeOf(context)?.widget.bottomNavigationBar != null;
+    final bottomMargin = bottomInset + (hasBottomBar ? 88 : 16) + reserveBottom;
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: snackBar.content,
+        action: snackBar.action,
+        backgroundColor: snackBar.backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        shape: snackBar.shape,
+        duration: snackBar.duration,
+        elevation: snackBar.elevation,
+        margin: EdgeInsets.fromLTRB(16, 0, 16, bottomMargin),
+      ),
+    );
   }
 
   static void showSuccess(
@@ -45,13 +69,18 @@ class FeedbackHelper {
     );
   }
 
-  static void showInfo(BuildContext context, String message) {
+  static void showInfo(
+    BuildContext context,
+    String message, {
+    double reserveBottom = 0,
+  }) {
     HapticFeedback.selectionClick();
     _showSnackbar(
       context,
       message,
       fill: Theme.of(context).colorScheme.primary,
       icon: Icons.info_outline_rounded,
+      reserveBottom: reserveBottom,
     );
   }
 

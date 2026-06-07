@@ -115,8 +115,8 @@ class _AdherenceDayBar extends StatelessWidget {
             : minFraction;
     final semanticsValue =
         hasActivity
-            ? '${value.round()} check-in${value == 1 ? '' : 's'}'
-            : 'Sem check-in';
+            ? '${value.round()} registro${value == 1 ? '' : 's'}'
+            : 'Sem registro';
 
     final weekday = weekdayNameFromIso(isoDate);
     final tooltip =
@@ -140,7 +140,6 @@ class _AdherenceDayBar extends StatelessWidget {
           dayLabel.isEmpty
               ? semanticsValue
               : '$dayLabel · $semanticsValue${isToday ? ' · hoje' : ''}',
-      button: true,
       child: Tooltip(
         message: tooltip,
         child: Column(

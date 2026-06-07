@@ -407,6 +407,28 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
             );
               },
             ),
+          ] else ...[
+            const SizedBox(height: 14),
+            Semantics(
+              label: 'Sem dados de aderência semanal',
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: neutralIdle.withValues(alpha: isDark ? 0.35 : 0.55),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: fxScreenMute(context).withValues(alpha: 0.25),
+                  ),
+                ),
+                child: Text(
+                  'Sem dados de aderência semanal ainda.',
+                  style: Aluno360Layout.captionStyle(context).copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
           ],
         ],
       ),

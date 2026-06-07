@@ -1,0 +1,25 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/alunos/widgets/aluno360_finance_risk_banner.dart';
+
+void main() {
+  testWidgets('finance risk banner exposes semantics and label', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Aluno360FinanceRiskBanner(alunoId: 42, isDark: false),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Pendência financeira'), findsOneWidget);
+    expect(find.text('Abrir mensalidades deste aluno'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(
+        'Pendência financeira. Abrir mensalidades deste aluno',
+      ),
+      findsOneWidget,
+    );
+  });
+}

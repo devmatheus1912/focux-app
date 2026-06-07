@@ -232,6 +232,19 @@ class CopilotExecutarAcaoSpec {
   final String? parametros;
 }
 
+/// Confirmation copy for copilot executar bottom sheet (testable).
+String copilotExecutarConfirmBody(String backendTipo) {
+  return switch (backendTipo) {
+    'REDUZIR_CARGA' =>
+      'Reduziremos cerca de 15% das cargas do treino ativo e avisaremos o aluno por notificação.',
+    'ENVIAR_PUSH' =>
+      'Enviaremos uma notificação ao aluno. Revise a mensagem antes de confirmar.',
+    'MARCAR_RISCO' =>
+      'Registraremos contato prioritário para hoje e notificaremos o aluno.',
+    _ => 'Confirme para aplicar esta ação no perfil do aluno.',
+  };
+}
+
 CopilotExecutarAcaoSpec? resolveCopilotExecutarAcao({
   required String? tipoAcao,
   required Aluno aluno,
@@ -261,19 +274,19 @@ CopilotExecutarAcaoSpec? resolveCopilotExecutarAcao({
       return CopilotExecutarAcaoSpec(
         backendTipo: 'ENVIAR_PUSH',
         parametros: pushMessage,
-        label: 'Enviar push ao aluno',
+        label: 'Enviar notificação ao aluno',
         icon: Icons.notifications_active_outlined,
         executingLabel: 'Enviando…',
-        executingSemantics: 'Enviando push ao aluno',
+        executingSemantics: 'Enviando notificação ao aluno',
       );
     }
     if (aluno.emRisco) {
       return const CopilotExecutarAcaoSpec(
         backendTipo: 'MARCAR_RISCO',
-        label: 'Sinalizar risco e enviar push',
+        label: 'Registrar contato prioritário',
         icon: Icons.warning_amber_rounded,
-        executingLabel: 'Sinalizando…',
-        executingSemantics: 'Sinalizando risco operacional',
+        executingLabel: 'Registrando…',
+        executingSemantics: 'Registrando contato prioritário',
       );
     }
   }
@@ -281,10 +294,10 @@ CopilotExecutarAcaoSpec? resolveCopilotExecutarAcao({
   if (aluno.emRisco && (tipo == 'GERAL' || tipo == null)) {
     return const CopilotExecutarAcaoSpec(
       backendTipo: 'MARCAR_RISCO',
-      label: 'Sinalizar risco e enviar push',
+      label: 'Registrar contato prioritário',
       icon: Icons.warning_amber_rounded,
-      executingLabel: 'Sinalizando…',
-      executingSemantics: 'Sinalizando risco operacional',
+      executingLabel: 'Registrando…',
+      executingSemantics: 'Registrando contato prioritário',
     );
   }
 
@@ -340,7 +353,7 @@ String copilotExecutarAcaoLabel(String? tipoAcao) {
       return 'Aplicar ajuste de carga (−15%)';
     case 'CONTATO':
     case 'WEARABLE':
-      return 'Enviar push ao aluno';
+      return 'Enviar notificação ao aluno';
     default:
       return 'Aplicar ajuste';
   }

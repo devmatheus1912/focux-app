@@ -46,10 +46,10 @@ void main() {
   ) async {
     const spec = CopilotExecutarAcaoSpec(
       backendTipo: 'ENVIAR_PUSH',
-      label: 'Enviar push ao aluno',
+      label: 'Enviar notificação ao aluno',
       icon: Icons.notifications_active_outlined,
       executingLabel: 'Enviando…',
-      executingSemantics: 'Enviando push ao aluno',
+      executingSemantics: 'Enviando notificação ao aluno',
       parametros: 'Oi, Beatriz.',
     );
 
@@ -68,6 +68,6 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Enviar push ao aluno'), findsOneWidget);
+    expect(find.text('Enviar notificação ao aluno'), findsOneWidget);
   });
 }

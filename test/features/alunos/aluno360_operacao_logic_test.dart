@@ -203,6 +203,16 @@ void main() {
       expect(state.showCheckinCta, isFalse);
     });
 
+    test('offers check-in CTA when operacao snapshot is null', () {
+      final state = resolveOperacaoAdherenceEmptyState(
+        week: emptyWeek,
+        operacao: null,
+      );
+      expect(state, isNotNull);
+      expect(state!.showCheckinCta, isTrue);
+      expect(state.compactLine, contains('Envie um lembrete rápido'));
+    });
+
     test('offers check-in CTA when outreach is not on copilot', () {
       final state = resolveOperacaoAdherenceEmptyState(
         week: emptyWeek,
@@ -464,7 +474,7 @@ void main() {
           50,
           sticky: const OperacaoStickyAction(
             label: 'Completar mapa corporal',
-            icon: Icons.accessibility_new_rounded,
+            icon: Icons.monitor_weight_outlined,
             destination: OperacaoStickyDestination.evolucao,
           ),
         ),
@@ -535,7 +545,7 @@ void main() {
     test('shows secondary chat on open task when follow-up due and CC primary', () {
       const sticky = OperacaoStickyAction(
         label: 'Ver tarefa',
-        icon: Icons.open_in_new_rounded,
+        icon: Icons.dashboard_outlined,
         destination: OperacaoStickyDestination.commandCenter,
       );
       expect(
@@ -555,7 +565,7 @@ void main() {
       final aluno = _aluno();
       const sticky = OperacaoStickyAction(
         label: 'Completar mapa corporal',
-        icon: Icons.accessibility_new_rounded,
+        icon: Icons.monitor_weight_outlined,
         destination: OperacaoStickyDestination.evolucao,
       );
       expect(
@@ -573,7 +583,7 @@ void main() {
       final aluno = _aluno();
       const sticky = OperacaoStickyAction(
         label: 'Completar mapa corporal',
-        icon: Icons.accessibility_new_rounded,
+        icon: Icons.monitor_weight_outlined,
         destination: OperacaoStickyDestination.evolucao,
       );
       expect(
@@ -593,7 +603,7 @@ void main() {
       final aluno = _aluno();
       const sticky = OperacaoStickyAction(
         label: 'Completar mapa corporal',
-        icon: Icons.accessibility_new_rounded,
+        icon: Icons.monitor_weight_outlined,
         destination: OperacaoStickyDestination.evolucao,
       );
       expect(
@@ -839,6 +849,34 @@ void main() {
         ),
         Duration.zero,
       );
+    });
+  });
+
+  group('isIsoDateToday', () {
+    test('returns true for today ISO date', () {
+      final now = DateTime.now();
+      final iso =
+          '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+      expect(isIsoDateToday(iso), isTrue);
+    });
+
+    test('returns false for yesterday', () {
+      final yesterday = DateTime.now().subtract(const Duration(days: 1));
+      final iso =
+          '${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}';
+      expect(isIsoDateToday(iso), isFalse);
+    });
+
+    test('returns false for invalid iso', () {
+      expect(isIsoDateToday(null), isFalse);
+      expect(isIsoDateToday(''), isFalse);
+      expect(isIsoDateToday('invalid'), isFalse);
+    });
+  });
+
+  group('weekdayNameFromIso', () {
+    test('returns weekday name for valid iso', () {
+      expect(weekdayNameFromIso('2026-06-04'), isNotEmpty);
     });
   });
 }

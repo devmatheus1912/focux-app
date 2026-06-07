@@ -298,6 +298,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
                     () => context.push('/dashboard/command-center/copiloto'),
               ),
             ),
+            reserveBottom: Aluno360Layout.snackbarStickyReserve,
           );
         }
         return true;
@@ -347,6 +348,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
                     )
                     : null,
           ),
+          reserveBottom: Aluno360Layout.snackbarStickyReserve,
         );
       }
       return persisted;
@@ -354,7 +356,12 @@ class Aluno360CopilotCard extends ConsumerWidget {
       if (context.mounted) {
         FeedbackHelper.showSnackBar(
           context,
-          SnackBar(content: Text('Não foi possível criar tarefa: ${friendlyError(e)}')),
+          SnackBar(
+            content: Text(
+              'Não foi possível criar tarefa: ${friendlyError(e)}',
+            ),
+          ),
+          reserveBottom: Aluno360Layout.snackbarStickyReserve,
         );
       }
       return false;
@@ -732,6 +739,7 @@ class _Aluno360CopilotExecutarAcaoButtonState
               friendlyError(e, fallback: 'Não foi possível aplicar a ação.'),
             ),
           ),
+          reserveBottom: Aluno360Layout.snackbarStickyReserve,
         );
       }
     } finally {
@@ -842,6 +850,7 @@ class Aluno360CopilotIaRefreshButtonState extends ConsumerState<Aluno360CopilotI
               ),
             ),
           ),
+          reserveBottom: Aluno360Layout.snackbarStickyReserve,
         );
       }
     } finally {

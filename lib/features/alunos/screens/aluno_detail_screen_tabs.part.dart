@@ -72,7 +72,7 @@ class _AlunoDetailOperacaoTab extends ConsumerWidget {
         proximaAcao360: proximaAcao360,
         hasOpenCopilotTask360: hasOpenCopilotTask360,
         isDark: isDark,
-        showFocusToggle: true,
+        showFocusToggle: ref.watch(alunoOperacaoFocusModeProvider(alunoId)),
         focusMode: ref.watch(alunoOperacaoFocusModeProvider(alunoId)),
       ),
       recoveryCard:
@@ -184,7 +184,26 @@ class _AlunoDetailFerramentasTab extends ConsumerWidget {
       measurementsSection: medidasAsync.when(
           loading:
               () => FxLoading.sectionShimmer(context, height: 88, showHeader: false),
-          error: (_, __) => const SizedBox.shrink(),
+          error:
+              (_, __) => Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: EagleTokens.bad.withValues(alpha: isDark ? 0.12 : 0.06),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: EagleTokens.bad.withValues(alpha: 0.22),
+                  ),
+                ),
+                child: Text(
+                  'Medidas indisponíveis agora. Tente novamente em instantes.',
+                  style: TextStyle(
+                    color: fxScreenMute(context),
+                    fontSize: 12.5,
+                    height: 1.35,
+                  ),
+                ),
+              ),
           data:
               (_) => LayoutBuilder(
                 builder: (context, constraints) {

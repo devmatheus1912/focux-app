@@ -41,22 +41,24 @@ class Aluno360FinanceRiskBanner extends StatelessWidget {
                 Icon(Icons.payments_outlined, color: EagleTokens.bad, size: 20),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Pendência financeira',
-                        style: TextStyle(
-                          color: ink,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 13.5,
+                  child: ExcludeSemantics(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Pendência financeira',
+                          style: TextStyle(
+                            color: ink,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13.5,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'Abrir mensalidades deste aluno',
-                        style: TextStyle(color: mute, fontSize: 11.5),
-                      ),
-                    ],
+                        Text(
+                          'Abrir mensalidades deste aluno',
+                          style: TextStyle(color: mute, fontSize: 11.5),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 Icon(Icons.chevron_right_rounded, color: mute),
