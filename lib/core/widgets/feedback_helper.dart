@@ -55,13 +55,18 @@ class FeedbackHelper {
     );
   }
 
-  static void showWarn(BuildContext context, String message) {
+  static void showWarn(
+    BuildContext context,
+    String message, {
+    double reserveBottom = 0,
+  }) {
     HapticFeedback.selectionClick();
     _showSnackbar(
       context,
       message,
       fill: EagleTokens.warn,
       icon: Icons.warning_amber_rounded,
+      reserveBottom: reserveBottom,
     );
   }
 

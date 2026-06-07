@@ -573,6 +573,17 @@ void main() {
         'Wearable desconectado',
       );
     });
+
+    test('hideMetricFooter suppresses entire footer', () {
+      expect(
+        sanitizeCopilotPrescriptionReason(
+          'Wearable desconectado · priorize contato',
+          statusMetricsVisible: false,
+          hideMetricFooter: true,
+        ),
+        isEmpty,
+      );
+    });
   });
 
   group('proximaAcaoResumoFromIaPayload', () {

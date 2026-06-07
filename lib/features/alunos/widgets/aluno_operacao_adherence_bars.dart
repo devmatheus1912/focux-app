@@ -10,12 +10,16 @@ class AlunoOperacaoAdherenceBars extends StatelessWidget {
     required this.points,
     required this.activeColor,
     required this.idleColor,
+    required this.missColor,
+    required this.todayRingColor,
     this.emptyWeek = false,
   });
 
   final List<AderenciaWeekPoint> points;
   final Color activeColor;
   final Color idleColor;
+  final Color missColor;
+  final Color todayRingColor;
   final bool emptyWeek;
 
   static const _barMaxHeight = 36.0;
@@ -54,6 +58,8 @@ class AlunoOperacaoAdherenceBars extends StatelessWidget {
                 maxVal: maxVal,
                 activeColor: activeColor,
                 idleColor: idleColor,
+                missColor: missColor,
+                todayRingColor: todayRingColor,
                 labelColor: labelColor,
                 barMaxHeight: _barMaxHeight,
                 labelBand: labelBand,
@@ -76,6 +82,8 @@ class _AdherenceDayBar extends StatelessWidget {
     required this.maxVal,
     required this.activeColor,
     required this.idleColor,
+    required this.missColor,
+    required this.todayRingColor,
     required this.labelColor,
     required this.barMaxHeight,
     required this.labelBand,
@@ -89,6 +97,8 @@ class _AdherenceDayBar extends StatelessWidget {
   final double maxVal;
   final Color activeColor;
   final Color idleColor;
+  final Color missColor;
+  final Color todayRingColor;
   final Color labelColor;
   final double barMaxHeight;
   final double labelBand;
@@ -98,6 +108,7 @@ class _AdherenceDayBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasActivity = value > 0;
+    final isToday = isIsoDateToday(isoDate);
     final fraction =
         hasActivity
             ? (value / maxVal).clamp(minFraction, 1.0)
@@ -111,13 +122,24 @@ class _AdherenceDayBar extends StatelessWidget {
     final tooltip =
         weekday.isEmpty
             ? semanticsValue
-            : '$weekday · $semanticsValue';
+            : '$weekday · $semanticsValue${isToday ? ' · hoje' : ''}';
+
+    final barFill =
+        hasActivity
+            ? activeColor
+            : (outlineIdle
+                ? Colors.transparent
+                : missColor.withValues(alpha: 0.38));
+    final barBorder =
+        outlineIdle && !hasActivity
+            ? Border.all(color: missColor.withValues(alpha: 0.55), width: 1)
+            : null;
 
     return Semantics(
       label:
           dayLabel.isEmpty
               ? semanticsValue
-              : '$dayLabel · $semanticsValue',
+              : '$dayLabel · $semanticsValue${isToday ? ' · hoje' : ''}',
       button: true,
       child: Tooltip(
         message: tooltip,
@@ -137,7 +159,7 @@ class _AdherenceDayBar extends StatelessWidget {
                         height: 5,
                         margin: const EdgeInsets.only(bottom: 4),
                         decoration: BoxDecoration(
-                          color: labelColor.withValues(alpha: 0.85),
+                          color: missColor.withValues(alpha: 0.85),
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -148,20 +170,9 @@ class _AdherenceDayBar extends StatelessWidget {
                       height: barMaxHeight * fraction,
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color:
-                            hasActivity
-                                ? activeColor
-                                : (outlineIdle
-                                    ? Colors.transparent
-                                    : idleColor),
+                        color: barFill,
                         borderRadius: BorderRadius.circular(4),
-                        border:
-                            outlineIdle && !hasActivity
-                                ? Border.all(
-                                  color: idleColor.withValues(alpha: 0.85),
-                                  width: 1,
-                                )
-                                : null,
+                        border: barBorder,
                       ),
                     ),
                   ],
@@ -171,15 +182,33 @@ class _AdherenceDayBar extends StatelessWidget {
             SizedBox(
               height: labelBand,
               child: Center(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    dayLabel,
-                    style: TextStyle(
-                      color: labelColor,
-                      fontSize: outlineIdle ? 10.5 : 10,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: outlineIdle ? 0.2 : 0,
+                child: DecoratedBox(
+                  decoration:
+                      isToday
+                          ? BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: todayRingColor,
+                              width: 1.5,
+                            ),
+                          )
+                          : const BoxDecoration(),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isToday ? 4 : 0,
+                      vertical: isToday ? 1 : 0,
+                    ),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        dayLabel,
+                        style: TextStyle(
+                          color: isToday ? todayRingColor : labelColor,
+                          fontSize: outlineIdle ? 10.5 : 10,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: outlineIdle ? 0.2 : 0,
+                        ),
+                      ),
                     ),
                   ),
                 ),

@@ -38,7 +38,7 @@ class Aluno360OperacaoFocusModeToggle extends ConsumerWidget {
                       .read(alunoOperacaoFocusModeProvider(alunoId).notifier)
                       .toggle(),
           icon: Icon(
-            focusMode ? Icons.center_focus_strong : Icons.center_focus_weak,
+            focusMode ? Icons.visibility_off_outlined : Icons.visibility_outlined,
             size: 18,
             color: focusMode ? primary : ink.withValues(alpha: 0.78),
           ),
@@ -70,7 +70,7 @@ class Aluno360OperacaoFocusModeToggle extends ConsumerWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.center_focus_weak, size: 15, color: primary),
+              Icon(Icons.visibility_outlined, size: 15, color: primary),
               const SizedBox(width: 4),
               const Text(
                 'Modo foco',
@@ -97,7 +97,7 @@ class Aluno360OperacaoFocusModeToggle extends ConsumerWidget {
                       .read(alunoOperacaoFocusModeProvider(alunoId).notifier)
                       .toggle(),
           icon: Icon(
-            focusMode ? Icons.center_focus_strong : Icons.center_focus_weak,
+            focusMode ? Icons.visibility_off_outlined : Icons.visibility_outlined,
             size: 16,
             color: focusMode ? primary : ink.withValues(alpha: 0.75),
           ),

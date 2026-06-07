@@ -370,8 +370,10 @@ String sanitizeCopilotIaLanguage(String text) {
     'discuss': 'discutir',
     'feedback': 'retorno',
     'follow-up': 'follow-up',
-    'follow up': 'follow-up',
-    'check in': 'check-in',
+    'motivating': 'motivar',
+    'reasons': 'motivos',
+    'reason': 'motivo',
+    'inactivity': 'inatividade',
   };
   for (final entry in leaks.entries) {
     result = result.replaceAll(
@@ -394,6 +396,7 @@ List<String> copilotPrescriptionReasonSegments(String reason) {
 bool isRedundantCopilotReasonSegment(
   String segment, {
   bool statusMetricsVisible = false,
+  bool hideMetricFooter = false,
 }) {
   final lower = segment.toLowerCase().trim();
   if (lower.isEmpty) return true;
@@ -408,9 +411,12 @@ bool isRedundantCopilotReasonSegment(
       lower.contains('últimos 7 dias') ||
       lower.contains('ultimos 7 dias') ||
       lower.contains('0 de 7') ||
+      lower.contains('dias parados') ||
+      lower.contains('dias sem treino') ||
+      lower.contains('inativid') ||
       (lower.contains('priorize contato') && lower.contains('ader'));
 
-  if (metricNoise) return true;
+  if (metricNoise || hideMetricFooter) return true;
 
   if (!statusMetricsVisible) return false;
 
@@ -423,8 +429,11 @@ bool isRedundantCopilotReasonSegment(
 String sanitizeCopilotPrescriptionReason(
   String reason, {
   required bool statusMetricsVisible,
+  bool hideMetricFooter = false,
 }) {
-  if (!statusMetricsVisible || reason.trim().isEmpty) return reason;
+  if (reason.trim().isEmpty) return '';
+  if (hideMetricFooter) return '';
+  if (!statusMetricsVisible) return reason.trim();
   final segments =
       copilotPrescriptionReasonSegments(reason)
           .where(
@@ -797,6 +806,7 @@ String copilotProfileGapsButtonLabel(Aluno aluno) {
 CopilotPrescriptionContent contactPriorityPrescriptionContent(
   Aluno aluno, {
   bool statusMetricsVisible = false,
+  bool hideMetricFooter = false,
 }) {
   final firstName = aluno.nome.trim().isEmpty
       ? 'o aluno'
@@ -809,6 +819,7 @@ CopilotPrescriptionContent contactPriorityPrescriptionContent(
             ? 'Sem check-ins recentes · priorize contato antes de evoluir o plano.'
             : 'Sinais do perfil pedem contato direto hoje.',
     statusMetricsVisible: statusMetricsVisible,
+    hideMetricFooter: hideMetricFooter,
   );
   return CopilotPrescriptionContent(
     title: 'Prioridade do dia',
@@ -942,6 +953,7 @@ CopilotPrescriptionContent resolveCopilotPrescriptionFromAction(
   bool wearableRelevant = true,
   bool contactPriority = false,
   bool statusMetricsVisible = false,
+  bool hideMetricFooter = false,
 }) {
   final rawAcao =
       (action['acao'] ?? action['mensagem'] ?? action['descricao'] ?? fallback)
@@ -962,6 +974,7 @@ CopilotPrescriptionContent resolveCopilotPrescriptionFromAction(
   final reason = sanitizeCopilotPrescriptionReason(
     isIa ? formatCopilotIaMotivo(motivoRaw) : motivoRaw,
     statusMetricsVisible: statusMetricsVisible,
+    hideMetricFooter: hideMetricFooter,
   );
   return CopilotPrescriptionContent(
     title:

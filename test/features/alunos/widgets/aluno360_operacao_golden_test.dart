@@ -6,6 +6,7 @@ import 'package:focux_app/features/alertas/data/alertas_repository.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
 import 'package:focux_app/features/alunos/providers/aluno_followup_provider.dart';
+import 'package:focux_app/features/alunos/widgets/aluno360_copilot_prescription.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_operational_status_section.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_operacao_focus_toggle.dart';
 
@@ -28,40 +29,106 @@ void main() {
     riscoNivel: 'MEDIO',
   );
 
-  testWidgets('operational status section golden at 390px', (tester) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          alertasConfigProvider.overrideWith(
-            (ref) async => AlertasConfiguracao(
-              diasSemTreino: 7,
-              aderenciaMinima: 70,
+  List<Map<String, dynamic>> weekDataEndingToday() {
+    final today = DateTime(2026, 6, 4);
+    return List.generate(7, (i) {
+      final day = today.subtract(Duration(days: 6 - i));
+      final iso =
+          '${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}';
+      return {'data': iso, 'checkins': i.isEven ? 1 : 0};
+    });
+  }
+
+  Widget operationalStatusHarness({
+    required bool isDark,
+    required Widget child,
+  }) {
+    return ProviderScope(
+      overrides: [
+        alertasConfigProvider.overrideWith(
+          (ref) async => AlertasConfiguracao(
+            diasSemTreino: 7,
+            aderenciaMinima: 70,
+          ),
+        ),
+        aluno360OperacaoProvider(42).overrideWith((ref) => null),
+      ],
+      child: MaterialApp(
+        theme: ThemeData(
+          useMaterial3: true,
+          brightness: isDark ? Brightness.dark : Brightness.light,
+        ),
+        home: MediaQuery(
+          data: const MediaQueryData(size: Size(390, 844)),
+          child: Scaffold(
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: child,
             ),
           ),
-          aluno360OperacaoProvider(42).overrideWith((ref) {
-            return null;
-          }),
-        ],
-        child: MaterialApp(
-          theme: ThemeData(useMaterial3: true, brightness: Brightness.light),
-          home: MediaQuery(
-            data: const MediaQueryData(size: Size(390, 844)),
-            child: Scaffold(
-              body: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Aluno360OperationalStatusSection(
-                  aluno: aluno,
-                  alunoId: 42,
-                  isDark: false,
-                  primary: const Color(0xFF12A3A3),
-                  aderenciaSemanal: List.generate(
-                    7,
-                    (i) => {
-                      'data': '2026-06-0${i + 1}',
-                      'checkins': i.isEven ? 1 : 0,
-                    },
-                  ),
-                ),
+        ),
+      ),
+    );
+  }
+
+  testWidgets('operational status section golden at 390px', (tester) async {
+    await tester.pumpWidget(
+      operationalStatusHarness(
+        isDark: false,
+        child: Aluno360OperationalStatusSection(
+          aluno: aluno,
+          alunoId: 42,
+          isDark: false,
+          primary: const Color(0xFF12A3A3),
+          aderenciaSemanal: weekDataEndingToday(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(Aluno360OperationalStatusSection),
+      matchesGoldenFile('goldens/aluno360_operational_status_390.png'),
+    );
+  });
+
+  testWidgets('operational status section golden dark at 390px', (tester) async {
+    await tester.pumpWidget(
+      operationalStatusHarness(
+        isDark: true,
+        child: Aluno360OperationalStatusSection(
+          aluno: aluno,
+          alunoId: 42,
+          isDark: true,
+          primary: const Color(0xFF12A3A3),
+          aderenciaSemanal: weekDataEndingToday(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(Aluno360OperationalStatusSection),
+      matchesGoldenFile('goldens/aluno360_operational_status_390_dark.png'),
+    );
+  });
+
+  testWidgets('copilot prescription golden at 390px', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true, brightness: Brightness.light),
+        home: MediaQuery(
+          data: const MediaQueryData(size: Size(390, 844)),
+          child: Scaffold(
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Aluno360CopilotPrescription(
+                title: 'Próximo passo',
+                action:
+                    'Retomar contato com Beatriz e alinhar expectativa de check-in.',
+                reason: 'Wearable desconectado · priorize contato direto hoje.',
+                color: const Color(0xFF12A3A3),
+                onPrepareMessage: () {},
               ),
             ),
           ),
@@ -71,8 +138,38 @@ void main() {
     await tester.pumpAndSettle();
 
     await expectLater(
-      find.byType(Aluno360OperationalStatusSection),
-      matchesGoldenFile('goldens/aluno360_operational_status_390.png'),
+      find.byType(Aluno360CopilotPrescription),
+      matchesGoldenFile('goldens/aluno360_copilot_prescription_390.png'),
+    );
+  });
+
+  testWidgets('copilot prescription golden dark at 390px', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true, brightness: Brightness.dark),
+        home: MediaQuery(
+          data: const MediaQueryData(size: Size(390, 844)),
+          child: Scaffold(
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Aluno360CopilotPrescription(
+                title: 'Próximo passo',
+                action:
+                    'Retomar contato com Beatriz e alinhar expectativa de check-in.',
+                reason: 'Wearable desconectado · priorize contato direto hoje.',
+                color: const Color(0xFF12A3A3),
+                onPrepareMessage: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(Aluno360CopilotPrescription),
+      matchesGoldenFile('goldens/aluno360_copilot_prescription_390_dark.png'),
     );
   });
 

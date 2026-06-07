@@ -256,7 +256,7 @@ void main() {
     expect(find.text('Prioridade do dia'), findsOneWidget);
     expect(find.byKey(const ValueKey('aluno360_operacao_status')), findsNothing);
     expect(find.text('Status operacional'), findsNothing);
-    expect(find.byIcon(Icons.center_focus_strong), findsOneWidget);
+    expect(find.byIcon(Icons.visibility_off_outlined), findsOneWidget);
 
     await tester.pump(const Duration(milliseconds: 300));
   });

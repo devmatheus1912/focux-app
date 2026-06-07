@@ -24,6 +24,7 @@ import '../providers/aluno_detail_providers.dart';
 import '../providers/alunos_provider.dart';
 import '../utils/aluno360_copilot_logic.dart';
 import '../utils/aluno360_operacao_logic.dart';
+import '../widgets/aluno360_copilot_executar_confirm.dart';
 import '../widgets/aluno360_copilot_prescription.dart';
 import '../widgets/aluno360_copilot_support.dart';
 import '../widgets/aluno360_operacao_focus_toggle.dart';
@@ -573,6 +574,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
               wearableRelevant: wearableRelevant,
               contactPriority: operacao.contactPriority,
               statusMetricsVisible: !focusMode,
+              hideMetricFooter: focusMode,
               onPrepareMessage:
                   showPrepareInPrescription
                       ? () => _prepararMensagem(
@@ -673,6 +675,14 @@ class _Aluno360CopilotExecutarAcaoButtonState
   Future<void> _executar() async {
     final spec = widget.spec;
     if (_executing) return;
+
+    final confirmed = await showCopilotExecutarConfirmSheet(
+      context,
+      spec: spec,
+      primary: widget.primary,
+    );
+    if (!confirmed || !mounted) return;
+
     setState(() => _executing = true);
     unawaited(
       AnalyticsService.instance.track(
@@ -694,9 +704,17 @@ class _Aluno360CopilotExecutarAcaoButtonState
       _invalidateAfterExecutar(spec.backendTipo);
       if (!mounted) return;
       if (resp.ok) {
-        FeedbackHelper.showSuccess(context, resp.mensagem);
+        FeedbackHelper.showSuccess(
+          context,
+          resp.mensagem,
+          reserveBottom: Aluno360Layout.snackbarStickyReserve,
+        );
       } else {
-        FeedbackHelper.showWarn(context, resp.mensagem);
+        FeedbackHelper.showWarn(
+          context,
+          resp.mensagem,
+          reserveBottom: Aluno360Layout.snackbarStickyReserve,
+        );
       }
     } catch (e) {
       if (!mounted) return;
@@ -704,6 +722,7 @@ class _Aluno360CopilotExecutarAcaoButtonState
         FeedbackHelper.showWarn(
           context,
           friendlyError(e, fallback: 'IA indisponível agora.'),
+          reserveBottom: Aluno360Layout.snackbarStickyReserve,
         );
       } else {
         FeedbackHelper.showSnackBar(
@@ -798,6 +817,7 @@ class Aluno360CopilotIaRefreshButtonState extends ConsumerState<Aluno360CopilotI
         FeedbackHelper.showSuccess(
           context,
           'Sugestão atualizada com IA',
+          reserveBottom: Aluno360Layout.snackbarStickyReserve,
         );
       }
     } catch (e) {
@@ -808,6 +828,7 @@ class Aluno360CopilotIaRefreshButtonState extends ConsumerState<Aluno360CopilotI
         FeedbackHelper.showWarn(
           context,
           friendlyError(e, fallback: 'IA indisponível agora.'),
+          reserveBottom: Aluno360Layout.snackbarStickyReserve,
         );
       } else {
         FeedbackHelper.showSnackBar(
@@ -896,6 +917,7 @@ class Aluno360CopilotIaRefreshButtonState extends ConsumerState<Aluno360CopilotI
               )
               : Icon(Icons.refresh_rounded, size: iconSize),
       tooltip: _refreshing ? 'Atualizando…' : 'Regenerar sugestão com IA',
+      visualDensity: VisualDensity.compact,
     ),
     );
   }

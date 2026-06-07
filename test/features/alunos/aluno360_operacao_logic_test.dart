@@ -198,8 +198,8 @@ void main() {
       );
       expect(state, isNotNull);
       expect(state!.message, contains('Nenhum check-in'));
-      expect(state.compactLine, contains('Prioridade do dia'));
-      expect(state.compactLine, isNot(contains('. ·')));
+      expect(state.compactLine, contains('Nenhum check-in'));
+      expect(state.compactLine, isNot(contains('Prioridade do dia')));
       expect(state.showCheckinCta, isFalse);
     });
 

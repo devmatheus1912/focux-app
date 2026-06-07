@@ -188,7 +188,11 @@ void main() {
     expect(screen, contains('Linha do tempo 360'));
     expect(screen, contains('Ver histórico completo da linha do tempo'));
     expect(screen, contains('class _AlunoDetailFerramentasTab'));
-    expect(screen, contains("'Módulos'"));
+    expect(
+      File('lib/features/alunos/widgets/aluno360_ferramentas_tab.dart')
+          .readAsStringSync(),
+      contains("'Módulos'"),
+    );
     expect(screen, contains('class _ModuleTile'));
     expect(screen, contains('Abas do perfil do aluno'));
     expect(screen, contains('ValueKey(\'aluno360_operacao_status\')'));

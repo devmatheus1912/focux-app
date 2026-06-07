@@ -233,7 +233,6 @@ OperacaoAdherenceEmptyState? resolveOperacaoAdherenceEmptyState({
   if (operacao?.showPrepareMessage == true) {
     return const OperacaoAdherenceEmptyState(
       message: 'Nenhum check-in nos últimos 7 dias.',
-      hint: 'Prioridade do dia abaixo.',
       showCheckinCta: false,
     );
   }
@@ -363,6 +362,17 @@ String weekdayNameFromIso(String? isoDate) {
     'Sáb',
   ];
   return labels[parsed.weekday % 7];
+}
+
+/// Whether [isoDate] (yyyy-MM-dd) is today in local time.
+bool isIsoDateToday(String? isoDate) {
+  if (isoDate == null || isoDate.isEmpty) return false;
+  final parsed = DateTime.tryParse(isoDate);
+  if (parsed == null) return false;
+  final now = DateTime.now();
+  return parsed.year == now.year &&
+      parsed.month == now.month &&
+      parsed.day == now.day;
 }
 
 /// Staggered entrance delay for Operação sections (finance banner shifts timeline).

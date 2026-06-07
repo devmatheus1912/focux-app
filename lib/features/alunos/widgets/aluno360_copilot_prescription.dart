@@ -330,7 +330,8 @@ class _Aluno360CopilotPrescriptionState
                   style: FilledButton.styleFrom(
                     elevation: 0,
                     foregroundColor: widget.color,
-                    backgroundColor: widget.color.withValues(alpha: 0.10),
+                    backgroundColor: widget.color.withValues(alpha: 0.14),
+                    side: BorderSide(color: widget.color.withValues(alpha: 0.32)),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(13),
                     ),
@@ -426,6 +427,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
     this.wearableRelevant = true,
     this.contactPriority = false,
     this.statusMetricsVisible = false,
+    this.hideMetricFooter = false,
   });
 
   final Aluno aluno;
@@ -440,6 +442,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
   final bool wearableRelevant;
   final bool contactPriority;
   final bool statusMetricsVisible;
+  final bool hideMetricFooter;
 
   @override
   Widget build(BuildContext context) {
@@ -465,6 +468,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
                 wearableRelevant: wearableRelevant,
                 contactPriority: contactPriority,
                 statusMetricsVisible: statusMetricsVisible,
+                hideMetricFooter: hideMetricFooter,
               ),
               isIaSuggestion: true,
             ),
@@ -478,6 +482,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
             ? contactPriorityPrescriptionContent(
               aluno,
               statusMetricsVisible: statusMetricsVisible,
+              hideMetricFooter: hideMetricFooter,
             )
             : resolveCopilotPrescriptionFromAction(
               aluno,
@@ -486,6 +491,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
               wearableRelevant: wearableRelevant,
               contactPriority: contactPriority,
               statusMetricsVisible: statusMetricsVisible,
+              hideMetricFooter: hideMetricFooter,
             ),
       );
     } else if (resumoLoading) {

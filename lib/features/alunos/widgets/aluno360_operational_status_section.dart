@@ -358,8 +358,10 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
                     label: 'Check-ins dos últimos 7 dias',
                     child: AlunoOperacaoAdherenceBars(
                       points: week.points,
-                      activeColor: aderenciaColor,
+                      activeColor: EagleTokens.good,
                       idleColor: neutralIdle,
+                      missColor: isDark ? EagleTokens.warn : const Color(0xFFDC6B6B),
+                      todayRingColor: primary,
                       emptyWeek: !week.hasAnyCheckin,
                     ),
                   ),

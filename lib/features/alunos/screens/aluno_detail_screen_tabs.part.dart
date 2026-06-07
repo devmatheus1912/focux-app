@@ -49,7 +49,7 @@ class _AlunoDetailOperacaoTab extends ConsumerWidget {
       onEntrancePlayed: onEntrancePlayed,
       financeRiskBanner:
           financeRisk
-              ? _AlunoFinanceiroRiskBanner(alunoId: alunoId, isDark: isDark)
+              ? Aluno360FinanceRiskBanner(alunoId: alunoId, isDark: isDark)
               : null,
       followUpCard: Aluno360FollowUpCard(
         aluno: aluno,
@@ -119,100 +119,25 @@ class _AlunoDetailEvolucaoTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _EvolucaoInteligenteCard(
-          alunoId: alunoId,
-          alunoNome: aluno.nome,
-          evolucaoAsync: evolucaoAsync,
-          isDark: isDark,
-        ),
-        const SizedBox(height: Aluno360Layout.sectionGap),
-        Aluno360OperacaoEntrance(
-          enabled: animateEntrance,
-          delay: const Duration(milliseconds: 40),
-          onPlayed: onEntrancePlayed,
-          child: _Aluno360TimelineCard(
-            aluno: aluno,
-            timelineApiAsync: timeline360Async,
-            isDark: isDark,
-          ),
-        ),
-        const SizedBox(height: Aluno360Layout.sectionGap),
-        Aluno360OperacaoEntrance(
-          enabled: animateEntrance,
-          delay: const Duration(milliseconds: 80),
-          onPlayed: onEntrancePlayed,
-          child: _AlunoWeightActivityCard(
-            aluno: aluno,
-            alunoId: alunoId,
-            isDark: isDark,
-            ink: ink,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _AlunoFinanceiroRiskBanner extends StatelessWidget {
-  const _AlunoFinanceiroRiskBanner({
-    required this.alunoId,
-    required this.isDark,
-  });
-
-  final int alunoId;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    final ink = fxScreenInk(context);
-    final mute = fxScreenMute(context);
-    return Semantics(
-      button: true,
-      label: 'Pendência financeira. Abrir mensalidades deste aluno',
-      child: Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => context.push('/financeiro?alunoId=$alunoId'),
-        borderRadius: BorderRadius.circular(TokensStrip.rCard),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: EagleTokens.bad.withValues(alpha: isDark ? 0.16 : 0.08),
-            borderRadius: BorderRadius.circular(TokensStrip.rCard),
-            border: Border.all(color: EagleTokens.bad.withValues(alpha: 0.28)),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.payments_outlined, color: EagleTokens.bad, size: 20),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Pendência financeira',
-                      style: TextStyle(
-                        color: ink,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13.5,
-                      ),
-                    ),
-                    Text(
-                      'Abrir mensalidades deste aluno',
-                      style: TextStyle(color: mute, fontSize: 11.5),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.chevron_right_rounded, color: mute),
-            ],
-          ),
-        ),
+    return Aluno360EvolucaoTab(
+      animateEntrance: animateEntrance,
+      onEntrancePlayed: onEntrancePlayed,
+      evolucaoCard: _EvolucaoInteligenteCard(
+        alunoId: alunoId,
+        alunoNome: aluno.nome,
+        evolucaoAsync: evolucaoAsync,
+        isDark: isDark,
       ),
+      timelineCard: _Aluno360TimelineCard(
+        aluno: aluno,
+        timelineApiAsync: timeline360Async,
+        isDark: isDark,
+      ),
+      weightCard: _AlunoWeightActivityCard(
+        aluno: aluno,
+        alunoId: alunoId,
+        isDark: isDark,
+        ink: ink,
       ),
     );
   }
@@ -253,10 +178,10 @@ class _AlunoDetailFerramentasTab extends ConsumerWidget {
             : null;
     final evolucaoRoute = '/alunos/$alunoId/evolucao';
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        medidasAsync.when(
+    return Aluno360FerramentasTab(
+      primary: primary,
+      isDark: isDark,
+      measurementsSection: medidasAsync.when(
           loading:
               () => FxLoading.sectionShimmer(context, height: 88, showHeader: false),
           error: (_, __) => const SizedBox.shrink(),
@@ -315,18 +240,7 @@ class _AlunoDetailFerramentasTab extends ConsumerWidget {
                 },
               ),
         ),
-        const SizedBox(height: 20),
-        Text(
-          'Módulos',
-          style: AppTypography.inter(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.4,
-            color: BrandPalette.sectionHeading(primary, dark: isDark),
-          ),
-        ),
-        const SizedBox(height: 12),
-        LayoutBuilder(
+      modulesSection: LayoutBuilder(
           builder: (context, constraints) {
             final textScale = MediaQuery.textScalerOf(context).scale(1);
             final aspectRatio = 2.55 / textScale.clamp(1.0, 2.2);
@@ -457,7 +371,6 @@ class _AlunoDetailFerramentasTab extends ConsumerWidget {
         );
           },
         ),
-      ],
     );
   }
 }
