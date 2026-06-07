@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../utils/aluno360_operacao_logic.dart';
@@ -136,84 +137,99 @@ class _AdherenceDayBar extends StatelessWidget {
             : null;
 
     return Semantics(
+      button: true,
       label:
           dayLabel.isEmpty
               ? semanticsValue
               : '$dayLabel · $semanticsValue${isToday ? ' · hoje' : ''}',
       child: Tooltip(
         message: tooltip,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            SizedBox(
-              height: barMaxHeight,
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    if (outlineIdle && !hasActivity) ...[
-                      Container(
-                        width: 5,
-                        height: 5,
-                        margin: const EdgeInsets.only(bottom: 4),
-                        decoration: BoxDecoration(
-                          color: missColor.withValues(alpha: 0.85),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ],
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 220),
-                      curve: Curves.easeOutCubic,
-                      height: barMaxHeight * fraction,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: barFill,
-                        borderRadius: BorderRadius.circular(4),
-                        border: barBorder,
-                      ),
-                    ),
-                  ],
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap:
+                () => SemanticsService.announce(
+                  tooltip,
+                  Directionality.of(context),
                 ),
-              ),
-            ),
-            SizedBox(
-              height: labelBand,
-              child: Center(
-                child: DecoratedBox(
-                  decoration:
-                      isToday
-                          ? BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: todayRingColor,
-                              width: 1.5,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48, minWidth: 28),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  SizedBox(
+                    height: barMaxHeight,
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          if (outlineIdle && !hasActivity) ...[
+                            Container(
+                              width: 7,
+                              height: 7,
+                              margin: const EdgeInsets.only(bottom: 4),
+                              decoration: BoxDecoration(
+                                color: missColor.withValues(alpha: 0.92),
+                                shape: BoxShape.circle,
+                              ),
                             ),
-                          )
-                          : const BoxDecoration(),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isToday ? 4 : 0,
-                      vertical: isToday ? 1 : 0,
+                          ],
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 220),
+                            curve: Curves.easeOutCubic,
+                            height: barMaxHeight * fraction,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: barFill,
+                              borderRadius: BorderRadius.circular(4),
+                              border: barBorder,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        dayLabel,
-                        style: TextStyle(
-                          color: isToday ? todayRingColor : labelColor,
-                          fontSize: outlineIdle ? 10.5 : 10,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: outlineIdle ? 0.2 : 0,
+                  ),
+                  SizedBox(
+                    height: labelBand,
+                    child: Center(
+                      child: DecoratedBox(
+                        decoration:
+                            isToday
+                                ? BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: todayRingColor,
+                                    width: 1.5,
+                                  ),
+                                )
+                                : const BoxDecoration(),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isToday ? 4 : 0,
+                            vertical: isToday ? 1 : 0,
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              dayLabel,
+                              style: TextStyle(
+                                color: isToday ? todayRingColor : labelColor,
+                                fontSize: outlineIdle ? 10.5 : 10,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: outlineIdle ? 0.2 : 0,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

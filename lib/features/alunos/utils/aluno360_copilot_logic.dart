@@ -599,15 +599,26 @@ String copilotCardSubtitle({
   required bool forceIa,
   required AsyncValue<Map<String, dynamic>>? iaAsync,
   required bool resumoLoading,
+  bool compact = false,
 }) {
   if (forceIa && iaAsync != null) {
     return iaAsync.when(
-      loading: () => 'Gerando sugestão com IA…',
-      error: (_, __) => 'Sugestão do Aluno 360 · IA indisponível agora',
-      data: (_) => 'Atualizado com IA · toque em atualizar para regenerar',
+      loading: () => compact ? 'Gerando com IA…' : 'Gerando sugestão com IA…',
+      error:
+          (_, __) =>
+              compact
+                  ? 'Aluno 360 · IA indisponível'
+                  : 'Sugestão do Aluno 360 · IA indisponível agora',
+      data:
+          (_) =>
+              compact
+                  ? 'Sugestão IA · toque em atualizar'
+                  : 'Atualizado com IA · toque em atualizar para regenerar',
     );
   }
-  if (resumoLoading) return 'Carregando sinais do perfil…';
+  if (resumoLoading) {
+    return compact ? 'Carregando perfil…' : 'Carregando sinais do perfil…';
+  }
   return 'Sugestão com base no perfil de hoje.';
 }
 

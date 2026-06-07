@@ -55,6 +55,8 @@ import '../widgets/aluno360_finance_risk_banner.dart';
 import '../widgets/aluno360_timeline_card.dart';
 import '../widgets/aluno360_action_empty_panel.dart';
 import '../widgets/aluno360_mini_autonomy_chip.dart';
+import '../widgets/aluno360_student_quick_actions.dart';
+import '../widgets/aluno360_evolucao_inteligente_card.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
 import '../utils/aluno_detail_aluno_actions.dart';
 import '../../../core/theme/tokens_strip.dart';

@@ -6,6 +6,7 @@ import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart'
 import 'package:focux_app/features/alunos/widgets/aluno360_operacao_focus_toggle.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_operacao_logic.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_operacao_sticky_cta.dart';
+import 'package:focux_app/features/alunos/widgets/aluno_operacao_adherence_legend.dart';
 import 'package:focux_app/features/ia/data/ia_repository.dart';
 
 void main() {
@@ -143,6 +144,30 @@ void main() {
               node.properties.label == 'Ações rápidas da aba operação',
         ),
         isTrue,
+      );
+    });
+  });
+
+  group('AlunoOperacaoAdherenceLegend', () {
+    testWidgets('exposes combined semantics label', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AlunoOperacaoAdherenceLegend(
+              activeColor: Colors.green,
+              missColor: Colors.red,
+              todayRingColor: Colors.teal,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.getSemantics(find.byType(AlunoOperacaoAdherenceLegend)),
+        matchesSemantics(
+          label: 'Legenda: verde check-in, vermelho sem registro, anel indica hoje',
+        ),
       );
     });
   });

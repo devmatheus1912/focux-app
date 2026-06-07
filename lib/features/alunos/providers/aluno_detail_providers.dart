@@ -78,6 +78,11 @@ final alunoCopilotIaSkipCacheProvider = StateProvider.family<bool, int>(
   (ref, alunoId) => false,
 );
 
+/// True while the user-triggered IA refresh is in flight (incl. stale-while-revalidate).
+final alunoCopilotIaRefreshingProvider = StateProvider.family<bool, int>(
+  (ref, alunoId) => false,
+);
+
 final alunoCopilotoActionProvider =
     FutureProvider.family<Map<String, dynamic>, int>((ref, alunoId) async {
       final skipCache = ref.watch(alunoCopilotIaSkipCacheProvider(alunoId));

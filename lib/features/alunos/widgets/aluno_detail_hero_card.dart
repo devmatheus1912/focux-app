@@ -304,8 +304,18 @@ class _IdentityMetricChip extends StatelessWidget {
         signal.label == 'Risco operacional' || signal.label == 'Sem treino'
             ? OperationalMetricEmphasis.alert
             : OperationalMetricEmphasis.normal;
+    final eyebrowColor =
+        emphasis == OperationalMetricEmphasis.alert
+            ? (isDark ? accent : Color.lerp(accent, Colors.black, 0.42)!)
+            : Color.lerp(ink, accent, 0.35)!;
+    final valueColor =
+        emphasis == OperationalMetricEmphasis.alert
+            ? (isDark ? ink : Color.lerp(ink, Colors.black, 0.15)!)
+            : ink;
 
-    return Container(
+    return Semantics(
+      label: '${eyebrow ?? signal.label} ${signal.value}${signal.suffix ?? ''}',
+      child: Container(
       constraints: const BoxConstraints(minWidth: 62),
       padding: const EdgeInsets.fromLTRB(8, 6, 10, 6),
       decoration: operationalMetricDecoration(
@@ -321,7 +331,7 @@ class _IdentityMetricChip extends StatelessWidget {
             Text(
               eyebrow.toUpperCase(),
               style: AppTypography.inter(
-                color: Color.lerp(ink, accent, 0.35)!,
+                color: eyebrowColor,
                 fontSize: 9,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0.35,
@@ -337,7 +347,7 @@ class _IdentityMetricChip extends StatelessWidget {
               Text(
                 signal.value,
                 style: AppTypography.condensed(
-                  color: ink,
+                  color: valueColor,
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.4,
@@ -360,6 +370,7 @@ class _IdentityMetricChip extends StatelessWidget {
             ],
           ),
         ],
+      ),
       ),
     );
   }

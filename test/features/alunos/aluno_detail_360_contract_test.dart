@@ -40,6 +40,14 @@ String _alunoDetailLibrarySource() {
       'lib/features/alunos/utils/aluno_detail_aluno_actions.dart';
   const deleteConfirmSheetFile =
       'lib/features/alunos/widgets/aluno_delete_confirm_sheet.dart';
+  const quickActionsFile =
+      'lib/features/alunos/widgets/aluno360_student_quick_actions.dart';
+  const evolucaoCardFile =
+      'lib/features/alunos/widgets/aluno360_evolucao_inteligente_card.dart';
+  const adherenceLegendFile =
+      'lib/features/alunos/widgets/aluno_operacao_adherence_legend.dart';
+  const profileGapsSheetFile =
+      'lib/features/alunos/widgets/aluno360_copilot_profile_gaps_sheet.dart';
   const copilotTaskActionsFile =
       'lib/features/alunos/utils/aluno360_copilot_task_actions.dart';
   const executarButtonFile =
@@ -67,13 +75,17 @@ String _alunoDetailLibrarySource() {
   final actionEmptyPanel = File(actionEmptyPanelFile).readAsStringSync();
   final alunoActions = File(alunoActionsFile).readAsStringSync();
   final deleteConfirmSheet = File(deleteConfirmSheetFile).readAsStringSync();
+  final quickActions = File(quickActionsFile).readAsStringSync();
+  final evolucaoCard = File(evolucaoCardFile).readAsStringSync();
+  final adherenceLegend = File(adherenceLegendFile).readAsStringSync();
+  final profileGapsSheet = File(profileGapsSheetFile).readAsStringSync();
   final iaRepository = File(iaRepositoryFile).readAsStringSync();
   final partPattern = RegExp(r"part '([^']+\.part\.dart)';");
   final parts = partPattern
       .allMatches(main)
       .map((m) => File('$dir/${m.group(1)!}').readAsStringSync())
       .join('\n');
-  return '$main\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$outreachSheet\n$copilotCard\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$actionEmptyPanel\n$alunoActions\n$deleteConfirmSheet\n$iaRepository\n$parts';
+  return '$main\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$outreachSheet\n$copilotCard\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$actionEmptyPanel\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$parts';
 }
 
 void main() {
@@ -267,6 +279,12 @@ void main() {
       contains('ValueKey(\'aluno360_ferramentas_modulos\')'),
     );
     expect(screen, contains('class Aluno360ActionEmptyPanel'));
+    expect(screen, contains('class Aluno360StudentQuickActions'));
+    expect(screen, contains('AlunoOperacaoAdherenceLegend'));
+    expect(screen, contains('alunoCopilotIaRefreshingProvider'));
+    expect(screen, contains('operacaoOutlinedButtonStyle'));
+    expect(screen, contains('class Aluno360EvolucaoInteligenteCard'));
+    expect(screen, contains('showAluno360CopilotProfileGapsSheet'));
     expect(screen, contains('Sem sinais de evolução ainda'));
     expect(screen, contains('Linha do tempo ainda vazia'));
     expect(screen, contains('friendlyError(e, fallback: \'Não foi possível gerar senha.\')'));

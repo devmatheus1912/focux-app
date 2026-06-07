@@ -81,7 +81,7 @@ class Aluno360OperacaoTab extends ConsumerWidget {
     Widget diagnosticBody() {
       return LayoutBuilder(
         builder: (context, constraints) {
-          if (constraints.maxWidth >= 600) {
+          if (constraints.maxWidth >= Aluno360Layout.operacaoTabletBreakpoint) {
             return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

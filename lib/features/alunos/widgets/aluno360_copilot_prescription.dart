@@ -422,6 +422,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
     required this.forceIa,
     required this.iaAsync,
     required this.resumoLoading,
+    this.iaRefreshing = false,
     this.onPrepareMessage,
     this.preferContactPriority = false,
     this.wearableRelevant = true,
@@ -437,6 +438,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
   final bool forceIa;
   final AsyncValue<Map<String, dynamic>>? iaAsync;
   final bool resumoLoading;
+  final bool iaRefreshing;
   final VoidCallback? onPrepareMessage;
   final bool preferContactPriority;
   final bool wearableRelevant;
@@ -447,32 +449,62 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isIaLoading = forceIa && (iaAsync?.isLoading ?? false);
+    final isIaLoading =
+        iaRefreshing || (forceIa && (iaAsync?.isLoading ?? false));
     final isIaData = forceIa && (iaAsync?.hasValue ?? false);
 
     late final Widget child;
     if (forceIa && iaAsync != null) {
-      child = iaAsync!.when(
-        loading: () => Aluno360CopilotPrescriptionLoading(color: primary),
-        error:
-            (_, __) => _fromContent(
-              iaErrorCopilotPrescription(fallback),
-              isIaSuggestion: false,
-            ),
-        data:
-            (action) => _fromContent(
-              resolveCopilotPrescriptionFromAction(
-                aluno,
-                copilotActionFromIa(action),
-                fallback,
-                wearableRelevant: wearableRelevant,
-                contactPriority: contactPriority,
-                statusMetricsVisible: statusMetricsVisible,
-                hideMetricFooter: hideMetricFooter,
+      if (isIaLoading && !isIaData) {
+        child = Aluno360CopilotPrescriptionLoading(color: primary);
+      } else if (isIaLoading && isIaData) {
+        child = Stack(
+          children: [
+            Opacity(
+              opacity: 0.45,
+              child: _fromContent(
+                resolveCopilotPrescriptionFromAction(
+                  aluno,
+                  copilotActionFromIa(iaAsync!.value!),
+                  fallback,
+                  wearableRelevant: wearableRelevant,
+                  contactPriority: contactPriority,
+                  statusMetricsVisible: statusMetricsVisible,
+                  hideMetricFooter: hideMetricFooter,
+                ),
+                isIaSuggestion: true,
               ),
-              isIaSuggestion: true,
             ),
-      );
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Aluno360CopilotPrescriptionLoading(color: primary),
+              ),
+            ),
+          ],
+        );
+      } else {
+        child = iaAsync!.when(
+          loading: () => Aluno360CopilotPrescriptionLoading(color: primary),
+          error:
+              (_, __) => _fromContent(
+                iaErrorCopilotPrescription(fallback),
+                isIaSuggestion: false,
+              ),
+          data:
+              (action) => _fromContent(
+                resolveCopilotPrescriptionFromAction(
+                  aluno,
+                  copilotActionFromIa(action),
+                  fallback,
+                  wearableRelevant: wearableRelevant,
+                  contactPriority: contactPriority,
+                  statusMetricsVisible: statusMetricsVisible,
+                  hideMetricFooter: hideMetricFooter,
+                ),
+                isIaSuggestion: true,
+              ),
+        );
+      }
     } else if (seed360 != null) {
       final seedAcao = (seed360!['acao'] ?? '').toString();
       final useContactPriority =

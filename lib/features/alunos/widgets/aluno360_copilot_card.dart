@@ -18,6 +18,7 @@ import '../providers/aluno_detail_providers.dart';
 import '../utils/aluno360_copilot_logic.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../utils/aluno360_copilot_task_actions.dart';
+import '../widgets/aluno360_copilot_profile_gaps_sheet.dart';
 import '../widgets/aluno360_copilot_executar_button.dart';
 import '../widgets/aluno360_copilot_ia_refresh_button.dart';
 import '../widgets/aluno360_copilot_prescription.dart';
@@ -69,174 +70,11 @@ class Aluno360CopilotCard extends ConsumerWidget {
       await _openProfileGap(context, aluno, gaps.first);
       return;
     }
-    await _showProfileGapSheet(context, aluno, gaps);
-  }
-
-  Future<void> _showProfileGapSheet(
-    BuildContext context,
-    Aluno aluno,
-    List<CopilotProfileGap> gaps,
-  ) async {
-    final primary = Theme.of(context).colorScheme.primary;
-    final ink = fxScreenInk(context);
-    final mute = fxScreenMute(context);
-
-    Future<void> go(CopilotProfileGap gap, BuildContext sheetContext) async {
-      Navigator.of(sheetContext).pop();
-      await _openProfileGap(context, aluno, gap);
-    }
-
-    await showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder:
-          (sheetContext) => SafeArea(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                16,
-                4,
-                16,
-                16 + MediaQuery.of(sheetContext).padding.bottom,
-              ),
-              child: ShellSurface(
-                radius: TokensStrip.rCard,
-                accent: primary,
-                padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 8, 20, 20),
-                child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: primary.withValues(alpha: 0.10),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Icon(
-                          Icons.fact_check_outlined,
-                          color: primary,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Completar perfil',
-                              style: TextStyle(
-                                color: ink,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              gaps.isEmpty
-                                  ? 'Perfil pronto para decisões da IA.'
-                                  : '${gaps.length} lacuna(s) afetam a prescrição.',
-                              style: TextStyle(color: mute, fontSize: 12.5),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: TokensStrip.s4),
-                  if (gaps.isEmpty)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: EagleTokens.good.withValues(alpha: 0.10),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: EagleTokens.good.withValues(alpha: 0.18),
-                        ),
-                      ),
-                      child: const Text('Nada pendente no perfil agora.'),
-                    )
-                  else
-                    ...gaps.map(
-                      (gap) => Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                          child: InkWell(
-                          borderRadius: BorderRadius.circular(16),
-                          onTap: () => go(gap, sheetContext),
-                          child: Container(
-                            padding: const EdgeInsets.all(13),
-                            decoration: fxListCardDecoration(
-                              sheetContext,
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 34,
-                                  height: 34,
-                                  decoration: BoxDecoration(
-                                    color: BrandPalette.soft(
-                                      primary,
-                                      dark: isDark,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Icon(
-                                    gap.icon,
-                                    color: primary,
-                                    size: 18,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        gap.title,
-                                        style: TextStyle(
-                                          color: ink,
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 3),
-                                      Text(
-                                        gap.detail,
-                                        style: TextStyle(
-                                          color: mute,
-                                          fontSize: 12,
-                                          height: 1.25,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Icon(Icons.chevron_right_rounded, color: mute),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  if (gaps.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text(
-                        'Para ajustes gerais, use Editar nas ações rápidas.',
-                        style: TextStyle(color: mute, fontSize: 12),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            ),
-          ),
+    await showAluno360CopilotProfileGapsSheet(
+      context,
+      aluno: aluno,
+      gaps: gaps,
+      onSelectGap: (gap) => _openProfileGap(context, aluno, gap),
     );
   }
 
@@ -294,8 +132,10 @@ class Aluno360CopilotCard extends ConsumerWidget {
             ref.watch(alunoRecoveryProvider(aluno.id)).valueOrNull,
           ),
         );
+    final iaRefreshing = ref.watch(alunoCopilotIaRefreshingProvider(aluno.id));
     final iaLoading =
-        forceIa && iaAsync != null && iaAsync.isLoading && !iaAsync.hasValue;
+        iaRefreshing ||
+        (forceIa && iaAsync != null && iaAsync.isLoading && !iaAsync.hasValue);
     final resumo = resumoAsync.valueOrNull;
     final profileCompletion = copilotProfileCompletion(aluno);
     final signals = resolveCopilotSignals(
@@ -337,6 +177,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
         alunoTemHistoricoWearable(
           ref.watch(alunoRecoveryProvider(aluno.id)).valueOrNull,
         );
+    final compactSubtitle = MediaQuery.sizeOf(context).width < 400;
 
     return Container(
       padding: EdgeInsets.all(cardPadding),
@@ -385,6 +226,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
                               iaAsync: iaAsync,
                               resumoLoading:
                                   resumoAsync.isLoading && !resumoAsync.hasValue,
+                              compact: compactSubtitle,
                             ),
                             style: TextStyle(
                               color: mute,
@@ -460,7 +302,8 @@ class Aluno360CopilotCard extends ConsumerWidget {
                 ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: primary,
-                  side: BorderSide(color: primary.withValues(alpha: 0.28)),
+                  side: Aluno360Layout.operacaoOutlineSide(primary, isDark: isDark),
+                  minimumSize: const Size(0, 48),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(13),
                   ),
@@ -477,6 +320,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
               seed360: seed360,
               forceIa: forceIa,
               iaAsync: iaAsync,
+              iaRefreshing: iaRefreshing,
               resumoLoading: resumoAsync.isLoading && !resumoAsync.hasValue,
               preferContactPriority: operacao.contactPriority,
               wearableRelevant: wearableRelevant,

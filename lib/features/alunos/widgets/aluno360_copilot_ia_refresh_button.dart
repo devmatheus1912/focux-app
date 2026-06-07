@@ -33,6 +33,8 @@ class Aluno360CopilotIaRefreshButtonState
   Future<void> _refreshIa() async {
     if (_refreshing) return;
     setState(() => _refreshing = true);
+    ref.read(alunoCopilotIaRefreshingProvider(widget.alunoId).notifier).state =
+        true;
     unawaited(
       AnalyticsService.instance.track(
         ProductEvents.aluno360CopilotRefresh,
@@ -78,6 +80,8 @@ class Aluno360CopilotIaRefreshButtonState
         );
       }
     } finally {
+      ref.read(alunoCopilotIaRefreshingProvider(widget.alunoId).notifier).state =
+          false;
       if (mounted) setState(() => _refreshing = false);
     }
   }

@@ -131,4 +131,28 @@ abstract final class Aluno360Layout {
       fontWeight: FontWeight.w600,
     );
   }
+
+  /// WCAG AA outline for Operação secondary buttons (≥4.5:1 on white).
+  static BorderSide operacaoOutlineSide(Color primary, {required bool isDark}) {
+    return BorderSide(
+      color: primary.withValues(alpha: isDark ? 0.52 : 0.58),
+      width: 1.25,
+    );
+  }
+
+  static ButtonStyle operacaoOutlinedButtonStyle(
+    BuildContext context,
+    Color primary,
+  ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return OutlinedButton.styleFrom(
+      foregroundColor: isDark ? primary : Color.lerp(primary, Colors.black, 0.28)!,
+      minimumSize: const Size(0, 48),
+      side: operacaoOutlineSide(primary, isDark: isDark),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+    );
+  }
+
+  /// Tablet breakpoint for side-by-side status + copilot.
+  static const double operacaoTabletBreakpoint = 600;
 }

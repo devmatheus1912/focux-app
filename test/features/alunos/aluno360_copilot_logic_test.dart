@@ -238,6 +238,18 @@ void main() {
         'Sugestão com base no perfil de hoje.',
       );
     });
+
+    test('compact copy on narrow headers', () {
+      expect(
+        copilotCardSubtitle(
+          forceIa: true,
+          iaAsync: const AsyncValue.data({'acao': 'Teste'}),
+          resumoLoading: false,
+          compact: true,
+        ),
+        'Sugestão IA · toque em atualizar',
+      );
+    });
   });
 
   group('copilotPrescriptionDisplayAction', () {

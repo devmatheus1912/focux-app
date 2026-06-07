@@ -11,6 +11,8 @@ import 'package:focux_app/features/alunos/widgets/aluno360_copilot_executar_conf
 import 'package:focux_app/features/alunos/widgets/aluno360_copilot_prescription.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_operational_status_section.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_operacao_focus_toggle.dart';
+import 'package:focux_app/features/alunos/widgets/aluno360_student_quick_actions.dart';
+import 'package:focux_app/features/alunos/widgets/aluno_operacao_adherence_legend.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -305,6 +307,63 @@ void main() {
     await expectLater(
       find.byType(Aluno360OperacaoFocusModeToggle),
       matchesGoldenFile('goldens/aluno360_focus_toggle_390.png'),
+    );
+  });
+
+  testWidgets('quick actions golden at 390px', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true, brightness: Brightness.light),
+        home: MediaQuery(
+          data: const MediaQueryData(size: Size(390, 844)),
+          child: Scaffold(
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Aluno360StudentQuickActions(
+                aluno: aluno,
+                isDark: false,
+                primary: const Color(0xFF12A3A3),
+                onPassword: () {},
+                onEdit: () {},
+                onEvolve: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(Aluno360StudentQuickActions),
+      matchesGoldenFile('goldens/aluno360_quick_actions_390.png'),
+    );
+  });
+
+  testWidgets('adherence legend golden at 390px', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true, brightness: Brightness.light),
+        home: MediaQuery(
+          data: const MediaQueryData(size: Size(390, 844)),
+          child: Scaffold(
+            body: Padding(
+              padding: const EdgeInsets.all(16),
+              child: AlunoOperacaoAdherenceLegend(
+                activeColor: const Color(0xFF22C55E),
+                missColor: const Color(0xFFDC6B6B),
+                todayRingColor: const Color(0xFF12A3A3),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(AlunoOperacaoAdherenceLegend),
+      matchesGoldenFile('goldens/aluno360_adherence_legend_390.png'),
     );
   });
 }

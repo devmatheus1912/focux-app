@@ -13,6 +13,7 @@ import '../providers/aluno_detail_providers.dart';
 import '../providers/aluno_followup_provider.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../widgets/aluno_operacao_adherence_bars.dart';
+import '../widgets/aluno_operacao_adherence_legend.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
 import '../widgets/aluno360_operacao_focus_toggle.dart';
 
@@ -365,12 +366,17 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
                       emptyWeek: !week.hasAnyCheckin,
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  AlunoOperacaoAdherenceLegend(
+                    activeColor: EagleTokens.good,
+                    missColor: isDark ? EagleTokens.warn : const Color(0xFFDC6B6B),
+                    todayRingColor: primary,
+                  ),
                   if (showCheckinCta &&
                       (adherenceEmpty?.showCheckinCta ?? true)) ...[
                     const SizedBox(height: 10),
                     SizedBox(
                       width: double.infinity,
-                      height: 36,
                       child: OutlinedButton.icon(
                         onPressed:
                             () => showAlunoCheckinMessageSheet(
@@ -390,14 +396,9 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: primary,
-                          side: BorderSide(
-                            color: primary.withValues(alpha: isDark ? 0.28 : 0.22),
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                        style: Aluno360Layout.operacaoOutlinedButtonStyle(
+                          context,
+                          primary,
                         ),
                       ),
                     ),
