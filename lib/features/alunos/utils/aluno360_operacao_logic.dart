@@ -195,8 +195,50 @@ OperacaoStickyAction resolveOperacaoStickyAction({
   );
 }
 
-String operacaoStatusSubtitle(Aluno aluno, {required bool heroShowsRisco}) {
+String? operacaoStatusSubtitle(
+  Aluno aluno, {
+  required bool heroShowsRisco,
+  bool compactFollowUpVisible = false,
+}) {
+  if (compactFollowUpVisible) return null;
   return 'Próximo contato: ${formatProximoContato(aluno)}';
+}
+
+/// Copy + CTA for a week with zero check-ins in the adherence spark block.
+class OperacaoAdherenceEmptyState {
+  const OperacaoAdherenceEmptyState({
+    required this.message,
+    this.hint,
+    required this.showCheckinCta,
+  });
+
+  final String message;
+  final String? hint;
+  final bool showCheckinCta;
+
+  String get compactLine =>
+      hint != null && hint!.isNotEmpty ? '$message · $hint' : message;
+}
+
+OperacaoAdherenceEmptyState? resolveOperacaoAdherenceEmptyState({
+  required AderenciaWeekSummary week,
+  required Aluno360OperacaoSnapshot? operacao,
+}) {
+  if (week.points.isEmpty || week.hasAnyCheckin) return null;
+
+  if (operacao?.showPrepareMessage == true) {
+    return const OperacaoAdherenceEmptyState(
+      message: 'Nenhum check-in nos últimos 7 dias.',
+      hint: 'Prioridade do dia abaixo.',
+      showCheckinCta: false,
+    );
+  }
+
+  return const OperacaoAdherenceEmptyState(
+    message: 'Nenhum check-in nos últimos 7 dias.',
+    hint: 'Envie um lembrete rápido ao aluno.',
+    showCheckinCta: true,
+  );
 }
 
 /// Human-readable idle days for operational tiles.

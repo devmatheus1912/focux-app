@@ -10,14 +10,17 @@ class AlunoOperacaoAdherenceBars extends StatelessWidget {
     required this.points,
     required this.activeColor,
     required this.idleColor,
+    this.emptyWeek = false,
   });
 
   final List<AderenciaWeekPoint> points;
   final Color activeColor;
   final Color idleColor;
+  final bool emptyWeek;
 
-  static const _barMaxHeight = 34.0;
+  static const _barMaxHeight = 36.0;
   static const _minFraction = 0.14;
+  static const _emptyWeekMinFraction = 0.14;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +30,12 @@ class AlunoOperacaoAdherenceBars extends StatelessWidget {
       1,
       (prev, p) => p.checkins > prev ? p.checkins : prev,
     );
-    final labelColor = fxScreenMute(context);
+    final ink = fxScreenInk(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final labelColor =
+        emptyWeek
+            ? Color.lerp(fxScreenMute(context), ink, isDark ? 0.58 : 0.68)!
+            : fxScreenMute(context);
     final labelBand =
         14.0 * MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 1.5);
 
@@ -49,7 +57,8 @@ class AlunoOperacaoAdherenceBars extends StatelessWidget {
                 labelColor: labelColor,
                 barMaxHeight: _barMaxHeight,
                 labelBand: labelBand,
-                minFraction: _minFraction,
+                minFraction: emptyWeek ? _emptyWeekMinFraction : _minFraction,
+                outlineIdle: emptyWeek,
               ),
             ),
           ],
@@ -71,6 +80,7 @@ class _AdherenceDayBar extends StatelessWidget {
     required this.barMaxHeight,
     required this.labelBand,
     required this.minFraction,
+    this.outlineIdle = false,
   });
 
   final double value;
@@ -83,6 +93,7 @@ class _AdherenceDayBar extends StatelessWidget {
   final double barMaxHeight;
   final double labelBand;
   final double minFraction;
+  final bool outlineIdle;
 
   @override
   Widget build(BuildContext context) {
@@ -122,8 +133,18 @@ class _AdherenceDayBar extends StatelessWidget {
                   curve: Curves.easeOutCubic,
                   height: barMaxHeight * fraction,
                   decoration: BoxDecoration(
-                    color: hasActivity ? activeColor : idleColor,
+                    color:
+                        hasActivity
+                            ? activeColor
+                            : (outlineIdle ? Colors.transparent : idleColor),
                     borderRadius: BorderRadius.circular(4),
+                    border:
+                        outlineIdle && !hasActivity
+                            ? Border.all(
+                              color: idleColor.withValues(alpha: 0.85),
+                              width: 1,
+                            )
+                            : null,
                   ),
                 ),
               ),
@@ -137,8 +158,9 @@ class _AdherenceDayBar extends StatelessWidget {
                     dayLabel,
                     style: TextStyle(
                       color: labelColor,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
+                      fontSize: outlineIdle ? 10.5 : 10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: outlineIdle ? 0.2 : 0,
                     ),
                   ),
                 ),

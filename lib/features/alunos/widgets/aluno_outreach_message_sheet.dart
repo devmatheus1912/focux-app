@@ -155,6 +155,21 @@ class _AlunoOutreachMessageSheet extends StatelessWidget {
                     ],
                   ),
                 ),
+                Semantics(
+                  button: true,
+                  label: 'Fechar',
+                  child: IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: Icon(Icons.close_rounded, color: mute, size: 22),
+                    tooltip: 'Fechar',
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 36,
+                      minHeight: 36,
+                    ),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 14),

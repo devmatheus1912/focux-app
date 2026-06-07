@@ -387,7 +387,8 @@ String copilotMensagemPronta(
       lower.contains('incentiv') ||
       lower.contains('contate') ||
       lower.contains('contatar')) {
-    return 'Oi, $primeiroNome. Notei sua ausência nos treinos. Quer retomar juntos? Me responde por aqui que eu ajusto o plano.';
+    final junto = retomarTreinoJuntoTerm(aluno.genero);
+    return 'Oi, $primeiroNome. Notei sua ausência nos treinos. Quer retomar $junto? Me responde por aqui que eu ajusto o plano.';
   }
   return 'Oi, $primeiroNome. Notei que você se afastou um pouco dos treinos. Quer retomar? Me responde por aqui que eu ajusto o plano.';
 }

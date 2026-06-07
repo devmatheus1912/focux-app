@@ -483,6 +483,34 @@ void main() {
     });
   });
 
+  group('copilotMensagemPronta gender agreement', () {
+    test('uses juntas for feminine profile', () {
+      final msg = copilotMensagemPronta(
+        _aluno(genero: 'Feminino'),
+        'Contate o aluno por inatividade',
+      );
+      expect(msg, contains('juntas'));
+      expect(msg, isNot(contains('juntos?')));
+    });
+
+    test('uses juntos for masculine profile', () {
+      final msg = copilotMensagemPronta(
+        _aluno(genero: 'Masculino'),
+        'Contate o aluno por inatividade',
+      );
+      expect(msg, contains('juntos?'));
+      expect(msg, isNot(contains('juntas')));
+    });
+
+    test('uses neutral fallback when gender unknown', () {
+      final msg = copilotMensagemPronta(
+        _aluno(),
+        'Contate o aluno por inatividade',
+      );
+      expect(msg, contains('juntos(as)'));
+    });
+  });
+
   group('contactPriorityPrescriptionContent', () {
     test('surfaces risk and adherence in reason', () {
       final content = contactPriorityPrescriptionContent(

@@ -30,9 +30,17 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
   Widget _semTreinoTile({
     required Color mute,
     required int diasLimite,
+    required bool heroShowsRisco,
   }) {
     final dias = aluno.diasSemTreino;
     final display = formatDiasSemTreinoDisplay(dias);
+    final emphasis = switch (dias) {
+      null => heroShowsRisco
+          ? OperationalMetricEmphasis.alert
+          : OperationalMetricEmphasis.muted,
+      final d when d >= diasLimite => OperationalMetricEmphasis.alert,
+      _ => OperationalMetricEmphasis.normal,
+    };
     return OperationalMetricTile(
       label: 'Sem treino',
       value: display,
@@ -40,6 +48,7 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
       color:
           (dias ?? 0) >= diasLimite ? EagleTokens.warn : mute,
       isDark: isDark,
+      emphasis: emphasis,
       semanticsLabel:
           dias == null
               ? 'Sem treino, sem registro'
@@ -48,15 +57,23 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
   }
 
   Widget _aderenciaTile({required Color aderenciaColor}) {
+    final pct = aluno.aderenciaPercent;
+    final emphasis =
+        pct == null
+            ? OperationalMetricEmphasis.muted
+            : pct <= 0
+            ? OperationalMetricEmphasis.alert
+            : OperationalMetricEmphasis.normal;
     return OperationalMetricTile(
       label: 'Aderência',
       value:
-          aluno.aderenciaPercent == null
+          pct == null
               ? '—'
-              : '${aluno.aderenciaPercent}%',
+              : '$pct%',
       hint: 'Semana atual',
       color: aderenciaColor,
       isDark: isDark,
+      emphasis: emphasis,
       semanticsLabel:
           aluno.aderenciaPercent == null
               ? 'Aderência indisponível'
@@ -73,10 +90,6 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
         AlunoFollowUpStore.diasSemTreinoLimite;
     final week = summarizeAderenciaWeek(parseAderenciaSemanal(aderenciaSemanal));
     final operacao = ref.watch(aluno360OperacaoProvider(alunoId));
-    final showCheckinCta = shouldShowOperacaoCheckinCta(
-      operacao: operacao,
-      weekHasAnyCheckin: week.hasAnyCheckin,
-    );
     final heroShowsRisco = operacaoHeroShowsRisco(aluno);
     final dominant = resolveOperacaoDominantMetric(aluno);
     final aderenciaColor = EagleTokens.aderenciaColor(
@@ -91,10 +104,30 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
         isDark
             ? const Color(0xFF374151).withValues(alpha: 0.35)
             : const Color(0xFFE5E7EB);
+    final showCheckinCta = shouldShowOperacaoCheckinCta(
+      operacao: operacao,
+      weekHasAnyCheckin: week.hasAnyCheckin,
+    );
+    final adherenceEmpty = resolveOperacaoAdherenceEmptyState(
+      week: week,
+      operacao: operacao,
+    );
+    final compactFollowUpVisible = shouldCompactFollowUpForContactPriority(
+      contactPriority: operacao?.contactPriority ?? false,
+    );
+    final statusSubtitle = operacaoStatusSubtitle(
+      aluno,
+      heroShowsRisco: heroShowsRisco,
+      compactFollowUpVisible: compactFollowUpVisible,
+    );
 
     return Container(
       key: const ValueKey('aluno360_operacao_status'),
-      decoration: fxListCardDecoration(context),
+      decoration: Aluno360Layout.operacaoInsetSectionDecoration(
+        context,
+        primary: primary,
+        isDark: isDark,
+      ),
       padding: const EdgeInsets.all(Aluno360Layout.cardPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,12 +156,14 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            operacaoStatusSubtitle(aluno, heroShowsRisco: heroShowsRisco),
-            style: Aluno360Layout.captionStyle(context),
-          ),
-          const SizedBox(height: 12),
+          if (statusSubtitle != null) ...[
+            Text(
+              statusSubtitle,
+              style: Aluno360Layout.captionStyle(context),
+            ),
+            const SizedBox(height: 12),
+          ] else
+            const SizedBox(height: 8),
           if (!heroShowsRisco) ...[
             OperationalMetricTile(
               label: dominant.label,
@@ -153,6 +188,7 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
                   child: _semTreinoTile(
                     mute: fxScreenMute(context),
                     diasLimite: diasLimite,
+                    heroShowsRisco: heroShowsRisco,
                   ),
                 ),
               ],
@@ -185,6 +221,7 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
                   child: _semTreinoTile(
                     mute: fxScreenMute(context),
                     diasLimite: diasLimite,
+                    heroShowsRisco: heroShowsRisco,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -212,7 +249,7 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
                     week.hasAnyCheckin ? aderenciaColor : sparkMute;
                 return Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
               decoration: BoxDecoration(
                 color: sparkAccent.withValues(alpha: isDark ? 0.1 : 0.06),
                 borderRadius: BorderRadius.circular(14),
@@ -249,16 +286,69 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  if (adherenceEmpty != null) ...[
+                    const SizedBox(height: 8),
+                    Semantics(
+                      label: adherenceEmpty.compactLine,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: EagleTokens.warn.withValues(
+                            alpha: isDark ? 0.12 : 0.08,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: EagleTokens.warn.withValues(
+                              alpha: isDark ? 0.28 : 0.2,
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.event_busy_rounded,
+                              size: 14,
+                              color:
+                                  isDark
+                                      ? const Color(0xFFFFB77A)
+                                      : EagleTokens.warn,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                adherenceEmpty.compactLine,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: Aluno360Layout.captionStyle(
+                                  context,
+                                ).copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: ink,
+                                  height: 1.3,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
                   Semantics(
                     label: 'Check-ins dos últimos 7 dias',
                     child: AlunoOperacaoAdherenceBars(
                       points: week.points,
                       activeColor: aderenciaColor,
                       idleColor: neutralIdle,
+                      emptyWeek: !week.hasAnyCheckin,
                     ),
                   ),
-                  if (showCheckinCta) ...[
+                  if (showCheckinCta &&
+                      (adherenceEmpty?.showCheckinCta ?? true)) ...[
                     const SizedBox(height: 10),
                     SizedBox(
                       width: double.infinity,

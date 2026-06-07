@@ -3,6 +3,14 @@ import 'package:flutter/material.dart';
 /// Whether the student has a prescription objective on file.
 bool alunoObjectiveIsDefined(String? value) => (value ?? '').trim().isNotEmpty;
 
+/// "juntos" / "juntas" / "juntos(as)" from profile gender when known.
+String retomarTreinoJuntoTerm(String? genero) {
+  final g = (genero ?? '').trim().toLowerCase();
+  if (g.startsWith('fem')) return 'juntas';
+  if (g.startsWith('masc')) return 'juntos';
+  return 'juntos(as)';
+}
+
 /// Human-readable objective label for cards and hero.
 String prettyAlunoObjective(String? value) {
   final raw = (value ?? '').trim();

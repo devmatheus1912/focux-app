@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 /// Layout tokens for Aluno 360 (hero, sticky CTA, scroll insets).
 abstract final class Aluno360Layout {
   Aluno360Layout._();
@@ -35,6 +36,25 @@ abstract final class Aluno360Layout {
     return stickyBarContentHeight +
         MediaQuery.paddingOf(context).bottom +
         40;
+  }
+
+  /// Inset surface shared by Operação follow-up + status cards (teal tint).
+  static BoxDecoration operacaoInsetSectionDecoration(
+    BuildContext context, {
+    required Color primary,
+    required bool isDark,
+  }) {
+    final line = ShellChrome.of(context).line;
+    return BoxDecoration(
+      color:
+          isDark
+              ? Colors.white.withValues(alpha: 0.04)
+              : primary.withValues(alpha: 0.035),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(
+        color: isDark ? line : line.withValues(alpha: 0.85),
+      ),
+    );
   }
 
   /// WCAG-friendly caption for cards (min 12px, gray-700 on light).

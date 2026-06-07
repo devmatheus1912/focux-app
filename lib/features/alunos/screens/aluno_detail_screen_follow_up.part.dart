@@ -91,16 +91,10 @@ class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
     required Color primary,
     required bool isDark,
   }) {
-    final line = ShellChrome.of(context).line;
-    return BoxDecoration(
-      color:
-          isDark
-              ? Colors.white.withValues(alpha: 0.04)
-              : primary.withValues(alpha: 0.035),
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(
-        color: isDark ? line : line.withValues(alpha: 0.85),
-      ),
+    return Aluno360Layout.operacaoInsetSectionDecoration(
+      context,
+      primary: primary,
+      isDark: isDark,
     );
   }
 

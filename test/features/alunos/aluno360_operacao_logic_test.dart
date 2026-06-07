@@ -146,9 +146,84 @@ void main() {
         _aluno(emRisco: true),
         heroShowsRisco: true,
       );
+      expect(subtitle, isNotNull);
       expect(subtitle, contains('Próximo contato'));
       expect(subtitle, isNot(contains('priorize contato')));
       expect(subtitle, isNot(contains('risco alto')));
+    });
+
+    test('hides proximo contato when compact follow-up is visible', () {
+      expect(
+        operacaoStatusSubtitle(
+          _aluno(emRisco: true),
+          heroShowsRisco: true,
+          compactFollowUpVisible: true,
+        ),
+        isNull,
+      );
+    });
+  });
+
+  group('resolveOperacaoAdherenceEmptyState', () {
+    Aluno360OperacaoSnapshot contactSnapshot({required bool prepareMessage}) {
+      return Aluno360OperacaoSnapshot(
+        effectiveProxima: null,
+        stickyAction: OperacaoStickyAction(
+          label: 'Contato',
+          icon: Icons.chat_rounded,
+          destination: OperacaoStickyDestination.chat,
+        ),
+        stickyDisplayLabel: 'Contato',
+        contactPriority: true,
+        showPrepareMessage: prepareMessage,
+        hideCopilotTaskRow: true,
+        hideCopilotChatRow: true,
+        outreachMessage: 'Oi',
+      );
+    }
+
+    const emptyWeek = AderenciaWeekSummary(
+      points: [
+        AderenciaWeekPoint(checkins: 0, date: '2026-06-01'),
+        AderenciaWeekPoint(checkins: 0, date: '2026-06-02'),
+      ],
+      totalCheckins: 0,
+      hasAnyCheckin: false,
+    );
+
+    test('returns guidance without check-in CTA when copilot owns outreach', () {
+      final state = resolveOperacaoAdherenceEmptyState(
+        week: emptyWeek,
+        operacao: contactSnapshot(prepareMessage: true),
+      );
+      expect(state, isNotNull);
+      expect(state!.message, contains('Nenhum check-in'));
+      expect(state.compactLine, contains('Prioridade do dia'));
+      expect(state.showCheckinCta, isFalse);
+    });
+
+    test('offers check-in CTA when outreach is not on copilot', () {
+      final state = resolveOperacaoAdherenceEmptyState(
+        week: emptyWeek,
+        operacao: contactSnapshot(prepareMessage: false),
+      );
+      expect(state, isNotNull);
+      expect(state!.showCheckinCta, isTrue);
+    });
+
+    test('returns null when week has check-ins', () {
+      const weekWithData = AderenciaWeekSummary(
+        points: [AderenciaWeekPoint(checkins: 1, date: '2026-06-01')],
+        totalCheckins: 1,
+        hasAnyCheckin: true,
+      );
+      expect(
+        resolveOperacaoAdherenceEmptyState(
+          week: weekWithData,
+          operacao: contactSnapshot(prepareMessage: true),
+        ),
+        isNull,
+      );
     });
   });
 
