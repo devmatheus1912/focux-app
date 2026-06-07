@@ -11,6 +11,50 @@ String retomarTreinoJuntoTerm(String? genero) {
   return 'juntos(as)';
 }
 
+/// Fixes IA/backend outreach copy that defaults to masculine "juntos".
+String sanitizeOutreachGenderTerms(String message, {String? genero}) {
+  final junto = retomarTreinoJuntoTerm(genero);
+  var out = message;
+
+  if (junto == 'juntas') {
+    return out
+        .replaceAll(
+          RegExp(r'Quer retomar juntos\?', caseSensitive: false),
+          'Quer retomar juntas?',
+        )
+        .replaceAll(
+          RegExp(r'retomar juntos\?', caseSensitive: false),
+          'retomar juntas?',
+        )
+        .replaceAll(
+          RegExp(r'voltar juntos\?', caseSensitive: false),
+          'voltar juntas?',
+        );
+  }
+
+  if (junto == 'juntos') {
+    return out
+        .replaceAll(
+          RegExp(r'Quer retomar juntas\?', caseSensitive: false),
+          'Quer retomar juntos?',
+        )
+        .replaceAll(
+          RegExp(r'retomar juntas\?', caseSensitive: false),
+          'retomar juntos?',
+        );
+  }
+
+  return out
+      .replaceAll(
+        RegExp(r'Quer retomar juntos\?', caseSensitive: false),
+        'Quer retomar juntos(as)?',
+      )
+      .replaceAll(
+        RegExp(r'retomar juntos\?', caseSensitive: false),
+        'retomar juntos(as)?',
+      );
+}
+
 /// Human-readable objective label for cards and hero.
 String prettyAlunoObjective(String? value) {
   final raw = (value ?? '').trim();

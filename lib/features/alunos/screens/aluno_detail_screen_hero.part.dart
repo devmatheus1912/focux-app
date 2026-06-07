@@ -22,8 +22,12 @@ class _StudentQuickActions extends StatelessWidget {
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
     return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: fxListCardDecoration(context),
+      padding: const EdgeInsets.all(Aluno360Layout.cardPadding),
+      decoration: Aluno360Layout.operacaoInsetSectionDecoration(
+        context,
+        primary: primary,
+        isDark: isDark,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -216,8 +216,12 @@ class OperacaoAdherenceEmptyState {
   final String? hint;
   final bool showCheckinCta;
 
-  String get compactLine =>
-      hint != null && hint!.isNotEmpty ? '$message · $hint' : message;
+  String get compactLine {
+    final base = message.replaceAll(RegExp(r'\.\s*$'), '');
+    if (hint == null || hint!.isEmpty) return message;
+    final hintText = hint!.replaceAll(RegExp(r'\.\s*$'), '');
+    return '$base · $hintText';
+  }
 }
 
 OperacaoAdherenceEmptyState? resolveOperacaoAdherenceEmptyState({

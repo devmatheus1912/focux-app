@@ -34,7 +34,7 @@ class AlunoOperacaoAdherenceBars extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final labelColor =
         emptyWeek
-            ? Color.lerp(fxScreenMute(context), ink, isDark ? 0.58 : 0.68)!
+            ? Color.lerp(fxScreenMute(context), ink, isDark ? 0.65 : 0.78)!
             : fxScreenMute(context);
     final labelBand =
         14.0 * MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 1.5);
@@ -128,24 +128,43 @@ class _AdherenceDayBar extends StatelessWidget {
               height: barMaxHeight,
               child: Align(
                 alignment: Alignment.bottomCenter,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 220),
-                  curve: Curves.easeOutCubic,
-                  height: barMaxHeight * fraction,
-                  decoration: BoxDecoration(
-                    color:
-                        hasActivity
-                            ? activeColor
-                            : (outlineIdle ? Colors.transparent : idleColor),
-                    borderRadius: BorderRadius.circular(4),
-                    border:
-                        outlineIdle && !hasActivity
-                            ? Border.all(
-                              color: idleColor.withValues(alpha: 0.85),
-                              width: 1,
-                            )
-                            : null,
-                  ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (outlineIdle && !hasActivity) ...[
+                      Container(
+                        width: 5,
+                        height: 5,
+                        margin: const EdgeInsets.only(bottom: 4),
+                        decoration: BoxDecoration(
+                          color: labelColor.withValues(alpha: 0.85),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ],
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 220),
+                      curve: Curves.easeOutCubic,
+                      height: barMaxHeight * fraction,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color:
+                            hasActivity
+                                ? activeColor
+                                : (outlineIdle
+                                    ? Colors.transparent
+                                    : idleColor),
+                        borderRadius: BorderRadius.circular(4),
+                        border:
+                            outlineIdle && !hasActivity
+                                ? Border.all(
+                                  color: idleColor.withValues(alpha: 0.85),
+                                  width: 1,
+                                )
+                                : null,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

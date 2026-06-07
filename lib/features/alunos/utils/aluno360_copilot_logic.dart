@@ -162,7 +162,7 @@ String resolveOutreachMessage(
         wearableRelevant: false,
       );
     }
-    return trimmed;
+    return sanitizeOutreachGenderTerms(trimmed, genero: aluno.genero);
   }
   return copilotMensagemPronta(
     aluno,

@@ -25,6 +25,25 @@ void main() {
     });
   });
 
+  group('sanitizeOutreachGenderTerms', () {
+    test('feminine profile uses juntas', () {
+      expect(
+        sanitizeOutreachGenderTerms(
+          'Quer retomar juntos?',
+          genero: 'Feminino',
+        ),
+        'Quer retomar juntas?',
+      );
+    });
+
+    test('unknown gender uses inclusive form', () {
+      expect(
+        sanitizeOutreachGenderTerms('Quer retomar juntos?'),
+        'Quer retomar juntos(as)?',
+      );
+    });
+  });
+
   group('resolveAlunoPhotoUrl', () {
     test('retorna null para vazio', () {
       expect(resolveAlunoPhotoUrl(''), isNull);

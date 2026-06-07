@@ -481,6 +481,29 @@ void main() {
         'Oi, Beatriz. Mensagem do servidor.',
       );
     });
+
+    test('sanitizes backend juntos for feminine profile', () {
+      expect(
+        resolveOutreachMessage(
+          _aluno(genero: 'Feminino'),
+          acao: 'Contate Beatriz',
+          backendMessage:
+              'Oi, Beatriz. Quer retomar juntos? Me responde por aqui.',
+        ),
+        contains('juntas'),
+      );
+    });
+
+    test('neutralizes backend juntos when gender unknown', () {
+      expect(
+        resolveOutreachMessage(
+          _aluno(),
+          acao: 'Contate Beatriz',
+          backendMessage: 'Quer retomar juntos?',
+        ),
+        'Quer retomar juntos(as)?',
+      );
+    });
   });
 
   group('copilotMensagemPronta gender agreement', () {
