@@ -524,68 +524,37 @@ class _AlunoDetailLoadingSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final heroExpandedHeight = Aluno360Layout.heroExpandedHeight(context);
+    final topInset = MediaQuery.paddingOf(context).top;
+    final heroBodyHeight = Aluno360Layout.heroBodyHeight(context);
 
     return CustomScrollView(
       physics: const NeverScrollableScrollPhysics(),
       slivers: [
-        SliverAppBar(
-          expandedHeight: heroExpandedHeight,
-          pinned: true,
-          backgroundColor: sheetFill,
-          surfaceTintColor: sheetFill,
-          elevation: 0,
-          leading: Padding(
-            padding: const EdgeInsets.only(left: 4),
-            child: IconButton(
-              tooltip: 'Voltar',
-              onPressed: () => safePopOrGo(context, '/alunos'),
-              icon: Container(
-                width: 38,
-                height: 38,
-                decoration: ShellChrome.of(context).headerAction(radius: 12),
-                child: Icon(Icons.arrow_back_ios_new, size: 16, color: ink),
-              ),
-            ),
-          ),
-          flexibleSpace: FlexibleSpaceBar(
-            collapseMode: CollapseMode.parallax,
-            background: Padding(
-              padding: EdgeInsets.fromLTRB(
-                TokensStrip.s4,
-                MediaQuery.paddingOf(context).top + kToolbarHeight + 2,
-                TokensStrip.s4,
-                4,
-              ),
-              child: Semantics(
-                label: 'Carregando perfil do aluno',
-                child: _AlunoDetailHeroSkeleton(isDark: isDark, primary: primary),
-              ),
-            ),
-          ),
-          actions: [
-            IconButton(
-              onPressed: null,
-              icon: Icon(Icons.more_horiz_rounded, color: ink.withValues(alpha: 0.45)),
-            ),
-            const ShellThemeToggle(size: 38),
-            const SizedBox(width: 8),
-          ],
-        ),
         SliverPersistentHeader(
           pinned: true,
-          delegate: _AlunoDetailTabBarDelegate(
+          delegate: _Aluno360CompositeHeaderDelegate(
+            topInset: topInset,
+            heroBodyHeight: heroBodyHeight,
+            heroChild: _AlunoDetailHeroSkeleton(
+              isDark: isDark,
+              primary: primary,
+            ),
             tabController: tabController,
             primary: primary,
             mute: mute,
             line: line,
+            displayName: 'Carregando',
+            ink: ink,
+            isDark: isDark,
+            onBack: () => safePopOrGo(context, '/alunos'),
+            actionsEnabled: false,
           ),
         ),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
               Aluno360Layout.screenPadding,
-              Aluno360Layout.sectionGap,
+              Aluno360Layout.tabContentGap,
               Aluno360Layout.screenPadding,
               24,
             ),

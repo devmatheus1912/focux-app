@@ -10,8 +10,7 @@ abstract final class Aluno360Layout {
   static const double sectionGap = 12;
   static const double cardPadding = 14;
   static const double tabBarHeight = 44;
-  static const double heroTabGap = 8;
-  static const double tabContentGap = 14;
+  static const double tabContentGap = 4;
   static const double stickyBarContentHeight = 56;
   static const double snackbarStickyReserve = 72;
 
@@ -22,25 +21,36 @@ abstract final class Aluno360Layout {
   }) {
     final textScale =
         MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0);
-    final base = compactContactPriority ? 52.0 : 72.0;
+    final base = compactContactPriority ? 56.0 : 72.0;
     return base + ((textScale - 1) * 22);
   }
 
-  /// Toolbar inset + identity strip + [heroTabGap] before tab bar.
-  static double heroExpandedHeight(
+  /// Status bar + toolbar + tab bar (header collapsed).
+  static double heroHeaderMinExtent(BuildContext context) {
+    return MediaQuery.paddingOf(context).top + kToolbarHeight + tabBarHeight;
+  }
+
+  /// Collapsed header + identity strip body.
+  static double heroHeaderMaxExtent(
     BuildContext context, {
     bool compactContactPriority = false,
   }) {
-    final top = MediaQuery.paddingOf(context).top;
-    return top +
-        kToolbarHeight +
-        2 +
+    return heroHeaderMinExtent(context) +
         heroBodyHeight(
           context,
           compactContactPriority: compactContactPriority,
-        ) +
-        heroTabGap;
+        );
   }
+
+  /// @deprecated Use [heroHeaderMaxExtent].
+  static double heroExpandedHeight(
+    BuildContext context, {
+    bool compactContactPriority = false,
+  }) =>
+      heroHeaderMaxExtent(
+        context,
+        compactContactPriority: compactContactPriority,
+      );
 
   /// Pinned toolbar + tab bar (content should not scroll under this stack).
   static double pinnedHeaderHeight(BuildContext context) {

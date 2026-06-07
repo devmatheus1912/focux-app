@@ -57,7 +57,10 @@ class AlunoDetailHeroCard extends StatelessWidget {
         child: Container(
           key: const ValueKey('aluno360_hero_card'),
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: compactContactPriority ? 6 : 8,
+          ),
           decoration: Aluno360Layout.operacaoInsetSectionDecoration(
             context,
             primary: primary,

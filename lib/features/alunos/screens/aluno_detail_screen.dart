@@ -1,4 +1,5 @@
 ﻿import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
@@ -78,7 +79,6 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _entrancePlayed = false;
-  bool _headerOnHero = true;
 
   int get alunoId => widget.alunoId;
 
@@ -211,162 +211,50 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
           final operacao = ref.watch(aluno360OperacaoProvider(alunoId));
           final compactHero =
               operacao?.contactPriority ?? isOperacaoContatoPrioritario(aluno: aluno);
-          final heroExpandedHeight = Aluno360Layout.heroExpandedHeight(
+          final topInset = MediaQuery.paddingOf(context).top;
+          final heroBodyHeight = Aluno360Layout.heroBodyHeight(
             context,
             compactContactPriority: compactHero,
           );
           final displayName = fxTitleCaseName(aluno.nome);
-          final collapseThreshold =
-              (heroExpandedHeight -
-                      MediaQuery.paddingOf(context).top -
-                      kToolbarHeight)
-                  .clamp(24.0, 120.0);
 
           return RefreshIndicator(
             onRefresh: () => invalidateAluno360Providers(ref, alunoId),
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (notification) {
-                if (!notification.metrics.hasPixels) return false;
-                final onHero = notification.metrics.pixels < collapseThreshold;
-                if (onHero != _headerOnHero) {
-                  setState(() => _headerOnHero = onHero);
-                }
-                return false;
-              },
-              child: CustomScrollView(
+            child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              SliverAppBar(
-                expandedHeight: heroExpandedHeight,
-                pinned: true,
-                stretch: false,
-                backgroundColor:
-                    _headerOnHero ? Colors.transparent : chrome.sheetFill,
-                surfaceTintColor: chrome.sheetFill,
-                elevation: 0,
-                scrolledUnderElevation: _headerOnHero ? 0 : 1,
-                shadowColor: Colors.black.withValues(alpha: isDark ? 0.35 : 0.12),
-                forceMaterialTransparency: _headerOnHero,
-                systemOverlayStyle: SystemUiOverlayStyle(
-                  statusBarColor: Colors.transparent,
-                  statusBarIconBrightness:
-                      isDark ? Brightness.light : Brightness.dark,
-                  statusBarBrightness:
-                      isDark ? Brightness.dark : Brightness.light,
-                ),
-                title:
-                    _headerOnHero
-                        ? null
-                        : Text(
-                          displayName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: ink,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.2,
-                          ),
-                        ),
-                leading: Padding(
-                  padding: const EdgeInsets.only(left: 4),
-                  child: IconButton(
-                    tooltip: 'Voltar',
-                    onPressed: () => safePopOrGo(context, '/alunos'),
-                    icon: Container(
-                      width: 38,
-                      height: 38,
-                      decoration: chrome.headerAction(radius: 12),
-                      child: Icon(
-                        Icons.arrow_back_ios_new,
-                        size: 16,
-                        color: ink,
-                      ),
-                    ),
-                  ),
-                ),
-                flexibleSpace: FlexibleSpaceBar(
-                  collapseMode: CollapseMode.pin,
-                  background: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
-                      MediaQuery.paddingOf(context).top + kToolbarHeight + 2,
-                      TokensStrip.s4,
-                      Aluno360Layout.heroTabGap,
-                    ),
-                    child: Align(
-                      alignment: Alignment.topCenter,
-                      child: AlunoDetailHeroCard(
-                        aluno: aluno,
-                        isDark: isDark,
-                        primary: primary,
-                        compactContactPriority: compactHero,
-                        onDefineObjective:
-                            alunoObjectiveIsDefined(aluno.objetivo)
-                                ? null
-                                : () async {
-                                  final updated = await context.push<bool>(
-                                    '/alunos/$alunoId/editar',
-                                    extra: aluno,
-                                  );
-                                  if (updated == true) {
-                                    invalidateAluno360Providers(ref, alunoId);
-                                  }
-                                },
-                      ),
-                    ),
-                  ),
-                ),
-                actions: [
-                  PopupMenuButton<String>(
-                    icon: Icon(Icons.more_horiz_rounded, color: ink),
-                    tooltip: 'Mais opções',
-                    offset: const Offset(0, 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    onSelected: (value) async {
-                      if (value == 'excluir') {
-                        await _confirmarExclusao(context, ref, aluno);
-                      }
-                    },
-                    itemBuilder:
-                        (ctx) => [
-                          PopupMenuItem<String>(
-                            value: 'excluir',
-                            height: 44,
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.delete_outline_rounded,
-                                  size: 20,
-                                  color: EagleTokens.bad,
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  'Excluir aluno',
-                                  style: AppTypography.inter(
-                                    color: EagleTokens.bad,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                  ),
-                  const ShellThemeToggle(size: 38),
-                  const SizedBox(width: 8),
-                ],
-              ),
               SliverPersistentHeader(
                 pinned: true,
-                delegate: _AlunoDetailTabBarDelegate(
+                delegate: _Aluno360CompositeHeaderDelegate(
+                  topInset: topInset,
+                  heroBodyHeight: heroBodyHeight,
+                  heroChild: AlunoDetailHeroCard(
+                    aluno: aluno,
+                    isDark: isDark,
+                    primary: primary,
+                    compactContactPriority: compactHero,
+                    onDefineObjective:
+                        alunoObjectiveIsDefined(aluno.objetivo)
+                            ? null
+                            : () async {
+                              final updated = await context.push<bool>(
+                                '/alunos/$alunoId/editar',
+                                extra: aluno,
+                              );
+                              if (updated == true) {
+                                invalidateAluno360Providers(ref, alunoId);
+                              }
+                            },
+                  ),
                   tabController: _tabController,
                   primary: primary,
                   mute: mute,
                   line: chrome.line,
+                  displayName: displayName,
+                  ink: ink,
+                  isDark: isDark,
+                  onBack: () => safePopOrGo(context, '/alunos'),
+                  onDelete: () => _confirmarExclusao(context, ref, aluno),
                 ),
               ),
               SliverToBoxAdapter(
@@ -453,7 +341,6 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
               ),
             ],
           ),
-            ),
           );
         },
       ),
