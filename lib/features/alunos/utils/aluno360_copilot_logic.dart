@@ -213,6 +213,28 @@ String sanitizeCopilotAcaoWearable(
   return 'Retomar contato e checar como está o treino.';
 }
 
+/// Maps copilot UI action types to backend executar endpoint values.
+String? copilotExecutarBackendTipo(String? tipoAcao) {
+  switch (tipoAcao?.toUpperCase()) {
+    case 'TREINO':
+      return 'REDUZIR_CARGA';
+    default:
+      return null;
+  }
+}
+
+bool shouldShowCopilotExecutarAcao(String? tipoAcao) =>
+    copilotExecutarBackendTipo(tipoAcao) != null;
+
+String copilotExecutarAcaoLabel(String? tipoAcao) {
+  switch (tipoAcao?.toUpperCase()) {
+    case 'TREINO':
+      return 'Aplicar ajuste de carga (−15%)';
+    default:
+      return 'Aplicar ajuste';
+  }
+}
+
 String cleanCopilotText(String value) {
   return value
       .replaceAll(RegExp(r'\*\*|__|`'), '')

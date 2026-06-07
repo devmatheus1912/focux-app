@@ -72,6 +72,31 @@ class IaOperationalException implements Exception {
   String toString() => message;
 }
 
+class ExecutarAcaoResponse {
+  final String tipoAcao;
+  final String status;
+  final String mensagem;
+  final int exerciciosAjustados;
+
+  const ExecutarAcaoResponse({
+    required this.tipoAcao,
+    required this.status,
+    required this.mensagem,
+    required this.exerciciosAjustados,
+  });
+
+  bool get ok => status.toUpperCase() == 'OK';
+
+  factory ExecutarAcaoResponse.fromJson(Map<String, dynamic> json) {
+    return ExecutarAcaoResponse(
+      tipoAcao: json['tipoAcao'] as String? ?? '',
+      status: json['status'] as String? ?? '',
+      mensagem: json['mensagem'] as String? ?? '',
+      exerciciosAjustados: (json['exerciciosAjustados'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
 class IaRepository {
   final Dio _dio;
   static final _iaOpts = Options(receiveTimeout: const Duration(seconds: 60));
@@ -237,6 +262,27 @@ class IaRepository {
         },
       );
       return r.data as Map<String, dynamic>;
+    });
+  }
+
+  Future<ExecutarAcaoResponse> executarAcaoCopiloto({
+    required int alunoId,
+    required String tipoAcao,
+    String? parametros,
+  }) async {
+    return _withIaErrorContext(() async {
+      final r = await _dio.post(
+        '/api/ia/copiloto/acao/executar',
+        options: _iaOpts,
+        data: {
+          'alunoId': alunoId,
+          'tipoAcao': tipoAcao,
+          if (parametros != null && parametros.isNotEmpty) 'parametros': parametros,
+        },
+      );
+      return ExecutarAcaoResponse.fromJson(
+        Map<String, dynamic>.from(r.data as Map),
+      );
     });
   }
 

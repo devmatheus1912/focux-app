@@ -1,6 +1,33 @@
-﻿part of 'aluno_detail_screen.dart';
+import 'dart:async';
 
-class _Aluno360CopilotCard extends ConsumerWidget {
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../core/analytics/analytics_service.dart';
+import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/fx_utils.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../features/auth/providers/auth_provider.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
+import '../../ia/data/ia_repository.dart';
+import '../constants/aluno_360_layout.dart';
+import '../data/aluno_copilot_ia_cache_store.dart';
+import '../data/aluno_repository.dart';
+import '../providers/aluno_detail_providers.dart';
+import '../utils/aluno360_copilot_logic.dart';
+import '../utils/aluno360_operacao_logic.dart';
+import '../widgets/aluno360_copilot_prescription.dart';
+import '../widgets/aluno360_copilot_support.dart';
+import '../widgets/aluno360_operacao_focus_toggle.dart';
+import '../widgets/aluno_outreach_message_sheet.dart';
+
+class Aluno360CopilotCard extends ConsumerWidget {
   final Aluno aluno;
   final int alunoId;
   final AsyncValue<AlunoAutonomiaResumo> resumoAsync;
@@ -10,7 +37,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
   final bool showFocusToggle;
   final bool focusMode;
 
-  const _Aluno360CopilotCard({
+  const Aluno360CopilotCard({
     required this.aluno,
     required this.alunoId,
     required this.resumoAsync,
@@ -460,7 +487,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                           sticky: stickyAction,
                         )) ...[
                           const SizedBox(width: 8),
-                          _ContactPriorityBadge(primary: primary),
+                          Aluno360ContactPriorityBadge(primary: primary),
                         ],
                       ],
                     ),
@@ -468,12 +495,12 @@ class _Aluno360CopilotCard extends ConsumerWidget {
                 ),
               ),
               if (showFocusToggle)
-                _OperacaoFocusModeToggle(
+                Aluno360OperacaoFocusModeToggle(
                   alunoId: alunoId,
                   primary: primary,
                   iconOnly: true,
                 ),
-              _CopilotIaRefreshButton(
+              Aluno360CopilotIaRefreshButton(
                 alunoId: aluno.id,
                 primary: primary,
               ),
@@ -501,7 +528,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
               childAspectRatio: 1.15,
               children:
                   signals
-                      .map((signal) => _Aluno360SignalTile(signal: signal))
+                      .map((signal) => Aluno360CopilotSignalTile(signal: signal))
                       .toList(),
             ),
           ],
@@ -559,7 +586,7 @@ class _Aluno360CopilotCard extends ConsumerWidget {
           if (!hasOpenTask)
             openActionsAsync.maybeWhen(
               loading:
-                  () => const _CopilotTaskStatus(
+                  () => const Aluno360CopilotTaskStatus(
                     icon: Icons.sync_rounded,
                     title: 'Sincronizando tarefas',
                     subtitle: 'Checando Command Center antes de criar.',
@@ -568,8 +595,17 @@ class _Aluno360CopilotCard extends ConsumerWidget {
             ),
           if (!hasOpenTask && openActionsAsync.isLoading)
             const SizedBox(height: 10),
+          if (!hasOpenTask &&
+              shouldShowCopilotExecutarAcao(effectiveProxima?.tipoAcao)) ...[
+            Aluno360CopilotExecutarAcaoButton(
+              alunoId: aluno.id,
+              tipoAcao: effectiveProxima!.tipoAcao!,
+              primary: primary,
+            ),
+            const SizedBox(height: 10),
+          ],
           if (!hasOpenTask)
-            _Aluno360ActionRow(
+            Aluno360CopilotActionRow(
             aluno: aluno,
             primary: primary,
             existingTask: openTask,
@@ -586,8 +622,114 @@ class _Aluno360CopilotCard extends ConsumerWidget {
   }
 }
 
-class _CopilotIaRefreshButton extends ConsumerStatefulWidget {
-  const _CopilotIaRefreshButton({
+class Aluno360CopilotExecutarAcaoButton extends ConsumerStatefulWidget {
+  const Aluno360CopilotExecutarAcaoButton({
+    super.key,
+    required this.alunoId,
+    required this.tipoAcao,
+    required this.primary,
+  });
+
+  final int alunoId;
+  final String tipoAcao;
+  final Color primary;
+
+  @override
+  ConsumerState<Aluno360CopilotExecutarAcaoButton> createState() =>
+      _Aluno360CopilotExecutarAcaoButtonState();
+}
+
+class _Aluno360CopilotExecutarAcaoButtonState
+    extends ConsumerState<Aluno360CopilotExecutarAcaoButton> {
+  var _executing = false;
+
+  Future<void> _executar() async {
+    final backendTipo = copilotExecutarBackendTipo(widget.tipoAcao);
+    if (backendTipo == null || _executing) return;
+    setState(() => _executing = true);
+    unawaited(
+      AnalyticsService.instance.track(
+        ProductEvents.aluno360CopilotExecutarAcao,
+        props: {
+          'aluno_id': widget.alunoId,
+          'tipo_acao': backendTipo,
+        },
+      ),
+    );
+    try {
+      final resp = await IaRepository(
+        ref.read(apiClientProvider),
+      ).executarAcaoCopiloto(
+        alunoId: widget.alunoId,
+        tipoAcao: backendTipo,
+      );
+      ref.invalidate(aluno360Provider(widget.alunoId));
+      if (!mounted) return;
+      if (resp.ok) {
+        FeedbackHelper.showSuccess(context, resp.mensagem);
+      } else {
+        FeedbackHelper.showWarn(context, resp.mensagem);
+      }
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showSnackBar(
+          context,
+          SnackBar(
+            content: Text(
+              friendlyError(e, fallback: 'Não foi possível aplicar o ajuste.'),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _executing = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final label = copilotExecutarAcaoLabel(widget.tipoAcao);
+    return Semantics(
+      button: true,
+      label: _executing ? 'Aplicando ajuste de carga' : label,
+      child: SizedBox(
+        width: double.infinity,
+        height: 40,
+        child: OutlinedButton.icon(
+          onPressed: _executing ? null : _executar,
+          icon:
+              _executing
+                  ? SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: widget.primary,
+                    ),
+                  )
+                  : Icon(Icons.fitness_center_rounded, size: 16),
+          label: Text(
+            _executing ? 'Aplicando…' : label,
+            style: const TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: widget.primary,
+            side: BorderSide(color: widget.primary.withValues(alpha: 0.32)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(13),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class Aluno360CopilotIaRefreshButton extends ConsumerStatefulWidget {
+  const Aluno360CopilotIaRefreshButton({
     required this.alunoId,
     required this.primary,
   });
@@ -596,11 +738,11 @@ class _CopilotIaRefreshButton extends ConsumerStatefulWidget {
   final Color primary;
 
   @override
-  ConsumerState<_CopilotIaRefreshButton> createState() =>
-      _CopilotIaRefreshButtonState();
+  ConsumerState<Aluno360CopilotIaRefreshButton> createState() =>
+      Aluno360CopilotIaRefreshButtonState();
 }
 
-class _CopilotIaRefreshButtonState extends ConsumerState<_CopilotIaRefreshButton> {
+class Aluno360CopilotIaRefreshButtonState extends ConsumerState<Aluno360CopilotIaRefreshButton> {
   var _refreshing = false;
 
   Future<void> _refreshIa() async {
@@ -725,8 +867,8 @@ class _CopilotIaRefreshButtonState extends ConsumerState<_CopilotIaRefreshButton
   }
 }
 
-class _ContactPriorityBadge extends StatelessWidget {
-  const _ContactPriorityBadge({required this.primary});
+class Aluno360ContactPriorityBadge extends StatelessWidget {
+  const Aluno360ContactPriorityBadge({required this.primary});
 
   final Color primary;
 

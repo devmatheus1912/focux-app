@@ -605,4 +605,15 @@ void main() {
       expect(gaps.any((g) => g.title == 'Contato'), isTrue);
     });
   });
+
+  group('copilotExecutarBackendTipo', () {
+    test('maps TREINO to REDUZIR_CARGA for executar endpoint', () {
+      expect(copilotExecutarBackendTipo('TREINO'), 'REDUZIR_CARGA');
+      expect(copilotExecutarBackendTipo('treino'), 'REDUZIR_CARGA');
+      expect(copilotExecutarBackendTipo('CONTATO'), isNull);
+      expect(shouldShowCopilotExecutarAcao('TREINO'), isTrue);
+      expect(shouldShowCopilotExecutarAcao('CONTATO'), isFalse);
+      expect(copilotExecutarAcaoLabel('TREINO'), contains('15%'));
+    });
+  });
 }

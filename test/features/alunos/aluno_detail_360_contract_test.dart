@@ -17,6 +17,15 @@ String _alunoDetailLibrarySource() {
       'lib/features/alunos/utils/aluno360_copilot_logic.dart';
   const outreachSheetFile =
       'lib/features/alunos/widgets/aluno_outreach_message_sheet.dart';
+  const copilotCardFile =
+      'lib/features/alunos/widgets/aluno360_copilot_card.dart';
+  const operationalSectionFile =
+      'lib/features/alunos/widgets/aluno360_operational_status_section.dart';
+  const focusToggleFile =
+      'lib/features/alunos/widgets/aluno360_operacao_focus_toggle.dart';
+  const copilotSupportFile =
+      'lib/features/alunos/widgets/aluno360_copilot_support.dart';
+  const iaRepositoryFile = 'lib/features/ia/data/ia_repository.dart';
   final main = File(mainFile).readAsStringSync();
   final providers = File(providersFile).readAsStringSync();
   final heroWidget = File(heroWidgetFile).readAsStringSync();
@@ -25,19 +34,24 @@ String _alunoDetailLibrarySource() {
   final operacaoLogic = File(operacaoLogicFile).readAsStringSync();
   final copilotLogic = File(copilotLogicFile).readAsStringSync();
   final outreachSheet = File(outreachSheetFile).readAsStringSync();
+  final copilotCard = File(copilotCardFile).readAsStringSync();
+  final operationalSection = File(operationalSectionFile).readAsStringSync();
+  final focusToggle = File(focusToggleFile).readAsStringSync();
+  final copilotSupport = File(copilotSupportFile).readAsStringSync();
+  final iaRepository = File(iaRepositoryFile).readAsStringSync();
   final partPattern = RegExp(r"part '([^']+\.part\.dart)';");
   final parts = partPattern
       .allMatches(main)
       .map((m) => File('$dir/${m.group(1)!}').readAsStringSync())
       .join('\n');
-  return '$main\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$outreachSheet\n$parts';
+  return '$main\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$outreachSheet\n$copilotCard\n$operationalSection\n$focusToggle\n$copilotSupport\n$iaRepository\n$parts';
 }
 
 void main() {
   test('aluno detail exposes 360 view and prescriptive copilot actions', () {
     final screen = _alunoDetailLibrarySource();
 
-    expect(screen, contains('class _Aluno360CopilotCard'));
+    expect(screen, contains('class Aluno360CopilotCard'));
     expect(screen, contains('Aluno 360'));
     expect(screen, contains('class _Aluno360TimelineCard'));
     expect(screen, contains("'Linha do tempo 360'"));
@@ -48,7 +62,7 @@ void main() {
     expect(screen, contains('proximaAcao(alunoId)'));
     expect(screen, contains('salvarAcaoCopiloto'));
     expect(screen, contains('commandCenterProvider'));
-    expect(screen, contains('class _Aluno360SignalTile'));
+    expect(screen, contains('class Aluno360CopilotSignalTile'));
     expect(
       File('lib/features/alunos/widgets/aluno360_copilot_prescription.dart')
           .readAsStringSync(),
@@ -69,7 +83,8 @@ void main() {
     expect(screen, contains("'Copiar mensagem'"));
     expect(screen, contains("'Mensagem sugerida'"));
     expect(screen, contains("'Abrir chat'"));
-    expect(screen, contains('Sugestão com base no perfil de hoje.'));
+    expect(screen, contains('executarAcaoCopiloto'));
+    expect(screen, contains('copilotExecutarBackendTipo'));
   });
 
   test('aluno 360 polish: tabs, unified status, refresh, altura, sparkline', () {
@@ -80,7 +95,7 @@ void main() {
     expect(screen, contains('Contato salvo · follow-up atualizado'));
     expect(screen, contains('Aluno360Layout.captionStyle'));
     expect(screen, contains('aderenciaSemanal'));
-    expect(screen, contains('class _AlunoOperationalStatusSection'));
+    expect(screen, contains('class Aluno360OperationalStatusSection'));
     expect(screen, contains('Status operacional'));
     expect(screen, contains('Índice operacional'));
     expect(screen, contains('Próximo contato:'));
@@ -88,7 +103,7 @@ void main() {
     expect(screen, contains('resolveOperacaoStickyAction'));
     expect(screen, contains('operacaoHeroShowsRisco'));
     expect(screen, contains('shouldShowCopilotProfileGapsButton'));
-    expect(screen, contains('_OperacaoFocusModeToggle'));
+    expect(screen, contains('Aluno360OperacaoFocusModeToggle'));
     expect(
       File('lib/features/alunos/utils/aluno360_copilot_logic.dart')
           .readAsStringSync(),
@@ -161,7 +176,7 @@ void main() {
 
     expect(screen, contains('class _AlunoDetailOperacaoTab'));
     expect(screen, contains('_OperacaoStickyCtaBar'));
-    expect(screen, contains('_AlunoOperationalStatusSection'));
+    expect(screen, contains('class Aluno360OperationalStatusSection'));
     expect(screen, contains('Ações rápidas da aba operação'));
     expect(screen, contains('class _AlunoDetailEvolucaoTab'));
     expect(screen, contains('_Aluno360TimelineCard'));

@@ -1,7 +1,23 @@
-﻿part of 'aluno_detail_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class _AlunoOperationalStatusSection extends ConsumerWidget {
-  const _AlunoOperationalStatusSection({
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
+import '../constants/aluno_360_layout.dart';
+import '../data/aluno_followup_store.dart';
+import '../data/aluno_repository.dart';
+import '../data/aluno_contact_utils.dart';
+import '../providers/aluno_detail_providers.dart';
+import '../providers/aluno_followup_provider.dart';
+import '../utils/aluno360_operacao_logic.dart';
+import '../widgets/aluno_operacao_adherence_bars.dart';
+import '../widgets/aluno_outreach_message_sheet.dart';
+import '../widgets/aluno360_operacao_focus_toggle.dart';
+
+class Aluno360OperationalStatusSection extends ConsumerWidget {
+  const Aluno360OperationalStatusSection({
     required this.aluno,
     required this.alunoId,
     required this.isDark,
@@ -149,7 +165,7 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
                   ),
                 ),
               ),
-              _OperacaoFocusModeToggle(
+              Aluno360OperacaoFocusModeToggle(
                 alunoId: alunoId,
                 primary: primary,
                 iconOnly: true,
