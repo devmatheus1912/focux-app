@@ -113,4 +113,8 @@ class ProductEvents {
   static const alunoAutonomyTaskViewed = 'aluno_autonomy_task_viewed';
   static const alunoAutonomyTaskClicked = 'aluno_autonomy_task_clicked';
   static const alunoAutonomyTaskCompleted = 'aluno_autonomy_task_completed';
+
+  static const aluno360CopilotRefresh = 'aluno360_copilot_refresh';
+  static const aluno360OutreachPrepared = 'aluno360_outreach_prepared';
+  static const aluno360OutreachChatOpened = 'aluno360_outreach_chat_opened';
 }

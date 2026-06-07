@@ -8,8 +8,11 @@ import '../../dashboard/data/command_center_data.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../health/data/health_repository.dart';
 import '../../ia/data/ia_repository.dart';
+import '../data/aluno_copilot_ia_cache_store.dart';
 import '../data/aluno_operacao_focus_store.dart';
 import '../data/aluno_repository.dart';
+import '../utils/aluno360_copilot_logic.dart';
+import '../utils/aluno360_operacao_logic.dart';
 import 'alunos_provider.dart';
 
 final aluno360Provider = FutureProvider.family<Aluno360, int>((ref, alunoId) async {
@@ -70,9 +73,55 @@ class AlunoOperacaoFocusModeController extends StateNotifier<bool> {
   Future<void> toggle() async => setFocus(!state);
 }
 
+/// Bust IA cache on explicit refresh (see copilot refresh button).
+final alunoCopilotIaSkipCacheProvider = StateProvider.family<bool, int>(
+  (ref, alunoId) => false,
+);
+
 final alunoCopilotoActionProvider =
     FutureProvider.family<Map<String, dynamic>, int>((ref, alunoId) async {
-      return IaRepository(ref.read(apiClientProvider)).proximaAcao(alunoId);
+      final skipCache = ref.watch(alunoCopilotIaSkipCacheProvider(alunoId));
+      if (!skipCache) {
+        final cached = await AlunoCopilotIaCacheStore.loadIfFresh(alunoId);
+        if (cached != null) return cached;
+      }
+      final payload =
+          await IaRepository(ref.read(apiClientProvider)).proximaAcao(alunoId);
+      await AlunoCopilotIaCacheStore.save(alunoId, payload);
+      ref.read(alunoCopilotIaSkipCacheProvider(alunoId).notifier).state = false;
+      return payload;
+    });
+
+/// Unified Operação snapshot (sticky + copilot + outreach).
+final aluno360OperacaoProvider =
+    Provider.family<Aluno360OperacaoSnapshot?, int>((ref, alunoId) {
+      final bundle = ref.watch(aluno360Provider(alunoId)).valueOrNull;
+      if (bundle == null) return null;
+      final aluno = bundle.aluno;
+      final forceIa = ref.watch(alunoCopilotoForceIaProvider(alunoId));
+      final iaAsync =
+          forceIa ? ref.watch(alunoCopilotoActionProvider(alunoId)) : null;
+      final recovery = ref.watch(alunoRecoveryProvider(alunoId)).valueOrNull;
+      final openActions =
+          ref.watch(alunoOpenIaActionsProvider(alunoId)).valueOrNull ??
+          const [];
+      final hasOpenTask =
+          findOpenCopilotTask(openActions) != null ||
+          (bundle.hasOpenCopilotTask ?? false);
+      final backendWearable = iaAsync?.valueOrNull?['wearableRelevant'];
+      final wearableRelevant =
+          backendWearable is bool
+              ? backendWearable
+              : alunoTemHistoricoWearable(recovery);
+      return resolveAluno360OperacaoSnapshot(
+        aluno: aluno,
+        proximaAcao360: bundle.proximaAcao,
+        forceIa: forceIa,
+        iaAsync: iaAsync,
+        hasOpenTask: hasOpenTask,
+        followUpDue: isAlunoFollowUpDue(aluno),
+        wearableRelevant: wearableRelevant,
+      );
     });
 
 final alunoMedidasResumoProvider =
@@ -165,6 +214,7 @@ Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
   ref.invalidate(alunoEvolucaoInteligenteProvider(alunoId));
   ref.invalidate(alunoTimeline360ApiProvider(alunoId));
   ref.read(alunoCopilotoForceIaProvider(alunoId).notifier).state = false;
+  ref.read(alunoCopilotIaSkipCacheProvider(alunoId).notifier).state = false;
   ref.invalidate(alunoCopilotoActionProvider(alunoId));
   ref.invalidate(alunoOpenIaActionsProvider(alunoId));
   ref.invalidate(alunoMedidasResumoProvider(alunoId));

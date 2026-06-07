@@ -1,9 +1,12 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
@@ -38,6 +41,7 @@ import '../utils/aluno_display_utils.dart';
 import '../widgets/aluno_detail_hero_card.dart';
 import '../widgets/aluno_operacao_adherence_bars.dart';
 import '../widgets/aluno360_copilot_prescription.dart';
+import '../data/aluno_copilot_ia_cache_store.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';

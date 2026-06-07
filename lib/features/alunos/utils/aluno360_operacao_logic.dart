@@ -335,6 +335,11 @@ Duration operacaoSectionDelay({
 bool operacaoHeroShowsRisco(Aluno aluno) =>
     alunoHeroPrimarySignal(aluno).label == 'Risco operacional';
 
+bool shouldCompactFollowUpForContactPriority({
+  required bool contactPriority,
+}) =>
+    contactPriority;
+
 /// Hide copilot lacunas when hero/sticky already covers the same action.
 bool shouldShowCopilotProfileGapsButton(
   Aluno aluno,

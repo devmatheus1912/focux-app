@@ -1,10 +1,15 @@
 ﻿part of 'aluno_detail_screen.dart';
 
 class _AlunoFollowUpCard extends ConsumerStatefulWidget {
-  const _AlunoFollowUpCard({required this.aluno, required this.isDark});
+  const _AlunoFollowUpCard({
+    required this.aluno,
+    required this.isDark,
+    this.compactContactPriority = false,
+  });
 
   final Aluno aluno;
   final bool isDark;
+  final bool compactContactPriority;
 
   @override
   ConsumerState<_AlunoFollowUpCard> createState() => _AlunoFollowUpCardState();
@@ -12,6 +17,7 @@ class _AlunoFollowUpCard extends ConsumerStatefulWidget {
 
 class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
   bool _busy = false;
+  bool _expanded = false;
 
   Aluno get aluno => widget.aluno;
 
@@ -75,6 +81,48 @@ class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
     final isSnoozed =
         snoozedUntil != null && snoozedUntil.isAfter(DateTime.now());
     final actions = ref.read(alunoFollowUpActionsProvider);
+    final compact = widget.compactContactPriority;
+
+    if (compact) {
+      return Container(
+        decoration: fxListCardDecoration(context),
+        child: Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            key: const ValueKey('aluno360_followup_compact'),
+            initiallyExpanded: _expanded,
+            onExpansionChanged: (value) => setState(() => _expanded = value),
+            tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+            leading: Icon(Icons.event_available_rounded, size: 18, color: primary),
+            title: Text(
+              'Follow-up do personal',
+              style: TextStyle(
+                color: ink,
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            subtitle: Text(
+              'Prioridade é contato · expanda para agendar',
+              style: Aluno360Layout.captionStyle(context),
+            ),
+            children: [
+              _buildFollowUpActions(
+                context,
+                primary: primary,
+                ink: ink,
+                followUpDate: followUpDate,
+                isSnoozed: isSnoozed,
+                snoozedUntil: snoozedUntil,
+                actions: actions,
+                contactPrimaryOutlined: true,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Container(
       decoration: fxListCardDecoration(context),
@@ -126,7 +174,32 @@ class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
             ),
           ],
           const SizedBox(height: 10),
-          LayoutBuilder(
+          _buildFollowUpActions(
+            context,
+            primary: primary,
+            ink: ink,
+            followUpDate: followUpDate,
+            isSnoozed: isSnoozed,
+            snoozedUntil: snoozedUntil,
+            actions: actions,
+            contactPrimaryOutlined: false,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFollowUpActions(
+    BuildContext context, {
+    required Color primary,
+    required Color ink,
+    required DateTime? followUpDate,
+    required bool isSnoozed,
+    required DateTime? snoozedUntil,
+    required dynamic actions,
+    required bool contactPrimaryOutlined,
+  }) {
+    return LayoutBuilder(
             builder: (context, constraints) {
               final narrow = constraints.maxWidth < 360;
               final compactFilled = FilledButton.styleFrom(
@@ -143,34 +216,55 @@ class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
                 foregroundColor: primary,
                 side: BorderSide(color: primary.withValues(alpha: 0.28)),
               );
-              final primaryActions = [
-                Semantics(
+              Widget contactDoneButton({required bool fullWidth}) {
+                final child = Semantics(
                   label: 'Registrar contato realizado com ${aluno.nome}',
                   button: true,
-                  child: FilledButton.icon(
-                    onPressed:
-                        _busy
-                            ? null
-                            : () => _runAction(
-                              () => actions.markContactDone(aluno.id),
-                              'Contato salvo · follow-up atualizado',
-                            ),
-                    icon:
-                        _busy
-                            ? SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: FxLoading(
-                                size: 16,
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                            : const Icon(Icons.check_rounded, size: 16),
-                    label: const Text('Contato feito'),
-                    style: compactFilled,
-                  ),
-                ),
+                  child:
+                      contactPrimaryOutlined
+                          ? OutlinedButton.icon(
+                            onPressed:
+                                _busy
+                                    ? null
+                                    : () => _runAction(
+                                      () => actions.markContactDone(aluno.id),
+                                      'Contato salvo · follow-up atualizado',
+                                    ),
+                            icon: const Icon(Icons.check_rounded, size: 16),
+                            label: const Text('Contato feito'),
+                            style: compactOutlined,
+                          )
+                          : FilledButton.icon(
+                            onPressed:
+                                _busy
+                                    ? null
+                                    : () => _runAction(
+                                      () => actions.markContactDone(aluno.id),
+                                      'Contato salvo · follow-up atualizado',
+                                    ),
+                            icon:
+                                _busy
+                                    ? SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: FxLoading(
+                                        size: 16,
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                    : const Icon(Icons.check_rounded, size: 16),
+                            label: const Text('Contato feito'),
+                            style: compactFilled,
+                          ),
+                );
+                return fullWidth
+                    ? SizedBox(width: double.infinity, child: child)
+                    : child;
+              }
+
+              final primaryActions = [
+                contactDoneButton(fullWidth: false),
                 Semantics(
                   label: 'Definir data de próximo contato para ${aluno.nome}',
                   button: true,
@@ -187,7 +281,9 @@ class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    ...primaryActions.map(
+                    contactDoneButton(fullWidth: true),
+                    const SizedBox(height: 6),
+                    ...primaryActions.skip(1).map(
                       (action) => Padding(
                         padding: const EdgeInsets.only(bottom: 6),
                         child: SizedBox(width: double.infinity, child: action),
@@ -254,48 +350,12 @@ class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Semantics(
-                    label: 'Registrar contato realizado com ${aluno.nome}',
-                    button: true,
-                    child: FilledButton.icon(
-                      onPressed:
-                          _busy
-                              ? null
-                              : () => _runAction(
-                                () => actions.markContactDone(aluno.id),
-                                'Contato salvo · follow-up atualizado',
-                              ),
-                      icon:
-                          _busy
-                              ? SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: FxLoading(
-                                  size: 16,
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                              : const Icon(Icons.check_rounded, size: 16),
-                      label: const Text('Contato feito'),
-                      style: compactFilled,
-                    ),
-                  ),
+                  contactDoneButton(fullWidth: true),
                   const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
-                        child: Semantics(
-                          label:
-                              'Definir data de próximo contato para ${aluno.nome}',
-                          button: true,
-                          child: OutlinedButton.icon(
-                            onPressed: _busy ? null : _pickFollowUpDate,
-                            icon: const Icon(Icons.calendar_month_rounded, size: 16),
-                            label: const Text('Definir data'),
-                            style: compactOutlined,
-                          ),
-                        ),
+                        child: primaryActions[1],
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -356,10 +416,7 @@ class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
                 ],
               );
             },
-          ),
-        ],
-      ),
-    );
+          );
   }
 
   String _formatTime(DateTime value) {
@@ -368,3 +425,5 @@ class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
     return '$h:$m';
   }
 }
+
+// removed duplicate _formatTime and old LayoutBuilder block below

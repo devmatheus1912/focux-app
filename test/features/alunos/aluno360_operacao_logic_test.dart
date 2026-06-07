@@ -565,6 +565,19 @@ void main() {
     });
   });
 
+  group('shouldCompactFollowUpForContactPriority', () {
+    test('true when contact is priority', () {
+      expect(
+        shouldCompactFollowUpForContactPriority(contactPriority: true),
+        isTrue,
+      );
+      expect(
+        shouldCompactFollowUpForContactPriority(contactPriority: false),
+        isFalse,
+      );
+    });
+  });
+
   group('resolveAluno360OperacaoSnapshot', () {
     test('hides task row when contact is priority without open task', () {
       final snapshot = resolveAluno360OperacaoSnapshot(

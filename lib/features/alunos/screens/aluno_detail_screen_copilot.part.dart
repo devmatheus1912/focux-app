@@ -219,6 +219,12 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     String? backendMessage,
     String? outreachMessage,
   }) {
+    unawaited(
+      AnalyticsService.instance.track(
+        ProductEvents.aluno360OutreachPrepared,
+        props: {'aluno_id': aluno.id},
+      ),
+    );
     showAlunoOutreachMessageSheet(
       context,
       alunoId: aluno.id,
@@ -332,12 +338,24 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     final forceIa = ref.watch(alunoCopilotoForceIaProvider(aluno.id));
     final iaAsync =
         forceIa ? ref.watch(alunoCopilotoActionProvider(aluno.id)) : null;
-    final wearableRelevant = alunoTemHistoricoWearable(
-      ref.watch(alunoRecoveryProvider(aluno.id)).valueOrNull,
-    );
     final openActionsAsync = ref.watch(alunoOpenIaActionsProvider(aluno.id));
     final openTask = findOpenCopilotTask(openActionsAsync.valueOrNull ?? const []);
     final hasOpenTask = openTask != null || hasOpenCopilotTask360;
+    final operacao =
+        ref.watch(aluno360OperacaoProvider(aluno.id)) ??
+        resolveAluno360OperacaoSnapshot(
+          aluno: aluno,
+          proximaAcao360: proximaAcao360,
+          forceIa: forceIa,
+          iaAsync: iaAsync,
+          hasOpenTask: hasOpenTask,
+          followUpDue: isAlunoFollowUpDue(aluno),
+          wearableRelevant: alunoTemHistoricoWearable(
+            ref.watch(alunoRecoveryProvider(aluno.id)).valueOrNull,
+          ),
+        );
+    final iaLoading =
+        forceIa && iaAsync != null && iaAsync.isLoading && !iaAsync.hasValue;
     final resumo = resumoAsync.valueOrNull;
     final profileCompletion = copilotProfileCompletion(aluno);
     final signals = resolveCopilotSignals(
@@ -350,15 +368,6 @@ class _Aluno360CopilotCard extends ConsumerWidget {
         proximaAcao360 != null
             ? copilotActionFrom360(proximaAcao360!)
             : null;
-    final operacao = resolveAluno360OperacaoSnapshot(
-      aluno: aluno,
-      proximaAcao360: proximaAcao360,
-      forceIa: forceIa,
-      iaAsync: iaAsync,
-      hasOpenTask: hasOpenTask,
-      followUpDue: isAlunoFollowUpDue(aluno),
-      wearableRelevant: wearableRelevant,
-    );
     final stickyAction = operacao.stickyAction;
     final effectiveProxima = operacao.effectiveProxima;
     final hideCopilotChat = operacao.hideCopilotChatRow;
@@ -383,6 +392,11 @@ class _Aluno360CopilotCard extends ConsumerWidget {
     );
     final showPrepareInPrescription = operacao.showPrepareMessage;
     final cardPadding = hasOpenTask ? 10.0 : 14.0;
+    final wearableRelevant =
+        effectiveProxima?.wearableRelevant ??
+        alunoTemHistoricoWearable(
+          ref.watch(alunoRecoveryProvider(aluno.id)).valueOrNull,
+        );
 
     return Container(
       padding: EdgeInsets.all(cardPadding),
@@ -457,6 +471,17 @@ class _Aluno360CopilotCard extends ConsumerWidget {
               ),
             ],
           ),
+          if (iaLoading) ...[
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: LinearProgressIndicator(
+                minHeight: 3,
+                backgroundColor: primary.withValues(alpha: 0.12),
+                color: primary,
+              ),
+            ),
+          ],
           if (!hasOpenTask) ...[
             const SizedBox(height: 10),
             GridView.count(
@@ -572,6 +597,15 @@ class _CopilotIaRefreshButtonState extends ConsumerState<_CopilotIaRefreshButton
   Future<void> _refreshIa() async {
     if (_refreshing) return;
     setState(() => _refreshing = true);
+    unawaited(
+      AnalyticsService.instance.track(
+        ProductEvents.aluno360CopilotRefresh,
+        props: {'aluno_id': widget.alunoId},
+      ),
+    );
+    await AlunoCopilotIaCacheStore.clear(widget.alunoId);
+    ref.read(alunoCopilotIaSkipCacheProvider(widget.alunoId).notifier).state =
+        true;
     ref.read(alunoCopilotoForceIaProvider(widget.alunoId).notifier).state = true;
     try {
       await ref.refresh(alunoCopilotoActionProvider(widget.alunoId).future);
@@ -618,7 +652,13 @@ class _CopilotIaRefreshButtonState extends ConsumerState<_CopilotIaRefreshButton
 
   @override
   Widget build(BuildContext context) {
-    return IconButton.filledTonal(
+    return Semantics(
+      button: true,
+      label:
+          _refreshing
+              ? 'Atualizando sugestão com IA'
+              : 'Atualizar sugestão com IA',
+      child: IconButton.filledTonal(
       onPressed: _refreshing ? null : _refreshIa,
       icon:
           _refreshing
@@ -632,6 +672,7 @@ class _CopilotIaRefreshButtonState extends ConsumerState<_CopilotIaRefreshButton
               )
               : const Icon(Icons.refresh_rounded, size: 18),
       tooltip: _refreshing ? 'Atualizando…' : 'Atualizar com IA',
+    ),
     );
   }
 }

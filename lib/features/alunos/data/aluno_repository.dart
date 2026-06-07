@@ -268,6 +268,7 @@ class ProximaAcaoResumo {
   final String? mensagemSugerida;
   final String? stickyLabel;
   final String? stickyLabelCompact;
+  final bool? wearableRelevant;
 
   const ProximaAcaoResumo({
     required this.acao,
@@ -278,6 +279,7 @@ class ProximaAcaoResumo {
     this.mensagemSugerida,
     this.stickyLabel,
     this.stickyLabelCompact,
+    this.wearableRelevant,
   });
 
   factory ProximaAcaoResumo.fromJson(Map<String, dynamic> json) =>
@@ -290,6 +292,7 @@ class ProximaAcaoResumo {
         mensagemSugerida: json['mensagemSugerida'] as String?,
         stickyLabel: json['stickyLabel'] as String?,
         stickyLabelCompact: json['stickyLabelCompact'] as String?,
+        wearableRelevant: json['wearableRelevant'] as bool?,
       );
 }
 

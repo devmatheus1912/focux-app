@@ -132,6 +132,8 @@ class _AlunoDetailOperacaoTab extends ConsumerWidget {
     final financeRisk =
         aluno.statusFinanceiro == 'INADIMPLENTE' || aluno.inadimplente;
     final focusMode = ref.watch(alunoOperacaoFocusModeProvider(alunoId));
+    final operacaoSnapshot = ref.watch(aluno360OperacaoProvider(alunoId));
+    final contactPriority = operacaoSnapshot?.contactPriority ?? false;
 
     Widget section(int step, Widget child) {
       return _Aluno360Entrance(
@@ -194,7 +196,16 @@ class _AlunoDetailOperacaoTab extends ConsumerWidget {
           ),
           const SizedBox(height: Aluno360Layout.sectionGap),
         ],
-        section(1, _AlunoFollowUpCard(aluno: aluno, isDark: isDark)),
+        section(
+          1,
+          _AlunoFollowUpCard(
+            aluno: aluno,
+            isDark: isDark,
+            compactContactPriority: shouldCompactFollowUpForContactPriority(
+              contactPriority: contactPriority,
+            ),
+          ),
+        ),
         const SizedBox(height: Aluno360Layout.sectionGap),
         AnimatedSize(
           duration: const Duration(milliseconds: 200),
@@ -510,24 +521,27 @@ class _OperacaoStickyCtaBar extends ConsumerWidget {
     final forceIa = ref.watch(alunoCopilotoForceIaProvider(alunoId));
     final iaAsync =
         forceIa ? ref.watch(alunoCopilotoActionProvider(alunoId)) : null;
-    final wearableRelevant = alunoTemHistoricoWearable(
-      ref.watch(alunoRecoveryProvider(alunoId)).valueOrNull,
-    );
+    final operacao =
+        ref.watch(aluno360OperacaoProvider(alunoId)) ??
+        resolveAluno360OperacaoSnapshot(
+          aluno: aluno,
+          proximaAcao360: proximaAcao360,
+          forceIa: forceIa,
+          iaAsync: iaAsync,
+          hasOpenTask:
+              findOpenCopilotTask(openActions.valueOrNull ?? const []) != null ||
+              hasOpenCopilotTask360,
+          followUpDue: isAlunoFollowUpDue(aluno),
+          wearableRelevant: alunoTemHistoricoWearable(
+            ref.watch(alunoRecoveryProvider(alunoId)).valueOrNull,
+          ),
+        );
+    final sticky = operacao.stickyAction;
+    final effectiveProxima = operacao.effectiveProxima;
     final hasOpenTask =
         findOpenCopilotTask(openActions.valueOrNull ?? const []) != null ||
         hasOpenCopilotTask360;
     final followUpDue = isAlunoFollowUpDue(aluno);
-    final operacao = resolveAluno360OperacaoSnapshot(
-      aluno: aluno,
-      proximaAcao360: proximaAcao360,
-      forceIa: forceIa,
-      iaAsync: iaAsync,
-      hasOpenTask: hasOpenTask,
-      followUpDue: followUpDue,
-      wearableRelevant: wearableRelevant,
-    );
-    final sticky = operacao.stickyAction;
-    final effectiveProxima = operacao.effectiveProxima;
 
     void openOutreach() {
       showAlunoOutreachMessageSheet(

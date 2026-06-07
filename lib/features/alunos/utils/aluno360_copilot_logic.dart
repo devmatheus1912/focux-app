@@ -140,6 +140,7 @@ ProximaAcaoResumo? proximaAcaoResumoFromIaPayload(
     mensagemSugerida: action['mensagemSugerida'] as String?,
     stickyLabel: action['stickyLabel'] as String?,
     stickyLabelCompact: action['stickyLabelCompact'] as String?,
+    wearableRelevant: action['wearableRelevant'] as bool?,
   );
 }
 
@@ -197,6 +198,7 @@ ProximaAcaoResumo sanitizeProximaAcaoWearable(
     ),
     stickyLabel: 'Retomar contato',
     stickyLabelCompact: 'Contato',
+    wearableRelevant: false,
   );
 }
 

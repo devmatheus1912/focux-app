@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -223,6 +226,12 @@ class _AlunoOutreachMessageSheet extends StatelessWidget {
               icon: Icons.chat_bubble_outline_rounded,
               label: 'Abrir chat',
               onPressed: () {
+                unawaited(
+                  AnalyticsService.instance.track(
+                    ProductEvents.aluno360OutreachChatOpened,
+                    props: {'aluno_id': alunoId},
+                  ),
+                );
                 Navigator.of(context).pop();
                 context.push(
                   '/alunos/$alunoId/chat',
