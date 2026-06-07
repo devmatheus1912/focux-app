@@ -72,6 +72,186 @@ class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
     );
   }
 
+  String _compactFollowUpSubtitle({
+    required DateTime? followUpDate,
+    required bool isSnoozed,
+    required DateTime? snoozedUntil,
+  }) {
+    return alunoFollowUpCompactSubtitle(
+      alunoNome: aluno.nome,
+      followUpDate: followUpDate,
+      isSnoozed: isSnoozed,
+      snoozedUntil: snoozedUntil,
+      formatDate: _formatDate,
+    );
+  }
+
+  BoxDecoration _compactFollowUpDecoration({
+    required BuildContext context,
+    required Color primary,
+    required bool isDark,
+  }) {
+    final line = ShellChrome.of(context).line;
+    return BoxDecoration(
+      color:
+          isDark
+              ? Colors.white.withValues(alpha: 0.04)
+              : primary.withValues(alpha: 0.035),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(
+        color: isDark ? line : line.withValues(alpha: 0.85),
+      ),
+    );
+  }
+
+  Widget _buildCompactContactPriorityCard({
+    required BuildContext context,
+    required Color primary,
+    required Color ink,
+    required DateTime? followUpDate,
+    required bool isSnoozed,
+    required DateTime? snoozedUntil,
+    required dynamic actions,
+  }) {
+    final mute = fxScreenMute(context);
+    final isDark = widget.isDark;
+    final subtitle = _compactFollowUpSubtitle(
+      followUpDate: followUpDate,
+      isSnoozed: isSnoozed,
+      snoozedUntil: snoozedUntil,
+    );
+    final motionMs =
+        reduceMotionOf(context)
+            ? 0
+            : 220;
+
+    return DecoratedBox(
+      key: const ValueKey('aluno360_followup_compact'),
+      decoration: _compactFollowUpDecoration(
+        context: context,
+        primary: primary,
+        isDark: isDark,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Semantics(
+              button: true,
+              label:
+                  'Próximo contato. $subtitle. '
+                  '${_expanded ? 'Recolher' : 'Expandir'} opções de follow-up',
+              child: InkWell(
+                onTap: () => setState(() => _expanded = !_expanded),
+                borderRadius: BorderRadius.vertical(
+                  top: const Radius.circular(16),
+                  bottom: Radius.circular(_expanded ? 0 : 16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 10, 12),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: BrandPalette.soft(primary, dark: isDark),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.event_available_rounded,
+                          size: 18,
+                          color: primary,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Próximo contato',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: ink,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.1,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              subtitle,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: Aluno360Layout.captionStyle(context),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color:
+                              isDark
+                                  ? Colors.white.withValues(alpha: 0.06)
+                                  : Colors.black.withValues(alpha: 0.04),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          _expanded
+                              ? Icons.expand_less_rounded
+                              : Icons.expand_more_rounded,
+                          size: 20,
+                          color: mute,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            AnimatedSize(
+              duration: Duration(milliseconds: motionMs),
+              curve: Curves.easeOutCubic,
+              alignment: Alignment.topCenter,
+              child:
+                  _expanded
+                      ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Divider(
+                            height: 1,
+                            thickness: 1,
+                            color: mute.withValues(alpha: isDark ? 0.14 : 0.12),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+                            child: _buildFollowUpActions(
+                              context,
+                              primary: primary,
+                              ink: ink,
+                              followUpDate: followUpDate,
+                              isSnoozed: isSnoozed,
+                              snoozedUntil: snoozedUntil,
+                              actions: actions,
+                              contactPrimaryOutlined: true,
+                            ),
+                          ),
+                        ],
+                      )
+                      : const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final ink = fxScreenInk(context);
@@ -84,46 +264,14 @@ class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
     final compact = widget.compactContactPriority;
 
     if (compact) {
-      return DecoratedBox(
-        decoration: fxListCardDecoration(context),
-        child: Material(
-          color: Colors.transparent,
-          child: Theme(
-          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-          child: ExpansionTile(
-            key: const ValueKey('aluno360_followup_compact'),
-            initiallyExpanded: _expanded,
-            onExpansionChanged: (value) => setState(() => _expanded = value),
-            tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-            childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-            leading: Icon(Icons.event_available_rounded, size: 18, color: primary),
-            title: Text(
-              'Follow-up do personal',
-              style: TextStyle(
-                color: ink,
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            subtitle: Text(
-              'Prioridade é contato · expanda para agendar',
-              style: Aluno360Layout.captionStyle(context),
-            ),
-            children: [
-              _buildFollowUpActions(
-                context,
-                primary: primary,
-                ink: ink,
-                followUpDate: followUpDate,
-                isSnoozed: isSnoozed,
-                snoozedUntil: snoozedUntil,
-                actions: actions,
-                contactPrimaryOutlined: true,
-              ),
-            ],
-          ),
-        ),
-        ),
+      return _buildCompactContactPriorityCard(
+        context: context,
+        primary: primary,
+        ink: ink,
+        followUpDate: followUpDate,
+        isSnoozed: isSnoozed,
+        snoozedUntil: snoozedUntil,
+        actions: actions,
       );
     }
 

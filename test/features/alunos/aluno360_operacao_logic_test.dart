@@ -214,6 +214,34 @@ void main() {
     });
   });
 
+  group('alunoFollowUpCompactSubtitle', () {
+    test('personalizes subtitle with first name', () {
+      expect(
+        alunoFollowUpCompactSubtitle(
+          alunoNome: 'Beatriz Silva',
+          followUpDate: null,
+          isSnoozed: false,
+          snoozedUntil: null,
+          formatDate: (d) => '${d.day}/${d.month}',
+        ),
+        'Agende depois de falar com Beatriz',
+      );
+    });
+
+    test('shows scheduled date when follow-up exists', () {
+      expect(
+        alunoFollowUpCompactSubtitle(
+          alunoNome: 'Beatriz',
+          followUpDate: DateTime(2026, 6, 10),
+          isSnoozed: false,
+          snoozedUntil: null,
+          formatDate: (d) => '10/06/2026',
+        ),
+        'Agendado para 10/06/2026',
+      );
+    });
+  });
+
   group('shouldShowCopilotContactBadge', () {
     test('shows when contact priority and sticky is not chat', () {
       expect(

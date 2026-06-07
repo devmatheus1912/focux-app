@@ -396,6 +396,27 @@ bool shouldHideCopilotPrimaryCtaWhenMatchesSticky({
   );
 }
 
+/// Copy for compact follow-up row when contact is the hero priority.
+String alunoFollowUpCompactSubtitle({
+  required String alunoNome,
+  required DateTime? followUpDate,
+  required bool isSnoozed,
+  required DateTime? snoozedUntil,
+  required String Function(DateTime) formatDate,
+}) {
+  if (isSnoozed && snoozedUntil != null) {
+    return 'Adiado até ${formatDate(snoozedUntil)}';
+  }
+  if (followUpDate != null) {
+    return 'Agendado para ${formatDate(followUpDate)}';
+  }
+  final firstName = alunoPrimeiroNome(alunoNome);
+  if (firstName != 'aluno') {
+    return 'Agende depois de falar com $firstName';
+  }
+  return 'Agende o próximo contato após hoje';
+}
+
 /// Hide contact badge when sticky already surfaces the same CTA.
 bool shouldShowCopilotContactBadge({
   required bool contactPriority,
