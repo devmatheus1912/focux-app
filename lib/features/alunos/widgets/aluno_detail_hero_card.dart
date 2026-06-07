@@ -1,13 +1,12 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/tokens_strip.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
-import '../../dashboard/utils/dashboard_readability.dart';
-import '../../dashboard/widgets/dashboard_hero_widgets.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
+import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno_display_utils.dart';
 import '../utils/aluno_hero_signal.dart';
@@ -19,12 +18,14 @@ class AlunoDetailHeroCard extends StatelessWidget {
     required this.aluno,
     required this.isDark,
     required this.primary,
+    this.compactContactPriority = false,
     this.onDefineObjective,
   });
 
   final Aluno aluno;
   final bool isDark;
   final Color primary;
+  final bool compactContactPriority;
   final VoidCallback? onDefineObjective;
 
   @override
@@ -35,6 +36,12 @@ class AlunoDetailHeroCard extends StatelessWidget {
     final status = alunoHeroStatusVisual(aluno);
     final signal = alunoHeroPrimarySignal(aluno);
     final caption = alunoHeroCaption(aluno, signal);
+    final contextLine = alunoHeroContextLine(signal, caption);
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
+    final subtitle =
+        objectiveDefined ? '$objective · $contextLine' : contextLine;
+    final subtitleMaxLines = 1;
 
     return Semantics(
       container: true,
@@ -43,227 +50,261 @@ class AlunoDetailHeroCard extends StatelessWidget {
           '${signal.label} ${signal.value}${signal.suffix ?? ''}',
       child: MediaQuery.withClampedTextScaling(
         maxScaleFactor: 1.25,
-        child: _HeroShell(
-          isDark: isDark,
-          primary: primary,
-          photoUrl: aluno.fotoUrl,
-          displayName: displayName,
-          objective: objective,
-          objectiveDefined: objectiveDefined,
-          onDefineObjective: onDefineObjective,
-          status: status,
-          signal: signal,
-          caption: caption,
+        child: Container(
+          key: const ValueKey('aluno360_hero_card'),
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: Aluno360Layout.operacaoInsetSectionDecoration(
+            context,
+            primary: primary,
+            isDark: isDark,
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: SizedBox(
+                  width: constraints.maxWidth,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      AlunoAvatar(
+                        name: displayName,
+                        photoUrl: aluno.fotoUrl,
+                        variant:
+                            compactContactPriority
+                                ? AlunoAvatarVariant.strip
+                                : AlunoAvatarVariant.hero,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    displayName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: ink,
+                                      fontSize:
+                                          compactContactPriority ? 15 : 15.5,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: -0.25,
+                                      height: 1.05,
+                                    ),
+                                  ),
+                                ),
+                                if (alunoHeroShouldShowStatusBadge(
+                                  signal: signal,
+                                  status: status,
+                                )) ...[
+                                  const SizedBox(width: 6),
+                                  _IdentityStatusChip(
+                                    status: status,
+                                    isDark: isDark,
+                                  ),
+                                ],
+                              ],
+                            ),
+                            const SizedBox(height: 3),
+                            if (!objectiveDefined && onDefineObjective != null)
+                              _IdentityObjectiveRow(
+                                label: objective,
+                                primary: primary,
+                                isDark: isDark,
+                                mute: mute,
+                                onDefineObjective: onDefineObjective!,
+                              )
+                            else
+                              Text(
+                                subtitle,
+                                maxLines: subtitleMaxLines,
+                                overflow: TextOverflow.ellipsis,
+                                style: Aluno360Layout.captionStyle(context)
+                                    .copyWith(
+                                      color: mute,
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.25,
+                                    ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      _IdentityMetricChip(
+                        signal: signal,
+                        isDark: isDark,
+                        primary: primary,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
   }
 }
 
-class _HeroShell extends StatefulWidget {
-  const _HeroShell({
-    required this.isDark,
+class _IdentityObjectiveRow extends StatelessWidget {
+  const _IdentityObjectiveRow({
+    required this.label,
     required this.primary,
-    required this.photoUrl,
-    required this.displayName,
-    required this.objective,
-    required this.objectiveDefined,
-    required this.status,
-    required this.signal,
-    required this.caption,
-    this.onDefineObjective,
+    required this.isDark,
+    required this.mute,
+    required this.onDefineObjective,
   });
 
-  final bool isDark;
+  final String label;
   final Color primary;
-  final String? photoUrl;
-  final String displayName;
-  final String objective;
-  final bool objectiveDefined;
-  final VoidCallback? onDefineObjective;
-  final AlunoHeroStatusVisual status;
-  final AlunoHeroPrimarySignal signal;
-  final String caption;
-
-  @override
-  State<_HeroShell> createState() => _HeroShellState();
-}
-
-class _HeroShellState extends State<_HeroShell>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _gradientCtrl;
-  bool _motionConfigured = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _gradientCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 8),
-    );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_motionConfigured) return;
-    _motionConfigured = true;
-    if (TokensStrip.prefersReducedMotion(context)) {
-      _gradientCtrl.stop();
-    } else {
-      _gradientCtrl.repeat();
-    }
-  }
-
-  @override
-  void dispose() {
-    _gradientCtrl.dispose();
-    super.dispose();
-  }
+  final bool isDark;
+  final Color mute;
+  final VoidCallback onDefineObjective;
 
   @override
   Widget build(BuildContext context) {
-    final heroDeep = BrandPalette.deep(widget.primary);
-    final reduceMotion = TokensStrip.prefersReducedMotion(context);
-
-    return AnimatedBuilder(
-      animation: _gradientCtrl,
-      builder: (context, _) {
-        final angle =
-            reduceMotion ? 0.0 : _gradientCtrl.value * 2 * math.pi;
-        final begin = Alignment(-math.cos(angle), -math.sin(angle));
-        final end = Alignment(math.cos(angle), math.sin(angle));
-
-        return Container(
-          key: const ValueKey('aluno360_hero_card'),
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            gradient: LinearGradient(
-              colors:
-                  widget.isDark
-                      ? const [Color(0xFF128989), Color(0xFF0A2E2E)]
-                      : [widget.primary, heroDeep],
-              begin: begin,
-              end: end,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: widget.primary.withValues(
-                  alpha: widget.isDark ? 0.24 : 0.14,
-                ),
-                blurRadius: widget.isDark ? 28 : 22,
-                offset: const Offset(0, 10),
-                spreadRadius: -10,
+    return Row(
+      children: [
+        Flexible(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: BrandPalette.soft(primary, dark: isDark),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: primary.withValues(alpha: isDark ? 0.24 : 0.18),
               ),
-            ],
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: CustomPaint(
-            foregroundPainter: const DashboardHeroGridPainter(lineAlpha: 0.035),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  AlunoAvatar(
-                    name: widget.displayName,
-                    photoUrl: widget.photoUrl,
-                    variant: AlunoAvatarVariant.hero,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                widget.displayName,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: -0.35,
-                                  height: 1.05,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            if (alunoHeroShouldShowStatusBadge(
-                              signal: widget.signal,
-                              status: widget.status,
-                            )) ...[
-                              const SizedBox(width: 8),
-                              _HeroStatusPill(
-                                label: widget.status.label,
-                                background: widget.status.background,
-                                foreground: widget.status.foreground,
-                              ),
-                            ],
-                          ],
-                        ),
-                        const SizedBox(height: 5),
-                        _HeroObjectiveRow(
-                          label: widget.objective,
-                          defined: widget.objectiveDefined,
-                          onDefineObjective: widget.onDefineObjective,
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          alunoHeroContextLine(widget.signal, widget.caption),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.92),
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w600,
-                            height: 1.25,
-                          ),
-                        ),
-                      ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.flag_outlined, size: 11, color: mute),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: mute,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w600,
+                      fontStyle: FontStyle.italic,
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  _HeroMetricPanel(
-                    eyebrow: alunoHeroMetricEyebrow(widget.signal),
-                    value: widget.signal.value,
-                    suffix: widget.signal.suffix,
-                  ),
-                ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        Semantics(
+          button: true,
+          label: 'Definir objetivo do aluno',
+          child: TextButton(
+            onPressed: onDefineObjective,
+            style: TextButton.styleFrom(
+              minimumSize: Size.zero,
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              foregroundColor: primary,
+            ),
+            child: const Text(
+              'Definir',
+              style: TextStyle(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w800,
+                decoration: TextDecoration.underline,
               ),
             ),
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 }
 
-class _HeroMetricPanel extends StatelessWidget {
-  const _HeroMetricPanel({
-    required this.value,
-    this.eyebrow,
-    this.suffix,
+class _IdentityStatusChip extends StatelessWidget {
+  const _IdentityStatusChip({
+    required this.status,
+    required this.isDark,
   });
 
-  final String? eyebrow;
-  final String value;
-  final String? suffix;
+  final AlunoHeroStatusVisual status;
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(minWidth: 68),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.11),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+        color: status.background.withValues(alpha: isDark ? 0.35 : 0.18),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: status.foreground.withValues(alpha: 0.35),
+        ),
+      ),
+      child: Text(
+        status.label,
+        style: TextStyle(
+          color: status.foreground,
+          fontSize: 9.5,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+}
+
+class _IdentityMetricChip extends StatelessWidget {
+  const _IdentityMetricChip({
+    required this.signal,
+    required this.isDark,
+    required this.primary,
+  });
+
+  final AlunoHeroPrimarySignal signal;
+  final bool isDark;
+  final Color primary;
+
+  Color _accentColor() {
+    return switch (signal.label) {
+      'Risco operacional' => EagleTokens.warn,
+      'Aderência semanal' => EagleTokens.aderenciaColor(
+        double.tryParse(signal.value) ?? 0,
+        isDark: isDark,
+      ),
+      'Sem treino' => EagleTokens.warn,
+      _ => primary,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = fxScreenInk(context);
+    final accent = _accentColor();
+    final eyebrow = alunoHeroMetricEyebrow(signal);
+    final emphasis =
+        signal.label == 'Risco operacional' || signal.label == 'Sem treino'
+            ? OperationalMetricEmphasis.alert
+            : OperationalMetricEmphasis.normal;
+
+    return Container(
+      constraints: const BoxConstraints(minWidth: 62),
+      padding: const EdgeInsets.fromLTRB(8, 6, 10, 6),
+      decoration: operationalMetricDecoration(
+        accent: accent,
+        isDark: isDark,
+        emphasis: emphasis,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -271,10 +312,10 @@ class _HeroMetricPanel extends StatelessWidget {
         children: [
           if (eyebrow != null)
             Text(
-              eyebrow!,
-              style: TextStyle(
-                color: dashboardHeroLabelOnTeal(),
-                fontSize: 9.5,
+              eyebrow.toUpperCase(),
+              style: AppTypography.inter(
+                color: Color.lerp(ink, accent, 0.35)!,
+                fontSize: 9,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0.35,
                 height: 1,
@@ -287,22 +328,22 @@ class _HeroMetricPanel extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                value,
-                style: AppTypography.mono(
-                  color: Colors.white,
-                  fontSize: 21,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.5,
+                signal.value,
+                style: AppTypography.condensed(
+                  color: ink,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.4,
                   height: 1,
                 ),
               ),
-              if (suffix != null)
+              if (signal.suffix != null)
                 Padding(
-                  padding: const EdgeInsets.only(left: 2),
+                  padding: const EdgeInsets.only(left: 1),
                   child: Text(
-                    suffix!,
-                    style: TextStyle(
-                      color: dashboardHeroLabelOnTeal(),
+                    signal.suffix!,
+                    style: AppTypography.inter(
+                      color: fxScreenMute(context),
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
                       height: 1,
@@ -312,159 +353,6 @@ class _HeroMetricPanel extends StatelessWidget {
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _HeroObjectiveRow extends StatelessWidget {
-  const _HeroObjectiveRow({
-    required this.label,
-    required this.defined,
-    this.onDefineObjective,
-  });
-
-  final String label;
-  final bool defined;
-  final VoidCallback? onDefineObjective;
-
-  @override
-  Widget build(BuildContext context) {
-    if (defined) {
-      return Semantics(
-        label: 'Objetivo: $label',
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.fitness_center_rounded,
-                size: 11,
-                color: dashboardHeroLabelOnTeal(),
-              ),
-              const SizedBox(width: 4),
-              Flexible(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: dashboardHeroCaptionOnTeal(),
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Row(
-      children: [
-        Flexible(
-          child: Semantics(
-            label: 'Objetivo pendente de definição',
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.06),
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.28),
-                  strokeAlign: BorderSide.strokeAlignInside,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.flag_outlined,
-                    size: 11,
-                    color: Colors.white.withValues(alpha: 0.72),
-                  ),
-                  const SizedBox(width: 4),
-                  Flexible(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.78),
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w600,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        if (onDefineObjective != null)
-          Semantics(
-            button: true,
-            label: 'Definir objetivo do aluno',
-            child: TextButton(
-              onPressed: onDefineObjective,
-              style: TextButton.styleFrom(
-                minimumSize: Size.zero,
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text(
-                'Definir',
-                style: TextStyle(
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w800,
-                  decoration: TextDecoration.underline,
-                  decorationThickness: 1.2,
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _HeroStatusPill extends StatelessWidget {
-  const _HeroStatusPill({
-    required this.label,
-    required this.background,
-    required this.foreground,
-  });
-
-  final String label;
-  final Color background;
-  final Color foreground;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: foreground,
-          fontSize: 10,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 0.1,
-        ),
       ),
     );
   }

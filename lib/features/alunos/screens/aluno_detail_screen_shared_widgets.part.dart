@@ -645,36 +645,33 @@ class _AlunoDetailHeroSkeleton extends StatelessWidget {
         key: const ValueKey('aluno360_hero_skeleton'),
         width: double.infinity,
         height: Aluno360Layout.heroBodyHeight(context),
-        padding: const EdgeInsets.fromLTRB(11, 8, 11, 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(16),
           color: Colors.white.withValues(alpha: isDark ? 0.06 : 0.35),
+          border: Border.all(
+            color: primary.withValues(alpha: isDark ? 0.14 : 0.1),
+          ),
         ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            bone(52, 52, radius: 26),
-            const SizedBox(width: 9),
+            bone(40, 40, radius: 20),
+            const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(child: bone(120, 14, radius: 8)),
-                      const SizedBox(width: 8),
-                      bone(64, 20, radius: 11),
-                    ],
-                  ),
+                  bone(120, 14, radius: 8),
                   const SizedBox(height: 6),
-                  bone(double.infinity, 22, radius: 10),
-                  const SizedBox(height: 6),
-                  bone(140, 9, radius: 6),
+                  bone(double.infinity, 10, radius: 6),
                 ],
               ),
             ),
+            const SizedBox(width: 8),
+            bone(62, 38, radius: 12),
           ],
         ),
       ),

@@ -5,7 +5,7 @@ import '../../../core/utils/fx_utils.dart';
 import '../utils/aluno_display_utils.dart';
 import '../utils/aluno_media_utils.dart';
 
-enum AlunoAvatarVariant { list, hero }
+enum AlunoAvatarVariant { list, hero, strip }
 
 class AlunoAvatar extends StatelessWidget {
   const AlunoAvatar({
@@ -16,8 +16,9 @@ class AlunoAvatar extends StatelessWidget {
     this.fallbackColor,
   });
 
-  static const double heroSize = 48;
+  static const double heroSize = 44;
   static const double listSize = 48;
+  static const double stripSize = 40;
 
   final String name;
   final String? photoUrl;
@@ -29,6 +30,7 @@ class AlunoAvatar extends StatelessWidget {
   double get _size =>
       switch (variant) {
         AlunoAvatarVariant.hero => heroSize,
+        AlunoAvatarVariant.strip => stripSize,
         AlunoAvatarVariant.list => listSize,
       };
 
@@ -39,13 +41,15 @@ class AlunoAvatar extends StatelessWidget {
     final resolvedUrl = resolveAlunoPhotoUrl(photoUrl);
     final ringColor =
         _onHero
-            ? Colors.white.withValues(alpha: 0.94)
+            ? BrandPalette.accent(primary).withValues(
+              alpha: isDark ? 0.96 : 0.88,
+            )
             : BrandPalette.accent(primary).withValues(
               alpha: isDark ? 0.96 : 0.88,
             );
     final glowColor =
         _onHero
-            ? Colors.black.withValues(alpha: 0.28)
+            ? ringColor.withValues(alpha: isDark ? 0.28 : 0.2)
             : ringColor.withValues(alpha: isDark ? 0.42 : 0.36);
 
     Widget avatar;
@@ -55,13 +59,20 @@ class AlunoAvatar extends StatelessWidget {
         height: _size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: ringColor, width: _onHero ? 2.5 : 2),
+          border: Border.all(color: ringColor, width: _onHero ? 2 : 2),
           boxShadow: [
-            BoxShadow(
-              color: glowColor,
-              blurRadius: _onHero ? 14 : (isDark ? 14 : 12),
-              offset: Offset(0, _onHero ? 4 : 0),
-            ),
+            if (_onHero)
+              BoxShadow(
+                color: glowColor,
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              )
+            else
+              BoxShadow(
+                color: glowColor,
+                blurRadius: isDark ? 14 : 12,
+                offset: Offset.zero,
+              ),
           ],
         ),
         padding: const EdgeInsets.all(2),
@@ -137,17 +148,17 @@ class _AlunoAvatarInitials extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: fallback,
-          border: Border.all(color: Colors.white.withValues(alpha: 0.94), width: 2.5),
+          border: Border.all(
+            color: BrandPalette.sectionAccent(primary, dark: isDark).withValues(
+              alpha: isDark ? 0.32 : 0.22,
+            ),
+            width: 2,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.28),
-              blurRadius: 14,
-              offset: const Offset(0, 4),
-            ),
-            BoxShadow(
-              color: Colors.white.withValues(alpha: 0.18),
+              color: primary.withValues(alpha: isDark ? 0.18 : 0.12),
               blurRadius: 8,
-              offset: const Offset(0, 1),
+              offset: const Offset(0, 2),
             ),
           ],
         ),

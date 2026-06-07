@@ -13,17 +13,31 @@ abstract final class Aluno360Layout {
   static const double stickyBarContentHeight = 56;
   static const double snackbarStickyReserve = 72;
 
-  /// Approximate hero card body (matches [AlunoDetailHeroCard] at textScale ≤ 1.25).
-  static double heroBodyHeight(BuildContext context) {
+  /// Approximate identity strip body (matches [AlunoDetailHeroCard] at textScale ≤ 1.25).
+  static double heroBodyHeight(
+    BuildContext context, {
+    bool compactContactPriority = false,
+  }) {
     final textScale =
-        MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 1.25);
-    return 112 + ((textScale - 1) * 20);
+        MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0);
+    final base = compactContactPriority ? 58.0 : 78.0;
+    return base + ((textScale - 1) * 22);
   }
 
-  /// Toolbar inset + hero card + bottom padding — no dead gap above the card.
-  static double heroExpandedHeight(BuildContext context) {
+  /// Toolbar inset + identity strip + bottom padding.
+  static double heroExpandedHeight(
+    BuildContext context, {
+    bool compactContactPriority = false,
+  }) {
     final top = MediaQuery.paddingOf(context).top;
-    return top + kToolbarHeight + 2 + heroBodyHeight(context) + 4;
+    return top +
+        kToolbarHeight +
+        2 +
+        heroBodyHeight(
+          context,
+          compactContactPriority: compactContactPriority,
+        ) +
+        4;
   }
 
   /// Pinned toolbar + tab bar (content should not scroll under this stack).

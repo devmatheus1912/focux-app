@@ -208,7 +208,13 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
         data: (aluno) {
           ref.watch(alertasConfigProvider);
           final perfilCompletion = copilotProfileCompletion(aluno);
-          final heroExpandedHeight = Aluno360Layout.heroExpandedHeight(context);
+          final operacao = ref.watch(aluno360OperacaoProvider(alunoId));
+          final compactHero =
+              operacao?.contactPriority ?? isOperacaoContatoPrioritario(aluno: aluno);
+          final heroExpandedHeight = Aluno360Layout.heroExpandedHeight(
+            context,
+            compactContactPriority: compactHero,
+          );
           final displayName = fxTitleCaseName(aluno.nome);
           final collapseThreshold =
               (heroExpandedHeight -
@@ -288,22 +294,26 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                       TokensStrip.s4,
                       4,
                     ),
-                    child: AlunoDetailHeroCard(
-                      aluno: aluno,
-                      isDark: isDark,
-                      primary: primary,
-                      onDefineObjective:
-                          alunoObjectiveIsDefined(aluno.objetivo)
-                              ? null
-                              : () async {
-                                final updated = await context.push<bool>(
-                                  '/alunos/$alunoId/editar',
-                                  extra: aluno,
-                                );
-                                if (updated == true) {
-                                  invalidateAluno360Providers(ref, alunoId);
-                                }
-                              },
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: AlunoDetailHeroCard(
+                        aluno: aluno,
+                        isDark: isDark,
+                        primary: primary,
+                        compactContactPriority: compactHero,
+                        onDefineObjective:
+                            alunoObjectiveIsDefined(aluno.objetivo)
+                                ? null
+                                : () async {
+                                  final updated = await context.push<bool>(
+                                    '/alunos/$alunoId/editar',
+                                    extra: aluno,
+                                  );
+                                  if (updated == true) {
+                                    invalidateAluno360Providers(ref, alunoId);
+                                  }
+                                },
+                      ),
                     ),
                   ),
                 ),
