@@ -487,41 +487,40 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
       child = _fromContent(offlineCopilotPrescription(fallback));
     }
 
+    final iaAccent = isIaData || isIaLoading;
+    final surfaceColor =
+        isDark
+            ? Colors.white.withValues(alpha: iaAccent ? 0.05 : 0.04)
+            : iaAccent
+                ? Color.alphaBlend(
+                  primary.withValues(alpha: 0.06),
+                  BrandPalette.softer(primary),
+                )
+                : BrandPalette.softer(primary);
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
       decoration: BoxDecoration(
-        color:
-            isDark
-                ? Colors.white.withValues(alpha: 0.04)
-                : BrandPalette.softer(primary),
-        borderRadius: BorderRadius.circular(18),
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isIaData ? primary.withValues(alpha: 0.28) : line,
+          color:
+              iaAccent
+                  ? primary.withValues(alpha: isDark ? 0.22 : 0.16)
+                  : line,
         ),
         boxShadow:
             isIaData
                 ? [
                   BoxShadow(
-                    color: primary.withValues(alpha: isDark ? 0.12 : 0.08),
-                    blurRadius: 14,
-                    offset: const Offset(0, 4),
+                    color: primary.withValues(alpha: isDark ? 0.08 : 0.05),
+                    blurRadius: 12,
+                    offset: const Offset(0, 3),
                   ),
                 ]
                 : null,
       ),
-      foregroundDecoration:
-          isIaData || isIaLoading
-              ? BoxDecoration(
-                borderRadius: BorderRadius.circular(18),
-                border: Border(
-                  left: BorderSide(
-                    color: primary.withValues(alpha: 0.85),
-                    width: 3,
-                  ),
-                ),
-              )
-              : null,
       child: child,
     );
   }
