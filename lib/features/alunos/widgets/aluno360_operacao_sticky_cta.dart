@@ -108,18 +108,22 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
           openEditAluno();
       }
     }
+    final showSecondaryCommandCenter = shouldShowStickySecondaryCommandCenter(
+      sticky: sticky,
+      hasOpenTask: hasOpenTask,
+    );
     final showSecondaryChat = shouldShowStickySecondaryChat(
       sticky: sticky,
       hasOpenTask: hasOpenTask,
       followUpDue: followUpDue,
       proximaAcaoText: effectiveProxima?.acao,
     );
-    final showSecondaryCommandCenter = shouldShowStickySecondaryCommandCenter(
+    final hasSecondary = showSecondaryCommandCenter || showSecondaryChat;
+    final stickyDisplayLabel = resolveStickyDisplayLabel(
       sticky: sticky,
-      hasOpenTask: hasOpenTask,
+      compact: hasSecondary,
+      proximaAcao: effectiveProxima,
     );
-    final hasSecondary =
-        showSecondaryCommandCenter || showSecondaryChat;
 
     return SafeArea(
       top: false,
@@ -147,10 +151,10 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
               flex: hasSecondary ? 5 : 1,
               child: Semantics(
                 button: true,
-                label: operacao.stickyDisplayLabel,
+                label: stickyDisplayLabel,
                 child: FxLiquidPrimaryButton(
                   icon: sticky.icon,
-                  label: operacao.stickyDisplayLabel,
+                  label: stickyDisplayLabel,
                   loading: creating,
                   loadingLabel: 'Criando…',
                   onPressed: creating ? null : onPrimary,

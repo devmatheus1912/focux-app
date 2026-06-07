@@ -538,6 +538,24 @@ bool shouldShowStickySecondaryCommandCenter({
 }) =>
     hasOpenTask && sticky.isChatAction;
 
+/// True when the sticky bar shows Tarefa or Chat beside the primary CTA.
+bool hasOperacaoStickySecondary({
+  required OperacaoStickyAction sticky,
+  required bool hasOpenTask,
+  required bool followUpDue,
+  required String? proximaAcaoText,
+}) =>
+    shouldShowStickySecondaryCommandCenter(
+      sticky: sticky,
+      hasOpenTask: hasOpenTask,
+    ) ||
+    shouldShowStickySecondaryChat(
+      sticky: sticky,
+      hasOpenTask: hasOpenTask,
+      followUpDue: followUpDue,
+      proximaAcaoText: proximaAcaoText,
+    );
+
 String alunoPrimeiroNome(String nomeAluno) {
   final trimmed = nomeAluno.trim();
   if (trimmed.isEmpty) return 'aluno';
@@ -586,7 +604,9 @@ String resolveStickyDisplayLabel({
 }) {
   if (compact) {
     final backend = proximaAcao?.stickyLabelCompact?.trim();
-    if (backend != null && backend.isNotEmpty) return backend;
+    if (backend != null && backend.isNotEmpty && backend.length <= 14) {
+      return backend;
+    }
     return stickyLabelCompactFallback(sticky.label);
   }
   return sticky.label;
@@ -694,20 +714,15 @@ Aluno360OperacaoSnapshot resolveAluno360OperacaoSnapshot({
     hasOpenTask: hasOpenTask,
     proximaAcao: effectiveProxima,
   );
-  final stickyCompact =
-      shouldShowStickySecondaryCommandCenter(
-        sticky: sticky,
-        hasOpenTask: hasOpenTask,
-      ) ||
-      shouldShowStickySecondaryChat(
-        sticky: sticky,
-        hasOpenTask: hasOpenTask,
-        followUpDue: followUpDue,
-        proximaAcaoText: effectiveProxima?.acao,
-      );
+  final stickySecondaryVisible = hasOperacaoStickySecondary(
+    sticky: sticky,
+    hasOpenTask: hasOpenTask,
+    followUpDue: followUpDue,
+    proximaAcaoText: effectiveProxima?.acao,
+  );
   final stickyDisplayLabel = resolveStickyDisplayLabel(
     sticky: sticky,
-    compact: stickyCompact,
+    compact: stickySecondaryVisible,
     proximaAcao: effectiveProxima,
   );
   final outreachAcao =

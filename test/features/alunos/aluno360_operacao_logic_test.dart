@@ -731,6 +731,48 @@ void main() {
         'Contato',
       );
     });
+
+    test('compact map label when secondary visible with long mapa label', () {
+      expect(
+        resolveStickyDisplayLabel(
+          sticky: const OperacaoStickyAction(
+            label: 'Completar mapa corporal',
+            icon: Icons.chat_bubble_outline_rounded,
+            destination: OperacaoStickyDestination.chat,
+          ),
+          compact: true,
+          proximaAcao: const ProximaAcaoResumo(
+            acao: 'Completar mapa corporal',
+            motivo: 'Sem medidas',
+            fonte: 'RADAR',
+            prioridade: 'P2',
+            stickyLabel: 'Completar mapa corporal',
+          ),
+        ),
+        'Mapa',
+      );
+    });
+
+    test('ignores backend compact label when too long', () {
+      expect(
+        resolveStickyDisplayLabel(
+          sticky: const OperacaoStickyAction(
+            label: 'Completar mapa corporal',
+            icon: Icons.chat_bubble_outline_rounded,
+            destination: OperacaoStickyDestination.chat,
+          ),
+          compact: true,
+          proximaAcao: const ProximaAcaoResumo(
+            acao: 'Completar mapa corporal',
+            motivo: 'Sem medidas',
+            fonte: 'RADAR',
+            prioridade: 'P2',
+            stickyLabelCompact: 'Completar mapa corporal',
+          ),
+        ),
+        'Mapa',
+      );
+    });
   });
 
   group('isOperacaoContatoPrioritario', () {
@@ -836,6 +878,35 @@ void main() {
       expect(snapshot.stickyAction.label, 'Retomar contato');
       expect(snapshot.showPrepareMessage, isTrue);
       expect(snapshot.outreachMessage, contains('Teste'));
+    });
+
+    test('uses compact map label when chat primary and task open', () {
+      final snapshot = resolveAluno360OperacaoSnapshot(
+        aluno: _aluno(),
+        proximaAcao360: const ProximaAcaoResumo(
+          acao: 'Contate aluno sobre check-in',
+          motivo: 'Sem resposta',
+          fonte: 'IA',
+          prioridade: 'P1',
+          stickyLabel: 'Completar mapa corporal',
+          stickyLabelCompact: 'Mapa',
+        ),
+        forceIa: false,
+        iaAsync: null,
+        hasOpenTask: true,
+        followUpDue: false,
+      );
+      expect(snapshot.stickyAction.isChatAction, isTrue);
+      expect(
+        hasOperacaoStickySecondary(
+          sticky: snapshot.stickyAction,
+          hasOpenTask: true,
+          followUpDue: false,
+          proximaAcaoText: snapshot.effectiveProxima?.acao,
+        ),
+        isTrue,
+      );
+      expect(snapshot.stickyDisplayLabel, 'Mapa');
     });
   });
 
