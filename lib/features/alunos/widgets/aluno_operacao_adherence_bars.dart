@@ -34,7 +34,7 @@ class AlunoOperacaoAdherenceBars extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final labelColor =
         emptyWeek
-            ? Color.lerp(fxScreenMute(context), ink, isDark ? 0.65 : 0.78)!
+            ? Color.lerp(fxScreenMute(context), ink, isDark ? 0.70 : 0.83)!
             : fxScreenMute(context);
     final labelBand =
         14.0 * MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 1.5);

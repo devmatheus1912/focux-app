@@ -400,9 +400,10 @@ class _Aluno360CopilotCard extends ConsumerWidget {
 
     return Container(
       padding: EdgeInsets.all(cardPadding),
-      decoration: fxListCardDecoration(
+      decoration: Aluno360Layout.operacaoInsetSectionDecoration(
         context,
-        accent: primary,
+        primary: primary,
+        isDark: isDark,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

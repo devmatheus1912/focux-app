@@ -143,6 +143,20 @@ String alunoHeroContextLine(AlunoHeroPrimarySignal signal, String caption) {
   return '${signal.label} · $caption';
 }
 
+/// Identity strip subtitle — in contact-priority mode, omit contact captions
+/// already surfaced by Prioridade do dia + sticky CTA.
+String alunoHeroIdentitySubtitle({
+  required bool compactContactPriority,
+  required bool objectiveDefined,
+  required String objective,
+  required String contextLine,
+}) {
+  if (compactContactPriority) {
+    return objective;
+  }
+  return objectiveDefined ? '$objective · $contextLine' : contextLine;
+}
+
 String? alunoHeroMetricEyebrow(AlunoHeroPrimarySignal signal) {
   return switch (signal.label) {
     'Risco operacional' => 'Risco',

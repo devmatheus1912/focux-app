@@ -39,8 +39,12 @@ class AlunoDetailHeroCard extends StatelessWidget {
     final contextLine = alunoHeroContextLine(signal, caption);
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
-    final subtitle =
-        objectiveDefined ? '$objective · $contextLine' : contextLine;
+    final subtitle = alunoHeroIdentitySubtitle(
+      compactContactPriority: compactContactPriority,
+      objectiveDefined: objectiveDefined,
+      objective: objective,
+      contextLine: contextLine,
+    );
     final subtitleMaxLines = 1;
 
     return Semantics(

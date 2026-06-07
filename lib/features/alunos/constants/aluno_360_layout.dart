@@ -10,6 +10,8 @@ abstract final class Aluno360Layout {
   static const double sectionGap = 12;
   static const double cardPadding = 14;
   static const double tabBarHeight = 44;
+  static const double heroTabGap = 8;
+  static const double tabContentGap = 14;
   static const double stickyBarContentHeight = 56;
   static const double snackbarStickyReserve = 72;
 
@@ -20,11 +22,11 @@ abstract final class Aluno360Layout {
   }) {
     final textScale =
         MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0);
-    final base = compactContactPriority ? 58.0 : 78.0;
+    final base = compactContactPriority ? 52.0 : 72.0;
     return base + ((textScale - 1) * 22);
   }
 
-  /// Toolbar inset + identity strip + bottom padding.
+  /// Toolbar inset + identity strip + [heroTabGap] before tab bar.
   static double heroExpandedHeight(
     BuildContext context, {
     bool compactContactPriority = false,
@@ -37,7 +39,7 @@ abstract final class Aluno360Layout {
           context,
           compactContactPriority: compactContactPriority,
         ) +
-        4;
+        heroTabGap;
   }
 
   /// Pinned toolbar + tab bar (content should not scroll under this stack).
@@ -50,6 +52,33 @@ abstract final class Aluno360Layout {
     return stickyBarContentHeight +
         MediaQuery.paddingOf(context).bottom +
         40;
+  }
+
+  /// Nested prescription block inside the copilot card (inset + optional IA accent).
+  static BoxDecoration operacaoPrescriptionDecoration(
+    BuildContext context, {
+    required Color primary,
+    required bool isDark,
+    bool iaAccent = false,
+  }) {
+    final base = operacaoInsetSectionDecoration(
+      context,
+      primary: primary,
+      isDark: isDark,
+    );
+    if (!iaAccent) return base;
+    return base.copyWith(
+      border: Border.all(
+        color: primary.withValues(alpha: isDark ? 0.22 : 0.16),
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: primary.withValues(alpha: isDark ? 0.08 : 0.05),
+          blurRadius: 12,
+          offset: const Offset(0, 3),
+        ),
+      ],
+    );
   }
 
   /// Inset surface shared by Operação follow-up + status cards (teal tint).

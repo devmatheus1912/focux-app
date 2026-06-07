@@ -6,6 +6,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_copilot_logic.dart';
 
@@ -441,7 +442,6 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final line = ShellChrome.of(context).line;
     final isIaLoading = forceIa && (iaAsync?.isLoading ?? false);
     final isIaData = forceIa && (iaAsync?.hasValue ?? false);
 
@@ -488,38 +488,15 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
     }
 
     final iaAccent = isIaData || isIaLoading;
-    final surfaceColor =
-        isDark
-            ? Colors.white.withValues(alpha: iaAccent ? 0.05 : 0.04)
-            : iaAccent
-                ? Color.alphaBlend(
-                  primary.withValues(alpha: 0.06),
-                  BrandPalette.softer(primary),
-                )
-                : BrandPalette.softer(primary);
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-      decoration: BoxDecoration(
-        color: surfaceColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color:
-              iaAccent
-                  ? primary.withValues(alpha: isDark ? 0.22 : 0.16)
-                  : line,
-        ),
-        boxShadow:
-            isIaData
-                ? [
-                  BoxShadow(
-                    color: primary.withValues(alpha: isDark ? 0.08 : 0.05),
-                    blurRadius: 12,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-                : null,
+      decoration: Aluno360Layout.operacaoPrescriptionDecoration(
+        context,
+        primary: primary,
+        isDark: isDark,
+        iaAccent: iaAccent,
       ),
       child: child,
     );

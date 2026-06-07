@@ -31,6 +31,32 @@ void main() {
     });
   });
 
+  group('alunoHeroIdentitySubtitle', () {
+    test('contact priority shows objective only', () {
+      expect(
+        alunoHeroIdentitySubtitle(
+          compactContactPriority: true,
+          objectiveDefined: true,
+          objective: 'Hipertrofia',
+          contextLine: 'Priorize contato hoje',
+        ),
+        'Hipertrofia',
+      );
+    });
+
+    test('normal mode keeps objective and context', () {
+      expect(
+        alunoHeroIdentitySubtitle(
+          compactContactPriority: false,
+          objectiveDefined: true,
+          objective: 'Hipertrofia',
+          contextLine: 'Priorize contato hoje',
+        ),
+        'Hipertrofia · Priorize contato hoje',
+      );
+    });
+  });
+
   group('alunoHeroMetricEyebrow', () {
     test('maps risk metric eyebrow', () {
       expect(

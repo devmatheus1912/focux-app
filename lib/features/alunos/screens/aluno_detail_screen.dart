@@ -292,7 +292,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                       TokensStrip.s4,
                       MediaQuery.paddingOf(context).top + kToolbarHeight + 2,
                       TokensStrip.s4,
-                      4,
+                      Aluno360Layout.heroTabGap,
                     ),
                     child: Align(
                       alignment: Alignment.topCenter,
@@ -372,7 +372,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
               SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.only(
-                    top: Aluno360Layout.sectionGap,
+                    top: Aluno360Layout.tabContentGap,
                     left: Aluno360Layout.screenPadding,
                     right: Aluno360Layout.screenPadding,
                     bottom: showOperacaoSticky
