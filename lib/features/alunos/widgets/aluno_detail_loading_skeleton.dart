@@ -1,56 +1,14 @@
-﻿part of 'aluno_detail_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 
-typedef _MiniAutonomyChip = Aluno360MiniAutonomyChip;
-typedef _Aluno360SecondaryAction = Aluno360SecondaryAction;
-typedef _Aluno360ActionEmptyPanel = Aluno360ActionEmptyPanel;
+import '../../../core/router/safe_navigation.dart';
+import '../../../core/widgets/fx_loading.dart';
+import '../constants/aluno_360_layout.dart';
+import 'aluno360_composite_header.dart';
 
-class _EmptyMiniState extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  final bool isDark;
-
-  const _EmptyMiniState({
-    required this.icon,
-    required this.text,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: primary.withValues(alpha: isDark ? 0.10 : 0.06),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: primary.withValues(alpha: 0.10)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: primary),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              text,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: mute,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                height: 1.25,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AlunoDetailLoadingSkeleton extends StatelessWidget {
-  const _AlunoDetailLoadingSkeleton({
+class AlunoDetailLoadingSkeleton extends StatelessWidget {
+  const AlunoDetailLoadingSkeleton({
+    super.key,
     required this.tabController,
     required this.isDark,
     required this.primary,
@@ -81,7 +39,7 @@ class _AlunoDetailLoadingSkeleton extends StatelessWidget {
           delegate: Aluno360CompositeHeaderDelegate(
             topInset: topInset,
             heroBodyHeight: heroBodyHeight,
-            heroChild: _AlunoDetailHeroSkeleton(
+            heroChild: AlunoDetailHeroSkeleton(
               isDark: isDark,
               primary: primary,
             ),
@@ -124,8 +82,9 @@ class _AlunoDetailLoadingSkeleton extends StatelessWidget {
   }
 }
 
-class _AlunoDetailHeroSkeleton extends StatelessWidget {
-  const _AlunoDetailHeroSkeleton({
+class AlunoDetailHeroSkeleton extends StatelessWidget {
+  const AlunoDetailHeroSkeleton({
+    super.key,
     required this.isDark,
     required this.primary,
   });
@@ -193,4 +152,3 @@ class _AlunoDetailHeroSkeleton extends StatelessWidget {
     );
   }
 }
-

@@ -1,74 +1,29 @@
-﻿import 'dart:async';
-
-import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:flutter/services.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/analytics/analytics_service.dart';
+
 import '../../../core/router/safe_navigation.dart';
-import '../../../features/auth/providers/auth_provider.dart';
-import '../../../core/utils/clipboard_sensitive.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
-import '../data/aluno_contact_utils.dart';
-import '../data/aluno_followup_store.dart';
-import '../utils/altura_display.dart';
-import '../providers/aluno_followup_provider.dart';
-import '../providers/aluno_detail_providers.dart';
-import '../data/aluno_repository.dart';
-import '../providers/alunos_provider.dart';
-import '../../../core/theme/app_typography.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/brand_palette.dart';
-import '../../dashboard/data/command_center_data.dart';
-import '../../dashboard/providers/dashboard_provider.dart';
-import '../../ia/data/ia_repository.dart';
-import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_sparkline.dart';
-import '../../../core/widgets/feedback_helper.dart';
 import '../../health/data/health_repository.dart';
-import '../../health/widgets/recovery_score_ring.dart';
-import '../../../core/utils/motion_preferences.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../constants/aluno_360_layout.dart';
-import '../utils/aluno360_operacao_logic.dart';
+import '../data/aluno_repository.dart';
+import '../providers/aluno_detail_providers.dart';
+import '../providers/aluno_followup_provider.dart';
+import '../providers/alunos_provider.dart';
 import '../utils/aluno360_copilot_logic.dart';
+import '../utils/aluno360_operacao_logic.dart';
+import '../utils/aluno_detail_aluno_actions.dart';
 import '../utils/aluno_display_utils.dart';
 import '../widgets/aluno360_composite_header.dart';
-import '../widgets/aluno360_copilot_card.dart';
-import '../widgets/aluno360_operacao_tab.dart';
-import '../widgets/aluno360_follow_up_card.dart';
+import '../widgets/aluno360_detail_evolucao_tab.dart';
+import '../widgets/aluno360_detail_ferramentas_tab.dart';
+import '../widgets/aluno360_detail_operacao_tab.dart';
 import '../widgets/aluno360_operacao_sticky_cta.dart';
-import '../widgets/aluno360_operational_status_section.dart';
+import '../widgets/aluno_detail_error_state.dart';
 import '../widgets/aluno_detail_hero_card.dart';
-import '../widgets/aluno_operacao_adherence_bars.dart';
-import '../widgets/aluno360_copilot_prescription.dart';
-import '../data/aluno_copilot_ia_cache_store.dart';
-import '../widgets/aluno360_evolucao_tab.dart';
-import '../widgets/aluno360_ferramentas_modules_grid.dart';
-import '../widgets/aluno360_ferramentas_tab.dart';
-import '../widgets/aluno360_module_tile.dart';
-import '../widgets/aluno360_finance_risk_banner.dart';
-import '../widgets/aluno360_timeline_card.dart';
-import '../widgets/aluno360_action_empty_panel.dart';
-import '../widgets/aluno360_mini_autonomy_chip.dart';
-import '../widgets/aluno360_student_quick_actions.dart';
-import '../widgets/aluno360_evolucao_inteligente_card.dart';
-import '../widgets/aluno_outreach_message_sheet.dart';
-import '../utils/aluno_detail_aluno_actions.dart';
-import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_motion.dart';
-part 'aluno_detail_screen_hero.part.dart';
-part 'aluno_detail_screen_evolucao.part.dart';
-part 'aluno_detail_screen_shared_widgets.part.dart';
-part 'aluno_detail_screen_modules.part.dart';
-part 'aluno_detail_screen_recovery.part.dart';
-part 'aluno_detail_screen_weight.part.dart';
-part 'aluno_detail_screen_shared.part.dart';
-part 'aluno_detail_screen_tabs.part.dart';
+import '../widgets/aluno_detail_loading_skeleton.dart';
 
 class AlunoDetailScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -184,7 +139,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
               )
               : null,
       body: loadingPrimary || loadingFallback
-          ? _AlunoDetailLoadingSkeleton(
+          ? AlunoDetailLoadingSkeleton(
               tabController: _tabController,
               isDark: isDark,
               primary: primary,
@@ -195,7 +150,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
             )
           : resolvedAlunoAsync.when(
         loading:
-            () => _AlunoDetailLoadingSkeleton(
+            () => AlunoDetailLoadingSkeleton(
               tabController: _tabController,
               isDark: isDark,
               primary: primary,
@@ -205,7 +160,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
               sheetFill: chrome.sheetFill,
             ),
         error:
-            (e, _) => _AlunoDetailErrorState(
+            (e, _) => AlunoDetailErrorState(
               message: friendlyError(
                 aluno360Async.error ?? e,
                 fallback: 'Não foi possível carregar os dados do aluno.',
@@ -297,7 +252,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                     switchOutCurve: Curves.easeIn,
                     layoutBuilder: (current, _) => current ?? const SizedBox.shrink(),
                     child: switch (tabIndex) {
-                      0 => _AlunoDetailOperacaoTab(
+                      0 => Aluno360DetailOperacaoTab(
                         key: const ValueKey('aluno360_tab_operacao'),
                         aluno: aluno,
                         alunoId: alunoId,
@@ -330,7 +285,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                           extra: aluno.nome,
                         ),
                       ),
-                      1 => _AlunoDetailEvolucaoTab(
+                      1 => Aluno360DetailEvolucaoTab(
                         key: const ValueKey('aluno360_tab_evolucao'),
                         aluno: aluno,
                         alunoId: alunoId,
@@ -345,7 +300,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                           }
                         },
                       ),
-                      _ => _AlunoDetailFerramentasTab(
+                      _ => Aluno360DetailFerramentasTab(
                         key: const ValueKey('aluno360_tab_ferramentas'),
                         aluno: aluno,
                         alunoId: alunoId,

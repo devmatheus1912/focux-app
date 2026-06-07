@@ -53,6 +53,22 @@ String _alunoDetailLibrarySource() {
   const executarButtonFile =
       'lib/features/alunos/widgets/aluno360_copilot_executar_button.dart';
   const iaRepositoryFile = 'lib/features/ia/data/ia_repository.dart';
+  const detailOperacaoTabFile =
+      'lib/features/alunos/widgets/aluno360_detail_operacao_tab.dart';
+  const detailEvolucaoTabFile =
+      'lib/features/alunos/widgets/aluno360_detail_evolucao_tab.dart';
+  const detailFerramentasTabFile =
+      'lib/features/alunos/widgets/aluno360_detail_ferramentas_tab.dart';
+  const recoveryInsightFile =
+      'lib/features/alunos/widgets/aluno360_recovery_insight_card.dart';
+  const weightActivityFile =
+      'lib/features/alunos/widgets/aluno360_weight_activity_card.dart';
+  const emptyMiniStateFile =
+      'lib/features/alunos/widgets/aluno360_empty_mini_state.dart';
+  const detailErrorStateFile =
+      'lib/features/alunos/widgets/aluno_detail_error_state.dart';
+  const detailLoadingSkeletonFile =
+      'lib/features/alunos/widgets/aluno_detail_loading_skeleton.dart';
   final main = File(mainFile).readAsStringSync();
   final providers = File(providersFile).readAsStringSync();
   final heroWidget = File(heroWidgetFile).readAsStringSync();
@@ -80,12 +96,15 @@ String _alunoDetailLibrarySource() {
   final adherenceLegend = File(adherenceLegendFile).readAsStringSync();
   final profileGapsSheet = File(profileGapsSheetFile).readAsStringSync();
   final iaRepository = File(iaRepositoryFile).readAsStringSync();
-  final partPattern = RegExp(r"part '([^']+\.part\.dart)';");
-  final parts = partPattern
-      .allMatches(main)
-      .map((m) => File('$dir/${m.group(1)!}').readAsStringSync())
-      .join('\n');
-  return '$main\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$outreachSheet\n$copilotCard\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$actionEmptyPanel\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$parts';
+  final detailOperacaoTab = File(detailOperacaoTabFile).readAsStringSync();
+  final detailEvolucaoTab = File(detailEvolucaoTabFile).readAsStringSync();
+  final detailFerramentasTab = File(detailFerramentasTabFile).readAsStringSync();
+  final recoveryInsight = File(recoveryInsightFile).readAsStringSync();
+  final weightActivity = File(weightActivityFile).readAsStringSync();
+  final emptyMiniState = File(emptyMiniStateFile).readAsStringSync();
+  final detailErrorState = File(detailErrorStateFile).readAsStringSync();
+  final detailLoadingSkeleton = File(detailLoadingSkeletonFile).readAsStringSync();
+  return '$main\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$outreachSheet\n$copilotCard\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$actionEmptyPanel\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$emptyMiniState\n$detailErrorState\n$detailLoadingSkeleton';
 }
 
 void main() {
@@ -179,7 +198,7 @@ void main() {
     expect(screen, contains('shouldHideCopilotChatCta'));
     expect(screen, contains('AlunoOperacaoAdherenceBars'));
     expect(screen, contains('summarizeAderenciaWeek'));
-    expect(screen, contains('class _WeightTrendSparkline'));
+    expect(screen, contains('class Aluno360WeightTrendSparkline'));
     expect(screen, contains('FxSparkline'));
     expect(screen, contains('formatAlturaDisplay'));
     expect(screen, contains('friendlyError'));
@@ -188,11 +207,11 @@ void main() {
     expect(screen, contains("Tab(text: 'Operação')"));
     expect(screen, contains("Tab(text: 'Evolução')"));
     expect(screen, contains("Tab(text: 'Ferramentas')"));
-    expect(screen, contains('class _AlunoDetailOperacaoTab'));
-    expect(screen, contains('class _AlunoDetailEvolucaoTab'));
-    expect(screen, contains('class _AlunoDetailFerramentasTab'));
+    expect(screen, contains('class Aluno360DetailOperacaoTab'));
+    expect(screen, contains('class Aluno360DetailEvolucaoTab'));
+    expect(screen, contains('class Aluno360DetailFerramentasTab'));
     expect(screen, contains('FxLoading.sectionShimmer'));
-    expect(screen, contains('class _AlunoDetailLoadingSkeleton'));
+    expect(screen, contains('class AlunoDetailLoadingSkeleton'));
     expect(screen, contains('aluno360_hero_skeleton'));
     expect(
       File('lib/features/alunos/widgets/aluno360_copilot_prescription.dart')
@@ -234,15 +253,15 @@ void main() {
   test('aluno 360 fase 3: tabs, semantics, friendly errors, shared tile', () {
     final screen = _alunoDetailLibrarySource();
 
-    expect(screen, contains('class _AlunoDetailOperacaoTab'));
+    expect(screen, contains('class Aluno360DetailOperacaoTab'));
     expect(screen, contains('Aluno360OperacaoStickyCtaBar'));
     expect(screen, contains('class Aluno360OperationalStatusSection'));
     expect(screen, contains('Ações rápidas da aba operação'));
-    expect(screen, contains('class _AlunoDetailEvolucaoTab'));
+    expect(screen, contains('class Aluno360DetailEvolucaoTab'));
     expect(screen, contains('class Aluno360TimelineCard'));
     expect(screen, contains('Linha do tempo 360'));
     expect(screen, contains('Ver histórico completo da linha do tempo'));
-    expect(screen, contains('class _AlunoDetailFerramentasTab'));
+    expect(screen, contains('class Aluno360DetailFerramentasTab'));
     expect(
       File('lib/features/alunos/widgets/aluno360_ferramentas_tab.dart')
           .readAsStringSync(),

@@ -1,7 +1,12 @@
-﻿part of 'aluno_detail_screen.dart';
+import 'package:flutter/material.dart';
 
-class _AlunoDetailErrorState extends StatelessWidget {
-  const _AlunoDetailErrorState({
+import '../../../core/theme/app_typography.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
+
+class AlunoDetailErrorState extends StatelessWidget {
+  const AlunoDetailErrorState({
+    super.key,
     required this.message,
     required this.onRetry,
   });

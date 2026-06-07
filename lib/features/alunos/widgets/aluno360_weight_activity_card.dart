@@ -1,7 +1,28 @@
-﻿part of 'aluno_detail_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-class _AlunoWeightActivityCard extends ConsumerWidget {
-  const _AlunoWeightActivityCard({
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_sparkline.dart';
+import '../data/aluno_repository.dart';
+import '../providers/aluno_detail_providers.dart';
+import 'aluno360_empty_mini_state.dart';
+
+List<double> resolveWeightSeriesForAluno(
+  List<double> avaliacoes,
+  double? currentPeso,
+) {
+  if (avaliacoes.isNotEmpty) return avaliacoes;
+  if (currentPeso == null) return const [];
+  return [currentPeso, currentPeso];
+}
+
+class Aluno360WeightActivityCard extends ConsumerWidget {
+  const Aluno360WeightActivityCard({
+    super.key,
     required this.aluno,
     required this.alunoId,
     required this.isDark,
@@ -30,77 +51,77 @@ class _AlunoWeightActivityCard extends ConsumerWidget {
             children: [
               Expanded(
                 child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'PESO · TENDÊNCIA',
-                    style: TextStyle(
-                      color:
-                          isDark
-                              ? EagleTokens.darkInkMute
-                              : TokensStrip.textSecondary,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.8,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'PESO · TENDÊNCIA',
+                      style: TextStyle(
+                        color:
+                            isDark
+                                ? EagleTokens.darkInkMute
+                                : TokensStrip.textSecondary,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.8,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Semantics(
-                    label:
-                        aluno.peso == null
-                            ? 'Peso não registrado'
-                            : 'Peso ${aluno.peso!.toStringAsFixed(1)} quilogramas',
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          aluno.peso?.toStringAsFixed(1) ?? '--',
-                          style: TextStyle(
-                            color: ink,
-                            fontSize: 32,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        if (aluno.peso != null) ...[
-                          const SizedBox(width: 3),
+                    const SizedBox(height: 4),
+                    Semantics(
+                      label:
+                          aluno.peso == null
+                              ? 'Peso não registrado'
+                              : 'Peso ${aluno.peso!.toStringAsFixed(1)} quilogramas',
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
                           Text(
-                            'kg',
+                            aluno.peso?.toStringAsFixed(1) ?? '--',
                             style: TextStyle(
-                              color:
-                                  isDark
-                                      ? EagleTokens.darkInkMute
-                                      : TokensStrip.textSecondary,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
+                              color: ink,
+                              fontSize: 32,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: -0.5,
                             ),
                           ),
+                          if (aluno.peso != null) ...[
+                            const SizedBox(width: 3),
+                            Text(
+                              'kg',
+                              style: TextStyle(
+                                color:
+                                    isDark
+                                        ? EagleTokens.darkInkMute
+                                        : TokensStrip.textSecondary,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
               ),
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
-                aluno.peso == null
-                    ? 'Sem medida registrada'
-                    : 'Ver evolução completa',
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.end,
-                style: TextStyle(
-                  color:
-                      isDark
-                          ? EagleTokens.darkInkMute
-                          : TokensStrip.textSecondary,
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w500,
+                  aluno.peso == null
+                      ? 'Sem medida registrada'
+                      : 'Ver evolução completa',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end,
+                  style: TextStyle(
+                    color:
+                        isDark
+                            ? EagleTokens.darkInkMute
+                            : TokensStrip.textSecondary,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
               ),
             ],
           ),
@@ -122,14 +143,17 @@ class _AlunoWeightActivityCard extends ConsumerWidget {
                           '/alunos/$alunoId/evolucao',
                           extra: aluno.nome,
                         ),
-                    child: _EmptyMiniState(
+                    child: Aluno360EmptyMiniState(
                       icon: Icons.show_chart_rounded,
                       text: 'Abrir evolução de peso',
                       isDark: isDark,
                     ),
                   ),
               data: (series) {
-                final weightSeries = _resolveWeightSeries(series, aluno.peso);
+                final weightSeries = resolveWeightSeriesForAluno(
+                  series,
+                  aluno.peso,
+                );
                 if (weightSeries.isEmpty) {
                   return InkWell(
                     borderRadius: BorderRadius.circular(14),
@@ -138,7 +162,7 @@ class _AlunoWeightActivityCard extends ConsumerWidget {
                           '/alunos/$alunoId/evolucao',
                           extra: aluno.nome,
                         ),
-                    child: _EmptyMiniState(
+                    child: Aluno360EmptyMiniState(
                       icon: Icons.monitor_weight_outlined,
                       text: 'Registrar primeira medida',
                       isDark: isDark,
@@ -156,7 +180,7 @@ class _AlunoWeightActivityCard extends ConsumerWidget {
                         '/alunos/$alunoId/evolucao',
                         extra: aluno.nome,
                       ),
-                  child: _WeightTrendSparkline(
+                  child: Aluno360WeightTrendSparkline(
                     values: weightSeries,
                     deltaKg: delta,
                     color: trendColor,
@@ -173,14 +197,9 @@ class _AlunoWeightActivityCard extends ConsumerWidget {
   }
 }
 
-List<double> _resolveWeightSeries(List<double> avaliacoes, double? currentPeso) {
-  if (avaliacoes.isNotEmpty) return avaliacoes;
-  if (currentPeso == null) return const [];
-  return [currentPeso, currentPeso];
-}
-
-class _WeightTrendSparkline extends StatelessWidget {
-  const _WeightTrendSparkline({
+class Aluno360WeightTrendSparkline extends StatelessWidget {
+  const Aluno360WeightTrendSparkline({
+    super.key,
     required this.values,
     required this.deltaKg,
     required this.color,
@@ -205,8 +224,8 @@ class _WeightTrendSparkline extends StatelessWidget {
         deltaKg.abs() < 0.05
             ? mute
             : deltaKg < 0
-                ? EagleTokens.good
-                : EagleTokens.warn;
+            ? EagleTokens.good
+            : EagleTokens.warn;
 
     return Semantics(
       label:
