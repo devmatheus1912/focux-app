@@ -195,11 +195,15 @@ class DashboardHeroMiniStat extends StatelessWidget {
   }
 }
 class DashboardHeroGridPainter extends CustomPainter {
+  const DashboardHeroGridPainter({this.lineAlpha = 0.06});
+
+  final double lineAlpha;
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = Colors.white.withValues(alpha: 0.06)
+          ..color = Colors.white.withValues(alpha: lineAlpha)
           ..strokeWidth = 0.5;
 
     for (double x = 0; x <= size.width; x += 24) {

@@ -136,3 +136,19 @@ String alunoHeroCaption(Aluno aluno, AlunoHeroPrimarySignal signal) {
   }
   return 'Índice operacional consolidado';
 }
+
+/// Hero caption without repeating the dominant metric label.
+String alunoHeroContextLine(AlunoHeroPrimarySignal signal, String caption) {
+  if (signal.label == 'Risco operacional') return caption;
+  return '${signal.label} · $caption';
+}
+
+String? alunoHeroMetricEyebrow(AlunoHeroPrimarySignal signal) {
+  return switch (signal.label) {
+    'Risco operacional' => 'Risco',
+    'Aderência semanal' => 'Aderência',
+    'Sem treino' => 'Parado',
+    'Prontidão' => 'Score',
+    _ => null,
+  };
+}

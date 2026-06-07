@@ -55,14 +55,14 @@ Color alunoAvatarFallbackColor(String name, bool isDark) {
   return palette[hash % palette.length];
 }
 
-/// Vivid fallback on teal hero — avoids blending with gradient.
+/// Vivid fallback on teal hero — harmonized tints that sit on the gradient.
 Color alunoAvatarHeroFallbackColor(String name) {
   const palette = [
-    Color(0xFF7C3AED),
-    Color(0xFFDB2777),
-    Color(0xFFEA580C),
-    Color(0xFF2563EB),
-    Color(0xFFB45309),
+    Color(0xFF5EEAD4),
+    Color(0xFF7DD3FC),
+    Color(0xFFF9A8D4),
+    Color(0xFFC4B5FD),
+    Color(0xFFFDBA74),
   ];
   final hash =
       name.isEmpty

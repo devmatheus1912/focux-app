@@ -148,25 +148,21 @@ class _HeroShellState extends State<_HeroShell>
               end: end,
             ),
             boxShadow: [
-              ...TokensStrip.coloredDepthGlow(
-                widget.primary,
-                strength: widget.isDark ? 0.28 : 0.34,
-              ),
               BoxShadow(
                 color: widget.primary.withValues(
-                  alpha: widget.isDark ? 0.22 : 0.16,
+                  alpha: widget.isDark ? 0.24 : 0.14,
                 ),
-                blurRadius: widget.isDark ? 24 : 20,
+                blurRadius: widget.isDark ? 28 : 22,
                 offset: const Offset(0, 10),
-                spreadRadius: widget.isDark ? -10 : -14,
+                spreadRadius: -10,
               ),
             ],
           ),
           clipBehavior: Clip.antiAlias,
           child: CustomPaint(
-            foregroundPainter: DashboardHeroGridPainter(),
+            foregroundPainter: const DashboardHeroGridPainter(lineAlpha: 0.035),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -175,7 +171,7 @@ class _HeroShellState extends State<_HeroShell>
                     photoUrl: widget.photoUrl,
                     variant: AlunoAvatarVariant.hero,
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,9 +185,9 @@ class _HeroShellState extends State<_HeroShell>
                                 widget.displayName,
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 15,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.w900,
-                                  letterSpacing: -0.3,
+                                  letterSpacing: -0.35,
                                   height: 1.05,
                                 ),
                                 maxLines: 1,
@@ -202,7 +198,7 @@ class _HeroShellState extends State<_HeroShell>
                               signal: widget.signal,
                               status: widget.status,
                             )) ...[
-                              const SizedBox(width: 6),
+                              const SizedBox(width: 8),
                               _HeroStatusPill(
                                 label: widget.status.label,
                                 background: widget.status.background,
@@ -211,84 +207,32 @@ class _HeroShellState extends State<_HeroShell>
                             ],
                           ],
                         ),
-                        const SizedBox(height: 3),
+                        const SizedBox(height: 5),
                         _HeroObjectiveRow(
                           label: widget.objective,
                           defined: widget.objectiveDefined,
                           onDefineObjective: widget.onDefineObjective,
                         ),
-                        const SizedBox(height: 3),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                '${widget.signal.label} · ${widget.caption}',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.96),
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w700,
-                                  height: 1.1,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 2),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (widget.signal.label == 'Risco operacional')
-                                    Text(
-                                      'Risco',
-                                      style: TextStyle(
-                                        color: dashboardHeroLabelOnTeal(),
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w800,
-                                        height: 1,
-                                      ),
-                                    ),
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.baseline,
-                                    textBaseline: TextBaseline.alphabetic,
-                                    children: [
-                                      Text(
-                                        widget.signal.value,
-                                        style: AppTypography.mono(
-                                          color: Colors.white,
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w700,
-                                          letterSpacing: -0.4,
-                                          height: 1,
-                                        ),
-                                      ),
-                                      if (widget.signal.suffix != null)
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                            left: 2,
-                                          ),
-                                          child: Text(
-                                            widget.signal.suffix!,
-                                            style: TextStyle(
-                                              color: dashboardHeroLabelOnTeal(),
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                        const SizedBox(height: 6),
+                        Text(
+                          alunoHeroContextLine(widget.signal, widget.caption),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.92),
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w600,
+                            height: 1.25,
+                          ),
                         ),
                       ],
                     ),
+                  ),
+                  const SizedBox(width: 10),
+                  _HeroMetricPanel(
+                    eyebrow: alunoHeroMetricEyebrow(widget.signal),
+                    value: widget.signal.value,
+                    suffix: widget.signal.suffix,
                   ),
                 ],
               ),
@@ -296,6 +240,79 @@ class _HeroShellState extends State<_HeroShell>
           ),
         );
       },
+    );
+  }
+}
+
+class _HeroMetricPanel extends StatelessWidget {
+  const _HeroMetricPanel({
+    required this.value,
+    this.eyebrow,
+    this.suffix,
+  });
+
+  final String? eyebrow;
+  final String value;
+  final String? suffix;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(minWidth: 68),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.11),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (eyebrow != null)
+            Text(
+              eyebrow!,
+              style: TextStyle(
+                color: dashboardHeroLabelOnTeal(),
+                fontSize: 9.5,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.35,
+                height: 1,
+              ),
+            ),
+          if (eyebrow != null) const SizedBox(height: 2),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                value,
+                style: AppTypography.mono(
+                  color: Colors.white,
+                  fontSize: 21,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.5,
+                  height: 1,
+                ),
+              ),
+              if (suffix != null)
+                Padding(
+                  padding: const EdgeInsets.only(left: 2),
+                  child: Text(
+                    suffix!,
+                    style: TextStyle(
+                      color: dashboardHeroLabelOnTeal(),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      height: 1,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
