@@ -396,6 +396,20 @@ bool shouldHideCopilotPrimaryCtaWhenMatchesSticky({
   );
 }
 
+/// Hide check-in CTA when copilot/sticky already owns contact outreach.
+bool shouldShowOperacaoCheckinCta({
+  required Aluno360OperacaoSnapshot? operacao,
+  required bool weekHasAnyCheckin,
+}) {
+  if (weekHasAnyCheckin) return false;
+  if (operacao == null) return true;
+  if (operacao.showPrepareMessage) return false;
+  if (operacao.contactPriority && operacao.stickyAction.isChatAction) {
+    return false;
+  }
+  return true;
+}
+
 /// Sticky primary opens chat — hide duplicate chat CTA in copilot card.
 bool shouldHideCopilotChatCta({
   required OperacaoStickyAction sticky,

@@ -240,6 +240,34 @@ String normalizeIaCopilotAcao(String raw) {
   return text[0].toUpperCase() + text.substring(1);
 }
 
+String humanizeCopilotMotivoDiasFragment(int dias, {String kind = 'atividade'}) {
+  if (dias >= 90) return 'sem registro recente';
+  if (dias == 0) return kind == 'treino' ? 'treinou hoje' : 'sem pausa hoje';
+  if (dias == 1) {
+    return kind == 'treino' ? '1 dia sem treino' : '1 dia parado';
+  }
+  return kind == 'treino' ? '$dias dias sem treino' : '$dias dias parados';
+}
+
+String _humanizeCopilotMotivoDiasInText(String text) {
+  var result = text.replaceAllMapped(
+    RegExp(r'(\d+) dia\(s\) sem (atividade|treino)', caseSensitive: false),
+    (match) {
+      final dias = int.tryParse(match.group(1)!) ?? 0;
+      final kind = match.group(2)!.toLowerCase() == 'treino' ? 'treino' : 'atividade';
+      return humanizeCopilotMotivoDiasFragment(dias, kind: kind);
+    },
+  );
+  result = result.replaceAllMapped(
+    RegExp(r'[Úú]ltima atividade há (\d+) dia\(s\)', caseSensitive: false),
+    (match) {
+      final dias = int.tryParse(match.group(1)!) ?? 0;
+      return humanizeCopilotMotivoDiasFragment(dias, kind: 'treino');
+    },
+  );
+  return result;
+}
+
 String formatCopilotIaMotivo(String motivo) {
   final trimmed = motivo.trim();
   if (trimmed.isEmpty) {
@@ -253,14 +281,26 @@ String formatCopilotIaMotivo(String motivo) {
   if (match != null) {
     final dias = int.tryParse(match.group(1)!) ?? 0;
     final aderencia = match.group(2)!;
-    if (dias >= 90 || dias == 999) {
+    if (dias >= 90) {
       return 'Sem treinos recentes · aderência de $aderencia% nos últimos 30 dias.';
     }
     if (dias == 0) return 'Treinou hoje · aderência de $aderencia%.';
     if (dias == 1) return 'Último treino ontem · aderência de $aderencia%.';
     return 'Sem treino há $dias dias · aderência de $aderencia%.';
   }
-  return trimmed;
+
+  final contatoMatch = RegExp(
+    r'Priorize contato · (\d+) dia\(s\) sem atividade · aderência (\d+)%',
+    caseSensitive: false,
+  ).firstMatch(trimmed);
+  if (contatoMatch != null) {
+    final dias = int.tryParse(contatoMatch.group(1)!) ?? 0;
+    final aderencia = contatoMatch.group(2)!;
+    final diasLabel = humanizeCopilotMotivoDiasFragment(dias);
+    return 'Priorize contato · $diasLabel · aderência $aderencia%.';
+  }
+
+  return _humanizeCopilotMotivoDiasInText(trimmed);
 }
 
 String copilotChatActionLabel(String acao) {
@@ -391,6 +431,13 @@ String copilotPrescriptionDisplayAction(
   }
   if (acaoSugereChat(full)) {
     if (full.length <= 88) return full;
+    final firstName = aluno.nome.trim().isEmpty
+        ? null
+        : aluno.nome.trim().split(' ').first;
+    final contatoComNome =
+        firstName == null
+            ? 'Retomar contato e checar como está o treino.'
+            : 'Retomar contato com $firstName e checar como está o treino.';
     if (lower.contains('inativid') ||
         lower.contains('reengaj') ||
         lower.contains('ausên') ||
@@ -398,16 +445,18 @@ String copilotPrescriptionDisplayAction(
         lower.contains('reaviv') ||
         lower.contains('aderência') ||
         lower.contains('aderencia')) {
-      return 'Retomar contato e checar como está o treino.';
+      return contatoComNome;
     }
     if (lower.contains('check-in') || lower.contains('check in')) {
-      return 'Pedir check-in e entender como foi a semana.';
+      return firstName == null
+          ? 'Pedir check-in e entender como foi a semana.'
+          : 'Pedir check-in com $firstName e entender como foi a semana.';
     }
     final label = copilotChatActionLabel(full);
     if (label != 'Abrir chat' && label != 'Retomar contato') {
-      return '$label com o aluno.';
+      return firstName == null ? '$label com o aluno.' : '$label com $firstName.';
     }
-    return 'Retomar contato e checar como está o treino.';
+    return contatoComNome;
   }
 
   final templated = copilotDisplayAction(aluno, sanitized);

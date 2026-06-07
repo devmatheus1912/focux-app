@@ -162,6 +162,58 @@ void main() {
     });
   });
 
+  group('shouldShowOperacaoCheckinCta', () {
+    Aluno360OperacaoSnapshot contactSnapshot({required bool chatSticky}) {
+      return Aluno360OperacaoSnapshot(
+        effectiveProxima: null,
+        stickyAction: OperacaoStickyAction(
+          label: chatSticky ? 'Contato' : 'Tarefa',
+          icon: Icons.chat_rounded,
+          destination:
+              chatSticky
+                  ? OperacaoStickyDestination.chat
+                  : OperacaoStickyDestination.commandCenter,
+        ),
+        stickyDisplayLabel: chatSticky ? 'Contato' : 'Tarefa',
+        contactPriority: true,
+        showPrepareMessage: true,
+        hideCopilotTaskRow: true,
+        hideCopilotChatRow: true,
+        outreachMessage: 'Oi',
+      );
+    }
+
+    test('hides when week has checkins', () {
+      expect(
+        shouldShowOperacaoCheckinCta(
+          operacao: contactSnapshot(chatSticky: true),
+          weekHasAnyCheckin: true,
+        ),
+        isFalse,
+      );
+    });
+
+    test('hides when contact priority owns outreach', () {
+      expect(
+        shouldShowOperacaoCheckinCta(
+          operacao: contactSnapshot(chatSticky: true),
+          weekHasAnyCheckin: false,
+        ),
+        isFalse,
+      );
+    });
+
+    test('shows when no operacao snapshot and empty week', () {
+      expect(
+        shouldShowOperacaoCheckinCta(
+          operacao: null,
+          weekHasAnyCheckin: false,
+        ),
+        isTrue,
+      );
+    });
+  });
+
   group('resolveOperacaoDominantMetric', () {
     test('prioritizes risk when em risco', () {
       final metric = resolveOperacaoDominantMetric(

@@ -84,9 +84,11 @@ class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
     final compact = widget.compactContactPriority;
 
     if (compact) {
-      return Container(
+      return DecoratedBox(
         decoration: fxListCardDecoration(context),
-        child: Theme(
+        child: Material(
+          color: Colors.transparent,
+          child: Theme(
           data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
           child: ExpansionTile(
             key: const ValueKey('aluno360_followup_compact'),
@@ -120,6 +122,7 @@ class _AlunoFollowUpCardState extends ConsumerState<_AlunoFollowUpCard> {
               ),
             ],
           ),
+        ),
         ),
       );
     }

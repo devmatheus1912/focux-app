@@ -72,6 +72,11 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
         configAsync.valueOrNull?.diasSemTreino ??
         AlunoFollowUpStore.diasSemTreinoLimite;
     final week = summarizeAderenciaWeek(parseAderenciaSemanal(aderenciaSemanal));
+    final operacao = ref.watch(aluno360OperacaoProvider(alunoId));
+    final showCheckinCta = shouldShowOperacaoCheckinCta(
+      operacao: operacao,
+      weekHasAnyCheckin: week.hasAnyCheckin,
+    );
     final heroShowsRisco = operacaoHeroShowsRisco(aluno);
     final dominant = resolveOperacaoDominantMetric(aluno);
     final aderenciaColor = EagleTokens.aderenciaColor(
@@ -253,7 +258,7 @@ class _AlunoOperationalStatusSection extends ConsumerWidget {
                       idleColor: neutralIdle,
                     ),
                   ),
-                  if (!week.hasAnyCheckin) ...[
+                  if (showCheckinCta) ...[
                     const SizedBox(height: 10),
                     SizedBox(
                       width: double.infinity,

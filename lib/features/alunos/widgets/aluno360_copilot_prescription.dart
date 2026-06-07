@@ -93,8 +93,8 @@ class _Aluno360CopilotPrescriptionState
               overflow: _expandedAction ? null : TextOverflow.ellipsis,
               style: AppTypography.inter(
                 color: ink,
-                fontSize: 13.5,
-                fontWeight: FontWeight.w700,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
                 height: 1.38,
               ),
             ),
@@ -136,8 +136,8 @@ class _Aluno360CopilotPrescriptionState
                     'Preparar mensagem',
                     style: TextStyle(
                       color: widget.color,
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   style: FilledButton.styleFrom(

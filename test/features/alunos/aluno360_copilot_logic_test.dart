@@ -297,6 +297,15 @@ void main() {
         'Sem treino há 14 dias · aderência de 0%.',
       );
     });
+
+    test('humanizes enrichment contato motivo with 999 days', () {
+      expect(
+        formatCopilotIaMotivo(
+          'Priorize contato · 999 dia(s) sem atividade · aderência 0%',
+        ),
+        'Priorize contato · sem registro recente · aderência 0%.',
+      );
+    });
   });
 
   group('copilotChatActionLabel', () {

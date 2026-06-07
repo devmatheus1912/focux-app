@@ -15,7 +15,7 @@ class _Aluno360Entrance extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!enabled) return child;
+    if (!enabled || reduceMotionOf(context)) return child;
     WidgetsBinding.instance.addPostFrameCallback((_) => onPlayed?.call());
     return ClipRect(
       child: FxPremiumEntrance(delay: delay, child: child),

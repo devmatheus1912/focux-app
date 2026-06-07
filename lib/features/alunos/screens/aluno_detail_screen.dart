@@ -31,6 +31,7 @@ import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../health/data/health_repository.dart';
 import '../../health/widgets/recovery_score_ring.dart';
+import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/theme/shell_chrome.dart';
