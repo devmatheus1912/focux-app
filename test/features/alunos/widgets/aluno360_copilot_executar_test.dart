@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_copilot_logic.dart';
-import 'package:focux_app/features/alunos/widgets/aluno360_copilot_card.dart';
+import 'package:focux_app/features/alunos/widgets/aluno360_copilot_executar_button.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

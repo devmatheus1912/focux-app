@@ -28,6 +28,14 @@ String _alunoDetailLibrarySource() {
   const stickyCtaFile =
       'lib/features/alunos/widgets/aluno360_operacao_sticky_cta.dart';
   const followUpFile = 'lib/features/alunos/widgets/aluno360_follow_up_card.dart';
+  const financeBannerFile =
+      'lib/features/alunos/widgets/aluno360_finance_risk_banner.dart';
+  const ferramentasModulesFile =
+      'lib/features/alunos/widgets/aluno360_ferramentas_modules_grid.dart';
+  const copilotTaskActionsFile =
+      'lib/features/alunos/utils/aluno360_copilot_task_actions.dart';
+  const executarButtonFile =
+      'lib/features/alunos/widgets/aluno360_copilot_executar_button.dart';
   const iaRepositoryFile = 'lib/features/ia/data/ia_repository.dart';
   final main = File(mainFile).readAsStringSync();
   final providers = File(providersFile).readAsStringSync();
@@ -43,13 +51,17 @@ String _alunoDetailLibrarySource() {
   final copilotSupport = File(copilotSupportFile).readAsStringSync();
   final stickyCta = File(stickyCtaFile).readAsStringSync();
   final followUp = File(followUpFile).readAsStringSync();
+  final copilotTaskActions = File(copilotTaskActionsFile).readAsStringSync();
+  final executarButton = File(executarButtonFile).readAsStringSync();
+  final financeBanner = File(financeBannerFile).readAsStringSync();
+  final ferramentasModules = File(ferramentasModulesFile).readAsStringSync();
   final iaRepository = File(iaRepositoryFile).readAsStringSync();
   final partPattern = RegExp(r"part '([^']+\.part\.dart)';");
   final parts = partPattern
       .allMatches(main)
       .map((m) => File('$dir/${m.group(1)!}').readAsStringSync())
       .join('\n');
-  return '$main\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$outreachSheet\n$copilotCard\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$iaRepository\n$parts';
+  return '$main\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$outreachSheet\n$copilotCard\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$iaRepository\n$parts';
 }
 
 void main() {
@@ -212,13 +224,36 @@ void main() {
           .readAsStringSync(),
       contains("'Módulos'"),
     );
-    expect(screen, contains('class _ModuleTile'));
+    expect(
+      File('lib/features/alunos/widgets/aluno360_module_tile.dart')
+          .readAsStringSync(),
+      contains('class Aluno360ModuleTile'),
+    );
+    expect(
+      File('lib/features/alunos/widgets/aluno360_ferramentas_modules_grid.dart')
+          .readAsStringSync(),
+      contains('class Aluno360FerramentasModulesGrid'),
+    );
+    expect(
+      File('lib/features/alunos/widgets/aluno360_copilot_executar_button.dart')
+          .readAsStringSync(),
+      contains('class Aluno360CopilotExecutarAcaoButton'),
+    );
+    expect(
+      File('lib/features/alunos/utils/aluno360_copilot_task_actions.dart')
+          .readAsStringSync(),
+      contains('criarTarefaCopilotoFromAluno360'),
+    );
     expect(screen, contains('Abas do perfil do aluno'));
     expect(screen, contains('ValueKey(\'aluno360_operacao_status\')'));
     expect(screen, contains('ValueKey(\'aluno360_operacao_sticky_cta\')'));
     expect(screen, contains('ValueKey(\'aluno360_evolucao_empty\')'));
     expect(screen, contains('ValueKey(\'aluno360_timeline_empty\')'));
-    expect(screen, contains('ValueKey(\'aluno360_ferramentas_modulos\')'));
+    expect(
+      File('lib/features/alunos/widgets/aluno360_ferramentas_modules_grid.dart')
+          .readAsStringSync(),
+      contains('ValueKey(\'aluno360_ferramentas_modulos\')'),
+    );
     expect(screen, contains('class _Aluno360ActionEmptyPanel'));
     expect(screen, contains('Sem sinais de evolução ainda'));
     expect(screen, contains('Linha do tempo ainda vazia'));
