@@ -5,7 +5,6 @@ import 'package:shimmer/shimmer.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -53,19 +52,21 @@ import '../widgets/aluno360_ferramentas_modules_grid.dart';
 import '../widgets/aluno360_ferramentas_tab.dart';
 import '../widgets/aluno360_module_tile.dart';
 import '../widgets/aluno360_finance_risk_banner.dart';
+import '../widgets/aluno360_timeline_card.dart';
+import '../widgets/aluno360_action_empty_panel.dart';
+import '../widgets/aluno360_mini_autonomy_chip.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
+import '../utils/aluno_detail_aluno_actions.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
 part 'aluno_detail_screen_hero.part.dart';
 part 'aluno_detail_screen_evolucao.part.dart';
-part 'aluno_detail_screen_timeline.part.dart';
 part 'aluno_detail_screen_shared_widgets.part.dart';
 part 'aluno_detail_screen_modules.part.dart';
 part 'aluno_detail_screen_recovery.part.dart';
 part 'aluno_detail_screen_weight.part.dart';
 part 'aluno_detail_screen_shared.part.dart';
 part 'aluno_detail_screen_tabs.part.dart';
-part 'aluno_detail_actions.part.dart';
 
 class AlunoDetailScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -275,7 +276,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                   ink: ink,
                   isDark: isDark,
                   onBack: () => safePopOrGo(context, '/alunos'),
-                  onDelete: () => _confirmarExclusao(context, ref, aluno),
+                  onDelete: () => confirmarExclusaoAlunoDetail(context, ref, aluno),
                 ),
               ),
               SliverToBoxAdapter(
@@ -312,7 +313,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                             setState(() => _entrancePlayed = true);
                           }
                         },
-                        onPassword: () => _confirmarGerarSenha(context, ref, aluno),
+                        onPassword: () => confirmarGerarSenhaAlunoDetail(context, ref, aluno),
                         onEdit: () async {
                           final updated = await context.push<bool>(
                             '/alunos/$alunoId/editar',

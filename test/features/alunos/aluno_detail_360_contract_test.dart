@@ -32,6 +32,14 @@ String _alunoDetailLibrarySource() {
       'lib/features/alunos/widgets/aluno360_finance_risk_banner.dart';
   const ferramentasModulesFile =
       'lib/features/alunos/widgets/aluno360_ferramentas_modules_grid.dart';
+  const timelineCardFile =
+      'lib/features/alunos/widgets/aluno360_timeline_card.dart';
+  const actionEmptyPanelFile =
+      'lib/features/alunos/widgets/aluno360_action_empty_panel.dart';
+  const alunoActionsFile =
+      'lib/features/alunos/utils/aluno_detail_aluno_actions.dart';
+  const deleteConfirmSheetFile =
+      'lib/features/alunos/widgets/aluno_delete_confirm_sheet.dart';
   const copilotTaskActionsFile =
       'lib/features/alunos/utils/aluno360_copilot_task_actions.dart';
   const executarButtonFile =
@@ -55,13 +63,17 @@ String _alunoDetailLibrarySource() {
   final executarButton = File(executarButtonFile).readAsStringSync();
   final financeBanner = File(financeBannerFile).readAsStringSync();
   final ferramentasModules = File(ferramentasModulesFile).readAsStringSync();
+  final timelineCard = File(timelineCardFile).readAsStringSync();
+  final actionEmptyPanel = File(actionEmptyPanelFile).readAsStringSync();
+  final alunoActions = File(alunoActionsFile).readAsStringSync();
+  final deleteConfirmSheet = File(deleteConfirmSheetFile).readAsStringSync();
   final iaRepository = File(iaRepositoryFile).readAsStringSync();
   final partPattern = RegExp(r"part '([^']+\.part\.dart)';");
   final parts = partPattern
       .allMatches(main)
       .map((m) => File('$dir/${m.group(1)!}').readAsStringSync())
       .join('\n');
-  return '$main\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$outreachSheet\n$copilotCard\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$iaRepository\n$parts';
+  return '$main\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$outreachSheet\n$copilotCard\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$actionEmptyPanel\n$alunoActions\n$deleteConfirmSheet\n$iaRepository\n$parts';
 }
 
 void main() {
@@ -70,11 +82,11 @@ void main() {
 
     expect(screen, contains('class Aluno360CopilotCard'));
     expect(screen, contains('Aluno 360'));
-    expect(screen, contains('class _Aluno360TimelineCard'));
+    expect(screen, contains('class Aluno360TimelineCard'));
     expect(screen, contains("'Linha do tempo 360'"));
     expect(screen, contains('aluno360Provider'));
     expect(screen, contains('buscarAluno360'));
-    expect(screen, contains('class _Timeline360Tile'));
+    expect(screen, contains('class Timeline360Tile'));
     expect(screen, contains('alunoCopilotoActionProvider'));
     expect(screen, contains('proximaAcao(alunoId)'));
     expect(screen, contains('salvarAcaoCopiloto'));
@@ -190,7 +202,7 @@ void main() {
     expect(screen, contains('Aluno360OperacaoStickyCtaBar'));
     expect(screen, isNot(contains('Pulso operacional')));
     expect(screen, isNot(contains('Score API')));
-    expect(screen, contains('part \'aluno_detail_actions.part.dart\';'));
+    expect(screen, contains('confirmarExclusaoAlunoDetail'));
     expect(screen, contains('riscoMetricIcon'));
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('copySensitiveToClipboard'));
@@ -215,7 +227,7 @@ void main() {
     expect(screen, contains('class Aluno360OperationalStatusSection'));
     expect(screen, contains('Ações rápidas da aba operação'));
     expect(screen, contains('class _AlunoDetailEvolucaoTab'));
-    expect(screen, contains('_Aluno360TimelineCard'));
+    expect(screen, contains('class Aluno360TimelineCard'));
     expect(screen, contains('Linha do tempo 360'));
     expect(screen, contains('Ver histórico completo da linha do tempo'));
     expect(screen, contains('class _AlunoDetailFerramentasTab'));
@@ -254,7 +266,7 @@ void main() {
           .readAsStringSync(),
       contains('ValueKey(\'aluno360_ferramentas_modulos\')'),
     );
-    expect(screen, contains('class _Aluno360ActionEmptyPanel'));
+    expect(screen, contains('class Aluno360ActionEmptyPanel'));
     expect(screen, contains('Sem sinais de evolução ainda'));
     expect(screen, contains('Linha do tempo ainda vazia'));
     expect(screen, contains('friendlyError(e, fallback: \'Não foi possível gerar senha.\')'));

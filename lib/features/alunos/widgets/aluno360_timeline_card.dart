@@ -1,17 +1,32 @@
-﻿part of 'aluno_detail_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-class _Aluno360TimelineCard extends StatelessWidget {
-  final Aluno aluno;
-  final AsyncValue<List<Timeline360Event>> timelineApiAsync;
-  final bool isDark;
+import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../data/aluno_repository.dart';
+import 'aluno360_action_empty_panel.dart';
+import 'aluno360_mini_autonomy_chip.dart';
+import 'aluno_outreach_message_sheet.dart';
 
-  const _Aluno360TimelineCard({
+class Aluno360TimelineCard extends StatelessWidget {
+  const Aluno360TimelineCard({
+    super.key,
     required this.aluno,
     required this.timelineApiAsync,
     required this.isDark,
   });
 
-  static _Timeline360Item _itemFromApi(
+  final Aluno aluno;
+  final AsyncValue<List<Timeline360Event>> timelineApiAsync;
+  final bool isDark;
+
+  static Timeline360Item _itemFromApi(
     Timeline360Event e, {
     required Color primary,
   }) {
@@ -58,7 +73,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
         }
     }
     final deep = e.deepLink.trim().isEmpty ? null : e.deepLink.trim();
-    return _Timeline360Item(
+    return Timeline360Item(
       at: at,
       kind: kind,
       title: e.titulo,
@@ -71,7 +86,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
     );
   }
 
-  List<_Timeline360Item> _items(Color primary) {
+  List<Timeline360Item> _items(Color primary) {
     if (!timelineApiAsync.hasValue) {
       return const [];
     }
@@ -155,7 +170,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
             ),
           ] else if (items.isEmpty) ...[
             const SizedBox(height: 14),
-            _Aluno360ActionEmptyPanel(
+            Aluno360ActionEmptyPanel(
               key: const ValueKey('aluno360_timeline_empty'),
               icon: Icons.timeline_rounded,
               title: 'Linha do tempo ainda vazia',
@@ -165,7 +180,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
               primaryIcon: Icons.message_outlined,
               onPrimary: () => _openTimelineCheckin(context),
               secondaryActions: [
-                _Aluno360SecondaryAction(
+                Aluno360SecondaryAction(
                   label: 'Abrir chat',
                   icon: Icons.chat_bubble_outline,
                   onTap:
@@ -174,7 +189,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
                         extra: aluno.nome,
                       ),
                 ),
-                _Aluno360SecondaryAction(
+                Aluno360SecondaryAction(
                   label: 'Ver treinos',
                   icon: Icons.fitness_center_rounded,
                   onTap:
@@ -188,7 +203,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
           ] else ...[
             const SizedBox(height: 14),
             for (final item in visibleItems) ...[
-              _Timeline360Tile(item: item, isDark: isDark),
+              Timeline360Tile(item: item, isDark: isDark),
               if (item != visibleItems.last) Divider(height: 18, color: line),
             ],
             if (hasMore) ...[
@@ -197,11 +212,11 @@ class _Aluno360TimelineCard extends StatelessWidget {
                 button: true,
                 label: 'Ver histórico completo da linha do tempo',
                 child: SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () => _showFullTimeline(context, items),
-                  child: Text('Ver histórico completo · ${items.length}'),
-                ),
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () => _showFullTimeline(context, items),
+                    child: Text('Ver histórico completo · ${items.length}'),
+                  ),
                 ),
               ),
             ],
@@ -211,7 +226,7 @@ class _Aluno360TimelineCard extends StatelessWidget {
     );
   }
 
-  void _showFullTimeline(BuildContext context, List<_Timeline360Item> items) {
+  void _showFullTimeline(BuildContext context, List<Timeline360Item> items) {
     final chrome = ShellChrome.of(context);
     showModalBottomSheet(
       context: context,
@@ -238,32 +253,32 @@ class _Aluno360TimelineCard extends StatelessWidget {
                       24 + MediaQuery.of(ctx).padding.bottom,
                     ),
                     child: ListView.separated(
-                  controller: controller,
-                  itemCount: items.length + 1,
-                  separatorBuilder: (_, index) {
-                    if (index == 0) return const SizedBox(height: 12);
-                    return Divider(
-                      height: 18,
-                      color: chrome.line,
-                    );
-                  },
-                  itemBuilder: (context, index) {
-                    if (index == 0) {
-                      return Text(
-                        'Histórico 360',
-                        style: TextStyle(
-                          color: fxScreenInk(context),
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      );
-                    }
-                    return _Timeline360Tile(
-                      item: items[index - 1],
-                      isDark: isDark,
-                    );
-                  },
-                ),
+                      controller: controller,
+                      itemCount: items.length + 1,
+                      separatorBuilder: (_, index) {
+                        if (index == 0) return const SizedBox(height: 12);
+                        return Divider(
+                          height: 18,
+                          color: chrome.line,
+                        );
+                      },
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          return Text(
+                            'Histórico 360',
+                            style: TextStyle(
+                              color: fxScreenInk(context),
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          );
+                        }
+                        return Timeline360Tile(
+                          item: items[index - 1],
+                          isDark: isDark,
+                        );
+                      },
+                    ),
                   ),
                 ),
           ),
@@ -271,18 +286,8 @@ class _Aluno360TimelineCard extends StatelessWidget {
   }
 }
 
-class _Timeline360Item {
-  final DateTime? at;
-  final String kind;
-  final String title;
-  final String body;
-  final String meta;
-  final String priority;
-  final IconData icon;
-  final Color color;
-  final String? deepLink;
-
-  const _Timeline360Item({
+class Timeline360Item {
+  const Timeline360Item({
     required this.at,
     required this.kind,
     required this.title,
@@ -293,13 +298,23 @@ class _Timeline360Item {
     required this.color,
     this.deepLink,
   });
+
+  final DateTime? at;
+  final String kind;
+  final String title;
+  final String body;
+  final String meta;
+  final String priority;
+  final IconData icon;
+  final Color color;
+  final String? deepLink;
 }
 
-class _Timeline360Tile extends StatelessWidget {
-  final _Timeline360Item item;
-  final bool isDark;
+class Timeline360Tile extends StatelessWidget {
+  const Timeline360Tile({super.key, required this.item, required this.isDark});
 
-  const _Timeline360Tile({required this.item, required this.isDark});
+  final Timeline360Item item;
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
@@ -336,7 +351,7 @@ class _Timeline360Tile extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      _timelineDate(item.at),
+                      formatTimeline360Date(item.at),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -371,8 +386,8 @@ class _Timeline360Tile extends StatelessWidget {
                 spacing: 6,
                 runSpacing: 4,
                 children: [
-                  _MiniAutonomyChip(label: item.priority, color: item.color),
-                  _MiniAutonomyChip(label: item.meta, color: mute),
+                  Aluno360MiniAutonomyChip(label: item.priority, color: item.color),
+                  Aluno360MiniAutonomyChip(label: item.meta, color: mute),
                 ],
               ),
             ],
@@ -382,7 +397,7 @@ class _Timeline360Tile extends StatelessWidget {
     );
 
     final semanticsLabel =
-        '${item.kind}: ${item.title}. ${_timelineDate(item.at)}';
+        '${item.kind}: ${item.title}. ${formatTimeline360Date(item.at)}';
 
     if (link != null && link.isNotEmpty) {
       return Semantics(
@@ -402,7 +417,7 @@ class _Timeline360Tile extends StatelessWidget {
   }
 }
 
-String _timelineDate(DateTime? value) {
+String formatTimeline360Date(DateTime? value) {
   if (value == null) return 'sem data';
   final day = value.day.toString().padLeft(2, '0');
   final month = value.month.toString().padLeft(2, '0');

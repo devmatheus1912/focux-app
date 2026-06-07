@@ -128,7 +128,7 @@ class _AlunoDetailEvolucaoTab extends StatelessWidget {
         evolucaoAsync: evolucaoAsync,
         isDark: isDark,
       ),
-      timelineCard: _Aluno360TimelineCard(
+      timelineCard: Aluno360TimelineCard(
         aluno: aluno,
         timelineApiAsync: timeline360Async,
         isDark: isDark,
