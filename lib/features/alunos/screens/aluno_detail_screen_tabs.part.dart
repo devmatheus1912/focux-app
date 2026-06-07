@@ -1,28 +1,5 @@
 part of 'aluno_detail_screen.dart';
 
-class _Aluno360Entrance extends StatelessWidget {
-  const _Aluno360Entrance({
-    required this.enabled,
-    required this.delay,
-    required this.child,
-    this.onPlayed,
-  });
-
-  final bool enabled;
-  final Duration delay;
-  final Widget child;
-  final VoidCallback? onPlayed;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!enabled || reduceMotionOf(context)) return child;
-    WidgetsBinding.instance.addPostFrameCallback((_) => onPlayed?.call());
-    return ClipRect(
-      child: FxPremiumEntrance(delay: delay, child: child),
-    );
-  }
-}
-
 class _AlunoDetailOperacaoTab extends ConsumerWidget {
   const _AlunoDetailOperacaoTab({
     super.key,
@@ -61,130 +38,59 @@ class _AlunoDetailOperacaoTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final financeRisk =
         aluno.statusFinanceiro == 'INADIMPLENTE' || aluno.inadimplente;
-    final focusMode = ref.watch(alunoOperacaoFocusModeProvider(alunoId));
     final operacaoSnapshot = ref.watch(aluno360OperacaoProvider(alunoId));
     final contactPriority = operacaoSnapshot?.contactPriority ?? false;
+    final showRecovery = alunoTemHistoricoWearable(recoveryAsync.valueOrNull);
 
-    Widget section(int step, Widget child) {
-      return _Aluno360Entrance(
-        enabled: animateEntrance && !contactPriority,
-        delay: operacaoSectionDelay(
-          financeRisk: financeRisk,
-          stepIndex: step,
+    return Aluno360OperacaoTab(
+      alunoId: alunoId,
+      showFinanceRisk: financeRisk,
+      animateEntrance: animateEntrance,
+      onEntrancePlayed: onEntrancePlayed,
+      financeRiskBanner:
+          financeRisk
+              ? _AlunoFinanceiroRiskBanner(alunoId: alunoId, isDark: isDark)
+              : null,
+      followUpCard: _AlunoFollowUpCard(
+        aluno: aluno,
+        isDark: isDark,
+        compactContactPriority: shouldCompactFollowUpForContactPriority(
           contactPriority: contactPriority,
         ),
-        onPlayed: onEntrancePlayed,
-        child: child,
-      );
-    }
-
-    final operational = _AlunoOperationalStatusSection(
-      aluno: aluno,
-      alunoId: alunoId,
-      isDark: isDark,
-      primary: primary,
-      aderenciaSemanal: aderenciaSemanal,
-    );
-    final copilot = _Aluno360CopilotCard(
-      aluno: aluno,
-      alunoId: alunoId,
-      resumoAsync: autonomiaResumoAsync,
-      proximaAcao360: proximaAcao360,
-      hasOpenCopilotTask360: hasOpenCopilotTask360,
-      isDark: isDark,
-      showFocusToggle: true,
-      focusMode: focusMode,
-    );
-
-    Widget diagnosticBody() {
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth >= 600) {
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: operational),
-                const SizedBox(width: Aluno360Layout.sectionGap),
-                Expanded(child: copilot),
-              ],
-            );
-          }
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              operational,
-              const SizedBox(height: Aluno360Layout.sectionGap),
-              copilot,
-            ],
-          );
-        },
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (financeRisk) ...[
-          section(
-            0,
-            _AlunoFinanceiroRiskBanner(alunoId: alunoId, isDark: isDark),
-          ),
-          const SizedBox(height: Aluno360Layout.sectionGap),
-        ],
-        section(
-          1,
-          _AlunoFollowUpCard(
-            aluno: aluno,
-            isDark: isDark,
-            compactContactPriority: shouldCompactFollowUpForContactPriority(
-              contactPriority: contactPriority,
-            ),
-          ),
-        ),
-        const SizedBox(height: Aluno360Layout.sectionGap),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOutCubic,
-          alignment: Alignment.topCenter,
-          child:
-              focusMode
-                  ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      section(3, copilot),
-                    ],
-                  )
-                  : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      section(2, diagnosticBody()),
-                      const SizedBox(height: Aluno360Layout.sectionGap),
-                      if (alunoTemHistoricoWearable(recoveryAsync.valueOrNull))
-                        section(
-                          4,
-                          _AlunoRecoveryInsightCard(
-                            recoveryAsync: recoveryAsync,
-                            isDark: isDark,
-                            primary: primary,
-                          ),
-                        ),
-                      if (alunoTemHistoricoWearable(recoveryAsync.valueOrNull))
-                        const SizedBox(height: Aluno360Layout.sectionGap),
-                      section(
-                        5,
-                        _StudentQuickActions(
-                          aluno: aluno,
-                          isDark: isDark,
-                          primary: primary,
-                          onPassword: onPassword,
-                          onEdit: onEdit,
-                          onEvolve: onEvolve,
-                        ),
-                      ),
-                    ],
-                  ),
-        ),
-      ],
+      ),
+      operationalSection: _AlunoOperationalStatusSection(
+        aluno: aluno,
+        alunoId: alunoId,
+        isDark: isDark,
+        primary: primary,
+        aderenciaSemanal: aderenciaSemanal,
+      ),
+      copilotCard: _Aluno360CopilotCard(
+        aluno: aluno,
+        alunoId: alunoId,
+        resumoAsync: autonomiaResumoAsync,
+        proximaAcao360: proximaAcao360,
+        hasOpenCopilotTask360: hasOpenCopilotTask360,
+        isDark: isDark,
+        showFocusToggle: true,
+        focusMode: ref.watch(alunoOperacaoFocusModeProvider(alunoId)),
+      ),
+      recoveryCard:
+          showRecovery
+              ? _AlunoRecoveryInsightCard(
+                recoveryAsync: recoveryAsync,
+                isDark: isDark,
+                primary: primary,
+              )
+              : null,
+      quickActions: _StudentQuickActions(
+        aluno: aluno,
+        isDark: isDark,
+        primary: primary,
+        onPassword: onPassword,
+        onEdit: onEdit,
+        onEvolve: onEvolve,
+      ),
     );
   }
 }
@@ -346,7 +252,7 @@ class _AlunoDetailEvolucaoTab extends StatelessWidget {
           isDark: isDark,
         ),
         const SizedBox(height: Aluno360Layout.sectionGap),
-        _Aluno360Entrance(
+        Aluno360OperacaoEntrance(
           enabled: animateEntrance,
           delay: const Duration(milliseconds: 40),
           onPlayed: onEntrancePlayed,
@@ -357,7 +263,7 @@ class _AlunoDetailEvolucaoTab extends StatelessWidget {
           ),
         ),
         const SizedBox(height: Aluno360Layout.sectionGap),
-        _Aluno360Entrance(
+        Aluno360OperacaoEntrance(
           enabled: animateEntrance,
           delay: const Duration(milliseconds: 80),
           onPlayed: onEntrancePlayed,

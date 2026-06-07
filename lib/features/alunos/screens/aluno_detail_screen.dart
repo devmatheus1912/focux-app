@@ -1,5 +1,4 @@
 ﻿import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
@@ -28,19 +27,19 @@ import '../../dashboard/data/command_center_data.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../ia/data/ia_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../health/data/health_repository.dart';
 import '../../health/widgets/recovery_score_ring.dart';
 import '../../../core/utils/motion_preferences.dart';
-import '../../../core/widgets/fx_premium_entrance.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../constants/aluno_360_layout.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../utils/aluno360_copilot_logic.dart';
 import '../utils/aluno_display_utils.dart';
 import '../widgets/aluno360_composite_header.dart';
+import '../widgets/aluno360_operacao_tab.dart';
 import '../widgets/aluno_detail_hero_card.dart';
 import '../widgets/aluno_operacao_adherence_bars.dart';
 import '../widgets/aluno360_copilot_prescription.dart';

@@ -7,6 +7,8 @@ String _alunoDetailLibrarySource() {
   const mainFile = '$dir/aluno_detail_screen.dart';
   const providersFile = 'lib/features/alunos/providers/aluno_detail_providers.dart';
   const heroWidgetFile = 'lib/features/alunos/widgets/aluno_detail_hero_card.dart';
+  const operacaoTabFile =
+      'lib/features/alunos/widgets/aluno360_operacao_tab.dart';
   const headerWidgetFile =
       'lib/features/alunos/widgets/aluno360_composite_header.dart';
   const operacaoLogicFile =
@@ -19,6 +21,7 @@ String _alunoDetailLibrarySource() {
   final providers = File(providersFile).readAsStringSync();
   final heroWidget = File(heroWidgetFile).readAsStringSync();
   final headerWidget = File(headerWidgetFile).readAsStringSync();
+  final operacaoTab = File(operacaoTabFile).readAsStringSync();
   final operacaoLogic = File(operacaoLogicFile).readAsStringSync();
   final copilotLogic = File(copilotLogicFile).readAsStringSync();
   final outreachSheet = File(outreachSheetFile).readAsStringSync();
@@ -27,7 +30,7 @@ String _alunoDetailLibrarySource() {
       .allMatches(main)
       .map((m) => File('$dir/${m.group(1)!}').readAsStringSync())
       .join('\n');
-  return '$main\n$providers\n$heroWidget\n$headerWidget\n$operacaoLogic\n$copilotLogic\n$outreachSheet\n$parts';
+  return '$main\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$outreachSheet\n$parts';
 }
 
 void main() {
@@ -105,6 +108,7 @@ void main() {
     expect(screen, contains('FxSparkline'));
     expect(screen, contains('formatAlturaDisplay'));
     expect(screen, contains('friendlyError'));
+    expect(screen, contains('class Aluno360OperacaoTab'));
     expect(screen, contains('class Aluno360CompositeHeaderDelegate'));
     expect(screen, contains("Tab(text: 'Operação')"));
     expect(screen, contains("Tab(text: 'Evolução')"));
