@@ -409,6 +409,41 @@ bool copilotAcaoMencionaWearable(String acao) {
       lower.contains('terra');
 }
 
+const _copilotComPhraseStopWords = {
+  'urgência',
+  'urgencia',
+  'calma',
+  'base',
+  'foco',
+  'treino',
+  'o',
+  'a',
+};
+
+String _stripCosmeticComPhrase(String key) {
+  return key.replaceAllMapped(RegExp(r'\s+com\s+(\S+)\s+'), (match) {
+    final word = match.group(1)!.toLowerCase();
+    if (_copilotComPhraseStopWords.contains(word)) return match.group(0)!;
+    if (word.length <= 2) return match.group(0)!;
+    return ' ';
+  });
+}
+
+String copilotPrescriptionActionCompareKey(String text) {
+  var key = cleanCopilotText(text).toLowerCase();
+  key = key.replaceAll(RegExp(r'[.!?;:,]'), '').trim();
+  key = key.replaceAll(RegExp(r'\s+com\s+(o\s+)?aluno\s+'), ' ');
+  key = _stripCosmeticComPhrase(key);
+  return key.replaceAll(RegExp(r'\s+'), ' ').trim();
+}
+
+/// Cosmetic-only differences (punctuation, embedded first name) are equivalent.
+bool copilotPrescriptionActionsEquivalent(String a, String b) {
+  if (a.trim() == b.trim()) return true;
+  return copilotPrescriptionActionCompareKey(a) ==
+      copilotPrescriptionActionCompareKey(b);
+}
+
 String copilotPrescriptionFullAction(Aluno aluno, String rawAcao) {
   final normalized = normalizeIaCopilotAcao(rawAcao);
   if (normalized.isNotEmpty) return normalized;
@@ -707,7 +742,10 @@ CopilotPrescriptionContent resolveCopilotPrescriptionFromAction(
             : (action['titulo'] ?? action['tipo'] ?? 'Próxima melhor ação')
                 .toString(),
     action: displayAction,
-    fullAction: fullAction == displayAction ? null : fullAction,
+    fullAction:
+        copilotPrescriptionActionsEquivalent(fullAction, displayAction)
+            ? null
+            : fullAction,
     reason: isIa ? formatCopilotIaMotivo(motivoRaw) : motivoRaw,
   );
 }

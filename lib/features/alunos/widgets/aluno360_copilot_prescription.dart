@@ -95,7 +95,10 @@ class _Aluno360CopilotPrescriptionState
     final hasDistinctFullAction =
         widget.fullAction != null &&
         widget.fullAction!.trim().isNotEmpty &&
-        widget.fullAction!.trim() != widget.action.trim();
+        !copilotPrescriptionActionsEquivalent(
+          widget.fullAction!,
+          widget.action,
+        );
     final actionStyle = _actionStyle(ink);
     final showExpandReason = reason.length > 72;
 

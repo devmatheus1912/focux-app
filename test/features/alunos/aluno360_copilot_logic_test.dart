@@ -270,6 +270,47 @@ void main() {
       expect(content.action, 'Retomar contato e pedir sync do wearable.');
       expect(content.fullAction, contains('sincronização'));
     });
+
+    test('drops fullAction when only name or punctuation differs', () {
+      expect(
+        copilotPrescriptionActionsEquivalent(
+          'Retomar contato e checar como está o treino.',
+          'Retomar contato com Beatriz e checar como está o treino.',
+        ),
+        isTrue,
+      );
+      final content = resolveCopilotPrescriptionFromAction(
+        _aluno(),
+        copilotActionFromIa(const {
+          'acao': 'Retomar contato e checar como está o treino.',
+          'motivo': 'Priorize contato · sem registro recente · aderência 0%',
+        }),
+        'fallback',
+      );
+      expect(content.fullAction, isNull);
+    });
+  });
+
+  group('copilotPrescriptionActionsEquivalent', () {
+    test('treats embedded first name as equivalent', () {
+      expect(
+        copilotPrescriptionActionsEquivalent(
+          'Retomar contato com Beatriz e checar como está o treino.',
+          'Retomar contato e checar como está o treino',
+        ),
+        isTrue,
+      );
+    });
+
+    test('keeps meaningfully different IA paragraphs distinct', () {
+      expect(
+        copilotPrescriptionActionsEquivalent(
+          'Retomar contato e pedir sync do wearable.',
+          'Entre em contato com Beatriz para reavivar e solicitar sincronização do wearable.',
+        ),
+        isFalse,
+      );
+    });
   });
 
   group('normalizeIaCopilotAcao', () {
