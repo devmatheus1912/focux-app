@@ -298,6 +298,19 @@ class Aluno360TimelineCard extends StatelessWidget {
                           isDark: isDark,
                           accent: primary,
                           alunoFirstName: aluno.nome.split(' ').first,
+                          onExpandableTap: (tileContext, item) {
+                            final host = context;
+                            Navigator.of(tileContext).pop();
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (!host.mounted) return;
+                              showTimeline360BodySheet(
+                                host,
+                                item,
+                                accent: primary,
+                                isDark: isDark,
+                              );
+                            });
+                          },
                         );
                       },
                     ),
@@ -308,6 +321,11 @@ class Aluno360TimelineCard extends StatelessWidget {
     );
   }
 }
+
+typedef Timeline360ExpandableTap = void Function(
+  BuildContext tileContext,
+  Timeline360Item item,
+);
 
 class Timeline360Item {
   const Timeline360Item({
@@ -460,12 +478,14 @@ class Timeline360Tile extends StatelessWidget {
     required this.isDark,
     required this.accent,
     this.alunoFirstName,
+    this.onExpandableTap,
   });
 
   final Timeline360Item item;
   final bool isDark;
   final Color accent;
   final String? alunoFirstName;
+  final Timeline360ExpandableTap? onExpandableTap;
 
   @override
   Widget build(BuildContext context) {
@@ -614,12 +634,16 @@ class Timeline360Tile extends StatelessWidget {
 
     void onTap() {
       if (expandable) {
-        showTimeline360BodySheet(
-          context,
-          item,
-          accent: accent,
-          isDark: isDark,
-        );
+        if (onExpandableTap != null) {
+          onExpandableTap!(context, item);
+        } else {
+          showTimeline360BodySheet(
+            context,
+            item,
+            accent: accent,
+            isDark: isDark,
+          );
+        }
         return;
       }
       if (link != null && link.isNotEmpty) {
