@@ -281,6 +281,20 @@ void main() {
     expect(layoutSource, contains('panelTitleStyle'));
     expect(layoutSource, contains('moduleTileTitleStyle'));
     expect(layoutSource, contains('ctaLabelStyle'));
+    expect(
+      File('lib/features/alunos/utils/aluno360_entry_motion.dart').existsSync(),
+      isFalse,
+      reason: 'dead motion util removed',
+    );
+    expect(layoutSource, isNot(contains('heroExpandedHeight')));
+    expect(
+      File('lib/features/alunos/data/aluno_repository.dart').readAsStringSync(),
+      isNot(contains('getTelefone')),
+    );
+    expect(
+      File('lib/core/utils/motion_preferences.dart').readAsStringSync(),
+      contains('fxMotionDurationMs'),
+    );
     expect(layoutSource, contains('tabSelectedLabelStyle'));
     expect(layoutSource, contains('secondaryActionLabelStyle'));
     expect(layoutSource, contains('TokensStrip.fontH2'));
@@ -289,8 +303,19 @@ void main() {
     expect(screen, contains('atualizarOperacaoFocus'));
     expect(layoutSource, contains('insetCardRadius'));
     expect(
-      File('lib/features/alunos/utils/aluno360_a11y.dart').readAsStringSync(),
+      File('lib/features/alunos/widgets/aluno360_section_header.dart')
+          .readAsStringSync(),
       contains('aluno360SectionHeaderSemantics'),
+    );
+    expect(
+      File('lib/features/alunos/widgets/aluno360_follow_up_card.dart')
+          .readAsStringSync(),
+      contains('aluno360FollowUpSemantics'),
+    );
+    expect(
+      File('lib/features/alunos/widgets/aluno360_module_tile.dart')
+          .readAsStringSync(),
+      contains('aluno360ModuleTileSemantics'),
     );
     expect(
       File('lib/features/alunos/utils/aluno360_readability.dart')

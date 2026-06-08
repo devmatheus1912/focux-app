@@ -6,6 +6,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import '../constants/aluno_360_layout.dart';
+import '../utils/aluno360_a11y.dart';
 
 class Aluno360MeasurementCard extends StatelessWidget {
   const Aluno360MeasurementCard({
@@ -197,14 +198,17 @@ class Aluno360ModuleTile extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
-    final badgeLabel = badge != null ? ', $badge' : '';
     final badgeInk = BrandPalette.deep(primary);
     final titleColor = highlight ? BrandPalette.deep(primary) : ink;
     final subColor = highlight ? BrandPalette.deep(primary) : mute;
 
     return Semantics(
       button: true,
-      label: '$label$badgeLabel. $sub',
+      label: aluno360ModuleTileSemantics(
+        label: label,
+        sub: sub,
+        badge: badge,
+      ),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),

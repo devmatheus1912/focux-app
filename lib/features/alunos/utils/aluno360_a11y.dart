@@ -1,6 +1,4 @@
 /// TalkBack / VoiceOver labels for Aluno 360 (PT-BR).
-String aluno360TabSemanticsLabel(String tabName) => 'Aba $tabName';
-
 String aluno360SectionHeaderSemantics({
   required String title,
   String? subtitle,
@@ -29,14 +27,4 @@ String aluno360ModuleTileSemantics({
 }) {
   final badgePart = badge != null ? ', $badge' : '';
   return '$label$badgePart. $sub';
-}
-
-String aluno360StickyCtaSemantics({
-  required String primaryLabel,
-  String? secondaryLabel,
-}) {
-  if (secondaryLabel == null || secondaryLabel.isEmpty) {
-    return primaryLabel;
-  }
-  return '$primaryLabel. Secundário: $secondaryLabel';
 }

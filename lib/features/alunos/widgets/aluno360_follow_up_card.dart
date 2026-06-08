@@ -10,6 +10,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
+import '../utils/aluno360_a11y.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_followup_provider.dart';
 import '../utils/aluno360_operacao_logic.dart';
@@ -204,10 +205,7 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
       isSnoozed: isSnoozed,
       snoozedUntil: snoozedUntil,
     );
-    final motionMs =
-        reduceMotionOf(context)
-            ? 0
-            : 220;
+    final motionMs = fxMotionDurationMs(context);
 
     return DecoratedBox(
       key: const ValueKey('aluno360_followup_compact'),
@@ -223,9 +221,10 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
           children: [
             Semantics(
               button: true,
-              label:
-                  'Próximo contato. $subtitle. '
-                  '${_expanded ? 'Recolher' : 'Expandir'} opções de follow-up',
+              label: aluno360FollowUpSemantics(
+                subtitle: subtitle,
+                expanded: _expanded,
+              ),
               child: InkWell(
                 onTap: () => setState(() => _expanded = !_expanded),
                 borderRadius: BorderRadius.vertical(

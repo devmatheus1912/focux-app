@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/motion_preferences.dart';
@@ -120,7 +119,7 @@ class Aluno360OperacaoTab extends ConsumerWidget {
       );
     }
 
-    final motionMs = reduceMotionOf(context) ? 0 : 200;
+    final motionMs = fxMotionDurationMs(context, normal: 200);
 
     return Semantics(
       container: true,

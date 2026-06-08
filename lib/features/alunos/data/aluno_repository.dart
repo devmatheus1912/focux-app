@@ -654,7 +654,4 @@ class AlunoRepository {
       },
     );
   }
-
-  // Telefone getter helper (nao esta no modelo ainda)
-  String? getTelefone(Aluno aluno) => null;
 }

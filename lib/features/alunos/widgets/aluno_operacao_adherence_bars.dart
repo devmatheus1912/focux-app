@@ -206,7 +206,7 @@ class _AdherenceDayBar extends StatelessWidget {
                           AnimatedContainer(
                             duration: Duration(
                               milliseconds:
-                                  reduceMotionOf(context) ? 0 : 220,
+                                  fxMotionDurationMs(context),
                             ),
                             curve: Curves.easeOutCubic,
                             height: barMaxHeight * fraction,

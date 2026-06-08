@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
+import '../utils/aluno360_a11y.dart';
 
 /// Shared section header for Operação and Evolução inset cards.
 class Aluno360SectionHeader extends StatelessWidget {
@@ -47,18 +48,13 @@ class Aluno360SectionHeader extends StatelessWidget {
             ? Aluno360Layout.compactSectionTitleStyle(context, ink)
             : Aluno360Layout.sectionTitleStyle(context, ink);
 
-    final semanticsLabel = StringBuffer(title);
-    if (subtitle != null && subtitle!.trim().isNotEmpty) {
-      semanticsLabel.write(', ${subtitle!.trim()}');
-    }
-    if (trailingSemanticsLabel != null &&
-        trailingSemanticsLabel!.trim().isNotEmpty) {
-      semanticsLabel.write(', ${trailingSemanticsLabel!.trim()}');
-    }
-
     return Semantics(
       header: true,
-      label: semanticsLabel.toString(),
+      label: aluno360SectionHeaderSemantics(
+        title: title,
+        subtitle: subtitle,
+        trailing: trailingSemanticsLabel,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

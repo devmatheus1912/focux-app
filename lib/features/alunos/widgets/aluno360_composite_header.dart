@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
 
@@ -276,44 +275,5 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
         ink != oldDelegate.ink ||
         isDark != oldDelegate.isDark ||
         actionsEnabled != oldDelegate.actionsEnabled;
-  }
-}
-
-/// Standalone tab bar sliver (legacy / tests).
-class Aluno360DetailTabBarDelegate extends SliverPersistentHeaderDelegate {
-  const Aluno360DetailTabBarDelegate({
-    required this.tabController,
-    required this.primary,
-    required this.mute,
-    required this.line,
-  });
-
-  final TabController tabController;
-  final Color primary;
-  final Color mute;
-  final Color line;
-
-  @override
-  double get minExtent => Aluno360Layout.tabBarHeight;
-
-  @override
-  double get maxExtent => Aluno360Layout.tabBarHeight;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Aluno360DetailTabBar(
-      tabController: tabController,
-      primary: primary,
-      mute: mute,
-      line: line,
-    );
-  }
-
-  @override
-  bool shouldRebuild(covariant Aluno360DetailTabBarDelegate oldDelegate) {
-    return tabController != oldDelegate.tabController ||
-        primary != oldDelegate.primary ||
-        mute != oldDelegate.mute ||
-        line != oldDelegate.line;
   }
 }

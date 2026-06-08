@@ -66,16 +66,6 @@ abstract final class Aluno360Layout {
         );
   }
 
-  /// @deprecated Use [heroHeaderMaxExtent].
-  static double heroExpandedHeight(
-    BuildContext context, {
-    bool compactContactPriority = false,
-  }) =>
-      heroHeaderMaxExtent(
-        context,
-        compactContactPriority: compactContactPriority,
-      );
-
   /// Pinned toolbar + tab bar (content should not scroll under this stack).
   static double pinnedHeaderHeight(BuildContext context) {
     return MediaQuery.paddingOf(context).top + kToolbarHeight + tabBarHeight;
