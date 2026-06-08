@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../constants/aluno_360_layout.dart';
 import '../utils/aluno360_ferramentas_logic.dart';
 import 'aluno360_operacao_tab.dart';
+import 'aluno360_tab_section_title.dart';
 
 /// Ferramentas tab layout: measurements grid + modules grid.
 class Aluno360FerramentasTab extends StatelessWidget {
@@ -35,17 +34,10 @@ class Aluno360FerramentasTab extends StatelessWidget {
   }
 
   Widget _sectionHeader(String title) {
-    return Semantics(
-      header: true,
-      child: Text(
-        title,
-        style: AppTypography.inter(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.4,
-          color: BrandPalette.sectionHeading(primary, dark: isDark),
-        ),
-      ),
+    return Aluno360TabSectionTitle(
+      title: title,
+      primary: primary,
+      isDark: isDark,
     );
   }
 

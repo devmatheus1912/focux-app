@@ -267,7 +267,24 @@ void main() {
     expect(
       File('lib/features/alunos/widgets/aluno360_ferramentas_tab.dart')
           .readAsStringSync(),
-      allOf(contains("'Módulos'"), contains("'Medidas'")),
+      allOf(
+        contains("'Módulos'"),
+        contains("'Medidas'"),
+        contains('Aluno360TabSectionTitle'),
+      ),
+    );
+    expect(
+      File('lib/features/alunos/constants/aluno_360_layout.dart')
+          .readAsStringSync(),
+      allOf(
+        contains('tabSectionTitleStyle'),
+        contains('panelTitleStyle'),
+      ),
+    );
+    expect(
+      File('lib/features/alunos/widgets/aluno360_operational_status_section.dart')
+          .readAsStringSync(),
+      contains('Aluno360SectionHeader'),
     );
     expect(
       File('lib/features/alunos/utils/aluno360_ferramentas_logic.dart')

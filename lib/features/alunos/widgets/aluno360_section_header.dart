@@ -12,6 +12,7 @@ class Aluno360SectionHeader extends StatelessWidget {
     required this.title,
     this.subtitle,
     this.trailing,
+    this.subtitleTrailing,
     this.trailingSemanticsLabel,
     required this.isDark,
   });
@@ -20,6 +21,7 @@ class Aluno360SectionHeader extends StatelessWidget {
   final String title;
   final String? subtitle;
   final Widget? trailing;
+  final Widget? subtitleTrailing;
   final String? trailingSemanticsLabel;
   final bool isDark;
 
@@ -79,12 +81,23 @@ class Aluno360SectionHeader extends StatelessWidget {
               ),
               if (subtitle != null) ...[
                 const SizedBox(height: 3),
-                Text(
-                  subtitle!,
-                  style: Aluno360Layout.captionStyle(context).copyWith(
-                    color: mute,
-                    height: 1.3,
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        subtitle!,
+                        style: Aluno360Layout.captionStyle(context).copyWith(
+                          color: mute,
+                          height: 1.3,
+                        ),
+                      ),
+                    ),
+                    if (subtitleTrailing != null) ...[
+                      const SizedBox(width: 8),
+                      subtitleTrailing!,
+                    ],
+                  ],
                 ),
               ],
             ],

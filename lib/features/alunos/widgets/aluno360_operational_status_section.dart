@@ -15,7 +15,8 @@ import '../utils/aluno360_operacao_logic.dart';
 import '../widgets/aluno_operacao_adherence_bars.dart';
 import '../widgets/aluno_operacao_adherence_legend.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
-import '../widgets/aluno360_operacao_focus_toggle.dart';
+import 'aluno360_operacao_focus_toggle.dart';
+import 'aluno360_section_header.dart';
 
 class Aluno360OperationalStatusSection extends ConsumerWidget {
   const Aluno360OperationalStatusSection({
@@ -149,38 +150,18 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(Icons.insights_rounded, size: 18, color: primary),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Status operacional',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-              Aluno360OperacaoFocusModeToggle(
-                alunoId: alunoId,
-                primary: primary,
-                iconOnly: true,
-              ),
-            ],
-          ),
-          if (statusSubtitle != null) ...[
-            Text(
-              statusSubtitle,
-              style: Aluno360Layout.captionStyle(context),
+          Aluno360SectionHeader(
+            icon: Icons.insights_rounded,
+            title: 'Status operacional',
+            subtitle: statusSubtitle,
+            trailing: Aluno360OperacaoFocusModeToggle(
+              alunoId: alunoId,
+              primary: primary,
+              iconOnly: true,
             ),
-            const SizedBox(height: 12),
-          ] else
-            const SizedBox(height: 8),
+            isDark: isDark,
+          ),
+          SizedBox(height: statusSubtitle != null ? 12 : 8),
           if (!heroShowsRisco) ...[
             OperationalMetricTile(
               label: dominant.label,

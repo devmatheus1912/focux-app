@@ -5,12 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
@@ -23,7 +20,8 @@ import '../widgets/aluno360_copilot_executar_button.dart';
 import '../widgets/aluno360_copilot_ia_refresh_button.dart';
 import '../widgets/aluno360_copilot_prescription.dart';
 import '../widgets/aluno360_copilot_support.dart';
-import '../widgets/aluno360_operacao_focus_toggle.dart';
+import 'aluno360_operacao_focus_toggle.dart';
+import 'aluno360_section_header.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
 
 class Aluno360CopilotCard extends ConsumerWidget {
@@ -110,8 +108,6 @@ class Aluno360CopilotCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = fxScreenInk(context);
-    final mute = fxScreenMute(context);
     final forceIa = ref.watch(alunoCopilotoForceIaProvider(aluno.id));
     final iaAsync =
         forceIa ? ref.watch(alunoCopilotoActionProvider(aluno.id)) : null;
@@ -194,54 +190,27 @@ class Aluno360CopilotCard extends ConsumerWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: BrandPalette.soft(primary, dark: isDark),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Icon(Icons.hub_outlined, color: primary, size: 20),
-              ),
-              const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      copilotCardTitle(
+                child: Aluno360SectionHeader(
+                  icon: Icons.hub_outlined,
+                  title: copilotCardTitle(
+                    contactPriority: operacao.contactPriority,
+                  ),
+                  subtitle: copilotCardSubtitle(
+                    forceIa: forceIa,
+                    iaAsync: iaAsync,
+                    resumoLoading:
+                        resumoAsync.isLoading && !resumoAsync.hasValue,
+                    compact: compactSubtitle,
+                  ),
+                  subtitleTrailing:
+                      shouldShowCopilotContactBadge(
                         contactPriority: operacao.contactPriority,
-                      ),
-                      style: Aluno360Layout.sectionTitleStyle(context, ink),
-                    ),
-                    const SizedBox(height: 3),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            copilotCardSubtitle(
-                              forceIa: forceIa,
-                              iaAsync: iaAsync,
-                              resumoLoading:
-                                  resumoAsync.isLoading && !resumoAsync.hasValue,
-                              compact: compactSubtitle,
-                            ),
-                            style: Aluno360Layout.captionStyle(context).copyWith(
-                              color: mute,
-                              height: 1.3,
-                            ),
-                          ),
-                        ),
-                        if (shouldShowCopilotContactBadge(
-                          contactPriority: operacao.contactPriority,
-                          sticky: stickyAction,
-                        )) ...[
-                          const SizedBox(width: 8),
-                          Aluno360ContactPriorityBadge(primary: primary),
-                        ],
-                      ],
-                    ),
-                  ],
+                        sticky: stickyAction,
+                      )
+                      ? Aluno360ContactPriorityBadge(primary: primary)
+                      : null,
+                  isDark: isDark,
                 ),
               ),
               if (showFocusToggle)

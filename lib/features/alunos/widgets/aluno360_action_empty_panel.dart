@@ -76,12 +76,7 @@ class Aluno360ActionEmptyPanel extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        height: 1.25,
-                      ),
+                      style: Aluno360Layout.panelTitleStyle(context, ink),
                     ),
                     const SizedBox(height: 4),
                     Text(

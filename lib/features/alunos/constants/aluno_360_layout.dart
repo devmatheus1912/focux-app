@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 
@@ -179,13 +180,38 @@ abstract final class Aluno360Layout {
     );
   }
 
-  /// Section titles inside Operação cards.
+  /// H2 titles on tab surfaces (Medidas, Módulos).
+  static TextStyle tabSectionTitleStyle(
+    BuildContext context, {
+    required Color primary,
+    required bool isDark,
+  }) {
+    return AppTypography.inter(
+      fontSize: 20,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.4,
+      color: BrandPalette.sectionHeading(primary, dark: isDark),
+    );
+  }
+
+  /// Section titles inside inset cards (Operação, Evolução).
   static TextStyle sectionTitleStyle(BuildContext context, Color ink) {
-    return TextStyle(
+    return AppTypography.inter(
       color: ink,
       fontSize: 17,
       fontWeight: FontWeight.w900,
       letterSpacing: -0.2,
+    );
+  }
+
+  /// Titles inside nested panels (empty states, callouts).
+  static TextStyle panelTitleStyle(BuildContext context, Color ink) {
+    return AppTypography.inter(
+      color: ink,
+      fontSize: 14,
+      fontWeight: FontWeight.w800,
+      height: 1.25,
+      letterSpacing: -0.1,
     );
   }
 

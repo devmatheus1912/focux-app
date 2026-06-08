@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -14,6 +13,7 @@ import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_followup_provider.dart';
 import '../utils/aluno360_operacao_logic.dart';
+import 'aluno360_section_header.dart';
 
 class Aluno360FollowUpCard extends ConsumerStatefulWidget {
   const Aluno360FollowUpCard({
@@ -234,67 +234,31 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(12, 12, 10, 12),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: BrandPalette.soft(primary, dark: isDark),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          Icons.event_available_rounded,
-                          size: 18,
-                          color: primary,
-                        ),
+                  child: Aluno360SectionHeader(
+                    icon: Icons.event_available_rounded,
+                    title: 'Próximo contato',
+                    subtitle: subtitle,
+                    trailing: Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color:
+                            isDark
+                                ? Colors.white.withValues(alpha: 0.06)
+                                : Colors.black.withValues(alpha: 0.04),
+                        shape: BoxShape.circle,
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Próximo contato',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: ink,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.1,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              subtitle,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: Aluno360Layout.captionStyle(context),
-                            ),
-                          ],
-                        ),
+                      child: Icon(
+                        _expanded
+                            ? Icons.expand_less_rounded
+                            : Icons.expand_more_rounded,
+                        size: 20,
+                        color: mute,
                       ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          color:
-                              isDark
-                                  ? Colors.white.withValues(alpha: 0.06)
-                                  : Colors.black.withValues(alpha: 0.04),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          _expanded
-                              ? Icons.expand_less_rounded
-                              : Icons.expand_more_rounded,
-                          size: 20,
-                          color: mute,
-                        ),
-                      ),
-                    ],
+                    ),
+                    trailingSemanticsLabel:
+                        _expanded ? 'Recolher' : 'Expandir',
+                    isDark: isDark,
                   ),
                 ),
               ),
@@ -370,33 +334,16 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(Icons.event_available_rounded, size: 18, color: primary),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Follow-up do personal',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ],
+          Aluno360SectionHeader(
+            icon: Icons.event_available_rounded,
+            title: 'Follow-up do personal',
+            subtitle:
+                followUpDate == null
+                    ? 'Agendar próximo contato · sincronizado com a nuvem'
+                    : 'Próximo contato: ${_formatDate(followUpDate)}',
+            isDark: widget.isDark,
           ),
           const SizedBox(height: 6),
-          Text(
-            followUpDate == null
-                ? 'Agendar próximo contato · sincronizado com a nuvem'
-                : 'Próximo contato: ${_formatDate(followUpDate)}',
-            style: Aluno360Layout.captionStyle(context),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
           if (aluno.ultimoContatoDate != null) ...[
             const SizedBox(height: 4),
             Text(
