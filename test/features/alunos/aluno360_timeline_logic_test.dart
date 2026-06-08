@@ -54,6 +54,24 @@ void main() {
       );
     });
 
+    test('rewrites copilot contate action to recovery coach tone', () {
+      expect(
+        sanitizeTimeline360Copy(
+          '! Passei pelo seu acompanhamento agora e o próximo passo para seu objetivo é: Contate Beatriz para entender inatividade.',
+        ),
+        'Beatriz sumiu do radar — manda um oi direto hoje.',
+      );
+    });
+
+    test('strips inactivity suffix from middle of message', () {
+      expect(
+        sanitizeTimeline360Copy(
+          'Você sumiu do radar — me responde por aqui que eu ajusto o plano. para entender o motivo da inatividade e verificar se há algum interesse. Quer retomar?',
+        ),
+        'Você sumiu do radar — me responde por aqui que eu ajusto o plano. Quer retomar?',
+      );
+    });
+
     test('removes orphan inactivity suffix after radar rewrite', () {
       expect(
         sanitizeTimeline360Copy(
@@ -110,6 +128,15 @@ void main() {
       expect(
         timeline360ChatBodyFingerprint(
           'Beatriz sumiu do radar — manda um oi direto hoje.',
+        ),
+        'chat:recovery',
+      );
+    });
+
+    test('buckets copilot contate action as recovery', () {
+      expect(
+        timeline360ChatBodyFingerprint(
+          '! Passei pelo seu acompanhamento agora e o próximo passo para seu objetivo é: Contate Beatriz.',
         ),
         'chat:recovery',
       );

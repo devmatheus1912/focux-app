@@ -54,6 +54,7 @@ String sanitizeTimeline360Copy(String? raw) {
 
   text = sanitizeCopilotIaLanguage(text);
   text = normalizeChatText(text);
+  text = timeline360CollapseCopilotTemplate(text);
 
   text = text.replaceAllMapped(
     RegExp(
@@ -86,26 +87,42 @@ String sanitizeTimeline360Copy(String? raw) {
 
   text = formatChatTextForDisplay(text);
   text = cleanCopilotText(text);
-  text = timeline360CollapseCopilotTemplate(text);
   return timeline360FinalizeCopy(text);
+}
+
+String timeline360RewriteCopilotExtractedAction(String action) {
+  final trimmed = action.trim();
+  if (trimmed.isEmpty) return trimmed;
+
+  if (trimmed.toLowerCase().contains('sumiu do radar')) {
+    return trimmed;
+  }
+
+  final contate = RegExp(
+    r'^contate\s+(\S+)',
+    caseSensitive: false,
+  ).firstMatch(trimmed);
+  if (contate != null) {
+    return '${contate.group(1)} sumiu do radar — manda um oi direto hoje.';
+  }
+  return 'Próximo passo do plano: $trimmed';
 }
 
 String timeline360CollapseCopilotTemplate(String text) {
   var out = text.trim();
   if (out.isEmpty) return out;
 
-  final extracted = out.replaceFirstMapped(
-    RegExp(
-      r'^passei pelo seu acompanhamento[^.]*próximo passo[^:]*:\s*(.+)$',
-      caseSensitive: false,
-      dotAll: true,
-    ),
-    (m) => 'Próximo passo do plano: ${m[1]!.trim()}',
-  );
-  if (extracted != out) return extracted;
+  final copilotMatch = RegExp(
+    r'^!?passei pelo seu acompanhamento[^.]*próximo passo[^:]*:\s*(.+)$',
+    caseSensitive: false,
+    dotAll: true,
+  ).firstMatch(out);
+  if (copilotMatch != null) {
+    return timeline360RewriteCopilotExtractedAction(copilotMatch.group(1)!);
+  }
 
   if (RegExp(
-    r'^passei pelo seu acompanhamento',
+    r'^!?passei pelo seu acompanhamento',
     caseSensitive: false,
   ).hasMatch(out)) {
     return 'Acompanhamento registrado — revise o próximo passo no chat.';
@@ -113,8 +130,31 @@ String timeline360CollapseCopilotTemplate(String text) {
   return out;
 }
 
+String timeline360StripInactivitySuffixFragments(String text) {
+  var out = text;
+  out = out.replaceAll(
+    RegExp(
+      r'\.\s+para entender o motivo da inatividad[ée][^.]*\.?',
+      caseSensitive: false,
+    ),
+    '.',
+  );
+  out = out.replaceAll(
+    RegExp(
+      r'\s+para entender o motivo da inatividad[ée][^.]*\.?',
+      caseSensitive: false,
+    ),
+    '',
+  );
+  out = out.replaceAll(
+    RegExp(r'\s+e verificar se há algum[^.]*\.?', caseSensitive: false),
+    '',
+  );
+  return out;
+}
+
 String timeline360FinalizeCopy(String text) {
-  var out = text.trim();
+  var out = timeline360StripInactivitySuffixFragments(text.trim());
   out = out.replaceAll(RegExp(r'\s+para retomar\.?$', caseSensitive: false), '');
   out = out.replaceAll(RegExp(r'\.\s+para retomar\.?$', caseSensitive: false), '.');
   out = out.replaceAllMapped(
@@ -123,13 +163,6 @@ String timeline360FinalizeCopy(String text) {
       caseSensitive: false,
     ),
     (m) => '${m[1]}.',
-  );
-  out = out.replaceAll(
-    RegExp(
-      r'\s+para entender o motivo da inatividad[ée][^.]*\.?$',
-      caseSensitive: false,
-    ),
-    '',
   );
   out = out.replaceAll(RegExp(r'\s{2,}'), ' ');
   return out.trim();
@@ -142,6 +175,9 @@ String timeline360ChatBodyFingerprint(String body) {
     ' ',
   ).trim();
   if (text.isEmpty) return '';
+  if (text.startsWith('próximo passo do plano:') && text.contains('contate')) {
+    return 'chat:recovery';
+  }
   if (text.startsWith('próximo passo do plano:')) return text;
   if (text.contains('sumiu do radar') ||
       text.contains('notei sua ausência') ||
