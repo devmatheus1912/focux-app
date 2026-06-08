@@ -11,6 +11,32 @@ O Focux Personal e o sistema operacional do personal trainer moderno. O app Flut
 
 O app se conecta ao `focux-backend`, usa JWT para sessao, aplica rotas por perfil e consome a mesma API multi-tenant que isola cada personal e seus alunos.
 
+## Estado atual (jun/2026)
+
+| Item | Valor |
+|---|---|
+| Versao | `1.1.0+2` |
+| Flutter / Dart | 3.44 / SDK `^3.7` |
+| Branch | `main` |
+| API producao | `https://focux-backend-production.up.railway.app` |
+| Analyzer | `dart analyze --fatal-warnings --fatal-infos` sem issues |
+| Testes Aluno 360 | 253 specs em `test/features/alunos/` |
+
+### Destaques recentes
+
+- **Aluno 360** (`/alunos/:id`): abas **Operacao**, **Evolucao** e **Ferramentas** com aderencia semanal, timeline, copiloto IA, recovery, risco financeiro, autonomia e evolucao inteligente.
+- **Modo foco da operacao** persistido no backend e sincronizado via `PATCH /api/alunos/{id}/operacao-focus`.
+- **Tokens e motion** centralizados em `lib/features/alunos/constants/aluno_360_layout.dart`; acessibilidade via `lib/core/utils/a11y_announce.dart`.
+- **Repositorio enxuto**: `scripts/`, `android/gradle.properties` e `lib/l10n/app_localizations*.dart` sao locais (gitignored); use os arquivos `.example` como base.
+
+### Areas em evolucao
+
+- habitos e recorrencia;
+- monetizacao / ofertas upsell;
+- QA smoke catalog e E2E Playwright;
+- iOS apos estabilizacao Android;
+- health/recovery e pose coach.
+
 ## Stack
 
 | Area | Tecnologia |
@@ -162,7 +188,7 @@ brand/
 test/
 integration_test/
 e2e/
-scripts/
+# scripts/ — local only (gitignored; copie de backup ou recrie a partir dos comandos abaixo)
 ```
 
 ## Rotas principais
@@ -296,18 +322,13 @@ scripts/
 
 - Lista de alunos com filtros.
 - Cadastro, edicao e exclusao.
-- Perfil 360 do aluno.
+- **Aluno 360** (`aluno_detail_screen.dart`):
+  - **Operacao**: status operacional, aderencia semanal, proxima acao, follow-up, copiloto IA com execucao de tarefas, modo foco (sync BE), recovery e banner de risco financeiro.
+  - **Evolucao**: evolucao inteligente, peso/atividade, timeline 360 paginada, Focux Score e insights.
+  - **Ferramentas**: atalhos para treinos, chat, anamnese, financeiro, fotos, trilhas, engajamento e demais modulos do aluno.
 - Dados de objetivo, status, foto, contato, genero, consultoria, status financeiro, peso, altura, idade e equipamentos.
 - Senha provisoria.
-- Aderencia semanal com sparkline.
-- Timeline 360.
-- Autonomia do aluno.
-- Gargalos de autonomia.
-- Evolucao inteligente.
-- Plano de sucesso.
-- Relatorio individual.
-- Engajamento.
-- Fotos de evolucao.
+- Providers principais: `aluno360Provider`, `aluno360OperacaoProvider`, `alunoOperacaoFocusStore`.
 - Acoes em massa:
   - excluir selecionados;
   - marcar mensalidades como pagas;
@@ -568,7 +589,7 @@ Arquivo local:
 .env.local
 ```
 
-`.env.local` e gitignored e usado pelos scripts PowerShell.
+`.env.local` e gitignored. Copie de `.env.local.example` antes de rodar.
 
 ## Rodando localmente
 
@@ -587,27 +608,23 @@ flutter pub get
 
 ### Rodar Android
 
-```powershell
-.\scripts\run-android.ps1
-```
-
-Ou manualmente:
-
 ```bash
-flutter run -d emulator-5554 --dart-define=API_URL=http://10.0.2.2:8080
+flutter run -d emulator-5554 \
+  --dart-define=API_URL=http://10.0.2.2:8080 \
+  --dart-define=PUBLIC_WEB_URL=http://10.0.2.2:8080
 ```
+
+No emulador Android, `10.0.2.2` aponta para `localhost` da maquina host.
 
 ### Rodar web
 
-```powershell
-.\scripts\run-web.ps1
-```
-
-Ou manualmente:
-
 ```bash
-flutter run -d chrome --web-port 61791
+flutter run -d chrome --web-port 61791 \
+  --dart-define=API_URL=http://localhost:8080 \
+  --dart-define=PUBLIC_WEB_URL=http://localhost:61791
 ```
+
+> Scripts PowerShell de conveniencia (`run-android.ps1`, `build-web.ps1`, etc.) existem apenas localmente — nao estao versionados. Veja a secao **Scripts locais** abaixo.
 
 ### Rodar apontando para outro backend
 
@@ -627,26 +644,31 @@ flutter run `
   --dart-define=GOOGLE_WEB_CLIENT_ID=<client-id>
 ```
 
-## Scripts
+## Scripts locais
 
-| Script | Funcao |
+A pasta `scripts/` e **gitignored** (ferramentas de deploy, build e assets por maquina). Mantenha uma copia local ou recrie conforme necessidade.
+
+Comandos equivalentes versionados no README:
+
+| Tarefa | Comando |
 |---|---|
-| `scripts/get-sha1.ps1` | Extrai SHA-1 do debug keystore Android para Firebase/Google Sign-In |
-| `scripts/run-android.ps1` | Roda no emulador Android com `.env.local` |
-| `scripts/run-web.ps1` | Roda web em `localhost:61791` |
-| `scripts/build-android.ps1` | Build APK release |
-| `scripts/build-web.ps1` | Build web release |
-| `scripts/generate_app_icon.js` | Gera icones |
-| `scripts/prepare_brand_assets.js` | Prepara assets de marca |
-| `scripts/patch_android_splash.js` | Ajusta splash Android |
-| `scripts/defringe_logo.js` | Trata arte de logo |
+| SHA-1 debug Android | `keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android` |
+| APK release | `flutter build apk --release` com `--dart-define` de ambiente |
+| Web release | `flutter build web --release` com `--dart-define` de ambiente |
+| Deploy Vercel | `flutter build web --release` + `npx vercel deploy --prebuilt` |
+
+### Android local
+
+Copie `android/gradle.properties.example` para `android/gradle.properties` e ajuste memoria/JVM para sua maquina.
 
 ## Build
 
 ### Android APK
 
-```powershell
-.\scripts\build-android.ps1
+```bash
+flutter build apk --release \
+  --dart-define=API_URL=https://focux-backend-production.up.railway.app \
+  --dart-define=PUBLIC_WEB_URL=https://focux.app
 ```
 
 Saida:
@@ -663,8 +685,10 @@ flutter build appbundle --release
 
 ### Web
 
-```powershell
-.\scripts\build-web.ps1
+```bash
+flutter build web --release \
+  --dart-define=API_URL=https://focux-backend-production.up.railway.app \
+  --dart-define=PUBLIC_WEB_URL=https://focux.app
 ```
 
 Saida:
@@ -686,8 +710,10 @@ Requer Xcode e configuracao de signing.
 ### Analyzer
 
 ```bash
-flutter analyze
+dart analyze --fatal-warnings --fatal-infos
 ```
+
+CI e pre-commit devem manter **zero issues**.
 
 ### Unit/widget tests
 
@@ -743,18 +769,19 @@ Inclui logos Focux, splash, app icon, mesh background e animacoes Rive:
 
 ## Internacionalizacao
 
-O app possui ARB em:
+Fontes (versionadas):
 
 ```text
 lib/l10n/app_pt.arb
 lib/l10n/app_en.arb
 lib/l10n/app_es.arb
+l10n.yaml
 ```
 
-Configuracao:
+Arquivos gerados `lib/l10n/app_localizations*.dart` sao **gitignored**. Regere com:
 
-```text
-l10n.yaml
+```bash
+flutter gen-l10n
 ```
 
 ## Backend
@@ -775,24 +802,29 @@ https://focux-backend-production.up.railway.app/actuator/health
 
 ## Seguranca de credenciais
 
-- Nunca commitar `.env.local`.
-- Nunca commitar credenciais Firebase, MercadoPago, Cloudinary, SMTP ou IA.
-- `GOOGLE_WEB_CLIENT_ID` e um identificador publico, mas deve continuar configuravel por ambiente.
-- Tokens e roles ficam no secure storage.
-- O backend continua sendo a fonte de verdade para autorizacao, plano e tenant.
+Nunca commitar:
+
+- `.env.local` e variantes;
+- `android/gradle.properties` (use `.example`);
+- `android/key.properties`, keystores (`.jks`, `.keystore`);
+- `google-services.json` / `GoogleService-Info.plist` reais (use `*.example`);
+- service accounts Firebase;
+- senhas de review, admin ou QA no codigo ou markdown.
+
+`GOOGLE_WEB_CLIENT_ID` e publico, mas deve ser configuravel por ambiente. Tokens JWT ficam em `flutter_secure_storage`. O backend e a fonte de verdade para autorizacao, plano e tenant.
+
+Metadados de App Store (conta demo, notas de review) ficam em `APP_STORE_METADATA.md` — senhas apenas via variaveis de ambiente no backend (`FOCUX_REVIEW_ACCOUNT_PASSWORD`).
 
 ## Roadmap operacional
 
-Areas ativas do produto:
+Prioridades atuais:
 
-- estabilidade Android primeiro;
-- iOS depois da base Android estabilizada;
-- QA visual e de rotas;
-- smoke catalog para telas e endpoints;
-- refinamento de IA Copiloto;
-- evolucao de landing/portfolio do personal;
-- crescimento de features Enterprise;
-- aprofundamento de health/recovery e pose coach.
+1. Aluno 360 e Command Center como cockpit principal do personal.
+2. Estabilidade Android e pipeline de release.
+3. iOS apos base Android consolidada.
+4. QA smoke + E2E Playwright para rotas criticas.
+5. Habitos, recorrencia e monetizacao enterprise.
+6. Health/recovery, wearables e pose coach.
 
 ## Licenca
 
