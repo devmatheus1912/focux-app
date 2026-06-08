@@ -33,33 +33,55 @@ class Aluno360FerramentasTab extends StatelessWidget {
     );
   }
 
+  Widget _sectionHeader(String title) {
+    return Semantics(
+      header: true,
+      child: Text(
+        title,
+        style: AppTypography.inter(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.4,
+          color: BrandPalette.sectionHeading(primary, dark: isDark),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final measurements = _section(0, measurementsSection);
-    final modules = _section(1, modulesSection);
+    final measurements = _section(
+      0,
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _sectionHeader('Medidas'),
+          const SizedBox(height: Aluno360Layout.sectionGap),
+          measurementsSection,
+        ],
+      ),
+    );
+    final modules = _section(
+      1,
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _sectionHeader('Módulos'),
+          const SizedBox(height: Aluno360Layout.sectionGap),
+          modulesSection,
+        ],
+      ),
+    );
 
     return Semantics(
       container: true,
-      label: 'Ferramentas do aluno, medidas e módulos',
+      label: 'Ferramentas do aluno: medidas corporais e módulos de ação',
       child: Aluno360Layout.operacaoContentWidthLimiter(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             measurements,
             const SizedBox(height: 20),
-            Semantics(
-              header: true,
-              child: Text(
-                'Módulos',
-                style: AppTypography.inter(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.4,
-                  color: BrandPalette.sectionHeading(primary, dark: isDark),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
             modules,
           ],
         ),

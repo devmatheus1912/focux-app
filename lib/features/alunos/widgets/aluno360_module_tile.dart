@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_sparkline.dart';
+import '../constants/aluno_360_layout.dart';
 
 class Aluno360MeasurementCard extends StatelessWidget {
   const Aluno360MeasurementCard({
@@ -13,6 +16,7 @@ class Aluno360MeasurementCard extends StatelessWidget {
     required this.isDark,
     this.emptyHint,
     this.onTap,
+    this.semanticsLabel,
   });
 
   final String label;
@@ -21,13 +25,13 @@ class Aluno360MeasurementCard extends StatelessWidget {
   final bool isDark;
   final String? emptyHint;
   final VoidCallback? onTap;
+  final String? semanticsLabel;
 
   @override
   Widget build(BuildContext context) {
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
     final primary = Theme.of(context).colorScheme.primary;
-
     final verticalPad = emptyHint != null ? 10.0 : 12.0;
 
     final child = Container(
@@ -43,11 +47,11 @@ class Aluno360MeasurementCard extends StatelessWidget {
               label.toUpperCase(),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: mute,
+              style: Aluno360Layout.captionStyle(context).copyWith(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 0.6,
+                color: mute,
               ),
               textAlign: TextAlign.center,
             ),
@@ -65,21 +69,21 @@ class Aluno360MeasurementCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: ink,
+                  style: AppTypography.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.5,
+                    color: ink,
                   ),
                 ),
               ),
               const SizedBox(width: 2),
               Text(
                 unit,
-                style: TextStyle(
-                  color: mute,
+                style: Aluno360Layout.captionStyle(context).copyWith(
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
+                  color: mute,
                 ),
               ),
             ],
@@ -88,11 +92,10 @@ class Aluno360MeasurementCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               emptyHint!,
-              style: TextStyle(
+              style: Aluno360Layout.chipLabelStyle(
+                context,
                 color: primary,
-                fontSize: 9,
-                fontWeight: FontWeight.w800,
-              ),
+              ).copyWith(fontSize: 10),
             ),
           ],
         ],
@@ -100,13 +103,45 @@ class Aluno360MeasurementCard extends StatelessWidget {
     );
 
     if (onTap == null) return child;
+    final a11yLabel = semanticsLabel ?? '$label $value $unit';
     return Semantics(
       button: true,
-      label: '$label $value $unit. Toque para $emptyHint',
+      label: '$a11yLabel. Toque para $emptyHint',
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(TokensStrip.rCard),
         child: child,
+      ),
+    );
+  }
+}
+
+/// Compact weekly trend for module tiles (e.g. Aderência).
+class Aluno360FerramentasMiniSparkline extends StatelessWidget {
+  const Aluno360FerramentasMiniSparkline({
+    super.key,
+    required this.data,
+    required this.color,
+    required this.semanticsLabel,
+  });
+
+  final List<double> data;
+  final Color color;
+  final String semanticsLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: semanticsLabel,
+      child: ExcludeSemantics(
+        child: FxSparkline(
+          data: data,
+          color: color,
+          width: 44,
+          height: 18,
+          strokeWidth: 1.8,
+          fill: false,
+        ),
       ),
     );
   }
@@ -122,6 +157,7 @@ class Aluno360ModuleTile extends StatelessWidget {
     required this.onTap,
     this.badge,
     this.highlight = false,
+    this.trailing,
   });
 
   final IconData icon;
@@ -131,14 +167,15 @@ class Aluno360ModuleTile extends StatelessWidget {
   final bool isDark;
   final bool highlight;
   final VoidCallback onTap;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
-
     final badgeLabel = badge != null ? ', $badge' : '';
+    final badgeInk = BrandPalette.deep(primary);
 
     return Semantics(
       button: true,
@@ -158,14 +195,16 @@ class Aluno360ModuleTile extends StatelessWidget {
                   : fxListCardDecoration(context),
           child: Row(
             children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: primary.withValues(alpha: highlight ? 0.18 : 0.1),
-                  borderRadius: BorderRadius.circular(12),
+              ExcludeSemantics(
+                child: Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: primary.withValues(alpha: highlight ? 0.18 : 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, size: 17, color: primary),
                 ),
-                child: Icon(icon, size: 17, color: primary),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -181,7 +220,7 @@ class Aluno360ModuleTile extends StatelessWidget {
                         label,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: AppTypography.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
                           height: 1.15,
@@ -198,7 +237,7 @@ class Aluno360ModuleTile extends StatelessWidget {
                         sub,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: Aluno360Layout.cardSubtitleStyle(context).copyWith(
                           fontSize: 11,
                           color: highlight ? BrandPalette.deep(primary) : mute,
                         ),
@@ -214,10 +253,10 @@ class Aluno360ModuleTile extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: primary.withValues(alpha: 0.12),
+                            color: primary.withValues(alpha: 0.14),
                             borderRadius: BorderRadius.circular(999),
                             border: Border.all(
-                              color: primary.withValues(alpha: 0.22),
+                              color: primary.withValues(alpha: 0.35),
                             ),
                           ),
                           child: Text(
@@ -225,8 +264,8 @@ class Aluno360ModuleTile extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: primary,
-                              fontSize: 8.8,
+                              color: badgeInk,
+                              fontSize: 9,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 0.2,
                             ),
@@ -237,6 +276,10 @@ class Aluno360ModuleTile extends StatelessWidget {
                   ],
                 ),
               ),
+              if (trailing != null) ...[
+                const SizedBox(width: 6),
+                trailing!,
+              ],
             ],
           ),
         ),

@@ -25,6 +25,11 @@ void main() {
     objetivo: 'Hipertrofia',
   );
 
+  final aderenciaSemana = List.generate(
+    7,
+    (i) => {'data': '2026-06-0${i + 1}', 'checkins': i % 3 == 0 ? 1 : 0},
+  );
+
   Widget ferramentasHarness({
     required bool isDark,
     required Widget child,
@@ -34,6 +39,9 @@ void main() {
     return ProviderScope(
       overrides: [
         alunoMedidasResumoProvider(42).overrideWith((ref) async => null),
+        alunoAderenciaSemanalProvider(42).overrideWith(
+          (ref) async => aderenciaSemana,
+        ),
       ],
       child: MaterialApp(
         theme: ThemeData(
@@ -56,10 +64,15 @@ void main() {
     );
   }
 
-  Widget ferramentasTab({required bool isDark, double textScale = 1.0}) {
+  Widget ferramentasTab({
+    required bool isDark,
+    double textScale = 1.0,
+    Size size = const Size(390, 1200),
+  }) {
     return ferramentasHarness(
       isDark: isDark,
       textScale: textScale,
+      size: size,
       child: Aluno360DetailFerramentasTab(
         aluno: aluno,
         alunoId: 42,
@@ -76,7 +89,9 @@ void main() {
     await tester.pumpWidget(ferramentasTab(isDark: false));
     await tester.pumpAndSettle();
 
+    expect(find.text('Medidas'), findsOneWidget);
     expect(find.text('IA Progresso'), findsOneWidget);
+    expect(find.text('GORDURA'), findsOneWidget);
     expect(find.text('MASSA MAGRA'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
@@ -108,6 +123,24 @@ void main() {
     await expectLater(
       find.byType(Aluno360DetailFerramentasTab),
       matchesGoldenFile('goldens/aluno360_ferramentas_tab_390_scale13.png'),
+    );
+  });
+
+  testWidgets('ferramentas tab golden tablet at 720px', (tester) async {
+    await tester.pumpWidget(
+      ferramentasTab(
+        isDark: false,
+        size: const Size(720, 1400),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Medidas'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await expectLater(
+      find.byType(Aluno360DetailFerramentasTab),
+      matchesGoldenFile('goldens/aluno360_ferramentas_tab_720.png'),
     );
   });
 }

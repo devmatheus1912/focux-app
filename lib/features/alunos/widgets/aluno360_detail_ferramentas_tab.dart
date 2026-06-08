@@ -7,6 +7,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
+import '../utils/aluno360_ferramentas_logic.dart';
 import '../utils/altura_display.dart';
 import 'aluno360_ferramentas_modules_grid.dart';
 import 'aluno360_ferramentas_tab.dart';
@@ -36,6 +37,8 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final altura = formatAlturaDisplay(aluno.altura);
     final medidasAsync = ref.watch(alunoMedidasResumoProvider(alunoId));
+    final aderenciaSemanal =
+        ref.watch(alunoAderenciaSemanalProvider(alunoId)).valueOrNull;
     final medidas = medidasAsync.valueOrNull;
     final bf =
         medidas?.percGordura != null
@@ -67,7 +70,7 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
                 ),
               ),
               child: Text(
-                'Medidas indisponíveis agora. Tente novamente em instantes.',
+                'Medidas indisponíveis agora. Puxe para atualizar ou tente em instantes.',
                 style: TextStyle(
                   color: fxScreenMute(context),
                   fontSize: 12.5,
@@ -78,15 +81,17 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
         data:
             (_) => LayoutBuilder(
               builder: (context, constraints) {
-                final crossAxisCount = constraints.maxWidth < 360 ? 2 : 4;
+                final crossAxisCount = Aluno360FerramentasLogic.measurementCrossAxisCount(
+                  constraints.maxWidth,
+                );
                 final textScale = MediaQuery.textScalerOf(context).scale(1);
                 final needsRegistrarHint = bf == null || massaMagra == null;
-                final aspectBase =
-                    crossAxisCount == 2
-                        ? (needsRegistrarHint ? 1.18 : 1.45)
-                        : (needsRegistrarHint ? 0.82 : 1.1);
                 final childAspectRatio =
-                    aspectBase / textScale.clamp(1.0, 2.2);
+                    Aluno360FerramentasLogic.measurementGridChildAspectRatio(
+                      crossAxisCount: crossAxisCount,
+                      needsRegistrarHint: needsRegistrarHint,
+                      textScale: textScale,
+                    );
                 return Semantics(
                   container: true,
                   label: 'Medidas corporais resumidas do aluno',
@@ -98,40 +103,48 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
                     crossAxisSpacing: 8,
                     childAspectRatio: childAspectRatio,
                     children: [
-                    Aluno360MeasurementCard(
-                      label: 'Idade',
-                      value: (aluno.idade ?? '—').toString(),
-                      unit: 'anos',
-                      isDark: isDark,
-                    ),
-                    Aluno360MeasurementCard(
-                      label: 'Altura',
-                      value: altura.value,
-                      unit: altura.unit,
-                      isDark: isDark,
-                    ),
-                    Aluno360MeasurementCard(
-                      label: 'BF',
-                      value: bf ?? '—',
-                      unit: '%',
-                      isDark: isDark,
-                      emptyHint: bf == null ? 'Registrar' : null,
-                      onTap:
-                          bf == null
-                              ? () => context.push(evolucaoRoute, extra: aluno.nome)
-                              : null,
-                    ),
-                    Aluno360MeasurementCard(
-                      label: 'Massa magra',
-                      value: massaMagra ?? '—',
-                      unit: 'kg',
-                      isDark: isDark,
-                      emptyHint: massaMagra == null ? 'Registrar' : null,
-                      onTap:
-                          massaMagra == null
-                              ? () => context.push(evolucaoRoute, extra: aluno.nome)
-                              : null,
-                    ),
+                      Aluno360MeasurementCard(
+                        label: 'Idade',
+                        value: (aluno.idade ?? '—').toString(),
+                        unit: 'anos',
+                        isDark: isDark,
+                      ),
+                      Aluno360MeasurementCard(
+                        label: 'Altura',
+                        value: altura.value,
+                        unit: altura.unit,
+                        isDark: isDark,
+                      ),
+                      Aluno360MeasurementCard(
+                        label: 'Gordura',
+                        value: bf ?? '—',
+                        unit: '%',
+                        isDark: isDark,
+                        semanticsLabel:
+                            bf == null
+                                ? 'Percentual de gordura não registrado'
+                                : 'Percentual de gordura $bf por cento',
+                        emptyHint: bf == null ? 'Registrar' : null,
+                        onTap:
+                            bf == null
+                                ? () => context.push(evolucaoRoute, extra: aluno.nome)
+                                : null,
+                      ),
+                      Aluno360MeasurementCard(
+                        label: 'Massa magra',
+                        value: massaMagra ?? '—',
+                        unit: 'kg',
+                        isDark: isDark,
+                        semanticsLabel:
+                            massaMagra == null
+                                ? 'Massa magra não registrada'
+                                : 'Massa magra $massaMagra quilogramas',
+                        emptyHint: massaMagra == null ? 'Registrar' : null,
+                        onTap:
+                            massaMagra == null
+                                ? () => context.push(evolucaoRoute, extra: aluno.nome)
+                                : null,
+                      ),
                     ],
                   ),
                 );
@@ -145,6 +158,7 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
         perfilCompletion: perfilCompletion,
         bf: bf,
         massaMagra: massaMagra,
+        aderenciaSemanal: aderenciaSemanal,
       ),
     );
   }

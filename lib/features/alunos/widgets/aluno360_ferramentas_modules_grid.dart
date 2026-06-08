@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/design_tokens.dart';
 import '../data/aluno_repository.dart';
+import '../utils/aluno360_ferramentas_logic.dart';
 import 'aluno360_module_tile.dart';
 
 /// Grid of Ferramentas module shortcuts for Aluno 360.
@@ -14,6 +16,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
     required this.perfilCompletion,
     this.bf,
     this.massaMagra,
+    this.aderenciaSemanal,
   });
 
   final Aluno aluno;
@@ -22,17 +25,29 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
   final int perfilCompletion;
   final String? bf;
   final String? massaMagra;
+  final List<Map<String, dynamic>>? aderenciaSemanal;
 
   @override
   Widget build(BuildContext context) {
     final evolucaoRoute = '/alunos/$alunoId/evolucao';
+    final primary = Theme.of(context).colorScheme.primary;
+    final aderenciaSpark = Aluno360FerramentasLogic.aderenciaSparklineValues(
+      aderenciaSemanal,
+    );
+    final aderenciaPercent = (aluno.aderenciaPercent ?? 0).toDouble();
+    final aderenciaColor = EagleTokens.aderenciaColor(
+      aderenciaPercent,
+      isDark: isDark,
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final textScale = MediaQuery.textScalerOf(context).scale(1);
         final hasBadgeTile = bf == null && massaMagra == null;
-        final aspectBase = hasBadgeTile ? 2.05 : 2.3;
-        final aspectRatio = aspectBase / textScale.clamp(1.0, 2.2);
+        final aspectRatio = Aluno360FerramentasLogic.modulesGridChildAspectRatio(
+          hasBadgeTile: hasBadgeTile,
+          textScale: textScale,
+        );
         return GridView.count(
           key: const ValueKey('aluno360_ferramentas_modulos'),
           shrinkWrap: true,
@@ -83,7 +98,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
             ),
             Aluno360ModuleTile(
               icon: Icons.show_chart,
-              label: 'Medidas',
+              label: 'Composição',
               sub:
                   bf != null || massaMagra != null
                       ? 'Última avaliação'
@@ -95,11 +110,18 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
             Aluno360ModuleTile(
               icon: Icons.assessment_outlined,
               label: 'Aderência',
-              sub:
-                  aluno.aderenciaPercent == null
-                      ? 'Sem dados'
-                      : '${aluno.aderenciaPercent}% semana',
+              sub: Aluno360FerramentasLogic.aderenciaModuleSub(
+                aluno: aluno,
+                aderenciaSemanal: aderenciaSemanal,
+              ),
               isDark: isDark,
+              trailing: Aluno360FerramentasMiniSparkline(
+                data: aderenciaSpark,
+                color: aderenciaColor,
+                semanticsLabel: Aluno360FerramentasLogic.aderenciaSparkSemanticsLabel(
+                  aderenciaSemanal,
+                ),
+              ),
               onTap:
                   () => context.push(
                     '/alunos/$alunoId/relatorio',

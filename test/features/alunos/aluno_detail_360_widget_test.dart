@@ -305,9 +305,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('aluno360_ferramentas_modulos')), findsOneWidget);
+      expect(find.text('Medidas'), findsOneWidget);
+      expect(find.text('Composição'), findsOneWidget);
       expect(find.text('Módulos'), findsOneWidget);
       expect(find.text('Treinos'), findsOneWidget);
       expect(find.text('IA Progresso'), findsOneWidget);
+      expect(find.text('GORDURA'), findsOneWidget);
       expect(find.text('MASSA MAGRA'), findsOneWidget);
       expect(find.text('Registrar'), findsNWidgets(2));
       expect(
