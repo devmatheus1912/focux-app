@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -13,6 +12,7 @@ import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import 'aluno360_action_empty_panel.dart';
 import 'aluno360_mini_autonomy_chip.dart';
+import 'aluno360_section_header.dart';
 import 'aluno_outreach_message_sheet.dart';
 
 class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
@@ -72,9 +72,16 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
 
-    return Container(
-      padding: const EdgeInsets.all(TokensStrip.s4),
-      decoration: fxListCardDecoration(context),
+    return Semantics(
+      container: true,
+      label: 'Evolução inteligente, sinais de volume e tendência',
+      child: Container(
+      padding: const EdgeInsets.all(Aluno360Layout.cardPadding),
+      decoration: Aluno360Layout.operacaoInsetSectionDecoration(
+        context,
+        primary: primary,
+        isDark: isDark,
+      ),
       child: evolucaoAsync.when(
         loading: () => FxLoading.sectionShimmer(context, height: 160),
         error:
@@ -92,54 +99,15 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: BrandPalette.soft(primary, dark: isDark),
-                      borderRadius: BorderRadius.circular(13),
-                    ),
-                    child: Icon(
-                      Icons.show_chart_rounded,
-                      color: primary,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Evolução inteligente',
-                                style: Aluno360Layout.cardTitleStyle(
-                                  context,
-                                  ink,
-                                ),
-                              ),
-                            ),
-                            Aluno360MiniAutonomyChip(
-                              label: sinalLabel(ev.sinal),
-                              color: sigColor,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'Sinais a partir de check-ins concluídos e volume.',
-                          style: Aluno360Layout.cardSubtitleStyle(context)
-                              .copyWith(color: mute),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              Aluno360SectionHeader(
+                icon: Icons.show_chart_rounded,
+                title: 'Evolução inteligente',
+                subtitle: 'Sinais a partir de check-ins concluídos e volume.',
+                isDark: isDark,
+                trailing: Aluno360MiniAutonomyChip(
+                  label: sinalLabel(ev.sinal),
+                  color: sigColor,
+                ),
               ),
               const SizedBox(height: 14),
               if (isEmptySignal) ...[
@@ -301,6 +269,7 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
           );
         },
       ),
+    ),
     );
   }
 }

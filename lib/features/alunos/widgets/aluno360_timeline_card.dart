@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -14,6 +13,7 @@ import '../data/aluno_repository.dart';
 import '../utils/aluno360_timeline_logic.dart';
 import 'aluno360_action_empty_panel.dart';
 import 'aluno360_mini_autonomy_chip.dart';
+import 'aluno360_section_header.dart';
 import 'aluno360_timeline_priority_badge.dart';
 import 'aluno360_timeline_sheet_motion.dart';
 import 'aluno_outreach_message_sheet.dart';
@@ -121,43 +121,24 @@ class Aluno360TimelineCard extends StatelessWidget {
     final visibleItems = items.take(3).toList();
     final hasMore = items.length > visibleItems.length;
 
-    return Container(
-      padding: const EdgeInsets.all(TokensStrip.s4),
-      decoration: fxListCardDecoration(context),
+    return Semantics(
+      container: true,
+      label: 'Linha do tempo 360, últimos sinais do aluno',
+      child: Container(
+      padding: const EdgeInsets.all(Aluno360Layout.cardPadding),
+      decoration: Aluno360Layout.operacaoInsetSectionDecoration(
+        context,
+        primary: primary,
+        isDark: isDark,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: BrandPalette.soft(primary, dark: isDark),
-                  borderRadius: BorderRadius.circular(13),
-                ),
-                child: Icon(Icons.timeline_rounded, color: primary, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Linha do tempo 360',
-                      style: Aluno360Layout.cardTitleStyle(context, ink),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      'Últimos sinais consolidados do aluno.',
-                      style: Aluno360Layout.cardSubtitleStyle(context).copyWith(
-                        color: mute,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          Aluno360SectionHeader(
+            icon: Icons.timeline_rounded,
+            title: 'Linha do tempo 360',
+            subtitle: 'Últimos sinais consolidados do aluno.',
+            isDark: isDark,
           ),
           if (loading) ...[
             const SizedBox(height: 14),
@@ -234,6 +215,7 @@ class Aluno360TimelineCard extends StatelessWidget {
           ],
         ],
       ),
+    ),
     );
   }
 
