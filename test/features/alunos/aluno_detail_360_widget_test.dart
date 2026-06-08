@@ -302,12 +302,14 @@ void main() {
       await _pumpAlunoDetail(tester, textScale: scale);
 
       await tester.tap(find.text('Ferramentas'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('aluno360_ferramentas_modulos')), findsOneWidget);
       expect(find.text('Módulos'), findsOneWidget);
       expect(find.text('Treinos'), findsOneWidget);
+      expect(find.text('IA Progresso'), findsOneWidget);
+      expect(find.text('MASSA MAGRA'), findsOneWidget);
+      expect(find.text('Registrar'), findsNWidgets(2));
       expect(
         find.descendant(
           of: find.byKey(const ValueKey('aluno360_ferramentas_modulos')),
@@ -315,9 +317,7 @@ void main() {
         ),
         findsOneWidget,
       );
-      if (scale == 1.0) {
-        expect(tester.takeException(), isNull);
-      }
+      expect(tester.takeException(), isNull);
     });
   }
 }

@@ -28,21 +28,29 @@ class Aluno360MeasurementCard extends StatelessWidget {
     final mute = fxScreenMute(context);
     final primary = Theme.of(context).colorScheme.primary;
 
+    final verticalPad = emptyHint != null ? 10.0 : 12.0;
+
     final child = Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+      padding: EdgeInsets.symmetric(vertical: verticalPad, horizontal: 8),
       decoration: fxListCardDecoration(context),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            label.toUpperCase(),
-            style: TextStyle(
-              color: mute,
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.0,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label.toUpperCase(),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: mute,
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.6,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
           Row(
@@ -94,7 +102,7 @@ class Aluno360MeasurementCard extends StatelessWidget {
     if (onTap == null) return child;
     return Semantics(
       button: true,
-      label: '$label $value $unit',
+      label: '$label $value $unit. Toque para $emptyHint',
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(TokensStrip.rCard),
@@ -130,14 +138,16 @@ class Aluno360ModuleTile extends StatelessWidget {
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
 
+    final badgeLabel = badge != null ? ', $badge' : '';
+
     return Semantics(
       button: true,
-      label: '$label. $sub',
+      label: '$label$badgeLabel. $sub',
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.all(11),
+          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
           decoration:
               highlight
                   ? fxListCardDecoration(
@@ -164,57 +174,66 @@ class Aluno360ModuleTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        label,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          height: 1.15,
+                          color: highlight ? primary : ink,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        sub,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: highlight ? BrandPalette.deep(primary) : mute,
+                        ),
+                      ),
+                    ),
+                    if (badge != null) ...[
+                      const SizedBox(height: 4),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: primary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(
+                              color: primary.withValues(alpha: 0.22),
+                            ),
+                          ),
                           child: Text(
-                            label,
+                            badge!,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: highlight ? primary : ink,
-                              letterSpacing: -0.2,
+                              color: primary,
+                              fontSize: 8.8,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.2,
                             ),
                           ),
                         ),
-                        if (badge != null) ...[
-                          const SizedBox(width: 5),
-                          Flexible(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: primary.withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                              child: Text(
-                                badge!,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: primary,
-                                  fontSize: 8.8,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    Text(
-                      sub,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: highlight ? BrandPalette.deep(primary) : mute,
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),

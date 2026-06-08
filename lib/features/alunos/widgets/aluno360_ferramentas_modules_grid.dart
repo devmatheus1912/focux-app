@@ -30,7 +30,9 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final textScale = MediaQuery.textScalerOf(context).scale(1);
-        final aspectRatio = 2.55 / textScale.clamp(1.0, 2.2);
+        final hasBadgeTile = bf == null && massaMagra == null;
+        final aspectBase = hasBadgeTile ? 2.05 : 2.3;
+        final aspectRatio = aspectBase / textScale.clamp(1.0, 2.2);
         return GridView.count(
           key: const ValueKey('aluno360_ferramentas_modulos'),
           shrinkWrap: true,

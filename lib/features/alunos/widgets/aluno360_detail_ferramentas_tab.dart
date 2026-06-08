@@ -50,6 +50,8 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
     return Aluno360FerramentasTab(
       primary: primary,
       isDark: isDark,
+      animateEntrance: animateEntrance,
+      onEntrancePlayed: onEntrancePlayed,
       measurementsSection: medidasAsync.when(
         loading:
             () => FxLoading.sectionShimmer(context, height: 88, showHeader: false),
@@ -78,17 +80,24 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
               builder: (context, constraints) {
                 final crossAxisCount = constraints.maxWidth < 360 ? 2 : 4;
                 final textScale = MediaQuery.textScalerOf(context).scale(1);
-                final aspectBase = crossAxisCount == 2 ? 1.45 : 1.1;
+                final needsRegistrarHint = bf == null || massaMagra == null;
+                final aspectBase =
+                    crossAxisCount == 2
+                        ? (needsRegistrarHint ? 1.18 : 1.45)
+                        : (needsRegistrarHint ? 0.82 : 1.1);
                 final childAspectRatio =
                     aspectBase / textScale.clamp(1.0, 2.2);
-                return GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: crossAxisCount,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  childAspectRatio: childAspectRatio,
-                  children: [
+                return Semantics(
+                  container: true,
+                  label: 'Medidas corporais resumidas do aluno',
+                  child: GridView.count(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: crossAxisCount,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    childAspectRatio: childAspectRatio,
+                    children: [
                     Aluno360MeasurementCard(
                       label: 'Idade',
                       value: (aluno.idade ?? '—').toString(),
@@ -113,7 +122,7 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
                               : null,
                     ),
                     Aluno360MeasurementCard(
-                      label: 'M. Magra',
+                      label: 'Massa magra',
                       value: massaMagra ?? '—',
                       unit: 'kg',
                       isDark: isDark,
@@ -123,7 +132,8 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
                               ? () => context.push(evolucaoRoute, extra: aluno.nome)
                               : null,
                     ),
-                  ],
+                    ],
+                  ),
                 );
               },
             ),
