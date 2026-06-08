@@ -13,14 +13,6 @@ abstract final class Aluno360FerramentasLogic {
   static int measurementCrossAxisCount(double maxWidth) =>
       maxWidth < narrowBreakpoint ? 2 : 4;
 
-  static double modulesGridChildAspectRatio({
-    required bool hasBadgeTile,
-    required double textScale,
-  }) {
-    final aspectBase = hasBadgeTile ? 2.05 : 2.3;
-    return aspectBase / textScale.clamp(1.0, 2.2);
-  }
-
   static List<double> aderenciaSparklineValues(
     List<Map<String, dynamic>>? raw,
   ) {

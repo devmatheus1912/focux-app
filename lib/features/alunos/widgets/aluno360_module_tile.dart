@@ -173,6 +173,29 @@ class Aluno360ModuleTile extends StatelessWidget {
   final VoidCallback onTap;
   final Widget? trailing;
 
+  Widget _badgeChip(BuildContext context, Color primary, Color badgeInk) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: primary.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: primary.withValues(alpha: 0.35)),
+      ),
+      child: Text(
+        badge!,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          color: badgeInk,
+          fontSize: 9,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0.2,
+          height: 1,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
@@ -180,6 +203,8 @@ class Aluno360ModuleTile extends StatelessWidget {
     final mute = fxScreenMute(context);
     final badgeLabel = badge != null ? ', $badge' : '';
     final badgeInk = BrandPalette.deep(primary);
+    final titleColor = highlight ? BrandPalette.deep(primary) : ink;
+    final subColor = highlight ? BrandPalette.deep(primary) : mute;
 
     return Semantics(
       button: true,
@@ -188,7 +213,8 @@ class Aluno360ModuleTile extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
+          width: double.infinity,
+          padding: EdgeInsets.fromLTRB(10, 8, badge != null ? 8 : 10, 8),
           decoration:
               highlight
                   ? fxListCardDecoration(
@@ -197,93 +223,74 @@ class Aluno360ModuleTile extends StatelessWidget {
                     selected: true,
                   )
                   : fxListCardDecoration(context),
-          child: Row(
+          child: Stack(
+            clipBehavior: Clip.none,
             children: [
-              ExcludeSemantics(
-                child: Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: primary.withValues(alpha: highlight ? 0.18 : 0.1),
-                    borderRadius: BorderRadius.circular(12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  ExcludeSemantics(
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: primary.withValues(alpha: highlight ? 0.18 : 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(icon, size: 16, color: primary),
+                    ),
                   ),
-                  child: Icon(icon, size: 17, color: primary),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        label,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.inter(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          height: 1.15,
-                          color: highlight ? primary : ink,
-                          letterSpacing: -0.2,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        sub,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Aluno360Layout.cardSubtitleStyle(context).copyWith(
-                          fontSize: 11,
-                          color: highlight ? BrandPalette.deep(primary) : mute,
-                        ),
-                      ),
-                    ),
-                    if (badge != null) ...[
-                      const SizedBox(height: 4),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: primary.withValues(alpha: 0.14),
-                            borderRadius: BorderRadius.circular(999),
-                            border: Border.all(
-                              color: primary.withValues(alpha: 0.35),
-                            ),
-                          ),
-                          child: Text(
-                            badge!,
-                            maxLines: 1,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(right: badge != null ? 30 : 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            label,
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: badgeInk,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.2,
+                            style: AppTypography.inter(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              height: 1.12,
+                              color: titleColor,
+                              letterSpacing: -0.2,
                             ),
                           ),
-                        ),
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  sub,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Aluno360Layout.cardSubtitleStyle(
+                                    context,
+                                  ).copyWith(fontSize: 11, color: subColor),
+                                ),
+                              ),
+                              if (trailing != null) ...[
+                                const SizedBox(width: 4),
+                                trailing!,
+                              ],
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
-                  ],
-                ),
+                    ),
+                  ),
+                ],
               ),
-              if (trailing != null) ...[
-                const SizedBox(width: 6),
-                trailing!,
-              ],
+              if (badge != null)
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: _badgeChip(context, primary, badgeInk),
+                ),
             ],
           ),
         ),
