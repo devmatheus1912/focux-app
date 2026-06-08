@@ -72,20 +72,9 @@ class Aluno360SectionHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: titleStyle,
-                      ),
-                    ),
-                    if (trailing != null) ...[
-                      const SizedBox(width: 8),
-                      Flexible(child: trailing!),
-                    ],
-                  ],
+                Text(
+                  title,
+                  style: titleStyle,
                 ),
                 if (subtitle != null) ...[
                   const SizedBox(height: 2),
@@ -111,6 +100,10 @@ class Aluno360SectionHeader extends StatelessWidget {
               ],
             ),
           ),
+          if (trailing != null) ...[
+            const SizedBox(width: 8),
+            trailing!,
+          ],
         ],
       ),
     );
