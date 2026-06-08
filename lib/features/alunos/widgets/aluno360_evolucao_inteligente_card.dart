@@ -8,6 +8,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_sparkline.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import 'aluno360_action_empty_panel.dart';
@@ -84,10 +85,15 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
         data: (ev) {
           final sigColor = sinalColor(ev.sinal);
           final isEmptySignal = ev.sinal == 'SEM_DADOS';
+          final sparklineData =
+              ev.volumePorSemana.where((v) => v > 0).length >= 2
+                  ? ev.volumePorSemana
+                  : const <double>[];
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
                     width: 38,
@@ -107,25 +113,31 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Evolução inteligente',
-                          style: TextStyle(
-                            color: ink,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w900,
-                          ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Evolução inteligente',
+                                style: Aluno360Layout.cardTitleStyle(
+                                  context,
+                                  ink,
+                                ),
+                              ),
+                            ),
+                            Aluno360MiniAutonomyChip(
+                              label: sinalLabel(ev.sinal),
+                              color: sigColor,
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 3),
                         Text(
                           'Sinais a partir de check-ins concluídos e volume.',
-                          style: TextStyle(color: mute, fontSize: 12.5),
+                          style: Aluno360Layout.cardSubtitleStyle(context)
+                              .copyWith(color: mute),
                         ),
                       ],
                     ),
-                  ),
-                  Aluno360MiniAutonomyChip(
-                    label: sinalLabel(ev.sinal),
-                    color: sigColor,
                   ),
                 ],
               ),
@@ -164,8 +176,39 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
               ] else ...[
                 Text(
                   ev.resumo,
-                  style: TextStyle(color: ink, fontSize: 13.2, height: 1.35),
+                  style: Aluno360Layout.captionStyle(context).copyWith(
+                    color: ink,
+                    fontSize: 13,
+                    height: 1.35,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
+                if (sparklineData.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Volume semanal',
+                          style: Aluno360Layout.metaStyle(context).copyWith(
+                            color: mute,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                      Semantics(
+                        label: 'Tendência de volume nas últimas semanas',
+                        child: FxSparkline(
+                          data: sparklineData,
+                          color: sigColor,
+                          width: 88,
+                          height: 28,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 12),
                 Wrap(
                   spacing: 8,
@@ -214,7 +257,12 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   ev.proximaAcao,
-                  style: TextStyle(color: ink, fontSize: 13, height: 1.3),
+                  style: Aluno360Layout.captionStyle(context).copyWith(
+                    color: ink,
+                    fontSize: 13,
+                    height: 1.3,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 SizedBox(

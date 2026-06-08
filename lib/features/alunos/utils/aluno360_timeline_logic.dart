@@ -14,10 +14,12 @@ String sanitizeTimeline360Copy(String? raw) {
   text = text.replaceAll(RegExp(r'\besta\b', caseSensitive: false), 'está');
 
   const englishToPt = {
-    'needs human action today': 'precisa de uma ação humana hoje',
-    'needs human action': 'precisa de uma ação humana',
-    'human action today': 'ação humana hoje',
-    'human action': 'ação humana',
+    'needs human action today: complete body map':
+        'ainda não completou o mapa corporal — vale cobrar hoje.',
+    'needs human action today': 'tem prioridade hoje',
+    'needs human action': 'precisa de atenção',
+    'human action today': 'prioridade hoje',
+    'human action': 'atenção',
     'complete body map': 'completar mapa corporal',
     'body map': 'mapa corporal',
   };
@@ -28,15 +30,32 @@ String sanitizeTimeline360Copy(String? raw) {
     );
   }
 
+  text = text.replaceAllMapped(
+    RegExp(
+      r'^(\S+)\s+precisa de uma ação humana hoje:\s*completar mapa corporal\.?$',
+      caseSensitive: false,
+    ),
+    (m) => '${m[1]} ainda não completou o mapa corporal — vale cobrar hoje.',
+  );
+  text = text.replaceAllMapped(
+    RegExp(
+      r'^(\S+)\s+precisa de uma ação humana hoje:\s*(.+?)\.?$',
+      caseSensitive: false,
+    ),
+    (m) => '${m[1]} tem prioridade hoje: ${m[2]}.',
+  );
+
   return sanitizeCopilotIaLanguage(text);
 }
 
 /// Whether the meta line adds information beyond title/priority.
 bool timeline360ShouldShowMetaChip({
+  required String kind,
   required String meta,
   required String priority,
   required String title,
 }) {
+  if (kind == 'Chat') return false;
   final trimmed = meta.trim();
   if (trimmed.isEmpty) return false;
   if (trimmed == priority.trim()) return false;
@@ -44,6 +63,26 @@ bool timeline360ShouldShowMetaChip({
   if (upper == 'PERSONAL' || upper == 'ALUNO') return false;
   if (title.toLowerCase().contains(trimmed.toLowerCase())) return false;
   return true;
+}
+
+/// Chat events use sender chip instead of priority badge.
+bool timeline360ShouldShowPriorityBadge({required String kind}) {
+  return kind != 'Chat';
+}
+
+/// Sender label for chat timeline rows.
+String? timeline360SenderChipLabel({
+  required String kind,
+  required String meta,
+  required String title,
+}) {
+  if (kind != 'Chat') return null;
+  final upper = meta.trim().toUpperCase();
+  if (upper == 'PERSONAL') return 'Personal';
+  if (upper == 'ALUNO') return 'Aluno';
+  if (title.contains('Personal')) return 'Personal';
+  if (title.contains('Aluno')) return 'Aluno';
+  return null;
 }
 
 /// Semantic color for P0–P3 timeline priority tags.

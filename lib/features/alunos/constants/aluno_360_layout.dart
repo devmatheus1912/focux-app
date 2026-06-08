@@ -182,6 +182,31 @@ abstract final class Aluno360Layout {
     );
   }
 
+  /// Card titles shared by Operação and Evolução blocks.
+  static TextStyle cardTitleStyle(BuildContext context, Color ink) {
+    return TextStyle(
+      color: ink,
+      fontSize: 16,
+      fontWeight: FontWeight.w900,
+      letterSpacing: -0.15,
+    );
+  }
+
+  /// Card subtitles under titles (min 12px).
+  static TextStyle cardSubtitleStyle(BuildContext context) {
+    return captionStyle(context);
+  }
+
+  /// Timeline event title inside list tiles.
+  static TextStyle timelineTileTitleStyle(BuildContext context, Color ink) {
+    return metaStyle(context).copyWith(
+      color: ink,
+      fontSize: 13,
+      fontWeight: FontWeight.w900,
+      height: 1.25,
+    );
+  }
+
   /// WCAG AA outline for Operação secondary buttons (≥4.5:1 on white).
   static BorderSide operacaoOutlineSide(Color primary, {required bool isDark}) {
     return BorderSide(

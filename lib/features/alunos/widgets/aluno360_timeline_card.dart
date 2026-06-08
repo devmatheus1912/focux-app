@@ -144,16 +144,14 @@ class Aluno360TimelineCard extends StatelessWidget {
                   children: [
                     Text(
                       'Linha do tempo 360',
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                      ),
+                      style: Aluno360Layout.cardTitleStyle(context, ink),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       'Últimos sinais consolidados do aluno.',
-                      style: TextStyle(color: mute, fontSize: 12.5),
+                      style: Aluno360Layout.cardSubtitleStyle(context).copyWith(
+                        color: mute,
+                      ),
                     ),
                   ],
                 ),
@@ -170,7 +168,10 @@ class Aluno360TimelineCard extends StatelessWidget {
                 timelineApiAsync.error!,
                 fallback: 'Não foi possível carregar a linha do tempo.',
               ),
-              style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
+              style: Aluno360Layout.cardSubtitleStyle(context).copyWith(
+                color: mute,
+                height: 1.35,
+              ),
             ),
           ] else if (items.isEmpty) ...[
             const SizedBox(height: 14),
@@ -243,6 +244,7 @@ class Aluno360TimelineCard extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      showDragHandle: true,
       backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -255,12 +257,12 @@ class Aluno360TimelineCard extends StatelessWidget {
             maxChildSize: 0.92,
             builder:
                 (context, controller) => Padding(
-                  padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 8, 16, 0),
+                  padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 4, 16, 0),
                   child: ShellSurface(
                     radius: 28,
                     padding: EdgeInsets.fromLTRB(
                       16,
-                      18,
+                      8,
                       16,
                       24 + MediaQuery.of(ctx).padding.bottom,
                     ),
@@ -276,12 +278,27 @@ class Aluno360TimelineCard extends StatelessWidget {
                       },
                       itemBuilder: (context, index) {
                         if (index == 0) {
-                          return Text(
-                            'Histórico 360',
-                            style: TextStyle(
-                              color: fxScreenInk(context),
-                              fontSize: 20,
-                              fontWeight: FontWeight.w900,
+                          final ink = fxScreenInk(context);
+                          final mute = fxScreenMute(context);
+                          return Semantics(
+                            header: true,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    'Histórico 360',
+                                    style: Aluno360Layout.sectionTitleStyle(
+                                      context,
+                                      ink,
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  tooltip: 'Fechar histórico',
+                                  onPressed: () => Navigator.of(ctx).pop(),
+                                  icon: Icon(Icons.close_rounded, color: mute),
+                                ),
+                              ],
                             ),
                           );
                         }
@@ -329,6 +346,7 @@ void showTimeline360BodySheet(BuildContext context, Timeline360Item item) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    showDragHandle: true,
     backgroundColor: Colors.transparent,
     builder:
         (ctx) => Padding(
@@ -400,8 +418,15 @@ class Timeline360Tile extends StatelessWidget {
     final link = item.deepLink;
     final expandable = timeline360BodyExpandable(item.body);
     final showMeta = timeline360ShouldShowMetaChip(
+      kind: item.kind,
       meta: item.meta,
       priority: item.priority,
+      title: item.title,
+    );
+    final showPriority = timeline360ShouldShowPriorityBadge(kind: item.kind);
+    final senderChip = timeline360SenderChipLabel(
+      kind: item.kind,
+      meta: item.meta,
       title: item.title,
     );
     final child = Row(
@@ -449,11 +474,7 @@ class Timeline360Tile extends StatelessWidget {
                 item.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: ink,
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w900,
-                ),
+                style: Aluno360Layout.timelineTileTitleStyle(context, ink),
               ),
               const SizedBox(height: 3),
               Text(
@@ -483,11 +504,14 @@ class Timeline360Tile extends StatelessWidget {
                 runSpacing: 4,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  Aluno360TimelinePriorityBadge(
-                    priority: item.priority,
-                    accent: accent,
-                    isDark: isDark,
-                  ),
+                  if (showPriority)
+                    Aluno360TimelinePriorityBadge(
+                      priority: item.priority,
+                      accent: accent,
+                      isDark: isDark,
+                    ),
+                  if (senderChip != null)
+                    Aluno360MiniAutonomyChip(label: senderChip, color: accent),
                   if (showMeta)
                     Aluno360MiniAutonomyChip(label: item.meta, color: mute),
                 ],

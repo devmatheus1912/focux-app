@@ -32,7 +32,7 @@ class Aluno360TimelinePriorityBadge extends StatelessWidget {
         child: Text(
           label,
           style: Aluno360Layout.chipLabelStyle(context, color: color).copyWith(
-            fontSize: 11,
+            fontSize: 12,
             letterSpacing: 0.2,
           ),
         ),
