@@ -68,7 +68,7 @@ https://focux.app
 
 Demo Account for Review:
 - Email: review@focux.app
-- Password: FocuxReview2026!
+- Password: set via `FOCUX_REVIEW_ACCOUNT_PASSWORD` on the backend (provide only in App Store Connect review notes, not in git).
 - This account has pre-populated data: 3 students, 3 training programs, and 9 exercises.
 - The app requires an internet connection to load data from the API.
 

@@ -10,7 +10,7 @@ void main() {
       'titulo': 'Treino',
       'conteudo': 'Tomem agua hoje.',
       'tipoPost': 'DICA',
-      'autorNome': 'Matheus Focux',
+      'autorNome': 'QA Coach',
       'autorAvatarUrl': 'https://cdn.focux.test/personal.jpg',
       'totalCurtidas': 1,
       'totalComentarios': 1,
@@ -25,7 +25,7 @@ void main() {
       'criadoEm': '2026-05-05T15:01:00',
     });
 
-    expect(post.autorNome, 'Matheus Focux');
+    expect(post.autorNome, 'QA Coach');
     expect(post.autorAvatarUrl, 'https://cdn.focux.test/personal.jpg');
     expect(comentario.alunoFotoUrl, 'https://cdn.focux.test/thales.jpg');
 

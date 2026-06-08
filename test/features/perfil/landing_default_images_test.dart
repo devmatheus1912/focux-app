@@ -2,15 +2,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/perfil/utils/landing_default_images.dart';
 
 void main() {
-  test('matheus slug resolves ambient hero-5', () {
-    expect(
-      landingDefaultHeroImageUrl('matheus-focux'),
-      contains('/landing/defaults/hero-5.jpg'),
-    );
+  test('qa slug resolves deterministic hero from pool', () {
+    const slug = 'qa-demo-coach';
+    final hero = landingDefaultHeroImageUrl(slug);
+    expect(hero, contains('/landing/defaults/hero-'));
+    expect(landingDefaultHeroImageUrl(slug), hero);
   });
 
   test('default hero uses backend static paths', () {
-    final hero = landingDefaultHeroImageUrl('matheus-focux');
+    final hero = landingDefaultHeroImageUrl('qa-demo-coach');
     expect(hero, contains('/landing/defaults/hero-'));
     expect(hero, startsWith('https://'));
   });
@@ -62,9 +62,9 @@ void main() {
   });
 
   test('webp urls mirror jpg defaults', () {
-    expect(landingDefaultHeroWebpUrl('matheus-focux'), endsWith('.webp'));
+    expect(landingDefaultHeroWebpUrl('qa-demo-coach'), endsWith('.webp'));
     expect(
-      landingFallbackBioWebpUrl('matheus-focux'),
+      landingFallbackBioWebpUrl('qa-demo-coach'),
       contains('/landing/defaults/bio-'),
     );
   });

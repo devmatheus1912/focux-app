@@ -87,4 +87,11 @@ focux_app.iml
 
 # Android local SDK path (per machine)
 android/local.properties
+android/gradle.properties
 .vercel
+
+# Generated l10n (keep .arb sources only)
+lib/l10n/app_localizations*.dart
+
+# Local dev/deploy scripts (workstation-specific)
+scripts/

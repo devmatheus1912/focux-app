@@ -31,7 +31,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 800));
 
-    expect(find.text('Matheus Focux'), findsWidgets);
+    expect(find.text('QA Coach'), findsWidgets);
     expect(find.text('Prontidão comercial'), findsOneWidget);
     expect(find.text('Identidade visual'), findsOneWidget);
     expect(find.text('Marca'), findsWidgets);
@@ -54,18 +54,18 @@ void main() {
 
 final _perfilFixture = PerfilPersonal(
   id: 7,
-  nome: 'Matheus Focux',
-  email: 'matheus@personal.com',
+  nome: 'QA Coach',
+  email: 'qa@example.com',
   cref: '123456-G/SP',
   especialidade: 'Hipertrofia',
   corPrimaria: '#2D4FB7',
   corSecundaria: '#3F63E4',
-  slug: 'matheus-focux',
+  slug: 'qa-demo-coach',
   plano: 'ENTERPRISE',
-  chavePix: 'matheus@personal.com',
+  chavePix: 'qa@example.com',
   descricaoProfissional: 'Especializado em biomecanica.',
   especialidades: 'Hipertrofia',
-  instagram: '@devmatheusb',
+  instagram: '@qacoach',
 );
 
 final _dashboardFixture = DashboardData(
@@ -73,10 +73,10 @@ final _dashboardFixture = DashboardData(
   alunosAtivos: 5,
   planoAtual: 'ENTERPRISE',
   limiteAlunos: 120,
-  nomePersonal: 'Matheus Focux',
+  nomePersonal: 'QA Coach',
   logoUrl: null,
   corPrimaria: '#2D4FB7',
   corSecundaria: '#3F63E4',
   descricaoProfissional: 'Especializado em biomecanica.',
-  instagram: '@devmatheusb',
+  instagram: '@qacoach',
 );
