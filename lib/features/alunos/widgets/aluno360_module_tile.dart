@@ -141,9 +141,9 @@ class Aluno360FerramentasMiniSparkline extends StatelessWidget {
         child: FxSparkline(
           data: data,
           color: color,
-          width: 44,
-          height: 18,
-          strokeWidth: 1.8,
+          width: 36,
+          height: 16,
+          strokeWidth: 1.6,
           fill: false,
         ),
       ),
@@ -215,12 +215,7 @@ class Aluno360ModuleTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: Container(
           width: double.infinity,
-          padding: EdgeInsets.fromLTRB(
-            10,
-            8,
-            badge != null || topTrailing != null ? 8 : 10,
-            8,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration:
               highlight
                   ? fxListCardDecoration(
@@ -229,47 +224,43 @@ class Aluno360ModuleTile extends StatelessWidget {
                     selected: true,
                   )
                   : fxListCardDecoration(context),
-          child: Stack(
-            clipBehavior: Clip.none,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  ExcludeSemantics(
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: primary.withValues(alpha: highlight ? 0.18 : 0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(icon, size: 16, color: primary),
-                    ),
+              ExcludeSemantics(
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: primary.withValues(alpha: highlight ? 0.18 : 0.1),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        right: badge != null || topTrailing != null ? 34 : 0,
+                  child: Icon(icon, size: 16, color: primary),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      label,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        height: 1.12,
+                        color: titleColor,
+                        letterSpacing: -0.2,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            label,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTypography.inter(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              height: 1.12,
-                              color: titleColor,
-                              letterSpacing: -0.2,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
                             sub,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -277,24 +268,34 @@ class Aluno360ModuleTile extends StatelessWidget {
                               context,
                             ).copyWith(fontSize: 11, color: subColor),
                           ),
+                        ),
+                        if (badge != null) ...[
+                          const SizedBox(width: 6),
+                          Flexible(
+                            fit: FlexFit.loose,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerRight,
+                              child: _badgeChip(context, primary, badgeInk),
+                            ),
+                          ),
                         ],
-                      ),
+                        if (topTrailing != null) ...[
+                          const SizedBox(width: 4),
+                          Flexible(
+                            fit: FlexFit.loose,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerRight,
+                              child: topTrailing!,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                  ),
-                ],
-              ),
-              if (badge != null)
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: _badgeChip(context, primary, badgeInk),
-                )
-              else if (topTrailing != null)
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: topTrailing!,
+                  ],
                 ),
+              ),
             ],
           ),
         ),
