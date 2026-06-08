@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../constants/aluno_360_layout.dart';
@@ -19,7 +18,7 @@ import 'aluno360_operacao_focus_toggle.dart';
 import 'aluno360_section_header.dart';
 
 class Aluno360OperationalStatusSection extends ConsumerWidget {
-  const Aluno360OperationalStatusSection({
+  const Aluno360OperationalStatusSection({super.key, 
     required this.aluno,
     required this.alunoId,
     required this.isDark,

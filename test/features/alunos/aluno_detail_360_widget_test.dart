@@ -8,7 +8,6 @@ import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart'
 import 'package:focux_app/features/alunos/providers/aluno_followup_provider.dart';
 import 'package:focux_app/features/alunos/providers/alunos_provider.dart';
 import 'package:focux_app/features/alunos/screens/aluno_detail_screen.dart';
-import 'package:focux_app/features/dashboard/data/command_center_data.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

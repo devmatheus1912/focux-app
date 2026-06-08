@@ -17,7 +17,7 @@ class ConversationMediaPreview extends StatelessWidget {
   final bool isDark;
   final VoidCallback onOpen;
 
-  const ConversationMediaPreview({
+  const ConversationMediaPreview({super.key, 
     required this.msg,
     required this.mine,
     required this.isDark,
@@ -174,7 +174,7 @@ class ConversationMediaFilterChip extends StatelessWidget {
   final Color primary;
   final bool isDark;
 
-  const ConversationMediaFilterChip({
+  const ConversationMediaFilterChip({super.key, 
     required this.label,
     required this.selected,
     required this.onTap,
@@ -227,7 +227,7 @@ class ConversationMediaGalleryTile extends StatelessWidget {
   final bool isDark;
   final VoidCallback onTap;
 
-  const ConversationMediaGalleryTile({
+  const ConversationMediaGalleryTile({super.key, 
     required this.msg,
     required this.isDark,
     required this.onTap,
@@ -339,7 +339,7 @@ class ConversationAudioInlinePlayer extends StatefulWidget {
   final bool isDark;
   final VoidCallback onFallbackOpen;
 
-  const ConversationAudioInlinePlayer({
+  const ConversationAudioInlinePlayer({super.key, 
     required this.url,
     required this.label,
     required this.mine,

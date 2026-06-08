@@ -3,11 +3,9 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_motion.dart';
 
 class CheckinLiveCoachingCard extends StatelessWidget {
   final Color brand;
@@ -16,7 +14,7 @@ class CheckinLiveCoachingCard extends StatelessWidget {
   final VoidCallback onApply;
   final VoidCallback onSkip;
 
-  const CheckinLiveCoachingCard({
+  const CheckinLiveCoachingCard({super.key, 
     required this.brand,
     required this.brandDeep,
     required this.dark,
@@ -122,7 +120,7 @@ class CheckinRestTimerDock extends StatelessWidget {
   final Color line;
   final VoidCallback onSkip;
 
-  const CheckinRestTimerDock({
+  const CheckinRestTimerDock({super.key, 
     required this.seconds,
     required this.totalSeconds,
     required this.brand,

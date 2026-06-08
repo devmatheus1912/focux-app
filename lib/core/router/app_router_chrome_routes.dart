@@ -1,4 +1,4 @@
-﻿import 'package:go_router/go_router.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../features/alunos/data/aluno_repository.dart';
 import '../../features/dashboard/screens/copilot_actions_screen.dart';
@@ -88,7 +88,6 @@ import '../../features/alimentar/screens/alimentar_screen.dart';
 import '../../features/ia/screens/ia_progressao_screen.dart';
 import '../../features/chat/screens/chat_screen.dart';
 import '../../features/perfil/screens/wallet_screen.dart';
-import 'qa_routes.dart' if (dart.vm.product) 'qa_routes_stub.dart';
 import '../widgets/fx_route_chrome.dart';
 import 'app_router_redirect.dart';
 import 'fx_page_transition.dart';

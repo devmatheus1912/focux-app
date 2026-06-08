@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/checkin_repository.dart';
 import '../widgets/gated_pose_coach_panel.dart';
@@ -25,7 +23,7 @@ class CheckinSerieCard extends StatelessWidget {
   final void Function(int) onMarcar;
   final void Function(int, ExecucaoSerie?) onSerieDetalhada;
 
-  const CheckinSerieCard({
+  const CheckinSerieCard({super.key, 
     required this.ee,
     required this.index,
     required this.total,
@@ -451,7 +449,7 @@ class CheckinExerciseMetaRow extends StatelessWidget {
   final Color line;
   final bool dark;
 
-  const CheckinExerciseMetaRow({
+  const CheckinExerciseMetaRow({super.key, 
     required this.loadText,
     required this.restText,
     required this.ink,
@@ -497,7 +495,7 @@ class CheckinExerciseNote extends StatelessWidget {
   final Color line;
   final bool dark;
 
-  const CheckinExerciseNote({
+  const CheckinExerciseNote({super.key, 
     required this.text,
     required this.mute,
     required this.line,
@@ -532,7 +530,7 @@ class CheckinExecutionGuidanceCard extends StatelessWidget {
   final Color line;
   final bool dark;
 
-  const CheckinExecutionGuidanceCard({
+  const CheckinExecutionGuidanceCard({super.key, 
     required this.icon,
     required this.title,
     required this.text,
@@ -595,7 +593,7 @@ class CheckinPreviousPerformance extends StatelessWidget {
   final Color line;
   final bool dark;
 
-  const CheckinPreviousPerformance({
+  const CheckinPreviousPerformance({super.key, 
     required this.loadText,
     required this.seriesText,
     required this.feedbackText,
@@ -667,7 +665,7 @@ class CheckinSeriesHistory extends StatelessWidget {
   final String? Function(String?, int?, bool?) formatFeedback;
   final void Function(ExecucaoSerie) onEdit;
 
-  const CheckinSeriesHistory({
+  const CheckinSeriesHistory({super.key, 
     required this.series,
     required this.ink,
     required this.mute,

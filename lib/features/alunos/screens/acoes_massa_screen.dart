@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -313,7 +313,7 @@ class _BottomSheetAcoesState extends State<_BottomSheetAcoes> {
           ),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
-            value: _statusSelecionado,
+            initialValue: _statusSelecionado,
             decoration: FxInputDeco.build(context, 'Novo status'),
             items:
                 ['ATIVO', 'INATIVO', 'BLOQUEADO']

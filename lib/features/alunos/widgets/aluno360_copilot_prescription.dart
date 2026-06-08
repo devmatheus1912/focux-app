@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
@@ -244,7 +242,7 @@ class _Aluno360CopilotPrescriptionState
 
         return Semantics(
           label:
-              '${widget.showTitle ? '${widget.title}. ' : ''}${expandedActionText}. $reason'
+              '${widget.showTitle ? '${widget.title}. ' : ''}$expandedActionText. $reason'
               '${showExpandAction && !_expandedAction ? '. Toque para ver ação completa' : ''}'
               '${showExpandReason && !_expandedReason ? '. Toque para ver contexto completo' : ''}',
           child: Column(

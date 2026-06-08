@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';

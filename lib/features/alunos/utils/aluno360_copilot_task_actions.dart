@@ -10,7 +10,6 @@ import '../../ia/data/ia_repository.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
-import '../utils/aluno360_copilot_logic.dart';
 
 /// Creates or surfaces an open Copilot task in Command Center from Aluno 360.
 Future<bool> criarTarefaCopilotoFromAluno360({

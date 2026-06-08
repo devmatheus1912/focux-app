@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';

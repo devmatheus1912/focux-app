@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';

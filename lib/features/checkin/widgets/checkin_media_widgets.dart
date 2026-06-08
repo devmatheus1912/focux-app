@@ -12,7 +12,7 @@ class CheckinExerciseThumbnailPreview extends StatelessWidget {
   final Color brand;
   final bool dark;
 
-  const CheckinExerciseThumbnailPreview({
+  const CheckinExerciseThumbnailPreview({super.key, 
     required this.url,
     required this.videoSource,
     required this.licenseStatus,
@@ -103,7 +103,7 @@ class CheckinExerciseMediaPreview extends StatelessWidget {
   final Color brand;
   final bool dark;
 
-  const CheckinExerciseMediaPreview({
+  const CheckinExerciseMediaPreview({super.key, 
     required this.url,
     required this.brand,
     required this.dark,
@@ -179,7 +179,7 @@ class CheckinExerciseVideoPreview extends StatefulWidget {
   final Color brand;
   final bool dark;
 
-  const CheckinExerciseVideoPreview({
+  const CheckinExerciseVideoPreview({super.key, 
     required this.url,
     required this.brand,
     required this.dark,
@@ -314,7 +314,7 @@ class CheckinVideoFallback extends StatelessWidget {
   final Color brand;
   final bool dark;
 
-  const CheckinVideoFallback({required this.brand, required this.dark});
+  const CheckinVideoFallback({super.key, required this.brand, required this.dark});
 
   @override
   Widget build(BuildContext context) {

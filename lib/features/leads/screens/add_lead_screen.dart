@@ -112,7 +112,7 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _origem,
+              initialValue: _origem,
               decoration: FxInputDeco.build(
                 context,
                 'Origem',

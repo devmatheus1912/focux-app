@@ -119,7 +119,6 @@ class Aluno360TimelineCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
     final loading = timelineApiAsync.isLoading && !timelineApiAsync.hasValue;
     final error = timelineApiAsync.hasError && !timelineApiAsync.hasValue;

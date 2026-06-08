@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/design_tokens.dart';
-import '../../dashboard/data/command_center_data.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno_display_utils.dart';
 import '../../health/data/health_repository.dart';

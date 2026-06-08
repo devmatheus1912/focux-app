@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/utils/a11y_announce.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../avaliacao/data/avaliacao_repository.dart';
 import '../../dashboard/data/command_center_data.dart';
@@ -85,9 +84,8 @@ class AlunoOperacaoFocusModeController extends StateNotifier<bool> {
       await AlunoRepository(_ref.read(apiClientProvider))
           .atualizarOperacaoFocus(alunoId, focusMode: value);
     } catch (_) {}
-    SemanticsService.announce(
+    fxAnnounceGlobal(
       value ? 'Modo foco ativado' : 'Modo foco desativado',
-      TextDirection.ltr,
     );
   }
 

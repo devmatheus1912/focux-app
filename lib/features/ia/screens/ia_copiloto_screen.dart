@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -124,6 +124,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final dark = chrome.isDark;

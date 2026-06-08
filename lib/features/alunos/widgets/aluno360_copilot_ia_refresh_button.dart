@@ -46,7 +46,8 @@ class Aluno360CopilotIaRefreshButtonState
         true;
     ref.read(alunoCopilotoForceIaProvider(widget.alunoId).notifier).state = true;
     try {
-      await ref.refresh(alunoCopilotoActionProvider(widget.alunoId).future);
+      ref.invalidate(alunoCopilotoActionProvider(widget.alunoId));
+      await ref.read(alunoCopilotoActionProvider(widget.alunoId).future);
       if (mounted) {
         FeedbackHelper.showOperacaoSuccess(
           context,

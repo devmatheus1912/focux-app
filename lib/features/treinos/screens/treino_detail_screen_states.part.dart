@@ -365,7 +365,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: _tipoSerie,
+                  initialValue: _tipoSerie,
                   decoration: _decoration('Tipo de série', primary),
                   items: const [
                     DropdownMenuItem(value: 'NORMAL', child: Text('Normal')),

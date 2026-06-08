@@ -53,13 +53,11 @@ class _TreinoExerciseReorderListState extends State<_TreinoExerciseReorderList> 
     return true;
   }
 
-  Future<void> _onReorder(int oldIndex, int newIndex) async {
-    var targetIndex = newIndex;
-    if (oldIndex < targetIndex) targetIndex -= 1;
+  Future<void> _onReorderItem(int oldIndex, int newIndex) async {
     final snapshot = [..._items];
     setState(() {
       final item = _items.removeAt(oldIndex);
-      _items.insert(targetIndex, item);
+      _items.insert(newIndex, item);
     });
     HapticFeedback.mediumImpact();
     final ids = _items.map((item) => item.id).toList();
@@ -99,7 +97,7 @@ class _TreinoExerciseReorderListState extends State<_TreinoExerciseReorderList> 
   Widget build(BuildContext context) {
     return SliverReorderableList(
       itemCount: _items.length,
-      onReorder: _onReorder,
+      onReorderItem: _onReorderItem,
       proxyDecorator: (child, index, animation) {
         return AnimatedBuilder(
           animation: animation,

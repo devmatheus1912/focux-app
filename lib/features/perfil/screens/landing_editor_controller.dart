@@ -309,7 +309,6 @@ class LandingEditorController {
   }
 
   void reorderSection(int oldIndex, int newIndex, {required VoidCallback onHighlightEnd}) {
-    if (newIndex > oldIndex) newIndex -= 1;
     final item = sectionOrder.removeAt(oldIndex);
     sectionOrder.insert(newIndex, item);
     dirty = true;
@@ -326,7 +325,7 @@ class LandingEditorController {
       return;
     }
     if (index >= sectionOrder.length - 1) return;
-    reorderSection(index, index + 2, onHighlightEnd: onHighlightEnd);
+    reorderSection(index, index + 1, onHighlightEnd: onHighlightEnd);
   }
 
   void addServico() {

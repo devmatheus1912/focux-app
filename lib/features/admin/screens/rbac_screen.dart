@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -182,7 +182,7 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
                     ),
                     const SizedBox(height: TokensStrip.s4),
                     DropdownButtonFormField<String>(
-                      value: recursoSelecionado,
+                      initialValue: recursoSelecionado,
                       decoration: FxInputDeco.build(context, 'Recurso'),
                       items: const [
                         DropdownMenuItem(
@@ -206,7 +206,7 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
                     ),
                     const SizedBox(height: TokensStrip.s4),
                     DropdownButtonFormField<String>(
-                      value: nivelSelecionado,
+                      initialValue: nivelSelecionado,
                       decoration: FxInputDeco.build(context, 'Nível de Acesso'),
                       items: const [
                         DropdownMenuItem(

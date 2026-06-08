@@ -1,12 +1,9 @@
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 
 class CheckinWorkoutHeader extends StatelessWidget {
@@ -27,7 +24,7 @@ class CheckinWorkoutHeader extends StatelessWidget {
   final bool dark;
   final VoidCallback onBack;
 
-  const CheckinWorkoutHeader({
+  const CheckinWorkoutHeader({super.key, 
     required this.treinoNome,
     required this.duration,
     required this.progress,
@@ -201,7 +198,7 @@ class CheckinHeaderMetric extends StatelessWidget {
   final String label;
   final String value;
 
-  const CheckinHeaderMetric({
+  const CheckinHeaderMetric({super.key, 
     required this.label,
     required this.value,
   });
@@ -239,7 +236,7 @@ class CheckinHeaderMetric extends StatelessWidget {
 }
 
 class CheckinLiveBadge extends StatefulWidget {
-  const CheckinLiveBadge();
+  const CheckinLiveBadge({super.key});
 
   @override
   State<CheckinLiveBadge> createState() => _CheckinLiveBadgeState();
@@ -295,7 +292,7 @@ class _CheckinLiveBadgeState extends State<CheckinLiveBadge>
 
 class CheckinPulseDot extends StatefulWidget {
   final Color color;
-  const CheckinPulseDot({required this.color});
+  const CheckinPulseDot({super.key, required this.color});
 
   @override
   State<CheckinPulseDot> createState() => _CheckinPulseDotState();

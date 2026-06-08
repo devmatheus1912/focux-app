@@ -66,6 +66,8 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     }
 
+    if (!mounted) return;
+
     HabitoTemplate? selected;
     final tituloCtrl = TextEditingController();
     final descricaoCtrl = TextEditingController();

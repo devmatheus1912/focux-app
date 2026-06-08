@@ -3,10 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
 
 /// Tab bar for Aluno 360 (Operação · Evolução · Ferramentas).

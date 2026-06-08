@@ -198,7 +198,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                             ),
                             const SizedBox(height: TokensStrip.s4),
                             DropdownButtonFormField<String>(
-                              value: tipoSelecionado,
+                              initialValue: tipoSelecionado,
                               decoration: InputDecoration(
                                 labelText: 'Tipo de post',
                                 border: FxInputDeco.outlineBorder(

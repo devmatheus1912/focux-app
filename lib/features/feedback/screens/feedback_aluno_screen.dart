@@ -228,7 +228,7 @@ class _EnviarFormSheetState extends State<_EnviarFormSheet> {
                 style: TextStyle(color: Theme.of(context).hintColor, fontSize: 13)),
             const SizedBox(height: 20),
             DropdownButtonFormField<int>(
-              value: _exercicioId,
+              initialValue: _exercicioId,
               isExpanded: true,
               decoration: const InputDecoration(labelText: 'Exercício *'),
               items: widget.exercicios

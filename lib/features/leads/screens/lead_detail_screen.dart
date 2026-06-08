@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -244,7 +244,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                       ),
                       const SizedBox(height: TokensStrip.s4),
                       DropdownButtonFormField<String>(
-                        value: tipo,
+                        initialValue: tipo,
                         decoration: InputDecoration(
                           labelText: 'Tipo',
                           border: FxInputDeco.outlineBorder(

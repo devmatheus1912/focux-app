@@ -2,18 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_input_deco.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../health/data/health_repository.dart';
 import '../copilot_insight_text.dart';
-import '../providers/ia_copilot_providers.dart';
 
 class IaCopilotInsightItem extends StatefulWidget {
-  const IaCopilotInsightItem({
+  const IaCopilotInsightItem({super.key, 
     required this.index,
     required this.insight,
     required this.isLast,
@@ -194,7 +190,7 @@ class _IaCopilotInsightItemState extends State<IaCopilotInsightItem> {
 }
 
 class IaCopilotTinyTypeChip extends StatelessWidget {
-  const IaCopilotTinyTypeChip({
+  const IaCopilotTinyTypeChip({super.key, 
     required this.label,
     required this.color,
     required this.background,
@@ -225,7 +221,7 @@ class IaCopilotTinyTypeChip extends StatelessWidget {
 }
 
 class IaCopilotReadinessCard extends StatelessWidget {
-  const IaCopilotReadinessCard({
+  const IaCopilotReadinessCard({super.key, 
     required this.headline,
     required this.modeDisplay,
     required this.icon,
@@ -392,7 +388,7 @@ class IaCopilotReadinessCard extends StatelessWidget {
 }
 
 class IaCopilotInsightsLoading extends StatelessWidget {
-  const IaCopilotInsightsLoading({
+  const IaCopilotInsightsLoading({super.key, 
     required this.ink,
     required this.mute,
     required this.brand,
@@ -474,7 +470,7 @@ class IaCopilotInsightsLoading extends StatelessWidget {
 }
 
 class IaCopilotPill extends StatelessWidget {
-  const IaCopilotPill({
+  const IaCopilotPill({super.key, 
     required this.icon,
     required this.label,
     required this.ink,

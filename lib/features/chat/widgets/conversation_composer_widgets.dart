@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -11,7 +10,7 @@ class ConversationAttachOption extends StatelessWidget {
   final bool isDark;
   final VoidCallback onTap;
 
-  const ConversationAttachOption({
+  const ConversationAttachOption({super.key, 
     required this.icon,
     required this.label,
     required this.isDark,
@@ -45,7 +44,7 @@ class ConversationReplyComposerBar extends StatelessWidget {
   final String preview;
   final VoidCallback onClose;
 
-  const ConversationReplyComposerBar({
+  const ConversationReplyComposerBar({super.key, 
     required this.isDark,
     required this.sender,
     required this.preview,
@@ -113,7 +112,7 @@ class ConversationSearchState extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  const ConversationSearchState({
+  const ConversationSearchState({super.key, 
     required this.icon,
     required this.title,
     required this.subtitle,
@@ -149,7 +148,7 @@ class ConversationRecordingComposerBar extends StatelessWidget {
   final VoidCallback onCancel;
   final VoidCallback onSend;
 
-  const ConversationRecordingComposerBar({
+  const ConversationRecordingComposerBar({super.key, 
     required this.isDark,
     required this.duration,
     required this.onCancel,

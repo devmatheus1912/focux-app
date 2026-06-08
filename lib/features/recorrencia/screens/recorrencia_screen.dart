@@ -61,7 +61,7 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             DropdownButtonFormField<int>(
-              value: alunoId,
+              initialValue: alunoId,
               items: alunos.map((a) => DropdownMenuItem(value: a.id, child: Text(a.nome))).toList(),
               onChanged: (v) => alunoId = v,
               decoration: const InputDecoration(labelText: 'Aluno'),

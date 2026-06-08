@@ -1,6 +1,6 @@
 part of 'migracao_magica_screen.dart';
 
-extension actions on _MigracaoMagicaScreenState {
+extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
   bool get _hasUnsavedWork =>
       _controller.text.trim().isNotEmpty ||
       _importedFileLabel != null ||

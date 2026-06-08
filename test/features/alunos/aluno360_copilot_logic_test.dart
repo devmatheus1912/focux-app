@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_copilot_logic.dart';
-import 'package:focux_app/features/dashboard/data/command_center_data.dart';
 
 Aluno _aluno({
   String? telefone,

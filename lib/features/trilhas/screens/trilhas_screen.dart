@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -226,7 +226,7 @@ class TrilhasScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
-                      value: metaTipo,
+                      initialValue: metaTipo,
                       decoration: FxInputDeco.build(context, 'Tipo de meta'),
                       items: const [
                         DropdownMenuItem(

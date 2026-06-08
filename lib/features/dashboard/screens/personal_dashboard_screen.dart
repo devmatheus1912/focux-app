@@ -652,6 +652,8 @@ class _PersonalDashboardScreenState
                                   child: SizedBox(
                                     height: 184,
                                     child: ListView.separated(
+                                      // ignore: deprecated_member_use
+                                      cacheExtent: 280,
                                       key: const PageStorageKey(
                                         'personal-attention-rail',
                                       ),
@@ -659,7 +661,6 @@ class _PersonalDashboardScreenState
                                         horizontal: TokensStrip.s4,
                                       ),
                                       scrollDirection: Axis.horizontal,
-                                      cacheExtent: 280,
                                       itemCount: attentionItemCount,
                                       separatorBuilder:
                                           (_, __) => const SizedBox(width: 12),

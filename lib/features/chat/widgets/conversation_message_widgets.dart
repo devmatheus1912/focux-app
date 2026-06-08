@@ -1,13 +1,10 @@
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:just_audio/just_audio.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../data/chat_repository.dart';
@@ -20,7 +17,7 @@ class ConversationEmptyState extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  const ConversationEmptyState({
+  const ConversationEmptyState({super.key, 
     required this.isDark,
     required this.accentColor,
     required this.title,
@@ -76,7 +73,7 @@ class ConversationErrorState extends StatelessWidget {
   final Color accentColor;
   final VoidCallback onRetry;
 
-  const ConversationErrorState({
+  const ConversationErrorState({super.key, 
     required this.isDark,
     required this.accentColor,
     required this.onRetry,
@@ -130,7 +127,7 @@ class ConversationErrorState extends StatelessWidget {
 class ConversationDateDivider extends StatelessWidget {
   final DateTime date;
 
-  const ConversationDateDivider({required this.date});
+  const ConversationDateDivider({super.key, required this.date});
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +174,7 @@ class ConversationOlderMessagesLoader extends StatelessWidget {
   final bool loading;
   final VoidCallback onTap;
 
-  const ConversationOlderMessagesLoader({required this.loading, required this.onTap});
+  const ConversationOlderMessagesLoader({super.key, required this.loading, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -224,7 +221,7 @@ class ConversationDeliveryStatus extends StatelessWidget {
   final ChatMsg msg;
   final Color color;
 
-  const ConversationDeliveryStatus({required this.msg, required this.color});
+  const ConversationDeliveryStatus({super.key, required this.msg, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -254,7 +251,7 @@ class ConversationTypingIndicator extends StatefulWidget {
   final bool isDark;
   final Color accentColor;
 
-  const ConversationTypingIndicator({required this.isDark, required this.accentColor});
+  const ConversationTypingIndicator({super.key, required this.isDark, required this.accentColor});
 
   @override
   State<ConversationTypingIndicator> createState() => _ConversationTypingIndicatorState();
@@ -328,7 +325,7 @@ class ConversationSwipeReplyWrapper extends StatefulWidget {
   final Color accentColor;
   final VoidCallback onReply;
 
-  const ConversationSwipeReplyWrapper({
+  const ConversationSwipeReplyWrapper({super.key, 
     required this.child,
     required this.alignRight,
     required this.accentColor,
@@ -405,7 +402,7 @@ class ConversationChatBackdrop extends StatelessWidget {
   final bool isDark;
   final Color accentColor;
 
-  const ConversationChatBackdrop({required this.isDark, required this.accentColor});
+  const ConversationChatBackdrop({super.key, required this.isDark, required this.accentColor});
 
   @override
   Widget build(BuildContext context) {
@@ -494,7 +491,7 @@ class ConversationBubble extends StatelessWidget {
   final VoidCallback? onReplyTap;
   final VoidCallback onOpenMedia;
 
-  const ConversationBubble({
+  const ConversationBubble({super.key, 
     required this.msg,
     required this.mine,
     required this.isDark,
@@ -704,7 +701,7 @@ class ConversationReplySnippet extends StatelessWidget {
   final String preview;
   final VoidCallback? onTap;
 
-  const ConversationReplySnippet({
+  const ConversationReplySnippet({super.key, 
     required this.mine,
     required this.isDark,
     required this.accentColor,

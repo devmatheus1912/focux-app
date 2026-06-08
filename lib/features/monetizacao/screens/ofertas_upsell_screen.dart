@@ -125,7 +125,7 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                  value: _tipoGatilho,
+                  initialValue: _tipoGatilho,
                   decoration: const InputDecoration(labelText: 'Gatilho'),
                   items: const [
                     DropdownMenuItem(value: 'MANUAL', child: Text('Manual')),

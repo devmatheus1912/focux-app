@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../dashboard/data/command_center_data.dart';
 import '../data/aluno_contact_utils.dart';
 import '../data/aluno_repository.dart';
-import '../utils/aluno_display_utils.dart';
 import 'aluno360_copilot_logic.dart';
 import 'aluno_hero_signal.dart';
 

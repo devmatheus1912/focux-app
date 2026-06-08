@@ -33,7 +33,7 @@ class CheckinSerieDetailSheet extends StatefulWidget {
   final int? initialRpe;
   final bool initialDor;
 
-  const CheckinSerieDetailSheet({
+  const CheckinSerieDetailSheet({super.key, 
     required this.title,
     required this.initialCargaKg,
     required this.initialRepeticoes,
@@ -227,7 +227,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                         ),
                         Switch.adaptive(
                           value: _useRpe,
-                          activeColor: brand,
+                          activeTrackColor: brand,
                           onChanged: (value) => setState(() => _useRpe = value),
                         ),
                       ],
@@ -250,7 +250,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
               const SizedBox(height: 10),
               SwitchListTile.adaptive(
                 contentPadding: EdgeInsets.zero,
-                activeColor: EagleTokens.bad,
+                activeTrackColor: EagleTokens.bad,
                 value: _dor,
                 onChanged:
                     (value) => setState(() {
@@ -342,7 +342,7 @@ class CheckinSerieField extends StatelessWidget {
   final Color line;
   final bool dark;
 
-  const CheckinSerieField({
+  const CheckinSerieField({super.key, 
     required this.controller,
     required this.label,
     required this.suffix,
@@ -396,7 +396,7 @@ class CheckinTinyMetric extends StatelessWidget {
   final Color line;
   final bool dark;
 
-  const CheckinTinyMetric({
+  const CheckinTinyMetric({super.key, 
     required this.icon,
     required this.label,
     required this.value,
@@ -444,7 +444,7 @@ class CheckinFeedbackChip extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
 
-  const CheckinFeedbackChip({
+  const CheckinFeedbackChip({super.key, 
     required this.label,
     required this.selected,
     required this.color,

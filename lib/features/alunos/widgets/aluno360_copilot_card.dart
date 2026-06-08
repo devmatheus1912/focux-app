@@ -6,9 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/tokens_strip.dart';
-import '../../../core/utils/fx_utils.dart';
-import '../../dashboard/providers/dashboard_provider.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
@@ -34,7 +31,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
   final bool showFocusToggle;
   final bool focusMode;
 
-  const Aluno360CopilotCard({
+  const Aluno360CopilotCard({super.key, 
     required this.aluno,
     required this.alunoId,
     required this.resumoAsync,
@@ -354,7 +351,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
 }
 
 class Aluno360ContactPriorityBadge extends StatelessWidget {
-  const Aluno360ContactPriorityBadge({required this.primary});
+  const Aluno360ContactPriorityBadge({super.key, required this.primary});
 
   final Color primary;
 

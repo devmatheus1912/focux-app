@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 
+import '../../../core/utils/a11y_announce.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
@@ -157,11 +157,7 @@ class _AdherenceDayBar extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(8),
-            onTap:
-                () => SemanticsService.announce(
-                  tooltip,
-                  Directionality.of(context),
-                ),
+            onTap: () => fxAnnounce(context, tooltip),
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 48, minWidth: 28),
               child: Column(

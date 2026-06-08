@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
 
-import '../../support/screen_source_bundle.dart';
 
 String _routerSources() {
   final routes = readRouterSourceBundle();

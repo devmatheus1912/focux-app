@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../health/data/health_repository.dart';
-import 'ia_copilot_insight_widgets.dart';
 
 class IaCopilotResultActionBar extends StatelessWidget {
-  const IaCopilotResultActionBar({
+  const IaCopilotResultActionBar({super.key, 
     required this.brand,
     required this.ink,
     required this.onCreateTask,
@@ -72,7 +68,7 @@ class IaCopilotResultActionBar extends StatelessWidget {
 }
 
 class IaCopilotHeaderStatus extends StatelessWidget {
-  const IaCopilotHeaderStatus({
+  const IaCopilotHeaderStatus({super.key, 
     required this.dark,
     required this.brand,
     required this.line,
@@ -113,7 +109,7 @@ class IaCopilotHeaderStatus extends StatelessWidget {
 }
 
 class IaCopilotStudentSelector extends StatelessWidget {
-  const IaCopilotStudentSelector({
+  const IaCopilotStudentSelector({super.key, 
     required this.alunoNome,
     required this.brand,
     required this.ink,
@@ -195,7 +191,7 @@ class IaCopilotStudentSelector extends StatelessWidget {
 }
 
 class IaCopilotModeSelector extends StatelessWidget {
-  const IaCopilotModeSelector({
+  const IaCopilotModeSelector({super.key, 
     required this.modes,
     required this.selectedIndex,
     required this.brand,
@@ -271,7 +267,7 @@ class IaCopilotModeSelector extends StatelessWidget {
 }
 
 class IaCopilotSafetyNote extends StatelessWidget {
-  const IaCopilotSafetyNote({
+  const IaCopilotSafetyNote({super.key, 
     required this.ink,
     required this.mute,
     required this.brand,
@@ -317,7 +313,7 @@ class IaCopilotSafetyNote extends StatelessWidget {
 }
 
 class IaCopilotMetaChip extends StatelessWidget {
-  const IaCopilotMetaChip({
+  const IaCopilotMetaChip({super.key, 
     required this.label,
     required this.icon,
     required this.brand,
@@ -360,7 +356,7 @@ class IaCopilotMetaChip extends StatelessWidget {
 }
 
 class IaCopilotMenuAction extends StatelessWidget {
-  const IaCopilotMenuAction({
+  const IaCopilotMenuAction({super.key, 
     required this.icon,
     required this.title,
     required this.subtitle,
@@ -435,7 +431,7 @@ class IaCopilotMenuAction extends StatelessWidget {
 }
 
 class IaCopilotPrimaryAction extends StatelessWidget {
-  const IaCopilotPrimaryAction({
+  const IaCopilotPrimaryAction({super.key, 
     required this.label,
     required this.icon,
     required this.brand,
@@ -492,7 +488,7 @@ class IaCopilotPrimaryAction extends StatelessWidget {
 }
 
 class IaCopilotGenerationStatus extends StatelessWidget {
-  const IaCopilotGenerationStatus({
+  const IaCopilotGenerationStatus({super.key, 
     required this.gerando,
     required this.gerado,
     required this.elapsedMs,
@@ -611,7 +607,7 @@ class IaCopilotGenerationStatus extends StatelessWidget {
 }
 
 class IaCopilotPreviewCard extends StatelessWidget {
-  const IaCopilotPreviewCard({
+  const IaCopilotPreviewCard({super.key, 
     required this.howItWorks,
     required this.brand,
     required this.ink,

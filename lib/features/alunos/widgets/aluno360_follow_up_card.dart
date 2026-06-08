@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -17,7 +15,7 @@ import '../utils/aluno360_operacao_logic.dart';
 import 'aluno360_section_header.dart';
 
 class Aluno360FollowUpCard extends ConsumerStatefulWidget {
-  const Aluno360FollowUpCard({
+  const Aluno360FollowUpCard({super.key, 
     required this.aluno,
     required this.isDark,
     this.compactContactPriority = false,

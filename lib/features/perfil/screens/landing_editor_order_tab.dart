@@ -35,7 +35,7 @@ class LandingEditorOrderTab extends StatelessWidget {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: c.sectionOrder.length,
-          onReorder: onReorder,
+          onReorderItem: onReorder,
           buildDefaultDragHandles: false,
           proxyDecorator: (child, index, animation) {
             return AnimatedBuilder(

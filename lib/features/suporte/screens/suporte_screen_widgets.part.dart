@@ -488,7 +488,7 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _severidade,
+              initialValue: _severidade,
               decoration: InputDecoration(
                 labelText: 'Severidade *',
                 border: FxInputDeco.outlineBorder(

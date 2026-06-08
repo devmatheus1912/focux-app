@@ -4,9 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/shell_chrome.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
@@ -15,7 +13,7 @@ import '../utils/aluno360_operacao_logic.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
 
 class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
-  const Aluno360OperacaoStickyCtaBar({
+  const Aluno360OperacaoStickyCtaBar({super.key, 
     required this.aluno,
     required this.alunoId,
     required this.proximaAcao360,
@@ -196,7 +194,7 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
 }
 
 class Aluno360OperacaoStickySecondaryButton extends StatelessWidget {
-  const Aluno360OperacaoStickySecondaryButton({
+  const Aluno360OperacaoStickySecondaryButton({super.key, 
     required this.label,
     required this.icon,
     required this.primary,

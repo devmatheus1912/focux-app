@@ -73,6 +73,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     return FeatureGate(
       featureName: 'Migração Focux',

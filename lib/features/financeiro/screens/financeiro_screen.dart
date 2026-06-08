@@ -474,7 +474,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                         ),
                         const SizedBox(height: 12),
                         DropdownButtonFormField<String>(
-                          value: selectedStatus,
+                          initialValue: selectedStatus,
                           decoration: _fxDeco('Status', icon: Icons.flag),
                           items:
                               statuses
@@ -579,7 +579,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       DropdownButtonFormField<String>(
-                        value: tipoSelecionado,
+                        initialValue: tipoSelecionado,
                         decoration: InputDecoration(
                           labelText: 'Tipo',
                           border: FxInputDeco.outlineBorder(
@@ -786,7 +786,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                                   ),
                               data:
                                   (alunos) => DropdownButtonFormField<int>(
-                                    value: alunoSelecionadoId,
+                                    initialValue: alunoSelecionadoId,
                                     decoration: _fxDeco(
                                       'Aluno',
                                       icon: Icons.person,

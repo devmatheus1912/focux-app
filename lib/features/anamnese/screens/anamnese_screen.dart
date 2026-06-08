@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
@@ -275,7 +275,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
         _field(_objetivoCtrl, 'Objetivo', maxLines: 2),
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
-          value: _nivelAtividade,
+          initialValue: _nivelAtividade,
           decoration: const InputDecoration(
             labelText: 'Nível de atividade física',
           ),
