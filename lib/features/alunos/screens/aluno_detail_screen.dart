@@ -246,9 +246,10 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                     top: Aluno360Layout.tabContentGap,
                     left: Aluno360Layout.screenPadding,
                     right: Aluno360Layout.screenPadding,
-                    bottom: showOperacaoSticky
-                        ? Aluno360Layout.operacaoScrollBottomReserve(context)
-                        : 24,
+                    bottom:
+                        showOperacaoSticky
+                            ? Aluno360Layout.operacaoScrollBottomReserve(context)
+                            : MediaQuery.paddingOf(context).bottom + 8,
                   ),
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 150),

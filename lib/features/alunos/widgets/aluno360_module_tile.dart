@@ -161,7 +161,7 @@ class Aluno360ModuleTile extends StatelessWidget {
     required this.onTap,
     this.badge,
     this.highlight = false,
-    this.trailing,
+    this.topTrailing,
   });
 
   final IconData icon;
@@ -171,7 +171,8 @@ class Aluno360ModuleTile extends StatelessWidget {
   final bool isDark;
   final bool highlight;
   final VoidCallback onTap;
-  final Widget? trailing;
+  /// Compact viz pinned top-right (e.g. aderência sparkline).
+  final Widget? topTrailing;
 
   Widget _badgeChip(BuildContext context, Color primary, Color badgeInk) {
     return Container(
@@ -214,7 +215,12 @@ class Aluno360ModuleTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: Container(
           width: double.infinity,
-          padding: EdgeInsets.fromLTRB(10, 8, badge != null ? 8 : 10, 8),
+          padding: EdgeInsets.fromLTRB(
+            10,
+            8,
+            badge != null || topTrailing != null ? 8 : 10,
+            8,
+          ),
           decoration:
               highlight
                   ? fxListCardDecoration(
@@ -243,7 +249,9 @@ class Aluno360ModuleTile extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Padding(
-                      padding: EdgeInsets.only(right: badge != null ? 30 : 0),
+                      padding: EdgeInsets.only(
+                        right: badge != null || topTrailing != null ? 34 : 0,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
@@ -261,23 +269,13 @@ class Aluno360ModuleTile extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 2),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  sub,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Aluno360Layout.cardSubtitleStyle(
-                                    context,
-                                  ).copyWith(fontSize: 11, color: subColor),
-                                ),
-                              ),
-                              if (trailing != null) ...[
-                                const SizedBox(width: 4),
-                                trailing!,
-                              ],
-                            ],
+                          Text(
+                            sub,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Aluno360Layout.cardSubtitleStyle(
+                              context,
+                            ).copyWith(fontSize: 11, color: subColor),
                           ),
                         ],
                       ),
@@ -290,6 +288,12 @@ class Aluno360ModuleTile extends StatelessWidget {
                   top: 0,
                   right: 0,
                   child: _badgeChip(context, primary, badgeInk),
+                )
+              else if (topTrailing != null)
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: topTrailing!,
                 ),
             ],
           ),

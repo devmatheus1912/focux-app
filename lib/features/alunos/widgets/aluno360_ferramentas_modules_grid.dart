@@ -127,7 +127,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
           aderenciaSemanal: aderenciaSemanal,
         ),
         isDark: isDark,
-        trailing: Aluno360FerramentasMiniSparkline(
+        topTrailing: Aluno360FerramentasMiniSparkline(
           data: aderenciaSpark,
           color: aderenciaColor,
           semanticsLabel: Aluno360FerramentasLogic.aderenciaSparkSemanticsLabel(

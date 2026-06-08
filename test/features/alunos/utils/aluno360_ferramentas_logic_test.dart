@@ -11,7 +11,7 @@ void main() {
 
     test('spacing tokens keep sections visually grouped', () {
       expect(Aluno360FerramentasLogic.sectionHeaderGap, lessThan(12));
-      expect(Aluno360FerramentasLogic.sectionDividerGap, lessThan(20));
+      expect(Aluno360FerramentasLogic.sectionDividerGap, lessThan(16));
     });
 
     test('aderenciaSparklineValues maps weekly checkins', () {
