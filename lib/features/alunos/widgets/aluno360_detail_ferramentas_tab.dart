@@ -7,8 +7,8 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
-import '../utils/aluno360_ferramentas_logic.dart';
 import '../utils/altura_display.dart';
+import 'aluno360_ferramentas_measurements_row.dart';
 import 'aluno360_ferramentas_modules_grid.dart';
 import 'aluno360_ferramentas_tab.dart';
 import 'aluno360_module_tile.dart';
@@ -79,76 +79,55 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
               ),
             ),
         data:
-            (_) => LayoutBuilder(
-              builder: (context, constraints) {
-                final crossAxisCount = Aluno360FerramentasLogic.measurementCrossAxisCount(
-                  constraints.maxWidth,
-                );
-                final textScale = MediaQuery.textScalerOf(context).scale(1);
-                final needsRegistrarHint = bf == null || massaMagra == null;
-                final childAspectRatio =
-                    Aluno360FerramentasLogic.measurementGridChildAspectRatio(
-                      crossAxisCount: crossAxisCount,
-                      needsRegistrarHint: needsRegistrarHint,
-                      textScale: textScale,
-                    );
-                return Semantics(
-                  container: true,
-                  label: 'Medidas corporais resumidas do aluno',
-                  child: GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: crossAxisCount,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
-                    childAspectRatio: childAspectRatio,
-                    children: [
-                      Aluno360MeasurementCard(
-                        label: 'Idade',
-                        value: (aluno.idade ?? '—').toString(),
-                        unit: 'anos',
-                        isDark: isDark,
-                      ),
-                      Aluno360MeasurementCard(
-                        label: 'Altura',
-                        value: altura.value,
-                        unit: altura.unit,
-                        isDark: isDark,
-                      ),
-                      Aluno360MeasurementCard(
-                        label: 'Gordura',
-                        value: bf ?? '—',
-                        unit: '%',
-                        isDark: isDark,
-                        semanticsLabel:
-                            bf == null
-                                ? 'Percentual de gordura não registrado'
-                                : 'Percentual de gordura $bf por cento',
-                        emptyHint: bf == null ? 'Registrar' : null,
-                        onTap:
-                            bf == null
-                                ? () => context.push(evolucaoRoute, extra: aluno.nome)
-                                : null,
-                      ),
-                      Aluno360MeasurementCard(
-                        label: 'Massa magra',
-                        value: massaMagra ?? '—',
-                        unit: 'kg',
-                        isDark: isDark,
-                        semanticsLabel:
-                            massaMagra == null
-                                ? 'Massa magra não registrada'
-                                : 'Massa magra $massaMagra quilogramas',
-                        emptyHint: massaMagra == null ? 'Registrar' : null,
-                        onTap:
-                            massaMagra == null
-                                ? () => context.push(evolucaoRoute, extra: aluno.nome)
-                                : null,
-                      ),
-                    ],
+            (_) => Semantics(
+              container: true,
+              label: 'Medidas corporais resumidas do aluno',
+              child: Aluno360FerramentasMeasurementsRow(
+                cards: [
+                  Aluno360MeasurementCard(
+                    label: 'Idade',
+                    value: (aluno.idade ?? '—').toString(),
+                    unit: 'anos',
+                    isDark: isDark,
                   ),
-                );
-              },
+                  Aluno360MeasurementCard(
+                    label: 'Altura',
+                    value: altura.value,
+                    unit: altura.unit,
+                    isDark: isDark,
+                  ),
+                  Aluno360MeasurementCard(
+                    label: 'Gordura',
+                    value: bf ?? '—',
+                    unit: '%',
+                    isDark: isDark,
+                    semanticsLabel:
+                        bf == null
+                            ? 'Percentual de gordura não registrado'
+                            : 'Percentual de gordura $bf por cento',
+                    emptyHint: bf == null ? 'Registrar' : null,
+                    onTap:
+                        bf == null
+                            ? () => context.push(evolucaoRoute, extra: aluno.nome)
+                            : null,
+                  ),
+                  Aluno360MeasurementCard(
+                    label: 'Massa magra',
+                    value: massaMagra ?? '—',
+                    unit: 'kg',
+                    isDark: isDark,
+                    semanticsLabel:
+                        massaMagra == null
+                            ? 'Massa magra não registrada'
+                            : 'Massa magra $massaMagra quilogramas',
+                    emptyHint: massaMagra == null ? 'Registrar' : null,
+                    onTap:
+                        massaMagra == null
+                            ? () => context.push(evolucaoRoute, extra: aluno.nome)
+                            : null,
+                  ),
+                ],
+              ),
             ),
       ),
       modulesSection: Aluno360FerramentasModulesGrid(

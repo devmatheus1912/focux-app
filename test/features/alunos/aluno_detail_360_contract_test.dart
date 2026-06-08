@@ -275,6 +275,12 @@ void main() {
       contains('class Aluno360FerramentasLogic'),
     );
     expect(
+      File(
+        'lib/features/alunos/widgets/aluno360_ferramentas_measurements_row.dart',
+      ).readAsStringSync(),
+      contains('class Aluno360FerramentasMeasurementsRow'),
+    );
+    expect(
       File('lib/features/alunos/widgets/aluno360_module_tile.dart')
           .readAsStringSync(),
       contains('class Aluno360ModuleTile'),

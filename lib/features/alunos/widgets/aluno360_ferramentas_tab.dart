@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../constants/aluno_360_layout.dart';
+import '../utils/aluno360_ferramentas_logic.dart';
 import 'aluno360_operacao_tab.dart';
 
 /// Ferramentas tab layout: measurements grid + modules grid.
@@ -56,7 +57,7 @@ class Aluno360FerramentasTab extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _sectionHeader('Medidas'),
-          const SizedBox(height: Aluno360Layout.sectionGap),
+          const SizedBox(height: Aluno360FerramentasLogic.sectionHeaderGap),
           measurementsSection,
         ],
       ),
@@ -67,7 +68,7 @@ class Aluno360FerramentasTab extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _sectionHeader('Módulos'),
-          const SizedBox(height: Aluno360Layout.sectionGap),
+          const SizedBox(height: Aluno360FerramentasLogic.sectionHeaderGap),
           modulesSection,
         ],
       ),
@@ -81,7 +82,7 @@ class Aluno360FerramentasTab extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             measurements,
-            const SizedBox(height: 20),
+            const SizedBox(height: Aluno360FerramentasLogic.sectionDividerGap),
             modules,
           ],
         ),

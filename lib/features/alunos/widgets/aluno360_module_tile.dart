@@ -32,13 +32,12 @@ class Aluno360MeasurementCard extends StatelessWidget {
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final verticalPad = emptyHint != null ? 10.0 : 12.0;
-
     final child = Container(
-      padding: EdgeInsets.symmetric(vertical: verticalPad, horizontal: 8),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       decoration: fxListCardDecoration(context),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           FittedBox(
@@ -88,16 +87,22 @@ class Aluno360MeasurementCard extends StatelessWidget {
               ),
             ],
           ),
-          if (emptyHint != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              emptyHint!,
-              style: Aluno360Layout.chipLabelStyle(
-                context,
-                color: primary,
-              ).copyWith(fontSize: 10),
+          const SizedBox(height: 4),
+          SizedBox(
+            height: 14,
+            child: Center(
+              child:
+                  emptyHint == null
+                      ? const SizedBox.shrink()
+                      : Text(
+                        emptyHint!,
+                        style: Aluno360Layout.chipLabelStyle(
+                          context,
+                          color: primary,
+                        ).copyWith(fontSize: 10),
+                      ),
             ),
-          ],
+          ),
         ],
       ),
     );

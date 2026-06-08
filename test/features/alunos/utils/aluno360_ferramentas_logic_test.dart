@@ -9,18 +9,9 @@ void main() {
       expect(Aluno360FerramentasLogic.measurementCrossAxisCount(360), 4);
     });
 
-    test('measurementGridChildAspectRatio lowers ratio when registrar hints', () {
-      final filled = Aluno360FerramentasLogic.measurementGridChildAspectRatio(
-        crossAxisCount: 4,
-        needsRegistrarHint: false,
-        textScale: 1,
-      );
-      final empty = Aluno360FerramentasLogic.measurementGridChildAspectRatio(
-        crossAxisCount: 4,
-        needsRegistrarHint: true,
-        textScale: 1,
-      );
-      expect(empty, lessThan(filled));
+    test('spacing tokens keep sections visually grouped', () {
+      expect(Aluno360FerramentasLogic.sectionHeaderGap, lessThan(12));
+      expect(Aluno360FerramentasLogic.sectionDividerGap, lessThan(20));
     });
 
     test('aderenciaSparklineValues maps weekly checkins', () {

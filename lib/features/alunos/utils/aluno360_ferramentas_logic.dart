@@ -6,21 +6,12 @@ abstract final class Aluno360FerramentasLogic {
   Aluno360FerramentasLogic._();
 
   static const double narrowBreakpoint = 360;
+  static const double sectionHeaderGap = 8;
+  static const double sectionDividerGap = 14;
+  static const double measurementRowGap = 8;
 
   static int measurementCrossAxisCount(double maxWidth) =>
       maxWidth < narrowBreakpoint ? 2 : 4;
-
-  static double measurementGridChildAspectRatio({
-    required int crossAxisCount,
-    required bool needsRegistrarHint,
-    required double textScale,
-  }) {
-    final aspectBase =
-        crossAxisCount == 2
-            ? (needsRegistrarHint ? 1.18 : 1.45)
-            : (needsRegistrarHint ? 0.82 : 1.1);
-    return aspectBase / textScale.clamp(1.0, 2.2);
-  }
 
   static double modulesGridChildAspectRatio({
     required bool hasBadgeTile,
