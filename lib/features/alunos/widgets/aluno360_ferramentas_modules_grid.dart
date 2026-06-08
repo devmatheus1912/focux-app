@@ -100,7 +100,6 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
         label: 'IA Progresso',
         sub: 'Sugerir carga',
         badge: 'IA',
-        highlight: true,
         isDark: isDark,
         onTap:
             () => context.push(
