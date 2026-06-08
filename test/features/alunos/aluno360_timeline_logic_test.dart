@@ -50,7 +50,25 @@ void main() {
         sanitizeTimeline360Copy(
           '! Passei pelo seu acompanhamento agora e o próximo passo para seu objetivo é: reforçar check-in.',
         ),
-        'Próximo passo do plano: reforçar check-in.',
+        'Vale reforçar o check-in com o aluno esta semana.',
+      );
+    });
+
+    test('collapses copilot without colon action segment', () {
+      expect(
+        sanitizeTimeline360Copy(
+          '! Passei pelo seu acompanhamento agora.',
+        ),
+        'Acompanhamento registrado — revise o próximo passo no chat.',
+      );
+    });
+
+    test('collapses copilot after chat formatters', () {
+      expect(
+        sanitizeTimeline360Copy(
+          '**! Passei pelo seu acompanhamento agora** e o proximo passo para seu objetivo é: reforçar check-in.',
+        ),
+        'Vale reforçar o check-in com o aluno esta semana.',
       );
     });
 
@@ -116,6 +134,7 @@ void main() {
         'Passei pelo seu acompanhamento agora e o próximo passo para seu objetivo é: reforçar check-in.',
       );
       expect(a, b);
+      expect(a, 'chat:copilot_acompanhamento');
     });
 
     test('buckets recovery variants', () {
@@ -262,6 +281,17 @@ void main() {
   });
 
   group('timeline360ShouldShowMetaChip', () {
+    test('hides radar mapa corporal meta when P0 badge is shown', () {
+      expect(
+        timeline360ShouldShowMetaChip(
+          kind: 'Radar',
+          meta: 'Completar mapa corporal',
+          priority: 'P0',
+          title: 'Radar Focux · 19 pts',
+        ),
+        isFalse,
+      );
+    });
     test('hides PERSONAL remetente duplicate', () {
       expect(
         timeline360ShouldShowMetaChip(
@@ -274,13 +304,13 @@ void main() {
       );
     });
 
-    test('shows proxima acao meta for radar', () {
+    test('shows non-mapa radar meta', () {
       expect(
         timeline360ShouldShowMetaChip(
           kind: 'Radar',
-          meta: 'Completar mapa corporal',
-          priority: 'P0',
-          title: 'Radar Focux · 19 pts',
+          meta: 'Revisar aderência semanal',
+          priority: 'P1',
+          title: 'Radar Focux · 12 pts',
         ),
         isTrue,
       );

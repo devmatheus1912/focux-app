@@ -14,6 +14,7 @@ String sanitizeTimeline360Copy(String? raw) {
 
   text = text.replaceAll(RegExp(r'\bacao\b', caseSensitive: false), 'ação');
   text = text.replaceAll(RegExp(r'\bevolucao\b', caseSensitive: false), 'evolução');
+  text = text.replaceAll(RegExp(r'\bproximo\b', caseSensitive: false), 'próximo');
   text = text.replaceAll(RegExp(r'\besta\b', caseSensitive: false), 'está');
 
   const englishToPt = {
@@ -87,15 +88,21 @@ String sanitizeTimeline360Copy(String? raw) {
 
   text = formatChatTextForDisplay(text);
   text = cleanCopilotText(text);
+  text = timeline360CollapseCopilotTemplate(text);
   return timeline360FinalizeCopy(text);
 }
 
 String timeline360RewriteCopilotExtractedAction(String action) {
-  final trimmed = action.trim();
+  var trimmed = action.trim();
   if (trimmed.isEmpty) return trimmed;
+  trimmed = trimmed.replaceAll(RegExp(r'[.!?]+$'), '').trim();
 
-  if (trimmed.toLowerCase().contains('sumiu do radar')) {
+  final lower = trimmed.toLowerCase();
+  if (lower.contains('sumiu do radar')) {
     return trimmed;
+  }
+  if (lower.contains('reforçar check-in') || lower.contains('reforcar check-in')) {
+    return 'Vale reforçar o check-in com o aluno esta semana.';
   }
 
   final contate = RegExp(
@@ -113,7 +120,7 @@ String timeline360CollapseCopilotTemplate(String text) {
   if (out.isEmpty) return out;
 
   final copilotMatch = RegExp(
-    r'^!?passei pelo seu acompanhamento[^.]*próximo passo[^:]*:\s*(.+)$',
+    r'!?passei pelo seu acompanhamento.{0,160}?pr[oó]ximo passo.{0,48}?:\s*(.+)$',
     caseSensitive: false,
     dotAll: true,
   ).firstMatch(out);
@@ -122,7 +129,7 @@ String timeline360CollapseCopilotTemplate(String text) {
   }
 
   if (RegExp(
-    r'^!?passei pelo seu acompanhamento',
+    r'passei pelo seu acompanhamento',
     caseSensitive: false,
   ).hasMatch(out)) {
     return 'Acompanhamento registrado — revise o próximo passo no chat.';
@@ -184,7 +191,9 @@ String timeline360ChatBodyFingerprint(String body) {
       text.contains('se afastou')) {
     return 'chat:recovery';
   }
-  if (text.contains('acompanhamento registrado')) {
+  if (text.contains('acompanhamento registrado') ||
+      text.contains('passei pelo seu acompanhamento') ||
+      text.contains('vale reforçar o check-in')) {
     return 'chat:copilot_acompanhamento';
   }
   return text.replaceAll(RegExp(r'[^a-z0-9áàâãéêíóôõúç\s]'), '').trim();
@@ -303,6 +312,9 @@ bool timeline360ShouldShowMetaChip({
   required String title,
 }) {
   if (kind == 'Chat') return false;
+  if (kind == 'Radar' && meta.toLowerCase().contains('mapa corporal')) {
+    return false;
+  }
   final trimmed = meta.trim();
   if (trimmed.isEmpty) return false;
   if (trimmed == priority.trim()) return false;

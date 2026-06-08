@@ -180,7 +180,7 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                         ),
                     ],
                   ),
-                  if (hasRadarP0) ...[
+                  if (hasRadarP0 && !timelineHasSignals) ...[
                     const SizedBox(height: 10),
                     SizedBox(
                       width: double.infinity,

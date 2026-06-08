@@ -76,6 +76,10 @@ void main() {
       find.textContaining('linha do tempo abaixo'),
       findsOneWidget,
     );
-    expect(find.text('Radar pede mapa corporal (P0)'), findsOneWidget);
+    expect(find.text('Radar pede mapa corporal (P0)'), findsNothing);
+    expect(
+      find.textContaining('O radar também pede mapa corporal (P0)'),
+      findsOneWidget,
+    );
   });
 }
