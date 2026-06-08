@@ -49,6 +49,9 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
             ? medidas!.massaMuscular!.toStringAsFixed(1)
             : null;
     final evolucaoRoute = '/alunos/$alunoId/evolucao';
+    final editarRoute = '/alunos/$alunoId/editar';
+    final idadeMissing = aluno.idade == null;
+    final alturaMissing = aluno.altura == null;
 
     return Aluno360FerramentasTab(
       primary: primary,
@@ -89,12 +92,26 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
                     value: (aluno.idade ?? '—').toString(),
                     unit: 'anos',
                     isDark: isDark,
+                    semanticsLabel:
+                        idadeMissing ? 'Idade não informada no perfil' : null,
+                    emptyHint: idadeMissing ? 'Completar' : null,
+                    onTap:
+                        idadeMissing
+                            ? () => context.push(editarRoute, extra: aluno)
+                            : null,
                   ),
                   Aluno360MeasurementCard(
                     label: 'Altura',
                     value: altura.value,
                     unit: altura.unit,
                     isDark: isDark,
+                    semanticsLabel:
+                        alturaMissing ? 'Altura não informada no perfil' : null,
+                    emptyHint: alturaMissing ? 'Completar' : null,
+                    onTap:
+                        alturaMissing
+                            ? () => context.push(editarRoute, extra: aluno)
+                            : null,
                   ),
                   Aluno360MeasurementCard(
                     label: 'Gordura',

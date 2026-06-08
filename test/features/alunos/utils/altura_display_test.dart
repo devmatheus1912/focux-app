@@ -17,7 +17,7 @@ void main() {
   group('formatAlturaDisplay', () {
     test('retorna placeholder quando nulo', () {
       final display = formatAlturaDisplay(null);
-      expect(display.value, '--');
+      expect(display.value, '—');
       expect(display.unit, 'm');
     });
 

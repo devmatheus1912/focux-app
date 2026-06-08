@@ -8,7 +8,7 @@ abstract final class Aluno360FerramentasLogic {
   static const double narrowBreakpoint = 360;
   static const double sectionHeaderGap = 8;
   static const double sectionDividerGap = 14;
-  static const double measurementRowGap = 8;
+  static const double measurementRowGap = 10;
 
   static int measurementCrossAxisCount(double maxWidth) =>
       maxWidth < narrowBreakpoint ? 2 : 4;

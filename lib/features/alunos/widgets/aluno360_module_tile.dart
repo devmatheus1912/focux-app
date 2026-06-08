@@ -46,11 +46,10 @@ class Aluno360MeasurementCard extends StatelessWidget {
               label.toUpperCase(),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: Aluno360Layout.captionStyle(context).copyWith(
+              style: Aluno360Layout.metaStyle(context).copyWith(
                 fontSize: 10,
-                fontWeight: FontWeight.w600,
                 letterSpacing: 0.6,
-                color: mute,
+                color: mute.withValues(alpha: isDark ? 0.92 : 0.88),
               ),
               textAlign: TextAlign.center,
             ),
@@ -89,7 +88,7 @@ class Aluno360MeasurementCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           SizedBox(
-            height: 14,
+            height: 16,
             child: Center(
               child:
                   emptyHint == null
@@ -99,7 +98,7 @@ class Aluno360MeasurementCard extends StatelessWidget {
                         style: Aluno360Layout.chipLabelStyle(
                           context,
                           color: primary,
-                        ).copyWith(fontSize: 10),
+                        ).copyWith(fontSize: 10, height: 1),
                       ),
             ),
           ),

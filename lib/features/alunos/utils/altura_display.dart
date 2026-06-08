@@ -14,7 +14,7 @@ class AlturaDisplay {
 /// Formata altura para exibição na ficha do aluno.
 AlturaDisplay formatAlturaDisplay(double? raw) {
   if (raw == null) {
-    return const AlturaDisplay(value: '--', unit: 'm');
+    return const AlturaDisplay(value: '—', unit: 'm');
   }
   final meters = normalizeAlturaMeters(raw);
   return AlturaDisplay(value: meters.toStringAsFixed(2), unit: 'm');
