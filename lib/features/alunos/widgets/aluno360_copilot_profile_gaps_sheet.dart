@@ -4,6 +4,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_copilot_logic.dart';
 
@@ -67,10 +68,9 @@ Future<void> showAluno360CopilotProfileGapsSheet(
                           children: [
                             Text(
                               'Completar perfil',
-                              style: TextStyle(
-                                color: ink,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w900,
+                              style: Aluno360Layout.sectionTitleStyle(
+                                context,
+                                ink,
                               ),
                             ),
                             const SizedBox(height: 3),
@@ -78,7 +78,8 @@ Future<void> showAluno360CopilotProfileGapsSheet(
                               gaps.isEmpty
                                   ? 'Perfil pronto para decisões da IA.'
                                   : '${gaps.length} lacuna(s) afetam a prescrição.',
-                              style: TextStyle(color: mute, fontSize: 12.5),
+                              style: Aluno360Layout.captionStyle(context)
+                                  .copyWith(color: mute),
                             ),
                           ],
                         ),
@@ -97,7 +98,10 @@ Future<void> showAluno360CopilotProfileGapsSheet(
                           color: EagleTokens.good.withValues(alpha: 0.18),
                         ),
                       ),
-                      child: const Text('Nada pendente no perfil agora.'),
+                      child: Text(
+                        'Nada pendente no perfil agora.',
+                        style: Aluno360Layout.captionStyle(sheetContext),
+                      ),
                     )
                   else
                     ...gaps.map(
@@ -135,17 +139,18 @@ Future<void> showAluno360CopilotProfileGapsSheet(
                                     children: [
                                       Text(
                                         gap.title,
-                                        style: TextStyle(
-                                          color: ink,
-                                          fontWeight: FontWeight.w800,
+                                        style: Aluno360Layout.panelTitleStyle(
+                                          context,
+                                          ink,
                                         ),
                                       ),
                                       const SizedBox(height: 3),
                                       Text(
                                         gap.detail,
-                                        style: TextStyle(
+                                        style: Aluno360Layout.captionStyle(
+                                          context,
+                                        ).copyWith(
                                           color: mute,
-                                          fontSize: 12,
                                           height: 1.25,
                                         ),
                                       ),
@@ -164,7 +169,8 @@ Future<void> showAluno360CopilotProfileGapsSheet(
                       padding: const EdgeInsets.only(top: 2),
                       child: Text(
                         'Para ajustes gerais, use Editar nas ações rápidas.',
-                        style: TextStyle(color: mute, fontSize: 12),
+                        style: Aluno360Layout.captionStyle(sheetContext)
+                            .copyWith(color: mute),
                       ),
                     ),
                 ],

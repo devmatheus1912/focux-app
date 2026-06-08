@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -233,11 +232,7 @@ class Aluno360OperacaoStickySecondaryButton extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppTypography.inter(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w800,
-                  color: primary,
-                ),
+                style: Aluno360Layout.ctaLabelStyle(context, primary),
               ),
             ),
           ],

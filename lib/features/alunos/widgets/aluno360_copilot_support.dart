@@ -5,8 +5,11 @@ import 'package:go_router/go_router.dart';
 import '../constants/aluno_360_layout.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../dashboard/data/command_center_data.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../utils/aluno360_copilot_logic.dart';
@@ -177,7 +180,36 @@ class Aluno360CopilotActionRow extends ConsumerStatefulWidget {
 class _Aluno360CopilotActionRowState
     extends ConsumerState<Aluno360CopilotActionRow> {
   bool _creating = false;
+  bool _completing = false;
   bool _created = false;
+
+  Future<void> _completeOpenTask() async {
+    final task = widget.existingTask;
+    if (task == null || _completing) return;
+    setState(() => _completing = true);
+    try {
+      await ref
+          .read(dashboardRepositoryProvider)
+          .completeCommandAction(task.actionKey);
+      ref.invalidate(alunoOpenIaActionsProvider(widget.aluno.id));
+      ref.invalidate(commandCenterProvider);
+      if (!mounted) return;
+      FeedbackHelper.showSnackBar(
+        context,
+        const SnackBar(content: Text('Tarefa concluída.')),
+        placement: FeedbackPlacement.operacaoTop,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showSnackBar(
+        context,
+        SnackBar(content: Text(friendlyError(e))),
+        placement: FeedbackPlacement.operacaoTop,
+      );
+    } finally {
+      if (mounted) setState(() => _completing = false);
+    }
+  }
 
   Future<void> _handlePrimary() async {
     if (widget.existingTask != null || widget.openTaskHint || _created) {
@@ -212,29 +244,65 @@ class _Aluno360CopilotActionRowState
             flex: widget.hideChatCta ? 1 : 3,
             child:
                 hasTask
-                    ? Semantics(
-                      button: true,
-                      label: 'Abrir Command Center',
-                      child: Tooltip(
-                        message: 'Abrir no Command Center',
-                        child: TextButton.icon(
-                          onPressed: _handlePrimary,
-                          icon: Icon(
-                            Icons.open_in_new_rounded,
-                            size: 16,
-                            color: widget.primary,
+                    ? Row(
+                      children: [
+                        if (widget.existingTask != null) ...[
+                          Expanded(
+                            child: Semantics(
+                              button: true,
+                              label: 'Concluir tarefa do copiloto',
+                              child: OutlinedButton(
+                                onPressed:
+                                    _completing ? null : _completeOpenTask,
+                                style: Aluno360Layout.operacaoOutlinedButtonStyle(
+                                  context,
+                                  widget.primary,
+                                ),
+                                child:
+                                    _completing
+                                        ? const SizedBox(
+                                          width: 18,
+                                          height: 18,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                        : Text(
+                                          'Concluir',
+                                          style: Aluno360Layout.chipLabelStyle(
+                                            context,
+                                            color: widget.primary,
+                                          ),
+                                        ),
+                              ),
+                            ),
                           ),
-                          label: Text(
-                            'Command Center',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Aluno360Layout.chipLabelStyle(
-                              context,
-                              color: widget.primary,
+                          const SizedBox(width: 8),
+                        ],
+                        Expanded(
+                          child: Semantics(
+                            button: true,
+                            label: 'Abrir Command Center',
+                            child: TextButton.icon(
+                              onPressed: _handlePrimary,
+                              icon: Icon(
+                                Icons.open_in_new_rounded,
+                                size: 16,
+                                color: widget.primary,
+                              ),
+                              label: Text(
+                                'Command Center',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: Aluno360Layout.chipLabelStyle(
+                                  context,
+                                  color: widget.primary,
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     )
                     : FxLiquidPrimaryButton(
                       loading: _creating,

@@ -1,3 +1,4 @@
+import '../../../core/theme/tokens_strip.dart';
 import '../data/aluno_repository.dart';
 import 'aluno360_operacao_logic.dart';
 
@@ -6,8 +7,8 @@ abstract final class Aluno360FerramentasLogic {
   Aluno360FerramentasLogic._();
 
   static const double narrowBreakpoint = 360;
-  static const double sectionHeaderGap = 8;
-  static const double sectionDividerGap = 10;
+  static const double sectionHeaderGap = TokensStrip.s2;
+  static const double sectionDividerGap = TokensStrip.s3;
   static const double measurementRowGap = 10;
 
   static int measurementCrossAxisCount(double maxWidth) =>
@@ -26,12 +27,12 @@ abstract final class Aluno360FerramentasLogic {
     List<Map<String, dynamic>>? aderenciaSemanal,
   }) {
     if (aluno.aderenciaPercent != null) {
-      return '${aluno.aderenciaPercent}% na semana';
+      return '${aluno.aderenciaPercent}% · semana';
     }
     final summary = summarizeAderenciaWeek(parseAderenciaSemanal(aderenciaSemanal));
     if (summary.hasAnyCheckin) {
       final n = summary.totalCheckins;
-      return '$n check-in${n == 1 ? '' : 's'} na semana';
+      return '$n chk · sem';
     }
     return 'Sem dados de check-in';
   }

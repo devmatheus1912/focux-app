@@ -273,16 +273,24 @@ void main() {
         contains('Aluno360TabSectionTitle'),
       ),
     );
+    final layoutSource =
+        File('lib/features/alunos/constants/aluno_360_layout.dart')
+            .readAsStringSync();
+    expect(layoutSource, contains('tabSectionTitleStyle'));
+    expect(layoutSource, contains('compactSectionTitleStyle'));
+    expect(layoutSource, contains('panelTitleStyle'));
+    expect(layoutSource, contains('moduleTileTitleStyle'));
+    expect(layoutSource, contains('ctaLabelStyle'));
+    expect(layoutSource, contains('TokensStrip.fontH2'));
+    expect(layoutSource, contains('insetCardRadius'));
     expect(
-      File('lib/features/alunos/constants/aluno_360_layout.dart')
+      File('lib/features/alunos/utils/aluno360_a11y.dart').readAsStringSync(),
+      contains('aluno360SectionHeaderSemantics'),
+    );
+    expect(
+      File('lib/features/alunos/utils/aluno360_readability.dart')
           .readAsStringSync(),
-      allOf(
-        contains('tabSectionTitleStyle'),
-        contains('compactSectionTitleStyle'),
-        contains('panelTitleStyle'),
-        contains('TokensStrip.fontH2'),
-        contains('TokensStrip.fontBody'),
-      ),
+      contains('aluno360ReadableCaption'),
     );
     expect(
       File('lib/features/alunos/widgets/aluno360_operational_status_section.dart')

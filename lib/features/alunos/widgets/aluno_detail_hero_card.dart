@@ -221,11 +221,10 @@ class _IdentityObjectiveRow extends StatelessWidget {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               foregroundColor: primary,
             ),
-            child: const Text(
+            child: Text(
               'Definir',
-              style: TextStyle(
+              style: Aluno360Layout.ctaLabelStyle(context, primary).copyWith(
                 fontSize: 10.5,
-                fontWeight: FontWeight.w800,
                 decoration: TextDecoration.underline,
               ),
             ),
@@ -258,11 +257,8 @@ class _IdentityStatusChip extends StatelessWidget {
       ),
       child: Text(
         status.label,
-        style: TextStyle(
-          color: status.foreground,
-          fontSize: 9.5,
-          fontWeight: FontWeight.w800,
-        ),
+        style: Aluno360Layout.badgeMicroStyle(context, status.foreground)
+            .copyWith(fontSize: 9.5),
       ),
     );
   }
@@ -330,13 +326,10 @@ class _IdentityMetricChip extends StatelessWidget {
           if (eyebrow != null)
             Text(
               eyebrow.toUpperCase(),
-              style: AppTypography.inter(
-                color: eyebrowColor,
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.35,
-                height: 1,
-              ),
+              style: Aluno360Layout.eyebrowLabelStyle(
+                context,
+                eyebrowColor,
+              ).copyWith(fontSize: 10),
             ),
           if (eyebrow != null) const SizedBox(height: 2),
           Row(
@@ -349,7 +342,7 @@ class _IdentityMetricChip extends StatelessWidget {
                 style: AppTypography.condensed(
                   color: valueColor,
                   fontSize: 18,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   letterSpacing: -0.4,
                   height: 1,
                 ),

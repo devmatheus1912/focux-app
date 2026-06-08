@@ -246,7 +246,6 @@ class _AdherenceDayBar extends StatelessWidget {
                               dayLabel,
                               style: Aluno360Layout.metaStyle(context).copyWith(
                                 color: isToday ? todayRingColor : labelColor,
-                                fontWeight: FontWeight.w800,
                                 letterSpacing: outlineIdle ? 0.2 : 0,
                               ),
                             ),

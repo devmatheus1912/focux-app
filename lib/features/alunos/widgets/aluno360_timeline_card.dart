@@ -172,9 +172,11 @@ class Aluno360TimelineCard extends StatelessWidget {
                       ? 'Quando houver check-in ou chat, os sinais aparecem aqui em ordem cronológica.'
                       : '${aluno.nome.split(' ').first} ainda não tem sinais suficientes. '
                           'Peça um check-in ou abra o chat para registrar a próxima interação.',
-              primaryLabel: 'Pedir check-in',
-              primaryIcon: Icons.message_outlined,
-              onPrimary: () => _openTimelineCheckin(context),
+              showPrimary: !compactEmpty,
+              primaryLabel: compactEmpty ? null : 'Pedir check-in',
+              primaryIcon: compactEmpty ? null : Icons.message_outlined,
+              onPrimary:
+                  compactEmpty ? null : () => _openTimelineCheckin(context),
               secondaryActions:
                   compactEmpty
                       ? [
@@ -604,9 +606,9 @@ class Timeline360Tile extends StatelessWidget {
                 children: [
                   Text(
                     kindHeader,
-                    style: Aluno360Layout.chipLabelStyle(
+                    style: Aluno360Layout.timelineTileTitleStyle(
                       context,
-                      color: item.color,
+                      item.color,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -643,9 +645,10 @@ class Timeline360Tile extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   expandLabel,
-                  style: Aluno360Layout.captionStyle(context).copyWith(
+                  style: Aluno360Layout.chipLabelStyle(
+                    context,
                     color: linkColor,
-                    fontWeight: FontWeight.w800,
+                  ).copyWith(
                     decoration: TextDecoration.underline,
                     decorationColor: linkColor.withValues(alpha: 0.55),
                   ),

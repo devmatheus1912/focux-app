@@ -135,9 +135,8 @@ class _Aluno360CopilotPrescriptionState
                 children: [
                   Text(
                     '•',
-                    style: TextStyle(
+                    style: Aluno360Layout.metaStyle(context).copyWith(
                       color: caption.withValues(alpha: 0.72),
-                      fontSize: 12,
                       height: 1.32,
                     ),
                   ),
@@ -147,9 +146,8 @@ class _Aluno360CopilotPrescriptionState
                       segments[i],
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: Aluno360Layout.captionStyle(context).copyWith(
                         color: caption,
-                        fontSize: 12,
                         height: 1.32,
                       ),
                     ),
@@ -164,9 +162,8 @@ class _Aluno360CopilotPrescriptionState
         reason,
         maxLines: _expandedReason ? null : _collapsedLines,
         overflow: _expandedReason ? null : TextOverflow.ellipsis,
-        style: TextStyle(
+        style: Aluno360Layout.captionStyle(context).copyWith(
           color: caption,
-          fontSize: 12,
           height: 1.32,
         ),
       );

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../constants/aluno_360_layout.dart';
 import '../utils/aluno360_copilot_logic.dart';
 
 /// Confirmation sheet before executing copilot actions (push, load adjust, risk).
@@ -54,11 +55,7 @@ Future<bool> showCopilotExecutarConfirmSheet(
                     Expanded(
                       child: Text(
                         spec.label,
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w900,
-                        ),
+                        style: Aluno360Layout.panelTitleStyle(context, ink),
                       ),
                     ),
                   ],
@@ -66,7 +63,10 @@ Future<bool> showCopilotExecutarConfirmSheet(
                 const SizedBox(height: 12),
                 Text(
                   body,
-                  style: TextStyle(color: mute, fontSize: 13, height: 1.35),
+                  style: Aluno360Layout.captionStyle(context).copyWith(
+                    color: mute,
+                    height: 1.35,
+                  ),
                 ),
                 if (spec.parametros != null && spec.parametros!.isNotEmpty) ...[
                   const SizedBox(height: 12),

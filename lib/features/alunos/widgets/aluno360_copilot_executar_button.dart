@@ -134,9 +134,9 @@ class _Aluno360CopilotExecutarAcaoButtonState
                   : Icon(spec.icon, size: 16),
           label: Text(
             _executing ? spec.executingLabel : spec.label,
-            style: const TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w800,
+            style: Aluno360Layout.chipLabelStyle(
+              context,
+              color: widget.primary,
             ),
           ),
           style: OutlinedButton.styleFrom(

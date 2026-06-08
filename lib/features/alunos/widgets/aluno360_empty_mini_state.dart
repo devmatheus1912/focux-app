@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../constants/aluno_360_layout.dart';
 
 class Aluno360EmptyMiniState extends StatelessWidget {
   const Aluno360EmptyMiniState({
@@ -35,9 +36,8 @@ class Aluno360EmptyMiniState extends StatelessWidget {
               text,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: Aluno360Layout.captionStyle(context).copyWith(
                 color: mute,
-                fontSize: 12,
                 fontWeight: FontWeight.w600,
                 height: 1.25,
               ),

@@ -46,11 +46,10 @@ class Aluno360MeasurementCard extends StatelessWidget {
               label.toUpperCase(),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: Aluno360Layout.metaStyle(context).copyWith(
-                fontSize: 10,
-                letterSpacing: 0.6,
-                color: mute.withValues(alpha: isDark ? 0.92 : 0.88),
-              ),
+              style: Aluno360Layout.eyebrowLabelStyle(
+                context,
+                mute.withValues(alpha: isDark ? 0.92 : 0.88),
+              ).copyWith(fontSize: 10),
               textAlign: TextAlign.center,
             ),
           ),
@@ -186,12 +185,8 @@ class Aluno360ModuleTile extends StatelessWidget {
         badge!,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          color: badgeInk,
-          fontSize: 9,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.2,
-          height: 1,
+        style: Aluno360Layout.badgeMicroStyle(context, badgeInk).copyWith(
+          fontSize: 11,
         ),
       ),
     );
@@ -248,12 +243,9 @@ class Aluno360ModuleTile extends StatelessWidget {
                       label,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.inter(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        height: 1.12,
-                        color: titleColor,
-                        letterSpacing: -0.2,
+                      style: Aluno360Layout.moduleTileTitleStyle(
+                        context,
+                        titleColor,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -264,9 +256,10 @@ class Aluno360ModuleTile extends StatelessWidget {
                             sub,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: Aluno360Layout.cardSubtitleStyle(
+                            style: Aluno360Layout.moduleTileSubtitleStyle(
                               context,
-                            ).copyWith(fontSize: 11, color: subColor),
+                              subColor,
+                            ),
                           ),
                         ),
                         if (badge != null) ...[

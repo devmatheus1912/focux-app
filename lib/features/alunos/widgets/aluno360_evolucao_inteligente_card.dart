@@ -105,7 +105,9 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                   e,
                   fallback: 'Evolução inteligente indisponível.',
                 ),
-                style: TextStyle(color: mute, fontSize: 12.5),
+                style: Aluno360Layout.captionStyle(context).copyWith(
+                  color: mute,
+                ),
               ),
             ),
           ),
@@ -230,7 +232,6 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                     style: Aluno360Layout.metaStyle(context)
                                         .copyWith(
                                           color: mute,
-                                          fontWeight: FontWeight.w800,
                                           letterSpacing: 0.4,
                                         ),
                                   ),
@@ -309,7 +310,6 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                     'Próxima ação',
                     style: Aluno360Layout.metaStyle(context).copyWith(
                       color: mute,
-                      fontWeight: FontWeight.w800,
                       letterSpacing: 0.6,
                     ),
                   ),

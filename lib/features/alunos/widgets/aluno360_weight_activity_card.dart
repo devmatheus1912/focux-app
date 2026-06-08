@@ -80,12 +80,12 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                 children: [
                   Text(
                     aluno.peso?.toStringAsFixed(1) ?? '--',
-                    style: TextStyle(
-                      color: ink,
-                      fontSize: 32,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: -0.5,
-                    ),
+                    style: Aluno360Layout.inlineMetricStyle(context, ink)
+                        .copyWith(
+                          fontSize: 32,
+                          letterSpacing: -0.5,
+                          height: 1,
+                        ),
                   ),
                   if (aluno.peso != null) ...[
                     const SizedBox(width: 3),
@@ -119,12 +119,13 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.end,
-                            style: Aluno360Layout.captionStyle(context).copyWith(
+                            style: Aluno360Layout.chipLabelStyle(
+                              context,
                               color: Aluno360Layout.timelineLinkForeground(
                                 primary,
                                 isDark: isDark,
                               ),
-                              fontWeight: FontWeight.w700,
+                            ).copyWith(
                               decoration: TextDecoration.underline,
                             ),
                           ),

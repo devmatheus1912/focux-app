@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../utils/altura_display.dart';
@@ -74,9 +75,8 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
               ),
               child: Text(
                 'Medidas indisponíveis agora. Puxe para atualizar ou tente em instantes.',
-                style: TextStyle(
+                style: Aluno360Layout.captionStyle(context).copyWith(
                   color: fxScreenMute(context),
-                  fontSize: 12.5,
                   height: 1.35,
                 ),
               ),

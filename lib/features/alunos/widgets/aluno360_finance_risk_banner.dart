@@ -48,11 +48,7 @@ class Aluno360FinanceRiskBanner extends StatelessWidget {
                       children: [
                         Text(
                           'Pendência financeira',
-                          style: TextStyle(
-                            color: ink,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 13.5,
-                          ),
+                          style: Aluno360Layout.panelTitleStyle(context, ink),
                         ),
                         Text(
                           'Abrir mensalidades deste aluno',

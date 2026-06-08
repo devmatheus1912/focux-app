@@ -33,7 +33,7 @@ void main() {
       );
       expect(
         Aluno360FerramentasLogic.aderenciaModuleSub(aluno: aluno),
-        '42% na semana',
+        '42% · semana',
       );
 
       final semDados = Aluno(
@@ -49,7 +49,7 @@ void main() {
             {'data': '2026-06-01', 'checkins': 2},
           ],
         ),
-        '2 check-ins na semana',
+        '2 chk · sem',
       );
     });
   });

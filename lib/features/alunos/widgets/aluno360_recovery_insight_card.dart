@@ -47,10 +47,9 @@ class _Aluno360RecoveryInsightCardState
                   Expanded(
                     child: Text(
                       'Wearable indisponível',
-                      style: TextStyle(
-                        color: chrome.mute,
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
+                      style: Aluno360Layout.panelTitleStyle(
+                        context,
+                        chrome.mute,
                       ),
                     ),
                   ),
@@ -88,9 +87,8 @@ class _Aluno360RecoveryInsightCardState
                           _expanded
                               ? 'Aluno ainda não conectou Apple Health ou Google Fit. Peça para conectar no app se fizer sentido.'
                               : 'Wearable · não conectado',
-                          style: TextStyle(
+                          style: Aluno360Layout.captionStyle(context).copyWith(
                             color: chrome.mute,
-                            fontSize: 12.5,
                             height: 1.35,
                           ),
                         ),
@@ -148,9 +146,8 @@ class _Aluno360RecoveryInsightCardState
                         snapshot.recoveryHint,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: Aluno360Layout.captionStyle(context).copyWith(
                           color: chrome.mute,
-                          fontSize: 12,
                           height: 1.3,
                         ),
                       ),

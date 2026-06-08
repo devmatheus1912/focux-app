@@ -22,18 +22,25 @@ class Aluno360ActionEmptyPanel extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
-    required this.primaryLabel,
-    required this.primaryIcon,
-    required this.onPrimary,
+    this.primaryLabel,
+    this.primaryIcon,
+    this.onPrimary,
+    this.showPrimary = true,
     this.secondaryActions = const [],
-  });
+  }) : assert(
+         !showPrimary ||
+             (primaryLabel != null &&
+                 primaryIcon != null &&
+                 onPrimary != null),
+       );
 
   final IconData icon;
   final String title;
   final String subtitle;
-  final String primaryLabel;
-  final IconData primaryIcon;
-  final VoidCallback onPrimary;
+  final String? primaryLabel;
+  final IconData? primaryIcon;
+  final VoidCallback? onPrimary;
+  final bool showPrimary;
   final List<Aluno360SecondaryAction> secondaryActions;
 
   @override
@@ -81,31 +88,36 @@ class Aluno360ActionEmptyPanel extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
+                      style: Aluno360Layout.captionStyle(context).copyWith(
+                        color: mute,
+                        height: 1.35,
+                      ),
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            height: 40,
-            child: Semantics(
-              button: true,
-              label: primaryLabel,
-              child: OutlinedButton.icon(
-                onPressed: onPrimary,
-                icon: Icon(primaryIcon, size: 16),
-                label: Text(primaryLabel),
-                style: Aluno360Layout.operacaoOutlinedButtonStyle(
-                  context,
-                  primary,
+          if (showPrimary) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 40,
+              child: Semantics(
+                button: true,
+                label: primaryLabel,
+                child: OutlinedButton.icon(
+                  onPressed: onPrimary,
+                  icon: Icon(primaryIcon, size: 16),
+                  label: Text(primaryLabel!),
+                  style: Aluno360Layout.operacaoOutlinedButtonStyle(
+                    context,
+                    primary,
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
           if (secondaryActions.isNotEmpty) ...[
             const SizedBox(height: 8),
             Wrap(

@@ -5,14 +5,16 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../utils/aluno360_readability.dart';
 
 /// Layout tokens for Aluno 360 (hero, sticky CTA, scroll insets).
 abstract final class Aluno360Layout {
   Aluno360Layout._();
 
-  static const double screenPadding = 16;
-  static const double sectionGap = 12;
-  static const double cardPadding = 14;
+  static const double screenPadding = TokensStrip.s4;
+  static const double sectionGap = TokensStrip.s3;
+  static const double cardPadding = TokensStrip.s4;
+  static const double insetCardRadius = TokensStrip.rCard;
   static const double tabBarHeight = 44;
   static const double tabContentGap = 12;
   static const double stickyBarContentHeight = 60;
@@ -136,7 +138,7 @@ abstract final class Aluno360Layout {
           isDark
               ? Colors.white.withValues(alpha: 0.04)
               : primary.withValues(alpha: 0.035),
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(insetCardRadius),
       border: Border.all(
         color: isDark ? line : line.withValues(alpha: 0.85),
       ),
@@ -157,18 +159,72 @@ abstract final class Aluno360Layout {
       fontSize: TokensStrip.fontBodySm,
       height: TokensStrip.leadingBody,
       fontWeight: FontWeight.w400,
-      color:
-          isDark
-              ? EagleTokens.darkInk.withValues(alpha: 0.82)
-              : TokensStrip.textSecondary,
+      color: aluno360ReadableCaption(context, isDark: isDark),
     );
   }
 
   /// Secondary metadata — min 12px with stronger contrast.
   static TextStyle metaStyle(BuildContext context) {
-    return captionStyle(context).copyWith(
+    return AppTypography.inter(
       fontSize: 12,
       fontWeight: FontWeight.w600,
+      height: 1.3,
+      color: aluno360ReadableMuted(
+        context,
+        isDark: Theme.of(context).brightness == Brightness.dark,
+      ),
+    );
+  }
+
+  /// Uppercase metric eyebrows (hero, operational tiles).
+  static TextStyle eyebrowLabelStyle(BuildContext context, Color color) {
+    return AppTypography.inter(
+      color: color,
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.35,
+      height: 1,
+    );
+  }
+
+  /// Micro badges (module tiles, status chips).
+  static TextStyle badgeMicroStyle(BuildContext context, Color color) {
+    return AppTypography.inter(
+      color: color,
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.15,
+      height: 1,
+    );
+  }
+
+  /// Sticky bar and primary pill labels.
+  static TextStyle ctaLabelStyle(BuildContext context, Color color) {
+    return AppTypography.inter(
+      color: color,
+      fontSize: TokensStrip.fontBodySm,
+      fontWeight: FontWeight.w600,
+      height: 1.2,
+    );
+  }
+
+  /// Module tile title (Ferramentas grid).
+  static TextStyle moduleTileTitleStyle(BuildContext context, Color ink) {
+    return AppTypography.inter(
+      color: ink,
+      fontSize: TokensStrip.fontBodySm,
+      fontWeight: FontWeight.w600,
+      height: 1.12,
+      letterSpacing: -0.15,
+    );
+  }
+
+  /// Module tile subtitle.
+  static TextStyle moduleTileSubtitleStyle(BuildContext context, Color mute) {
+    return captionStyle(context).copyWith(
+      color: mute,
+      fontSize: 11,
+      height: 1.2,
     );
   }
 
