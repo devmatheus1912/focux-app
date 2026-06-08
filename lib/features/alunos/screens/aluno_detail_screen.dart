@@ -81,11 +81,11 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
             ? ref.watch(alunoAutonomiaResumoProvider(alunoId))
             : const AsyncValue<AlunoAutonomiaResumo>.loading();
     final evolucaoGranularAsync =
-        tabIndex == 1 && !aluno360Async.hasValue
+        tabIndex == 1
             ? ref.watch(alunoEvolucaoInteligenteProvider(alunoId))
             : const AsyncValue<EvolucaoInteligente>.loading();
     final timelineGranularAsync =
-        tabIndex == 1 && !aluno360Async.hasValue
+        tabIndex == 1
             ? ref.watch(alunoTimeline360ApiProvider(alunoId))
             : const AsyncValue<List<Timeline360Event>>.loading();
     final recoveryAsync =
@@ -109,15 +109,19 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
       resolvedAutonomiaResumoAsync = AsyncData(aluno360Async.value!.autonomiaResumo);
     }
 
-    AsyncValue<EvolucaoInteligente> resolvedEvolucaoAsync = evolucaoGranularAsync;
-    if (aluno360Async.hasValue) {
-      resolvedEvolucaoAsync = AsyncData(aluno360Async.value!.evolucaoInteligente);
-    }
+    AsyncValue<EvolucaoInteligente> resolvedEvolucaoAsync =
+        tabIndex == 1
+            ? evolucaoGranularAsync
+            : (aluno360Async.hasValue
+                ? AsyncData(aluno360Async.value!.evolucaoInteligente)
+                : evolucaoGranularAsync);
 
-    AsyncValue<List<Timeline360Event>> resolvedTimelineAsync = timelineGranularAsync;
-    if (aluno360Async.hasValue) {
-      resolvedTimelineAsync = AsyncData(aluno360Async.value!.timelinePreview);
-    }
+    AsyncValue<List<Timeline360Event>> resolvedTimelineAsync =
+        tabIndex == 1
+            ? timelineGranularAsync
+            : (aluno360Async.hasValue
+                ? AsyncData(aluno360Async.value!.timelinePreview)
+                : timelineGranularAsync);
 
     final loadingPrimary = aluno360Async.isLoading && !aluno360Async.hasValue;
     final loadingFallback = resolvedAlunoAsync.isLoading && !resolvedAlunoAsync.hasValue;
@@ -300,6 +304,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                             setState(() => _entrancePlayed = true);
                           }
                         },
+                        onOpenCopilot: () => _tabController.animateTo(0),
                       ),
                       _ => Aluno360DetailFerramentasTab(
                         key: const ValueKey('aluno360_tab_ferramentas'),

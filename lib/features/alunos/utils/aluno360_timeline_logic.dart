@@ -47,6 +47,10 @@ String sanitizeTimeline360Copy(String? raw) {
     ),
     (m) => '${m[1]} tem prioridade hoje: ${m[2]}.',
   );
+  text = text.replaceAll(
+    RegExp(r'precisa de uma ação humana', caseSensitive: false),
+    'precisa de atenção',
+  );
 
   text = sanitizeCopilotIaLanguage(text);
   text = normalizeChatText(text);
@@ -61,6 +65,20 @@ String sanitizeTimeline360Copy(String? raw) {
   text = text.replaceAllMapped(
     RegExp(
       r'contate\s+(\S+)\s+imediatamente(?:\s+para\s+retomar)?\.?',
+      caseSensitive: false,
+    ),
+    (m) => '${m[1]} sumiu do radar — manda um oi direto hoje.',
+  );
+  text = text.replaceAllMapped(
+    RegExp(
+      r'entre em contato com\s+(\S+)\s+para entender o motivo do afastamento\.?',
+      caseSensitive: false,
+    ),
+    (m) => '${m[1]} sumiu do radar — manda um oi direto hoje.',
+  );
+  text = text.replaceAllMapped(
+    RegExp(
+      r'contate\s+(\S+)\s+para entender (?:os motivos de sua |o motivo da )?inativid[^.]*\.?',
       caseSensitive: false,
     ),
     (m) => '${m[1]} sumiu do radar — manda um oi direto hoje.',
@@ -125,11 +143,40 @@ String timeline360ChatBodyFingerprint(String body) {
   ).trim();
   if (text.isEmpty) return '';
   if (text.startsWith('próximo passo do plano:')) return text;
-  if (text.contains('sumiu do radar')) return 'chat:sumiu_radar';
+  if (text.contains('sumiu do radar') ||
+      text.contains('notei sua ausência') ||
+      text.contains('se afastou')) {
+    return 'chat:recovery';
+  }
   if (text.contains('acompanhamento registrado')) {
     return 'chat:copilot_acompanhamento';
   }
   return text.replaceAll(RegExp(r'[^a-z0-9áàâãéêíóôõúç\s]'), '').trim();
+}
+
+/// Dedupe chat rows by normalized body fingerprint (keeps first = most recent).
+List<T> dedupeChatTimelineByFingerprint<T>(
+  List<T> items, {
+  required String Function(T item) kindOf,
+  required String Function(T item) bodyOf,
+}) {
+  final out = <T>[];
+  final seen = <String>{};
+  for (final item in items) {
+    if (kindOf(item) != 'Chat') {
+      out.add(item);
+      continue;
+    }
+    final fingerprint = timeline360ChatBodyFingerprint(bodyOf(item));
+    if (fingerprint.isEmpty) {
+      out.add(item);
+      continue;
+    }
+    if (seen.contains(fingerprint)) continue;
+    seen.add(fingerprint);
+    out.add(item);
+  }
+  return out;
 }
 
 /// Preview body for chat rows — drops redundant "Oi, {nome}." after kind header.
@@ -169,6 +216,19 @@ String timeline360KindHeader({
   if (sender != null) return 'Chat · $sender';
   if (title.contains('·')) return title.trim();
   return kind;
+}
+
+/// Sheet/modal title for a timeline item.
+String timeline360SheetTitle({
+  required String kind,
+  required String title,
+  required String meta,
+}) {
+  if (kind == 'Chat') {
+    return timeline360KindHeader(kind: kind, title: title, meta: meta);
+  }
+  if (title.trim().isEmpty) return kind;
+  return '$kind · ${title.trim()}';
 }
 
 /// Whether the title row adds information beyond the kind header.
@@ -225,7 +285,15 @@ Color timeline360PriorityColor(String? priority, {required Color primary}) {
   return primary;
 }
 
-bool timeline360BodyExpandable(String body) => body.trim().length > 96;
+bool timeline360BodyExpandable(
+  String body, {
+  String? kind,
+  String? previewBody,
+}) {
+  final text = (previewBody ?? body).trim();
+  final threshold = kind == 'Chat' ? 72 : 96;
+  return text.length > threshold;
+}
 
 bool timeline360HasFooterChips({
   required String kind,

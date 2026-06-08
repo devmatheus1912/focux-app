@@ -99,29 +99,11 @@ class Aluno360TimelineCard extends StatelessWidget {
         timelineApiAsync.value!
             .map((event) => _itemFromApi(event, primary: primary))
             .toList();
-    return _dedupeChatTimelineItems(mapped);
-  }
-
-  static List<Timeline360Item> _dedupeChatTimelineItems(
-    List<Timeline360Item> items,
-  ) {
-    final out = <Timeline360Item>[];
-    final seen = <String>{};
-    for (final item in items) {
-      if (item.kind != 'Chat') {
-        out.add(item);
-        continue;
-      }
-      final fingerprint = timeline360ChatBodyFingerprint(item.body);
-      if (fingerprint.isEmpty) {
-        out.add(item);
-        continue;
-      }
-      if (seen.contains(fingerprint)) continue;
-      seen.add(fingerprint);
-      out.add(item);
-    }
-    return out;
+    return dedupeChatTimelineByFingerprint(
+      mapped,
+      kindOf: (item) => item.kind,
+      bodyOf: (item) => item.body,
+    );
   }
 
   void _openTimelineCheckin(BuildContext context) {
@@ -141,8 +123,7 @@ class Aluno360TimelineCard extends StatelessWidget {
     final loading = timelineApiAsync.isLoading && !timelineApiAsync.hasValue;
     final error = timelineApiAsync.hasError && !timelineApiAsync.hasValue;
     final allItems = _allItems(primary);
-    final previewItems = allItems.take(7).toList();
-    final visibleItems = previewItems.take(3).toList();
+    final visibleItems = allItems.take(3).toList();
     final hasMore = allItems.length > visibleItems.length;
 
     return Semantics(
@@ -352,9 +333,24 @@ class Timeline360Item {
   final String? deepLink;
 }
 
-void showTimeline360BodySheet(BuildContext context, Timeline360Item item) {
+void showTimeline360BodySheet(
+  BuildContext context,
+  Timeline360Item item, {
+  required Color accent,
+  required bool isDark,
+}) {
   final ink = fxScreenInk(context);
   final mute = fxScreenMute(context);
+  final link = item.deepLink;
+  final title = timeline360SheetTitle(
+    kind: item.kind,
+    title: item.title,
+    meta: item.meta,
+  );
+  final linkColor = Aluno360Layout.timelineLinkForeground(
+    accent,
+    isDark: isDark,
+  );
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -363,48 +359,96 @@ void showTimeline360BodySheet(BuildContext context, Timeline360Item item) {
     builder:
         (ctx) => Aluno360TimelineSheetEntrance(
           child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            16,
-            12,
-            16,
-            16 + MediaQuery.paddingOf(ctx).bottom,
-          ),
-          child: ShellSurface(
-            radius: 24,
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        '${item.kind} · ${item.title}',
-                        style: Aluno360Layout.sectionTitleStyle(context, ink),
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: 'Fechar',
-                      onPressed: () => Navigator.of(ctx).pop(),
-                      icon: Icon(Icons.close_rounded, color: mute),
-                    ),
-                  ],
+            padding: EdgeInsets.fromLTRB(
+              16,
+              12,
+              16,
+              16 + MediaQuery.paddingOf(ctx).bottom,
+            ),
+            child: ShellSurface(
+              radius: 24,
+              padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.sizeOf(ctx).height * 0.72,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  item.body,
-                  style: Aluno360Layout.captionStyle(context).copyWith(
-                    color: ink,
-                    fontSize: 14,
-                    height: 1.45,
-                    fontWeight: FontWeight.w500,
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Semantics(
+                        header: true,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                title,
+                                style: Aluno360Layout.sectionTitleStyle(
+                                  context,
+                                  ink,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: 'Fechar',
+                              onPressed: () => Navigator.of(ctx).pop(),
+                              icon: Icon(Icons.close_rounded, color: mute),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        formatTimeline360Date(item.at),
+                        style: Aluno360Layout.timelineMetaStyle(context),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        item.body,
+                        style: Aluno360Layout.captionStyle(context).copyWith(
+                          color: ink,
+                          fontSize: 14,
+                          height: 1.45,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      if (link != null && link.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              Navigator.of(ctx).pop();
+                              ctx.push(link);
+                            },
+                            icon: Icon(
+                              item.kind == 'Chat'
+                                  ? Icons.chat_bubble_outline
+                                  : Icons.open_in_new_rounded,
+                              size: 18,
+                            ),
+                            label: Text(
+                              item.kind == 'Chat'
+                                  ? 'Abrir chat'
+                                  : 'Abrir destino',
+                            ),
+                            style: Aluno360Layout.operacaoOutlinedButtonStyle(
+                              context,
+                              accent,
+                            ).copyWith(
+                              foregroundColor: WidgetStatePropertyAll(
+                                linkColor,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
-        ),
         ),
   );
 }
@@ -428,7 +472,18 @@ class Timeline360Tile extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final link = item.deepLink;
-    final expandable = timeline360BodyExpandable(item.body);
+    final previewBody =
+        item.kind == 'Chat'
+            ? timeline360ChatPreviewBody(
+              item.body,
+              alunoFirstName: alunoFirstName,
+            )
+            : item.body;
+    final expandable = timeline360BodyExpandable(
+      item.body,
+      kind: item.kind,
+      previewBody: previewBody,
+    );
     final showMeta = timeline360ShouldShowMetaChip(
       kind: item.kind,
       meta: item.meta,
@@ -452,13 +507,6 @@ class Timeline360Tile extends StatelessWidget {
       priority: item.priority,
       title: item.title,
     );
-    final previewBody =
-        item.kind == 'Chat'
-            ? timeline360ChatPreviewBody(
-              item.body,
-              alunoFirstName: alunoFirstName,
-            )
-            : item.body;
     final linkColor = Aluno360Layout.timelineLinkForeground(
       accent,
       isDark: isDark,
@@ -501,10 +549,7 @@ class Timeline360Tile extends StatelessWidget {
                       formatTimeline360Date(item.at),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Aluno360Layout.captionStyle(context).copyWith(
-                        color: mute,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: Aluno360Layout.timelineMetaStyle(context),
                     ),
                   ),
                 ],
@@ -569,7 +614,12 @@ class Timeline360Tile extends StatelessWidget {
 
     void onTap() {
       if (expandable) {
-        showTimeline360BodySheet(context, item);
+        showTimeline360BodySheet(
+          context,
+          item,
+          accent: accent,
+          isDark: isDark,
+        );
         return;
       }
       if (link != null && link.isNotEmpty) {

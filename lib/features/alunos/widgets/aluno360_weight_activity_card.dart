@@ -97,14 +97,36 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                   ],
                   const Spacer(),
                   if (aluno.peso != null)
-                    Text(
-                      'Ver evolução completa',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.end,
-                      style: Aluno360Layout.captionStyle(context).copyWith(
-                        color: mute,
-                        fontWeight: FontWeight.w500,
+                    Semantics(
+                      button: true,
+                      label: 'Ver evolução completa de peso',
+                      child: InkWell(
+                        onTap:
+                            () => context.push(
+                              '/alunos/$alunoId/evolucao',
+                              extra: aluno.nome,
+                            ),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 2,
+                          ),
+                          child: Text(
+                            'Ver evolução completa',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.end,
+                            style: Aluno360Layout.captionStyle(context).copyWith(
+                              color: Aluno360Layout.timelineLinkForeground(
+                                primary,
+                                isDark: isDark,
+                              ),
+                              fontWeight: FontWeight.w700,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                 ],

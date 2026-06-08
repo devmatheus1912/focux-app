@@ -73,6 +73,10 @@ List<Override> _beatrizOverrides() {
     alunoMedidasResumoProvider(_contactPriorityAlunoId).overrideWith((ref) async => null),
     alunoPesoHistoricoProvider(_contactPriorityAlunoId)
         .overrideWith((ref) async => const []),
+    alunoEvolucaoInteligenteProvider(_contactPriorityAlunoId)
+        .overrideWith((ref) async => _emptyEvolucaoFixture),
+    alunoTimeline360ApiProvider(_contactPriorityAlunoId)
+        .overrideWith((ref) async => const []),
     alunoCopilotoActionProvider(_contactPriorityAlunoId)
         .overrideWith((ref) async => const {}),
     alertasConfigProvider.overrideWith(
@@ -162,6 +166,9 @@ List<Override> _aluno360Overrides() {
     alunoOpenIaActionsProvider(_alunoId).overrideWith((ref) async => const []),
     alunoMedidasResumoProvider(_alunoId).overrideWith((ref) async => null),
     alunoPesoHistoricoProvider(_alunoId).overrideWith((ref) async => const []),
+    alunoEvolucaoInteligenteProvider(_alunoId)
+        .overrideWith((ref) async => _emptyEvolucaoFixture),
+    alunoTimeline360ApiProvider(_alunoId).overrideWith((ref) async => const []),
     alunoCopilotoActionProvider(_alunoId).overrideWith((ref) async => const {}),
     alertasConfigProvider.overrideWith(
       (ref) async => AlertasConfiguracao(
@@ -267,8 +274,12 @@ void main() {
     await _pumpAlunoDetail(tester);
 
     await tester.tap(find.text('Evolução'));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('aluno360_evolucao_empty')),
+    );
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.byKey(const ValueKey('aluno360_evolucao_empty')), findsOneWidget);
     expect(find.text('Sem sinais de evolução ainda'), findsOneWidget);

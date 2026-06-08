@@ -62,6 +62,31 @@ void main() {
         'Você sumiu do radar — me responde por aqui que eu ajusto o plano.',
       );
     });
+
+    test('rewrites afastamento contact template', () {
+      expect(
+        sanitizeTimeline360Copy(
+          'Entre em contato com Beatriz para entender o motivo do afastamento.',
+        ),
+        'Beatriz sumiu do radar — manda um oi direto hoje.',
+      );
+    });
+
+    test('rewrites contate para entender inatividade', () {
+      expect(
+        sanitizeTimeline360Copy(
+          'Contate Beatriz para entender os motivos de sua inatividade e incentivá-la.',
+        ),
+        'Beatriz sumiu do radar — manda um oi direto hoje.',
+      );
+    });
+
+    test('fixes acao before humana fragment', () {
+      expect(
+        sanitizeTimeline360Copy('precisa de uma acao humana'),
+        'precisa de atenção',
+      );
+    });
   });
 
   group('timeline360ChatBodyFingerprint', () {
@@ -73,6 +98,62 @@ void main() {
         'Passei pelo seu acompanhamento agora e o próximo passo para seu objetivo é: reforçar check-in.',
       );
       expect(a, b);
+    });
+
+    test('buckets recovery variants', () {
+      expect(
+        timeline360ChatBodyFingerprint(
+          'Você sumiu do radar — me responde por aqui que eu ajusto o plano.',
+        ),
+        'chat:recovery',
+      );
+      expect(
+        timeline360ChatBodyFingerprint(
+          'Beatriz sumiu do radar — manda um oi direto hoje.',
+        ),
+        'chat:recovery',
+      );
+    });
+  });
+
+  group('timeline360BodyExpandable', () {
+    test('uses lower threshold for chat preview', () {
+      final body = 'A' * 80;
+      expect(
+        timeline360BodyExpandable(body, kind: 'Chat', previewBody: body),
+        isTrue,
+      );
+      expect(timeline360BodyExpandable(body, kind: 'Radar'), isFalse);
+    });
+  });
+
+  group('timeline360SheetTitle', () {
+    test('avoids duplicate chat label', () {
+      expect(
+        timeline360SheetTitle(
+          kind: 'Chat',
+          title: 'Chat · Personal',
+          meta: 'PERSONAL',
+        ),
+        'Chat · Personal',
+      );
+    });
+  });
+
+  group('dedupeChatTimelineByFingerprint', () {
+    test('keeps one recovery chat', () {
+      final items = ['Chat', 'Chat', 'Chat'];
+      final bodies = [
+        'Você sumiu do radar — me responde por aqui que eu ajusto o plano.',
+        'Beatriz sumiu do radar — manda um oi direto hoje.',
+        'Como foi seu último treino?',
+      ];
+      final deduped = dedupeChatTimelineByFingerprint(
+        List.generate(3, (i) => i),
+        kindOf: (i) => items[i],
+        bodyOf: (i) => bodies[i],
+      );
+      expect(deduped, [0, 2]);
     });
   });
 

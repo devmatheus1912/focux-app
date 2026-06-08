@@ -22,12 +22,14 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
     required this.alunoNome,
     required this.evolucaoAsync,
     required this.isDark,
+    this.onOpenCopilot,
   });
 
   final int alunoId;
   final String alunoNome;
   final AsyncValue<EvolucaoInteligente> evolucaoAsync;
   final bool isDark;
+  final VoidCallback? onOpenCopilot;
 
   static String sinalLabel(String s) {
     switch (s) {
@@ -264,18 +266,28 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                 ),
                 if (ev.sugerirCopiloto) ...[
                   const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Icon(Icons.auto_awesome, size: 16, color: primary),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          'Copiloto pode ajudar a transformar isso em mensagem ou tarefa.',
-                          style: TextStyle(color: mute, fontSize: 12),
+                  Text(
+                    'Copiloto pode ajudar a transformar isso em mensagem ou tarefa.',
+                    style: Aluno360Layout.captionStyle(context).copyWith(
+                      color: mute,
+                      height: 1.35,
+                    ),
+                  ),
+                  if (onOpenCopilot != null) ...[
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: onOpenCopilot,
+                        icon: const Icon(Icons.auto_awesome, size: 16),
+                        label: const Text('Abrir Copiloto'),
+                        style: Aluno360Layout.operacaoOutlinedButtonStyle(
+                          context,
+                          primary,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ],
               ],
             ],

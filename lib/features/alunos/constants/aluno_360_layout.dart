@@ -140,6 +140,13 @@ abstract final class Aluno360Layout {
     );
   }
 
+  /// Timeline metadata (dates) — stronger contrast than mute captions.
+  static TextStyle timelineMetaStyle(BuildContext context) {
+    return captionStyle(context).copyWith(
+      fontWeight: FontWeight.w600,
+    );
+  }
+
   /// WCAG-friendly caption for cards (min 12px, gray-700 on light).
   static TextStyle captionStyle(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;

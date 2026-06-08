@@ -18,6 +18,7 @@ class Aluno360DetailEvolucaoTab extends StatelessWidget {
     required this.timeline360Async,
     required this.animateEntrance,
     required this.onEntrancePlayed,
+    this.onOpenCopilot,
   });
 
   final Aluno aluno;
@@ -28,6 +29,7 @@ class Aluno360DetailEvolucaoTab extends StatelessWidget {
   final AsyncValue<List<Timeline360Event>> timeline360Async;
   final bool animateEntrance;
   final VoidCallback onEntrancePlayed;
+  final VoidCallback? onOpenCopilot;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +41,7 @@ class Aluno360DetailEvolucaoTab extends StatelessWidget {
         alunoNome: aluno.nome,
         evolucaoAsync: evolucaoAsync,
         isDark: isDark,
+        onOpenCopilot: onOpenCopilot,
       ),
       timelineCard: Aluno360TimelineCard(
         aluno: aluno,
