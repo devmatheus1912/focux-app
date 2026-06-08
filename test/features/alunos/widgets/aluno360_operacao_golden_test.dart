@@ -215,7 +215,7 @@ void main() {
       ProviderScope(
         overrides: [
           alunoOperacaoFocusModeProvider(42).overrideWith(
-            (ref) => AlunoOperacaoFocusModeController(42)..state = true,
+            (ref) => AlunoOperacaoFocusModeController(ref, 42)..state = true,
           ),
         ],
         child: MaterialApp(

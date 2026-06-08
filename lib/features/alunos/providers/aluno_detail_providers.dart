@@ -43,13 +43,30 @@ final alunoCopilotCreatingProvider = StateProvider.family<bool, int>(
 /// Operação tab focus mode — hides secondary diagnostics (status grid, wearable, quick actions).
 final alunoOperacaoFocusModeProvider =
     StateNotifierProvider.family<AlunoOperacaoFocusModeController, bool, int>(
-  (ref, alunoId) => AlunoOperacaoFocusModeController(alunoId),
+  (ref, alunoId) => AlunoOperacaoFocusModeController(ref, alunoId),
 );
 
 class AlunoOperacaoFocusModeController extends StateNotifier<bool> {
-  AlunoOperacaoFocusModeController(this.alunoId) : super(false);
+  AlunoOperacaoFocusModeController(this._ref, this.alunoId) : super(false);
 
+  final Ref _ref;
   final int alunoId;
+
+  /// Server preference wins, then local explicit, then contact-priority auto-default.
+  Future<void> syncFromAluno(
+    Aluno aluno, {
+    required bool autoDefault,
+  }) async {
+    try {
+      final server = aluno.operacaoFocusMode;
+      if (server != null) {
+        if (state != server) state = server;
+        await AlunoOperacaoFocusStore.saveExplicit(alunoId, server);
+        return;
+      }
+      await syncAutoDefault(autoDefault: autoDefault);
+    } catch (_) {}
+  }
 
   /// Applies contact-priority auto-default unless the personal toggled focus manually.
   Future<void> syncAutoDefault({required bool autoDefault}) async {
@@ -65,6 +82,8 @@ class AlunoOperacaoFocusModeController extends StateNotifier<bool> {
     state = value;
     try {
       await AlunoOperacaoFocusStore.saveExplicit(alunoId, value);
+      await AlunoRepository(_ref.read(apiClientProvider))
+          .atualizarOperacaoFocus(alunoId, focusMode: value);
     } catch (_) {}
     SemanticsService.announce(
       value ? 'Modo foco ativado' : 'Modo foco desativado',

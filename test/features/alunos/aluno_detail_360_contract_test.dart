@@ -281,7 +281,12 @@ void main() {
     expect(layoutSource, contains('panelTitleStyle'));
     expect(layoutSource, contains('moduleTileTitleStyle'));
     expect(layoutSource, contains('ctaLabelStyle'));
+    expect(layoutSource, contains('tabSelectedLabelStyle'));
+    expect(layoutSource, contains('secondaryActionLabelStyle'));
     expect(layoutSource, contains('TokensStrip.fontH2'));
+    expect(screen, contains('syncFromAluno'));
+    expect(screen, contains('operacaoFocusMode'));
+    expect(screen, contains('atualizarOperacaoFocus'));
     expect(layoutSource, contains('insetCardRadius'));
     expect(
       File('lib/features/alunos/utils/aluno360_a11y.dart').readAsStringSync(),

@@ -45,15 +45,8 @@ class Aluno360DetailTabBar extends StatelessWidget {
             unselectedLabelColor: mute,
             indicatorWeight: 2,
             dividerColor: Colors.transparent,
-            labelStyle: TextStyle(
-              fontSize: TokensStrip.fontBodySm,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.1,
-            ),
-            unselectedLabelStyle: TextStyle(
-              fontSize: TokensStrip.fontBodySm,
-              fontWeight: FontWeight.w500,
-            ),
+            labelStyle: Aluno360Layout.tabSelectedLabelStyle(),
+            unselectedLabelStyle: Aluno360Layout.tabUnselectedLabelStyle(),
             tabs: const [
               Tab(text: 'Operação'),
               Tab(text: 'Evolução'),

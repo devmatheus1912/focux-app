@@ -29,6 +29,7 @@ class Aluno {
   final String? proximoContato;
   final String? snoozedUntil;
   final String? ultimoContato;
+  final bool? operacaoFocusMode;
 
   Aluno({
     required this.id,
@@ -56,6 +57,7 @@ class Aluno {
     this.proximoContato,
     this.snoozedUntil,
     this.ultimoContato,
+    this.operacaoFocusMode,
   });
 
   DateTime? get followUpDate {
@@ -114,6 +116,7 @@ class Aluno {
     proximoContato: json['proximoContato'] as String?,
     snoozedUntil: json['snoozedUntil'] as String?,
     ultimoContato: json['ultimoContato'] as String?,
+    operacaoFocusMode: json['operacaoFocusMode'] as bool?,
     equipamentosDisponiveis:
         parseEnumCsv(
           Equipamento.values,
@@ -482,6 +485,14 @@ class AlunoRepository {
 
   Future<Aluno> marcarContatoRealizado(int id) async {
     final response = await _dio.post('/api/alunos/$id/contato-realizado');
+    return Aluno.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<Aluno> atualizarOperacaoFocus(int id, {required bool focusMode}) async {
+    final response = await _dio.patch(
+      '/api/alunos/$id/operacao-focus',
+      data: {'focusMode': focusMode},
+    );
     return Aluno.fromJson(response.data as Map<String, dynamic>);
   }
 

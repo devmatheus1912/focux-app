@@ -193,7 +193,8 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
             if (!mounted) return;
             ref
                 .read(alunoOperacaoFocusModeProvider(alunoId).notifier)
-                .syncAutoDefault(
+                .syncFromAluno(
+                  aluno,
                   autoDefault: shouldDefaultOperacaoFocusMode(
                     aluno: aluno,
                     contactPriority: contactPriority,

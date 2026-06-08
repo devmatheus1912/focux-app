@@ -139,10 +139,7 @@ class Aluno360ActionEmptyPanel extends StatelessWidget {
                       icon: Icon(action.icon, size: 15),
                       label: Text(
                         action.label,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: Aluno360Layout.secondaryActionLabelStyle(),
                       ),
                     ),
                   ),

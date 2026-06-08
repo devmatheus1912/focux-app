@@ -20,7 +20,7 @@ void main() {
         ProviderScope(
           overrides: [
             alunoOperacaoFocusModeProvider(42).overrideWith(
-              (ref) => AlunoOperacaoFocusModeController(42),
+              (ref) => AlunoOperacaoFocusModeController(ref, 42),
             ),
           ],
           child: MaterialApp(
@@ -53,7 +53,7 @@ void main() {
         ProviderScope(
           overrides: [
             alunoOperacaoFocusModeProvider(42).overrideWith((ref) {
-              final c = AlunoOperacaoFocusModeController(42);
+              final c = AlunoOperacaoFocusModeController(ref, 42);
               c.state = true;
               return c;
             }),

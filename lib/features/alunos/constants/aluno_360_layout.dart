@@ -228,6 +228,31 @@ abstract final class Aluno360Layout {
     );
   }
 
+  /// Tab bar selected label (Operação · Evolução · Ferramentas).
+  static TextStyle tabSelectedLabelStyle() {
+    return AppTypography.inter(
+      fontSize: TokensStrip.fontBodySm,
+      fontWeight: FontWeight.w600,
+      letterSpacing: -0.1,
+    );
+  }
+
+  /// Tab bar unselected label.
+  static TextStyle tabUnselectedLabelStyle() {
+    return AppTypography.inter(
+      fontSize: TokensStrip.fontBodySm,
+      fontWeight: FontWeight.w500,
+    );
+  }
+
+  /// Compact secondary actions in empty states.
+  static TextStyle secondaryActionLabelStyle() {
+    return AppTypography.inter(
+      fontSize: 12,
+      fontWeight: FontWeight.w600,
+    );
+  }
+
   /// Chip / button labels inside Operação cards.
   static TextStyle chipLabelStyle(BuildContext context, {Color? color}) {
     return captionStyle(context).copyWith(

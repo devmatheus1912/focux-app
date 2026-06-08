@@ -82,12 +82,7 @@ Future<bool> showCopilotExecutarConfirmSheet(
                     ),
                     child: Text(
                       spec.parametros!,
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 12.5,
-                        height: 1.35,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: Aluno360Layout.bodyEmphasisStyle(context, ink),
                     ),
                   ),
                 ],
