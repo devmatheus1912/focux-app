@@ -15,6 +15,7 @@ import '../utils/aluno360_timeline_logic.dart';
 import 'aluno360_action_empty_panel.dart';
 import 'aluno360_mini_autonomy_chip.dart';
 import 'aluno360_timeline_priority_badge.dart';
+import 'aluno360_timeline_sheet_motion.dart';
 import 'aluno_outreach_message_sheet.dart';
 
 class Aluno360TimelineCard extends StatelessWidget {
@@ -256,7 +257,8 @@ class Aluno360TimelineCard extends StatelessWidget {
             minChildSize: 0.45,
             maxChildSize: 0.92,
             builder:
-                (context, controller) => Padding(
+                (context, controller) => Aluno360TimelineSheetEntrance(
+                  child: Padding(
                   padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 4, 16, 0),
                   child: ShellSurface(
                     radius: 28,
@@ -311,6 +313,7 @@ class Aluno360TimelineCard extends StatelessWidget {
                     ),
                   ),
                 ),
+                ),
           ),
     );
   }
@@ -349,7 +352,8 @@ void showTimeline360BodySheet(BuildContext context, Timeline360Item item) {
     showDragHandle: true,
     backgroundColor: Colors.transparent,
     builder:
-        (ctx) => Padding(
+        (ctx) => Aluno360TimelineSheetEntrance(
+          child: Padding(
           padding: EdgeInsets.fromLTRB(
             16,
             12,
@@ -396,6 +400,7 @@ void showTimeline360BodySheet(BuildContext context, Timeline360Item item) {
             ),
           ),
         ),
+        ),
   );
 }
 
@@ -424,9 +429,20 @@ class Timeline360Tile extends StatelessWidget {
       title: item.title,
     );
     final showPriority = timeline360ShouldShowPriorityBadge(kind: item.kind);
-    final senderChip = timeline360SenderChipLabel(
+    final kindHeader = timeline360KindHeader(
+      kind: item.kind,
+      title: item.title,
+      meta: item.meta,
+    );
+    final showTitle = timeline360ShowTitleRow(
+      kind: item.kind,
+      title: item.title,
+      meta: item.meta,
+    );
+    final hasFooterChips = timeline360HasFooterChips(
       kind: item.kind,
       meta: item.meta,
+      priority: item.priority,
       title: item.title,
     );
     final child = Row(
@@ -449,7 +465,7 @@ class Timeline360Tile extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    item.kind,
+                    kindHeader,
                     style: Aluno360Layout.chipLabelStyle(
                       context,
                       color: item.color,
@@ -469,13 +485,15 @@ class Timeline360Tile extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 3),
-              Text(
-                item.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Aluno360Layout.timelineTileTitleStyle(context, ink),
-              ),
+              if (showTitle) ...[
+                const SizedBox(height: 3),
+                Text(
+                  item.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Aluno360Layout.timelineTileTitleStyle(context, ink),
+                ),
+              ],
               const SizedBox(height: 3),
               Text(
                 item.body,
@@ -498,24 +516,24 @@ class Timeline360Tile extends StatelessWidget {
                   ),
                 ),
               ],
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 6,
-                runSpacing: 4,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  if (showPriority)
-                    Aluno360TimelinePriorityBadge(
-                      priority: item.priority,
-                      accent: accent,
-                      isDark: isDark,
-                    ),
-                  if (senderChip != null)
-                    Aluno360MiniAutonomyChip(label: senderChip, color: accent),
-                  if (showMeta)
-                    Aluno360MiniAutonomyChip(label: item.meta, color: mute),
-                ],
-              ),
+              if (hasFooterChips) ...[
+                SizedBox(height: expandable ? 10 : 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    if (showPriority)
+                      Aluno360TimelinePriorityBadge(
+                        priority: item.priority,
+                        accent: accent,
+                        isDark: isDark,
+                      ),
+                    if (showMeta)
+                      Aluno360MiniAutonomyChip(label: item.meta, color: mute),
+                  ],
+                ),
+              ],
             ],
           ),
         ),

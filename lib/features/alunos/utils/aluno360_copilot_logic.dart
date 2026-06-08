@@ -171,7 +171,8 @@ String resolveOutreachMessage(
   );
 }
 
-String contactPriorityOutreachAcao() => 'Contate o aluno para retomar treino.';
+String contactPriorityOutreachAcao() =>
+    'Mandar mensagem curta para retomar o treino.';
 
 bool alunoTemHistoricoWearable(RecoverySnapshot? recovery) => recovery != null;
 

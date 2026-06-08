@@ -29,6 +29,58 @@ void main() {
         'Beatriz ainda não completou o mapa corporal — vale cobrar hoje.',
       );
     });
+
+    test('strips markdown and rewrites contate imediatamente', () {
+      expect(
+        sanitizeTimeline360Copy(
+          'Oi, Beatriz. **Contate Beatriz imediatamente** para retomar.',
+        ),
+        'Oi, Beatriz. Você sumiu do radar — me responde por aqui que eu ajusto o plano. para retomar.',
+      );
+      expect(
+        sanitizeTimeline360Copy(
+          'Oi, Beatriz. **Contate Beatriz imediatamente** para retomar.',
+        ),
+        isNot(contains('**')),
+      );
+    });
+  });
+
+  group('timeline360KindHeader', () {
+    test('merges chat sender into kind header', () {
+      expect(
+        timeline360KindHeader(
+          kind: 'Chat',
+          title: 'Chat · Personal',
+          meta: 'PERSONAL',
+        ),
+        'Chat · Personal',
+      );
+    });
+  });
+
+  group('timeline360ShowTitleRow', () {
+    test('hides title row for chat', () {
+      expect(
+        timeline360ShowTitleRow(
+          kind: 'Chat',
+          title: 'Chat · Personal',
+          meta: 'PERSONAL',
+        ),
+        isFalse,
+      );
+    });
+
+    test('shows title row for radar', () {
+      expect(
+        timeline360ShowTitleRow(
+          kind: 'Radar',
+          title: 'Radar Focux · 19 pts',
+          meta: 'Completar mapa corporal',
+        ),
+        isTrue,
+      );
+    });
   });
 
   group('timeline360ShouldShowMetaChip', () {
@@ -69,19 +121,6 @@ void main() {
       expect(
         timeline360ShouldShowPriorityBadge(kind: 'Radar'),
         isTrue,
-      );
-    });
-  });
-
-  group('timeline360SenderChipLabel', () {
-    test('returns Personal for chat personal', () {
-      expect(
-        timeline360SenderChipLabel(
-          kind: 'Chat',
-          meta: 'PERSONAL',
-          title: 'Chat · Personal',
-        ),
-        'Personal',
       );
     });
   });

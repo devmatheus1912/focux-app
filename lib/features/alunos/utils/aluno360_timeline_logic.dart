@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../chat/data/chat_text_formatter.dart';
 import 'aluno360_copilot_logic.dart';
 
 /// Normalizes timeline copy to PT-BR and fixes legacy encoding leaks.
@@ -45,7 +46,47 @@ String sanitizeTimeline360Copy(String? raw) {
     (m) => '${m[1]} tem prioridade hoje: ${m[2]}.',
   );
 
-  return sanitizeCopilotIaLanguage(text);
+  text = sanitizeCopilotIaLanguage(text);
+  text = normalizeChatText(text);
+
+  text = text.replaceAllMapped(
+    RegExp(
+      r'oi,\s*(\S+)\.\s*contate\s+\1\s+imediatamente',
+      caseSensitive: false,
+    ),
+    (m) =>
+        'Oi, ${m[1]}. Você sumiu do radar — me responde por aqui que eu ajusto o plano.',
+  );
+  text = text.replaceAllMapped(
+    RegExp(r'contate\s+(\S+)\s+imediatamente', caseSensitive: false),
+    (m) => '${m[1]} sumiu do radar — manda um oi direto hoje.',
+  );
+
+  text = formatChatTextForDisplay(text);
+  return cleanCopilotText(text);
+}
+
+/// Header label for timeline kind row (merges chat sender into one line).
+String timeline360KindHeader({
+  required String kind,
+  required String title,
+  required String meta,
+}) {
+  if (kind != 'Chat') return kind;
+  final sender = timeline360SenderLabel(meta: meta, title: title);
+  if (sender != null) return 'Chat · $sender';
+  if (title.contains('·')) return title.trim();
+  return kind;
+}
+
+/// Whether the title row adds information beyond the kind header.
+bool timeline360ShowTitleRow({
+  required String kind,
+  required String title,
+  required String meta,
+}) {
+  if (kind == 'Chat') return false;
+  return title.trim().isNotEmpty;
 }
 
 /// Whether the meta line adds information beyond title/priority.
@@ -65,18 +106,15 @@ bool timeline360ShouldShowMetaChip({
   return true;
 }
 
-/// Chat events use sender chip instead of priority badge.
+/// Chat events use sender in kind header — no priority badge.
 bool timeline360ShouldShowPriorityBadge({required String kind}) {
   return kind != 'Chat';
 }
 
-/// Sender label for chat timeline rows.
-String? timeline360SenderChipLabel({
-  required String kind,
+String? timeline360SenderLabel({
   required String meta,
   required String title,
 }) {
-  if (kind != 'Chat') return null;
   final upper = meta.trim().toUpperCase();
   if (upper == 'PERSONAL') return 'Personal';
   if (upper == 'ALUNO') return 'Aluno';
@@ -96,3 +134,18 @@ Color timeline360PriorityColor(String? priority, {required Color primary}) {
 }
 
 bool timeline360BodyExpandable(String body) => body.trim().length > 96;
+
+bool timeline360HasFooterChips({
+  required String kind,
+  required String meta,
+  required String priority,
+  required String title,
+}) {
+  return timeline360ShouldShowPriorityBadge(kind: kind) ||
+      timeline360ShouldShowMetaChip(
+        kind: kind,
+        meta: meta,
+        priority: priority,
+        title: title,
+      );
+}
