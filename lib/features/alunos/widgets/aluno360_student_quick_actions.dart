@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
@@ -57,11 +58,7 @@ class Aluno360StudentQuickActions extends StatelessWidget {
                     children: [
                       Text(
                         'Ações rápidas',
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w900,
-                        ),
+                        style: Aluno360Layout.panelTitleStyle(context, ink),
                       ),
                       Text(
                         'Acesso e evolução de ${aluno.nome.split(' ').first}',
@@ -162,10 +159,10 @@ class Aluno360QuickActionPill extends StatelessWidget {
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: AppTypography.inter(
                     color: pillInk,
                     fontSize: 11,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),

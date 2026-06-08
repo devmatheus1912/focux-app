@@ -189,7 +189,7 @@ class Aluno360ModuleTile extends StatelessWidget {
         style: TextStyle(
           color: badgeInk,
           fontSize: 9,
-          fontWeight: FontWeight.w900,
+          fontWeight: FontWeight.w700,
           letterSpacing: 0.2,
           height: 1,
         ),

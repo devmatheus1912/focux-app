@@ -99,13 +99,9 @@ class AlunoDetailHeroCard extends StatelessWidget {
                                     displayName,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: ink,
-                                      fontSize:
-                                          compactContactPriority ? 15 : 15.5,
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: -0.25,
-                                      height: 1.05,
+                                    style: Aluno360Layout.identityNameStyle(
+                                      context,
+                                      ink,
                                     ),
                                   ),
                                 ),

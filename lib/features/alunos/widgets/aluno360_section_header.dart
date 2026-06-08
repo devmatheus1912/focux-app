@@ -4,7 +4,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
 
-/// Shared section header for Operação and Evolução inset cards (40×40 icon + title).
+/// Shared section header for Operação and Evolução inset cards.
 class Aluno360SectionHeader extends StatelessWidget {
   const Aluno360SectionHeader({
     super.key,
@@ -14,6 +14,7 @@ class Aluno360SectionHeader extends StatelessWidget {
     this.trailing,
     this.subtitleTrailing,
     this.trailingSemanticsLabel,
+    this.compact = false,
     required this.isDark,
   });
 
@@ -23,17 +24,28 @@ class Aluno360SectionHeader extends StatelessWidget {
   final Widget? trailing;
   final Widget? subtitleTrailing;
   final String? trailingSemanticsLabel;
+  final bool compact;
   final bool isDark;
 
-  static const double iconSize = 40;
-  static const double iconRadius = 15;
-  static const double iconGlyphSize = 20;
+  static const double _iconSize = 36;
+  static const double _iconRadius = 12;
+  static const double _iconGlyphSize = 18;
+  static const double _compactIconSize = 32;
+  static const double _compactIconRadius = 10;
+  static const double _compactIconGlyphSize = 16;
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
+    final iconBox = compact ? _compactIconSize : _iconSize;
+    final iconRadius = compact ? _compactIconRadius : _iconRadius;
+    final iconGlyph = compact ? _compactIconGlyphSize : _iconGlyphSize;
+    final titleStyle =
+        compact
+            ? Aluno360Layout.compactSectionTitleStyle(context, ink)
+            : Aluno360Layout.sectionTitleStyle(context, ink);
 
     final semanticsLabel = StringBuffer(title);
     if (subtitle != null && subtitle!.trim().isNotEmpty) {
@@ -48,63 +60,63 @@ class Aluno360SectionHeader extends StatelessWidget {
       header: true,
       label: semanticsLabel.toString(),
       child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: iconSize,
-          height: iconSize,
-          decoration: BoxDecoration(
-            color: BrandPalette.soft(primary, dark: isDark),
-            borderRadius: BorderRadius.circular(iconRadius),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: iconBox,
+            height: iconBox,
+            decoration: BoxDecoration(
+              color: BrandPalette.soft(primary, dark: isDark),
+              borderRadius: BorderRadius.circular(iconRadius),
+            ),
+            child: Icon(icon, color: primary, size: iconGlyph),
           ),
-          child: Icon(icon, color: primary, size: iconGlyphSize),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: Aluno360Layout.sectionTitleStyle(context, ink),
-                    ),
-                  ),
-                  if (trailing != null) ...[
-                    const SizedBox(width: 8),
-                    Flexible(child: trailing!),
-                  ],
-                ],
-              ),
-              if (subtitle != null) ...[
-                const SizedBox(height: 3),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: Text(
-                        subtitle!,
-                        style: Aluno360Layout.captionStyle(context).copyWith(
-                          color: mute,
-                          height: 1.3,
-                        ),
+                        title,
+                        style: titleStyle,
                       ),
                     ),
-                    if (subtitleTrailing != null) ...[
+                    if (trailing != null) ...[
                       const SizedBox(width: 8),
-                      subtitleTrailing!,
+                      Flexible(child: trailing!),
                     ],
                   ],
                 ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 2),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          subtitle!,
+                          style: Aluno360Layout.captionStyle(context).copyWith(
+                            color: mute,
+                            height: 1.3,
+                          ),
+                        ),
+                      ),
+                      if (subtitleTrailing != null) ...[
+                        const SizedBox(width: 8),
+                        subtitleTrailing!,
+                      ],
+                    ],
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
-      ],
-    ),
+        ],
+      ),
     );
   }
 }

@@ -371,11 +371,10 @@ class Aluno360ContactPriorityBadge extends StatelessWidget {
       ),
       child: Text(
         'Contato',
-        style: Aluno360Layout.metaStyle(context).copyWith(
+        style: Aluno360Layout.chipLabelStyle(
+          context,
           color: EagleTokens.bad,
-          fontWeight: FontWeight.w900,
-          letterSpacing: 0.2,
-        ),
+        ).copyWith(letterSpacing: 0.2),
       ),
     ),
     );

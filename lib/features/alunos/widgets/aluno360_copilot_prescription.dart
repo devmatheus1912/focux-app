@@ -47,12 +47,8 @@ class _Aluno360CopilotPrescriptionState
   String? _lastOverflowText;
   double? _lastOverflowWidth;
 
-  TextStyle _actionStyle(Color ink) => AppTypography.inter(
-    color: ink,
-    fontSize: 13,
-    fontWeight: FontWeight.w600,
-    height: 1.38,
-  );
+  TextStyle _actionStyle(Color ink) =>
+      Aluno360Layout.bodyEmphasisStyle(context, ink);
 
   void _scheduleActionOverflowCheck({
     required String text,
@@ -267,12 +263,10 @@ class _Aluno360CopilotPrescriptionState
                         widget.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: Aluno360Layout.chipLabelStyle(
+                          context,
                           color: ink,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.2,
-                        ),
+                        ).copyWith(letterSpacing: 0.2),
                       ),
                     ),
                   ],

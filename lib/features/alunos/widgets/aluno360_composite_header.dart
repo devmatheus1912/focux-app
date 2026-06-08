@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
 
@@ -44,14 +45,14 @@ class Aluno360DetailTabBar extends StatelessWidget {
             unselectedLabelColor: mute,
             indicatorWeight: 2,
             dividerColor: Colors.transparent,
-            labelStyle: const TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.15,
-            ),
-            unselectedLabelStyle: const TextStyle(
-              fontSize: 12.5,
+            labelStyle: TextStyle(
+              fontSize: TokensStrip.fontBodySm,
               fontWeight: FontWeight.w600,
+              letterSpacing: -0.1,
+            ),
+            unselectedLabelStyle: TextStyle(
+              fontSize: TokensStrip.fontBodySm,
+              fontWeight: FontWeight.w500,
             ),
             tabs: const [
               Tab(text: 'Operação'),
@@ -107,12 +108,7 @@ class Aluno360HeaderToolbar extends StatelessWidget {
               displayName,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: ink,
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.2,
-              ),
+              style: Aluno360Layout.identityNameStyle(context, ink),
             ),
           )
         else

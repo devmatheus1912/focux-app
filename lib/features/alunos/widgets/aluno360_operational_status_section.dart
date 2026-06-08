@@ -269,15 +269,12 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
                               'Aderência · últimos 7 dias',
                               style: Aluno360Layout.metaStyle(context).copyWith(
                                 color: ink,
-                                fontWeight: FontWeight.w800,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               week.caption,
-                              style: Aluno360Layout.metaStyle(context).copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
+                              style: Aluno360Layout.captionStyle(context),
                             ),
                           ],
                         ),
@@ -370,11 +367,11 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
                           size: 16,
                           color: primary,
                         ),
-                        label: const Text(
+                        label: Text(
                           'Pedir check-in',
-                          style: TextStyle(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w800,
+                          style: Aluno360Layout.chipLabelStyle(
+                            context,
+                            color: primary,
                           ),
                         ),
                         style: Aluno360Layout.operacaoOutlinedButtonStyle(

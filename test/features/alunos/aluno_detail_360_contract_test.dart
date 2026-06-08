@@ -278,7 +278,10 @@ void main() {
           .readAsStringSync(),
       allOf(
         contains('tabSectionTitleStyle'),
+        contains('compactSectionTitleStyle'),
         contains('panelTitleStyle'),
+        contains('TokensStrip.fontH2'),
+        contains('TokensStrip.fontBody'),
       ),
     );
     expect(

@@ -238,6 +238,7 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
                     icon: Icons.event_available_rounded,
                     title: 'Próximo contato',
                     subtitle: subtitle,
+                    compact: true,
                     trailing: Container(
                       width: 30,
                       height: 30,

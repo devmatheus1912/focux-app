@@ -138,10 +138,9 @@ class _Aluno360RecoveryInsightCardState
                       const SizedBox(height: 3),
                       Text(
                         snapshot.recoveryLabel,
-                        style: TextStyle(
-                          color: chrome.ink,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 16,
+                        style: Aluno360Layout.sectionTitleStyle(
+                          context,
+                          chrome.ink,
                         ),
                       ),
                       const SizedBox(height: 4),

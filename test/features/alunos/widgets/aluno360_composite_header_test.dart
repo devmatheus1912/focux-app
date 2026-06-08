@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:focux_app/features/alunos/constants/aluno_360_layout.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_composite_header.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    GoogleFonts.config.allowRuntimeFetching = false;
+  });
 
   testWidgets('hero strip aligns flush with tab bar at 390px width', (tester) async {
     const topInset = 44.0;

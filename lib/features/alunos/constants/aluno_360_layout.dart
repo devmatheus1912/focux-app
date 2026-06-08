@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 /// Layout tokens for Aluno 360 (hero, sticky CTA, scroll insets).
 abstract final class Aluno360Layout {
@@ -148,17 +150,17 @@ abstract final class Aluno360Layout {
     );
   }
 
-  /// WCAG-friendly caption for cards (min 12px, gray-700 on light).
+  /// Secondary copy inside cards — matches Home/Alunos muted body.
   static TextStyle captionStyle(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return TextStyle(
-      fontSize: 12,
-      height: 1.35,
-      fontWeight: FontWeight.w500,
+    return AppTypography.inter(
+      fontSize: TokensStrip.fontBodySm,
+      height: TokensStrip.leadingBody,
+      fontWeight: FontWeight.w400,
       color:
           isDark
               ? EagleTokens.darkInk.withValues(alpha: 0.82)
-              : const Color(0xFF374151),
+              : TokensStrip.textSecondary,
     );
   }
 
@@ -170,37 +172,50 @@ abstract final class Aluno360Layout {
     );
   }
 
-  /// Chip / button labels inside Operação cards (min 12px).
+  /// Chip / button labels inside Operação cards.
   static TextStyle chipLabelStyle(BuildContext context, {Color? color}) {
     return captionStyle(context).copyWith(
       color: color,
-      fontSize: 12,
-      fontWeight: FontWeight.w800,
+      fontSize: TokensStrip.fontBodySm,
+      fontWeight: FontWeight.w600,
       height: 1.2,
     );
   }
 
-  /// H2 titles on tab surfaces (Medidas, Módulos).
+  /// H2 on tab surfaces — same scale as Home/Dashboard section headings.
   static TextStyle tabSectionTitleStyle(
     BuildContext context, {
     required Color primary,
     required bool isDark,
   }) {
     return AppTypography.inter(
-      fontSize: 20,
-      fontWeight: FontWeight.w700,
-      letterSpacing: -0.4,
+      fontSize: TokensStrip.fontH2,
+      fontWeight: TokensStrip.weightH2,
+      letterSpacing: TokensStrip.trackingH2,
+      height: 1.2,
       color: BrandPalette.sectionHeading(primary, dark: isDark),
     );
   }
 
-  /// Section titles inside inset cards (Operação, Evolução).
+  /// Card section titles — same weight as Alunos list card names.
   static TextStyle sectionTitleStyle(BuildContext context, Color ink) {
     return AppTypography.inter(
       color: ink,
-      fontSize: 17,
-      fontWeight: FontWeight.w900,
-      letterSpacing: -0.2,
+      fontSize: TokensStrip.fontBody,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.15,
+      height: 1.2,
+    );
+  }
+
+  /// Collapsible inset headers (Próximo contato compact).
+  static TextStyle compactSectionTitleStyle(BuildContext context, Color ink) {
+    return AppTypography.inter(
+      color: ink,
+      fontSize: TokensStrip.fontBodySm,
+      fontWeight: FontWeight.w600,
+      letterSpacing: -0.1,
+      height: 1.2,
     );
   }
 
@@ -208,20 +223,47 @@ abstract final class Aluno360Layout {
   static TextStyle panelTitleStyle(BuildContext context, Color ink) {
     return AppTypography.inter(
       color: ink,
-      fontSize: 14,
-      fontWeight: FontWeight.w800,
+      fontSize: TokensStrip.fontBodySm,
+      fontWeight: FontWeight.w600,
       height: 1.25,
+      letterSpacing: -0.05,
+    );
+  }
+
+  /// Alias for [sectionTitleStyle] — single card-title token.
+  static TextStyle cardTitleStyle(BuildContext context, Color ink) {
+    return sectionTitleStyle(context, ink);
+  }
+
+  /// Emphasized body inside cards (prescription, instructions).
+  static TextStyle bodyEmphasisStyle(BuildContext context, Color ink) {
+    return AppTypography.inter(
+      color: ink,
+      fontSize: TokensStrip.fontBodySm,
+      fontWeight: FontWeight.w600,
+      height: 1.38,
+    );
+  }
+
+  /// Compact metric inside signal tiles and chips.
+  static TextStyle inlineMetricStyle(BuildContext context, Color ink) {
+    return AppTypography.inter(
+      color: ink,
+      fontSize: TokensStrip.fontBodySm,
+      fontWeight: FontWeight.w700,
+      height: 1.15,
       letterSpacing: -0.1,
     );
   }
 
-  /// Card titles shared by Operação and Evolução blocks.
-  static TextStyle cardTitleStyle(BuildContext context, Color ink) {
-    return TextStyle(
+  /// Hero / identity name on Aluno 360 toolbar and hero card.
+  static TextStyle identityNameStyle(BuildContext context, Color ink) {
+    return AppTypography.inter(
       color: ink,
-      fontSize: 16,
-      fontWeight: FontWeight.w900,
+      fontSize: TokensStrip.fontBody,
+      fontWeight: FontWeight.w700,
       letterSpacing: -0.15,
+      height: 1.15,
     );
   }
 
@@ -239,8 +281,8 @@ abstract final class Aluno360Layout {
   static TextStyle timelineTileTitleStyle(BuildContext context, Color ink) {
     return metaStyle(context).copyWith(
       color: ink,
-      fontSize: 13,
-      fontWeight: FontWeight.w900,
+      fontSize: TokensStrip.fontBodySm,
+      fontWeight: FontWeight.w600,
       height: 1.25,
     );
   }

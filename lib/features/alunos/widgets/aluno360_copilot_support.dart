@@ -57,19 +57,14 @@ class Aluno360CopilotSignalTile extends StatelessWidget {
                       signal.label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Aluno360Layout.metaStyle(context).copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
+                      style: Aluno360Layout.metaStyle(context),
                     ),
                     const SizedBox(height: 1),
                     Text(
                       signal.value,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Aluno360Layout.captionStyle(context).copyWith(
-                        color: ink,
-                        fontWeight: FontWeight.w900,
-                      ),
+                      style: Aluno360Layout.inlineMetricStyle(context, ink),
                     ),
                     if (signal.detail.isNotEmpty) ...[
                       const SizedBox(height: 1),
@@ -130,11 +125,7 @@ class Aluno360CopilotTaskStatus extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w900,
-                  ),
+                  style: Aluno360Layout.panelTitleStyle(context, ink),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -143,7 +134,6 @@ class Aluno360CopilotTaskStatus extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: Aluno360Layout.captionStyle(context).copyWith(
                     color: mute,
-                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
@@ -238,10 +228,9 @@ class _Aluno360CopilotActionRowState
                             'Command Center',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                            style: Aluno360Layout.chipLabelStyle(
+                              context,
                               color: widget.primary,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 12.5,
                             ),
                           ),
                         ),
@@ -291,10 +280,9 @@ class _Aluno360CopilotActionRowState
                             'Abrir chat',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                            style: Aluno360Layout.chipLabelStyle(
+                              context,
                               color: widget.primary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w900,
                             ),
                           ),
                         ),
