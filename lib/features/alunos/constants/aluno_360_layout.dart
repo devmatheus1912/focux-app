@@ -254,4 +254,9 @@ abstract final class Aluno360Layout {
 
   /// Tablet breakpoint for side-by-side status + copilot.
   static const double operacaoTabletBreakpoint = 600;
+
+  /// Timeline list tile icon (aligned with section header proportions).
+  static const double timelineTileIconSize = 38;
+  static const double timelineTileIconRadius = 14;
+  static const double timelineTileIconGlyphSize = 19;
 }

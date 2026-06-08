@@ -44,6 +44,36 @@ void main() {
         isNot(contains('**')),
       );
     });
+
+    test('strips bang and collapses copilot follow-up template', () {
+      expect(
+        sanitizeTimeline360Copy(
+          '! Passei pelo seu acompanhamento agora e o próximo passo para seu objetivo é: reforçar check-in.',
+        ),
+        'Próximo passo do plano: reforçar check-in.',
+      );
+    });
+
+    test('removes orphan inactivity suffix after radar rewrite', () {
+      expect(
+        sanitizeTimeline360Copy(
+          'Você sumiu do radar — me responde por aqui que eu ajusto o plano. para entender o motivo da inatividade.',
+        ),
+        'Você sumiu do radar — me responde por aqui que eu ajusto o plano.',
+      );
+    });
+  });
+
+  group('timeline360ChatBodyFingerprint', () {
+    test('dedupes identical copilot messages', () {
+      final a = timeline360ChatBodyFingerprint(
+        '! Passei pelo seu acompanhamento agora e o próximo passo para seu objetivo é: reforçar check-in.',
+      );
+      final b = timeline360ChatBodyFingerprint(
+        'Passei pelo seu acompanhamento agora e o próximo passo para seu objetivo é: reforçar check-in.',
+      );
+      expect(a, b);
+    });
   });
 
   group('timeline360ChatPreviewBody', () {

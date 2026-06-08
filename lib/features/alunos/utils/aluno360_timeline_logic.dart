@@ -10,6 +10,8 @@ String sanitizeTimeline360Copy(String? raw) {
   var text = raw.trim();
   if (text.isEmpty) return '';
 
+  text = text.replaceFirst(RegExp(r'^!\s*'), '');
+
   text = text.replaceAll(RegExp(r'\bacao\b', caseSensitive: false), 'ação');
   text = text.replaceAll(RegExp(r'\bevolucao\b', caseSensitive: false), 'evolução');
   text = text.replaceAll(RegExp(r'\besta\b', caseSensitive: false), 'está');
@@ -66,15 +68,68 @@ String sanitizeTimeline360Copy(String? raw) {
 
   text = formatChatTextForDisplay(text);
   text = cleanCopilotText(text);
+  text = timeline360CollapseCopilotTemplate(text);
   return timeline360FinalizeCopy(text);
+}
+
+String timeline360CollapseCopilotTemplate(String text) {
+  var out = text.trim();
+  if (out.isEmpty) return out;
+
+  final extracted = out.replaceFirstMapped(
+    RegExp(
+      r'^passei pelo seu acompanhamento[^.]*próximo passo[^:]*:\s*(.+)$',
+      caseSensitive: false,
+      dotAll: true,
+    ),
+    (m) => 'Próximo passo do plano: ${m[1]!.trim()}',
+  );
+  if (extracted != out) return extracted;
+
+  if (RegExp(
+    r'^passei pelo seu acompanhamento',
+    caseSensitive: false,
+  ).hasMatch(out)) {
+    return 'Acompanhamento registrado — revise o próximo passo no chat.';
+  }
+  return out;
 }
 
 String timeline360FinalizeCopy(String text) {
   var out = text.trim();
   out = out.replaceAll(RegExp(r'\s+para retomar\.?$', caseSensitive: false), '');
   out = out.replaceAll(RegExp(r'\.\s+para retomar\.?$', caseSensitive: false), '.');
+  out = out.replaceAllMapped(
+    RegExp(
+      r'(ajusto o plano)\.?\s+para entender o motivo da inatividad[ée][^.]*\.?$',
+      caseSensitive: false,
+    ),
+    (m) => '${m[1]}.',
+  );
+  out = out.replaceAll(
+    RegExp(
+      r'\s+para entender o motivo da inatividad[ée][^.]*\.?$',
+      caseSensitive: false,
+    ),
+    '',
+  );
   out = out.replaceAll(RegExp(r'\s{2,}'), ' ');
   return out.trim();
+}
+
+/// Fingerprint para deduplicar previews de chat no FE (defensivo).
+String timeline360ChatBodyFingerprint(String body) {
+  final text = sanitizeTimeline360Copy(body).toLowerCase().replaceAll(
+    RegExp(r'\s+'),
+    ' ',
+  ).trim();
+  if (text.isEmpty) return '';
+  if (text.startsWith('próximo passo do plano:')) return text;
+  if (text.contains('sumiu do radar')) return 'chat:sumiu_radar';
+  if (text.contains('acompanhamento registrado')) {
+    return 'chat:copilot_acompanhamento';
+  }
+  return text.replaceAll(RegExp(r'[^a-z0-9áàâãéêíóôõúç\s]'), '').trim();
 }
 
 /// Preview body for chat rows — drops redundant "Oi, {nome}." after kind header.

@@ -41,7 +41,7 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
         return 'Atenção';
       case 'SEM_DADOS':
       default:
-        return 'Sem dados';
+        return 'Aguardando check-ins';
     }
   }
 
@@ -153,28 +153,41 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                 ),
                 if (sparklineData.isNotEmpty) ...[
                   const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Volume semanal',
-                          style: Aluno360Layout.metaStyle(context).copyWith(
-                            color: mute,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.4,
+                  Builder(
+                    builder: (context) {
+                      final minVol = sparklineData.reduce(
+                        (a, b) => a < b ? a : b,
+                      );
+                      final maxVol = sparklineData.reduce(
+                        (a, b) => a > b ? a : b,
+                      );
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Volume semanal',
+                              style: Aluno360Layout.metaStyle(context).copyWith(
+                                color: mute,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.4,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      Semantics(
-                        label: 'Tendência de volume nas últimas semanas',
-                        child: FxSparkline(
-                          data: sparklineData,
-                          color: sigColor,
-                          width: 88,
-                          height: 28,
-                        ),
-                      ),
-                    ],
+                          Semantics(
+                            label:
+                                'Tendência de volume nas últimas semanas, '
+                                'de ${minVol.toStringAsFixed(0)} a '
+                                '${maxVol.toStringAsFixed(0)}',
+                            child: FxSparkline(
+                              data: sparklineData,
+                              color: sigColor,
+                              width: 88,
+                              height: 28,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
                 const SizedBox(height: 12),

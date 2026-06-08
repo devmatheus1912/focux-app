@@ -91,14 +91,37 @@ class Aluno360TimelineCard extends StatelessWidget {
     );
   }
 
-  List<Timeline360Item> _items(Color primary) {
+  List<Timeline360Item> _allItems(Color primary) {
     if (!timelineApiAsync.hasValue) {
       return const [];
     }
-    return timelineApiAsync.value!
-        .take(7)
-        .map((event) => _itemFromApi(event, primary: primary))
-        .toList();
+    final mapped =
+        timelineApiAsync.value!
+            .map((event) => _itemFromApi(event, primary: primary))
+            .toList();
+    return _dedupeChatTimelineItems(mapped);
+  }
+
+  static List<Timeline360Item> _dedupeChatTimelineItems(
+    List<Timeline360Item> items,
+  ) {
+    final out = <Timeline360Item>[];
+    final seen = <String>{};
+    for (final item in items) {
+      if (item.kind != 'Chat') {
+        out.add(item);
+        continue;
+      }
+      final fingerprint = timeline360ChatBodyFingerprint(item.body);
+      if (fingerprint.isEmpty) {
+        out.add(item);
+        continue;
+      }
+      if (seen.contains(fingerprint)) continue;
+      seen.add(fingerprint);
+      out.add(item);
+    }
+    return out;
   }
 
   void _openTimelineCheckin(BuildContext context) {
@@ -117,9 +140,10 @@ class Aluno360TimelineCard extends StatelessWidget {
     final line = ShellChrome.of(context).line;
     final loading = timelineApiAsync.isLoading && !timelineApiAsync.hasValue;
     final error = timelineApiAsync.hasError && !timelineApiAsync.hasValue;
-    final items = _items(primary);
-    final visibleItems = items.take(3).toList();
-    final hasMore = items.length > visibleItems.length;
+    final allItems = _allItems(primary);
+    final previewItems = allItems.take(7).toList();
+    final visibleItems = previewItems.take(3).toList();
+    final hasMore = allItems.length > visibleItems.length;
 
     return Semantics(
       container: true,
@@ -155,7 +179,7 @@ class Aluno360TimelineCard extends StatelessWidget {
                 height: 1.35,
               ),
             ),
-          ] else if (items.isEmpty) ...[
+          ] else if (allItems.isEmpty) ...[
             const SizedBox(height: 14),
             Aluno360ActionEmptyPanel(
               key: const ValueKey('aluno360_timeline_empty'),
@@ -206,8 +230,9 @@ class Aluno360TimelineCard extends StatelessWidget {
                 child: SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
-                    onPressed: () => _showFullTimeline(context, items, primary),
-                    child: Text('Ver histórico completo · ${items.length}'),
+                    onPressed:
+                        () => _showFullTimeline(context, allItems, primary),
+                    child: Text('Ver histórico completo · ${allItems.length}'),
                   ),
                 ),
               ),
@@ -356,11 +381,7 @@ void showTimeline360BodySheet(BuildContext context, Timeline360Item item) {
                     Expanded(
                       child: Text(
                         '${item.kind} · ${item.title}',
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w900,
-                        ),
+                        style: Aluno360Layout.sectionTitleStyle(context, ink),
                       ),
                     ),
                     IconButton(
@@ -446,13 +467,19 @@ class Timeline360Tile extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 34,
-          height: 34,
+          width: Aluno360Layout.timelineTileIconSize,
+          height: Aluno360Layout.timelineTileIconSize,
           decoration: BoxDecoration(
             color: item.color.withValues(alpha: isDark ? 0.16 : 0.10),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(
+              Aluno360Layout.timelineTileIconRadius,
+            ),
           ),
-          child: Icon(item.icon, color: item.color, size: 17),
+          child: Icon(
+            item.icon,
+            color: item.color,
+            size: Aluno360Layout.timelineTileIconGlyphSize,
+          ),
         ),
         const SizedBox(width: 10),
         Expanded(
