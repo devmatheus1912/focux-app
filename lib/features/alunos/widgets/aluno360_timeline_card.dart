@@ -213,6 +213,7 @@ class Aluno360TimelineCard extends StatelessWidget {
                 item: item,
                 isDark: isDark,
                 accent: primary,
+                alunoFirstName: aluno.nome.split(' ').first,
               ),
               if (item != visibleItems.last) Divider(height: 18, color: line),
             ],
@@ -308,6 +309,7 @@ class Aluno360TimelineCard extends StatelessWidget {
                           item: items[index - 1],
                           isDark: isDark,
                           accent: primary,
+                          alunoFirstName: aluno.nome.split(' ').first,
                         );
                       },
                     ),
@@ -410,11 +412,13 @@ class Timeline360Tile extends StatelessWidget {
     required this.item,
     required this.isDark,
     required this.accent,
+    this.alunoFirstName,
   });
 
   final Timeline360Item item;
   final bool isDark;
   final Color accent;
+  final String? alunoFirstName;
 
   @override
   Widget build(BuildContext context) {
@@ -444,6 +448,17 @@ class Timeline360Tile extends StatelessWidget {
       meta: item.meta,
       priority: item.priority,
       title: item.title,
+    );
+    final previewBody =
+        item.kind == 'Chat'
+            ? timeline360ChatPreviewBody(
+              item.body,
+              alunoFirstName: alunoFirstName,
+            )
+            : item.body;
+    final linkColor = Aluno360Layout.timelineLinkForeground(
+      accent,
+      isDark: isDark,
     );
     final child = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -496,7 +511,7 @@ class Timeline360Tile extends StatelessWidget {
               ],
               const SizedBox(height: 3),
               Text(
-                item.body,
+                previewBody,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: Aluno360Layout.captionStyle(context).copyWith(
@@ -509,10 +524,10 @@ class Timeline360Tile extends StatelessWidget {
                 Text(
                   'Ver mensagem completa',
                   style: Aluno360Layout.captionStyle(context).copyWith(
-                    color: accent,
+                    color: linkColor,
                     fontWeight: FontWeight.w800,
                     decoration: TextDecoration.underline,
-                    decorationColor: accent.withValues(alpha: 0.45),
+                    decorationColor: linkColor.withValues(alpha: 0.55),
                   ),
                 ),
               ],

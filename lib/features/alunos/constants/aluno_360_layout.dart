@@ -197,6 +197,11 @@ abstract final class Aluno360Layout {
     return captionStyle(context);
   }
 
+  /// WCAG-friendly link color for timeline expand actions (≥4.5:1 on white).
+  static Color timelineLinkForeground(Color primary, {required bool isDark}) {
+    return operacaoOutlinedForeground(primary, isDark: isDark);
+  }
+
   /// Timeline event title inside list tiles.
   static TextStyle timelineTileTitleStyle(BuildContext context, Color ink) {
     return metaStyle(context).copyWith(

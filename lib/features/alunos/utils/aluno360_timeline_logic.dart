@@ -51,19 +51,56 @@ String sanitizeTimeline360Copy(String? raw) {
 
   text = text.replaceAllMapped(
     RegExp(
-      r'oi,\s*(\S+)\.\s*contate\s+\1\s+imediatamente',
+      r'oi,\s*(\S+)\.\s*contate\s+\1\s+imediatamente(?:\s+para\s+retomar)?\.?',
       caseSensitive: false,
     ),
-    (m) =>
-        'Oi, ${m[1]}. Você sumiu do radar — me responde por aqui que eu ajusto o plano.',
+    (_) => 'Você sumiu do radar — me responde por aqui que eu ajusto o plano.',
   );
   text = text.replaceAllMapped(
-    RegExp(r'contate\s+(\S+)\s+imediatamente', caseSensitive: false),
+    RegExp(
+      r'contate\s+(\S+)\s+imediatamente(?:\s+para\s+retomar)?\.?',
+      caseSensitive: false,
+    ),
     (m) => '${m[1]} sumiu do radar — manda um oi direto hoje.',
   );
 
   text = formatChatTextForDisplay(text);
-  return cleanCopilotText(text);
+  text = cleanCopilotText(text);
+  return timeline360FinalizeCopy(text);
+}
+
+String timeline360FinalizeCopy(String text) {
+  var out = text.trim();
+  out = out.replaceAll(RegExp(r'\s+para retomar\.?$', caseSensitive: false), '');
+  out = out.replaceAll(RegExp(r'\.\s+para retomar\.?$', caseSensitive: false), '.');
+  out = out.replaceAll(RegExp(r'\s{2,}'), ' ');
+  return out.trim();
+}
+
+/// Preview body for chat rows — drops redundant "Oi, {nome}." after kind header.
+String timeline360ChatPreviewBody(
+  String body, {
+  String? alunoFirstName,
+}) {
+  var text = body.trim();
+  if (text.isEmpty) return text;
+
+  final patterns = <String>[];
+  if (alunoFirstName != null && alunoFirstName.trim().isNotEmpty) {
+    patterns.add('oi,\\s*${RegExp.escape(alunoFirstName.trim())}\\.?\\s*');
+  }
+  patterns.add(r'oi,\s*\S+\.?\s*');
+
+  for (final pattern in patterns) {
+    final stripped = text.replaceFirst(
+      RegExp('^$pattern', caseSensitive: false),
+      '',
+    );
+    if (stripped != text && stripped.trim().isNotEmpty) {
+      return stripped.trim();
+    }
+  }
+  return text;
 }
 
 /// Header label for timeline kind row (merges chat sender into one line).

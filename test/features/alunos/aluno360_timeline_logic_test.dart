@@ -35,13 +35,25 @@ void main() {
         sanitizeTimeline360Copy(
           'Oi, Beatriz. **Contate Beatriz imediatamente** para retomar.',
         ),
-        'Oi, Beatriz. Você sumiu do radar — me responde por aqui que eu ajusto o plano. para retomar.',
+        'Você sumiu do radar — me responde por aqui que eu ajusto o plano.',
       );
       expect(
         sanitizeTimeline360Copy(
           'Oi, Beatriz. **Contate Beatriz imediatamente** para retomar.',
         ),
         isNot(contains('**')),
+      );
+    });
+  });
+
+  group('timeline360ChatPreviewBody', () {
+    test('drops redundant Oi greeting in chat preview', () {
+      expect(
+        timeline360ChatPreviewBody(
+          'Oi, Beatriz. Como foi seu último treino?',
+          alunoFirstName: 'Beatriz',
+        ),
+        'Como foi seu último treino?',
       );
     });
   });
