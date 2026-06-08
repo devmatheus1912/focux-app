@@ -22,25 +22,27 @@ class Aluno360EvolucaoTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        evolucaoCard,
-        const SizedBox(height: Aluno360Layout.sectionGap),
-        Aluno360OperacaoEntrance(
-          enabled: animateEntrance,
-          delay: const Duration(milliseconds: 40),
-          onPlayed: onEntrancePlayed,
-          child: timelineCard,
-        ),
-        const SizedBox(height: Aluno360Layout.sectionGap),
-        Aluno360OperacaoEntrance(
-          enabled: animateEntrance,
-          delay: const Duration(milliseconds: 80),
-          onPlayed: onEntrancePlayed,
-          child: weightCard,
-        ),
-      ],
+    return Aluno360Layout.operacaoContentWidthLimiter(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          evolucaoCard,
+          const SizedBox(height: Aluno360Layout.sectionGap),
+          Aluno360OperacaoEntrance(
+            enabled: animateEntrance,
+            delay: const Duration(milliseconds: 40),
+            onPlayed: onEntrancePlayed,
+            child: timelineCard,
+          ),
+          const SizedBox(height: Aluno360Layout.sectionGap),
+          Aluno360OperacaoEntrance(
+            enabled: animateEntrance,
+            delay: const Duration(milliseconds: 80),
+            onPlayed: onEntrancePlayed,
+            child: weightCard,
+          ),
+        ],
+      ),
     );
   }
 }

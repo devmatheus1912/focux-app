@@ -205,9 +205,8 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                 const SizedBox(height: 12),
                 Text(
                   'Próxima ação',
-                  style: TextStyle(
+                  style: Aluno360Layout.metaStyle(context).copyWith(
                     color: mute,
-                    fontSize: 11,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.6,
                   ),

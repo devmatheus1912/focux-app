@@ -7,6 +7,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_sparkline.dart';
+import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
 import 'aluno360_empty_mini_state.dart';
@@ -55,13 +56,11 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                   children: [
                     Text(
                       'PESO · TENDÊNCIA',
-                      style: TextStyle(
+                      style: Aluno360Layout.metaStyle(context).copyWith(
                         color:
                             isDark
                                 ? EagleTokens.darkInkMute
                                 : TokensStrip.textSecondary,
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w600,
                         letterSpacing: 0.8,
                       ),
                     ),
@@ -113,12 +112,11 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.end,
-                  style: TextStyle(
+                  style: Aluno360Layout.captionStyle(context).copyWith(
                     color:
                         isDark
                             ? EagleTokens.darkInkMute
                             : TokensStrip.textSecondary,
-                    fontSize: 11.5,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

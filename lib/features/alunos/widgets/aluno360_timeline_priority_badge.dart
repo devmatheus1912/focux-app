@@ -1,0 +1,42 @@
+import 'package:flutter/material.dart';
+
+import '../constants/aluno_360_layout.dart';
+import '../utils/aluno360_timeline_logic.dart';
+
+/// Semantic P0–P3 badge for timeline events.
+class Aluno360TimelinePriorityBadge extends StatelessWidget {
+  const Aluno360TimelinePriorityBadge({
+    super.key,
+    required this.priority,
+    required this.accent,
+    required this.isDark,
+  });
+
+  final String priority;
+  final Color accent;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = priority.trim().isEmpty ? 'P2' : priority.trim().toUpperCase();
+    final color = timeline360PriorityColor(label, primary: accent);
+    return Semantics(
+      label: 'Prioridade $label',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: isDark ? 0.22 : 0.12),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: color.withValues(alpha: isDark ? 0.5 : 0.45)),
+        ),
+        child: Text(
+          label,
+          style: Aluno360Layout.chipLabelStyle(context, color: color).copyWith(
+            fontSize: 11,
+            letterSpacing: 0.2,
+          ),
+        ),
+      ),
+    );
+  }
+}
