@@ -58,7 +58,9 @@ void main() {
       at: null,
       kind: 'Chat',
       title: 'Chat · Personal',
-      body: _longChatBodies.first,
+      body:
+          '${_longChatBodies.first} '
+          'Inclua também como se sentiu nas últimas séries e se teve alguma dor.',
       meta: 'PERSONAL',
       priority: 'P3',
       icon: Icons.chat_bubble_outline,
@@ -113,7 +115,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Histórico 360'), findsNothing);
 
-    await tester.tap(find.text('Ver mensagem completa'));
+    await tester.tap(find.text('Ler mensagem inteira'));
     await tester.pumpAndSettle();
 
     expect(find.byType(DraggableScrollableSheet), findsNothing);

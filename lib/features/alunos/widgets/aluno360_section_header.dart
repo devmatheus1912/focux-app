@@ -12,6 +12,7 @@ class Aluno360SectionHeader extends StatelessWidget {
     required this.title,
     this.subtitle,
     this.trailing,
+    this.trailingSemanticsLabel,
     required this.isDark,
   });
 
@@ -19,6 +20,7 @@ class Aluno360SectionHeader extends StatelessWidget {
   final String title;
   final String? subtitle;
   final Widget? trailing;
+  final String? trailingSemanticsLabel;
   final bool isDark;
 
   static const double iconSize = 40;
@@ -31,7 +33,19 @@ class Aluno360SectionHeader extends StatelessWidget {
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
 
-    return Row(
+    final semanticsLabel = StringBuffer(title);
+    if (subtitle != null && subtitle!.trim().isNotEmpty) {
+      semanticsLabel.write(', ${subtitle!.trim()}');
+    }
+    if (trailingSemanticsLabel != null &&
+        trailingSemanticsLabel!.trim().isNotEmpty) {
+      semanticsLabel.write(', ${trailingSemanticsLabel!.trim()}');
+    }
+
+    return Semantics(
+      header: true,
+      label: semanticsLabel.toString(),
+      child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
@@ -57,7 +71,10 @@ class Aluno360SectionHeader extends StatelessWidget {
                       style: Aluno360Layout.sectionTitleStyle(context, ink),
                     ),
                   ),
-                  if (trailing != null) trailing!,
+                  if (trailing != null) ...[
+                    const SizedBox(width: 8),
+                    Flexible(child: trailing!),
+                  ],
                 ],
               ),
               if (subtitle != null) ...[
@@ -74,6 +91,7 @@ class Aluno360SectionHeader extends StatelessWidget {
           ),
         ),
       ],
+    ),
     );
   }
 }

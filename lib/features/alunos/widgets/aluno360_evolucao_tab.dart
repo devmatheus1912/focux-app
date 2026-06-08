@@ -20,10 +20,11 @@ class Aluno360EvolucaoTab extends StatelessWidget {
   final bool animateEntrance;
   final VoidCallback onEntrancePlayed;
 
-  Widget _section(int step, Widget child) {
+  Widget _section(int step, Widget child, {bool tablet = false}) {
+    final baseMs = tablet ? 60 : 40;
     return Aluno360OperacaoEntrance(
       enabled: animateEntrance,
-      delay: Duration(milliseconds: step * 40),
+      delay: Duration(milliseconds: step * baseMs),
       onPlayed: onEntrancePlayed,
       child: child,
     );
@@ -34,6 +35,9 @@ class Aluno360EvolucaoTab extends StatelessWidget {
     final inteligente = _section(0, evolucaoCard);
     final timeline = _section(1, timelineCard);
     final weight = _section(2, weightCard);
+    final inteligenteTablet = _section(0, evolucaoCard, tablet: true);
+    final timelineTablet = _section(1, timelineCard, tablet: true);
+    final weightTablet = _section(2, weightCard, tablet: true);
 
     return Semantics(
       container: true,
@@ -45,19 +49,21 @@ class Aluno360EvolucaoTab extends StatelessWidget {
                 constraints.maxWidth >= Aluno360Layout.operacaoTabletBreakpoint;
 
             if (tablet) {
-              return Column(
+              return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: inteligente),
-                      const SizedBox(width: Aluno360Layout.sectionGap),
-                      Expanded(child: timeline),
-                    ],
+                  Expanded(child: inteligenteTablet),
+                  const SizedBox(width: Aluno360Layout.sectionGap),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        timelineTablet,
+                        const SizedBox(height: Aluno360Layout.sectionGap),
+                        weightTablet,
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: Aluno360Layout.sectionGap),
-                  weight,
                 ],
               );
             }

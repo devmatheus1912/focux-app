@@ -7,16 +7,28 @@ class Aluno360MiniAutonomyChip extends StatelessWidget {
     super.key,
     required this.label,
     required this.color,
+    this.isDark = false,
   });
 
   final String label;
   final Color color;
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      label,
-      style: Aluno360Layout.chipLabelStyle(context, color: color),
+    final dark = isDark || Theme.of(context).brightness == Brightness.dark;
+    return Semantics(
+      label: label,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: Aluno360Layout.miniChipDecoration(color, isDark: dark),
+        child: Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Aluno360Layout.chipLabelStyle(context, color: color),
+        ),
+      ),
     );
   }
 }

@@ -262,7 +262,7 @@ void main() {
     expect(screen, contains('class Aluno360DetailEvolucaoTab'));
     expect(screen, contains('class Aluno360TimelineCard'));
     expect(screen, contains('Linha do tempo 360'));
-    expect(screen, contains('Ver histórico completo da linha do tempo'));
+    expect(screen, contains('Ver todos os'));
     expect(screen, contains('class Aluno360DetailFerramentasTab'));
     expect(
       File('lib/features/alunos/widgets/aluno360_ferramentas_tab.dart')

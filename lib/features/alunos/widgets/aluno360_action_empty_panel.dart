@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../constants/aluno_360_layout.dart';
 
 class Aluno360SecondaryAction {
   const Aluno360SecondaryAction({
@@ -43,7 +43,10 @@ class Aluno360ActionEmptyPanel extends StatelessWidget {
     final mute = fxScreenMute(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
+    return Semantics(
+      container: true,
+      label: '$title. $subtitle',
+      child: Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -94,15 +97,16 @@ class Aluno360ActionEmptyPanel extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             height: 40,
-            child: OutlinedButton.icon(
-              onPressed: onPrimary,
-              icon: Icon(primaryIcon, size: 16),
-              label: Text(primaryLabel),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: primary,
-                side: BorderSide(color: primary.withValues(alpha: 0.32)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(13),
+            child: Semantics(
+              button: true,
+              label: primaryLabel,
+              child: OutlinedButton.icon(
+                onPressed: onPrimary,
+                icon: Icon(primaryIcon, size: 16),
+                label: Text(primaryLabel),
+                style: Aluno360Layout.operacaoOutlinedButtonStyle(
+                  context,
+                  primary,
                 ),
               ),
             ),
@@ -140,6 +144,7 @@ class Aluno360ActionEmptyPanel extends StatelessWidget {
           ],
         ],
       ),
+    ),
     );
   }
 }

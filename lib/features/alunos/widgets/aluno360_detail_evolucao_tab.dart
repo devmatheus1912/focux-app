@@ -7,6 +7,20 @@ import 'aluno360_evolucao_tab.dart';
 import 'aluno360_timeline_card.dart';
 import 'aluno360_weight_activity_card.dart';
 
+bool _evolucaoSemDados(AsyncValue<EvolucaoInteligente> evolucaoAsync) {
+  final ev = evolucaoAsync.valueOrNull;
+  if (ev == null) return evolucaoAsync.isLoading;
+  return ev.sinal == 'SEM_DADOS';
+}
+
+bool _hasRadarP0(List<Timeline360Event> events) {
+  return events.any(
+    (e) =>
+        e.tipo == 'RADAR' &&
+        e.prioridade.trim().toUpperCase().startsWith('P0'),
+  );
+}
+
 class Aluno360DetailEvolucaoTab extends StatelessWidget {
   const Aluno360DetailEvolucaoTab({
     super.key,
@@ -33,6 +47,18 @@ class Aluno360DetailEvolucaoTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final timelineEvents = timeline360Async.valueOrNull ?? const [];
+    final timelineHasSignals = timelineEvents.isNotEmpty;
+    final hasRadarP0 = _hasRadarP0(timelineEvents);
+    final evolucaoEmpty = _evolucaoSemDados(evolucaoAsync);
+    final timelineEmpty =
+        timeline360Async.hasValue && timelineEvents.isEmpty;
+    final bothEmpty =
+        evolucaoEmpty &&
+        timelineEmpty &&
+        !evolucaoAsync.isLoading &&
+        !timeline360Async.isLoading;
+
     return Aluno360EvolucaoTab(
       animateEntrance: animateEntrance,
       onEntrancePlayed: onEntrancePlayed,
@@ -42,17 +68,21 @@ class Aluno360DetailEvolucaoTab extends StatelessWidget {
         evolucaoAsync: evolucaoAsync,
         isDark: isDark,
         onOpenCopilot: onOpenCopilot,
+        timelineHasSignals: timelineHasSignals,
+        hasRadarP0: hasRadarP0,
       ),
       timelineCard: Aluno360TimelineCard(
         aluno: aluno,
         timelineApiAsync: timeline360Async,
         isDark: isDark,
+        compactEmpty: bothEmpty,
       ),
       weightCard: Aluno360WeightActivityCard(
         aluno: aluno,
         alunoId: alunoId,
         isDark: isDark,
         ink: ink,
+        hasRadarP0: hasRadarP0,
       ),
     );
   }

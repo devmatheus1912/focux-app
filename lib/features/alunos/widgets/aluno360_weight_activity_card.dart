@@ -29,12 +29,14 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
     required this.alunoId,
     required this.isDark,
     required this.ink,
+    this.hasRadarP0 = false,
   });
 
   final Aluno aluno;
   final int alunoId;
   final bool isDark;
   final Color ink;
+  final bool hasRadarP0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,7 +46,7 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
     final trendColor = primary;
     final subtitle =
         aluno.peso == null
-            ? 'Sem medida registrada'
+            ? 'Nenhuma avaliação ainda'
             : 'Última medida registrada';
 
     return Semantics(
@@ -99,7 +101,7 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                   if (aluno.peso != null)
                     Semantics(
                       button: true,
-                      label: 'Ver evolução completa de peso',
+                      label: 'Ver radar e medidas corporais',
                       child: InkWell(
                         onTap:
                             () => context.push(
@@ -113,7 +115,7 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                             vertical: 2,
                           ),
                           child: Text(
-                            'Ver evolução completa',
+                            'Ver radar e medidas',
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.end,
@@ -133,36 +135,20 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 14),
-            SizedBox(
-              height: 72,
-              child: pesoHistoricoAsync.when(
-                loading:
-                    () => FxLoading.sectionShimmer(
+            pesoHistoricoAsync.when(
+              loading:
+                  () => SizedBox(
+                    height: 72,
+                    child: FxLoading.sectionShimmer(
                       context,
                       height: 72,
                       showHeader: false,
                     ),
-                error:
-                    (_, __) => InkWell(
-                      borderRadius: BorderRadius.circular(14),
-                      onTap:
-                          () => context.push(
-                            '/alunos/$alunoId/evolucao',
-                            extra: aluno.nome,
-                          ),
-                      child: Aluno360EmptyMiniState(
-                        icon: Icons.show_chart_rounded,
-                        text: 'Abrir evolução de peso',
-                        isDark: isDark,
-                      ),
-                    ),
-                data: (series) {
-                  final weightSeries = resolveWeightSeriesForAluno(
-                    series,
-                    aluno.peso,
-                  );
-                  if (weightSeries.isEmpty) {
-                    return InkWell(
+                  ),
+              error:
+                  (_, __) => SizedBox(
+                    height: 72,
+                    child: InkWell(
                       borderRadius: BorderRadius.circular(14),
                       onTap:
                           () => context.push(
@@ -171,32 +157,79 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                           ),
                       child: Aluno360EmptyMiniState(
                         icon: Icons.monitor_weight_outlined,
-                        text: 'Registrar primeira medida',
+                        text: 'Abrir avaliações corporais',
                         isDark: isDark,
                       ),
-                    );
-                  }
-                  final delta =
-                      weightSeries.length >= 2
-                          ? weightSeries.last - weightSeries.first
-                          : 0.0;
-                  return InkWell(
-                    borderRadius: BorderRadius.circular(14),
-                    onTap:
-                        () => context.push(
-                          '/alunos/$alunoId/evolucao',
-                          extra: aluno.nome,
-                        ),
-                    child: Aluno360WeightTrendSparkline(
-                      values: weightSeries,
-                      deltaKg: delta,
-                      color: trendColor,
-                      trackColor: primary.withValues(alpha: isDark ? 0.18 : 0.12),
-                      isDark: isDark,
                     ),
+                  ),
+              data: (series) {
+                final weightSeries = resolveWeightSeriesForAluno(
+                  series,
+                  aluno.peso,
+                );
+                if (weightSeries.isEmpty) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(
+                        height: 72,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(14),
+                          onTap:
+                              () => context.push(
+                                '/alunos/$alunoId/evolucao',
+                                extra: aluno.nome,
+                              ),
+                          child: Aluno360EmptyMiniState(
+                            icon: Icons.monitor_weight_outlined,
+                            text: 'Registrar primeira medida',
+                            isDark: isDark,
+                          ),
+                        ),
+                      ),
+                      if (hasRadarP0) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          'O radar também pede mapa corporal (P0) — '
+                          'registre peso e medidas na evolução corporal.',
+                          style: Aluno360Layout.captionStyle(context).copyWith(
+                            color: mute,
+                            height: 1.35,
+                          ),
+                        ),
+                      ],
+                    ],
                   );
-                },
-              ),
+                }
+                final delta =
+                    weightSeries.length >= 2
+                        ? weightSeries.last - weightSeries.first
+                        : 0.0;
+                return SizedBox(
+                  height: 72,
+                  child: Semantics(
+                    button: true,
+                    label: 'Abrir histórico de medições corporais',
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap:
+                          () => context.push(
+                            '/alunos/$alunoId/evolucao',
+                            extra: aluno.nome,
+                          ),
+                      child: Aluno360WeightTrendSparkline(
+                        values: weightSeries,
+                        deltaKg: delta,
+                        color: trendColor,
+                        trackColor: primary.withValues(
+                          alpha: isDark ? 0.18 : 0.12,
+                        ),
+                        isDark: isDark,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -252,7 +285,7 @@ class Aluno360WeightTrendSparkline extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Histórico de avaliações',
+                    'Últimas medições',
                     style: Aluno360Layout.captionStyle(context).copyWith(
                       color: mute,
                       fontWeight: FontWeight.w600,

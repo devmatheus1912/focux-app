@@ -60,7 +60,7 @@ class _SparklinePainter extends CustomPainter {
     }
 
     if (data.length < 2) {
-      _paintEmptyTrack(canvas, size, padding);
+      _paintSinglePoint(canvas, size, padding);
       return;
     }
 
@@ -135,6 +135,29 @@ class _SparklinePainter extends CustomPainter {
           ..close();
 
     canvas.drawPath(fillPath, fillPaint);
+  }
+
+  void _paintSinglePoint(Canvas canvas, Size size, double padding) {
+    final x = size.width / 2;
+    final y = size.height / 2;
+    canvas.drawCircle(
+      Offset(x, y),
+      3,
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.fill,
+    );
+    final trackPaint =
+        Paint()
+          ..color = color.withValues(alpha: 0.18)
+          ..strokeWidth = 1.4
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
+    canvas.drawLine(
+      Offset(padding, y),
+      Offset(size.width - padding, y),
+      trackPaint,
+    );
   }
 
   void _paintEmptyTrack(Canvas canvas, Size size, double padding) {

@@ -266,4 +266,17 @@ abstract final class Aluno360Layout {
   static const double timelineTileIconSize = 38;
   static const double timelineTileIconRadius = 14;
   static const double timelineTileIconGlyphSize = 19;
+  static const double timelineSpineWidth = 2;
+
+  /// Pill background for mini autonomy / signal chips (WCAG-friendly contrast).
+  static BoxDecoration miniChipDecoration(
+    Color color, {
+    required bool isDark,
+  }) {
+    return BoxDecoration(
+      color: color.withValues(alpha: isDark ? 0.22 : 0.12),
+      borderRadius: BorderRadius.circular(999),
+      border: Border.all(color: color.withValues(alpha: isDark ? 0.38 : 0.28)),
+    );
+  }
 }

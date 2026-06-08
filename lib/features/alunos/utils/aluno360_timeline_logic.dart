@@ -235,10 +235,28 @@ String timeline360ChatPreviewBody(
       '',
     );
     if (stripped != text && stripped.trim().isNotEmpty) {
-      return stripped.trim();
+      text = stripped.trim();
+      break;
     }
   }
+
+  if (_isRecoveryBody(text)) {
+    return _firstSentence(text);
+  }
   return text;
+}
+
+bool _isRecoveryBody(String text) {
+  final lower = text.toLowerCase();
+  return lower.contains('sumiu do radar') ||
+      lower.contains('me responde por aqui') ||
+      lower.contains('notei sua ausência');
+}
+
+String _firstSentence(String text) {
+  final match = RegExp(r'^[^.!?]+[.!?]').firstMatch(text.trim());
+  if (match != null) return match.group(0)!.trim();
+  return text.trim();
 }
 
 /// Header label for timeline kind row (merges chat sender into one line).
@@ -327,8 +345,21 @@ bool timeline360BodyExpandable(
   String? previewBody,
 }) {
   final text = (previewBody ?? body).trim();
-  final threshold = kind == 'Chat' ? 72 : 96;
+  final threshold = kind == 'Chat' ? 100 : 110;
   return text.length > threshold;
+}
+
+String timeline360ExpandLinkLabel({required String kind}) {
+  return kind == 'Chat' ? 'Ler mensagem inteira' : 'Ver detalhes';
+}
+
+String formatTimeline360Date(DateTime? value) {
+  if (value == null) return 'data não informada';
+  final day = value.day.toString().padLeft(2, '0');
+  final month = value.month.toString().padLeft(2, '0');
+  final hour = value.hour.toString().padLeft(2, '0');
+  final minute = value.minute.toString().padLeft(2, '0');
+  return '$day/$month às $hour:$minute';
 }
 
 bool timeline360HasFooterChips({

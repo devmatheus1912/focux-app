@@ -145,12 +145,40 @@ void main() {
 
   group('timeline360BodyExpandable', () {
     test('uses lower threshold for chat preview', () {
-      final body = 'A' * 80;
+      final body = 'A' * 105;
       expect(
         timeline360BodyExpandable(body, kind: 'Chat', previewBody: body),
         isTrue,
       );
       expect(timeline360BodyExpandable(body, kind: 'Radar'), isFalse);
+    });
+  });
+
+  group('timeline360ChatPreviewBody', () {
+    test('keeps first sentence for recovery bodies', () {
+      expect(
+        timeline360ChatPreviewBody(
+          'Você sumiu do radar — me responde por aqui que eu ajusto o plano. '
+          'Quer retomar? Me responde com um oi.',
+        ),
+        'Você sumiu do radar — me responde por aqui que eu ajusto o plano.',
+      );
+    });
+  });
+
+  group('formatTimeline360Date', () {
+    test('null date uses accessible label', () {
+      expect(formatTimeline360Date(null), 'data não informada');
+    });
+  });
+
+  group('timeline360ExpandLinkLabel', () {
+    test('chat vs other kinds', () {
+      expect(
+        timeline360ExpandLinkLabel(kind: 'Chat'),
+        'Ler mensagem inteira',
+      );
+      expect(timeline360ExpandLinkLabel(kind: 'Radar'), 'Ver detalhes');
     });
   });
 

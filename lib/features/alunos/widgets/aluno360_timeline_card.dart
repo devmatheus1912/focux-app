@@ -24,11 +24,13 @@ class Aluno360TimelineCard extends StatelessWidget {
     required this.aluno,
     required this.timelineApiAsync,
     required this.isDark,
+    this.compactEmpty = false,
   });
 
   final Aluno aluno;
   final AsyncValue<List<Timeline360Event>> timelineApiAsync;
   final bool isDark;
+  final bool compactEmpty;
 
   static Timeline360Item _itemFromApi(
     Timeline360Event e, {
@@ -119,7 +121,6 @@ class Aluno360TimelineCard extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
-    final line = ShellChrome.of(context).line;
     final loading = timelineApiAsync.isLoading && !timelineApiAsync.hasValue;
     final error = timelineApiAsync.hasError && !timelineApiAsync.hasValue;
     final allItems = _allItems(primary);
@@ -164,56 +165,77 @@ class Aluno360TimelineCard extends StatelessWidget {
             const SizedBox(height: 14),
             Aluno360ActionEmptyPanel(
               key: const ValueKey('aluno360_timeline_empty'),
-              icon: Icons.timeline_rounded,
+              icon: Icons.history_toggle_off_outlined,
               title: 'Linha do tempo ainda vazia',
               subtitle:
-                  '${aluno.nome.split(' ').first} ainda não tem sinais suficientes. Peça um check-in ou abra o chat para registrar a próxima interação.',
+                  compactEmpty
+                      ? 'Quando houver check-in ou chat, os sinais aparecem aqui em ordem cronológica.'
+                      : '${aluno.nome.split(' ').first} ainda não tem sinais suficientes. '
+                          'Peça um check-in ou abra o chat para registrar a próxima interação.',
               primaryLabel: 'Pedir check-in',
               primaryIcon: Icons.message_outlined,
               onPrimary: () => _openTimelineCheckin(context),
-              secondaryActions: [
-                Aluno360SecondaryAction(
-                  label: 'Abrir chat',
-                  icon: Icons.chat_bubble_outline,
-                  onTap:
-                      () => context.push(
-                        '/alunos/${aluno.id}/chat',
-                        extra: aluno.nome,
-                      ),
-                ),
-                Aluno360SecondaryAction(
-                  label: 'Ver treinos',
-                  icon: Icons.fitness_center_rounded,
-                  onTap:
-                      () => context.push(
-                        '/alunos/${aluno.id}/treinos-list',
-                        extra: aluno.nome,
-                      ),
-                ),
-              ],
+              secondaryActions:
+                  compactEmpty
+                      ? [
+                        Aluno360SecondaryAction(
+                          label: 'Abrir chat',
+                          icon: Icons.chat_bubble_outline,
+                          onTap:
+                              () => context.push(
+                                '/alunos/${aluno.id}/chat',
+                                extra: aluno.nome,
+                              ),
+                        ),
+                      ]
+                      : [
+                        Aluno360SecondaryAction(
+                          label: 'Abrir chat',
+                          icon: Icons.chat_bubble_outline,
+                          onTap:
+                              () => context.push(
+                                '/alunos/${aluno.id}/chat',
+                                extra: aluno.nome,
+                              ),
+                        ),
+                        Aluno360SecondaryAction(
+                          label: 'Ver treinos',
+                          icon: Icons.fitness_center_rounded,
+                          onTap:
+                              () => context.push(
+                                '/alunos/${aluno.id}/treinos-list',
+                                extra: aluno.nome,
+                              ),
+                        ),
+                      ],
             ),
           ] else ...[
             const SizedBox(height: 14),
-            for (final item in visibleItems) ...[
+            for (var i = 0; i < visibleItems.length; i++) ...[
               Timeline360Tile(
-                item: item,
+                item: visibleItems[i],
                 isDark: isDark,
                 accent: primary,
                 alunoFirstName: aluno.nome.split(' ').first,
+                showSpineBelow: i < visibleItems.length - 1,
               ),
-              if (item != visibleItems.last) Divider(height: 18, color: line),
+              if (i < visibleItems.length - 1) const SizedBox(height: 10),
             ],
             if (hasMore) ...[
               const SizedBox(height: 6),
               Semantics(
                 button: true,
-                label: 'Ver histórico completo da linha do tempo',
+                label: 'Ver todos os ${allItems.length} sinais da linha do tempo',
                 child: SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
                     onPressed:
                         () => _showFullTimeline(context, allItems, primary),
-                    child: Text('Ver histórico completo · ${allItems.length}'),
+                    style: Aluno360Layout.operacaoOutlinedButtonStyle(
+                      context,
+                      primary,
+                    ),
+                    child: Text('Ver todos os ${allItems.length} sinais'),
                   ),
                 ),
               ),
@@ -230,7 +252,6 @@ class Aluno360TimelineCard extends StatelessWidget {
     List<Timeline360Item> items,
     Color primary,
   ) {
-    final chrome = ShellChrome.of(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -262,10 +283,7 @@ class Aluno360TimelineCard extends StatelessWidget {
                       itemCount: items.length + 1,
                       separatorBuilder: (_, index) {
                         if (index == 0) return const SizedBox(height: 12);
-                        return Divider(
-                          height: 18,
-                          color: chrome.line,
-                        );
+                        return const SizedBox(height: 10);
                       },
                       itemBuilder: (context, index) {
                         if (index == 0) {
@@ -293,11 +311,13 @@ class Aluno360TimelineCard extends StatelessWidget {
                             ),
                           );
                         }
+                        final tileIndex = index - 1;
                         return Timeline360Tile(
-                          item: items[index - 1],
+                          item: items[tileIndex],
                           isDark: isDark,
                           accent: primary,
                           alunoFirstName: aluno.nome.split(' ').first,
+                          showSpineBelow: tileIndex < items.length - 1,
                           onExpandableTap: (tileContext, item) {
                             final host = context;
                             Navigator.of(tileContext).pop();
@@ -479,6 +499,7 @@ class Timeline360Tile extends StatelessWidget {
     required this.accent,
     this.alunoFirstName,
     this.onExpandableTap,
+    this.showSpineBelow = false,
   });
 
   final Timeline360Item item;
@@ -486,6 +507,7 @@ class Timeline360Tile extends StatelessWidget {
   final Color accent;
   final String? alunoFirstName;
   final Timeline360ExpandableTap? onExpandableTap;
+  final bool showSpineBelow;
 
   @override
   Widget build(BuildContext context) {
@@ -531,22 +553,46 @@ class Timeline360Tile extends StatelessWidget {
       accent,
       isDark: isDark,
     );
+    final expandLabel = timeline360ExpandLinkLabel(kind: item.kind);
+    final spineColor = ShellChrome.of(context).line.withValues(alpha: 0.55);
+    final iconSize = Aluno360Layout.timelineTileIconSize;
     final child = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: Aluno360Layout.timelineTileIconSize,
-          height: Aluno360Layout.timelineTileIconSize,
-          decoration: BoxDecoration(
-            color: item.color.withValues(alpha: isDark ? 0.16 : 0.10),
-            borderRadius: BorderRadius.circular(
-              Aluno360Layout.timelineTileIconRadius,
-            ),
-          ),
-          child: Icon(
-            item.icon,
-            color: item.color,
-            size: Aluno360Layout.timelineTileIconGlyphSize,
+        SizedBox(
+          width: iconSize,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              if (showSpineBelow)
+                Positioned(
+                  top: iconSize - 2,
+                  left: iconSize / 2 - Aluno360Layout.timelineSpineWidth / 2,
+                  bottom: -12,
+                  width: Aluno360Layout.timelineSpineWidth,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: spineColor,
+                      borderRadius: BorderRadius.circular(1),
+                    ),
+                  ),
+                ),
+              Container(
+                width: iconSize,
+                height: iconSize,
+                decoration: BoxDecoration(
+                  color: item.color.withValues(alpha: isDark ? 0.16 : 0.10),
+                  borderRadius: BorderRadius.circular(
+                    Aluno360Layout.timelineTileIconRadius,
+                  ),
+                ),
+                child: Icon(
+                  item.icon,
+                  color: item.color,
+                  size: Aluno360Layout.timelineTileIconGlyphSize,
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(width: 10),
@@ -596,7 +642,7 @@ class Timeline360Tile extends StatelessWidget {
               if (expandable) ...[
                 const SizedBox(height: 4),
                 Text(
-                  'Ver mensagem completa',
+                  expandLabel,
                   style: Aluno360Layout.captionStyle(context).copyWith(
                     color: linkColor,
                     fontWeight: FontWeight.w800,
@@ -619,7 +665,11 @@ class Timeline360Tile extends StatelessWidget {
                         isDark: isDark,
                       ),
                     if (showMeta)
-                      Aluno360MiniAutonomyChip(label: item.meta, color: mute),
+                      Aluno360MiniAutonomyChip(
+                        label: item.meta,
+                        color: item.color,
+                        isDark: isDark,
+                      ),
                   ],
                 ),
               ],
@@ -630,7 +680,7 @@ class Timeline360Tile extends StatelessWidget {
     );
 
     final semanticsLabel =
-        '${item.kind}: ${item.title}. ${formatTimeline360Date(item.at)}';
+        '${item.kind}: $kindHeader. ${formatTimeline360Date(item.at)}. $previewBody';
 
     void onTap() {
       if (expandable) {
@@ -659,7 +709,7 @@ class Timeline360Tile extends StatelessWidget {
       button: true,
       label:
           expandable
-              ? '$semanticsLabel. Toque para ver mensagem completa'
+              ? '$semanticsLabel. Toque para $expandLabel'
               : semanticsLabel,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -671,13 +721,4 @@ class Timeline360Tile extends StatelessWidget {
       ),
     );
   }
-}
-
-String formatTimeline360Date(DateTime? value) {
-  if (value == null) return 'sem data';
-  final day = value.day.toString().padLeft(2, '0');
-  final month = value.month.toString().padLeft(2, '0');
-  final hour = value.hour.toString().padLeft(2, '0');
-  final minute = value.minute.toString().padLeft(2, '0');
-  return '$day/$month às $hour:$minute';
 }
