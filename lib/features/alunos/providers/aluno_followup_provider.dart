@@ -49,9 +49,10 @@ class AlunoFollowUpActions {
     _invalidate(alunoId);
   }
 
-  Future<void> markContactDone(int alunoId) async {
-    await _repo.marcarContatoRealizado(alunoId);
+  Future<Aluno> markContactDone(int alunoId) async {
+    final updated = await _repo.marcarContatoRealizado(alunoId);
     _invalidate(alunoId);
+    return updated;
   }
 
   void _invalidate(int alunoId) {

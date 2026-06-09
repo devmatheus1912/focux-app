@@ -36,9 +36,10 @@ void main() {
   );
 
   List<Map<String, dynamic>> weekDataEndingToday() {
-    final today = DateTime(2026, 6, 4);
+    final today = DateTime.now();
+    final anchor = DateTime(today.year, today.month, today.day);
     return List.generate(7, (i) {
-      final day = today.subtract(Duration(days: 6 - i));
+      final day = anchor.subtract(Duration(days: 6 - i));
       final iso =
           '${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}';
       return {'data': iso, 'checkins': i.isEven ? 1 : 0};

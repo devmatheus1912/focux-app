@@ -122,14 +122,18 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
 
   Future<void> _runAction(
     Future<void> Function() action,
-    String successMessage,
-  ) async {
+    String successMessage, {
+    VoidCallback? onSuccess,
+  }) async {
     if (_busy) return;
     setState(() => _busy = true);
     try {
       await action();
       if (mounted) {
-        FeedbackHelper.showOperacaoSuccess(context, successMessage);
+        onSuccess?.call();
+        if (successMessage.isNotEmpty) {
+          FeedbackHelper.showOperacaoSuccess(context, successMessage);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -138,6 +142,32 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
           friendlyError(e, fallback: 'Não foi possível salvar o follow-up.'),
         );
       }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _markContactDone(dynamic actions) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final updated = await actions.markContactDone(aluno.id);
+      if (!mounted) return;
+      final when = updated.ultimoContatoDate;
+      final msg =
+          when == null
+              ? 'Contato registrado'
+              : 'Contato registrado em ${_formatDate(when)}';
+      if (widget.compactContactPriority) {
+        setState(() => _expanded = false);
+      }
+      FeedbackHelper.showOperacaoSuccess(context, msg);
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showOperacaoError(
+        context,
+        friendlyError(e, fallback: 'Não foi possível salvar o follow-up.'),
+      );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -411,25 +441,13 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
                   child:
                       contactPrimaryOutlined
                           ? OutlinedButton.icon(
-                            onPressed:
-                                _busy
-                                    ? null
-                                    : () => _runAction(
-                                      () => actions.markContactDone(aluno.id),
-                                      'Contato salvo · follow-up atualizado',
-                                    ),
+                            onPressed: _busy ? null : () => _markContactDone(actions),
                             icon: _busy ? loadingIcon : const Icon(Icons.check_rounded, size: 16),
                             label: const Text('Contato feito'),
                             style: outlinedStyle,
                           )
                           : FilledButton.icon(
-                            onPressed:
-                                _busy
-                                    ? null
-                                    : () => _runAction(
-                                      () => actions.markContactDone(aluno.id),
-                                      'Contato salvo · follow-up atualizado',
-                                    ),
+                            onPressed: _busy ? null : () => _markContactDone(actions),
                             icon: _busy ? loadingIcon : const Icon(Icons.check_rounded, size: 16),
                             label: const Text('Contato feito'),
                             style: filledStyle,

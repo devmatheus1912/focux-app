@@ -149,6 +149,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
       sticky: stickyAction,
       aluno: aluno,
       proximaAcaoRaw: proximaAcao360?.acao,
+      contactPriority: operacao.contactPriority,
     );
     final hideCopilotPrimary =
         operacao.hideCopilotTaskRow ||

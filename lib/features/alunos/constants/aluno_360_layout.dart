@@ -135,6 +135,21 @@ abstract final class Aluno360Layout {
     );
   }
 
+  /// Flat surface for every tile inside the Histórico 360 sheet (no mixed InkWell fills).
+  static BoxDecoration timelineModalTileDecoration(
+    BuildContext context, {
+    required bool isDark,
+  }) {
+    final chrome = ShellChrome.of(context);
+    return BoxDecoration(
+      color:
+          isDark
+              ? Colors.white.withValues(alpha: 0.04)
+              : chrome.cardFill.withValues(alpha: 0.85),
+      borderRadius: BorderRadius.circular(12),
+    );
+  }
+
   /// Timeline metadata (dates) — stronger contrast than mute captions.
   static TextStyle timelineMetaStyle(BuildContext context) {
     return captionStyle(context).copyWith(

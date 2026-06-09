@@ -321,7 +321,10 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
                                   context,
                                 ).copyWith(
                                   fontWeight: FontWeight.w600,
-                                  color: ink,
+                                  color:
+                                      isDark
+                                          ? const Color(0xFFFFB77A)
+                                          : const Color(0xFF8A4B00),
                                   height: 1.3,
                                 ),
                               ),
@@ -387,25 +390,61 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
             ),
           ] else ...[
             const SizedBox(height: 14),
-            Semantics(
-              label: 'Sem dados de aderência semanal',
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                decoration: BoxDecoration(
-                  color: neutralIdle.withValues(alpha: isDark ? 0.35 : 0.55),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: fxScreenMute(context).withValues(alpha: 0.25),
+            Builder(
+              builder: (context) {
+                final emptyWeek = summarizeAderenciaWeek(
+                  padAderenciaWeekToSevenDays(const []),
+                );
+                final sparkMute = fxScreenMute(context);
+                final sparkAccent = sparkMute;
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+                  decoration: BoxDecoration(
+                    color: sparkAccent.withValues(alpha: isDark ? 0.1 : 0.06),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: sparkAccent.withValues(alpha: isDark ? 0.22 : 0.14),
+                    ),
                   ),
-                ),
-                child: Text(
-                  'Sem dados de aderência semanal ainda.',
-                  style: Aluno360Layout.captionStyle(context).copyWith(
-                    fontWeight: FontWeight.w600,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Aderência · últimos 7 dias',
+                        style: Aluno360Layout.metaStyle(context).copyWith(
+                          color: ink,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        emptyWeek.caption,
+                        style: Aluno360Layout.captionStyle(context),
+                      ),
+                      const SizedBox(height: 12),
+                      Semantics(
+                        label: 'Check-ins dos últimos 7 dias',
+                        child: AlunoOperacaoAdherenceBars(
+                          points: emptyWeek.points,
+                          activeColor: EagleTokens.good,
+                          idleColor: neutralIdle,
+                          missColor:
+                              isDark ? EagleTokens.warn : const Color(0xFFDC6B6B),
+                          todayRingColor: primary,
+                          emptyWeek: true,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      AlunoOperacaoAdherenceLegend(
+                        activeColor: EagleTokens.good,
+                        missColor:
+                            isDark ? EagleTokens.warn : const Color(0xFFDC6B6B),
+                        todayRingColor: primary,
+                      ),
+                    ],
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ],
         ],

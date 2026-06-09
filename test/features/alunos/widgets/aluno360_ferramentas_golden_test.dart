@@ -25,10 +25,16 @@ void main() {
     objetivo: 'Hipertrofia',
   );
 
-  final aderenciaSemana = List.generate(
-    7,
-    (i) => {'data': '2026-06-0${i + 1}', 'checkins': i % 3 == 0 ? 1 : 0},
-  );
+  List<Map<String, dynamic>> aderenciaSemanaEndingToday() {
+    final today = DateTime.now();
+    final anchor = DateTime(today.year, today.month, today.day);
+    return List.generate(7, (i) {
+      final day = anchor.subtract(Duration(days: 6 - i));
+      final iso =
+          '${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}';
+      return {'data': iso, 'checkins': i % 3 == 0 ? 1 : 0};
+    });
+  }
 
   Widget ferramentasHarness({
     required bool isDark,
@@ -40,7 +46,7 @@ void main() {
       overrides: [
         alunoMedidasResumoProvider(42).overrideWith((ref) async => null),
         alunoAderenciaSemanalProvider(42).overrideWith(
-          (ref) async => aderenciaSemana,
+          (ref) async => aderenciaSemanaEndingToday(),
         ),
       ],
       child: MaterialApp(

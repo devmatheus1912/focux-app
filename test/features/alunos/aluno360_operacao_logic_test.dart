@@ -4,6 +4,12 @@ import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_operacao_logic.dart';
 import 'package:focux_app/features/dashboard/data/command_center_data.dart';
 
+String _isoDay(DateTime day) {
+  return '${day.year.toString().padLeft(4, '0')}-'
+      '${day.month.toString().padLeft(2, '0')}-'
+      '${day.day.toString().padLeft(2, '0')}';
+}
+
 Aluno _aluno({
   bool emRisco = false,
   String? riscoNivel,
@@ -384,14 +390,19 @@ void main() {
     });
 
     test('summarize checkins total', () {
+      final today = DateTime.now();
+      final anchor = DateTime(today.year, today.month, today.day);
+      final day0 = anchor.subtract(const Duration(days: 1));
+      final day1 = anchor;
+
       final summary = summarizeAderenciaWeek(
-        parseAderenciaSemanal(const [
-          {'data': '2026-06-01', 'checkins': 2},
-          {'data': '2026-06-02', 'checkins': 0},
+        parseAderenciaSemanal([
+          {'data': _isoDay(day0), 'checkins': 2},
+          {'data': _isoDay(day1), 'checkins': 0},
         ]),
       );
       expect(summary.totalCheckins, 2);
-      expect(summary.caption, '2 check-ins · 1 de 2 dias');
+      expect(summary.caption, '2 check-ins · 1 de 7 dias');
     });
   });
 
@@ -827,13 +838,58 @@ void main() {
       );
     });
 
-    test('disabled without contact priority', () {
+    test('enabled for contact priority regardless of adherence', () {
+      expect(
+        shouldDefaultOperacaoFocusMode(
+          aluno: _aluno(aderenciaPercent: 55),
+          contactPriority: true,
+        ),
+        isTrue,
+      );
+    });
+
+    test('enabled for em risco with zero adherence without contact priority', () {
       expect(
         shouldDefaultOperacaoFocusMode(
           aluno: _aluno(aderenciaPercent: 0, emRisco: true),
           contactPriority: false,
         ),
+        isTrue,
+      );
+    });
+
+    test('disabled for stable profile', () {
+      expect(
+        shouldDefaultOperacaoFocusMode(
+          aluno: _aluno(aderenciaPercent: 80, emRisco: false),
+          contactPriority: false,
+        ),
         isFalse,
+      );
+    });
+  });
+
+  group('padAderenciaWeekToSevenDays', () {
+    test('pads empty input to seven distinct days', () {
+      final points = padAderenciaWeekToSevenDays(const []);
+      expect(points.length, 7);
+      expect(points.map((p) => p.date).toSet().length, 7);
+      expect(points.every((p) => p.checkins == 0), isTrue);
+    });
+  });
+
+  group('shouldHideCopilotPrescriptionWhenContactPrioritySticky', () {
+    test('hides when sticky is chat under contact priority', () {
+      expect(
+        shouldHideCopilotPrescriptionWhenContactPrioritySticky(
+          contactPriority: true,
+          sticky: const OperacaoStickyAction(
+            label: 'Contato',
+            icon: Icons.chat_rounded,
+            destination: OperacaoStickyDestination.chat,
+          ),
+        ),
+        isTrue,
       );
     });
   });

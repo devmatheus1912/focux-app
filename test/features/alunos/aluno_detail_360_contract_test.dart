@@ -173,7 +173,7 @@ void main() {
 
     expect(screen, contains('class Aluno360FollowUpCard'));
     expect(screen, contains('ConsumerState<Aluno360FollowUpCard>'));
-    expect(screen, contains('Contato salvo · follow-up atualizado'));
+    expect(screen, contains('Contato registrado'));
     expect(screen, contains('Aluno360Layout.captionStyle'));
     expect(screen, contains('aderenciaSemanal'));
     expect(screen, contains('class Aluno360OperationalStatusSection'));

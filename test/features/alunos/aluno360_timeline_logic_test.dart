@@ -317,6 +317,28 @@ void main() {
     });
   });
 
+  group('isSmokeTimelineContent', () {
+    test('detects smoke chat prefix', () {
+      expect(isSmokeTimelineContent('Smoke chat 20260502232331'), isTrue);
+    });
+
+    test('detects copilot boilerplate', () {
+      expect(
+        isSmokeTimelineContent(
+          'Acompanhamento registrado — revise o próximo passo no chat.',
+        ),
+        isTrue,
+      );
+    });
+
+    test('keeps real coach copy', () {
+      expect(
+        isSmokeTimelineContent('Nathalia ainda não completou o mapa corporal.'),
+        isFalse,
+      );
+    });
+  });
+
   group('timeline360ShouldShowPriorityBadge', () {
     test('hides priority on chat events', () {
       expect(

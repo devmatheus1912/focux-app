@@ -1,6 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_ferramentas_logic.dart';
+import 'package:focux_app/features/alunos/utils/aluno360_operacao_logic.dart';
+
+String _isoDay(DateTime day) {
+  return '${day.year.toString().padLeft(4, '0')}-'
+      '${day.month.toString().padLeft(2, '0')}-'
+      '${day.day.toString().padLeft(2, '0')}';
+}
 
 void main() {
   group('Aluno360FerramentasLogic', () {
@@ -15,12 +22,24 @@ void main() {
     });
 
     test('aderenciaSparklineValues maps weekly checkins', () {
-      final values = Aluno360FerramentasLogic.aderenciaSparklineValues(const [
-        {'data': '2026-06-01', 'checkins': 1},
-        {'data': '2026-06-02', 'checkins': 0},
-        {'data': '2026-06-03', 'checkins': 2},
+      final today = DateTime.now();
+      final anchor = DateTime(today.year, today.month, today.day);
+      final day0 = anchor.subtract(const Duration(days: 2));
+      final day1 = anchor.subtract(const Duration(days: 1));
+      final day2 = anchor;
+
+      final raw = [
+        {'data': _isoDay(day0), 'checkins': 1},
+        {'data': _isoDay(day1), 'checkins': 0},
+        {'data': _isoDay(day2), 'checkins': 2},
+      ];
+      final values = Aluno360FerramentasLogic.aderenciaSparklineValues(raw);
+      final padded = padAderenciaWeekToSevenDays([
+        AderenciaWeekPoint(checkins: 1, date: _isoDay(day0)),
+        AderenciaWeekPoint(checkins: 0, date: _isoDay(day1)),
+        AderenciaWeekPoint(checkins: 2, date: _isoDay(day2)),
       ]);
-      expect(values, [1.0, 0.0, 2.0]);
+      expect(values, padded.map((p) => p.checkins).toList(growable: false));
     });
 
     test('aderenciaModuleSub prefers percent then checkins', () {
@@ -36,6 +55,9 @@ void main() {
         '42% · semana',
       );
 
+      final today = DateTime.now();
+      final anchor = DateTime(today.year, today.month, today.day);
+
       final semDados = Aluno(
         id: 2,
         nome: 'B',
@@ -45,8 +67,8 @@ void main() {
       expect(
         Aluno360FerramentasLogic.aderenciaModuleSub(
           aluno: semDados,
-          aderenciaSemanal: const [
-            {'data': '2026-06-01', 'checkins': 2},
+          aderenciaSemanal: [
+            {'data': _isoDay(anchor), 'checkins': 2},
           ],
         ),
         '2 chk · sem',

@@ -19,14 +19,17 @@ class Aluno360MiniAutonomyChip extends StatelessWidget {
     final dark = isDark || Theme.of(context).brightness == Brightness.dark;
     return Semantics(
       label: label,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: Aluno360Layout.miniChipDecoration(color, isDark: dark),
-        child: Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: Aluno360Layout.chipLabelStyle(context, color: color),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 140),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: Aluno360Layout.miniChipDecoration(color, isDark: dark),
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Aluno360Layout.chipLabelStyle(context, color: color),
+          ),
         ),
       ),
     );

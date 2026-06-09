@@ -101,10 +101,18 @@ class Aluno360TimelineCard extends StatelessWidget {
         timelineApiAsync.value!
             .map((event) => _itemFromApi(event, primary: primary))
             .toList();
-    return dedupeChatTimelineByFingerprint(
-      mapped,
-      kindOf: (item) => item.kind,
-      bodyOf: (item) => item.body,
+    final filtered =
+        mapped
+            .where((item) => !isSmokeTimelineContent(item.body))
+            .toList(growable: false);
+    return sortTimeline360Items(
+      dedupeChatTimelineByFingerprint(
+        filtered,
+        kindOf: (item) => item.kind,
+        bodyOf: (item) => item.body,
+      ),
+      atOf: (item) => item.at,
+      priorityOf: (item) => item.priority,
     );
   }
 
@@ -313,13 +321,19 @@ class Aluno360TimelineCard extends StatelessWidget {
                           );
                         }
                         final tileIndex = index - 1;
-                        return Timeline360Tile(
-                          item: items[tileIndex],
-                          isDark: isDark,
-                          accent: primary,
-                          alunoFirstName: aluno.nome.split(' ').first,
-                          showSpineBelow: tileIndex < items.length - 1,
-                          onExpandableTap: (tileContext, item) {
+                        return DecoratedBox(
+                          decoration: Aluno360Layout.timelineModalTileDecoration(
+                            context,
+                            isDark: isDark,
+                          ),
+                          child: Timeline360Tile(
+                            item: items[tileIndex],
+                            isDark: isDark,
+                            accent: primary,
+                            alunoFirstName: aluno.nome.split(' ').first,
+                            showSpineBelow: tileIndex < items.length - 1,
+                            inkWell: false,
+                            onExpandableTap: (tileContext, item) {
                             final host = context;
                             Navigator.of(tileContext).pop();
                             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -332,6 +346,7 @@ class Aluno360TimelineCard extends StatelessWidget {
                               );
                             });
                           },
+                          ),
                         );
                       },
                     ),
@@ -400,7 +415,7 @@ void showTimeline360BodySheet(
           child: Padding(
             padding: EdgeInsets.fromLTRB(
               16,
-              12,
+              12 + MediaQuery.paddingOf(ctx).top,
               16,
               16 + MediaQuery.paddingOf(ctx).bottom,
             ),
@@ -501,6 +516,7 @@ class Timeline360Tile extends StatelessWidget {
     this.alunoFirstName,
     this.onExpandableTap,
     this.showSpineBelow = false,
+    this.inkWell = true,
   });
 
   final Timeline360Item item;
@@ -509,6 +525,7 @@ class Timeline360Tile extends StatelessWidget {
   final String? alunoFirstName;
   final Timeline360ExpandableTap? onExpandableTap;
   final bool showSpineBelow;
+  final bool inkWell;
 
   @override
   Widget build(BuildContext context) {
@@ -707,6 +724,20 @@ class Timeline360Tile extends StatelessWidget {
     if (!tappable) {
       return Semantics(label: semanticsLabel, child: child);
     }
+    final padded = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+      child: child,
+    );
+    if (!inkWell) {
+      return Semantics(
+        button: true,
+        label:
+            expandable
+                ? '$semanticsLabel. Toque para $expandLabel'
+                : semanticsLabel,
+        child: GestureDetector(onTap: onTap, child: padded),
+      );
+    }
     return Semantics(
       button: true,
       label:
@@ -716,10 +747,7 @@ class Timeline360Tile extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: child,
-        ),
+        child: padded,
       ),
     );
   }

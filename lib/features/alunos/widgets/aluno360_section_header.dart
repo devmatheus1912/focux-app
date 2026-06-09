@@ -102,7 +102,12 @@ class Aluno360SectionHeader extends StatelessWidget {
           ),
           if (trailing != null) ...[
             const SizedBox(width: 8),
-            trailing!,
+            Flexible(
+              child: Align(
+                alignment: Alignment.topRight,
+                child: trailing!,
+              ),
+            ),
           ],
         ],
       ),

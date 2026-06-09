@@ -286,8 +286,8 @@ OperacaoDominantMetric resolveOperacaoDominantMetric(Aluno aluno) {
 List<AderenciaWeekPoint> parseAderenciaSemanal(
   List<Map<String, dynamic>>? raw,
 ) {
-  if (raw == null || raw.isEmpty) return const [];
-  return raw
+  if (raw == null || raw.isEmpty) return padAderenciaWeekToSevenDays(const []);
+  final parsed = raw
       .map(
         (point) => AderenciaWeekPoint(
           checkins: (point['checkins'] as num?)?.toDouble() ?? 0,
@@ -295,6 +295,32 @@ List<AderenciaWeekPoint> parseAderenciaSemanal(
         ),
       )
       .toList(growable: false);
+  return padAderenciaWeekToSevenDays(parsed);
+}
+
+/// Ensures 7 distinct ISO days ending today (sparkline always has D–S labels).
+List<AderenciaWeekPoint> padAderenciaWeekToSevenDays(
+  List<AderenciaWeekPoint> points,
+) {
+  final byDate = <String, double>{};
+  for (final point in points) {
+    final date = point.date;
+    if (date == null || date.isEmpty) continue;
+    byDate[date] = point.checkins;
+  }
+  final today = DateTime.now();
+  final anchor = DateTime(today.year, today.month, today.day);
+  return List.generate(7, (index) {
+    final day = anchor.subtract(Duration(days: 6 - index));
+    final iso =
+        '${day.year.toString().padLeft(4, '0')}-'
+        '${day.month.toString().padLeft(2, '0')}-'
+        '${day.day.toString().padLeft(2, '0')}';
+    return AderenciaWeekPoint(
+      checkins: byDate[iso] ?? 0,
+      date: iso,
+    );
+  });
 }
 
 AderenciaWeekSummary summarizeAderenciaWeek(List<AderenciaWeekPoint> points) {
@@ -397,14 +423,23 @@ bool shouldCompactFollowUpForContactPriority({
 }) =>
     contactPriority;
 
-/// Auto-enable focus mode for contact-priority profiles with zero adherence.
+/// Auto-enable focus mode for high-friction operational profiles.
 bool shouldDefaultOperacaoFocusMode({
   required Aluno aluno,
   required bool contactPriority,
 }) {
-  if (!contactPriority) return false;
   final aderencia = aluno.aderenciaPercent ?? 0;
-  return aderencia <= 0 || aluno.emRisco;
+  if (contactPriority) return true;
+  return aluno.emRisco && aderencia <= 0;
+}
+
+/// Hide copilot prescription when sticky CTA already covers contact outreach.
+bool shouldHideCopilotPrescriptionWhenContactPrioritySticky({
+  required bool contactPriority,
+  required OperacaoStickyAction sticky,
+}) {
+  if (!contactPriority) return false;
+  return sticky.isChatAction;
 }
 
 /// Hide copilot lacunas when hero/sticky already covers the same action.
@@ -427,8 +462,15 @@ bool shouldShowCopilotPrescriptionBlock({
   required OperacaoStickyAction sticky,
   required Aluno aluno,
   String? proximaAcaoRaw,
+  bool contactPriority = false,
 }) {
   if (forceIa) return true;
+  if (shouldHideCopilotPrescriptionWhenContactPrioritySticky(
+    contactPriority: contactPriority,
+    sticky: sticky,
+  )) {
+    return false;
+  }
   return !shouldHideCopilotPrescriptionWhenMatchesSticky(
     sticky: sticky,
     aluno: aluno,

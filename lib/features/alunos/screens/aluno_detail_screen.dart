@@ -43,6 +43,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _entrancePlayed = false;
+  String? _lastFocusSyncSignature;
 
   int get alunoId => widget.alunoId;
 
@@ -189,18 +190,24 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
               operacao?.contactPriority ??
               isOperacaoContatoPrioritario(aluno: aluno);
 
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!mounted) return;
-            ref
-                .read(alunoOperacaoFocusModeProvider(alunoId).notifier)
-                .syncFromAluno(
-                  aluno,
-                  autoDefault: shouldDefaultOperacaoFocusMode(
-                    aluno: aluno,
-                    contactPriority: contactPriority,
-                  ),
-                );
-          });
+          final focusSignature =
+              '${aluno.id}|${aluno.operacaoFocusMode}|$contactPriority|'
+              '${aluno.emRisco}|${aluno.aderenciaPercent}';
+          if (_lastFocusSyncSignature != focusSignature) {
+            _lastFocusSyncSignature = focusSignature;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              ref
+                  .read(alunoOperacaoFocusModeProvider(alunoId).notifier)
+                  .syncFromAluno(
+                    aluno,
+                    autoDefault: shouldDefaultOperacaoFocusMode(
+                      aluno: aluno,
+                      contactPriority: contactPriority,
+                    ),
+                  );
+            });
+          }
 
           return RefreshIndicator(
             onRefresh: () => invalidateAluno360Providers(ref, alunoId),

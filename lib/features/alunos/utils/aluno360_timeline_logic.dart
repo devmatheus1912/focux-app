@@ -199,6 +199,55 @@ String timeline360ChatBodyFingerprint(String body) {
   return text.replaceAll(RegExp(r'[^a-z0-9áàâãéêíóôõúç\s]'), '').trim();
 }
 
+/// Smoke / QA strings that must never surface in production timeline UI.
+bool isSmokeTimelineContent(String? raw) {
+  final text = sanitizeTimeline360Copy(raw).toLowerCase().trim();
+  if (text.isEmpty) return true;
+  if (RegExp(r'^smoke\b').hasMatch(text)) return true;
+  if (text.contains('smoke chat')) return true;
+  if (text == 'acompanhamento registrado — revise o próximo passo no chat.') {
+    return true;
+  }
+  if (text.startsWith('próximo passo do plano:') &&
+      (text.contains('reforçar check-in') || text.contains('reforcar check-in'))) {
+    return true;
+  }
+  return false;
+}
+
+int timeline360PriorityRank(String priority) {
+  final normalized = priority.trim().toUpperCase();
+  if (normalized.startsWith('P0')) return 0;
+  if (normalized.startsWith('P1')) return 1;
+  if (normalized.startsWith('P2')) return 2;
+  if (normalized.startsWith('P3')) return 3;
+  return 4;
+}
+
+/// Newest first; ties broken by priority (P0 wins).
+List<T> sortTimeline360Items<T>(
+  List<T> items, {
+  required DateTime? Function(T item) atOf,
+  required String Function(T item) priorityOf,
+}) {
+  final sorted = List<T>.from(items);
+  sorted.sort((a, b) {
+    final atA = atOf(a);
+    final atB = atOf(b);
+    if (atA != null && atB != null) {
+      final byDate = atB.compareTo(atA);
+      if (byDate != 0) return byDate;
+    } else if (atA != null) {
+      return -1;
+    } else if (atB != null) {
+      return 1;
+    }
+    return timeline360PriorityRank(priorityOf(a))
+        .compareTo(timeline360PriorityRank(priorityOf(b)));
+  });
+  return sorted;
+}
+
 /// Dedupe chat rows by normalized body fingerprint (keeps first = most recent).
 List<T> dedupeChatTimelineByFingerprint<T>(
   List<T> items, {
@@ -212,6 +261,7 @@ List<T> dedupeChatTimelineByFingerprint<T>(
       out.add(item);
       continue;
     }
+    if (isSmokeTimelineContent(bodyOf(item))) continue;
     final fingerprint = timeline360ChatBodyFingerprint(bodyOf(item));
     if (fingerprint.isEmpty) {
       out.add(item);
