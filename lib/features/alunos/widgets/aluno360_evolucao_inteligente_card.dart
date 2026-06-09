@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_sparkline.dart';
@@ -158,8 +159,20 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 14),
-                if (isEmptySignal) ...[
-                  Aluno360ActionEmptyPanel(
+                AnimatedSwitcher(
+                  duration: Duration(
+                    milliseconds: fxMotionDurationMs(context),
+                  ),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  child:
+                      isEmptySignal
+                          ? KeyedSubtree(
+                            key: const ValueKey('evolucao_empty'),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Aluno360ActionEmptyPanel(
                     key: const ValueKey('aluno360_evolucao_empty'),
                     icon: Icons.hourglass_empty_rounded,
                     title: 'Sem sinais de evolução ainda',
@@ -194,27 +207,40 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                         ),
                     ],
                   ),
-                  if (hasRadarP0 && !timelineHasSignals) ...[
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed:
-                            () => context.push(
-                              '/alunos/$alunoId/evolucao',
-                              extra: alunoNome,
+                                if (hasRadarP0 && !timelineHasSignals) ...[
+                                  const SizedBox(height: 10),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: OutlinedButton.icon(
+                                      onPressed:
+                                          () => context.push(
+                                            '/alunos/$alunoId/evolucao',
+                                            extra: alunoNome,
+                                          ),
+                                      icon: const Icon(
+                                        Icons.radar_outlined,
+                                        size: 16,
+                                      ),
+                                      label: const Text(
+                                        'Radar pede mapa corporal (P0)',
+                                      ),
+                                      style:
+                                          Aluno360Layout.operacaoOutlinedButtonStyle(
+                                            context,
+                                            EagleTokens.warn,
+                                          ),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
-                        icon: const Icon(Icons.radar_outlined, size: 16),
-                        label: const Text('Radar pede mapa corporal (P0)'),
-                        style: Aluno360Layout.operacaoOutlinedButtonStyle(
-                          context,
-                          EagleTokens.warn,
-                        ),
-                      ),
-                    ),
-                  ],
-                ] else ...[
-                  Text(
+                          )
+                          : KeyedSubtree(
+                            key: ValueKey('evolucao_${ev.sinal}'),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
                     ev.resumo,
                     style: Aluno360Layout.captionStyle(context).copyWith(
                       color: ink,
@@ -377,7 +403,10 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                       ),
                     ],
                   ],
-                ],
+                              ],
+                            ),
+                          ),
+                ),
               ],
             ),
           ),

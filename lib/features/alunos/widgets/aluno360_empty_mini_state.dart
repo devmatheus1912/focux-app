@@ -10,17 +10,19 @@ class Aluno360EmptyMiniState extends StatelessWidget {
     required this.icon,
     required this.text,
     required this.isDark,
+    this.semanticsLabel,
   });
 
   final IconData icon;
   final String text;
   final bool isDark;
+  final String? semanticsLabel;
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    return Container(
+    final shell = Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: primary.withValues(alpha: isDark ? 0.10 : 0.06),
@@ -46,5 +48,7 @@ class Aluno360EmptyMiniState extends StatelessWidget {
         ],
       ),
     );
+    final label = semanticsLabel ?? text;
+    return Semantics(label: label, child: shell);
   }
 }

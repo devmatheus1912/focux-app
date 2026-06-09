@@ -74,5 +74,17 @@ void main() {
         '2 chk',
       );
     });
+
+    test('aderenciaSparkSemanticsLabel names each weekday', () {
+      final today = DateTime.now();
+      final anchor = DateTime(today.year, today.month, today.day);
+      final raw = [
+        {'data': _isoDay(anchor.subtract(const Duration(days: 1))), 'checkins': 1},
+        {'data': _isoDay(anchor), 'checkins': 0},
+      ];
+      final label = Aluno360FerramentasLogic.aderenciaSparkSemanticsLabel(raw);
+      expect(label, startsWith('Aderência semanal:'));
+      expect(label, contains(weekdayNameFromIso(_isoDay(anchor))));
+    });
   });
 }

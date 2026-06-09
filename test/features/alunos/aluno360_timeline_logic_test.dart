@@ -18,7 +18,7 @@ void main() {
         sanitizeTimeline360Copy(
           'Beatriz precisa de uma ação humana hoje: completar mapa corporal.',
         ),
-        'Beatriz ainda não completou o mapa corporal — vale cobrar hoje.',
+        'Beatriz ainda não completou o mapa corporal — vale lembrar hoje.',
       );
     });
 
@@ -27,7 +27,7 @@ void main() {
         sanitizeTimeline360Copy(
           'Beatriz precisa de uma acao humana hoje: completar mapa corporal.',
         ),
-        'Beatriz ainda não completou o mapa corporal — vale cobrar hoje.',
+        'Beatriz ainda não completou o mapa corporal — vale lembrar hoje.',
       );
     });
 
@@ -171,6 +171,35 @@ void main() {
         isTrue,
       );
       expect(timeline360BodyExpandable(body, kind: 'Radar'), isFalse);
+    });
+
+    test('expands chat near two-line limit', () {
+      final body = 'A' * 73;
+      expect(
+        timeline360BodyExpandable(body, kind: 'Chat', previewBody: body),
+        isTrue,
+      );
+    });
+
+    test('expands when preview is shorter than full body', () {
+      const preview = 'Como foi seu último treino?';
+      const full =
+          '$preview Me manda carga, repetições e qualquer sensação fora do normal.';
+      expect(
+        timeline360BodyExpandable(full, kind: 'Chat', previewBody: preview),
+        isTrue,
+      );
+    });
+  });
+
+  group('legacy radar copy', () {
+    test('rewrites vale cobrar to vale lembrar', () {
+      expect(
+        sanitizeTimeline360Copy(
+          'Beatriz ainda não completou o mapa corporal — vale cobrar hoje.',
+        ),
+        'Beatriz ainda não completou o mapa corporal — vale lembrar hoje.',
+      );
     });
   });
 

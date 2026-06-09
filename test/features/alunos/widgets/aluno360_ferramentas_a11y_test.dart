@@ -83,7 +83,7 @@ void main() {
     );
 
     expect(
-      find.bySemanticsLabel(RegExp(r'Tendência semanal')),
+      find.bySemanticsLabel(RegExp(r'Aderência semanal:')),
       findsOneWidget,
     );
 

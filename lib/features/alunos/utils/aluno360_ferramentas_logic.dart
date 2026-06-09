@@ -40,9 +40,26 @@ abstract final class Aluno360FerramentasLogic {
   static String aderenciaSparkSemanticsLabel(
     List<Map<String, dynamic>>? aderenciaSemanal,
   ) {
-    final summary = summarizeAderenciaWeek(parseAderenciaSemanal(aderenciaSemanal));
+    final points = parseAderenciaSemanal(aderenciaSemanal);
+    final summary = summarizeAderenciaWeek(points);
+    if (points.isEmpty) {
+      return 'Sem dados de aderência nesta semana';
+    }
     if (!summary.hasAnyCheckin) {
-      return 'Sem check-ins registrados nesta semana';
+      return 'Sem check-ins nos últimos 7 dias';
+    }
+    final dayParts = <String>[];
+    for (final point in points) {
+      final day = weekdayNameFromIso(point.date);
+      if (day.isEmpty) continue;
+      final status =
+          point.checkins > 0
+              ? '${point.checkins.round()} check-in${point.checkins == 1 ? '' : 's'}'
+              : 'sem registro';
+      dayParts.add('$day $status');
+    }
+    if (dayParts.isNotEmpty) {
+      return 'Aderência semanal: ${dayParts.join(', ')}';
     }
     final n = summary.totalCheckins;
     return 'Tendência semanal: $n check-in${n == 1 ? '' : 's'} nos últimos dias';

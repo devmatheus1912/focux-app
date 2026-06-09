@@ -148,13 +148,16 @@ class Aluno360FerramentasMiniSparkline extends StatelessWidget {
     return Semantics(
       label: semanticsLabel,
       child: ExcludeSemantics(
-        child: FxSparkline(
-          data: plotData,
-          color: strokeColor,
-          width: 36,
-          height: 16,
-          strokeWidth: hasSignal ? 1.6 : 2.0,
-          fill: false,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 2, top: 1),
+          child: FxSparkline(
+            data: plotData,
+            color: strokeColor,
+            width: 52,
+            height: 22,
+            strokeWidth: hasSignal ? 2.0 : 2.2,
+            fill: false,
+          ),
         ),
       ),
     );

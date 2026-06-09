@@ -44,7 +44,7 @@ class AlunoOperacaoAdherenceBars extends StatelessWidget {
             ? Color.lerp(fxScreenMute(context), ink, isDark ? 0.78 : 0.80)!
             : fxScreenMute(context);
     final labelBand =
-        14.0 * MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 1.5);
+        18.0 * MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 1.5);
 
     if (emptyWeek) {
       return SizedBox(
@@ -145,7 +145,7 @@ class _AdherenceDayMarker extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           onTap: () => fxAnnounce(context, tooltip),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48, minWidth: 28),
+            constraints: const BoxConstraints(minHeight: 48, minWidth: 34),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -289,7 +289,7 @@ class _AdherenceDayBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             onTap: () => fxAnnounce(context, tooltip),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 48, minWidth: 28),
+              constraints: const BoxConstraints(minHeight: 48, minWidth: 34),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [

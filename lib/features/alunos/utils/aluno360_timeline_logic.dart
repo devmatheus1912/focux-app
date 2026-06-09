@@ -17,9 +17,14 @@ String sanitizeTimeline360Copy(String? raw) {
   text = text.replaceAll(RegExp(r'\bproximo\b', caseSensitive: false), 'próximo');
   text = text.replaceAll(RegExp(r'\besta\b', caseSensitive: false), 'está');
 
+  text = text.replaceAll(
+    RegExp(r'vale cobrar hoje', caseSensitive: false),
+    'vale lembrar hoje',
+  );
+
   const englishToPt = {
     'needs human action today: complete body map':
-        'ainda não completou o mapa corporal — vale cobrar hoje.',
+        'ainda não completou o mapa corporal — vale lembrar hoje.',
     'needs human action today': 'tem prioridade hoje',
     'needs human action': 'precisa de atenção',
     'human action today': 'prioridade hoje',
@@ -39,7 +44,7 @@ String sanitizeTimeline360Copy(String? raw) {
       r'^(\S+)\s+precisa de uma ação humana hoje:\s*completar mapa corporal\.?$',
       caseSensitive: false,
     ),
-    (m) => '${m[1]} ainda não completou o mapa corporal — vale cobrar hoje.',
+    (m) => '${m[1]} ainda não completou o mapa corporal — vale lembrar hoje.',
   );
   text = text.replaceAllMapped(
     RegExp(
@@ -490,9 +495,13 @@ bool timeline360BodyExpandable(
   String? kind,
   String? previewBody,
 }) {
-  final text = (previewBody ?? body).trim();
-  final threshold = kind == 'Chat' ? 100 : 110;
-  return text.length > threshold;
+  final full = body.trim();
+  final preview = (previewBody ?? full).trim();
+  if (kind == 'Chat') {
+    if (full.length > preview.length) return true;
+    return preview.length > 72;
+  }
+  return preview.length > 110;
 }
 
 String timeline360ExpandLinkLabel({required String kind}) {

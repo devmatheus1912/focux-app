@@ -28,7 +28,7 @@ void main() {
       tipo: 'RADAR',
       titulo: 'Radar Focux · 19 pts',
       corpo:
-          'Beatriz ainda não completou o mapa corporal — vale cobrar hoje.',
+          'Beatriz ainda não completou o mapa corporal — vale lembrar hoje.',
       meta: 'Completar mapa corporal',
       ocorridoEm: '2026-06-07T06:15:00',
       deepLink: '/alunos/42/evolucao',

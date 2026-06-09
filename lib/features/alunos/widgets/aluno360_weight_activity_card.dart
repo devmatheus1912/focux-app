@@ -185,6 +185,8 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                             icon: Icons.monitor_weight_outlined,
                             text: 'Registrar primeira medida',
                             isDark: isDark,
+                            semanticsLabel:
+                                'Registrar primeira medida na evolução corporal',
                           ),
                         ),
                       ),

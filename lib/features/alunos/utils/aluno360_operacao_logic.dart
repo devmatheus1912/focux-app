@@ -382,12 +382,14 @@ DateTime? parseIsoDateLocal(String? isoDate) {
   );
 }
 
-/// Single-letter weekday for spark bars (D S T Q Q S S — padrão BR, domingo = D).
+/// Siglas de dois caracteres para spark bars (Do Sg Te Qa Qi Sx Sb — sem ambiguidade).
+const kWeekdayShortLabels = ['Do', 'Sg', 'Te', 'Qa', 'Qi', 'Sx', 'Sb'];
+
+/// Two-letter weekday label for adherence sparkline (domingo = Do).
 String weekdayLetterFromIso(String? isoDate) {
   final parsed = parseIsoDateLocal(isoDate);
   if (parsed == null) return '';
-  const labels = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
-  return labels[parsed.weekday % 7];
+  return kWeekdayShortLabels[parsed.weekday % 7];
 }
 
 /// Full weekday name for sparkline tooltips (Seg, Ter, …).

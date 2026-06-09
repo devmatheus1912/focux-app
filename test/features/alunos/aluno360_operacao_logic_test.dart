@@ -682,13 +682,13 @@ void main() {
   });
 
   group('weekdayLetterFromIso', () {
-    test('returns D for Sunday', () {
-      expect(weekdayLetterFromIso('2026-06-07'), 'D');
+    test('returns Do for Sunday', () {
+      expect(weekdayLetterFromIso('2026-06-07'), 'Do');
     });
 
-    test('returns Q for Wednesday and Thursday (padrão BR)', () {
-      expect(weekdayLetterFromIso('2026-06-03'), 'Q');
-      expect(weekdayLetterFromIso('2026-06-04'), 'Q');
+    test('returns distinct Qa and Qi for Wednesday and Thursday', () {
+      expect(weekdayLetterFromIso('2026-06-03'), 'Qa');
+      expect(weekdayLetterFromIso('2026-06-04'), 'Qi');
     });
 
     test('parseIsoDateLocal ignores UTC midnight drift', () {
@@ -708,7 +708,7 @@ void main() {
             dayLetter: 'I',
           ),
         ),
-        'Q',
+        'Qi',
       );
     });
   });
