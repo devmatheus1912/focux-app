@@ -1,5 +1,4 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -11,6 +10,8 @@ import 'package:printing/printing.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/ia_repository.dart';
+import '../utils/ia_progressao_result_parser.dart';
+import '../widgets/ia_progressao_result_view.dart';
 import '../widgets/ia_quota_upgrade.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
@@ -35,43 +36,73 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
   String? _erro;
 
   Future<void> _exportarPdf(String conteudo) async {
+    final parsed = parseIaProgressaoMarkdown(conteudo);
     final doc = pw.Document();
-    final linhas = conteudo.split('\n');
     doc.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(32),
-        build:
-            (ctx) => [
-              pw.Text(
-                'Progressão de Carga — ${widget.alunoNome}',
-                style: pw.TextStyle(
-                  fontSize: 20,
-                  fontWeight: pw.FontWeight.bold,
+        build: (ctx) {
+          final blocks = <pw.Widget>[
+            pw.Text(
+              'Progressão de Carga — ${widget.alunoNome}',
+              style: pw.TextStyle(
+                fontSize: 20,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+            pw.SizedBox(height: 8),
+            pw.Text(
+              'Gerado em: ${DateTime.now().toString().substring(0, 16)}',
+              style: const pw.TextStyle(fontSize: 10),
+            ),
+            pw.SizedBox(height: 20),
+          ];
+
+          if (parsed.hasStructuredRows) {
+            if (parsed.intro != null && parsed.intro!.isNotEmpty) {
+              blocks.add(pw.Text(parsed.intro!, style: const pw.TextStyle(fontSize: 11)));
+              blocks.add(pw.SizedBox(height: 12));
+            }
+            for (final row in parsed.exercises) {
+              blocks.addAll([
+                pw.Text(
+                  row.exercicio,
+                  style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold),
                 ),
-              ),
-              pw.SizedBox(height: 8),
-              pw.Text(
-                'Gerado em: ${DateTime.now().toString().substring(0, 16)}',
-                style: const pw.TextStyle(fontSize: 10),
-              ),
-              pw.SizedBox(height: 20),
-              ...linhas.map(
+                pw.SizedBox(height: 4),
+                pw.Text(
+                  'Atual: ${row.cargaAtual}  →  Sugerido: ${row.cargaSugerida}',
+                  style: const pw.TextStyle(fontSize: 11),
+                ),
+                if (row.justificativa.isNotEmpty) ...[
+                  pw.SizedBox(height: 4),
+                  pw.Text(
+                    row.justificativa,
+                    style: const pw.TextStyle(fontSize: 10),
+                  ),
+                ],
+                pw.SizedBox(height: 12),
+              ]);
+            }
+            if (parsed.footer != null && parsed.footer!.isNotEmpty) {
+              blocks.add(pw.Text(parsed.footer!, style: const pw.TextStyle(fontSize: 10)));
+            }
+          } else {
+            blocks.addAll(
+              conteudo.split('\n').map(
                 (l) => pw.Padding(
                   padding: const pw.EdgeInsets.only(bottom: 4),
                   child: pw.Text(
                     l.replaceAll(RegExp(r'^#+\s*'), '').replaceAll('**', ''),
-                    style: pw.TextStyle(
-                      fontSize: l.startsWith('#') ? 13 : 11,
-                      fontWeight:
-                          l.startsWith('#')
-                              ? pw.FontWeight.bold
-                              : pw.FontWeight.normal,
-                    ),
+                    style: const pw.TextStyle(fontSize: 11),
                   ),
                 ),
               ),
-            ],
+            );
+          }
+          return blocks;
+        },
       ),
     );
     await Printing.sharePdf(
@@ -146,6 +177,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                     controller: _objetivo,
                     decoration: InputDecoration(
                       labelText: 'Objetivo (ex: hipertrofia, força)',
+                      hintText: 'Ex: hipertrofia, força máxima, emagrecimento',
                       border: FxInputDeco.outlineBorder(
                         borderRadius: BorderRadius.circular(TokensStrip.rCard),
                       ),
@@ -214,8 +246,11 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
             const SizedBox(height: 20),
             const Divider(),
             const SizedBox(height: 8),
-            MarkdownBody(data: _resultado!, selectable: true),
-            const SizedBox(height: TokensStrip.s4),
+            IaProgressaoResultView(
+              markdown: _resultado!,
+              alunoNome: widget.alunoNome,
+            ),
+            const SizedBox(height: TokensStrip.s3),
             OutlinedButton.icon(
               onPressed: () => _exportarPdf(_resultado!),
               icon: const Icon(Icons.picture_as_pdf),

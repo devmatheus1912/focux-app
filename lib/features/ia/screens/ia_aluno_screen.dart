@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
 import '../../../features/chat/data/chat_repository.dart';
 import '../data/ia_repository.dart';
+import '../widgets/ia_progressao_result_view.dart';
 import '../widgets/ia_quota_upgrade.dart';
 import '../../../core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
@@ -263,7 +263,7 @@ class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
       FeedbackHelper.showSnackBar(
         context,
         const SnackBar(
-          content: Text('Nao foi possivel identificar seu perfil de aluno.'),
+          content: Text('Não foi possível identificar seu perfil de aluno.'),
         ),
       );
       return;
@@ -316,7 +316,10 @@ class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
           const SizedBox(height: 20),
           const Divider(),
           const SizedBox(height: 8),
-          MarkdownBody(data: _resultado!, selectable: true),
+          IaProgressaoResultView(
+            markdown: _resultado!,
+            showSectionTitle: false,
+          ),
         ],
       ],
     ),
