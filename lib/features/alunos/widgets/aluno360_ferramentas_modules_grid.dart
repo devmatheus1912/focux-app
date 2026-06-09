@@ -102,7 +102,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
       Aluno360ModuleTile(
         icon: Icons.auto_awesome,
         label: 'IA Progresso',
-        sub: 'Sugerir carga',
+        sub: 'Carga IA',
         badge: 'IA',
         isDark: isDark,
         onTap:
@@ -117,7 +117,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
         sub:
             bf != null || massaMagra != null
                 ? 'Última avaliação'
-                : 'Registrar medida',
+                : 'Medida',
         badge: bf == null && massaMagra == null ? 'Pendente' : null,
         isDark: isDark,
         onTap: () => context.push(evolucaoRoute, extra: aluno.nome),
@@ -193,7 +193,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
       Aluno360ModuleTile(
         icon: Icons.video_camera_back,
         label: 'Feedback',
-        sub: 'Análise de vídeo',
+        sub: 'Vídeo',
         isDark: isDark,
         onTap:
             () => context.push(

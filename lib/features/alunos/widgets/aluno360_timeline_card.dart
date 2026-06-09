@@ -106,10 +106,14 @@ class Aluno360TimelineCard extends StatelessWidget {
             .where((item) => !isSmokeTimelineContent(item.body))
             .toList(growable: false);
     return sortTimeline360Items(
-      dedupeChatTimelineByFingerprint(
-        filtered,
+      dedupeAutonomiaTimelineByTask(
+        dedupeChatTimelineByFingerprint(
+          filtered,
+          kindOf: (item) => item.kind,
+          bodyOf: (item) => item.body,
+        ),
         kindOf: (item) => item.kind,
-        bodyOf: (item) => item.body,
+        titleOf: (item) => item.title,
       ),
       atOf: (item) => item.at,
       priorityOf: (item) => item.priority,
@@ -553,7 +557,9 @@ class Timeline360Tile extends StatelessWidget {
               item.body,
               alunoFirstName: alunoFirstName,
             )
-            : item.body;
+            : item.kind == 'Autonomia'
+                ? timeline360LocalizeAutonomiaActionCode(item.body)
+                : item.body;
     final expandable = timeline360BodyExpandable(
       item.body,
       kind: item.kind,

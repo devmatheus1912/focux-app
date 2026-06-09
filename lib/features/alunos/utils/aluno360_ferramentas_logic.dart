@@ -27,12 +27,12 @@ abstract final class Aluno360FerramentasLogic {
     List<Map<String, dynamic>>? aderenciaSemanal,
   }) {
     if (aluno.aderenciaPercent != null) {
-      return '${aluno.aderenciaPercent}% · semana';
+      return '${aluno.aderenciaPercent}%';
     }
     final summary = summarizeAderenciaWeek(parseAderenciaSemanal(aderenciaSemanal));
     if (summary.hasAnyCheckin) {
       final n = summary.totalCheckins;
-      return '$n chk · sem';
+      return '$n chk';
     }
     return 'Sem dados de check-in';
   }

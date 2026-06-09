@@ -52,7 +52,7 @@ void main() {
       );
       expect(
         Aluno360FerramentasLogic.aderenciaModuleSub(aluno: aluno),
-        '42% · semana',
+        '42%',
       );
 
       final today = DateTime.now();
@@ -71,7 +71,7 @@ void main() {
             {'data': _isoDay(anchor), 'checkins': 2},
           ],
         ),
-        '2 chk · sem',
+        '2 chk',
       );
     });
   });

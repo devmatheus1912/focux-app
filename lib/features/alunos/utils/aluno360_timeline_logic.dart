@@ -89,7 +89,40 @@ String sanitizeTimeline360Copy(String? raw) {
   text = formatChatTextForDisplay(text);
   text = cleanCopilotText(text);
   text = timeline360CollapseCopilotTemplate(text);
+  text = timeline360LocalizeAutonomiaActionCode(text);
   return timeline360FinalizeCopy(text);
+}
+
+/// Códigos de evento de autonomia (legado em inglês) → PT-BR.
+String timeline360LocalizeAutonomiaActionCode(String raw) {
+  final trimmed = raw.trim();
+  if (trimmed.isEmpty) return trimmed;
+  return switch (trimmed.toUpperCase()) {
+    'VIEWED' => 'Visualizado',
+    'CLICKED' => 'Abriu no app',
+    'COMPLETED' => 'Concluído',
+    'DISMISSED' => 'Dispensou',
+    'SKIPPED' => 'Pulou',
+    _ => trimmed,
+  };
+}
+
+bool timeline360IsAutonomiaActionCode(String? raw) {
+  if (raw == null) return false;
+  return const {
+    'VIEWED',
+    'CLICKED',
+    'COMPLETED',
+    'DISMISSED',
+    'SKIPPED',
+  }.contains(raw.trim().toUpperCase());
+}
+
+String timeline360AutonomiaTaskFingerprint(String title) {
+  return sanitizeTimeline360Copy(title)
+      .toLowerCase()
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
 }
 
 String timeline360RewriteCopilotExtractedAction(String action) {
@@ -274,6 +307,31 @@ List<T> dedupeChatTimelineByFingerprint<T>(
   return out;
 }
 
+/// Dedupe autonomia rows by task title (keeps first = most recent).
+List<T> dedupeAutonomiaTimelineByTask<T>(
+  List<T> items, {
+  required String Function(T item) kindOf,
+  required String Function(T item) titleOf,
+}) {
+  final out = <T>[];
+  final seen = <String>{};
+  for (final item in items) {
+    if (kindOf(item) != 'Autonomia') {
+      out.add(item);
+      continue;
+    }
+    final key = timeline360AutonomiaTaskFingerprint(titleOf(item));
+    if (key.isEmpty) {
+      out.add(item);
+      continue;
+    }
+    if (seen.contains(key)) continue;
+    seen.add(key);
+    out.add(item);
+  }
+  return out;
+}
+
 /// Preview body for chat rows — drops redundant "Oi, {nome}." after kind header.
 String timeline360ChatPreviewBody(
   String body, {
@@ -362,6 +420,16 @@ bool timeline360ShouldShowMetaChip({
   required String title,
 }) {
   if (kind == 'Chat') return false;
+  if (kind == 'Autonomia') {
+    final upper = meta.trim().toUpperCase();
+    if (upper == 'ALTA' ||
+        upper == 'MEDIA' ||
+        upper == 'MÉDIA' ||
+        upper == 'BAIXA') {
+      return false;
+    }
+    if (timeline360IsAutonomiaActionCode(meta)) return false;
+  }
   if (kind == 'Radar' && meta.toLowerCase().contains('mapa corporal')) {
     return false;
   }

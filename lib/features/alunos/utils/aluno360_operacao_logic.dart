@@ -638,6 +638,31 @@ String stickyLabelCompactFallback(String label) {
   return truncateStickyLabel(label);
 }
 
+/// Evita usar rótulo compacto do backend quando o sticky já foi sobrescrito
+/// (ex.: contato prioritário enquanto proximaAcao ainda sugere mapa).
+bool stickyCompactLabelAlignedWithAction({
+  required OperacaoStickyAction sticky,
+  required ProximaAcaoResumo? proximaAcao,
+}) {
+  if (proximaAcao == null) return true;
+  final backend = proximaAcao.stickyLabelCompact?.trim();
+  if (backend == null || backend.isEmpty) return true;
+
+  final stickyCompact = stickyLabelCompactFallback(sticky.label);
+  if (backend == stickyCompact) return true;
+
+  final acao = proximaAcao.acao.trim();
+  if (sticky.isChatAction && acao.isNotEmpty && !acaoSugereChat(acao)) {
+    return false;
+  }
+  if (acao.isEmpty) return true;
+  final expected = resolveOperacaoStickyDestination(
+    acao,
+    followUpDue: false,
+  );
+  return sticky.destination == expected;
+}
+
 String resolveStickyDisplayLabel({
   required OperacaoStickyAction sticky,
   required bool compact,
@@ -645,7 +670,13 @@ String resolveStickyDisplayLabel({
 }) {
   if (compact) {
     final backend = proximaAcao?.stickyLabelCompact?.trim();
-    if (backend != null && backend.isNotEmpty && backend.length <= 14) {
+    if (backend != null &&
+        backend.isNotEmpty &&
+        backend.length <= 14 &&
+        stickyCompactLabelAlignedWithAction(
+          sticky: sticky,
+          proximaAcao: proximaAcao,
+        )) {
       return backend;
     }
     return stickyLabelCompactFallback(sticky.label);

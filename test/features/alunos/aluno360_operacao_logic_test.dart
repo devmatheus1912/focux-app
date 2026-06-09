@@ -784,6 +784,27 @@ void main() {
         'Mapa',
       );
     });
+
+    test('ignores backend Mapa when sticky overridden to contact', () {
+      expect(
+        resolveStickyDisplayLabel(
+          sticky: const OperacaoStickyAction(
+            label: 'Retomar contato',
+            icon: Icons.chat_bubble_outline_rounded,
+            destination: OperacaoStickyDestination.chat,
+          ),
+          compact: true,
+          proximaAcao: const ProximaAcaoResumo(
+            acao: 'Completar mapa corporal',
+            motivo: 'Sem medidas',
+            fonte: 'RADAR',
+            prioridade: 'P2',
+            stickyLabelCompact: 'Mapa',
+          ),
+        ),
+        'Contato',
+      );
+    });
   });
 
   group('isOperacaoContatoPrioritario', () {

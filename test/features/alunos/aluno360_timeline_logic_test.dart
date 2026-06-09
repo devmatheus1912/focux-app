@@ -315,6 +315,58 @@ void main() {
         isTrue,
       );
     });
+
+    test('hides autonomia business priority and action codes', () {
+      expect(
+        timeline360ShouldShowMetaChip(
+          kind: 'Autonomia',
+          meta: 'ALTA',
+          priority: 'P2',
+          title: 'Completar perfil base',
+        ),
+        isFalse,
+      );
+      expect(
+        timeline360ShouldShowMetaChip(
+          kind: 'Autonomia',
+          meta: 'VIEWED',
+          priority: 'P2',
+          title: 'Completar perfil base',
+        ),
+        isFalse,
+      );
+    });
+  });
+
+  group('timeline360LocalizeAutonomiaActionCode', () {
+    test('translates VIEWED to Visualizado', () {
+      expect(
+        sanitizeTimeline360Copy('VIEWED'),
+        'Visualizado',
+      );
+      expect(
+        timeline360LocalizeAutonomiaActionCode('CLICKED'),
+        'Abriu no app',
+      );
+    });
+  });
+
+  group('dedupeAutonomiaTimelineByTask', () {
+    test('keeps one row per task title', () {
+      final kinds = ['Autonomia', 'Autonomia', 'Chat'];
+      final titles = [
+        'Completar perfil base',
+        'Completar perfil base',
+        'Oi',
+      ];
+      final bodies = ['Visualizado', 'Visualizado', 'Oi'];
+      final deduped = dedupeAutonomiaTimelineByTask(
+        List.generate(3, (i) => i),
+        kindOf: (i) => kinds[i],
+        titleOf: (i) => titles[i],
+      );
+      expect(deduped, [0, 2]);
+    });
   });
 
   group('isSmokeTimelineContent', () {

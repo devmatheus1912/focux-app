@@ -116,11 +116,7 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
       proximaAcaoText: effectiveProxima?.acao,
     );
     final hasSecondary = showSecondaryCommandCenter || showSecondaryChat;
-    final stickyDisplayLabel = resolveStickyDisplayLabel(
-      sticky: sticky,
-      compact: hasSecondary,
-      proximaAcao: effectiveProxima,
-    );
+    final stickyDisplayLabel = operacao.stickyDisplayLabel;
 
     return SafeArea(
       top: false,
