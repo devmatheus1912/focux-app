@@ -74,8 +74,11 @@ List<Override> _beatrizOverrides() {
         .overrideWith((ref) async => const []),
     alunoEvolucaoInteligenteProvider(_contactPriorityAlunoId)
         .overrideWith((ref) async => _emptyEvolucaoFixture),
-    alunoTimeline360ApiProvider(_contactPriorityAlunoId)
-        .overrideWith((ref) async => const []),
+    alunoTimeline360PagedProvider(_contactPriorityAlunoId).overrideWith(
+      (ref) =>
+          Timeline360PagedNotifier(ref, _contactPriorityAlunoId)
+            ..state = const AsyncValue.data(Timeline360PagedState(events: [])),
+    ),
     alunoCopilotoActionProvider(_contactPriorityAlunoId)
         .overrideWith((ref) async => const {}),
     alertasConfigProvider.overrideWith(
@@ -167,7 +170,11 @@ List<Override> _aluno360Overrides() {
     alunoPesoHistoricoProvider(_alunoId).overrideWith((ref) async => const []),
     alunoEvolucaoInteligenteProvider(_alunoId)
         .overrideWith((ref) async => _emptyEvolucaoFixture),
-    alunoTimeline360ApiProvider(_alunoId).overrideWith((ref) async => const []),
+    alunoTimeline360PagedProvider(_alunoId).overrideWith(
+      (ref) =>
+          Timeline360PagedNotifier(ref, _alunoId)
+            ..state = const AsyncValue.data(Timeline360PagedState(events: [])),
+    ),
     alunoCopilotoActionProvider(_alunoId).overrideWith((ref) async => const {}),
     alertasConfigProvider.overrideWith(
       (ref) async => AlertasConfiguracao(

@@ -441,9 +441,10 @@ Future<void> _sendText() async {
               : await repo.editarMensagem(msg.id!, normalized);
       if (!mounted) return;
       setState(() => _upsertMessage(updated));
+      _invalidateAluno360Timeline();
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showSuccess(context, 'Nao foi possivel editar: $e');
+      FeedbackHelper.showError(context, 'Não foi possível editar a mensagem.');
     }
   }
 
@@ -478,10 +479,19 @@ Future<void> _sendText() async {
               : await repo.apagarMensagem(msg.id!);
       if (!mounted) return;
       setState(() => _upsertMessage(updated));
+      _invalidateAluno360Timeline();
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showSuccess(context, 'Nao foi possivel apagar: $e');
+      FeedbackHelper.showError(context, 'Não foi possível apagar a mensagem.');
     }
+  }
+
+  void _invalidateAluno360Timeline() {
+    if (_isAlunoMode) return;
+    final alunoId = _alunoId ?? widget.alunoId;
+    if (alunoId == null) return;
+    ref.invalidate(alunoTimeline360PagedProvider(alunoId));
+    ref.invalidate(aluno360Provider(alunoId));
   }
 
   void _setReply(ChatMsg msg) {

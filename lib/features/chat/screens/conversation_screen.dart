@@ -24,6 +24,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../alunos/providers/aluno_detail_providers.dart';
 import '../data/chat_repository.dart';
 import '../data/chat_text_formatter.dart';
 import '../../../core/widgets/feedback_helper.dart';

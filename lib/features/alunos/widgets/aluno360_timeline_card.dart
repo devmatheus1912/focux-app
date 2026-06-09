@@ -15,6 +15,7 @@ import 'aluno360_action_empty_panel.dart';
 import 'aluno360_mini_autonomy_chip.dart';
 import 'aluno360_section_header.dart';
 import 'aluno360_timeline_priority_badge.dart';
+import 'aluno360_timeline_full_sheet.dart';
 import 'aluno360_timeline_sheet_motion.dart';
 import 'aluno_outreach_message_sheet.dart';
 
@@ -32,7 +33,7 @@ class Aluno360TimelineCard extends StatelessWidget {
   final bool isDark;
   final bool compactEmpty;
 
-  static Timeline360Item _itemFromApi(
+  static Timeline360Item itemFromApi(
     Timeline360Event e, {
     required Color primary,
   }) {
@@ -99,7 +100,7 @@ class Aluno360TimelineCard extends StatelessWidget {
     }
     final mapped =
         timelineApiAsync.value!
-            .map((event) => _itemFromApi(event, primary: primary))
+            .map((event) => itemFromApi(event, primary: primary))
             .toList();
     final filtered =
         mapped
@@ -260,8 +261,7 @@ class Aluno360TimelineCard extends StatelessWidget {
                 child: SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
-                    onPressed:
-                        () => _showFullTimeline(context, allItems, primary),
+                    onPressed: () => _showFullTimeline(context, primary),
                     style: Aluno360Layout.operacaoOutlinedButtonStyle(
                       context,
                       primary,
@@ -278,11 +278,7 @@ class Aluno360TimelineCard extends StatelessWidget {
     );
   }
 
-  void _showFullTimeline(
-    BuildContext context,
-    List<Timeline360Item> items,
-    Color primary,
-  ) {
+  void _showFullTimeline(BuildContext context, Color primary) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -292,96 +288,10 @@ class Aluno360TimelineCard extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder:
-          (ctx) => DraggableScrollableSheet(
-            expand: false,
-            initialChildSize: 0.78,
-            minChildSize: 0.45,
-            maxChildSize: 0.92,
-            builder:
-                (context, controller) => Aluno360TimelineSheetEntrance(
-                  child: Padding(
-                  padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 4, 16, 0),
-                  child: ShellSurface(
-                    radius: 28,
-                    padding: EdgeInsets.fromLTRB(
-                      16,
-                      8,
-                      16,
-                      24 + MediaQuery.of(ctx).padding.bottom,
-                    ),
-                    child: ListView.separated(
-                      controller: controller,
-                      itemCount: items.length + 1,
-                      separatorBuilder: (_, index) {
-                        if (index == 0) return const SizedBox(height: 12);
-                        return const SizedBox(height: 10);
-                      },
-                      itemBuilder: (context, index) {
-                        if (index == 0) {
-                          final ink = fxScreenInk(context);
-                          final mute = fxScreenMute(context);
-                          return Semantics(
-                            header: true,
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    'Histórico 360',
-                                    style: Aluno360Layout.sectionTitleStyle(
-                                      context,
-                                      ink,
-                                    ),
-                                  ),
-                                ),
-                                IconButton(
-                                  tooltip: 'Fechar histórico',
-                                  onPressed: () => Navigator.of(ctx).pop(),
-                                  icon: Icon(Icons.close_rounded, color: mute),
-                                  constraints: const BoxConstraints(
-                                    minWidth: 44,
-                                    minHeight: 44,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-                        final tileIndex = index - 1;
-                        return Aluno360TimelineTileEntrance(
-                          index: tileIndex,
-                          child: DecoratedBox(
-                          decoration: Aluno360Layout.timelineModalTileDecoration(
-                            context,
-                            isDark: isDark,
-                          ),
-                          child: Timeline360Tile(
-                            item: items[tileIndex],
-                            isDark: isDark,
-                            accent: primary,
-                            alunoFirstName: aluno.nome.split(' ').first,
-                            showSpineBelow: tileIndex < items.length - 1,
-                            inkWell: true,
-                            onExpandableTap: (tileContext, item) {
-                            final host = context;
-                            Navigator.of(tileContext).pop();
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              if (!host.mounted) return;
-                              showTimeline360BodySheet(
-                                host,
-                                item,
-                                accent: primary,
-                                isDark: isDark,
-                              );
-                            });
-                          },
-                          ),
-                        ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                ),
+          (ctx) => Aluno360TimelineFullSheet(
+            aluno: aluno,
+            isDark: isDark,
+            primary: primary,
           ),
     );
   }

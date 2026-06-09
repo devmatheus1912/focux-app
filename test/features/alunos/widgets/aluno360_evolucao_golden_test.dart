@@ -53,7 +53,13 @@ void main() {
   }) {
     return ProviderScope(
       overrides: [
-        alunoTimeline360ApiProvider(42).overrideWith((ref) async => timelineEvents),
+        alunoTimeline360PagedProvider(42).overrideWith(
+          (ref) =>
+              Timeline360PagedNotifier(ref, 42)
+                ..state = AsyncValue.data(
+                  Timeline360PagedState(events: timelineEvents),
+                ),
+        ),
         alunoPesoHistoricoProvider(42).overrideWith((ref) async => const []),
       ],
       child: MaterialApp(

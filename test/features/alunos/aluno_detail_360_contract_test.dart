@@ -397,6 +397,22 @@ void main() {
     expect(screen, contains('Sem sinais de evolução ainda'));
     expect(screen, contains('Linha do tempo ainda vazia'));
     expect(screen, contains('friendlyError(e, fallback: \'Não foi possível gerar senha.\')'));
+    expect(screen, contains('alunoTimeline360PagedProvider'));
+    expect(screen, contains('reduceMotionOf(context)'));
+    expect(
+      File('lib/features/alunos/providers/aluno_timeline360_paged_provider.dart')
+          .readAsStringSync(),
+      allOf(contains('loadMore'), contains('Timeline360PagedState')),
+    );
+    expect(
+      File('lib/features/alunos/widgets/aluno360_timeline_full_sheet.dart')
+          .readAsStringSync(),
+      contains('class Aluno360TimelineFullSheet'),
+    );
+    expect(
+      File('lib/features/alunos/data/aluno_repository.dart').readAsStringSync(),
+      allOf(contains('buscarTimeline360Page'), contains('totalCount')),
+    );
     expect(
       File('lib/core/widgets/operational_metric_tile.dart').readAsStringSync(),
       contains('class OperationalMetricTile'),

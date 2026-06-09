@@ -12,7 +12,10 @@ import '../data/aluno_operacao_focus_store.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_copilot_logic.dart';
 import '../utils/aluno360_operacao_logic.dart';
+import 'aluno_timeline360_paged_provider.dart';
 import 'alunos_provider.dart';
+
+export 'aluno_timeline360_paged_provider.dart';
 
 final aluno360Provider = FutureProvider.family<Aluno360, int>((ref, alunoId) async {
   return AlunoRepository(ref.read(apiClientProvider)).buscarAluno360(alunoId);
@@ -64,7 +67,13 @@ class AlunoOperacaoFocusModeController extends StateNotifier<bool> {
         return;
       }
       await syncAutoDefault(autoDefault: autoDefault);
-    } catch (_) {}
+    } catch (error) {
+      assert(() {
+        // ignore: avoid_print
+        print('AlunoOperacaoFocusModeController.syncFromAluno: $error');
+        return true;
+      }());
+    }
   }
 
   /// Applies contact-priority auto-default unless the personal toggled focus manually.
@@ -73,20 +82,30 @@ class AlunoOperacaoFocusModeController extends StateNotifier<bool> {
       final explicit = await AlunoOperacaoFocusStore.loadExplicit(alunoId);
       final next = explicit ?? autoDefault;
       if (state != next) state = next;
-    } catch (_) {}
+    } catch (error) {
+      assert(() {
+        // ignore: avoid_print
+        print('AlunoOperacaoFocusModeController.syncAutoDefault: $error');
+        return true;
+      }());
+    }
   }
 
   Future<void> setFocus(bool value) async {
     if (state == value) return;
+    final previous = state;
     state = value;
     try {
       await AlunoOperacaoFocusStore.saveExplicit(alunoId, value);
       await AlunoRepository(_ref.read(apiClientProvider))
           .atualizarOperacaoFocus(alunoId, focusMode: value);
-    } catch (_) {}
-    fxAnnounceGlobal(
-      value ? 'Modo foco ativado' : 'Modo foco desativado',
-    );
+      fxAnnounceGlobal(
+        value ? 'Modo foco ativado' : 'Modo foco desativado',
+      );
+    } catch (error) {
+      state = previous;
+      fxAnnounceGlobal('Não foi possível salvar o modo foco. Tente novamente.');
+    }
   }
 
   Future<void> toggle() async => setFocus(!state);
@@ -186,14 +205,6 @@ final alunoEvolucaoInteligenteProvider =
       ).buscarEvolucaoInteligente(alunoId);
     });
 
-final alunoTimeline360ApiProvider =
-    FutureProvider.family<List<Timeline360Event>, int>((ref, alunoId) async {
-      final page = await AlunoRepository(
-        ref.read(apiClientProvider),
-      ).buscarTimeline360Page(alunoId, limit: 80);
-      return page.events;
-    });
-
 final alunoAderenciaSemanalProvider =
     FutureProvider.family<List<Map<String, dynamic>>, int>((ref, alunoId) async {
       final aluno360 = await ref.watch(aluno360Provider(alunoId).future);
@@ -238,7 +249,7 @@ Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
   ref.invalidate(alunoAutonomiaResumoProvider(alunoId));
   ref.invalidate(alunoScoreSnapshotsProvider(alunoId));
   ref.invalidate(alunoEvolucaoInteligenteProvider(alunoId));
-  ref.invalidate(alunoTimeline360ApiProvider(alunoId));
+  ref.invalidate(alunoTimeline360PagedProvider(alunoId));
   ref.read(alunoCopilotoForceIaProvider(alunoId).notifier).state = false;
   ref.read(alunoCopilotIaSkipCacheProvider(alunoId).notifier).state = false;
   ref.read(alunoCopilotIaRefreshingProvider(alunoId).notifier).state = false;
