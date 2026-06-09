@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/aluno_360_layout.dart';
+import '../utils/aluno360_timeline_logic.dart';
 
 class Aluno360MiniAutonomyChip extends StatelessWidget {
   const Aluno360MiniAutonomyChip({
@@ -17,6 +18,7 @@ class Aluno360MiniAutonomyChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dark = isDark || Theme.of(context).brightness == Brightness.dark;
+    final ink = timeline360PriorityInk(color, isDark: dark);
     return Semantics(
       label: label,
       child: ConstrainedBox(
@@ -28,7 +30,10 @@ class Aluno360MiniAutonomyChip extends StatelessWidget {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: Aluno360Layout.chipLabelStyle(context, color: color),
+            style: Aluno360Layout.chipLabelStyle(
+              context,
+              color: ink,
+            ).copyWith(fontWeight: FontWeight.w700),
           ),
         ),
       ),

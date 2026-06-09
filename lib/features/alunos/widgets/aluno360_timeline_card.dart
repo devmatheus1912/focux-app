@@ -240,12 +240,15 @@ class Aluno360TimelineCard extends StatelessWidget {
           ] else ...[
             const SizedBox(height: 14),
             for (var i = 0; i < visibleItems.length; i++) ...[
-              Timeline360Tile(
-                item: visibleItems[i],
-                isDark: isDark,
-                accent: primary,
-                alunoFirstName: aluno.nome.split(' ').first,
-                showSpineBelow: i < visibleItems.length - 1,
+              Aluno360TimelineTileEntrance(
+                index: i,
+                child: Timeline360Tile(
+                  item: visibleItems[i],
+                  isDark: isDark,
+                  accent: primary,
+                  alunoFirstName: aluno.nome.split(' ').first,
+                  showSpineBelow: i < visibleItems.length - 1,
+                ),
               ),
               if (i < visibleItems.length - 1) const SizedBox(height: 10),
             ],
@@ -334,13 +337,19 @@ class Aluno360TimelineCard extends StatelessWidget {
                                   tooltip: 'Fechar histórico',
                                   onPressed: () => Navigator.of(ctx).pop(),
                                   icon: Icon(Icons.close_rounded, color: mute),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 44,
+                                    minHeight: 44,
+                                  ),
                                 ),
                               ],
                             ),
                           );
                         }
                         final tileIndex = index - 1;
-                        return DecoratedBox(
+                        return Aluno360TimelineTileEntrance(
+                          index: tileIndex,
+                          child: DecoratedBox(
                           decoration: Aluno360Layout.timelineModalTileDecoration(
                             context,
                             isDark: isDark,
@@ -366,6 +375,7 @@ class Aluno360TimelineCard extends StatelessWidget {
                             });
                           },
                           ),
+                        ),
                         );
                       },
                     ),
@@ -466,6 +476,10 @@ void showTimeline360BodySheet(
                               tooltip: 'Fechar',
                               onPressed: () => Navigator.of(ctx).pop(),
                               icon: Icon(Icons.close_rounded, color: mute),
+                              constraints: const BoxConstraints(
+                                minWidth: 44,
+                                minHeight: 44,
+                              ),
                             ),
                           ],
                         ),

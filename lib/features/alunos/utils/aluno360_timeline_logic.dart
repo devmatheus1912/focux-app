@@ -469,6 +469,15 @@ Color timeline360PriorityColor(String? priority, {required Color primary}) {
   return primary;
 }
 
+/// Ink on priority pill backgrounds — darkens brand teal for WCAG AA on white.
+Color timeline360PriorityInk(
+  Color accent, {
+  required bool isDark,
+}) {
+  if (isDark) return accent;
+  return Color.lerp(accent, const Color(0xFF0F3D3D), 0.42)!;
+}
+
 bool timeline360BodyExpandable(
   String body, {
   String? kind,

@@ -111,7 +111,10 @@ class Aluno360CopilotCard extends ConsumerWidget {
     final openActionsAsync = ref.watch(alunoOpenIaActionsProvider(aluno.id));
     final openTask = findOpenCopilotTask(openActionsAsync.valueOrNull ?? const []);
     final hasOpenTask = openTask != null || hasOpenCopilotTask360;
-    final bundle = ref.watch(aluno360Provider(aluno.id)).valueOrNull;
+    final bundleAsync = ref.watch(aluno360Provider(aluno.id));
+    final bundle = bundleAsync.valueOrNull;
+    final bundleLoading = bundleAsync.isLoading && !bundleAsync.hasValue;
+    final bundleRefreshing = bundleAsync.isRefreshing && bundleAsync.hasValue;
     final operacao =
         ref.watch(aluno360OperacaoProvider(aluno.id)) ??
         resolveAluno360OperacaoSnapshot(
@@ -201,6 +204,8 @@ class Aluno360CopilotCard extends ConsumerWidget {
                         resumoAsync.isLoading && !resumoAsync.hasValue,
                     compact: compactSubtitle,
                     iaRefreshing: iaRefreshing,
+                    bundleLoading: bundleLoading,
+                    bundleRefreshing: bundleRefreshing,
                   ),
                   subtitleTrailing:
                       shouldShowCopilotContactBadge(
@@ -278,7 +283,10 @@ class Aluno360CopilotCard extends ConsumerWidget {
               forceIa: forceIa,
               iaAsync: iaAsync,
               iaRefreshing: iaRefreshing,
-              resumoLoading: resumoAsync.isLoading && !resumoAsync.hasValue,
+              resumoLoading:
+                  resumoAsync.isLoading && !resumoAsync.hasValue,
+              bundleLoading: bundleLoading,
+              bundleRefreshing: bundleRefreshing,
               preferContactPriority: operacao.contactPriority,
               wearableRelevant: wearableRelevant,
               contactPriority: operacao.contactPriority,

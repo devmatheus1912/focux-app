@@ -409,6 +409,8 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
     required this.forceIa,
     required this.iaAsync,
     required this.resumoLoading,
+    this.bundleLoading = false,
+    this.bundleRefreshing = false,
     this.iaRefreshing = false,
     this.onPrepareMessage,
     this.preferContactPriority = false,
@@ -425,6 +427,8 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
   final bool forceIa;
   final AsyncValue<Map<String, dynamic>>? iaAsync;
   final bool resumoLoading;
+  final bool bundleLoading;
+  final bool bundleRefreshing;
   final bool iaRefreshing;
   final VoidCallback? onPrepareMessage;
   final bool preferContactPriority;
@@ -441,7 +445,33 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
     final isIaData = forceIa && (iaAsync?.hasValue ?? false);
 
     late final Widget child;
-    if (forceIa && iaAsync != null) {
+    if (bundleLoading) {
+      child = Aluno360CopilotPrescriptionLoading(color: primary);
+    } else if (bundleRefreshing && seed360 != null) {
+      child = Stack(
+        children: [
+          Opacity(
+            opacity: 0.5,
+            child: _fromContent(
+              resolveCopilotPrescriptionFromAction(
+                aluno,
+                seed360!,
+                fallback,
+                wearableRelevant: wearableRelevant,
+                contactPriority: contactPriority,
+                statusMetricsVisible: statusMetricsVisible,
+                hideMetricFooter: hideMetricFooter,
+              ),
+            ),
+          ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Aluno360CopilotPrescriptionLoading(color: primary),
+            ),
+          ),
+        ],
+      );
+    } else if (forceIa && iaAsync != null) {
       if (isIaLoading && !isIaData) {
         child = Aluno360CopilotPrescriptionLoading(color: primary);
       } else if (isIaLoading && isIaData) {

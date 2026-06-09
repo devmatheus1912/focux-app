@@ -118,7 +118,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
             bf != null || massaMagra != null
                 ? 'Última avaliação'
                 : 'Medida',
-        badge: bf == null && massaMagra == null ? 'Pendente' : null,
+        badge: bf == null && massaMagra == null ? 'Pend.' : null,
         isDark: isDark,
         onTap: () => context.push(evolucaoRoute, extra: aluno.nome),
       ),

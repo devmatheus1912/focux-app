@@ -20,19 +20,21 @@ class Aluno360TimelinePriorityBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final label = priority.trim().isEmpty ? 'P2' : priority.trim().toUpperCase();
     final color = timeline360PriorityColor(label, primary: accent);
+    final ink = timeline360PriorityInk(color, isDark: isDark);
     return Semantics(
       label: 'Prioridade $label',
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: isDark ? 0.22 : 0.12),
+          color: color.withValues(alpha: isDark ? 0.22 : 0.14),
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: color.withValues(alpha: isDark ? 0.5 : 0.45)),
+          border: Border.all(color: ink.withValues(alpha: isDark ? 0.55 : 0.38)),
         ),
         child: Text(
           label,
-          style: Aluno360Layout.chipLabelStyle(context, color: color).copyWith(
+          style: Aluno360Layout.chipLabelStyle(context, color: ink).copyWith(
             fontSize: 12,
+            fontWeight: FontWeight.w700,
             letterSpacing: 0.2,
           ),
         ),

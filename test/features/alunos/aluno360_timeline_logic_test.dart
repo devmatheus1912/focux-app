@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_timeline_logic.dart';
 
@@ -388,6 +389,15 @@ void main() {
         isSmokeTimelineContent('Nathalia ainda não completou o mapa corporal.'),
         isFalse,
       );
+    });
+  });
+
+  group('timeline360PriorityInk', () {
+    test('darkens brand teal on light surfaces', () {
+      const primary = Color(0xFF18B5B5);
+      final ink = timeline360PriorityInk(primary, isDark: false);
+      expect(ink, isNot(same(primary)));
+      expect(ink.computeLuminance(), lessThan(primary.computeLuminance()));
     });
   });
 

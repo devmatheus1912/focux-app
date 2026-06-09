@@ -13,6 +13,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../utils/aluno360_operacao_logic.dart';
+import 'aluno360_timeline_sheet_motion.dart';
 
 /// Opens a polished outreach sheet with copy + chat actions.
 Future<void> showAlunoOutreachMessageSheet(
@@ -87,7 +88,8 @@ class _AlunoOutreachMessageSheet extends StatelessWidget {
     final displayName = fxTitleCaseName(alunoNome);
     final firstName = alunoPrimeiroNome(alunoNome);
 
-    return Padding(
+    return Aluno360TimelineSheetEntrance(
+      child: Padding(
       padding: EdgeInsets.fromLTRB(
         16,
         8,
@@ -165,8 +167,8 @@ class _AlunoOutreachMessageSheet extends StatelessWidget {
                     visualDensity: VisualDensity.compact,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(
-                      minWidth: 36,
-                      minHeight: 36,
+                      minWidth: 44,
+                      minHeight: 44,
                     ),
                   ),
                 ),
@@ -298,6 +300,7 @@ class _AlunoOutreachMessageSheet extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

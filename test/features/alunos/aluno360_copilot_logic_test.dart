@@ -261,6 +261,28 @@ void main() {
         'Atualizando sugestão com IA…',
       );
     });
+
+    test('shows bundle sync copy while 360 loads', () {
+      expect(
+        copilotCardSubtitle(
+          forceIa: false,
+          iaAsync: null,
+          resumoLoading: false,
+          bundleLoading: true,
+        ),
+        'Sincronizando Aluno 360…',
+      );
+      expect(
+        copilotCardSubtitle(
+          forceIa: false,
+          iaAsync: null,
+          resumoLoading: false,
+          bundleRefreshing: true,
+          compact: true,
+        ),
+        'Atualizando 360…',
+      );
+    });
   });
 
   group('copilotPrescriptionDisplayAction', () {

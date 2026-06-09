@@ -176,19 +176,30 @@ class Aluno360ModuleTile extends StatelessWidget {
   /// Compact viz pinned top-right (e.g. aderência sparkline).
   final Widget? topTrailing;
 
+  String get _badgeSemanticsLabel {
+    final value = badge?.trim() ?? '';
+    if (value == 'Pend.') return 'Pendente';
+    return value;
+  }
+
   Widget _badgeChip(BuildContext context, Color primary, Color badgeInk) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: primary.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: primary.withValues(alpha: 0.35)),
-      ),
-      child: Text(
-        badge!,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: Aluno360Layout.badgeMicroStyle(context, badgeInk),
+    return Semantics(
+      label: _badgeSemanticsLabel,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: primary.withValues(alpha: 0.14),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: badgeInk.withValues(alpha: 0.38)),
+        ),
+        child: Text(
+          badge!,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Aluno360Layout.badgeMicroStyle(context, badgeInk).copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ),
     );
   }

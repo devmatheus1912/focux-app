@@ -108,7 +108,8 @@ class Aluno360CopilotIaRefreshButtonState
           onPressed: _refreshing ? null : _refreshIa,
           style: TextButton.styleFrom(
             visualDensity: VisualDensity.compact,
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            minimumSize: const Size(44, 44),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
             foregroundColor: widget.primary,
           ),
           icon:
@@ -140,6 +141,7 @@ class Aluno360CopilotIaRefreshButtonState
               : 'Atualizar sugestão com IA',
       child: IconButton.filledTonal(
         onPressed: _refreshing ? null : _refreshIa,
+        constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
         icon:
             _refreshing
                 ? SizedBox(

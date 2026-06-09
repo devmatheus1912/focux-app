@@ -601,7 +601,15 @@ String copilotCardSubtitle({
   required bool resumoLoading,
   bool compact = false,
   bool iaRefreshing = false,
+  bool bundleLoading = false,
+  bool bundleRefreshing = false,
 }) {
+  if (bundleLoading) {
+    return compact ? 'Sincronizando…' : 'Sincronizando Aluno 360…';
+  }
+  if (bundleRefreshing) {
+    return compact ? 'Atualizando 360…' : 'Atualizando sinais do Aluno 360…';
+  }
   if (iaRefreshing) {
     return compact
         ? 'Atualizando IA…'
