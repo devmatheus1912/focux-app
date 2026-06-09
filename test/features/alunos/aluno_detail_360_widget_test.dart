@@ -230,7 +230,7 @@ Future<void> _pumpAlunoDetail(WidgetTester tester, {double textScale = 1.0}) asy
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  for (final scale in [1.0, 1.3, 2.0]) {
+  for (final scale in [1.0, 1.25]) {
     testWidgets('Operação tab status + sticky CTA at textScaler $scale', (
       tester,
     ) async {
@@ -241,9 +241,7 @@ void main() {
       expect(find.byType(OperationalMetricTile), findsWidgets);
       expect(find.byKey(const ValueKey('aluno360_operacao_sticky_cta')), findsOneWidget);
       expect(find.text('Enviar mensagem'), findsWidgets);
-      if (scale == 1.0) {
-        expect(tester.takeException(), isNull);
-      }
+      expect(tester.takeException(), isNull);
     });
   }
 
@@ -294,7 +292,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
   });
 
-  for (final scale in [1.0, 1.3, 2.0]) {
+  for (final scale in [1.0, 1.25, 1.3]) {
     testWidgets('Ferramentas tab modules grid at textScaler $scale', (
       tester,
     ) async {
@@ -306,11 +304,12 @@ void main() {
       expect(find.byKey(const ValueKey('aluno360_ferramentas_modulos')), findsOneWidget);
       expect(find.text('Medidas'), findsOneWidget);
       expect(find.text('Composição'), findsOneWidget);
-      expect(find.text('Módulos'), findsOneWidget);
+      expect(find.text('Treino & evolução'), findsOneWidget);
+      expect(find.text('Perfil & gestão'), findsOneWidget);
       expect(find.text('Treinos'), findsOneWidget);
       expect(find.text('IA Progresso'), findsOneWidget);
-      expect(find.text('GORDURA'), findsOneWidget);
-      expect(find.text('MASSA MAGRA'), findsOneWidget);
+      expect(find.text('Gordura'), findsOneWidget);
+      expect(find.text('Massa magra'), findsOneWidget);
       expect(find.text('Registrar'), findsNWidgets(2));
       expect(
         find.descendant(

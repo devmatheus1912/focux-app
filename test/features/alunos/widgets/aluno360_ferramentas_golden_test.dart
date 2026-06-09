@@ -97,8 +97,8 @@ void main() {
 
     expect(find.text('Medidas'), findsOneWidget);
     expect(find.text('IA Progresso'), findsOneWidget);
-    expect(find.text('GORDURA'), findsOneWidget);
-    expect(find.text('MASSA MAGRA'), findsOneWidget);
+    expect(find.text('Gordura'), findsOneWidget);
+    expect(find.text('Massa magra'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await expectLater(

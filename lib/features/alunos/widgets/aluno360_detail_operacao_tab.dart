@@ -87,7 +87,7 @@ class Aluno360DetailOperacaoTab extends ConsumerWidget {
         proximaAcao360: proximaAcao360,
         hasOpenCopilotTask360: hasOpenCopilotTask360,
         isDark: isDark,
-        showFocusToggle: focusMode,
+        showFocusToggle: true,
         focusMode: focusMode,
       ),
       recoveryCard:

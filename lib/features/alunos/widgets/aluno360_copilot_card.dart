@@ -217,15 +217,24 @@ class Aluno360CopilotCard extends ConsumerWidget {
                   isDark: isDark,
                 ),
               ),
-              if (showFocusToggle)
-                Aluno360OperacaoFocusModeToggle(
-                  alunoId: alunoId,
-                  primary: primary,
-                  iconOnly: true,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.topRight,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (showFocusToggle)
+                      Aluno360OperacaoFocusModeToggle(
+                        alunoId: alunoId,
+                        primary: primary,
+                        iconOnly: true,
+                      ),
+                    Aluno360CopilotIaRefreshButton(
+                      alunoId: aluno.id,
+                      primary: primary,
+                    ),
+                  ],
                 ),
-              Aluno360CopilotIaRefreshButton(
-                alunoId: aluno.id,
-                primary: primary,
               ),
             ],
           ),

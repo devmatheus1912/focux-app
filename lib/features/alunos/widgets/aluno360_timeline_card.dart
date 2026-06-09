@@ -360,7 +360,7 @@ class Aluno360TimelineCard extends StatelessWidget {
                             accent: primary,
                             alunoFirstName: aluno.nome.split(' ').first,
                             showSpineBelow: tileIndex < items.length - 1,
-                            inkWell: false,
+                            inkWell: true,
                             onExpandableTap: (tileContext, item) {
                             final host = context;
                             Navigator.of(tileContext).pop();

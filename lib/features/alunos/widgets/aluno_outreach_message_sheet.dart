@@ -8,6 +8,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -180,18 +181,18 @@ class _AlunoOutreachMessageSheet extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: primary.withValues(alpha: isDark ? 0.12 : 0.08),
+                  color:
+                      isDark
+                          ? BrandPalette.deep(primary).withValues(alpha: 0.88)
+                          : BrandPalette.deep(primary),
                   borderRadius: BorderRadius.circular(999),
-                  border: Border.all(
-                    color: primary.withValues(alpha: isDark ? 0.24 : 0.16),
-                  ),
                 ),
                 child: Text(
                   'Para $firstName',
                   style: AppTypography.inter(
                     fontSize: 11.5,
                     fontWeight: FontWeight.w800,
-                    color: BrandPalette.sectionAccent(primary, dark: isDark),
+                    color: Colors.white,
                     letterSpacing: 0.15,
                   ),
                 ),
@@ -268,7 +269,7 @@ class _AlunoOutreachMessageSheet extends StatelessWidget {
                 height: 46,
                 child: OutlinedButton.icon(
                   onPressed: () async {
-                    await Clipboard.setData(ClipboardData(text: message));
+                    await copySensitiveToClipboard(message);
                     if (!context.mounted) return;
                     Navigator.of(context).pop();
                     FeedbackHelper.showSnackBar(

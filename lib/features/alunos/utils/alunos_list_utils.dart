@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/design_tokens.dart';
 import '../constants/alunos_list_filters.dart';
 import '../data/aluno_repository.dart';
 
@@ -11,6 +12,21 @@ Color alunoListSecondaryInk(bool isDark) =>
 (Color, Color) alunoRiscoAltoBadgeColors(bool isDark) => isDark
     ? (const Color(0xFFFFB088), const Color(0xFF3D2A18))
     : (const Color(0xFF8A4F00), const Color(0xFFFFE8CC));
+
+/// Hero metric chip — mesma família cromática da lista, por nível.
+(Color, Color) alunoHeroRiscoMetricBadgeColors(bool isDark, String nivel) {
+  final upper = nivel.trim().toUpperCase();
+  return switch (upper) {
+    'ALTO' => alunoRiscoAltoBadgeColors(isDark),
+    'MÉDIO' || 'MEDIO' => isDark
+        ? (const Color(0xFFE2C48A), const Color(0xFF2E2618))
+        : (const Color(0xFF7A5A00), EagleTokens.warnSoft),
+    'BAIXO' => isDark
+        ? (const Color(0xFF9CF0C0), const Color(0xFF1A2E24))
+        : (EagleTokens.good, EagleTokens.goodSoft),
+    _ => alunoRiscoAltoBadgeColors(isDark),
+  };
+}
 
 /// Returns true if the status badge should be shown on the card.
 bool shouldShowAlunoListBadge(

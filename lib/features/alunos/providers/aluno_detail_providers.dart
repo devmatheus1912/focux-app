@@ -188,9 +188,10 @@ final alunoEvolucaoInteligenteProvider =
 
 final alunoTimeline360ApiProvider =
     FutureProvider.family<List<Timeline360Event>, int>((ref, alunoId) async {
-      return AlunoRepository(
+      final page = await AlunoRepository(
         ref.read(apiClientProvider),
-      ).buscarTimeline360(alunoId);
+      ).buscarTimeline360Page(alunoId, limit: 80);
+      return page.events;
     });
 
 final alunoAderenciaSemanalProvider =

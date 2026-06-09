@@ -356,6 +356,46 @@ class AderenciaSemanalBundle {
   }
 }
 
+class RiscoResumo {
+  const RiscoResumo({
+    required this.score,
+    required this.motivos,
+    required this.nivel,
+  });
+
+  final int score;
+  final List<String> motivos;
+  final String nivel;
+
+  factory RiscoResumo.fromJson(Map<String, dynamic> json) => RiscoResumo(
+    score: (json['score'] as num?)?.toInt() ?? 0,
+    motivos: (json['motivos'] as List<dynamic>? ?? const [])
+        .map((e) => e.toString())
+        .toList(),
+    nivel: (json['nivel'] as String?) ?? 'BAIXO',
+  );
+}
+
+class Timeline360Page {
+  const Timeline360Page({
+    required this.events,
+    required this.hasMore,
+    this.nextOffset,
+  });
+
+  final List<Timeline360Event> events;
+  final bool hasMore;
+  final int? nextOffset;
+
+  factory Timeline360Page.fromJson(Map<String, dynamic> json) => Timeline360Page(
+    events: (json['events'] as List<dynamic>? ?? const [])
+        .map((e) => Timeline360Event.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    hasMore: json['hasMore'] as bool? ?? false,
+    nextOffset: (json['nextOffset'] as num?)?.toInt(),
+  );
+}
+
 class Aluno360 {
   final Aluno aluno;
   final AlunoAutonomiaResumo autonomiaResumo;
@@ -366,6 +406,7 @@ class Aluno360 {
   final AderenciaSemanalBundle aderenciaSemanal;
   final bool? hasWearableHistory;
   final RecoverySnapshot? recoverySnapshot;
+  final RiscoResumo? riscoResumo;
 
   const Aluno360({
     required this.aluno,
@@ -377,6 +418,7 @@ class Aluno360 {
     this.aderenciaSemanal = const AderenciaSemanalBundle(),
     this.hasWearableHistory,
     this.recoverySnapshot,
+    this.riscoResumo,
   });
 
   factory Aluno360.fromJson(Map<String, dynamic> json) => Aluno360(
@@ -400,6 +442,12 @@ class Aluno360 {
         json['recoverySnapshot'] != null
             ? RecoverySnapshot.fromJson(
               json['recoverySnapshot'] as Map<String, dynamic>,
+            )
+            : null,
+    riscoResumo:
+        json['riscoResumo'] != null
+            ? RiscoResumo.fromJson(
+              json['riscoResumo'] as Map<String, dynamic>,
             )
             : null,
   );
@@ -607,14 +655,24 @@ class AlunoRepository {
     int alunoId, {
     int limit = 40,
   }) async {
+    final page = await buscarTimeline360Page(alunoId, limit: limit);
+    return page.events;
+  }
+
+  Future<Timeline360Page> buscarTimeline360Page(
+    int alunoId, {
+    int limit = 40,
+    int offset = 0,
+  }) async {
     final response = await _dio.get(
       '/api/alunos/$alunoId/timeline-360',
-      queryParameters: {'limit': limit},
+      queryParameters: {
+        'limit': limit,
+        'offset': offset,
+        'paged': true,
+      },
     );
-    final list = response.data as List<dynamic>;
-    return list
-        .map((e) => Timeline360Event.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return Timeline360Page.fromJson(response.data as Map<String, dynamic>);
   }
 
   Future<String> gerarSenhaProvisoria(int id) async {

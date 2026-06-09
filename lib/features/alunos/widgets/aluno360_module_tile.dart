@@ -44,12 +44,12 @@ class Aluno360MeasurementCard extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              label.toUpperCase(),
+              label,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: Aluno360Layout.eyebrowLabelStyle(
-                context,
-                mute.withValues(alpha: isDark ? 0.92 : 0.88),
+              style: Aluno360Layout.captionStyle(context).copyWith(
+                fontWeight: FontWeight.w700,
+                color: mute.withValues(alpha: isDark ? 0.92 : 0.88),
               ),
               textAlign: TextAlign.center,
             ),
@@ -137,15 +137,19 @@ class Aluno360FerramentasMiniSparkline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final hasSignal = data.any((v) => v > 0);
+    final strokeColor =
+        hasSignal ? color : color.withValues(alpha: isDark ? 0.55 : 0.42);
     return Semantics(
       label: semanticsLabel,
       child: ExcludeSemantics(
         child: FxSparkline(
           data: data,
-          color: color,
+          color: strokeColor,
           width: 36,
           height: 16,
-          strokeWidth: 1.6,
+          strokeWidth: hasSignal ? 1.6 : 2.2,
           fill: false,
         ),
       ),
@@ -183,20 +187,31 @@ class Aluno360ModuleTile extends StatelessWidget {
   }
 
   Widget _badgeChip(BuildContext context, Color primary, Color badgeInk) {
+    final isPending = badge == 'Pend.';
+    final bg =
+        isPending
+            ? (isDark
+                ? const Color(0xFF3D2A18)
+                : EagleTokens.warnSoft)
+            : primary.withValues(alpha: isDark ? 0.16 : 0.12);
+    final ink =
+        isPending
+            ? (isDark ? const Color(0xFFFFD59A) : const Color(0xFF7A5A00))
+            : badgeInk;
     return Semantics(
       label: _badgeSemanticsLabel,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
         decoration: BoxDecoration(
-          color: primary.withValues(alpha: 0.14),
+          color: bg,
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: badgeInk.withValues(alpha: 0.38)),
+          border: Border.all(color: ink.withValues(alpha: isDark ? 0.45 : 0.35)),
         ),
         child: Text(
           badge!,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: Aluno360Layout.badgeMicroStyle(context, badgeInk).copyWith(
+          style: Aluno360Layout.badgeMicroStyle(context, ink).copyWith(
             fontWeight: FontWeight.w700,
           ),
         ),

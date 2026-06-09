@@ -59,7 +59,7 @@ class Aluno360FerramentasTab extends StatelessWidget {
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionHeader('Módulos'),
+          _sectionHeader('Acesso rápido'),
           const SizedBox(height: Aluno360FerramentasLogic.sectionHeaderGap),
           modulesSection,
         ],

@@ -78,25 +78,56 @@ class Aluno360SectionHeader extends StatelessWidget {
                 ),
                 if (subtitle != null) ...[
                   const SizedBox(height: 2),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          subtitle!,
-                          maxLines: compact ? 2 : 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: Aluno360Layout.captionStyle(context).copyWith(
-                            color: mute,
-                            height: 1.3,
+                  LayoutBuilder(
+                    builder: (context, subtitleConstraints) {
+                      final stackTrailing =
+                          subtitleTrailing != null &&
+                          subtitleConstraints.maxWidth < 220;
+                      if (stackTrailing) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              subtitle!,
+                              maxLines: compact ? 2 : 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: Aluno360Layout.captionStyle(context)
+                                  .copyWith(
+                                    color: mute,
+                                    height: 1.3,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            subtitleTrailing!,
+                          ],
+                        );
+                      }
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              subtitle!,
+                              maxLines: compact ? 2 : 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: Aluno360Layout.captionStyle(context)
+                                  .copyWith(
+                                    color: mute,
+                                    height: 1.3,
+                                  ),
+                            ),
                           ),
-                        ),
-                      ),
-                      if (subtitleTrailing != null) ...[
-                        const SizedBox(width: 8),
-                        subtitleTrailing!,
-                      ],
-                    ],
+                          if (subtitleTrailing != null) ...[
+                            const SizedBox(width: 8),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.topRight,
+                              child: subtitleTrailing!,
+                            ),
+                          ],
+                        ],
+                      );
+                    },
                   ),
                 ],
               ],

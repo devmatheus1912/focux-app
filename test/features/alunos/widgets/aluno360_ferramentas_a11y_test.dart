@@ -71,9 +71,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Medidas'), findsOneWidget);
-    expect(find.text('Módulos'), findsOneWidget);
-    expect(find.text('GORDURA'), findsOneWidget);
-    expect(find.text('MASSA MAGRA'), findsOneWidget);
+    expect(find.text('Treino & evolução'), findsOneWidget);
+    expect(find.text('Perfil & gestão'), findsOneWidget);
+    expect(find.text('Gordura'), findsOneWidget);
+    expect(find.text('Massa magra'), findsOneWidget);
     expect(find.text('IA Progresso'), findsOneWidget);
 
     expect(

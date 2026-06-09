@@ -6,7 +6,7 @@ import '../data/aluno_repository.dart';
 import '../utils/aluno360_ferramentas_logic.dart';
 import 'aluno360_module_tile.dart';
 
-/// Grid of Ferramentas module shortcuts for Aluno 360.
+/// Grid of Ferramentas module shortcuts for Aluno 360 — grouped by coach workflow.
 class Aluno360FerramentasModulesGrid extends StatelessWidget {
   const Aluno360FerramentasModulesGrid({
     super.key,
@@ -29,6 +29,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
 
   static const _rowGap = 8.0;
   static const _columnGap = 10.0;
+  static const _sectionGap = 14.0;
 
   Widget _intrinsicRows(List<Widget> tiles) {
     final rows = <Widget>[];
@@ -60,6 +61,25 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
     );
   }
 
+  Widget _section(String title, List<Widget> tiles) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: AppTypography.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.2,
+            color: isDark ? EagleTokens.darkInkMute : const Color(0xFF4B5563),
+          ),
+        ),
+        const SizedBox(height: 8),
+        _intrinsicRows(tiles),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final evolucaoRoute = '/alunos/$alunoId/evolucao';
@@ -72,7 +92,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
       isDark: isDark,
     );
 
-    final tiles = [
+    final treinoTiles = [
       Aluno360ModuleTile(
         icon: Icons.fitness_center,
         label: 'Treinos',
@@ -154,6 +174,9 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
               extra: aluno.nome,
             ),
       ),
+    ];
+
+    final perfilTiles = [
       Aluno360ModuleTile(
         icon: Icons.people,
         label: 'Anamnese',
@@ -205,7 +228,14 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
 
     return KeyedSubtree(
       key: const ValueKey('aluno360_ferramentas_modulos'),
-      child: _intrinsicRows(tiles),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _section('Treino & evolução', treinoTiles),
+          const SizedBox(height: _sectionGap),
+          _section('Perfil & gestão', perfilTiles),
+        ],
+      ),
     );
   }
 }

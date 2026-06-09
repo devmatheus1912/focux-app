@@ -242,6 +242,13 @@ void main() {
         'Como foi seu último treino?',
       );
     });
+
+    test('maps trivial oi-only chat to coach-friendly label', () {
+      expect(
+        timeline360ChatPreviewBody('oi'),
+        'Saudação no chat',
+      );
+    });
   });
 
   group('timeline360KindHeader', () {

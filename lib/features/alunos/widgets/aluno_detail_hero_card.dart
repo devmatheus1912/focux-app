@@ -9,6 +9,7 @@ import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno_display_utils.dart';
 import '../utils/aluno_hero_signal.dart';
+import '../utils/alunos_list_utils.dart';
 import 'aluno_avatar.dart';
 
 class AlunoDetailHeroCard extends StatelessWidget {
@@ -66,91 +67,138 @@ class AlunoDetailHeroCard extends StatelessWidget {
             isDark: isDark,
           ),
           clipBehavior: Clip.antiAlias,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: SizedBox(
-                  width: constraints.maxWidth,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      AlunoAvatar(
-                        name: displayName,
-                        photoUrl: aluno.fotoUrl,
-                        variant:
-                            compactContactPriority
-                                ? AlunoAvatarVariant.strip
-                                : AlunoAvatarVariant.hero,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: SizedBox(
+                        width: constraints.maxWidth,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    displayName,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: Aluno360Layout.identityNameStyle(
-                                      context,
-                                      ink,
-                                    ),
-                                  ),
-                                ),
-                                if (alunoHeroShouldShowStatusBadge(
-                                  signal: signal,
-                                  status: status,
-                                )) ...[
-                                  const SizedBox(width: 6),
-                                  _IdentityStatusChip(
-                                    status: status,
-                                    isDark: isDark,
-                                  ),
-                                ],
-                              ],
+                            AlunoAvatar(
+                              name: displayName,
+                              photoUrl: aluno.fotoUrl,
+                              variant:
+                                  compactContactPriority
+                                      ? AlunoAvatarVariant.strip
+                                      : AlunoAvatarVariant.hero,
                             ),
-                            const SizedBox(height: 3),
-                            if (!objectiveDefined && onDefineObjective != null)
-                              _IdentityObjectiveRow(
-                                label: objective,
-                                primary: primary,
-                                isDark: isDark,
-                                mute: mute,
-                                onDefineObjective: onDefineObjective!,
-                              )
-                            else
-                              Text(
-                                subtitle,
-                                maxLines: subtitleMaxLines,
-                                overflow: TextOverflow.ellipsis,
-                                style: Aluno360Layout.captionStyle(context)
-                                    .copyWith(
-                                      color: mute,
-                                      fontWeight: FontWeight.w600,
-                                      height: 1.25,
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  LayoutBuilder(
+                                    builder: (context, nameConstraints) {
+                                      final showStatusBadge =
+                                          alunoHeroShouldShowStatusBadge(
+                                            signal: signal,
+                                            status: status,
+                                          );
+                                      final stackStatusBadge =
+                                          showStatusBadge &&
+                                          nameConstraints.maxWidth < 140;
+                                      final nameStyle =
+                                          Aluno360Layout.identityNameStyle(
+                                            context,
+                                            ink,
+                                          );
+                                      if (stackStatusBadge) {
+                                        return Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              displayName,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: nameStyle,
+                                            ),
+                                            const SizedBox(height: 2),
+                                            _IdentityStatusChip(
+                                              status: status,
+                                              isDark: isDark,
+                                            ),
+                                          ],
+                                        );
+                                      }
+                                      return Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              displayName,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: nameStyle,
+                                            ),
+                                          ),
+                                          if (showStatusBadge) ...[
+                                            const SizedBox(width: 4),
+                                            _IdentityStatusChip(
+                                              status: status,
+                                              isDark: isDark,
+                                            ),
+                                          ],
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                  SizedBox(
+                                    height: compactContactPriority ? 2 : 4,
+                                  ),
+                                  if (!objectiveDefined &&
+                                      onDefineObjective != null)
+                                    _IdentityObjectiveRow(
+                                      label: objective,
+                                      primary: primary,
+                                      isDark: isDark,
+                                      mute: mute,
+                                      onDefineObjective: onDefineObjective!,
+                                    )
+                                  else
+                                    Text(
+                                      subtitle,
+                                      maxLines: subtitleMaxLines,
+                                      overflow: TextOverflow.ellipsis,
+                                      style:
+                                          Aluno360Layout.captionStyle(context)
+                                              .copyWith(
+                                                color: mute,
+                                                fontWeight: FontWeight.w600,
+                                                height: 1.3,
+                                              ),
                                     ),
+                                ],
                               ),
+                            ),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      _IdentityMetricChip(
-                        signal: signal,
-                        isDark: isDark,
-                        primary: primary,
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
-              );
-            },
+              ),
+              const SizedBox(width: 8),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: _IdentityMetricChip(
+                  signal: signal,
+                  isDark: isDark,
+                  primary: primary,
+                  compact: compactContactPriority,
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -215,9 +263,9 @@ class _IdentityObjectiveRow extends StatelessWidget {
           child: TextButton(
             onPressed: onDefineObjective,
             style: TextButton.styleFrom(
-              minimumSize: Size.zero,
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              minimumSize: const Size(44, 44),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              tapTargetSize: MaterialTapTargetSize.padded,
               foregroundColor: primary,
             ),
             child: Text(
@@ -266,11 +314,13 @@ class _IdentityMetricChip extends StatelessWidget {
     required this.signal,
     required this.isDark,
     required this.primary,
+    this.compact = false,
   });
 
   final AlunoHeroPrimarySignal signal;
   final bool isDark;
   final Color primary;
+  final bool compact;
 
   Color _accentColor() {
     return switch (signal.label) {
@@ -286,11 +336,19 @@ class _IdentityMetricChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (signal.label == 'Risco operacional') {
+      return _HeroRiscoMetricBadge(
+        nivel: signal.value,
+        isDark: isDark,
+        compact: compact,
+      );
+    }
+
     final ink = fxScreenInk(context);
     final accent = _accentColor();
     final eyebrow = alunoHeroMetricEyebrow(signal);
     final emphasis =
-        signal.label == 'Risco operacional' || signal.label == 'Sem treino'
+        signal.label == 'Sem treino'
             ? OperationalMetricEmphasis.alert
             : OperationalMetricEmphasis.normal;
     final eyebrowColor =
@@ -306,61 +364,240 @@ class _IdentityMetricChip extends StatelessWidget {
                 : Color.lerp(accent, const Color(0xFF450A0A), 0.55)!)
             : ink;
 
-    return Semantics(
-      label: '${eyebrow ?? signal.label} ${signal.value}${signal.suffix ?? ''}',
-      child: Container(
-      constraints: const BoxConstraints(minWidth: 62),
-      padding: const EdgeInsets.fromLTRB(8, 6, 10, 6),
-      decoration: operationalMetricDecoration(
-        accent: accent,
-        isDark: isDark,
-        emphasis: emphasis,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (eyebrow != null)
-            Text(
-              eyebrow.toUpperCase(),
-              style: Aluno360Layout.eyebrowLabelStyle(
-                context,
-                eyebrowColor,
-              ),
-            ),
-          if (eyebrow != null) const SizedBox(height: 2),
-          Row(
+    final semanticsLabel =
+        '${eyebrow ?? signal.label} ${signal.value}${signal.suffix ?? ''}';
+
+    if (compact) {
+      return Semantics(
+        label: semanticsLabel,
+        child: Container(
+          constraints: const BoxConstraints(minWidth: 58),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: operationalMetricDecoration(
+            accent: accent,
+            isDark: isDark,
+            emphasis: emphasis,
+          ),
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
+              if (eyebrow != null) ...[
+                Text(
+                  eyebrow,
+                  style: AppTypography.inter(
+                    color: eyebrowColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    height: 1.05,
+                  ),
+                ),
+                const SizedBox(width: 4),
+              ],
               Text(
                 signal.value,
                 style: AppTypography.condensed(
                   color: valueColor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.4,
-                  height: 1,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.3,
+                  height: 1.05,
                 ),
               ),
               if (signal.suffix != null)
-                Padding(
-                  padding: const EdgeInsets.only(left: 1),
-                  child: Text(
-                    signal.suffix!,
-                    style: AppTypography.inter(
-                      color: fxScreenMute(context),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      height: 1,
-                    ),
+                Text(
+                  signal.suffix!,
+                  style: AppTypography.inter(
+                    color: fxScreenMute(context),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    height: 1.05,
                   ),
                 ),
             ],
           ),
-        ],
+        ),
+      );
+    }
+
+    return Semantics(
+      label: semanticsLabel,
+      child: Container(
+        constraints: const BoxConstraints(minWidth: 62),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        decoration: operationalMetricDecoration(
+          accent: accent,
+          isDark: isDark,
+          emphasis: emphasis,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (eyebrow != null)
+              Text(
+                eyebrow,
+                style: Aluno360Layout.eyebrowLabelStyle(
+                  context,
+                  eyebrowColor,
+                ),
+              ),
+            if (eyebrow != null) const SizedBox(height: 3),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  signal.value,
+                  style: AppTypography.condensed(
+                    color: valueColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.4,
+                    height: 1.1,
+                  ),
+                ),
+                if (signal.suffix != null)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 1),
+                    child: Text(
+                      signal.suffix!,
+                      style: AppTypography.inter(
+                        color: fxScreenMute(context),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        height: 1.1,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+/// Badge de risco no hero — contraste AA, cabe no slot compacto (52px).
+class _HeroRiscoMetricBadge extends StatelessWidget {
+  const _HeroRiscoMetricBadge({
+    required this.nivel,
+    required this.isDark,
+    this.compact = false,
+  });
+
+  final String nivel;
+  final bool isDark;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final (ink, bg) = alunoHeroRiscoMetricBadgeColors(isDark, nivel);
+    final valueInk =
+        isDark
+            ? const Color(0xFFFFF4E8)
+            : Color.lerp(ink, const Color(0xFF1A1208), 0.22)!;
+    final contentPadding =
+        compact
+            ? const EdgeInsets.fromLTRB(7, 4, 9, 4)
+            : const EdgeInsets.fromLTRB(8, 6, 10, 6);
+    final accentHeight = compact ? 22.0 : 30.0;
+
+    return Semantics(
+      label: 'Risco ${nivel.toLowerCase()}',
+      child: Container(
+        constraints: BoxConstraints(minWidth: compact ? 64 : 68),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(compact ? 9 : 10),
+          border: Border.all(
+            color: ink.withValues(alpha: isDark ? 0.42 : 0.32),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(
+                left: 6,
+                top: contentPadding.top,
+                bottom: contentPadding.bottom,
+              ),
+              child: Container(
+                width: 3,
+                height: accentHeight,
+                decoration: BoxDecoration(
+                  color: ink,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+            Padding(
+              padding: contentPadding.copyWith(left: 5),
+              child:
+                  compact
+                      ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(
+                            'Risco',
+                            style: AppTypography.inter(
+                              color: ink,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.15,
+                              height: 1.1,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            nivel,
+                            style: AppTypography.condensed(
+                              color: valueInk,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.15,
+                              height: 1.05,
+                            ),
+                          ),
+                        ],
+                      )
+                      : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Risco',
+                            style: AppTypography.inter(
+                              color: ink,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.2,
+                              height: 1.1,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            nivel,
+                            style: AppTypography.condensed(
+                              color: valueInk,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.2,
+                              height: 1.05,
+                            ),
+                          ),
+                        ],
+                      ),
+            ),
+          ],
+        ),
       ),
     );
   }

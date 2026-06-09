@@ -140,7 +140,7 @@ void main() {
           .readAsStringSync(),
       contains('copilotMensagemPronta'),
     );
-    expect(screen, contains('Clipboard.setData'));
+    expect(screen, contains('copySensitiveToClipboard'));
     expect(screen, contains("'Criar tarefa'"));
     expect(screen, contains("'Copiar mensagem'"));
     expect(screen, contains("'Mensagem sugerida'"));
@@ -243,6 +243,11 @@ void main() {
     expect(screen, isNot(contains('operational_metrics.part.dart')));
     expect(screen, contains('class AlunoDetailHeroCard'));
     expect(screen, contains('aluno360_hero_card'));
+    expect(screen, contains('class _HeroRiscoMetricBadge'));
+    expect(screen, contains('alunoHeroRiscoMetricBadgeColors'));
+    expect(screen, contains('copySensitiveToClipboard'));
+    expect(screen, isNot(contains('trailing: Aluno360OperacaoFocusModeToggle')));
+    expect(screen, contains('showFocusToggle: true'));
     expect(screen, contains('class _IdentityObjectiveRow'));
     expect(screen, contains('alunoObjectiveIsDefined'));
     expect(screen, contains('onDefineObjective'));
@@ -268,9 +273,17 @@ void main() {
       File('lib/features/alunos/widgets/aluno360_ferramentas_tab.dart')
           .readAsStringSync(),
       allOf(
-        contains("'Módulos'"),
+        contains("'Acesso rápido'"),
         contains("'Medidas'"),
         contains('Aluno360TabSectionTitle'),
+      ),
+    );
+    expect(
+      File('lib/features/alunos/widgets/aluno360_ferramentas_modules_grid.dart')
+          .readAsStringSync(),
+      allOf(
+        contains("'Treino & evolução'"),
+        contains("'Perfil & gestão'"),
       ),
     );
     final layoutSource =

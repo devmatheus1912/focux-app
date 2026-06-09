@@ -46,7 +46,7 @@ abstract final class Aluno360Layout {
   }) {
     final textScale =
         MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0);
-    final base = compactContactPriority ? 52.0 : 70.0;
+    final base = compactContactPriority ? 58.0 : 70.0;
     return base + ((textScale - 1) * 20);
   }
 

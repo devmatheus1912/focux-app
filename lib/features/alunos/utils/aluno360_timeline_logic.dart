@@ -339,6 +339,9 @@ String timeline360ChatPreviewBody(
 }) {
   var text = body.trim();
   if (text.isEmpty) return text;
+  if (text.length <= 4 && RegExp(r'^oi[!?.]*$', caseSensitive: false).hasMatch(text)) {
+    return 'Saudação no chat';
+  }
 
   final patterns = <String>[];
   if (alunoFirstName != null && alunoFirstName.trim().isNotEmpty) {

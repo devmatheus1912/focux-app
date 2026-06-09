@@ -14,7 +14,6 @@ import '../utils/aluno360_operacao_logic.dart';
 import '../widgets/aluno_operacao_adherence_bars.dart';
 import '../widgets/aluno_operacao_adherence_legend.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
-import 'aluno360_operacao_focus_toggle.dart';
 import 'aluno360_section_header.dart';
 
 class Aluno360OperationalStatusSection extends ConsumerWidget {
@@ -153,11 +152,6 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
             icon: Icons.insights_rounded,
             title: 'Status operacional',
             subtitle: statusSubtitle,
-            trailing: Aluno360OperacaoFocusModeToggle(
-              alunoId: alunoId,
-              primary: primary,
-              iconOnly: true,
-            ),
             isDark: isDark,
           ),
           SizedBox(height: statusSubtitle != null ? 12 : 8),
