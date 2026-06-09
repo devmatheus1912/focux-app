@@ -685,6 +685,11 @@ void main() {
     test('returns D for Sunday', () {
       expect(weekdayLetterFromIso('2026-06-07'), 'D');
     });
+
+    test('returns distinct letters for Wednesday and Thursday', () {
+      expect(weekdayLetterFromIso('2026-06-03'), 'Q');
+      expect(weekdayLetterFromIso('2026-06-04'), 'I');
+    });
   });
 
   group('checkinMensagemPronta', () {

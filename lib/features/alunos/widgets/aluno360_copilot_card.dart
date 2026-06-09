@@ -115,19 +115,10 @@ class Aluno360CopilotCard extends ConsumerWidget {
     final bundle = bundleAsync.valueOrNull;
     final bundleLoading = bundleAsync.isLoading && !bundleAsync.hasValue;
     final bundleRefreshing = bundleAsync.isRefreshing && bundleAsync.hasValue;
-    final operacao =
-        ref.watch(aluno360OperacaoProvider(aluno.id)) ??
-        resolveAluno360OperacaoSnapshot(
-          aluno: aluno,
-          proximaAcao360: proximaAcao360,
-          forceIa: forceIa,
-          iaAsync: iaAsync,
-          hasOpenTask: hasOpenTask,
-          followUpDue: isAlunoFollowUpDue(aluno),
-          wearableRelevant:
-              bundle?.hasWearableHistory ??
-              alunoTemHistoricoWearable(bundle?.recoverySnapshot),
-        );
+    final operacao = ref.watch(aluno360OperacaoProvider(aluno.id));
+    if (operacao == null) {
+      return const SizedBox.shrink();
+    }
     final iaRefreshing = ref.watch(alunoCopilotIaRefreshingProvider(aluno.id));
     final iaLoading =
         iaRefreshing ||

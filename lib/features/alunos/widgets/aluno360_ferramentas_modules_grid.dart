@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_ferramentas_logic.dart';
 import 'aluno360_module_tile.dart';
@@ -71,7 +72,10 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
             fontSize: 12,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.2,
-            color: isDark ? EagleTokens.darkInkMute : const Color(0xFF4B5563),
+            color:
+                isDark
+                    ? EagleTokens.darkInkMute.withValues(alpha: 0.92)
+                    : TokensStrip.textPrimary.withValues(alpha: 0.76),
           ),
         ),
         const SizedBox(height: 8),

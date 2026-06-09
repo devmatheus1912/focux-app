@@ -153,9 +153,7 @@ abstract final class Aluno360Layout {
 
   /// Timeline metadata (dates) — stronger contrast than mute captions.
   static TextStyle timelineMetaStyle(BuildContext context) {
-    return captionStyle(context).copyWith(
-      fontWeight: FontWeight.w600,
-    );
+    return metaStyle(context);
   }
 
   /// Secondary copy inside cards — matches Home/Alunos muted body.

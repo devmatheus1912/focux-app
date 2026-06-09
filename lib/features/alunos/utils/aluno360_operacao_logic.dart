@@ -368,7 +368,7 @@ String weekdayLetterFromIso(String? isoDate) {
   if (isoDate == null || isoDate.isEmpty) return '';
   final parsed = DateTime.tryParse(isoDate);
   if (parsed == null) return '';
-  const labels = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+  const labels = ['D', 'S', 'T', 'Q', 'I', 'X', 'A'];
   return labels[parsed.weekday % 7];
 }
 

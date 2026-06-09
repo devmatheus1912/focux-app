@@ -361,11 +361,13 @@ class RiscoResumo {
     required this.score,
     required this.motivos,
     required this.nivel,
+    required this.emRisco,
   });
 
   final int score;
   final List<String> motivos;
   final String nivel;
+  final bool emRisco;
 
   factory RiscoResumo.fromJson(Map<String, dynamic> json) => RiscoResumo(
     score: (json['score'] as num?)?.toInt() ?? 0,
@@ -373,6 +375,7 @@ class RiscoResumo {
         .map((e) => e.toString())
         .toList(),
     nivel: (json['nivel'] as String?) ?? 'BAIXO',
+    emRisco: json['emRisco'] as bool? ?? ((json['score'] as num?)?.toInt() ?? 0) > 0,
   );
 }
 
@@ -381,11 +384,13 @@ class Timeline360Page {
     required this.events,
     required this.hasMore,
     this.nextOffset,
+    this.totalCount = 0,
   });
 
   final List<Timeline360Event> events;
   final bool hasMore;
   final int? nextOffset;
+  final int totalCount;
 
   factory Timeline360Page.fromJson(Map<String, dynamic> json) => Timeline360Page(
     events: (json['events'] as List<dynamic>? ?? const [])
@@ -393,6 +398,7 @@ class Timeline360Page {
         .toList(),
     hasMore: json['hasMore'] as bool? ?? false,
     nextOffset: (json['nextOffset'] as num?)?.toInt(),
+    totalCount: (json['totalCount'] as num?)?.toInt() ?? 0,
   );
 }
 

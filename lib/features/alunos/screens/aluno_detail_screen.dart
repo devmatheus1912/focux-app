@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/motion_preferences.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../health/data/health_repository.dart';
 import '../constants/aluno_360_layout.dart';
@@ -260,10 +261,13 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                             : MediaQuery.paddingOf(context).bottom + 8,
                   ),
                   child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
+                    duration: reduceMotionOf(context)
+                        ? Duration.zero
+                        : const Duration(milliseconds: 200),
                     switchInCurve: Curves.easeOutCubic,
                     switchOutCurve: Curves.easeInCubic,
                     transitionBuilder: (child, animation) {
+                      if (reduceMotionOf(context)) return child;
                       return FadeTransition(
                         opacity: animation,
                         child: SlideTransition(

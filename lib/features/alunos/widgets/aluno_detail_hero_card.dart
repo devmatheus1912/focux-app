@@ -502,8 +502,8 @@ class _HeroRiscoMetricBadge extends StatelessWidget {
             : Color.lerp(ink, const Color(0xFF1A1208), 0.22)!;
     final contentPadding =
         compact
-            ? const EdgeInsets.fromLTRB(7, 4, 9, 4)
-            : const EdgeInsets.fromLTRB(8, 6, 10, 6);
+            ? const EdgeInsets.fromLTRB(7, 5, 9, 5)
+            : const EdgeInsets.fromLTRB(8, 7, 10, 7);
     final accentHeight = compact ? 22.0 : 30.0;
 
     return Semantics(

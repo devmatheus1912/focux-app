@@ -139,17 +139,21 @@ class Aluno360FerramentasMiniSparkline extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final hasSignal = data.any((v) => v > 0);
+    final plotData =
+        hasSignal
+            ? data
+            : List<double>.filled(data.isEmpty ? 5 : data.length, 0.14);
     final strokeColor =
-        hasSignal ? color : color.withValues(alpha: isDark ? 0.55 : 0.42);
+        hasSignal ? color : color.withValues(alpha: isDark ? 0.62 : 0.48);
     return Semantics(
       label: semanticsLabel,
       child: ExcludeSemantics(
         child: FxSparkline(
-          data: data,
+          data: plotData,
           color: strokeColor,
           width: 36,
           height: 16,
-          strokeWidth: hasSignal ? 1.6 : 2.2,
+          strokeWidth: hasSignal ? 1.6 : 2.0,
           fill: false,
         ),
       ),

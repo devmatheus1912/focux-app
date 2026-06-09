@@ -33,24 +33,10 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
     final line = ShellChrome.of(context).line;
     final creating = ref.watch(alunoCopilotCreatingProvider(alunoId));
     final openActions = ref.watch(alunoOpenIaActionsProvider(alunoId));
-    final forceIa = ref.watch(alunoCopilotoForceIaProvider(alunoId));
-    final iaAsync =
-        forceIa ? ref.watch(alunoCopilotoActionProvider(alunoId)) : null;
-    final operacao =
-        ref.watch(aluno360OperacaoProvider(alunoId)) ??
-        resolveAluno360OperacaoSnapshot(
-          aluno: aluno,
-          proximaAcao360: proximaAcao360,
-          forceIa: forceIa,
-          iaAsync: iaAsync,
-          hasOpenTask:
-              findOpenCopilotTask(openActions.valueOrNull ?? const []) != null ||
-              hasOpenCopilotTask360,
-          followUpDue: isAlunoFollowUpDue(aluno),
-          wearableRelevant: alunoTemHistoricoWearable(
-            ref.watch(alunoRecoveryProvider(alunoId)).valueOrNull,
-          ),
-        );
+    final operacao = ref.watch(aluno360OperacaoProvider(alunoId));
+    if (operacao == null) {
+      return const SizedBox.shrink();
+    }
     final sticky = operacao.stickyAction;
     final effectiveProxima = operacao.effectiveProxima;
     final hasOpenTask =

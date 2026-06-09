@@ -15,5 +15,5 @@ Color aluno360ReadableCaption(BuildContext context, {required bool isDark}) {
   if (isDark) {
     return EagleTokens.darkInkMute.withValues(alpha: 0.88);
   }
-  return TokensStrip.textSecondary;
+  return TokensStrip.textPrimary.withValues(alpha: 0.68);
 }
