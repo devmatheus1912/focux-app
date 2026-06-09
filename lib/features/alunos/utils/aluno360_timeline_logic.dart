@@ -475,7 +475,11 @@ Color timeline360PriorityInk(
   required bool isDark,
 }) {
   if (isDark) return accent;
-  return Color.lerp(accent, const Color(0xFF0F3D3D), 0.42)!;
+  final hsl = HSLColor.fromColor(accent);
+  if (hsl.hue >= 95 && hsl.hue <= 165) {
+    return Color.lerp(accent, const Color(0xFF0F3D3D), 0.42)!;
+  }
+  return Color.lerp(accent, const Color(0xFF14532D), 0.48)!;
 }
 
 bool timeline360BodyExpandable(

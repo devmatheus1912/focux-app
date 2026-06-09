@@ -109,6 +109,7 @@ class _LegendItem extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: Aluno360Layout.captionStyle(context).copyWith(
               color: mute,
+              fontSize: 12,
               fontWeight: FontWeight.w700,
             ),
           ),

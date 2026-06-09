@@ -20,7 +20,7 @@ void main() {
             expect(
               margin.bottom,
               closeTo(
-                size.height - top - Aluno360Layout.operacaoTopSnackHeight,
+                size.height - top - Aluno360Layout.operacaoTopSnackHeight - 12,
                 1,
               ),
             );

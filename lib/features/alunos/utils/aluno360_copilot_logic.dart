@@ -545,6 +545,39 @@ String formatCopilotIaMotivo(String motivo) {
   return _humanizeCopilotMotivoDiasInText(trimmed);
 }
 
+/// IA/contact copy that reads like a task prompt, not coach UI tone.
+bool isRoboticCopilotContactCopy(String text) {
+  final lower = normalizeIaCopilotAcao(text).toLowerCase();
+  if (lower.isEmpty) return false;
+  return lower.contains('entre em contato') ||
+      lower.contains('entender os motivos') ||
+      lower.contains('entender o motivo') ||
+      lower.contains('discutir um plano') ||
+      lower.contains('plano de retomada') ||
+      lower.contains('paralisa') ||
+      lower.contains('paralis') ||
+      lower.contains('personalizado') ||
+      lower.contains('próxima ação mais importante') ||
+      lower.contains('proxima acao mais importante') ||
+      lower.contains('incentiv') ||
+      (lower.contains('contate') && lower.length > 72) ||
+      (lower.contains('contato') && lower.length > 88);
+}
+
+String copilotCoachContactPrescription(Aluno aluno, {String? acao}) {
+  final firstName =
+      aluno.nome.trim().isEmpty ? null : aluno.nome.trim().split(' ').first;
+  final lower = acao == null ? '' : normalizeIaCopilotAcao(acao).toLowerCase();
+  if (lower.contains('check-in') || lower.contains('check in')) {
+    return firstName == null
+        ? 'Pedir check-in e entender como foi a semana.'
+        : 'Pedir check-in com $firstName e entender como foi a semana.';
+  }
+  return firstName == null
+      ? 'Retomar contato e checar como está o treino.'
+      : 'Retomar contato com $firstName e checar como está o treino.';
+}
+
 String copilotChatActionLabel(String acao) {
   final lower = normalizeIaCopilotAcao(acao).toLowerCase();
   if (lower.contains('whatsapp')) return 'Enviar WhatsApp';
@@ -639,6 +672,16 @@ String copilotCardSubtitle({
 String copilotDisplayAction(Aluno aluno, String acao) {
   final normalized = normalizeIaCopilotAcao(acao);
   final lower = normalized.toLowerCase();
+  if (acaoSugereChat(normalized) || isRoboticCopilotContactCopy(normalized)) {
+    if (isRoboticCopilotContactCopy(normalized) || normalized.length > 72) {
+      return copilotCoachContactPrescription(aluno, acao: normalized);
+    }
+    if (normalized.length <= 72) return normalized;
+    final firstName =
+        aluno.nome.trim().isEmpty ? null : aluno.nome.trim().split(' ').first;
+    final label = copilotChatActionLabel(normalized);
+    return firstName == null ? '$label com o aluno.' : '$label com $firstName.';
+  }
   if (lower.contains('mapa') || lower.contains('corporal')) {
     return 'Completar mapa corporal para orientar a prescrição.';
   }
@@ -654,11 +697,7 @@ String copilotDisplayAction(Aluno aluno, String acao) {
   if (lower.contains('treino') || lower.contains('carga')) {
     return 'Ajustar treino e orientar próximo check-in.';
   }
-  if (acaoSugereChat(normalized)) {
-    if (normalized.length <= 140) return normalized;
-    return '${copilotChatActionLabel(normalized)} com o aluno.';
-  }
-  if (normalized.length <= 140 && normalized.isNotEmpty) return normalized;
+  if (normalized.length <= 72 && normalized.isNotEmpty) return normalized;
   return 'Retomar contato e ajustar plano com base na resposta.';
 }
 
@@ -728,43 +767,21 @@ String copilotPrescriptionDisplayAction(
   final lower = full.toLowerCase();
 
   if (wearableRelevant &&
-      acaoSugereChat(full) &&
-      copilotAcaoMencionaWearable(full)) {
+      copilotAcaoMencionaWearable(full) &&
+      (acaoSugereChat(full) || isRoboticCopilotContactCopy(full))) {
     return 'Retomar contato e pedir sync do wearable.';
   }
-  if (acaoSugereChat(full)) {
-    if (full.length <= 88) return full;
-    final firstName = aluno.nome.trim().isEmpty
-        ? null
-        : aluno.nome.trim().split(' ').first;
-    final contatoComNome =
-        firstName == null
-            ? 'Retomar contato e checar como está o treino.'
-            : 'Retomar contato com $firstName e checar como está o treino.';
-    if (lower.contains('inativid') ||
-        lower.contains('reengaj') ||
-        lower.contains('ausên') ||
-        lower.contains('ausen') ||
-        lower.contains('reaviv') ||
-        lower.contains('aderência') ||
-        lower.contains('aderencia')) {
-      return contatoComNome;
-    }
-    if (lower.contains('check-in') || lower.contains('check in')) {
-      return firstName == null
-          ? 'Pedir check-in e entender como foi a semana.'
-          : 'Pedir check-in com $firstName e entender como foi a semana.';
-    }
-    final label = copilotChatActionLabel(full);
-    if (label != 'Abrir chat' && label != 'Retomar contato') {
-      return firstName == null ? '$label com o aluno.' : '$label com $firstName.';
-    }
-    return contatoComNome;
+  if (acaoSugereChat(full) ||
+      isRoboticCopilotContactCopy(full) ||
+      lower.contains('paralisa') ||
+      lower.contains('paralis')) {
+    return copilotCoachContactPrescription(aluno, acao: full);
   }
 
   final templated = copilotDisplayAction(aluno, sanitized);
-  if (templated != full && full.length > 88) return templated;
-  if (full.length <= 96) return full;
+  if (isRoboticCopilotContactCopy(full)) return templated;
+  if (templated != full && full.length > 72) return templated;
+  if (full.length <= 72) return full;
   return templated;
 }
 
@@ -785,10 +802,14 @@ bool acaoSugereChat(String acao) {
       lower.contains('contatar') ||
       lower.contains('contactar') ||
       lower.contains('falar com') ||
+      lower.contains('entre em contato') ||
       lower.contains('inativid') ||
+      lower.contains('paralisa') ||
+      lower.contains('paralis') ||
       lower.contains('incentiv') ||
       lower.contains('reengaj') ||
       lower.contains('retomar') ||
+      lower.contains('retomada') ||
       lower.contains('follow-up') ||
       lower.contains('follow up') ||
       lower.contains('whatsapp');
@@ -1003,12 +1024,21 @@ CopilotPrescriptionContent resolveCopilotPrescriptionFromAction(
     rawAcao,
     wearableRelevant: wearableRelevant,
   );
-  final fullAction = copilotPrescriptionFullAction(aluno, sanitizedAcao);
+  final fullActionRaw = copilotPrescriptionFullAction(aluno, sanitizedAcao);
   final displayAction = copilotPrescriptionDisplayAction(
     aluno,
     sanitizedAcao,
     wearableRelevant: wearableRelevant,
   );
+  final String? fullAction;
+  if (isRoboticCopilotContactCopy(fullActionRaw) &&
+      !(wearableRelevant && copilotAcaoMencionaWearable(fullActionRaw))) {
+    fullAction = null;
+  } else if (copilotPrescriptionActionsEquivalent(fullActionRaw, displayAction)) {
+    fullAction = null;
+  } else {
+    fullAction = fullActionRaw;
+  }
   final reason = sanitizeCopilotPrescriptionReason(
     isIa ? formatCopilotIaMotivo(motivoRaw) : motivoRaw,
     statusMetricsVisible: statusMetricsVisible,
@@ -1021,10 +1051,7 @@ CopilotPrescriptionContent resolveCopilotPrescriptionFromAction(
             : (action['titulo'] ?? action['tipo'] ?? 'Próxima melhor ação')
                 .toString(),
     action: displayAction,
-    fullAction:
-        copilotPrescriptionActionsEquivalent(fullAction, displayAction)
-            ? null
-            : fullAction,
+    fullAction: fullAction,
     reason: reason,
   );
 }

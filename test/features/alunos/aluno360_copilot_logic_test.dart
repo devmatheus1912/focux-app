@@ -5,6 +5,7 @@ import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_copilot_logic.dart';
 
 Aluno _aluno({
+  String nome = 'Beatriz',
   String? telefone,
   String? whatsapp,
   String? objetivo,
@@ -16,7 +17,7 @@ Aluno _aluno({
 }) {
   return Aluno(
     id: 1,
-    nome: 'Beatriz',
+    nome: nome,
     email: 'b@test.com',
     status: 'ATIVO',
     telefone: telefone,
@@ -510,8 +511,42 @@ void main() {
           'Pedir sync do wearable',
           wearableRelevant: false,
         ),
-        'Retomar contato e checar como está o treino.',
+        'Retomar contato com Beatriz e checar como está o treino.',
       );
+    });
+
+    test('rewrites robotic IA paralisação prompt to coach prescription', () {
+      expect(
+        copilotPrescriptionDisplayAction(
+          _aluno(nome: 'Nathalia', genero: 'Feminino'),
+          'Entre em contato com Nathalia para entender os motivos da paralisação e discutir um plano de retomada de treino personalizado.',
+        ),
+        'Retomar contato com Nathalia e checar como está o treino.',
+      );
+      expect(
+        copilotDisplayAction(
+          _aluno(nome: 'Nathalia', genero: 'Feminino'),
+          'Entre em contato com Nathalia para entender os motivos da paralisação e discutir um plano de retomada de treino personalizado.',
+        ),
+        'Retomar contato com Nathalia e checar como está o treino.',
+      );
+    });
+  });
+
+  group('resolveCopilotPrescriptionFromAction', () {
+    test('hides expand link when IA action is robotic contact copy', () {
+      final content = resolveCopilotPrescriptionFromAction(
+        _aluno(nome: 'Nathalia'),
+        {
+          'acao':
+              'Entre em contato com Nathalia para entender os motivos da paralisação e discutir um plano de retomada de treino personalizado.',
+          'motivo': 'Sem atividade recente',
+          'fonte': 'IA',
+        },
+        'fallback',
+      );
+      expect(content.action, 'Retomar contato com Nathalia e checar como está o treino.');
+      expect(content.fullAction, isNull);
     });
   });
 

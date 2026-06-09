@@ -30,11 +30,12 @@ abstract final class Aluno360Layout {
         kToolbarHeight +
         tabBarHeight +
         8;
+    const snackBelowHeaderGap = 12.0;
     return EdgeInsets.fromLTRB(
       screenPadding,
       0,
       screenPadding,
-      size.height - top - operacaoTopSnackHeight,
+      size.height - top - operacaoTopSnackHeight - snackBelowHeaderGap,
     );
   }
 
