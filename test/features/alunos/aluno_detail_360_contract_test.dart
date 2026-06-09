@@ -15,6 +15,12 @@ String _alunoDetailLibrarySource() {
       'lib/features/alunos/utils/aluno360_operacao_logic.dart';
   const copilotLogicFile =
       'lib/features/alunos/utils/aluno360_copilot_logic.dart';
+  const copilotExecutarLogicFile =
+      'lib/features/alunos/utils/aluno360_copilot_executar_logic.dart';
+  const copilotOutreachLogicFile =
+      'lib/features/alunos/utils/aluno360_copilot_outreach_logic.dart';
+  const copilotTextLogicFile =
+      'lib/features/alunos/utils/aluno360_copilot_text_logic.dart';
   const outreachSheetFile =
       'lib/features/alunos/widgets/aluno_outreach_message_sheet.dart';
   const copilotCardFile =
@@ -77,6 +83,10 @@ String _alunoDetailLibrarySource() {
   final operacaoTab = File(operacaoTabFile).readAsStringSync();
   final operacaoLogic = File(operacaoLogicFile).readAsStringSync();
   final copilotLogic = File(copilotLogicFile).readAsStringSync();
+  final copilotExecutarLogic =
+      File(copilotExecutarLogicFile).readAsStringSync();
+  final copilotOutreachLogic = File(copilotOutreachLogicFile).readAsStringSync();
+  final copilotTextLogic = File(copilotTextLogicFile).readAsStringSync();
   final outreachSheet = File(outreachSheetFile).readAsStringSync();
   final copilotCard = File(copilotCardFile).readAsStringSync();
   final operationalSection = File(operationalSectionFile).readAsStringSync();
@@ -106,7 +116,7 @@ String _alunoDetailLibrarySource() {
   final detailErrorState = File(detailErrorStateFile).readAsStringSync();
   final detailLoadingSkeleton = File(detailLoadingSkeletonFile).readAsStringSync();
   final alunoRepository = File(alunoRepositoryFile).readAsStringSync();
-  return '$main\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$outreachSheet\n$copilotCard\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$actionEmptyPanel\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$emptyMiniState\n$detailErrorState\n$detailLoadingSkeleton\n$alunoRepository';
+  return '$main\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachSheet\n$copilotCard\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$actionEmptyPanel\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$emptyMiniState\n$detailErrorState\n$detailLoadingSkeleton\n$alunoRepository';
 }
 
 void main() {
@@ -136,7 +146,7 @@ void main() {
       contains('resolveCopilotAcao'),
     );
     expect(
-      File('lib/features/alunos/utils/aluno360_copilot_logic.dart')
+      File('lib/features/alunos/utils/aluno360_copilot_outreach_logic.dart')
           .readAsStringSync(),
       contains('copilotMensagemPronta'),
     );
@@ -158,7 +168,7 @@ void main() {
       contains('class Aluno360FinanceRiskBanner'),
     );
     expect(
-      File('lib/features/alunos/utils/aluno360_copilot_logic.dart')
+      File('lib/features/alunos/utils/aluno360_copilot_executar_logic.dart')
           .readAsStringSync(),
       contains('copilotExecutarConfirmBody'),
     );
@@ -411,7 +421,11 @@ void main() {
     );
     expect(
       File('lib/features/alunos/data/aluno_repository.dart').readAsStringSync(),
-      allOf(contains('buscarTimeline360Page'), contains('totalCount')),
+      allOf(
+        contains('buscarTimeline360Page'),
+        contains('timeline-360/page'),
+        contains('totalCount'),
+      ),
     );
     expect(
       File('lib/core/widgets/operational_metric_tile.dart').readAsStringSync(),
