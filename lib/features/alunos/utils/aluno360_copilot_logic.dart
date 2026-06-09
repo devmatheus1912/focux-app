@@ -600,7 +600,13 @@ String copilotCardSubtitle({
   required AsyncValue<Map<String, dynamic>>? iaAsync,
   required bool resumoLoading,
   bool compact = false,
+  bool iaRefreshing = false,
 }) {
+  if (iaRefreshing) {
+    return compact
+        ? 'Atualizando IA…'
+        : 'Atualizando sugestão com IA…';
+  }
   if (forceIa && iaAsync != null) {
     return iaAsync.when(
       loading: () => compact ? 'Gerando com IA…' : 'Gerando sugestão com IA…',

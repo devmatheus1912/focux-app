@@ -260,10 +260,21 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                             : MediaQuery.paddingOf(context).bottom + 8,
                   ),
                   child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 150),
-                    switchInCurve: Curves.easeOut,
-                    switchOutCurve: Curves.easeIn,
-                    layoutBuilder: (current, _) => current ?? const SizedBox.shrink(),
+                    duration: const Duration(milliseconds: 200),
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    transitionBuilder: (child, animation) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0, 0.015),
+                            end: Offset.zero,
+                          ).animate(animation),
+                          child: child,
+                        ),
+                      );
+                    },
                     child: switch (tabIndex) {
                       0 => Aluno360DetailOperacaoTab(
                         key: const ValueKey('aluno360_tab_operacao'),

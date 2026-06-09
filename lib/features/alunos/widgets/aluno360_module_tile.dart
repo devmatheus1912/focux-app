@@ -50,7 +50,7 @@ class Aluno360MeasurementCard extends StatelessWidget {
               style: Aluno360Layout.eyebrowLabelStyle(
                 context,
                 mute.withValues(alpha: isDark ? 0.92 : 0.88),
-              ).copyWith(fontSize: 10),
+              ),
               textAlign: TextAlign.center,
             ),
           ),
@@ -79,7 +79,6 @@ class Aluno360MeasurementCard extends StatelessWidget {
               Text(
                 unit,
                 style: Aluno360Layout.captionStyle(context).copyWith(
-                  fontSize: 10,
                   fontWeight: FontWeight.w500,
                   color: mute,
                 ),
@@ -98,7 +97,7 @@ class Aluno360MeasurementCard extends StatelessWidget {
                         style: Aluno360Layout.chipLabelStyle(
                           context,
                           color: primary,
-                        ).copyWith(fontSize: 10, height: 1),
+                        ).copyWith(height: 1.1),
                       ),
             ),
           ),
@@ -111,10 +110,13 @@ class Aluno360MeasurementCard extends StatelessWidget {
     return Semantics(
       button: true,
       label: '$a11yLabel. Toque para $emptyHint',
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(TokensStrip.rCard),
-        child: child,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(TokensStrip.rCard),
+          child: child,
+        ),
       ),
     );
   }
@@ -186,9 +188,7 @@ class Aluno360ModuleTile extends StatelessWidget {
         badge!,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: Aluno360Layout.badgeMicroStyle(context, badgeInk).copyWith(
-          fontSize: 11,
-        ),
+        style: Aluno360Layout.badgeMicroStyle(context, badgeInk),
       ),
     );
   }
@@ -209,10 +209,12 @@ class Aluno360ModuleTile extends StatelessWidget {
         sub: sub,
         badge: badge,
       ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration:
@@ -253,47 +255,33 @@ class Aluno360ModuleTile extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            sub,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Aluno360Layout.moduleTileSubtitleStyle(
-                              context,
-                              subColor,
-                            ),
-                          ),
-                        ),
-                        if (badge != null) ...[
-                          const SizedBox(width: 6),
-                          Flexible(
-                            fit: FlexFit.loose,
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerRight,
+                    Text(
+                      sub,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Aluno360Layout.moduleTileSubtitleStyle(
+                        context,
+                        subColor,
+                      ),
+                    ),
+                    if (badge != null || topTrailing != null) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          if (badge != null)
+                            Flexible(
                               child: _badgeChip(context, primary, badgeInk),
                             ),
-                          ),
+                          const Spacer(),
+                          if (topTrailing != null) topTrailing!,
                         ],
-                        if (topTrailing != null) ...[
-                          const SizedBox(width: 4),
-                          Flexible(
-                            fit: FlexFit.loose,
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerRight,
-                              child: topTrailing!,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
+                      ),
+                    ],
                   ],
                 ),
               ),
             ],
+          ),
           ),
         ),
       ),

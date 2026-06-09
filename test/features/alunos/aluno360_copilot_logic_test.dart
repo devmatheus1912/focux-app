@@ -249,6 +249,18 @@ void main() {
         'Sugestão IA · toque em atualizar',
       );
     });
+
+    test('shows refreshing copy while IA reloads', () {
+      expect(
+        copilotCardSubtitle(
+          forceIa: true,
+          iaAsync: const AsyncValue.data({'acao': 'Teste'}),
+          resumoLoading: false,
+          iaRefreshing: true,
+        ),
+        'Atualizando sugestão com IA…',
+      );
+    });
   });
 
   group('copilotPrescriptionDisplayAction', () {

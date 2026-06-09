@@ -200,6 +200,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
                     resumoLoading:
                         resumoAsync.isLoading && !resumoAsync.hasValue,
                     compact: compactSubtitle,
+                    iaRefreshing: iaRefreshing,
                   ),
                   subtitleTrailing:
                       shouldShowCopilotContactBadge(
@@ -228,7 +229,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(999),
               child: LinearProgressIndicator(
-                minHeight: 3,
+                minHeight: iaRefreshing ? 4 : 3,
                 backgroundColor: primary.withValues(alpha: 0.12),
                 color: primary,
               ),

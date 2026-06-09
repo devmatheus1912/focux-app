@@ -128,7 +128,11 @@ class Aluno360TimelineCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final mute = fxScreenMute(context);
-    final loading = timelineApiAsync.isLoading && !timelineApiAsync.hasValue;
+    final loading =
+        timelineApiAsync.isLoading &&
+        (!timelineApiAsync.hasValue || timelineApiAsync.isRefreshing);
+    final refreshing =
+        timelineApiAsync.isRefreshing && timelineApiAsync.hasValue;
     final error = timelineApiAsync.hasError && !timelineApiAsync.hasValue;
     final allItems = _allItems(primary);
     final visibleItems = allItems.take(3).toList();
@@ -153,6 +157,17 @@ class Aluno360TimelineCard extends StatelessWidget {
             subtitle: 'Últimos sinais consolidados do aluno.',
             isDark: isDark,
           ),
+          if (refreshing && !loading) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: LinearProgressIndicator(
+                minHeight: 3,
+                backgroundColor: primary.withValues(alpha: 0.12),
+                color: primary,
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
           if (loading) ...[
             const SizedBox(height: 14),
             FxLoading.sectionShimmer(context, height: 140),

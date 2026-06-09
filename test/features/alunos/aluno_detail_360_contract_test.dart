@@ -248,7 +248,7 @@ void main() {
     expect(screen, contains('onDefineObjective'));
     expect(screen, contains('Aluno360Layout'));
     expect(screen, contains('operacaoScrollBottomReserve'));
-    expect(screen, contains('layoutBuilder:'));
+    expect(screen, contains('transitionBuilder:'));
     expect(screen, contains('chrome.sheetFill'));
   });
 

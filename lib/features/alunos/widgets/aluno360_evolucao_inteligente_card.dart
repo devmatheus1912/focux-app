@@ -81,6 +81,8 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
     final mute = fxScreenMute(context);
     final firstName = alunoNome.split(' ').first;
 
+    final refreshing = evolucaoAsync.isRefreshing && evolucaoAsync.hasValue;
+
     return evolucaoAsync.when(
       loading:
           () => Semantics(
@@ -132,6 +134,17 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (refreshing) ...[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(999),
+                    child: LinearProgressIndicator(
+                      minHeight: 4,
+                      backgroundColor: primary.withValues(alpha: 0.12),
+                      color: primary,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
                 Aluno360SectionHeader(
                   icon: Icons.insights_outlined,
                   title: 'Evolução inteligente',

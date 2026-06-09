@@ -84,6 +84,8 @@ class Aluno360SectionHeader extends StatelessWidget {
                       Expanded(
                         child: Text(
                           subtitle!,
+                          maxLines: compact ? 2 : 3,
+                          overflow: TextOverflow.ellipsis,
                           style: Aluno360Layout.captionStyle(context).copyWith(
                             color: mute,
                             height: 1.3,

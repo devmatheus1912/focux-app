@@ -34,18 +34,22 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
     final rows = <Widget>[];
     for (var i = 0; i < tiles.length; i += 2) {
       final hasPair = i + 1 < tiles.length;
-      rows.add(
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(child: tiles[i]),
-              const SizedBox(width: _columnGap),
-              Expanded(child: hasPair ? tiles[i + 1] : const SizedBox.shrink()),
-            ],
+      if (hasPair) {
+        rows.add(
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: tiles[i]),
+                const SizedBox(width: _columnGap),
+                Expanded(child: tiles[i + 1]),
+              ],
+            ),
           ),
-        ),
-      );
+        );
+      } else {
+        rows.add(tiles[i]);
+      }
       if (i + 2 < tiles.length) {
         rows.add(const SizedBox(height: _rowGap));
       }

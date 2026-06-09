@@ -199,7 +199,7 @@ class _IdentityObjectiveRow extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: mute,
-                      fontSize: 10.5,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                       fontStyle: FontStyle.italic,
                     ),
@@ -223,7 +223,6 @@ class _IdentityObjectiveRow extends StatelessWidget {
             child: Text(
               'Definir',
               style: Aluno360Layout.ctaLabelStyle(context, primary).copyWith(
-                fontSize: 10.5,
                 decoration: TextDecoration.underline,
               ),
             ),
@@ -256,8 +255,7 @@ class _IdentityStatusChip extends StatelessWidget {
       ),
       child: Text(
         status.label,
-        style: Aluno360Layout.badgeMicroStyle(context, status.foreground)
-            .copyWith(fontSize: 9.5),
+        style: Aluno360Layout.badgeMicroStyle(context, status.foreground),
       ),
     );
   }
@@ -328,7 +326,7 @@ class _IdentityMetricChip extends StatelessWidget {
               style: Aluno360Layout.eyebrowLabelStyle(
                 context,
                 eyebrowColor,
-              ).copyWith(fontSize: 10),
+              ),
             ),
           if (eyebrow != null) const SizedBox(height: 2),
           Row(
@@ -353,7 +351,7 @@ class _IdentityMetricChip extends StatelessWidget {
                     signal.suffix!,
                     style: AppTypography.inter(
                       color: fxScreenMute(context),
-                      fontSize: 10,
+                      fontSize: 12,
                       fontWeight: FontWeight.w700,
                       height: 1,
                     ),

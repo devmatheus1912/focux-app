@@ -253,15 +253,17 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
                 subtitle: subtitle,
                 expanded: _expanded,
               ),
-              child: InkWell(
-                onTap: () => setState(() => _expanded = !_expanded),
-                borderRadius: BorderRadius.vertical(
-                  top: const Radius.circular(16),
-                  bottom: Radius.circular(_expanded ? 0 : 16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 12, 10, 12),
-                  child: Aluno360SectionHeader(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: InkWell(
+                  onTap: () => setState(() => _expanded = !_expanded),
+                  borderRadius: BorderRadius.vertical(
+                    top: const Radius.circular(16),
+                    bottom: Radius.circular(_expanded ? 0 : 16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 12, 10, 12),
+                    child: Aluno360SectionHeader(
                     icon: Icons.event_available_rounded,
                     title: 'Próximo contato',
                     subtitle: subtitle,
@@ -287,6 +289,7 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
                     trailingSemanticsLabel:
                         _expanded ? 'Recolher' : 'Expandir',
                     isDark: isDark,
+                    ),
                   ),
                 ),
               ),
@@ -306,7 +309,7 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
                             color: mute.withValues(alpha: isDark ? 0.14 : 0.12),
                           ),
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+                            padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
                             child: _buildFollowUpActions(
                               context,
                               primary: primary,
@@ -506,13 +509,11 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  contactDoneButton(fullWidth: true),
-                  const SizedBox(height: 8),
                   Row(
                     children: [
-                      Expanded(
-                        child: primaryActions[1],
-                      ),
+                      Expanded(child: contactDoneButton(fullWidth: false)),
+                      const SizedBox(width: 8),
+                      Expanded(child: primaryActions[1]),
                       const SizedBox(width: 8),
                       Expanded(
                         child: _snoozeMenuButton(

@@ -185,7 +185,7 @@ abstract final class Aluno360Layout {
   static TextStyle eyebrowLabelStyle(BuildContext context, Color color) {
     return AppTypography.inter(
       color: color,
-      fontSize: 11,
+      fontSize: 12,
       fontWeight: FontWeight.w600,
       letterSpacing: 0.35,
       height: 1,
@@ -196,7 +196,7 @@ abstract final class Aluno360Layout {
   static TextStyle badgeMicroStyle(BuildContext context, Color color) {
     return AppTypography.inter(
       color: color,
-      fontSize: 11,
+      fontSize: 12,
       fontWeight: FontWeight.w600,
       letterSpacing: 0.15,
       height: 1,
@@ -228,8 +228,8 @@ abstract final class Aluno360Layout {
   static TextStyle moduleTileSubtitleStyle(BuildContext context, Color mute) {
     return captionStyle(context).copyWith(
       color: mute,
-      fontSize: 11,
-      height: 1.2,
+      fontSize: 12,
+      height: 1.25,
     );
   }
 

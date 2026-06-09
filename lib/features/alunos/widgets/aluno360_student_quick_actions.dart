@@ -137,10 +137,12 @@ class Aluno360QuickActionPill extends StatelessWidget {
     return Semantics(
       button: true,
       label: label,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Container(
           height: 48,
           padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
@@ -161,12 +163,13 @@ class Aluno360QuickActionPill extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.inter(
                     color: pillInk,
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ],
+          ),
           ),
         ),
       ),
