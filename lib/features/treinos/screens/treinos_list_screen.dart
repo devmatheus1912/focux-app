@@ -335,6 +335,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                       child: _EmptyState(
                         isDark: isDark,
                         primary: primary,
+                        alunoNome: widget.alunoNome,
                         onCreate: createWorkout,
                       ),
                     )
@@ -1827,11 +1828,13 @@ class _LibraryControls extends StatelessWidget {
 class _EmptyState extends StatelessWidget {
   final bool isDark;
   final Color primary;
+  final String? alunoNome;
   final VoidCallback onCreate;
 
   const _EmptyState({
     required this.isDark,
     required this.primary,
+    this.alunoNome,
     required this.onCreate,
   });
 
@@ -1839,6 +1842,19 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+
+    final isAlunoContext = (alunoNome ?? '').trim().isNotEmpty;
+    final firstName =
+        isAlunoContext ? alunoNome!.trim().split(RegExp(r'\s+')).first : null;
+    final title =
+        isAlunoContext
+            ? 'Nenhum treino atribuído'
+            : 'Sua biblioteca começa aqui';
+    final subtitle =
+        isAlunoContext
+            ? 'Atribua um plano a $firstName ou crie um treino e vincule ao perfil.'
+            : 'Crie um plano base, adicione exercícios e use como ponto de partida para seus alunos.';
+    final ctaLabel = isAlunoContext ? 'Criar treino' : 'Criar treino';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 20, 28, 150),
@@ -1856,7 +1872,7 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           Text(
-            'Sua biblioteca começa aqui',
+            title,
             textAlign: TextAlign.center,
             style: AppTypography.inter(
               color: ink,
@@ -1867,7 +1883,7 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Crie um plano base, adicione exercícios e use como ponto de partida para seus alunos.',
+            subtitle,
             textAlign: TextAlign.center,
             style: AppTypography.inter(color: mute, fontSize: 13, height: 1.35),
           ),
@@ -1875,7 +1891,7 @@ class _EmptyState extends StatelessWidget {
           SizedBox(
             width: 220,
             child: FxLiquidPrimaryButton(
-              label: 'Criar treino',
+              label: ctaLabel,
               icon: Icons.add_rounded,
               onPressed: onCreate,
               expand: true,

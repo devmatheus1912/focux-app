@@ -23,7 +23,7 @@ extension ConversationScreenSheetsHelpers on _ConversationScreenState {
 
   String _subtitle(PersonalBrand? brand) {
     if (_isPersonalMode) {
-      return 'Treino, ajustes e feedback em um so lugar';
+      return 'Treino, ajustes e feedback em um só lugar';
     }
     return brand?.slogan?.trim().isNotEmpty == true
         ? brand!.slogan!
@@ -39,9 +39,9 @@ extension ConversationScreenSheetsHelpers on _ConversationScreenState {
 
   String _replySenderLabel(String remetente) {
     if (_isAlunoMode) {
-      return remetente == 'ALUNO' ? 'Voce' : 'Personal';
+      return remetente == 'ALUNO' ? 'Você' : 'Personal';
     }
-    return remetente == 'PERSONAL' ? 'Voce' : 'Aluno';
+    return remetente == 'PERSONAL' ? 'Você' : 'Aluno';
   }
 
   String _previewText(ChatMsg msg) {
@@ -52,8 +52,8 @@ extension ConversationScreenSheetsHelpers on _ConversationScreenState {
       return displayText;
     }
     if (msg.primaryMediaType == 'IMAGE') return 'Foto';
-    if (msg.primaryMediaType == 'VIDEO') return 'Video';
-    if (msg.primaryMediaType == 'AUDIO') return 'Audio';
+    if (msg.primaryMediaType == 'VIDEO') return 'Vídeo';
+    if (msg.primaryMediaType == 'AUDIO') return 'Áudio';
     return 'Mensagem';
   }
 
@@ -73,9 +73,9 @@ extension ConversationScreenSheetsHelpers on _ConversationScreenState {
       case ConversationMediaType.photo:
         return 'Foto';
       case ConversationMediaType.video:
-        return 'Video';
+        return 'Vídeo';
       case ConversationMediaType.audio:
-        return 'Audio';
+        return 'Áudio';
     }
   }
 

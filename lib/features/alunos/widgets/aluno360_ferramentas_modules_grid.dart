@@ -215,7 +215,11 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
         label: 'Dieta',
         sub: 'Plano atual',
         isDark: isDark,
-        onTap: () => context.push('/alunos/$alunoId/alimentar'),
+        onTap:
+            () => context.push(
+              '/alunos/$alunoId/alimentar',
+              extra: aluno.nome,
+            ),
       ),
       Aluno360ModuleTile(
         icon: Icons.video_camera_back,

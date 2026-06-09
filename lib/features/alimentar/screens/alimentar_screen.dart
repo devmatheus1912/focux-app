@@ -10,10 +10,17 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../alunos/utils/satellite_screen_utils.dart';
+import '../../alunos/widgets/aluno360_action_empty_panel.dart';
 
 class AlimentarScreen extends ConsumerStatefulWidget {
   final int alunoId;
-  const AlimentarScreen({super.key, required this.alunoId});
+  final String? alunoNome;
+  const AlimentarScreen({
+    super.key,
+    required this.alunoId,
+    this.alunoNome,
+  });
   @override
   ConsumerState<AlimentarScreen> createState() => _AlimentarScreenState();
 }
@@ -74,7 +81,41 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
           _loading
               ? const FxLoading()
               : _planos.isEmpty
-              ? const Center(child: Text('Nenhum plano alimentar criado.'))
+              ? satelliteEmptyBody(
+                child: Aluno360ActionEmptyPanel(
+                  key: const ValueKey('alimentar_empty'),
+                  icon: Icons.restaurant_menu_rounded,
+                  title: 'Nenhum plano alimentar',
+                  subtitle:
+                      widget.alunoNome != null
+                          ? 'Monte o primeiro plano de ${satelliteFirstName(widget.alunoNome)} com metas de calorias e macros.'
+                          : 'Crie o primeiro plano com metas de calorias e macros.',
+                  primaryLabel: 'Criar plano',
+                  primaryIcon: Icons.add_rounded,
+                  onPrimary: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (_) => _NovoPlanoScreen(alunoId: widget.alunoId),
+                      ),
+                    );
+                    if (!context.mounted) return;
+                    _load();
+                  },
+                  secondaryActions: [
+                    Aluno360SecondaryAction(
+                      label: 'Voltar ao Aluno 360',
+                      icon: Icons.arrow_back_rounded,
+                      onTap:
+                          () => safePopOrGo(
+                            context,
+                            '/alunos/${widget.alunoId}',
+                          ),
+                    ),
+                  ],
+                ),
+              )
               : ListView.builder(
                 padding: const EdgeInsets.all(TokensStrip.s4),
                 itemCount: _planos.length,

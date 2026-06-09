@@ -99,7 +99,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
       if (mounted) {
         final message = e is IaOperationalException
             ? e.message
-            : 'Nao consegui falar com a IA agora. Tente novamente em alguns segundos.';
+            : 'Não consegui falar com a IA agora. Tente novamente em alguns segundos.';
         setState(() => _erro = message);
         await IaQuotaUpgrade.handleError(context, ref, e);
       }
@@ -192,7 +192,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                         Icon(Icons.wifi_off_rounded, size: 18),
                         SizedBox(width: 8),
                         Text(
-                          'IA indisponivel',
+                          'IA indisponível',
                           style: TextStyle(fontWeight: FontWeight.w700),
                         ),
                       ],

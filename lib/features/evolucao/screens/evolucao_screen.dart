@@ -14,6 +14,8 @@ import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../alunos/utils/satellite_screen_utils.dart';
+import '../../alunos/widgets/aluno360_action_empty_panel.dart';
 
 // ─── Providers ───────────────────────────────────────────────────────────────
 final medidasProvider = FutureProvider.family<List<MedidaCorporal>, int>((
@@ -115,11 +117,15 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
               children: [
                 _TabMedidas(
                   alunoId: widget.alunoId,
+                  alunoNome: widget.alunoNome,
                   medidasAsync: medidasAsync,
+                  onRegister: () => _mostrarDialogMedida(context),
                 ),
                 _TabRecordes(
                   alunoId: widget.alunoId,
+                  alunoNome: widget.alunoNome,
                   recordesAsync: recordesAsync,
+                  onRegister: () => _mostrarDialogRecorde(context),
                 ),
               ],
             ),
@@ -365,8 +371,15 @@ class _BannerVariacao extends StatelessWidget {
 
 class _TabMedidas extends StatelessWidget {
   final int alunoId;
+  final String alunoNome;
   final AsyncValue<List<MedidaCorporal>> medidasAsync;
-  const _TabMedidas({required this.alunoId, required this.medidasAsync});
+  final VoidCallback onRegister;
+  const _TabMedidas({
+    required this.alunoId,
+    required this.alunoNome,
+    required this.medidasAsync,
+    required this.onRegister,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -375,7 +388,27 @@ class _TabMedidas extends StatelessWidget {
       error: (e, _) => Center(child: Text('Erro: $e')),
       data: (lista) {
         if (lista.isEmpty) {
-          return const Center(child: Text('Nenhuma medida registrada.'));
+          final first = satelliteFirstName(alunoNome);
+          return satelliteEmptyBody(
+            child: Aluno360ActionEmptyPanel(
+              key: const ValueKey('evolucao_medidas_empty'),
+              icon: Icons.monitor_weight_outlined,
+              title: 'Nenhuma medida registrada',
+              subtitle:
+                  'Registre peso e circunferências de $first para liberar o gráfico e o radar corporal.',
+              primaryLabel: 'Registrar medida',
+              primaryIcon: Icons.add_rounded,
+              onPrimary: onRegister,
+              secondaryActions: [
+                Aluno360SecondaryAction(
+                  label: 'Voltar ao Aluno 360',
+                  icon: Icons.arrow_back_rounded,
+                  onTap:
+                      () => safePopOrGo(context, '/alunos/$alunoId'),
+                ),
+              ],
+            ),
+          );
         }
         final ordenada = [...lista]..sort((a, b) => b.data.compareTo(a.data));
         final pesos = [...lista]..sort((a, b) => a.data.compareTo(b.data));
@@ -483,8 +516,15 @@ class _CardMedida extends StatelessWidget {
 
 class _TabRecordes extends StatelessWidget {
   final int alunoId;
+  final String alunoNome;
   final AsyncValue<List<RecordePessoal>> recordesAsync;
-  const _TabRecordes({required this.alunoId, required this.recordesAsync});
+  final VoidCallback onRegister;
+  const _TabRecordes({
+    required this.alunoId,
+    required this.alunoNome,
+    required this.recordesAsync,
+    required this.onRegister,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -493,7 +533,27 @@ class _TabRecordes extends StatelessWidget {
       error: (e, _) => Center(child: Text('Erro: $e')),
       data: (lista) {
         if (lista.isEmpty) {
-          return const Center(child: Text('Nenhum recorde registrado.'));
+          final first = satelliteFirstName(alunoNome);
+          return satelliteEmptyBody(
+            child: Aluno360ActionEmptyPanel(
+              key: const ValueKey('evolucao_recordes_empty'),
+              icon: Icons.emoji_events_outlined,
+              title: 'Nenhum recorde registrado',
+              subtitle:
+                  'Marque o primeiro recorde de $first após um check-in ou treino forte.',
+              primaryLabel: 'Registrar recorde',
+              primaryIcon: Icons.add_rounded,
+              onPrimary: onRegister,
+              secondaryActions: [
+                Aluno360SecondaryAction(
+                  label: 'Voltar ao Aluno 360',
+                  icon: Icons.arrow_back_rounded,
+                  onTap:
+                      () => safePopOrGo(context, '/alunos/$alunoId'),
+                ),
+              ],
+            ),
+          );
         }
         final ordenada = [...lista]..sort((a, b) => b.data.compareTo(a.data));
         return ListView.builder(

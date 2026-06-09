@@ -272,7 +272,12 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
     padding: const EdgeInsets.all(TokensStrip.s4),
     child: Column(
       children: [
-        _field(_objetivoCtrl, 'Objetivo', maxLines: 2),
+        _field(
+          _objetivoCtrl,
+          'Objetivo',
+          maxLines: 2,
+          hint: 'Ex.: hipertrofia, emagrecimento, condicionamento',
+        ),
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
           initialValue: _nivelAtividade,
@@ -291,9 +296,24 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
           onChanged: (v) => setState(() => _nivelAtividade = v),
         ),
         const SizedBox(height: 12),
-        _field(_lesoesCtrl, 'Lesões / Limitações', maxLines: 3),
-        _field(_medicCtrl, 'Medicamentos em uso', maxLines: 2),
-        _field(_obsCtrl, 'Observações gerais', maxLines: 3),
+        _field(
+          _lesoesCtrl,
+          'Lesões / Limitações',
+          maxLines: 3,
+          hint: 'Ex.: joelho, lombar, evitar impacto',
+        ),
+        _field(
+          _medicCtrl,
+          'Medicamentos em uso',
+          maxLines: 2,
+          hint: 'Ex.: anti-hipertensivo, tireoide',
+        ),
+        _field(
+          _obsCtrl,
+          'Observações gerais',
+          maxLines: 3,
+          hint: 'Rotina, sono, estresse, preferências',
+        ),
         const SizedBox(height: 80),
       ],
     ),
@@ -303,9 +323,24 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
     padding: const EdgeInsets.all(TokensStrip.s4),
     child: Column(
       children: [
-        _field(_historicoCtrl, 'Histórico médico', maxLines: 4),
-        _field(_cirurgiasCtrl, 'Cirurgias realizadas', maxLines: 3),
-        _field(_doresCtrl, 'Dores crônicas', maxLines: 3),
+        _field(
+          _historicoCtrl,
+          'Histórico médico',
+          maxLines: 4,
+          hint: 'Doenças, diagnósticos, acompanhamentos',
+        ),
+        _field(
+          _cirurgiasCtrl,
+          'Cirurgias realizadas',
+          maxLines: 3,
+          hint: 'Ex.: LCA, hérnia, quando ocorreu',
+        ),
+        _field(
+          _doresCtrl,
+          'Dores crônicas',
+          maxLines: 3,
+          hint: 'Ex.: cervical, ombro direito',
+        ),
         const SizedBox(height: 80),
       ],
     ),
@@ -316,7 +351,12 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _field(_objDetalhadoCtrl, 'Objetivo detalhado', maxLines: 3),
+        _field(
+          _objDetalhadoCtrl,
+          'Objetivo detalhado',
+          maxLines: 3,
+          hint: 'Meta em 8–12 semanas, eventos, prioridades',
+        ),
         const SizedBox(height: TokensStrip.s4),
         Row(
           children: [
@@ -349,19 +389,40 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
           ),
         ),
         const SizedBox(height: 8),
-        _field(_prefTreinoCtrl, 'Preferências de treino', maxLines: 3),
-        _field(_restricoesCtrl, 'Restrições alimentares', maxLines: 3),
+        _field(
+          _prefTreinoCtrl,
+          'Preferências de treino',
+          maxLines: 3,
+          hint: 'Ex.: manhã, musculação, evitar corrida',
+        ),
+        _field(
+          _restricoesCtrl,
+          'Restrições alimentares',
+          maxLines: 3,
+          hint: 'Ex.: lactose, vegetariano, alergias',
+        ),
         const SizedBox(height: 80),
       ],
     ),
   );
 
-  Widget _field(TextEditingController c, String label, {int maxLines = 1}) =>
+  Widget _field(
+    TextEditingController c,
+    String label, {
+    int maxLines = 1,
+    String? hint,
+  }) =>
       Padding(
         padding: const EdgeInsets.only(bottom: 12),
         child: TextFormField(
           controller: c,
-          decoration: InputDecoration(labelText: label),
+          decoration: InputDecoration(
+            labelText: label,
+            hintText: hint,
+            hintStyle: TextStyle(
+              color: TokensStrip.textSecondary.withValues(alpha: 0.72),
+            ),
+          ),
           maxLines: maxLines,
         ),
       );

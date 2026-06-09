@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../exercicios/data/enums.dart';
 import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../providers/alunos_provider.dart';
+import '../utils/satellite_screen_utils.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -46,7 +47,11 @@ class _AlunoEquipamentosScreenState
     return FxShellScaffold(
       useMesh: true,
       appBar: FxShellAppBar(
-        title: 'Equipamentos do aluno',
+        title: 'Equipamentos',
+        subtitle:
+            alunoAsync.valueOrNull == null
+                ? null
+                : satelliteFirstName(alunoAsync.value!.nome),
         onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
         actions:
             _saving
@@ -84,7 +89,7 @@ class _AlunoEquipamentosScreenState
               Text(aluno.nome, style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 6),
               const Text(
-                'Use isto para filtrar substituicoes inteligentes e evitar prescrever algo que o aluno nao consegue executar.',
+                'Use isto para filtrar substituições inteligentes e evitar prescrever algo que o aluno não consegue executar.',
               ),
               const SizedBox(height: TokensStrip.s4),
               Wrap(
@@ -113,7 +118,7 @@ class _AlunoEquipamentosScreenState
               OutlinedButton.icon(
                 onPressed: () => setState(() => _selected = {}),
                 icon: const Icon(Icons.all_inclusive_rounded),
-                label: const Text('Sem restricao'),
+                label: const Text('Sem restrição'),
               ),
             ],
           );

@@ -11,6 +11,8 @@ import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../alunos/utils/satellite_screen_utils.dart';
+import '../../alunos/widgets/aluno360_action_empty_panel.dart';
 
 class FeedbackVideoScreen extends ConsumerStatefulWidget {
   final int? alunoId;
@@ -88,6 +90,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
       builder:
           (ctx) => _NovoFeedbackDialog(
             alunoIdPreenchido: widget.alunoId,
+            alunoNome: widget.alunoNome,
             onSalvo: () {
               Navigator.pop(ctx);
               _load();
@@ -148,7 +151,31 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
           _loading
               ? Center(child: FxLoading(color: primary))
               : _feedbacks.isEmpty
-              ? const Center(child: Text('Nenhum feedback encontrado.'))
+              ? satelliteEmptyBody(
+                child: Aluno360ActionEmptyPanel(
+                  key: const ValueKey('feedback_video_empty'),
+                  icon: Icons.video_camera_back_outlined,
+                  title: 'Nenhum feedback de vídeo',
+                  subtitle:
+                      widget.alunoNome != null
+                          ? 'Peça a ${satelliteFirstName(widget.alunoNome)} um vídeo de execução ou registre o primeiro feedback técnico.'
+                          : 'Registre o primeiro feedback técnico com URL do vídeo e comentário.',
+                  primaryLabel: 'Novo feedback',
+                  primaryIcon: Icons.add_rounded,
+                  onPrimary: _novoFeedback,
+                  secondaryActions:
+                      widget.alunoId != null
+                          ? [
+                            Aluno360SecondaryAction(
+                              label: 'Voltar ao Aluno 360',
+                              icon: Icons.arrow_back_rounded,
+                              onTap:
+                                  () => Navigator.maybePop(context),
+                            ),
+                          ]
+                          : const [],
+                ),
+              )
               : ListView.builder(
                 padding: const EdgeInsets.all(TokensStrip.s4),
                 itemCount: _feedbacks.length,
@@ -162,7 +189,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                         size: 36,
                         color: primary,
                       ),
-                      title: Text('Exercício ID: ${f.exercicioId}'),
+                      title: Text('Exercício #${f.exercicioId}'),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -191,7 +218,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.open_in_new),
-                            tooltip: 'Assistir Vídeo',
+                            tooltip: 'Assistir vídeo',
                             onPressed: () => _abrirVideo(f.videoUrl),
                           ),
                           IconButton(
@@ -214,9 +241,14 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
 
 class _NovoFeedbackDialog extends ConsumerStatefulWidget {
   final int? alunoIdPreenchido;
+  final String? alunoNome;
   final VoidCallback onSalvo;
 
-  const _NovoFeedbackDialog({this.alunoIdPreenchido, required this.onSalvo});
+  const _NovoFeedbackDialog({
+    this.alunoIdPreenchido,
+    this.alunoNome,
+    required this.onSalvo,
+  });
 
   @override
   ConsumerState<_NovoFeedbackDialog> createState() =>
@@ -239,7 +271,8 @@ class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
   }
 
   Future<void> _salvar() async {
-    final alunoId = int.tryParse(_alunoIdCtrl.text);
+    final alunoId =
+        widget.alunoIdPreenchido ?? int.tryParse(_alunoIdCtrl.text);
     final exercicioId = int.tryParse(_exercicioIdCtrl.text);
     final video = _videoUrlCtrl.text.trim();
     final com = _comentarioCtrl.text.trim();
@@ -248,7 +281,10 @@ class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
         exercicioId == null ||
         video.isEmpty ||
         com.isEmpty) {
-      FeedbackHelper.showSuccess(context, 'Preencha todos os campos');
+      FeedbackHelper.showSnackBar(
+        context,
+        const SnackBar(content: Text('Preencha todos os campos')),
+      );
       return;
     }
 
@@ -277,16 +313,34 @@ class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
-              controller: _alunoIdCtrl,
-              decoration: const InputDecoration(labelText: 'ID do Aluno'),
-              keyboardType: TextInputType.number,
-              enabled: widget.alunoIdPreenchido == null,
-            ),
-            const SizedBox(height: 8),
+            if (widget.alunoIdPreenchido != null &&
+                (widget.alunoNome ?? '').trim().isNotEmpty) ...[
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Chip(
+                  label: Text(
+                    'Para ${satelliteFirstName(widget.alunoNome)}',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ] else ...[
+              TextField(
+                controller: _alunoIdCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Aluno (ID interno)',
+                  hintText: 'Somente se não veio do perfil',
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 8),
+            ],
             TextField(
               controller: _exercicioIdCtrl,
-              decoration: const InputDecoration(labelText: 'ID do Exercício'),
+              decoration: const InputDecoration(
+                labelText: 'Exercício',
+                hintText: 'ID do exercício no app',
+              ),
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 8),

@@ -120,6 +120,8 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
           subtitle == null
               ? Text(
                 title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TokensStrip.h2(
                   color: ink,
                   fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
@@ -130,6 +132,8 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
                 children: [
                   Text(
                     title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TokensStrip.h2(
                       color: ink,
                       fontFamily:

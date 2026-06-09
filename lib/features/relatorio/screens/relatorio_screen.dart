@@ -8,8 +8,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import '../../../features/alunos/utils/satellite_screen_utils.dart';
+import '../../../features/alunos/widgets/aluno_outreach_message_sheet.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/relatorio_repository.dart';
+import '../../alunos/constants/aluno_360_layout.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
 
@@ -260,7 +263,11 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                 ),
               )
             else if (_dados != null) ...[
-              _CardAderencia(dados: _dados!),
+              _CardAderencia(
+                dados: _dados!,
+                alunoId: widget.alunoId,
+                alunoNome: widget.alunoNome,
+              ),
               const SizedBox(height: TokensStrip.s4),
               if (_comparativo != null) ...[
                 _CardComparativo(comparativo: _comparativo!),
@@ -426,13 +433,22 @@ class _PeriodPill extends StatelessWidget {
 
 class _CardAderencia extends StatelessWidget {
   final AderenciaData dados;
+  final int alunoId;
+  final String alunoNome;
 
-  const _CardAderencia({required this.dados});
+  const _CardAderencia({
+    required this.dados,
+    required this.alunoId,
+    required this.alunoNome,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
     final taxa = dados.taxaAderenciaPercent.clamp(0.0, 100.0);
+    final showCheckinCta = taxa < 50;
+    final firstName = satelliteFirstName(alunoNome, fallback: 'aluno');
     final cor =
         taxa >= 75
             ? EagleTokens.good
@@ -482,6 +498,37 @@ class _CardAderencia extends StatelessWidget {
                 ],
               ),
             ),
+            if (showCheckinCta) ...[
+              const SizedBox(height: TokensStrip.s4),
+              Text(
+                taxa <= 0
+                    ? 'Nenhum check-in no período — vale retomar contato com $firstName.'
+                    : 'Aderência abaixo do ideal — reforce o hábito de check-in.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  height: 1.35,
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed:
+                      () => showAlunoCheckinMessageSheet(
+                        context,
+                        alunoId: alunoId,
+                        alunoNome: alunoNome,
+                      ),
+                  icon: const Icon(Icons.message_outlined, size: 16),
+                  label: const Text('Pedir check-in'),
+                  style: Aluno360Layout.operacaoOutlinedButtonStyle(
+                    context,
+                    primary,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

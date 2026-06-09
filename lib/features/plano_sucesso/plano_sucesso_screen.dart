@@ -11,12 +11,18 @@ import '../../core/widgets/fx_empty_state.dart';
 import '../../core/widgets/feedback_helper.dart';
 import '../../core/widgets/fx_shell_scaffold.dart';
 import '../../core/widgets/skeleton_loader.dart';
+import '../alunos/utils/satellite_screen_utils.dart';
 import 'plano_sucesso_model.dart';
 import 'plano_sucesso_provider.dart';
 
 class PlanoSucessoScreen extends StatefulWidget {
   final int alunoId;
-  const PlanoSucessoScreen({super.key, required this.alunoId});
+  final String? alunoNome;
+  const PlanoSucessoScreen({
+    super.key,
+    required this.alunoId,
+    this.alunoNome,
+  });
 
   @override
   State<PlanoSucessoScreen> createState() => _PlanoSucessoScreenState();
@@ -57,11 +63,19 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
           title: 'Plano de Sucesso',
           onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
         ),
-        body: const SafeArea(
+        body: SafeArea(
           child: FxEmptyState(
             icon: 'flag',
-            title: 'Nenhum Plano Ativo',
-            subtitle: 'Este aluno ainda não possui plano de sucesso.',
+            title: 'Nenhum plano ativo',
+            subtitle:
+                widget.alunoNome != null
+                    ? '${satelliteFirstName(widget.alunoNome)} ainda não possui marcos de sucesso definidos.'
+                    : 'Este aluno ainda não possui plano de sucesso.',
+            action: FxEmptyAction(
+              label: 'Voltar ao Aluno 360',
+              onTap:
+                  () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+            ),
           ),
         ),
       );
@@ -77,7 +91,10 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
       useMesh: true,
       appBar: FxShellAppBar(
         title: 'Plano de Sucesso',
-        subtitle: 'Aluno #${widget.alunoId}',
+        subtitle:
+            widget.alunoNome?.trim().isNotEmpty == true
+                ? widget.alunoNome!.trim()
+                : 'Aluno #${widget.alunoId}',
         onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
       ),
       body: SafeArea(
@@ -141,7 +158,7 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
                         Text(
                           pendentes.isEmpty
                               ? 'Plano completo'
-                              : 'Proximo: ${pendentes.first.titulo}',
+                              : 'Próximo: ${pendentes.first.titulo}',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -364,7 +381,7 @@ class _MarcoTile extends StatelessWidget {
                       const SizedBox(height: 3),
                       Text(
                         marco.atingido
-                            ? 'Etapa concluida.'
+                            ? 'Etapa concluída.'
                             : (atual
                                 ? 'Etapa atual do onboarding.'
                                 : 'Pendente.'),

@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
+import '../../../features/alunos/utils/satellite_screen_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../data/financeiro_repository.dart';
@@ -1114,9 +1115,13 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Text(
-                                    m.status,
+                                    financeiroMensalidadeStatusLabel(m.status),
                                     style: TextStyle(
-                                      color: statusColor,
+                                      color: financeiroMensalidadeStatusInk(
+                                        statusColor,
+                                        status: m.status,
+                                        isDark: chrome.isDark,
+                                      ),
                                       fontSize: 11,
                                       fontWeight: FontWeight.w800,
                                       letterSpacing: 0.3,

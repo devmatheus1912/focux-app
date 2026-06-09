@@ -191,6 +191,7 @@ RouteBase buildChromeShellRoute() {
                   create: (_) => PlanoSucessoProvider(),
                   child: PlanoSucessoScreen(
                     alunoId: intPathParam(state, 'id')!,
+                    alunoNome: stringRouteExtra(state),
                   ),
                 ),
           ),
@@ -229,8 +230,10 @@ RouteBase buildChromeShellRoute() {
                 (context, state) =>
                     intPathParam(state, 'id') == null ? '/alunos' : null,
             builder:
-                (context, state) =>
-                    AlimentarScreen(alunoId: intPathParam(state, 'id')!),
+                (context, state) => AlimentarScreen(
+                  alunoId: intPathParam(state, 'id')!,
+                  alunoNome: stringRouteExtra(state),
+                ),
           ),
           GoRoute(
             path: '/alunos/:id/treinos-list',

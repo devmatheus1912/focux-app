@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../features/alunos/utils/satellite_screen_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
@@ -303,9 +304,13 @@ class _MensalidadeCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
-                  m.status,
+                  financeiroMensalidadeStatusLabel(m.status),
                   style: TextStyle(
-                    color: sColor,
+                    color: financeiroMensalidadeStatusInk(
+                      sColor,
+                      status: m.status,
+                      isDark: isDark,
+                    ),
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.3,
