@@ -51,10 +51,16 @@ class OperacaoDominantMetric {
 }
 
 class AderenciaWeekPoint {
-  const AderenciaWeekPoint({required this.checkins, this.date});
+  const AderenciaWeekPoint({
+    required this.checkins,
+    this.date,
+    this.dayLetter,
+  });
 
   final double checkins;
   final String? date;
+  /// Server-provided single-letter label (D S T Q I X A); avoids TZ drift on yyyy-MM-dd.
+  final String? dayLetter;
 }
 
 class AderenciaWeekSummary {
@@ -292,6 +298,7 @@ List<AderenciaWeekPoint> parseAderenciaSemanal(
         (point) => AderenciaWeekPoint(
           checkins: (point['checkins'] as num?)?.toDouble() ?? 0,
           date: point['data'] as String?,
+          dayLetter: (point['labelDia'] as String?)?.trim(),
         ),
       )
       .toList(growable: false);
@@ -363,10 +370,21 @@ int alunoDetailTabIndex(AlunoDetailTab tab) => tab.index;
 int parseAlunoDetailTabIndex(String? tab) =>
     alunoDetailTabIndex(parseAlunoDetailTab(tab));
 
-/// Single-letter weekday for spark bars (D S T Q Q S S, Sunday-first).
+/// Parses yyyy-MM-dd as a local calendar date (not UTC midnight).
+DateTime? parseIsoDateLocal(String? isoDate) {
+  if (isoDate == null || isoDate.isEmpty) return null;
+  final match = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$').firstMatch(isoDate.trim());
+  if (match == null) return null;
+  return DateTime(
+    int.parse(match.group(1)!),
+    int.parse(match.group(2)!),
+    int.parse(match.group(3)!),
+  );
+}
+
+/// Single-letter weekday for spark bars (D S T Q I X A — Dom a Sáb).
 String weekdayLetterFromIso(String? isoDate) {
-  if (isoDate == null || isoDate.isEmpty) return '';
-  final parsed = DateTime.tryParse(isoDate);
+  final parsed = parseIsoDateLocal(isoDate);
   if (parsed == null) return '';
   const labels = ['D', 'S', 'T', 'Q', 'I', 'X', 'A'];
   return labels[parsed.weekday % 7];
@@ -374,8 +392,7 @@ String weekdayLetterFromIso(String? isoDate) {
 
 /// Full weekday name for sparkline tooltips (Seg, Ter, …).
 String weekdayNameFromIso(String? isoDate) {
-  if (isoDate == null || isoDate.isEmpty) return '';
-  final parsed = DateTime.tryParse(isoDate);
+  final parsed = parseIsoDateLocal(isoDate);
   if (parsed == null) return '';
   const labels = [
     'Dom',
@@ -391,13 +408,19 @@ String weekdayNameFromIso(String? isoDate) {
 
 /// Whether [isoDate] (yyyy-MM-dd) is today in local time.
 bool isIsoDateToday(String? isoDate) {
-  if (isoDate == null || isoDate.isEmpty) return false;
-  final parsed = DateTime.tryParse(isoDate);
+  final parsed = parseIsoDateLocal(isoDate);
   if (parsed == null) return false;
   final now = DateTime.now();
   return parsed.year == now.year &&
       parsed.month == now.month &&
       parsed.day == now.day;
+}
+
+/// Label for adherence spark bar: server label wins, else local ISO parse.
+String adherenceDayLetter(AderenciaWeekPoint point) {
+  final fromApi = point.dayLetter;
+  if (fromApi != null && fromApi.isNotEmpty) return fromApi;
+  return weekdayLetterFromIso(point.date);
 }
 
 /// Staggered entrance delay for Operação sections (finance banner shifts timeline).

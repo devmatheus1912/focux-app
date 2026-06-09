@@ -56,7 +56,7 @@ class AlunoOperacaoAdherenceBars extends StatelessWidget {
               if (i > 0) const SizedBox(width: 5),
               Expanded(
                 child: _AdherenceDayMarker(
-                  dayLabel: weekdayLetterFromIso(points[i].date),
+                  dayLabel: adherenceDayLetter(points[i]),
                   isoDate: points[i].date,
                   hasActivity: points[i].checkins > 0,
                   activeColor: activeColor,
@@ -82,7 +82,7 @@ class AlunoOperacaoAdherenceBars extends StatelessWidget {
             Expanded(
               child: _AdherenceDayBar(
                 value: points[i].checkins,
-                dayLabel: weekdayLetterFromIso(points[i].date),
+                dayLabel: adherenceDayLetter(points[i]),
                 isoDate: points[i].date,
                 maxVal: maxVal,
                 activeColor: activeColor,

@@ -690,6 +690,27 @@ void main() {
       expect(weekdayLetterFromIso('2026-06-03'), 'Q');
       expect(weekdayLetterFromIso('2026-06-04'), 'I');
     });
+
+    test('parseIsoDateLocal ignores UTC midnight drift', () {
+      final parsed = parseIsoDateLocal('2026-06-04');
+      expect(parsed?.weekday, DateTime.thursday);
+      expect(weekdayNameFromIso('2026-06-04'), 'Qui');
+    });
+  });
+
+  group('adherenceDayLetter', () {
+    test('prefers server labelDia over ISO parse', () {
+      expect(
+        adherenceDayLetter(
+          const AderenciaWeekPoint(
+            checkins: 0,
+            date: '2026-06-04',
+            dayLetter: 'I',
+          ),
+        ),
+        'I',
+      );
+    });
   });
 
   group('checkinMensagemPronta', () {
