@@ -59,7 +59,7 @@ class AderenciaWeekPoint {
 
   final double checkins;
   final String? date;
-  /// Server-provided single-letter label (D S T Q I X A); avoids TZ drift on yyyy-MM-dd.
+  /// Optional API label (ignored na UI — exibimos via [adherenceDayLetter]).
   final String? dayLetter;
 }
 
@@ -382,11 +382,11 @@ DateTime? parseIsoDateLocal(String? isoDate) {
   );
 }
 
-/// Single-letter weekday for spark bars (D S T Q I X A — Dom a Sáb).
+/// Single-letter weekday for spark bars (D S T Q Q S S — padrão BR, domingo = D).
 String weekdayLetterFromIso(String? isoDate) {
   final parsed = parseIsoDateLocal(isoDate);
   if (parsed == null) return '';
-  const labels = ['D', 'S', 'T', 'Q', 'I', 'X', 'A'];
+  const labels = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
   return labels[parsed.weekday % 7];
 }
 
@@ -416,12 +416,9 @@ bool isIsoDateToday(String? isoDate) {
       parsed.day == now.day;
 }
 
-/// Label for adherence spark bar: server label wins, else local ISO parse.
-String adherenceDayLetter(AderenciaWeekPoint point) {
-  final fromApi = point.dayLetter;
-  if (fromApi != null && fromApi.isNotEmpty) return fromApi;
-  return weekdayLetterFromIso(point.date);
-}
+/// Label for adherence spark bar (always from local ISO — evita labelDia legado I/X/A).
+String adherenceDayLetter(AderenciaWeekPoint point) =>
+    weekdayLetterFromIso(point.date);
 
 /// Staggered entrance delay for Operação sections (finance banner shifts timeline).
 Duration operacaoSectionDelay({

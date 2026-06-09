@@ -686,9 +686,9 @@ void main() {
       expect(weekdayLetterFromIso('2026-06-07'), 'D');
     });
 
-    test('returns distinct letters for Wednesday and Thursday', () {
+    test('returns Q for Wednesday and Thursday (padrão BR)', () {
       expect(weekdayLetterFromIso('2026-06-03'), 'Q');
-      expect(weekdayLetterFromIso('2026-06-04'), 'I');
+      expect(weekdayLetterFromIso('2026-06-04'), 'Q');
     });
 
     test('parseIsoDateLocal ignores UTC midnight drift', () {
@@ -699,7 +699,7 @@ void main() {
   });
 
   group('adherenceDayLetter', () {
-    test('prefers server labelDia over ISO parse', () {
+    test('derives from local ISO even when API sends legacy label', () {
       expect(
         adherenceDayLetter(
           const AderenciaWeekPoint(
@@ -708,7 +708,7 @@ void main() {
             dayLetter: 'I',
           ),
         ),
-        'I',
+        'Q',
       );
     });
   });
