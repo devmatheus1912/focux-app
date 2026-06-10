@@ -7,17 +7,25 @@ class IaProgressaoCargaResult {
     this.intro,
     this.exercises = const [],
     this.footer,
+    this.sugestoesRegistradas = 0,
   });
 
   final String resposta;
   final String? intro;
   final List<IaProgressaoExerciseRow> exercises;
   final String? footer;
+  final int sugestoesRegistradas;
 
   factory IaProgressaoCargaResult.fromApi(Map<String, dynamic> json) {
     final resposta = (json['resposta'] as String?) ?? '';
     final intro = json['intro'] as String?;
     final footer = json['footer'] as String?;
+    final registradas = switch (json['sugestoesRegistradas']) {
+      final int value => value,
+      final num value => value.toInt(),
+      final String value => int.tryParse(value) ?? 0,
+      _ => 0,
+    };
     final rawExercises = json['exercicios'];
 
     if (rawExercises is List && rawExercises.isNotEmpty) {
@@ -47,6 +55,7 @@ class IaProgressaoCargaResult {
           intro: intro,
           exercises: exercises,
           footer: footer,
+          sugestoesRegistradas: registradas,
         );
       }
     }
@@ -57,6 +66,7 @@ class IaProgressaoCargaResult {
       intro: parsed.intro ?? intro,
       exercises: parsed.exercises,
       footer: parsed.footer ?? footer,
+      sugestoesRegistradas: registradas,
     );
   }
 

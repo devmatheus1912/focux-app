@@ -132,7 +132,10 @@ class _StructuredResult extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (parsed.intro != null && parsed.intro!.isNotEmpty) ...[
-          IaExpandableCopy(text: parsed.intro!),
+          IaExpandableCopy(
+            text: parsed.intro!,
+            collapseLabel: 'Ver menos contexto',
+          ),
           const SizedBox(height: TokensStrip.s3),
         ],
         if (showSectionTitle) ...[
@@ -168,6 +171,7 @@ class _StructuredResult extends StatelessWidget {
             child: IaExpandableCopy(
               text: parsed.footer!,
               expandLabel: 'Ler lembrete completo',
+              collapseLabel: 'Ocultar lembrete',
               style: const TextStyle(
                 fontSize: 12,
                 height: 1.4,

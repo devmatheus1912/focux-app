@@ -291,8 +291,11 @@ class IaRepository {
 
   // ── Progressão sugestões ──────────────────────────────────────────────────
 
-  Future<List<Map<String, dynamic>>> sugestoesProgressao() async {
-    final r = await _dio.get('/api/ia/progressao/sugestoes');
+  Future<List<Map<String, dynamic>>> sugestoesProgressao({int? alunoId}) async {
+    final r = await _dio.get(
+      '/api/ia/progressao/sugestoes',
+      queryParameters: {if (alunoId != null) 'alunoId': alunoId},
+    );
     return (r.data as List).cast<Map<String, dynamic>>();
   }
 

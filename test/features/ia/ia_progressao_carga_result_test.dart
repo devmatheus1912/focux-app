@@ -7,6 +7,7 @@ void main() {
       'resposta': 'fallback markdown',
       'intro': 'Contexto curto.',
       'footer': 'RPE.',
+      'sugestoesRegistradas': 1,
       'exercicios': [
         {
           'exercicio': 'Supino',
@@ -20,6 +21,7 @@ void main() {
 
     expect(result.exercises, hasLength(1));
     expect(result.exercises.first.deltaLabel, '+2,5 kg');
+    expect(result.sugestoesRegistradas, 1);
     expect(result.toParsed().hasStructuredRows, isTrue);
   });
 }

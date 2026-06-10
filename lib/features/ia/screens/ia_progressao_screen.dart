@@ -18,6 +18,7 @@ import '../data/ia_repository.dart';
 import '../models/ia_progressao_carga_result.dart';
 import '../widgets/ia_progressao_loading_skeleton.dart';
 import '../widgets/ia_progressao_result_view.dart';
+import '../utils/progressao_aceitar_route_args.dart';
 import '../widgets/ia_quota_upgrade.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
@@ -156,6 +157,18 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
       if (!mounted) return;
       setState(() => _resultado = r);
       _scrollToResult();
+      if (r.sugestoesRegistradas > 0) {
+        FeedbackHelper.showSnackBar(
+          context,
+          SnackBar(
+            content: Text(
+              r.sugestoesRegistradas == 1
+                  ? '1 sugestão salva para revisão.'
+                  : '${r.sugestoesRegistradas} sugestões salvas para revisão.',
+            ),
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) {
         final message = e is IaOperationalException
@@ -294,8 +307,15 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                           '/alunos/${widget.alunoId}/treinos-list',
                           extra: widget.alunoNome,
                         ),
-                        onReviewSuggestions: () =>
-                            context.push('/ia/progressao/aceitar'),
+                        onReviewSuggestions:
+                            () => context.push(
+                              '/ia/progressao/aceitar',
+                              extra: ProgressaoAceitarRouteArgs(
+                                returnTo: '/alunos/${widget.alunoId}',
+                                alunoId: widget.alunoId,
+                                alunoNome: widget.alunoNome,
+                              ).toExtra(),
+                            ),
                       ),
                     ],
                   ),

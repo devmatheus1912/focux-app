@@ -34,6 +34,7 @@ import '../../features/evolucao/screens/evolucao_screen.dart';
 import '../../features/evolucao/screens/evolucao_fotos_screen.dart';
 import '../../features/checkin/screens/modo_presencial_screen.dart';
 import '../../features/ia/screens/progressao_aceitar_screen.dart';
+import '../../features/ia/utils/progressao_aceitar_route_args.dart';
 import '../../features/alunos/screens/editar_aluno_screen.dart';
 import '../../features/ranking/screens/ranking_screen.dart';
 import '../../features/perfil/screens/identidade_visual_screen.dart';
@@ -515,7 +516,10 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/ia/progressao/aceitar',
-            builder: (context, state) => const ProgressaoAceitarScreen(),
+            builder: (context, state) {
+              final args = ProgressaoAceitarRouteArgs.fromExtra(state.extra);
+              return ProgressaoAceitarScreen(args: args);
+            },
           ),
 
           // Chat
