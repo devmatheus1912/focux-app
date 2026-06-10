@@ -97,10 +97,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
       });
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -160,10 +157,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                     if (ctx.mounted) Navigator.pop(ctx, true);
                   } catch (e) {
                     if (ctx.mounted) {
-                      FeedbackHelper.showSnackBar(
-                        ctx,
-                        SnackBar(content: Text(friendlyError(e))),
-                      );
+                      FeedbackHelper.showError(ctx, friendlyError(e));
                     }
                   }
                 },

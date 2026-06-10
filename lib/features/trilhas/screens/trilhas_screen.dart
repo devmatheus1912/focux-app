@@ -419,33 +419,38 @@ class _MarcoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      dense: true,
-      contentPadding: EdgeInsets.zero,
-      leading: IconButton(
-        tooltip: marco.concluido ? 'Marco concluído' : 'Concluir marco',
-        icon: Icon(
-          marco.concluido ? Icons.check_circle : Icons.radio_button_unchecked,
-          color:
-              marco.concluido ? EagleTokens.good : ShellChrome.of(context).mute,
+    return fxListTileCardShell(
+      context: context,
+      margin: EdgeInsets.zero,
+      accent: marco.concluido ? EagleTokens.good : null,
+      child: ListTile(
+        dense: true,
+        contentPadding: EdgeInsets.zero,
+        leading: IconButton(
+          tooltip: marco.concluido ? 'Marco concluído' : 'Concluir marco',
+          icon: Icon(
+            marco.concluido ? Icons.check_circle : Icons.radio_button_unchecked,
+            color:
+                marco.concluido ? EagleTokens.good : ShellChrome.of(context).mute,
+          ),
+          onPressed:
+              marco.concluido
+                  ? null
+                  : () async {
+                    final api = ref.read(apiClientProvider);
+                    await api.dio.post(
+                      '/api/trilhas/$trilhaId/marcos/${marco.id}/concluir',
+                    );
+                    ref.invalidate(trilhasAlunoProvider(alunoId));
+                  },
         ),
-        onPressed:
-            marco.concluido
-                ? null
-                : () async {
-                  final api = ref.read(apiClientProvider);
-                  await api.dio.post(
-                    '/api/trilhas/$trilhaId/marcos/${marco.id}/concluir',
-                  );
-                  ref.invalidate(trilhasAlunoProvider(alunoId));
-                },
-      ),
-      title: Text(
-        marco.titulo,
-        style: TextStyle(
-          fontSize: 13,
-          decoration: marco.concluido ? TextDecoration.lineThrough : null,
-          color: marco.concluido ? TokensStrip.textSecondary : null,
+        title: Text(
+          marco.titulo,
+          style: TextStyle(
+            fontSize: 13,
+            decoration: marco.concluido ? TextDecoration.lineThrough : null,
+            color: marco.concluido ? TokensStrip.textSecondary : null,
+          ),
         ),
       ),
     );

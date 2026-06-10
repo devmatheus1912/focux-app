@@ -5,12 +5,7 @@ Future<void> _selecionarAluno() async {
     final alunos = await ref.read(alunosProvider.future);
     if (!mounted) return;
     if (alunos.isEmpty) {
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(
-          content: Text('Você ainda não possui alunos cadastrados.'),
-        ),
-      );
+      FeedbackHelper.showError(context, 'Você ainda não possui alunos cadastrados.');
       return;
     }
     final search = TextEditingController();
@@ -452,26 +447,10 @@ Future<void> _selecionarAluno() async {
       });
       ref.invalidate(dashboardHomeProvider);
       ref.invalidate(commandCenterProvider);
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(
-          content: Text(
-            persisted
-                ? 'Tarefa salva no Command Center.'
-                : 'Tarefa criada. Confirme no Command Center.',
-          ),
-          action: SnackBarAction(
-            label: 'Ver',
-            onPressed: () => context.push('/dashboard/command-center/copiloto'),
-          ),
-        ),
-      );
+      FeedbackHelper.showSuccess(context, persisted ? 'Tarefa salva no Command Center.' : 'Tarefa criada. Confirme no Command Center.');
     } catch (_) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Não foi possível atribuir agora.')),
-      );
+      FeedbackHelper.showError(context, 'Não foi possível atribuir agora.');
     }
   }
 

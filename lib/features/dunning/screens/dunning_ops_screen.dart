@@ -49,10 +49,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(content: Text(friendlyError(e))),
-      );
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -65,10 +62,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
       await _carregar();
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(content: Text(friendlyError(e))),
-      );
+      FeedbackHelper.showError(context, friendlyError(e));
     } finally {
       if (mounted) setState(() => _marcandoId = null);
     }

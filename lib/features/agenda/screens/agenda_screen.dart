@@ -120,14 +120,11 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
       final fullUrl = _resolveAbsoluteApiUrl(info.url);
       await Clipboard.setData(ClipboardData(text: fullUrl));
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(content: Text('Link iCal copiado — cole no Google Calendar ou Apple Calendar.')),
-        );
+        FeedbackHelper.showSuccess(context, 'Link iCal copiado — cole no Google Calendar ou Apple Calendar.');
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(context, SnackBar(content: Text('Erro ao gerar link iCal: $e')));
+        FeedbackHelper.showError(context, 'Erro ao gerar link iCal: $e');
       }
     }
   }
@@ -149,10 +146,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
               if (!mounted) return;
               Navigator.pop(context);
               _load();
-              FeedbackHelper.showSnackBar(
-                context,
-                const SnackBar(content: Text('Agendamento excluído.')),
-              );
+              FeedbackHelper.showSuccess(context, 'Agendamento excluído.');
             },
           ),
     );

@@ -845,19 +845,11 @@ void _showDeleteAccountDialog(BuildContext context) {
                   final dio = ApiClient().dio;
                   await dio.delete('/api/lgpd/me/delete');
                   if (!context.mounted) return;
-                  FeedbackHelper.showSnackBar(
-                    context,
-                    const SnackBar(
-                      content: Text('Conta excluída com sucesso.'),
-                    ),
-                  );
+                  FeedbackHelper.showSuccess(context, 'Conta excluída com sucesso.');
                   GoRouter.of(context).go('/login');
                 } catch (e) {
                   if (!context.mounted) return;
-                  FeedbackHelper.showSnackBar(
-                    context,
-                    SnackBar(content: Text(friendlyError(e))),
-                  );
+                  FeedbackHelper.showError(context, friendlyError(e));
                 }
               },
               child: const Text('Excluir definitivamente'),

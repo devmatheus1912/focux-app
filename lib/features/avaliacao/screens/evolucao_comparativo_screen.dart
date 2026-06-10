@@ -134,7 +134,8 @@ class _EvolucaoComparativoScreenState
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Cabeçalho com datas
-          Card(
+          Container(
+            decoration: fxListCardDecoration(context),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
@@ -185,7 +186,9 @@ class _EvolucaoComparativoScreenState
           const SizedBox(height: TokensStrip.s4),
 
           // Tabela de comparativo
-          Card(
+          Container(
+            decoration: fxListCardDecoration(context),
+            clipBehavior: Clip.antiAlias,
             child: Column(
               children: [
                 _headerRow(),
@@ -281,21 +284,19 @@ class _EvolucaoComparativoScreenState
               label: 'Compartilhar com o aluno via Chat',
               icon: Icons.share_rounded,
               onPressed: () async {
-                final messenger = FeedbackHelper.messengerOf(context);
                 try {
                   final repo = EvolucaoRepository(ref.read(apiClientProvider));
                   await repo.compartilharEvolucao(widget.alunoId);
                   if (mounted) {
-                    messenger.showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Evolução compartilhada via chat com sucesso!',
-                        ),
-                      ),
+                    FeedbackHelper.showSuccess(
+                      context,
+                      'Evolução compartilhada via chat com sucesso!',
                     );
                   }
                 } catch (e) {
-                  FeedbackHelper.showError(context, friendlyError(e));
+                  if (mounted) {
+                    FeedbackHelper.showError(context, friendlyError(e));
+                  }
                 }
               },
             ),

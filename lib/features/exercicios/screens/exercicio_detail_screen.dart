@@ -58,10 +58,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
       ref.invalidate(exercicioProvider(widget.exercicioId));
       ref.invalidate(exerciciosFilteredProvider);
       if (!context.mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Video proprio adicionado ao exercicio.')),
-      );
+      FeedbackHelper.showSuccess(context, 'Video proprio adicionado ao exercicio.');
     } catch (e) {
       if (context.mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
@@ -121,14 +118,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
       ref.invalidate(exerciciosFilteredProvider);
       ref.invalidate(exerciciosCuradoriaProvider);
       if (!context.mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(
-          content: Text(
-            'Curadoria marcada como ${_formatEditorialStatus(status)}.',
-          ),
-        ),
-      );
+      FeedbackHelper.showSuccess(context, 'Curadoria marcada como ${_formatEditorialStatus(status)}.',);
     } catch (e) {
       if (context.mounted) {
         FeedbackHelper.showError(context, friendlyError(e));

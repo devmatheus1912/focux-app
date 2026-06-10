@@ -272,10 +272,7 @@ class _AlunoOutreachMessageSheet extends StatelessWidget {
                     await copySensitiveToClipboard(message);
                     if (!context.mounted) return;
                     Navigator.of(context).pop();
-                    FeedbackHelper.showSnackBar(
-                      context,
-                      const SnackBar(content: Text('Mensagem copiada.')),
-                    );
+                    FeedbackHelper.showSuccess(context, 'Mensagem copiada.');
                   },
                   icon: Icon(Icons.copy_rounded, size: 17, color: primary),
                   label: Text(

@@ -88,10 +88,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
       await invalidateAluno360Providers(ref, widget.aluno.id);
       if (!mounted) return;
       HapticFeedback.heavyImpact();
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Aluno atualizado!')),
-      );
+      FeedbackHelper.showSuccess(context, 'Aluno atualizado!');
       Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) {

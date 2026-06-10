@@ -10,6 +10,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/relatorio_repository.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../dashboard/utils/dashboard_readability.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../subscription/models/subscription_plan.dart';
 
@@ -238,28 +239,31 @@ class _HeroCard extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.16),
+                  color: dashboardHeroCaptionOnTeal().withValues(alpha: 0.16),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Icon(Icons.insights_rounded, color: Colors.white),
+                child: Icon(
+                  Icons.insights_rounded,
+                  color: dashboardHeroCaptionOnTeal(),
+                ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Performance da base',
-                      style: TextStyle(
-                        color: Colors.white,
+                      style: dashboardHeroMutedOnTealStyle(
                         fontWeight: FontWeight.w800,
-                        fontSize: 16,
-                      ),
+                      ).copyWith(fontSize: 16),
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     Text(
                       'Aderencia media geral',
-                      style: TextStyle(color: Colors.white70, fontSize: 12.5),
+                      style: dashboardHeroCaptionOnTealStyle().copyWith(
+                        fontSize: 12.5,
+                      ),
                     ),
                   ],
                 ),
@@ -270,11 +274,11 @@ class _HeroCard extends StatelessWidget {
           const SizedBox(height: TokensStrip.s5),
           Text(
             '${aderencia.toStringAsFixed(1)}%',
-            style: const TextStyle(
-              color: Colors.white,
+            style: dashboardHeroMutedOnTealStyle(
+              fontWeight: FontWeight.w900,
+            ).copyWith(
               fontSize: 52,
               height: 0.95,
-              fontWeight: FontWeight.w900,
             ),
           ),
           const SizedBox(height: 18),
@@ -283,26 +287,24 @@ class _HeroCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: aderencia / 100,
               minHeight: 8,
-              backgroundColor: Colors.white.withValues(alpha: 0.18),
-              valueColor: const AlwaysStoppedAnimation(Colors.white),
+              backgroundColor: dashboardHeroCaptionOnTeal().withValues(alpha: 0.18),
+              valueColor: AlwaysStoppedAnimation(dashboardHeroCaptionOnTeal()),
             ),
           ),
           const SizedBox(height: 14),
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.people_alt_rounded,
-                color: Colors.white70,
+                color: dashboardHeroMutedOnTeal(),
                 size: 16,
               ),
               const SizedBox(width: 6),
               Text(
                 '${dados.totalAlunos} alunos monitorados',
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 13,
+                style: dashboardHeroCaptionOnTealStyle(
                   fontWeight: FontWeight.w700,
-                ),
+                ).copyWith(fontSize: 13),
               ),
             ],
           ),
@@ -322,17 +324,17 @@ class _HeroPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.16),
+        color: dashboardHeroCaptionOnTeal().withValues(alpha: 0.16),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+        border: Border.all(
+          color: dashboardHeroCaptionOnTeal().withValues(alpha: 0.18),
+        ),
       ),
       child: Text(
         text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 11,
+        style: dashboardHeroCaptionOnTealStyle(
           fontWeight: FontWeight.w800,
-        ),
+        ).copyWith(fontSize: 11),
       ),
     );
   }

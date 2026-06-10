@@ -54,10 +54,7 @@ class _PlanoAlimentarDetailScreenState
     } catch (e) {
       if (mounted) {
         setState(() => _loading = false);
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -72,10 +69,7 @@ class _PlanoAlimentarDetailScreenState
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -178,18 +172,12 @@ class _PlanoAlimentarDetailScreenState
       if (!mounted) return;
       await _load();
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(content: Text('Dieta gerada com sucesso!')),
-        );
+        FeedbackHelper.showSuccess(context, 'Dieta gerada com sucesso!');
       }
     } catch (e) {
       if (mounted) {
         setState(() => _loading = false);
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
         final mapped =
             e is DioException ? IaOperationalException.fromDio(e) : e;
         await IaQuotaUpgrade.handleError(context, ref, mapped);
@@ -381,8 +369,9 @@ class _RefeicaoCard extends StatelessWidget {
         ),
         child: const Icon(Icons.delete, color: Colors.white),
       ),
-      child: Card(
+      child: Container(
         margin: const EdgeInsets.only(bottom: 10),
+        decoration: fxListCardDecoration(context),
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Column(
@@ -498,10 +487,7 @@ class _NovaRefeicaoSheetState extends ConsumerState<_NovaRefeicaoSheet> {
 
   Future<void> _salvar() async {
     if (_nome.text.trim().isEmpty) {
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Nome da refeição é obrigatório.')),
-      );
+      FeedbackHelper.showError(context, 'Nome da refeição é obrigatório.');
       return;
     }
     setState(() => _saving = true);

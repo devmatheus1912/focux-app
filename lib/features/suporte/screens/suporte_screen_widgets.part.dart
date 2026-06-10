@@ -287,7 +287,10 @@ class _BubbleMensagem extends StatelessWidget {
             ? EagleTokens.bad.withValues(alpha: 0.10)
             : Theme.of(context).colorScheme.surfaceContainerHighest;
 
-    return Padding(
+    return Semantics(
+      label: isUser ? 'Você: ${msg.texto}' : 'Suporte: ${msg.texto}',
+      container: true,
+      child: Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         mainAxisAlignment:
@@ -334,6 +337,7 @@ class _BubbleMensagem extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }
@@ -419,10 +423,7 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _enviando = false);
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(content: Text(friendlyError(e))),
-      );
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -669,73 +670,71 @@ class _TicketCard extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          decoration: fxListCardDecoration(context, accent: statusColor),
-          child: Theme(
-            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-            child:
-                temResposta
-                    ? ExpansionTile(
-                      backgroundColor: Colors.transparent,
-                      collapsedBackgroundColor: Colors.transparent,
-                tilePadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 4,
-                ),
-                childrenPadding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 12),
-                title: _TicketTileContent(
-                  ticket: ticket,
-                  statusColor: statusColor,
-                  sevColor: sevColor,
-                ),
-                children: [
-                  const Divider(),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.support_agent,
-                        size: 18,
-                        color: EagleTokens.good,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Resposta do suporte',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 12,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              ticket.respostaAdmin!,
-                              style: const TextStyle(fontSize: 13),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              )
-                    : ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 4,
-                ),
-                title: _TicketTileContent(
-                  ticket: ticket,
-                  statusColor: statusColor,
-                  sevColor: sevColor,
-                ),
+      child: fxListTileCardShell(
+        context: context,
+        accent: statusColor,
+        child: Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child:
+              temResposta
+                  ? ExpansionTile(
+                    backgroundColor: Colors.transparent,
+                    collapsedBackgroundColor: Colors.transparent,
+              tilePadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 4,
               ),
-          ),
+              childrenPadding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 12),
+              title: _TicketTileContent(
+                ticket: ticket,
+                statusColor: statusColor,
+                sevColor: sevColor,
+              ),
+              children: [
+                const Divider(),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.support_agent,
+                      size: 18,
+                      color: EagleTokens.good,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Resposta do suporte',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            ticket.respostaAdmin!,
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            )
+                  : ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 4,
+              ),
+              title: _TicketTileContent(
+                ticket: ticket,
+                statusColor: statusColor,
+                sevColor: sevColor,
+              ),
+            ),
         ),
       ),
     );

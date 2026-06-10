@@ -67,14 +67,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
       ref.invalidate(perfilProvider);
       if (!mounted) return;
 
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(
-          content: Text(
-            'Trial Enterprise ativado. Aproveite os próximos 5 dias.',
-          ),
-        ),
-      );
+      FeedbackHelper.showSuccess(context, 'Trial Enterprise ativado. Aproveite os próximos 5 dias.',);
       context.go('/dashboard/personal');
     } catch (error) {
       if (!mounted) return;

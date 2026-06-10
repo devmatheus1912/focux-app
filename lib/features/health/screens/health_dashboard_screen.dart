@@ -65,12 +65,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
         setState(() {
           _loading = false;
         });
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(
-            content: Text('Saúde não disponível neste dispositivo'),
-          ),
-        );
+        FeedbackHelper.showError(context, 'Saúde não disponível neste dispositivo');
       }
     }
   }

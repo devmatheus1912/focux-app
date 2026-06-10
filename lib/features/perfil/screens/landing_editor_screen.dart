@@ -461,10 +461,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(content: Text(friendlyError(e))),
-      );
+      FeedbackHelper.showError(context, friendlyError(e));
     } finally {
       if (mounted) {
         setState(() {
@@ -502,10 +499,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
         _c.clearBioImage();
       }
     });
-    FeedbackHelper.showSnackBar(
-      context,
-      SnackBar(content: Text('$label removida. Salve para publicar.')),
-    );
+    FeedbackHelper.showSuccess(context, '$label removida. Salve para publicar.');
   }
 
   void _useDefaultImage({required bool hero}) {
@@ -513,10 +507,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
         ? (_c.heroImageUrl == null || _c.heroImageUrl!.isEmpty)
         : (_c.bioImageUrl == null || _c.bioImageUrl!.isEmpty);
     if (alreadyDefault) {
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Já está no padrão.')),
-      );
+      FeedbackHelper.showInfo(context, 'Já está no padrão.');
       return;
     }
     setState(() {
@@ -526,15 +517,11 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
         _c.clearBioImage();
       }
     });
-    FeedbackHelper.showSnackBar(
+    FeedbackHelper.showSuccess(
       context,
-      SnackBar(
-        content: Text(
-          hero
-              ? 'Padrão aplicado — capa premium de academia na landing.'
-              : 'Padrão aplicado — seção sobre usa sua foto de perfil.',
-        ),
-      ),
+      hero
+          ? 'Padrão aplicado — capa premium de academia na landing.'
+          : 'Padrão aplicado — seção sobre usa sua foto de perfil.',
     );
   }
 
@@ -590,10 +577,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       await _loadGrowth();
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(content: Text(friendlyError(e))),
-      );
+      FeedbackHelper.showError(context, friendlyError(e));
     } finally {
       if (mounted) setState(() => _c.saving = false);
     }

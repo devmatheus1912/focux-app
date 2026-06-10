@@ -226,10 +226,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                     );
                     ref.invalidate(medidasProvider(widget.alunoId));
                     if (context.mounted) {
-                      FeedbackHelper.showSnackBar(
-                        context,
-                        const SnackBar(content: Text('Medida adicionada!')),
-                      );
+                      FeedbackHelper.showSuccess(context, 'Medida adicionada!');
                     }
                   } catch (e) {
                     if (context.mounted) {
@@ -316,10 +313,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                     );
                     ref.invalidate(recordesProvider(widget.alunoId));
                     if (context.mounted) {
-                      FeedbackHelper.showSnackBar(
-                        context,
-                        const SnackBar(content: Text('Recorde adicionado!')),
-                      );
+                      FeedbackHelper.showSuccess(context, 'Recorde adicionado!');
                     }
                   } catch (e) {
                     if (context.mounted) {

@@ -77,23 +77,13 @@ class AlunoUpsellCarousel extends ConsumerWidget {
       );
       ref.invalidate(_alunoUpsellProvider);
       if (context.mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(
-            content: Text(
-              resposta == 'ACEITO'
+        FeedbackHelper.showSuccess(context, resposta == 'ACEITO'
                   ? 'Oferta aceita! Seu personal será avisado.'
-                  : 'Oferta recusada.',
-            ),
-          ),
-        );
+                  : 'Oferta recusada.',);
       }
     } catch (_) {
       if (context.mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(content: Text('Não foi possível registrar sua resposta')),
-        );
+        FeedbackHelper.showError(context, 'Não foi possível registrar sua resposta');
       }
     }
   }

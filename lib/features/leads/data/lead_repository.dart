@@ -74,6 +74,11 @@ class LeadRepository {
   final Dio _dio;
   LeadRepository(ApiClient c) : _dio = c.dio;
 
+  Future<Lead> buscar(int id) async {
+    final r = await _dio.get('/api/leads/$id');
+    return Lead.fromJson(r.data as Map<String, dynamic>);
+  }
+
   Future<List<Lead>> listar({String? status}) async {
     final r = await _dio.get(
       '/api/leads',

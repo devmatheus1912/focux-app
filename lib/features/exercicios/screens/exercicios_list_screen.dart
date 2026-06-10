@@ -80,10 +80,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   Future<void> _uploadVideo(Exercicio exercicio) async {
     final file = await _picker.pickVideo(source: ImageSource.gallery);
     if (file == null || !mounted) return;
-    final messenger = FeedbackHelper.messengerOf(context);
-    messenger.showSnackBar(
-      SnackBar(content: Text('Enviando video de ${exercicio.nome}...')),
-    );
+    FeedbackHelper.showInfo(context, 'Enviando video de ${exercicio.nome}...');
     try {
       await ref
           .read(exercicioRepositoryProvider)
@@ -97,21 +94,9 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
         props: {'exId': exercicio.id},
       );
       _refresh();
-      messenger.clearSnackBars();
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Video adicionado.'),
-          backgroundColor: EagleTokens.good,
-        ),
-      );
+      if (mounted) FeedbackHelper.showSuccess(context, 'Video adicionado.');
     } catch (e) {
-      messenger.clearSnackBars();
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(friendlyError(e)),
-          backgroundColor: EagleTokens.bad,
-        ),
-      );
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -146,23 +131,11 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       _selected.remove(exercicio.id);
       _refresh();
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(
-            content: Text('Exercicio excluido.'),
-            backgroundColor: EagleTokens.good,
-          ),
-        );
+        FeedbackHelper.showSuccess(context, 'Exercicio excluido.');
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(
-            content: Text(friendlyError(e)),
-            backgroundColor: EagleTokens.bad,
-          ),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -178,10 +151,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       _refresh();
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(content: Text(friendlyError(e))),
-      );
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -264,17 +234,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     });
     _refresh();
     if (blocked.isEmpty) {
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(
-          content: Text(
-            deleted.length == 1
-                ? '1 exercicio excluido.'
-                : '${deleted.length} exercicios excluidos.',
-          ),
-          backgroundColor: EagleTokens.good,
-        ),
-      );
+      FeedbackHelper.showSuccess(context, deleted.length == 1 ? '1 exercicio excluido.' : '${deleted.length} exercicios excluidos.',);
       return;
     }
 

@@ -11,6 +11,7 @@ import '../../pricing/widgets/smart_pricing_card.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../dashboard/utils/dashboard_readability.dart';
 
 class FinanceiroDashboardScreen extends ConsumerStatefulWidget {
   const FinanceiroDashboardScreen({super.key});
@@ -277,8 +278,8 @@ class _FinanceiroDashboardScreenState
                                   t.alunoNome.isNotEmpty
                                       ? t.alunoNome[0].toUpperCase()
                                       : '?',
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onPrimary,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -390,20 +391,18 @@ class _HeroRing extends StatelessWidget {
                     children: [
                       Text(
                         'RECEBIDO',
-                        style: TextStyle(
+                        style: dashboardHeroEyebrowOnTeal().copyWith(
                           fontSize: 9,
-                          fontWeight: FontWeight.w600,
                           letterSpacing: 1.0,
-                          color: Colors.white.withValues(alpha: 0.82),
                         ),
                       ),
                       Text(
                         '${(perc * 100).round()}%',
-                        style: const TextStyle(
-                          fontSize: 18,
+                        style: dashboardHeroMutedOnTealStyle(
                           fontWeight: FontWeight.w700,
+                        ).copyWith(
+                          fontSize: 18,
                           letterSpacing: -0.5,
-                          color: Colors.white,
                         ),
                       ),
                     ],
@@ -418,21 +417,19 @@ class _HeroRing extends StatelessWidget {
                 children: [
                   Text(
                     metaSuperada ? 'META SUPERADA' : 'RECEBIDO NESTE MÊS',
-                    style: TextStyle(
+                    style: dashboardHeroEyebrowOnTeal().copyWith(
                       fontSize: 10,
-                      fontWeight: FontWeight.w600,
                       letterSpacing: 0.8,
-                      color: Colors.white.withValues(alpha: 0.72),
                     ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     'R\$ ${data.receitaMes.toStringAsFixed(2).replaceAll('.', ',')}',
-                    style: const TextStyle(
-                      fontSize: 28,
+                    style: dashboardHeroMutedOnTealStyle(
                       fontWeight: FontWeight.w600,
+                    ).copyWith(
+                      fontSize: 28,
                       letterSpacing: -0.5,
-                      color: Colors.white,
                       height: 1.1,
                     ),
                   ),
@@ -442,19 +439,16 @@ class _HeroRing extends StatelessWidget {
                       children: [
                         TextSpan(
                           text: 'Previsto ',
-                          style: TextStyle(
+                          style: dashboardHeroCaptionOnTealStyle().copyWith(
                             fontSize: 12.5,
-                            color: Colors.white.withValues(alpha: 0.62),
                           ),
                         ),
                         TextSpan(
                           text:
                               'R\$ ${data.previsaoReceita.toStringAsFixed(2).replaceAll('.', ',')}',
-                          style: TextStyle(
-                            fontSize: 12.5,
-                            color: Colors.white.withValues(alpha: 0.88),
+                          style: dashboardHeroCaptionOnTealStyle(
                             fontWeight: FontWeight.w600,
-                          ),
+                          ).copyWith(fontSize: 12.5),
                         ),
                       ],
                     ),
@@ -830,8 +824,8 @@ class _VencimentoRow extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               item.alunoNome.isNotEmpty ? item.alunoNome[0].toUpperCase() : '?',
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary,
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
               ),

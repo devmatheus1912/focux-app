@@ -7,10 +7,7 @@ Future<void> _sendText() async {
     if (_isDuplicateOutgoing(text)) {
       HapticFeedback.selectionClick();
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(content: Text('Mensagem recente ja enviada.')),
-        );
+        FeedbackHelper.showSuccess(context, 'Mensagem recente ja enviada.');
       }
       return;
     }
@@ -41,10 +38,7 @@ Future<void> _sendText() async {
       _scrollToBottom();
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     } finally {
       if (mounted) {
@@ -63,10 +57,7 @@ Future<void> _sendText() async {
       _ctrl.clear();
       _composerHasText = false;
     });
-    FeedbackHelper.showSnackBar(
-      context,
-      const SnackBar(content: Text('Mensagem recente ja existe no chat.')),
-    );
+    FeedbackHelper.showSuccess(context, 'Mensagem recente ja existe no chat.');
   }
 
   bool _isDuplicateOutgoing(String text) {
@@ -148,10 +139,7 @@ Future<void> _sendText() async {
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text('Nao foi possivel selecionar o arquivo: $e')),
-        );
+        FeedbackHelper.showError(context, 'Nao foi possivel selecionar o arquivo: $e');
       }
       return;
     }
@@ -194,10 +182,7 @@ Future<void> _sendText() async {
       _scrollToBottom();
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     } finally {
       if (mounted) {
@@ -212,12 +197,7 @@ Future<void> _sendText() async {
       final allowed = await _audioRecorder.hasPermission();
       if (!allowed) {
         if (!mounted) return;
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(
-            content: Text('Permita o microfone para gravar audio.'),
-          ),
-        );
+        FeedbackHelper.showError(context, 'Permita o microfone para gravar audio.');
         return;
       }
 
@@ -253,10 +233,7 @@ Future<void> _sendText() async {
       });
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(content: Text('Nao foi possivel iniciar o audio: $e')),
-      );
+      FeedbackHelper.showError(context, 'Nao foi possivel iniciar o audio: $e');
     }
   }
 
@@ -279,10 +256,7 @@ Future<void> _sendText() async {
       path = await _audioRecorder.stop();
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(content: Text('Nao foi possivel finalizar o audio: $e')),
-      );
+      FeedbackHelper.showError(context, 'Nao foi possivel finalizar o audio: $e');
       return;
     }
 
@@ -292,10 +266,7 @@ Future<void> _sendText() async {
     }
     if (path == null || path.isEmpty) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Audio vazio. Grave novamente.')),
-      );
+      FeedbackHelper.showError(context, 'Audio vazio. Grave novamente.');
       return;
     }
 
@@ -312,10 +283,7 @@ Future<void> _sendText() async {
       );
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(content: Text('Nao foi possivel enviar o audio: $e')),
-      );
+      FeedbackHelper.showError(context, 'Nao foi possivel enviar o audio: $e');
     }
   }
 
@@ -363,10 +331,7 @@ Future<void> _sendText() async {
       _scrollToBottom();
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     } finally {
       if (mounted) {
@@ -537,10 +502,7 @@ Future<void> _sendText() async {
   void _jumpToReplySource(ChatMsg msg) {
     final original = _findMessageById(msg.replyToMessageId);
     if (original == null) {
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Mensagem original nao encontrada aqui.')),
-      );
+      FeedbackHelper.showInfo(context, 'Mensagem original nao encontrada aqui.');
       return;
     }
     _focusMessage(original);

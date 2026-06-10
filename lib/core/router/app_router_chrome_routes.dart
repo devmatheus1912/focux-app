@@ -29,6 +29,13 @@ import '../../features/chat/screens/chat_aluno_screen.dart';
 import '../../features/chat/screens/chat_inbox_screen.dart';
 import '../../features/ia/screens/ia_chat_screen.dart';
 import '../../features/leads/screens/leads_list_screen.dart';
+import '../../features/leads/screens/leads_kanban_screen.dart';
+import '../../features/leads/screens/lead_detail_screen.dart';
+import '../../features/leads/screens/add_lead_screen.dart';
+import '../../features/leads/data/lead_repository.dart';
+import '../../features/assinatura/screens/assinatura_review_screen.dart';
+import '../../features/assinatura/screens/assinatura_success_screen.dart';
+import '../../features/assinatura/assinatura_route_args.dart';
 import '../../features/alertas/screens/alertas_screen.dart';
 import '../../features/evolucao/screens/evolucao_screen.dart';
 import '../../features/evolucao/screens/evolucao_fotos_screen.dart';
@@ -121,7 +128,7 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/kanban',
-            redirect: (context, state) => '/alunos/acoes-massa',
+            redirect: (context, state) => '/leads/kanban',
           ),
           GoRoute(
             path: '/alunos/:id',
@@ -549,6 +556,30 @@ RouteBase buildChromeShellRoute() {
             path: '/leads',
             builder: (context, state) => const LeadsListScreen(),
           ),
+          GoRoute(
+            path: '/leads/kanban',
+            builder: (context, state) => const LeadsKanbanScreen(),
+          ),
+          GoRoute(
+            path: '/leads/novo',
+            builder: (context, state) => const AddLeadScreen(),
+          ),
+          GoRoute(
+            path: '/leads/:id',
+            redirect: (context, state) {
+              if (intPathParam(state, 'id') == null) return '/leads';
+              if (state.extra is Lead) return null;
+              return null;
+            },
+            builder: (context, state) {
+              final id = intPathParam(state, 'id')!;
+              final extra = state.extra;
+              return LeadDetailScreen(
+                lead: extra is Lead ? extra : null,
+                leadId: extra is Lead ? null : id,
+              );
+            },
+          ),
 
           // Alertas
           GoRoute(
@@ -614,6 +645,47 @@ RouteBase buildChromeShellRoute() {
                   blockedFeature: state.uri.queryParameters['feature'],
                   blockedCapability: state.uri.queryParameters['capability'],
                 ),
+          ),
+          GoRoute(
+            path: '/assinatura/review',
+            redirect:
+                (context, state) =>
+                    state.extra is AssinaturaReviewRouteArgs ? null : '/assinatura',
+            builder: (context, state) {
+              final args = state.extra! as AssinaturaReviewRouteArgs;
+              return AssinaturaReviewScreen(
+                plan: args.plan,
+                billingPeriod: args.billingPeriod,
+                priceDisplay: args.priceDisplay,
+                trialNote: args.trialNote,
+              );
+            },
+          ),
+          GoRoute(
+            path: '/assinatura/success',
+            redirect: (context, state) {
+              if (state.extra is AssinaturaSuccessRouteArgs) return null;
+              final plan = subscriptionPlanFromRouteName(
+                state.uri.queryParameters['plano'],
+              );
+              return plan == null ? '/assinatura' : null;
+            },
+            builder: (context, state) {
+              final extra = state.extra;
+              if (extra is AssinaturaSuccessRouteArgs) {
+                return AssinaturaSuccessScreen(
+                  plan: extra.plan,
+                  transactionId: extra.transactionId,
+                );
+              }
+              final plan = subscriptionPlanFromRouteName(
+                state.uri.queryParameters['plano'],
+              )!;
+              return AssinaturaSuccessScreen(
+                plan: plan,
+                transactionId: state.uri.queryParameters['transactionId'],
+              );
+            },
           ),
           GoRoute(
             path: '/referral',

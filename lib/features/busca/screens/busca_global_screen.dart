@@ -303,7 +303,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
 
   void _showError(String msg) {
     if (!mounted) return;
-    FeedbackHelper.showSnackBar(context, SnackBar(content: Text(msg)));
+    FeedbackHelper.showInfo(context, msg);
   }
 
   @override

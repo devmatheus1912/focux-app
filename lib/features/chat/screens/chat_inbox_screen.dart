@@ -154,15 +154,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
       ref.invalidate(chatInboxUnreadProvider);
       ref.invalidate(chatInboxArchivedProvider);
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(
-          content: Text(
-            ids.length == 1 ? 'Mensagens excluidas' : 'Conversas excluidas',
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      FeedbackHelper.showInfo(context, ids.length == 1 ? 'Mensagens excluidas' : 'Conversas excluidas',);
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(context, friendlyError(e));
@@ -188,14 +180,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
           'unmute': 'Notificações ativadas',
           'clear': 'Conversa limpa',
         };
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(
-            content: Text(labels[action] ?? 'Ação aplicada'),
-            duration: const Duration(seconds: 2),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        FeedbackHelper.showInfo(context, labels[action] ?? 'Ação aplicada');
       }
     } catch (e) {
       if (mounted) {

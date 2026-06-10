@@ -3,13 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../data/enums.dart';
 import '../providers/exercicios_provider.dart';
 import 'widgets/wizard_step_confirmacao.dart';
 import 'widgets/wizard_step_espacos.dart';
 import 'widgets/wizard_step_loading.dart';
 import 'widgets/wizard_step_modalidades.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -70,7 +70,6 @@ class _OnboardingBibliotecaWizardState
       _importing = true;
       _step = 3;
     });
-    final messenger = FeedbackHelper.messengerOf(context);
     try {
       final result = await ref
           .read(exercicioRepositoryProvider)
@@ -87,12 +86,7 @@ class _OnboardingBibliotecaWizardState
         },
       );
       if (!mounted) return;
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('$importados exercicios carregados.'),
-          backgroundColor: EagleTokens.good,
-        ),
-      );
+      FeedbackHelper.showSuccess(context, '$importados exercicios carregados.');
       context.pop(true);
     } catch (e) {
       if (!mounted) return;
@@ -100,12 +94,7 @@ class _OnboardingBibliotecaWizardState
         _importing = false;
         _step = 2;
       });
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('Falha ao carregar biblioteca: $e'),
-          backgroundColor: EagleTokens.bad,
-        ),
-      );
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 

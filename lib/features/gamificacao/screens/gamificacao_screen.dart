@@ -4,19 +4,15 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../features/auth/providers/auth_provider.dart';
 import '../data/gamificacao_repository.dart';
+import '../providers/gamificacao_provider.dart';
 import 'package:focux_app/core/widgets/fx_rive_player.dart';
-
-final _gamificacaoRepoProvider = Provider<GamificacaoRepository>(
-  (ref) => GamificacaoRepository(ref.read(apiClientProvider)),
-);
-
-final gamificacaoProvider = FutureProvider<GamificacaoData>((ref) async {
-  return ref.read(_gamificacaoRepoProvider).getGamificacao();
-});
+import 'package:focux_app/core/widgets/fx_loading.dart';
+import '../../dashboard/widgets/dashboard_error_state.dart';
 
 const _badgeCatalog = <String, ({String icon, String label})>{
   'STREAK_10': (icon: '🔥', label: 'Sequencia 10d'),
@@ -59,25 +55,18 @@ List<Map<String, dynamic>> _buildBadgeTiles(GamificacaoData data, Color brand) {
 class GamificacaoScreen extends ConsumerWidget {
   const GamificacaoScreen({super.key});
 
+  Future<void> _refresh(WidgetRef ref) async {
+    ref.invalidate(gamificacaoProvider);
+    await ref.read(gamificacaoProvider.future);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final brand = Theme.of(context).colorScheme.primary;
-
     final async = ref.watch(gamificacaoProvider);
-    final badges = async.maybeWhen(
-      data: (data) => _buildBadgeTiles(data, brand),
-      orElse: () => _buildBadgeTiles(
-        GamificacaoData(
-          streak: Streak(streakAtual: 0, streakMaximo: 0),
-          badges: const [],
-          totalTreinos: 0,
-        ),
-        brand,
-      ),
-    );
 
     return FxShellScaffold(
       useMesh: true,
@@ -85,243 +74,272 @@ class GamificacaoScreen extends ConsumerWidget {
         title: 'Minha evolução',
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 110),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                TokensStrip.s5,
-                10,
-                TokensStrip.s5,
-                TokensStrip.s5,
-              ),
-              child: Text(
-                'Minha Evolução',
-                style: TextStyle(
-                  color: ink,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.8,
-                ),
-              ),
-            ),
-
-            // Streak hero card
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                TokensStrip.s4,
-                0,
-                TokensStrip.s4,
-                TokensStrip.s4,
-              ),
-              child: async.when(
-                loading: () => _StreakHeroStatic(
-                  dark: dark,
-                  brand: brand,
-                  streak: 0,
-                  recorde: 0,
-                  totalTreinos: 0,
-                  prs: 0,
-                  aderencia: 0,
-                ),
-                error: (_, __) => _StreakHeroStatic(
-                  dark: dark,
-                  brand: brand,
-                  streak: 0,
-                  recorde: 0,
-                  totalTreinos: 0,
-                  prs: 0,
-                  aderencia: 0,
-                ),
-                data: (data) => _StreakHeroStatic(
-                  dark: dark,
-                  brand: brand,
-                  streak: data.streak.streakAtual,
-                  recorde: data.streak.streakMaximo,
-                  totalTreinos: data.totalTreinos,
-                  prs: data.prsEsseMes,
-                  aderencia: data.aderenciaPercent,
-                ),
-              ),
-            ),
-
-            // Conquistas title
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                TokensStrip.s5,
-                0,
-                TokensStrip.s5,
-                TokensStrip.s3,
-              ),
-              child: Text(
-                'Conquistas',
-                style: TextStyle(
-                  color: ink,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: -0.5,
-                ),
-              ),
-            ),
-
-            // Badges grid
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s4),
-              child: GridView.count(
-                crossAxisCount: 3,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                childAspectRatio: 0.9,
-                children:
-                    badges.map((b) {
-                      final earned = b['earned'] as bool;
-                      final cor = b['cor'] as Color;
-                      return AnimatedOpacity(
-                        opacity: earned ? 1.0 : 0.45,
-                        duration: const Duration(milliseconds: 300),
-                        child: Container(
-                          decoration: fxListCardDecoration(
-                            context,
-                            accent: earned ? cor : null,
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: 48,
-                                height: 48,
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    if (earned)
-                                      Positioned.fill(
-                                        child: FxRiveBadgeGlow(size: 48),
-                                      ),
-                                    Container(
-                                      width: 48,
-                                      height: 48,
-                                      decoration: BoxDecoration(
-                                        color:
-                                            earned
-                                                ? cor.withValues(alpha: 0.13)
-                                                : (dark
-                                                    ? const Color(0x0AFFFFFF)
-                                                    : TokensStrip.borderDefault),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Center(
-                                        child: ColorFiltered(
-                                          colorFilter:
-                                              earned
-                                                  ? const ColorFilter.mode(
-                                                    Colors.transparent,
-                                                    BlendMode.saturation,
-                                                  )
-                                                  : const ColorFilter.matrix([
-                                                    0.2126,
-                                                    0.7152,
-                                                    0.0722,
-                                                    0,
-                                                    0,
-                                                    0.2126,
-                                                    0.7152,
-                                                    0.0722,
-                                                    0,
-                                                    0,
-                                                    0.2126,
-                                                    0.7152,
-                                                    0.0722,
-                                                    0,
-                                                    0,
-                                                    0,
-                                                    0,
-                                                    0,
-                                                    1,
-                                                    0,
-                                                  ]),
-                                          child: Text(
-                                            b['icon'] as String,
-                                            style: const TextStyle(fontSize: 24),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                ),
-                                child: Text(
-                                  b['label'] as String,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: ink,
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.w600,
-                                    height: 1.3,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }).toList(),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Referral card
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s4),
-              child: Container(
-                padding: const EdgeInsets.all(TokensStrip.s4),
-                decoration: fxListCardDecoration(
-                  context,
-                  accent: brand,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      body: FxContentWidthLimiter(
+        child: async.when(
+          loading: () => Center(child: FxLoading(color: brand)),
+          error:
+              (e, _) => RefreshIndicator(
+                color: brand,
+                onRefresh: () => _refresh(ref),
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   children: [
-                    Row(
-                      children: [
-                        const Text('🎁', style: TextStyle(fontSize: 22)),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Indique um amigo',
-                          style: TextStyle(
-                            color: ink,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Indique outro personal. Quando ele assinar, você ganha 30 dias extras no plano.',
-                      style: TextStyle(color: mute, fontSize: 13, height: 1.5),
-                    ),
-                    const SizedBox(height: 14),
-                    FilledButton(
-                      onPressed: () => context.push('/referral'),
-                      child: const Text('Ver meu código de indicação'),
+                    SizedBox(
+                      height: MediaQuery.sizeOf(context).height * 0.55,
+                      child: DashboardErrorState(
+                        chromeOnDark: dark,
+                        primary: brand,
+                        message: friendlyError(e),
+                        onRetry: () => _refresh(ref),
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+          data:
+              (data) => RefreshIndicator(
+                color: brand,
+                onRefresh: () => _refresh(ref),
+                child: _GamificacaoBody(
+                  data: data,
+                  dark: dark,
+                  ink: ink,
+                  mute: mute,
+                  brand: brand,
+                ),
+              ),
         ),
+      ),
+    );
+  }
+}
+
+class _GamificacaoBody extends StatelessWidget {
+  final GamificacaoData data;
+  final bool dark;
+  final Color ink;
+  final Color mute;
+  final Color brand;
+
+  const _GamificacaoBody({
+    required this.data,
+    required this.dark,
+    required this.ink,
+    required this.mute,
+    required this.brand,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final badges = _buildBadgeTiles(data, brand);
+
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.only(bottom: 110),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s5,
+              10,
+              TokensStrip.s5,
+              TokensStrip.s5,
+            ),
+            child: Text(
+              'Minha Evolução',
+              style: TextStyle(
+                color: ink,
+                fontSize: 28,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.8,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s4,
+              0,
+              TokensStrip.s4,
+              TokensStrip.s4,
+            ),
+            child: _StreakHeroStatic(
+              dark: dark,
+              brand: brand,
+              streak: data.streak.streakAtual,
+              recorde: data.streak.streakMaximo,
+              totalTreinos: data.totalTreinos,
+              prs: data.prsEsseMes,
+              aderencia: data.aderenciaPercent,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s5,
+              0,
+              TokensStrip.s5,
+              TokensStrip.s3,
+            ),
+            child: Text(
+              'Conquistas',
+              style: TextStyle(
+                color: ink,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s4),
+            child: GridView.count(
+              crossAxisCount: 3,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              childAspectRatio: 0.9,
+              children:
+                  badges.map((b) {
+                    final earned = b['earned'] as bool;
+                    final cor = b['cor'] as Color;
+                    return AnimatedOpacity(
+                      opacity: earned ? 1.0 : 0.45,
+                      duration: const Duration(milliseconds: 300),
+                      child: Container(
+                        decoration: fxListCardDecoration(
+                          context,
+                          accent: earned ? cor : null,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 48,
+                              height: 48,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  if (earned)
+                                    Positioned.fill(
+                                      child: FxRiveBadgeGlow(size: 48),
+                                    ),
+                                  Container(
+                                    width: 48,
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      color:
+                                          earned
+                                              ? cor.withValues(alpha: 0.13)
+                                              : (dark
+                                                  ? const Color(0x0AFFFFFF)
+                                                  : TokensStrip.borderDefault),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: ColorFiltered(
+                                        colorFilter:
+                                            earned
+                                                ? const ColorFilter.mode(
+                                                  Colors.transparent,
+                                                  BlendMode.saturation,
+                                                )
+                                                : const ColorFilter.matrix([
+                                                  0.2126,
+                                                  0.7152,
+                                                  0.0722,
+                                                  0,
+                                                  0,
+                                                  0.2126,
+                                                  0.7152,
+                                                  0.0722,
+                                                  0,
+                                                  0,
+                                                  0.2126,
+                                                  0.7152,
+                                                  0.0722,
+                                                  0,
+                                                  0,
+                                                  0,
+                                                  0,
+                                                  0,
+                                                  1,
+                                                  0,
+                                                ]),
+                                        child: Text(
+                                          b['icon'] as String,
+                                          style: const TextStyle(fontSize: 24),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                              ),
+                              child: Text(
+                                b['label'] as String,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: ink,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.3,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s4),
+            child: Container(
+              padding: const EdgeInsets.all(TokensStrip.s4),
+              decoration: fxListCardDecoration(
+                context,
+                accent: brand,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Text('🎁', style: TextStyle(fontSize: 22)),
+                      const SizedBox(width: 10),
+                      Text(
+                        'Indique um amigo',
+                        style: TextStyle(
+                          color: ink,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Indique outro personal. Quando ele assinar, você ganha 30 dias extras no plano.',
+                    style: TextStyle(color: mute, fontSize: 13, height: 1.5),
+                  ),
+                  const SizedBox(height: 14),
+                  FilledButton(
+                    onPressed: () => context.push('/referral'),
+                    child: const Text('Ver meu código de indicação'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -344,6 +362,17 @@ class _StreakHeroStatic extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final brandDeep = BrandPalette.deep(brand);
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final heroInk = dark ? EagleTokens.darkInk : onPrimary;
+    final heroInkMute =
+        dark ? EagleTokens.darkInkMute : onPrimary.withValues(alpha: 0.75);
+    final heroInkSubtle =
+        dark
+            ? EagleTokens.darkInkMute.withValues(alpha: 0.72)
+            : onPrimary.withValues(alpha: 0.6);
+    final heroDivider =
+        dark ? EagleTokens.darkLine : onPrimary.withValues(alpha: 0.24);
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -356,11 +385,17 @@ class _StreakHeroStatic extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // subtle grid bg
           Positioned.fill(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(26),
-              child: CustomPaint(painter: _GridPainter()),
+              child: CustomPaint(
+                painter: _GridPainter(
+                  gridColor:
+                      dark
+                          ? EagleTokens.darkInk.withValues(alpha: 0.06)
+                          : onPrimary.withValues(alpha: 0.06),
+                ),
+              ),
             ),
           ),
           Padding(
@@ -378,16 +413,16 @@ class _StreakHeroStatic extends StatelessWidget {
                         Text(
                           '$streak dias',
                           style: AppTypography.inter(
-                            color: Colors.white,
+                            color: heroInk,
                             fontSize: 44,
                             fontWeight: FontWeight.w600,
                             height: 1,
                           ),
                         ),
-                        const Text(
+                        Text(
                           'Sequência ativa!',
                           style: TextStyle(
-                            color: Color(0xBFFFFFFF),
+                            color: heroInkMute,
                             fontSize: 14,
                           ),
                         ),
@@ -397,10 +432,10 @@ class _StreakHeroStatic extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        const Text(
+                        Text(
                           'RECORDE',
                           style: TextStyle(
-                            color: Color(0x99FFFFFF),
+                            color: heroInkSubtle,
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 1.2,
@@ -408,8 +443,8 @@ class _StreakHeroStatic extends StatelessWidget {
                         ),
                         Text(
                           '${recorde}d',
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: heroInk,
                             fontSize: 26,
                             fontWeight: FontWeight.w700,
                           ),
@@ -431,8 +466,8 @@ class _StreakHeroStatic extends StatelessWidget {
                         children: [
                           Text(
                             item.$1.toUpperCase(),
-                            style: const TextStyle(
-                              color: Color(0x99FFFFFF),
+                            style: TextStyle(
+                              color: heroInkSubtle,
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 1,
@@ -440,8 +475,8 @@ class _StreakHeroStatic extends StatelessWidget {
                           ),
                           Text(
                             item.$2,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: heroInk,
                               fontSize: 24,
                               fontWeight: FontWeight.w700,
                             ),
@@ -452,7 +487,7 @@ class _StreakHeroStatic extends StatelessWidget {
                         Container(
                           width: 1,
                           height: 36,
-                          color: Colors.white24,
+                          color: heroDivider,
                           margin: const EdgeInsets.symmetric(horizontal: 20),
                         ),
                     ],
@@ -468,11 +503,15 @@ class _StreakHeroStatic extends StatelessWidget {
 }
 
 class _GridPainter extends CustomPainter {
+  final Color gridColor;
+
+  const _GridPainter({required this.gridColor});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = Colors.white.withValues(alpha: 0.06)
+          ..color = gridColor
           ..strokeWidth = 0.5;
     const step = 26.0;
     for (double x = 0; x < size.width; x += step) {
@@ -484,5 +523,5 @@ class _GridPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_) => false;
+  bool shouldRepaint(_GridPainter old) => old.gridColor != gridColor;
 }

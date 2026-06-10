@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/legal/focux_legal.dart';
 import '../../../core/platform/secure_screen.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -150,7 +151,7 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
             child: FilledButton(
               onPressed: () {
                 HapticFeedback.mediumImpact();
-                Navigator.of(context).pop(true);
+                context.pop(true);
               },
               style: FilledButton.styleFrom(
                 backgroundColor: accent,
@@ -163,7 +164,7 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
           ),
           const SizedBox(height: 10),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () => context.pop(false),
             child: Text('Voltar', style: TextStyle(color: mute, fontWeight: FontWeight.w600)),
           ),
         ],

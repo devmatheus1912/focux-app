@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/config/env.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -93,7 +94,8 @@ class _WhiteLabelSettingsScreenState extends ConsumerState<WhiteLabelSettingsScr
             onPressed: () => context.pop(),
           ),
         ),
-        body: configAsync.when(
+        body: FxContentWidthLimiter(
+          child: configAsync.when(
           loading: () => const Center(child: FxLoading()),
           error: (_, __) => Center(
             child: Text(
@@ -108,12 +110,16 @@ class _WhiteLabelSettingsScreenState extends ConsumerState<WhiteLabelSettingsScr
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
               children: [
                 _sectionTitle('App do aluno'),
-                SwitchListTile(
-                  value: _ocultarFocux,
-                  onChanged: (v) => setState(() => _ocultarFocux = v),
-                  title: const Text('Ocultar marca Focux'),
-                  subtitle: const Text(
-                    'Login, splash e cards sociais usam só a sua marca.',
+                Semantics(
+                  toggled: _ocultarFocux,
+                  label: 'Ocultar marca Focux',
+                  child: SwitchListTile(
+                    value: _ocultarFocux,
+                    onChanged: (v) => setState(() => _ocultarFocux = v),
+                    title: const Text('Ocultar marca Focux'),
+                    subtitle: const Text(
+                      'Login, splash e cards sociais usam só a sua marca.',
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -181,20 +187,23 @@ class _WhiteLabelSettingsScreenState extends ConsumerState<WhiteLabelSettingsScr
                 ),
                 const SizedBox(height: 24),
                 _sectionTitle('Como você vende'),
-                SegmentedButton<String>(
-                  showSelectedIcon: false,
-                  segments: const [
-                    ButtonSegment(
-                      value: 'CAPTURA',
-                      label: Text('Formulário rápido'),
-                    ),
-                    ButtonSegment(
-                      value: 'SITE',
-                      label: Text('Página completa'),
-                    ),
-                  ],
-                  selected: {_landingModo},
-                  onSelectionChanged: (s) => setState(() => _landingModo = s.first),
+                Semantics(
+                  label: 'Modo de venda da landing',
+                  child: SegmentedButton<String>(
+                    showSelectedIcon: false,
+                    segments: const [
+                      ButtonSegment(
+                        value: 'CAPTURA',
+                        label: Text('Formulário rápido'),
+                      ),
+                      ButtonSegment(
+                        value: 'SITE',
+                        label: Text('Página completa'),
+                      ),
+                    ],
+                    selected: {_landingModo},
+                    onSelectionChanged: (s) => setState(() => _landingModo = s.first),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -240,19 +249,25 @@ class _WhiteLabelSettingsScreenState extends ConsumerState<WhiteLabelSettingsScr
                   ),
                 ),
                 const SizedBox(height: 24),
-                FilledButton(
-                  onPressed: _salvando ? null : _salvar,
-                  child: _salvando
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: FxLoading(strokeWidth: 2),
-                        )
-                      : const Text('Salvar configurações'),
+                Semantics(
+                  button: true,
+                  enabled: !_salvando,
+                  label: 'Salvar configurações de marca própria',
+                  child: FilledButton(
+                    onPressed: _salvando ? null : _salvar,
+                    child: _salvando
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: FxLoading(strokeWidth: 2),
+                          )
+                        : const Text('Salvar configurações'),
+                  ),
                 ),
               ],
             );
           },
+          ),
         ),
       ),
     );
@@ -276,13 +291,9 @@ class _WhiteLabelSettingsScreenState extends ConsumerState<WhiteLabelSettingsScr
     final chrome = ShellChrome.of(context);
     final urlToCopy = copyUrl.isNotEmpty ? copyUrl : displayLabel;
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: chrome.line),
-      ),
+      decoration: fxListCardDecoration(context, radius: 12),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
         child: Column(

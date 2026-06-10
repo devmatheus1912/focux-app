@@ -40,30 +40,69 @@ const _tipoIcons = {
 };
 
 class LeadDetailScreen extends ConsumerStatefulWidget {
-  final Lead lead;
-  const LeadDetailScreen({super.key, required this.lead});
+  final Lead? lead;
+  final int? leadId;
+
+  const LeadDetailScreen({super.key, this.lead, this.leadId})
+    : assert(lead != null || leadId != null);
 
   @override
   ConsumerState<LeadDetailScreen> createState() => _LeadDetailScreenState();
 }
 
 class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
-  late Lead _lead;
+  Lead? _lead;
   List<LeadInteracao> _interacoes = [];
+  bool _loadingLead = false;
   bool _loadingInteracoes = true;
+
+  Lead get _activeLead {
+    final lead = _lead;
+    if (lead == null) {
+      throw StateError('Lead ainda não carregado');
+    }
+    return lead;
+  }
 
   @override
   void initState() {
     super.initState();
-    _lead = widget.lead;
-    _carregarInteracoes();
+    if (widget.lead != null) {
+      _lead = widget.lead;
+      _carregarInteracoes();
+    } else {
+      _carregarLead();
+    }
+  }
+
+  Future<void> _carregarLead() async {
+    setState(() => _loadingLead = true);
+    try {
+      final lead = await LeadRepository(
+        ref.read(apiClientProvider),
+      ).buscar(widget.leadId!);
+      if (mounted) {
+        setState(() {
+          _lead = lead;
+          _loadingLead = false;
+        });
+        _carregarInteracoes();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loadingLead = false);
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    }
   }
 
   Future<void> _carregarInteracoes() async {
+    final lead = _lead;
+    if (lead == null) return;
     setState(() => _loadingInteracoes = true);
     try {
       final repo = LeadRepository(ref.read(apiClientProvider));
-      final lista = await repo.listarInteracoes(_lead.id);
+      final lista = await repo.listarInteracoes(lead.id);
       if (mounted) {
         setState(() {
           _interacoes = lista;
@@ -79,16 +118,16 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
   }
 
   Future<void> _ligar() async {
-    if (_lead.telefone == null) return;
-    final uri = Uri.parse('tel:${_lead.telefone}');
+    if (_activeLead.telefone == null) return;
+    final uri = Uri.parse('tel:${_activeLead.telefone}');
     if (await canLaunchUrl(uri)) {
       launchUrl(uri);
     }
   }
 
   Future<void> _whatsapp() async {
-    if (_lead.telefone == null) return;
-    final tel = _lead.telefone!.replaceAll(RegExp(r'\D'), '');
+    if (_activeLead.telefone == null) return;
+    final tel = _activeLead.telefone!.replaceAll(RegExp(r'\D'), '');
     final uri = Uri.parse('https://wa.me/55$tel');
     if (await canLaunchUrl(uri)) {
       launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -99,17 +138,10 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
     try {
       final updated = await LeadRepository(
         ref.read(apiClientProvider),
-      ).atualizar(_lead.id, {'status': novoStatus});
+      ).atualizar(_activeLead.id, {'status': novoStatus});
       setState(() => _lead = updated);
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(
-            content: Text(
-              'Status atualizado para ${_statusLabels[novoStatus]}',
-            ),
-          ),
-        );
+        FeedbackHelper.showSuccess(context, 'Status atualizado para ${_statusLabels[novoStatus]}',);
       }
     } catch (e) {
       if (mounted) {
@@ -124,7 +156,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       builder:
           (ctx) => AlertDialog(
             title: const Text('Converter em Aluno?'),
-            content: Text('${_lead.nome} será criado como aluno na sua lista.'),
+            content: Text('${_activeLead.nome} será criado como aluno na sua lista.'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
@@ -140,7 +172,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
     );
     if (confirm != true) return;
     try {
-      await LeadRepository(ref.read(apiClientProvider)).converter(_lead.id);
+      await LeadRepository(ref.read(apiClientProvider)).converter(_activeLead.id);
       if (mounted) {
         FeedbackHelper.showSuccess(context, 'Lead convertido!');
         safePopOrGo(context, '/leads');
@@ -174,7 +206,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
     );
     if (confirm != true) return;
     try {
-      await LeadRepository(ref.read(apiClientProvider)).arquivar(_lead.id);
+      await LeadRepository(ref.read(apiClientProvider)).arquivar(_activeLead.id);
       if (mounted) safePopOrGo(context, '/leads');
     } catch (e) {
       if (mounted) {
@@ -186,9 +218,9 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
   Future<void> _definirFollowUp() async {
     final now = DateTime.now();
     DateTime? inicial;
-    if (_lead.proximoContato != null) {
+    if (_activeLead.proximoContato != null) {
       try {
-        inicial = DateTime.parse(_lead.proximoContato!);
+        inicial = DateTime.parse(_activeLead.proximoContato!);
       } catch (_) {}
     }
     final picked = await showDatePicker(
@@ -204,13 +236,10 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
     try {
       final updated = await LeadRepository(
         ref.read(apiClientProvider),
-      ).atualizarProximoContato(_lead.id, dataStr);
+      ).atualizarProximoContato(_activeLead.id, dataStr);
       setState(() => _lead = updated);
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text('Follow-up definido para $dataStr')),
-        );
+        FeedbackHelper.showSuccess(context, 'Follow-up definido para $dataStr');
       }
     } catch (e) {
       if (mounted) {
@@ -296,34 +325,21 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                           onPressed: () async {
                             final desc = descCtrl.text.trim();
                             if (desc.isEmpty) {
-                              FeedbackHelper.showSnackBar(
-                                ctx,
-                                const SnackBar(
-                                  content: Text('Informe a descrição'),
-                                ),
-                              );
+                              FeedbackHelper.showError(ctx, 'Informe a descrição');
                               return;
                             }
                             Navigator.pop(ctx);
                             try {
                               await LeadRepository(
                                 ref.read(apiClientProvider),
-                              ).adicionarInteracao(_lead.id, tipo, desc);
+                              ).adicionarInteracao(_activeLead.id, tipo, desc);
                               await _carregarInteracoes();
                               if (mounted) {
-                                FeedbackHelper.showSnackBar(
-                                  context,
-                                  const SnackBar(
-                                    content: Text('Interação registrada!'),
-                                  ),
-                                );
+                                FeedbackHelper.showSuccess(context, 'Interação registrada!');
                               }
                             } catch (e) {
                               if (mounted) {
-                                FeedbackHelper.showSnackBar(
-                                  context,
-                                  SnackBar(content: Text(friendlyError(e))),
-                                );
+                                FeedbackHelper.showError(context, friendlyError(e));
                               }
                             }
                           },
@@ -339,17 +355,29 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_loadingLead || _lead == null) {
+      return FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Lead',
+          onBack: () => safePopOrGo(context, '/leads'),
+        ),
+        body: const Center(child: FxLoading()),
+      );
+    }
+
+    final lead = _lead!;
     final color = _statusColor(
-      _lead.status,
+      lead.status,
       Theme.of(context).colorScheme.primary,
     );
     final podeConverter =
-        _lead.status != 'CONVERTIDO' && _lead.status != 'ATIVO';
+        lead.status != 'CONVERTIDO' && lead.status != 'ATIVO';
 
     return FxShellScaffold(
       useMesh: true,
       appBar: FxShellAppBar(
-        title: _lead.nome,
+        title: lead.nome,
         onBack: () => safePopOrGo(context, '/leads'),
         actions: [
           PopupMenuButton<String>(
@@ -403,7 +431,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
             Center(
               child: Chip(
                 label: Text(
-                  _statusLabels[_lead.status] ?? _lead.status,
+                  _statusLabels[lead.status] ?? lead.status,
                   style: TextStyle(color: color, fontWeight: FontWeight.w700),
                 ),
                 backgroundColor: color.withValues(alpha: 0.12),
@@ -419,18 +447,18 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                 padding: const EdgeInsets.all(TokensStrip.s4),
                 child: Column(
                   children: [
-                    _InfoRow(label: 'Nome', value: _lead.nome),
-                    if (_lead.telefone != null)
-                      _InfoRow(label: 'Telefone', value: _lead.telefone!),
-                    if (_lead.origem != null)
-                      _InfoRow(label: 'Origem', value: _lead.origem!),
-                    if (_lead.objetivo != null)
-                      _InfoRow(label: 'Objetivo', value: _lead.objetivo!),
-                    _InfoRow(label: 'Cadastrado em', value: _lead.criadoEm),
-                    if (_lead.convertidoEm != null)
+                    _InfoRow(label: 'Nome', value: lead.nome),
+                    if (lead.telefone != null)
+                      _InfoRow(label: 'Telefone', value: lead.telefone!),
+                    if (lead.origem != null)
+                      _InfoRow(label: 'Origem', value: lead.origem!),
+                    if (lead.objetivo != null)
+                      _InfoRow(label: 'Objetivo', value: lead.objetivo!),
+                    _InfoRow(label: 'Cadastrado em', value: lead.criadoEm),
+                    if (lead.convertidoEm != null)
                       _InfoRow(
                         label: 'Convertido em',
-                        value: _lead.convertidoEm!,
+                        value: lead.convertidoEm!,
                       ),
                   ],
                 ),
@@ -461,11 +489,11 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            _lead.proximoContato ?? 'Não definido',
+                            lead.proximoContato ?? 'Não definido',
                             style: TextStyle(
                               fontWeight: FontWeight.w500,
                               color:
-                                  _lead.proximoContato != null
+                                  lead.proximoContato != null
                                       ? const Color(0xFF6D28D9)
                                       : TokensStrip.textSecondary,
                             ),
@@ -483,7 +511,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
               ),
             ),
 
-            if (_lead.observacoes != null) ...[
+            if (lead.observacoes != null) ...[
               const SizedBox(height: 12),
               Container(
                 decoration: fxListCardDecoration(context),
@@ -498,7 +526,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                             ?.copyWith(color: TokensStrip.textSecondary),
                       ),
                       const SizedBox(height: TokensStrip.s2),
-                      Text(_lead.observacoes!),
+                      Text(lead.observacoes!),
                     ],
                   ),
                 ),
@@ -510,7 +538,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
             const SizedBox(height: 8),
 
             // Ações rápidas
-            if (_lead.telefone != null) ...[
+            if (lead.telefone != null) ...[
               Row(
                 children: [
                   Expanded(

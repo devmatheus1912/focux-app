@@ -76,23 +76,13 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
       ref.invalidate(dashboardProvider);
 
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Foto atualizada com sucesso.')),
-      );
+      FeedbackHelper.showSuccess(context, 'Foto atualizada com sucesso.');
     } catch (error) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(
-          content: Text(
-            friendlyError(
+      FeedbackHelper.showError(context, friendlyError(
               error,
               fallback: 'Não foi possível enviar a foto agora.',
-            ),
-          ),
-        ),
-      );
+            ),);
     } finally {
       if (mounted) {
         setState(() => _uploadingPhoto = false);

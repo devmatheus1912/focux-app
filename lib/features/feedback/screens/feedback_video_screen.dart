@@ -64,10 +64,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
       await launchUrl(uri);
     } else {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(content: Text('Não foi possível abrir a URL')),
-        );
+        FeedbackHelper.showError(context, 'Não foi possível abrir a URL');
       }
     }
   }
@@ -79,10 +76,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
       setState(() {});
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -276,10 +270,7 @@ class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
         exercicioId == null ||
         video.isEmpty ||
         com.isEmpty) {
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Preencha todos os campos')),
-      );
+      FeedbackHelper.showError(context, 'Preencha todos os campos');
       return;
     }
 

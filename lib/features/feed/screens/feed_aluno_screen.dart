@@ -66,10 +66,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }

@@ -244,10 +244,7 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
     }
     final opened = await launchUrlString(url);
     if (!opened && mounted) {
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Nao foi possivel abrir o anexo.')),
-      );
+      FeedbackHelper.showError(context, 'Nao foi possivel abrir o anexo.');
     }
   }
 

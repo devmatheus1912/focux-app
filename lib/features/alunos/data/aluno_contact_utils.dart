@@ -122,9 +122,6 @@ Future<void> openAlunoWhatsappOutreach(
   }
   await Clipboard.setData(ClipboardData(text: mensagem));
   if (context.mounted) {
-    FeedbackHelper.showSnackBar(
-      context,
-      const SnackBar(content: Text('Mensagem copiada para a área de transferência')),
-    );
+    FeedbackHelper.showSuccess(context, 'Mensagem copiada para a área de transferência');
   }
 }

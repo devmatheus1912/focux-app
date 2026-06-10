@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
@@ -99,6 +100,15 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
     }
   }
 
+  String _periodoLabelPdf() {
+    if (_rangeCustom != null) {
+      final s = _rangeCustom!.start;
+      final e = _rangeCustom!.end;
+      return '${s.day.toString().padLeft(2, '0')}/${s.month.toString().padLeft(2, '0')}/${s.year} – ${e.day.toString().padLeft(2, '0')}/${e.month.toString().padLeft(2, '0')}/${e.year}';
+    }
+    return '$_dias dias';
+  }
+
   Future<void> _exportarPdf() async {
     if (_dados == null) return;
     final doc = pw.Document();
@@ -129,7 +139,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
               ),
               pw.SizedBox(height: 24),
               pw.Text(
-                'Período Analisado: $_dias dias',
+                'Período Analisado: ${_periodoLabelPdf()}',
                 style: pw.TextStyle(
                   fontSize: 14,
                   fontWeight: pw.FontWeight.bold,
@@ -221,7 +231,10 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
         subtitle: widget.alunoNome,
         onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
         actions: [
-          IconButton(
+          Semantics(
+            label: 'Exportar relatório em PDF',
+            button: true,
+            child: IconButton(
             tooltip: 'Exportar PDF',
             onPressed: _dados != null ? _exportarPdf : null,
             icon: Icon(
@@ -230,11 +243,16 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
               size: 22,
             ),
           ),
+          ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(TokensStrip.s4),
-        child: Column(
+      body: FxContentWidthLimiter(
+        child: RefreshIndicator(
+          onRefresh: _carregarDados,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(TokensStrip.s4),
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _SeletorPeriodo(
@@ -253,8 +271,11 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
             if (_carregando)
               const SizedBox(height: 200, child: FxLoading())
             else if (_erro != null)
-              Card(
-                color: theme.colorScheme.errorContainer,
+              Container(
+                decoration: fxListCardDecoration(
+                  context,
+                  accent: theme.colorScheme.error,
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(TokensStrip.s4),
                   child: Text(
@@ -298,6 +319,8 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
               ),
             ],
           ],
+            ),
+          ),
         ),
       ),
     );
@@ -477,6 +500,10 @@ class _CardAderencia extends StatelessWidget {
                     painter: _AderenciaRingPainter(
                       fraction: taxa / 100,
                       color: cor,
+                      trackColor:
+                          Theme.of(context).brightness == Brightness.dark
+                              ? EagleTokens.darkLine
+                              : TokensStrip.borderDefault,
                     ),
                   ),
                   Column(
@@ -546,8 +573,13 @@ class _CardAderencia extends StatelessWidget {
 class _AderenciaRingPainter extends CustomPainter {
   final double fraction;
   final Color color;
+  final Color trackColor;
 
-  const _AderenciaRingPainter({required this.fraction, required this.color});
+  const _AderenciaRingPainter({
+    required this.fraction,
+    required this.color,
+    required this.trackColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -558,7 +590,7 @@ class _AderenciaRingPainter extends CustomPainter {
       center,
       r,
       Paint()
-        ..color = const Color(0xFFE4E5E7)
+        ..color = trackColor
         ..strokeWidth = sw
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round,
@@ -577,7 +609,8 @@ class _AderenciaRingPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_AderenciaRingPainter old) => old.fraction != fraction;
+  bool shouldRepaint(_AderenciaRingPainter old) =>
+      old.fraction != fraction || old.trackColor != trackColor;
 }
 
 class _CardInfo extends StatelessWidget {

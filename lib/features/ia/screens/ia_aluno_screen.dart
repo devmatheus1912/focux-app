@@ -280,12 +280,7 @@ class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
   Future<void> _gerarProgressao() async {
     final id = widget.alunoId;
     if (id == null || id <= 0) {
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(
-          content: Text('Não foi possível identificar seu perfil de aluno.'),
-        ),
-      );
+      FeedbackHelper.showError(context, 'Não foi possível identificar seu perfil de aluno.');
       return;
     }
     setState(() {
@@ -298,10 +293,7 @@ class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
       if (mounted) setState(() => _resultado = r);
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
         await IaQuotaUpgrade.handleError(context, ref, e);
       }
     }

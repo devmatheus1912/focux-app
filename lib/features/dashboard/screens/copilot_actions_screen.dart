@@ -270,16 +270,10 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
       ref.invalidate(iaActionsProvider(_status));
       ref.invalidate(dashboardHomeProvider);
       ref.invalidate(commandCenterProvider);
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(content: Text(successMessage)),
-      );
+      FeedbackHelper.showInfo(context, successMessage);
     } catch (_) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Não foi possível atualizar a tarefa.')),
-      );
+      FeedbackHelper.showError(context, 'Não foi possível atualizar a tarefa.');
     }
   }
 }

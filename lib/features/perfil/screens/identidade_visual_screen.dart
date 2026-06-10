@@ -157,10 +157,7 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
       }
       ref.invalidate(perfilProvider);
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(successMessage)),
-        );
+        FeedbackHelper.showInfo(context, successMessage);
         if (widget.isSetup) context.pop(true);
       }
     } catch (e) {

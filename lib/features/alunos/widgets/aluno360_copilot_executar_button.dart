@@ -96,14 +96,9 @@ class _Aluno360CopilotExecutarAcaoButtonState
           friendlyError(e, fallback: 'IA indisponível agora.'),
         );
       } else {
-        FeedbackHelper.showSnackBar(
+        FeedbackHelper.showOperacaoError(
           context,
-          SnackBar(
-            content: Text(
-              friendlyError(e, fallback: 'Não foi possível aplicar a ação.'),
-            ),
-          ),
-          placement: FeedbackPlacement.operacaoTop,
+          friendlyError(e, fallback: 'Não foi possível aplicar a ação.'),
         );
       }
     } finally {

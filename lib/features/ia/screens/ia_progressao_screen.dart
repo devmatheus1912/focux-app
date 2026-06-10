@@ -122,10 +122,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
       filename: 'progressao_carga.pdf',
     );
     if (!mounted) return;
-    FeedbackHelper.showSnackBar(
-      context,
-      const SnackBar(content: Text('PDF pronto para compartilhar.')),
-    );
+    FeedbackHelper.showSuccess(context, 'PDF pronto para compartilhar.');
   }
 
   void _scrollToResult() {
@@ -154,14 +151,9 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
       final objetivo = normalizeIaProgressaoObjetivo(_objetivo.text);
       if (iaProgressaoHistoricoWasNormalized(_historico.text, historico) &&
           mounted) {
-        FeedbackHelper.showSnackBar(
+        FeedbackHelper.showInfo(
           context,
-          const SnackBar(
-            content: Text(
-              'Histórico ajustado (séries e nomes de exercício padronizados).',
-            ),
-            duration: Duration(seconds: 3),
-          ),
+          'Histórico ajustado (séries e nomes de exercício padronizados).',
         );
       }
       final repo = IaRepository(ref.read(apiClientProvider));
@@ -174,12 +166,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
       setState(() => _resultado = r);
       _scrollToResult();
       if (r.sugestoesRegistradas > 0) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(
-            content: Text(progressaoSavedForReviewSnack(r.sugestoesRegistradas)),
-          ),
-        );
+        FeedbackHelper.showSuccess(context, progressaoSavedForReviewSnack(r.sugestoesRegistradas));
       }
     } catch (e) {
       if (mounted) {
@@ -316,14 +303,9 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                         alunoNome: widget.alunoNome,
                         onExportPdf: () => _exportarPdf(_resultado!),
                         onApplyTreino: () {
-                          FeedbackHelper.showSnackBar(
+                          FeedbackHelper.showInfo(
                             context,
-                            const SnackBar(
-                              content: Text(
-                                'Abra o treino ativo para conferir ou ajustar as cargas.',
-                              ),
-                              duration: Duration(seconds: 3),
-                            ),
+                            'Abra o treino ativo para conferir ou ajustar as cargas.',
                           );
                           context.push(
                             '/alunos/${widget.alunoId}/treinos-list',

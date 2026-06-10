@@ -10,9 +10,6 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
-import 'lead_detail_screen.dart';
-import 'add_lead_screen.dart';
-import 'leads_kanban_screen.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
@@ -63,10 +60,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
     final testeLeads = _leads.where((lead) => lead.status == 'TESTE').toList();
     final ativoLeads = _leads.where((lead) => lead.status == 'ATIVO').toList();
     Future<void> openLead(Lead lead) async {
-      await Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => LeadDetailScreen(lead: lead)),
-      );
+      await context.push('/leads/${lead.id}', extra: lead);
       _load();
     }
 
@@ -87,10 +81,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
             ),
             tooltip: 'Visão Kanban',
             onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const LeadsKanbanScreen()),
-              );
+              await context.push('/leads/kanban');
               _load();
             },
           ),
@@ -117,10 +108,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
         ),
         child: FloatingActionButton.extended(
           onPressed: () async {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const AddLeadScreen()),
-            );
+            await context.push('/leads/novo');
             _load();
           },
           backgroundColor: Colors.transparent,

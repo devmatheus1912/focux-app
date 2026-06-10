@@ -5,12 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../data/analytics_repository.dart';
 import '../providers/analytics_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../dashboard/widgets/dashboard_error_state.dart';
 
 part 'analytics_screen_widgets.part.dart';
 
@@ -22,6 +24,7 @@ class AnalyticsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
+    final chrome = ShellChrome.of(context);
     final async = ref.watch(analyticsDashboardProvider);
 
     return FxShellScaffold(
@@ -30,57 +33,27 @@ class AnalyticsScreen extends ConsumerWidget {
         title: 'Analytics',
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
       ),
-      body: async.when(
-        loading: () => Center(child: FxLoading(color: primary)),
-        error:
-            (e, _) => Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.error_outline,
-                    color: EagleTokens.bad,
-                    size: 40,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Erro ao carregar analytics',
-                    style: TextStyle(
-                      color: dark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    friendlyError(e),
-                    style: TextStyle(
-                      color:
-                          dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
-                      fontSize: 12,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                  FxLiquidPrimaryButton(
-                    label: 'Tentar novamente',
-                    icon: Icons.refresh,
-                    expand: false,
-                    onPressed:
-                        () => ref.invalidate(analyticsDashboardProvider),
-                  ),
-                ],
+      body: FxContentWidthLimiter(
+        child: async.when(
+          loading: () => Center(child: FxLoading(color: primary)),
+          error:
+              (e, _) => DashboardErrorState(
+                chromeOnDark: chrome.isDark,
+                primary: primary,
+                message: friendlyError(e),
+                onRetry: () => ref.invalidate(analyticsDashboardProvider),
               ),
-            ),
-        data:
-            (data) => RefreshIndicator(
-              color: primary,
-              onRefresh: () async => ref.invalidate(analyticsDashboardProvider),
-              child: _AnalyticsBody(data: data, dark: dark),
-            ),
+          data:
+              (data) => RefreshIndicator(
+                color: primary,
+                onRefresh:
+                    () async => ref.invalidate(analyticsDashboardProvider),
+                child: _AnalyticsBody(data: data, dark: dark),
+              ),
+        ),
       ),
     );
   }
 }
 
 // ─── Body ─────────────────────────────────────────────────────────────────────
-

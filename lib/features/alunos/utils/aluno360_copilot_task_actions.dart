@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -27,16 +26,9 @@ Future<bool> criarTarefaCopilotoFromAluno360({
     if (existing != null) {
       ref.invalidate(alunoOpenIaActionsProvider(aluno.id));
       if (context.mounted) {
-        FeedbackHelper.showSnackBar(
+        FeedbackHelper.showInfo(
           context,
-          SnackBar(
-            content: const Text('Tarefa já aberta no Command Center.'),
-            action: SnackBarAction(
-              label: 'Ver',
-              onPressed:
-                  () => context.push('/dashboard/command-center/copiloto'),
-            ),
-          ),
+          'Tarefa já aberta no Command Center.',
           placement: FeedbackPlacement.operacaoTop,
         );
       }
@@ -68,39 +60,19 @@ Future<bool> criarTarefaCopilotoFromAluno360({
     ref.invalidate(commandCenterProvider);
     ref.invalidate(alunoOpenIaActionsProvider(aluno.id));
     if (context.mounted) {
-      FeedbackHelper.showSnackBar(
+      FeedbackHelper.showOperacaoSuccess(
         context,
-        SnackBar(
-          content: Text(
-            persisted
-                ? 'Tarefa criada no Command Center.'
-                : 'Servidor aceitou, mas a tarefa ainda não apareceu.',
-          ),
-          action:
-              persisted
-                  ? SnackBarAction(
-                    label: 'Ver',
-                    onPressed:
-                        () => context.push(
-                          '/dashboard/command-center/copiloto',
-                        ),
-                  )
-                  : null,
-        ),
-        placement: FeedbackPlacement.operacaoTop,
+        persisted
+            ? 'Tarefa criada no Command Center.'
+            : 'Servidor aceitou, mas a tarefa ainda não apareceu.',
       );
     }
     return persisted;
   } catch (e) {
     if (context.mounted) {
-      FeedbackHelper.showSnackBar(
+      FeedbackHelper.showOperacaoError(
         context,
-        SnackBar(
-          content: Text(
-            'Não foi possível criar tarefa: ${friendlyError(e)}',
-          ),
-        ),
-        placement: FeedbackPlacement.operacaoTop,
+        'Não foi possível criar tarefa: ${friendlyError(e)}',
       );
     }
     return false;

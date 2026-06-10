@@ -1206,27 +1206,33 @@ class _EnumPickerFullScreenState<T extends Enum>
                       button: true,
                       selected: selected,
                       label: itemLabel,
-                      child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      minLeadingWidth: 28,
-                      leading: Icon(
-                        selected
-                            ? Icons.check_circle_rounded
-                            : Icons.circle_outlined,
-                        color: selected ? primary : mute,
-                        size: 21,
-                      ),
-                      title: Text(
-                        itemLabel,
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 14,
-                          fontWeight:
-                              selected ? FontWeight.w900 : FontWeight.w700,
+                      child: fxListTileCardShell(
+                        context: context,
+                        margin: EdgeInsets.zero,
+                        accent: selected ? primary : null,
+                        selected: selected,
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          minLeadingWidth: 28,
+                          leading: Icon(
+                            selected
+                                ? Icons.check_circle_rounded
+                                : Icons.circle_outlined,
+                            color: selected ? primary : mute,
+                            size: 21,
+                          ),
+                          title: Text(
+                            itemLabel,
+                            style: TextStyle(
+                              color: ink,
+                              fontSize: 14,
+                              fontWeight:
+                                  selected ? FontWeight.w900 : FontWeight.w700,
+                            ),
+                          ),
+                          onTap: () => Navigator.of(context).pop(item),
                         ),
                       ),
-                      onTap: () => Navigator.of(context).pop(item),
-                    ),
                     );
                   },
                 ),
@@ -1357,27 +1363,33 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
                       button: true,
                       selected: selected,
                       label: itemLabel,
-                      child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      minLeadingWidth: 28,
-                      leading: Icon(
-                        selected
-                            ? Icons.check_circle_rounded
-                            : Icons.circle_outlined,
-                        color: selected ? primary : mute,
-                        size: 21,
-                      ),
-                      title: Text(
-                        itemLabel,
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 14,
-                          fontWeight:
-                              selected ? FontWeight.w900 : FontWeight.w700,
+                      child: fxListTileCardShell(
+                        context: context,
+                        margin: EdgeInsets.zero,
+                        accent: selected ? primary : null,
+                        selected: selected,
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          minLeadingWidth: 28,
+                          leading: Icon(
+                            selected
+                                ? Icons.check_circle_rounded
+                                : Icons.circle_outlined,
+                            color: selected ? primary : mute,
+                            size: 21,
+                          ),
+                          title: Text(
+                            itemLabel,
+                            style: TextStyle(
+                              color: ink,
+                              fontSize: 14,
+                              fontWeight:
+                                  selected ? FontWeight.w900 : FontWeight.w700,
+                            ),
+                          ),
+                          onTap: () => Navigator.of(context).pop(item),
                         ),
                       ),
-                      onTap: () => Navigator.of(context).pop(item),
-                    ),
                     );
                   },
                 ),

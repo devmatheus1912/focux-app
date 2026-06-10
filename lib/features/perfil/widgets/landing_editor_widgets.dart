@@ -7,6 +7,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/landing_growth_repository.dart';
 import '../screens/landing_editor_checklist.dart';
 import '../screens/landing_editor_quality.dart';
@@ -43,15 +44,10 @@ class LandingLinkCard extends StatelessWidget {
     return Semantics(
       container: true,
       label: '$title. $subtitle. Link: $displayLabel',
-      child: Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(TokensStrip.rLg),
-        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.6)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(TokensStrip.s4),
-        child: Column(
+      child: FxSatellitePanel(
+      padding: const EdgeInsets.all(TokensStrip.s4),
+      radius: TokensStrip.rLg,
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -126,7 +122,6 @@ class LandingLinkCard extends StatelessWidget {
           ],
         ),
       ),
-    ),
     );
   }
 }
@@ -165,20 +160,22 @@ class LandingChecklistCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 320),
         curve: Curves.easeOutCubic,
-        child: Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(TokensStrip.rLg),
-            side: BorderSide(
+        child: Container(
+          decoration: fxListCardDecoration(
+            context,
+            accent: allReady ? EagleTokens.good : null,
+            radius: TokensStrip.rLg,
+          ).copyWith(
+            color: allReady
+                ? EagleTokens.good.withValues(alpha: 0.06)
+                : scheme.surface,
+            border: Border.all(
               color: allReady
                   ? EagleTokens.good.withValues(alpha: 0.55)
                   : scheme.outlineVariant.withValues(alpha: 0.6),
               width: allReady ? 1.5 : 1,
             ),
           ),
-          color: allReady
-              ? EagleTokens.good.withValues(alpha: 0.06)
-              : scheme.surface,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(12, 16, 12, 8),
             child: Column(
@@ -268,39 +265,44 @@ class LandingChecklistCard extends StatelessWidget {
                 final tappable =
                     onItemTap != null && landingChecklistTarget(item.id) != null;
 
-                return ListTile(
-                contentPadding: EdgeInsets.zero,
-                dense: true,
-                onTap: tappable ? () => onItemTap!(item) : null,
-                leading: Icon(
-                  item.done ? Icons.check_circle_rounded : Icons.circle_outlined,
-                  color: item.done ? EagleTokens.good : scheme.outline,
-                ),
-                title: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: item.done ? FontWeight.w600 : FontWeight.w500,
-                    color: item.done
-                        ? scheme.onSurface
-                        : scheme.onSurface.withValues(alpha: 0.72),
+                return fxListTileCardShell(
+                  context: context,
+                  margin: const EdgeInsets.only(bottom: 4),
+                  accent: item.done ? EagleTokens.good : null,
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    onTap: tappable ? () => onItemTap!(item) : null,
+                    leading: Icon(
+                      item.done ? Icons.check_circle_rounded : Icons.circle_outlined,
+                      color: item.done ? EagleTokens.good : scheme.outline,
+                    ),
+                    title: Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: item.done ? FontWeight.w600 : FontWeight.w500,
+                        color: item.done
+                            ? scheme.onSurface
+                            : scheme.onSurface.withValues(alpha: 0.72),
+                      ),
+                    ),
+                    subtitle: tappable && !item.done
+                        ? Text(
+                            landingChecklistHint(item.id),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: scheme.primary.withValues(alpha: 0.85),
+                            ),
+                          )
+                        : null,
+                    trailing: tappable
+                        ? Icon(
+                            Icons.chevron_right_rounded,
+                            color: scheme.onSurface.withValues(alpha: 0.35),
+                          )
+                        : null,
                   ),
-                ),
-                subtitle: tappable && !item.done
-                    ? Text(
-                        landingChecklistHint(item.id),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: scheme.primary.withValues(alpha: 0.85),
-                        ),
-                      )
-                    : null,
-                trailing: tappable
-                    ? Icon(
-                        Icons.chevron_right_rounded,
-                        color: scheme.onSurface.withValues(alpha: 0.35),
-                      )
-                    : null,
                 );
               }),
             ],
@@ -318,15 +320,11 @@ class LandingChecklistSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(TokensStrip.rLg),
-        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.6)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+    return FxSatellitePanel(
+      padding: const EdgeInsets.all(16),
+      radius: TokensStrip.rLg,
+      accent: scheme.primary,
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
@@ -365,7 +363,6 @@ class LandingChecklistSkeleton extends StatelessWidget {
             ],
           ],
         ),
-      ),
     );
   }
 }
@@ -512,18 +509,14 @@ Future<void> showLandingContentReviewSheet(
                   separatorBuilder: (_, __) => const Divider(height: 1),
                   itemBuilder: (_, i) {
                     final issue = issues[i];
-                    return ListTile(
-                      contentPadding: EdgeInsets.zero,
+                    return FxSatelliteListTile(
+                      title: issue.message,
+                      titleCase: false,
+                      margin: EdgeInsets.zero,
+                      accent: const Color(0xFFE6A800),
                       leading: const Icon(
                         Icons.warning_amber_rounded,
                         color: Color(0xFFE6A800),
-                      ),
-                      title: Text(
-                        issue.message,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
                       ),
                       trailing: Icon(
                         Icons.chevron_right_rounded,
@@ -577,21 +570,22 @@ class LandingHighlightCard extends StatelessWidget {
               ]
             : null,
       ),
-      child: Card(
-        margin: EdgeInsets.zero,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(TokensStrip.rMd),
-          side: BorderSide(
+      child: Container(
+        decoration: fxListCardDecoration(
+          context,
+          accent: highlighted ? const Color(0xFFE6A800) : null,
+          radius: TokensStrip.rMd,
+        ).copyWith(
+          color: highlighted
+              ? const Color(0xFFFFF4D6).withValues(alpha: 0.55)
+              : scheme.surface,
+          border: Border.all(
             color: highlighted
                 ? const Color(0xFFE6A800).withValues(alpha: 0.75)
                 : scheme.outlineVariant.withValues(alpha: 0.55),
             width: highlighted ? 1.5 : 1,
           ),
         ),
-        color: highlighted
-            ? const Color(0xFFFFF4D6).withValues(alpha: 0.55)
-            : scheme.surface,
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(

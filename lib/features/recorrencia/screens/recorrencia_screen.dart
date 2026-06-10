@@ -45,10 +45,7 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
     final alunos = await AlunoRepository(ref.read(apiClientProvider)).listar();
     if (alunos.isEmpty) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Cadastre um aluno primeiro.')),
-      );
+      FeedbackHelper.showWarn(context, 'Cadastre um aluno primeiro.');
       return;
     }
     int? alunoId = alunos.first.id;
@@ -91,20 +88,12 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
       if (r.initPoint != null && r.initPoint!.isNotEmpty) {
         await Clipboard.setData(ClipboardData(text: r.initPoint!));
         if (!mounted) return;
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(
-            content: Text('Link de assinatura copiado — envie ao aluno.'),
-          ),
-        );
+        FeedbackHelper.showSuccess(context, 'Link de assinatura copiado — envie ao aluno.');
       }
       _load();
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(content: Text(friendlyError(e))),
-      );
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 

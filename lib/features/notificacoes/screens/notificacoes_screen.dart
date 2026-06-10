@@ -61,12 +61,7 @@ class NotificacoesScreen extends ConsumerWidget {
                 await repo.marcarTodasLidas();
                 await reload();
                 if (!context.mounted) return;
-                FeedbackHelper.showSnackBar(
-                  context,
-                  const SnackBar(
-                    content: Text('Todas marcadas como lidas.'),
-                  ),
-                );
+                FeedbackHelper.showSuccess(context, 'Todas marcadas como lidas.');
               },
               child: const Text('Ler todas'),
             ),

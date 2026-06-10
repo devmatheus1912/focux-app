@@ -74,7 +74,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(context, SnackBar(content: Text(friendlyError(e))));
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -90,10 +90,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }

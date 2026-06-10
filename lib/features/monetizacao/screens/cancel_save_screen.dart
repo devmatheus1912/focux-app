@@ -134,14 +134,7 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
       _showResultado(resposta);
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(
-          content: Text(
-            'Não foi possível concluir agora. Tente novamente em instantes.',
-          ),
-        ),
-      );
+      FeedbackHelper.showError(context, 'Não foi possível concluir agora. Tente novamente em instantes.',);
     } finally {
       if (mounted) setState(() => _enviando = false);
     }

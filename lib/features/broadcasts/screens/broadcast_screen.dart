@@ -59,19 +59,10 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
       setState(() => _publicoAlvo = 'TODOS');
       ref.invalidate(_broadcastHistoricoProvider);
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(
-          content: Text('Enviado para ${resultado.totalEnviados} alunos.'),
-          backgroundColor: EagleTokens.good,
-        ),
-      );
+      FeedbackHelper.showSuccess(context, 'Enviado para ${resultado.totalEnviados} alunos.');
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(content: Text(friendlyError(e))),
-      );
+      FeedbackHelper.showError(context, friendlyError(e));
     } finally {
       if (mounted) setState(() => _enviando = false);
     }

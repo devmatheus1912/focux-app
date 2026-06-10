@@ -34,8 +34,7 @@ import '../../planos/paywall/paywall_vitrine.dart';
 import '../../subscription/plan_entitlements.dart';
 import '../services/subscription_biometric_gate.dart';
 import '../services/subscription_device_guard.dart';
-import 'assinatura_review_screen.dart';
-import 'assinatura_success_screen.dart';
+import '../assinatura_route_args.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
 
@@ -156,10 +155,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     if (_restoringPurchases || !subscriptionUsesNativeStore) return;
 
     setState(() => _restoringPurchases = true);
-    FeedbackHelper.showSnackBar(
-      context,
-      const SnackBar(content: Text('Verificando compras anteriores...')),
-    );
+    FeedbackHelper.showInfo(context, 'Verificando compras anteriores...');
 
     try {
       final result = await ref.read(iapServiceProvider).restoreAndVerifyPurchases(
@@ -174,39 +170,27 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       if (!mounted) return;
 
       if (!result.storeAvailable) {
-        FeedbackHelper.showSnackBar(
+        FeedbackHelper.showError(
           context,
-          const SnackBar(content: Text('A loja do dispositivo não está disponível.')),
+          'A loja do dispositivo não está disponível.',
         );
         return;
       }
 
       if (result.hasVerifiedPurchases) {
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(content: Text('Compras restauradas com sucesso.')),
-        );
+        FeedbackHelper.showSuccess(context, 'Compras restauradas com sucesso.');
         return;
       }
 
       if (result.errors.isNotEmpty) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(result.errors.first.message)),
-        );
+        FeedbackHelper.showError(context, result.errors.first.message);
         return;
       }
 
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Nenhuma compra anterior encontrada.')),
-      );
+      FeedbackHelper.showInfo(context, 'Nenhuma compra anterior encontrada.');
     } catch (error) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(content: Text('Erro ao restaurar compras: $error')),
-      );
+      FeedbackHelper.showError(context, 'Erro ao restaurar compras: $error');
     } finally {
       if (mounted) setState(() => _restoringPurchases = false);
     }
@@ -247,22 +231,16 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       final ok = await openNativeSubscriptionManagement();
       if (!mounted) return;
       if (!ok) {
-        FeedbackHelper.showSnackBar(
+        FeedbackHelper.showError(
           context,
-          const SnackBar(
-            content: Text(
-              'Não foi possível abrir as assinaturas do dispositivo.',
-            ),
-          ),
+          'Não foi possível abrir as assinaturas do dispositivo.',
         );
       }
       return;
     }
-    FeedbackHelper.showSnackBar(
+    FeedbackHelper.showInfo(
       context,
-      const SnackBar(
-        content: Text('Gerencie sua assinatura na área de cobrança da web.'),
-      ),
+      'Gerencie sua assinatura na área de cobrança da web.',
     );
   }
 
@@ -303,13 +281,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       if (FocuxLegal.plansMarketingWebLive) {
         unawaited(FocuxLegal.openPlansMarketing());
       } else {
-        FeedbackHelper.showSnackBar(
+        FeedbackHelper.showInfo(
           context,
-          const SnackBar(
-            content: Text(
-              'Comparação detalhada (tabela, ROI e features) no site em breve.',
-            ),
-          ),
+          'Comparação detalhada (tabela, ROI e features) no site em breve.',
         );
       }
       return;
@@ -355,20 +329,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
 
   void _handleDowngradeTierTap() {
     HapticFeedback.lightImpact();
-    FeedbackHelper.showSnackBar(
+    FeedbackHelper.showInfo(
       context,
-      SnackBar(
-        content: Text(
-          'Downgrade e cancelamento só nas assinaturas do ${subscriptionChannelLabel()}.',
-        ),
-        action:
-            subscriptionUsesNativeStore
-                ? SnackBarAction(
-                  label: 'Abrir',
-                  onPressed: _openSubscriptionManagement,
-                )
-                : null,
-      ),
+      'Downgrade e cancelamento só nas assinaturas do ${subscriptionChannelLabel()}.',
     );
   }
 
@@ -497,13 +460,11 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       );
 
       if (!mounted) return;
-      await Navigator.of(context).push<void>(
-        MaterialPageRoute(
-          fullscreenDialog: true,
-          builder: (_) => AssinaturaSuccessScreen(
-            plan: purchasedPlan,
-            transactionId: purchase.purchaseID,
-          ),
+      await context.push<void>(
+        '/assinatura/success',
+        extra: AssinaturaSuccessRouteArgs(
+          plan: purchasedPlan,
+          transactionId: purchase.purchaseID,
         ),
       );
       if (mounted) safePopOrGo(context, '/dashboard/personal');
@@ -573,13 +534,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     if (!kIsWeb &&
         subscriptionUsesNativeStore &&
         !_storeAvailable) {
-      FeedbackHelper.showSnackBar(
+      FeedbackHelper.showError(
         context,
-        const SnackBar(
-          content: Text(
-            'Loja do dispositivo indisponível. Tente novamente em instantes.',
-          ),
-        ),
+        'Loja do dispositivo indisponível. Tente novamente em instantes.',
       );
       return;
     }
@@ -611,14 +568,13 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   _trialStatus?.trialEligible == true
               ? 'Teste introdutório pode ser aplicado pela loja ao assinar.'
               : null;
-      final confirmed = await Navigator.of(context).push<bool>(
-        MaterialPageRoute(
-          builder: (_) => AssinaturaReviewScreen(
-            plan: plan,
-            billingPeriod: _billingPeriod,
-            priceDisplay: priceDisplay,
-            trialNote: trialNote,
-          ),
+      final confirmed = await context.push<bool>(
+        '/assinatura/review',
+        extra: AssinaturaReviewRouteArgs(
+          plan: plan,
+          billingPeriod: _billingPeriod,
+          priceDisplay: priceDisplay,
+          trialNote: trialNote,
         ),
       );
       if (!mounted || confirmed != true) return;
@@ -696,7 +652,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       _loadingCheckout = false;
       _syncingPurchase = false;
     });
-    FeedbackHelper.showSnackBar(context, SnackBar(content: Text(message)));
+    FeedbackHelper.showError(context, message);
   }
 
   @override

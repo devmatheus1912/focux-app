@@ -72,12 +72,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
 
   Future<void> _salvar() async {
     if (!_canSave) {
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(
-          content: Text('Selecione aluno, início e fim para agendar.'),
-        ),
-      );
+      FeedbackHelper.showError(context, 'Selecione aluno, início e fim para agendar.');
       return;
     }
     final alunoId = _alunoId;
@@ -88,10 +83,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
     final inicio = _inicio!;
     final fim = _fim!;
     if (!fim.isAfter(inicio)) {
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Fim deve ser após início.')),
-      );
+      FeedbackHelper.showWarn(context, 'Fim deve ser após início.');
       return;
     }
     setState(() => _saving = true);
@@ -102,10 +94,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
       if (mounted) safePopOrGo(context, '/agenda');
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text('Erro ao agendar. Tente novamente.')),
-        );
+        FeedbackHelper.showError(context, 'Erro ao agendar. Tente novamente.');
       }
     }
     if (mounted) setState(() => _saving = false);

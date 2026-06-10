@@ -161,22 +161,24 @@ class LandingSectionOrderTile extends StatelessWidget {
               ]
             : null,
       ),
-      child: Card(
+      child: Container(
         key: ValueKey('$sectionKey-$index'),
-        margin: EdgeInsets.zero,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(TokensStrip.rMd),
-          side: BorderSide(
+        decoration: fxListCardDecoration(
+          context,
+          accent: highlighted ? scheme.primary : null,
+          radius: TokensStrip.rMd,
+          selected: highlighted,
+        ).copyWith(
+          color: highlighted
+              ? scheme.primaryContainer.withValues(alpha: 0.22)
+              : scheme.surface,
+          border: Border.all(
             color: highlighted
                 ? scheme.primary.withValues(alpha: 0.75)
                 : scheme.outlineVariant.withValues(alpha: 0.55),
             width: highlighted ? 1.5 : 1,
           ),
         ),
-        color: highlighted
-            ? scheme.primaryContainer.withValues(alpha: 0.22)
-            : scheme.surface,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(
@@ -470,15 +472,11 @@ class LandingTemplatesCompactCard extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final defaultTemplate = templates.isNotEmpty ? templates.first : null;
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(TokensStrip.rLg),
-        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.6)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 16, 14, 14),
-        child: Column(
+    return FxSatellitePanel(
+      padding: const EdgeInsets.fromLTRB(14, 16, 14, 14),
+      radius: TokensStrip.rLg,
+      accent: scheme.primary,
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
@@ -542,7 +540,6 @@ class LandingTemplatesCompactCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 }

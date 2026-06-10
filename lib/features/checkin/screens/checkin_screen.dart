@@ -550,22 +550,10 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                     brandDeep: brandDeep,
                     dark: dark,
                     onApply: () {
-                      FeedbackHelper.showSnackBar(
-                        context,
-                        const SnackBar(
-                          content: Text(
-                            'Sugestao registrada para a proxima serie.',
-                          ),
-                        ),
-                      );
+                      FeedbackHelper.showSuccess(context, 'Sugestao registrada para a proxima serie.',);
                     },
                     onSkip: () {
-                      FeedbackHelper.showSnackBar(
-                        context,
-                        const SnackBar(
-                          content: Text('Sugestao ignorada neste exercicio.'),
-                        ),
-                      );
+                      FeedbackHelper.showSuccess(context, 'Sugestao ignorada neste exercicio.');
                     },
                   ),
                 ),

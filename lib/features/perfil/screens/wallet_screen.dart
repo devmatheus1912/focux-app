@@ -201,17 +201,11 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
       ref.invalidate(perfilProvider);
       if (mounted) {
         _captureSnapshot();
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(content: Text('Carteira atualizada com sucesso.')),
-        );
+        FeedbackHelper.showSuccess(context, 'Carteira atualizada com sucesso.');
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     } finally {
       if (mounted) setState(() => _carregando = false);
@@ -223,10 +217,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     if (chave.isEmpty) return;
     await Clipboard.setData(ClipboardData(text: chave));
     if (!mounted) return;
-    FeedbackHelper.showSnackBar(
-      context,
-      const SnackBar(content: Text('Chave PIX copiada.')),
-    );
+    FeedbackHelper.showSuccess(context, 'Chave PIX copiada.');
   }
 
   Future<void> _selecionarTipoPix(FormFieldState<String> field) async {

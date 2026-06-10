@@ -98,10 +98,7 @@ class _RecorrenciaAlunoScreenState extends ConsumerState<RecorrenciaAlunoScreen>
                                     }
                                   } catch (e) {
                                     if (!context.mounted) return;
-                                    FeedbackHelper.showSnackBar(
-                                      context,
-                                      SnackBar(content: Text(friendlyError(e))),
-                                    );
+                                    FeedbackHelper.showError(context, friendlyError(e));
                                   }
                                 },
                                 icon: const Icon(Icons.payment),

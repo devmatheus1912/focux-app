@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/config/env.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/landing_growth_repository.dart';
 import '../utils/landing_default_images.dart';
 import '../widgets/landing_editor_widgets.dart';
@@ -29,14 +30,12 @@ class LandingEditorLinksTab extends StatelessWidget {
       return ListView(
         padding: const EdgeInsets.all(TokensStrip.s4),
         children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'Defina seu slug no perfil para gerar os links da sua página.',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
-                ),
+          FxSatellitePanel(
+            padding: const EdgeInsets.all(TokensStrip.s4),
+            child: Text(
+              'Defina seu slug no perfil para gerar os links da sua página.',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
               ),
             ),
           ),

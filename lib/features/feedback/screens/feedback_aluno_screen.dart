@@ -46,10 +46,7 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
 
   Future<void> _enviar() async {
     if (_exercicios.isEmpty) {
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Você precisa de um treino atribuído pelo personal antes de enviar form-check.')),
-      );
+      FeedbackHelper.showError(context, 'Você precisa de um treino atribuído pelo personal antes de enviar form-check.');
       return;
     }
 
@@ -71,14 +68,11 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
         comentario: result.comentario,
       );
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(content: Text('Vídeo enviado! Análise IA em andamento — atualize em alguns segundos.')),
-        );
+        FeedbackHelper.showSuccess(context, 'Vídeo enviado! Análise IA em andamento — atualize em alguns segundos.');
         _load();
       }
     } catch (e) {
-      if (mounted) FeedbackHelper.showSnackBar(context, SnackBar(content: Text(friendlyError(e))));
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -195,14 +189,7 @@ class _EnviarFormSheetState extends State<_EnviarFormSheet> {
     final url = _videoUrl.text.trim();
     if (_exercicioId == null) return;
     if (url.isEmpty || !(url.startsWith('http://') || url.startsWith('https://'))) {
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(
-          content: Text(
-            'Cole uma URL válida (https://) do vídeo no YouTube ou Drive.',
-          ),
-        ),
-      );
+      FeedbackHelper.showError(context, 'Cole uma URL válida (https://) do vídeo no YouTube ou Drive.',);
       return;
     }
     Navigator.pop(context, _FormResult(

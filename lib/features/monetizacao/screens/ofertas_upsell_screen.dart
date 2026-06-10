@@ -55,10 +55,7 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
   Future<void> _criar() async {
     final valor = double.tryParse(_valor.text.replaceAll(',', '.'));
     if (_titulo.text.trim().isEmpty || valor == null || valor <= 0) {
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Preencha título e valor válido')),
-      );
+      FeedbackHelper.showError(context, 'Preencha título e valor válido');
       return;
     }
     setState(() => _saving = true);
@@ -74,17 +71,11 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
       _valor.clear();
       await _load();
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(content: Text('Oferta criada')),
-        );
+        FeedbackHelper.showSuccess(context, 'Oferta criada');
       }
     } catch (_) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(content: Text('Erro ao criar oferta')),
-        );
+        FeedbackHelper.showError(context, 'Erro ao criar oferta');
       }
     } finally {
       if (mounted) setState(() => _saving = false);

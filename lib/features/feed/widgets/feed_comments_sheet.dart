@@ -79,10 +79,7 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _sending = false);
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(content: Text(friendlyError(e))),
-      );
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 

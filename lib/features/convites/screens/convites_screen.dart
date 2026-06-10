@@ -82,10 +82,7 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
     if (_shareLink.isEmpty) return;
     HapticFeedback.selectionClick();
     Clipboard.setData(ClipboardData(text: _shareLink));
-    FeedbackHelper.showSnackBar(
-      context,
-      const SnackBar(content: Text('Link copiado!')),
-    );
+    FeedbackHelper.showSuccess(context, 'Link copiado!');
   }
 
   Future<void> _compartilharWhatsApp() async {

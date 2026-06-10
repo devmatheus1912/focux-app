@@ -273,30 +273,17 @@ class _ProgressaoAceitarScreenState extends ConsumerState<ProgressaoAceitarScree
         if (!mounted) return;
         unawaited(HapticFeedback.mediumImpact());
         setState(() => _successBanner = response.mensagem);
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(
-            content: Text(response.mensagem),
-            backgroundColor:
-                response.cargaAplicada ? EagleTokens.good : EagleTokens.warn,
-          ),
-        );
+        FeedbackHelper.showSuccess(context, response.mensagem);
       } else {
         await repo.rejeitarSugestao(sugestao.id);
         ref.invalidate(progressaoSugestoesProvider(args.alunoId));
         if (mounted) {
-          FeedbackHelper.showSnackBar(
-            context,
-            const SnackBar(content: Text('Sugestão descartada.')),
-          );
+          FeedbackHelper.showSuccess(context, 'Sugestão descartada.');
         }
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text('Não foi possível concluir: $e')),
-        );
+        FeedbackHelper.showError(context, 'Não foi possível concluir: $e');
       }
     } finally {
       if (mounted) setState(() => _actingOnId = null);

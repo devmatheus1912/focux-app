@@ -45,6 +45,11 @@ void main() {
             pattern: RegExp(r"debugPrint\s*\(\s*'\[Focux\] Error"),
             allowedFiles: const {},
           ),
+          _EagleGateRule(
+            label: 'SnackBar(content: Text(',
+            pattern: RegExp(r'SnackBar\s*\(\s*content:\s*Text\s*\('),
+            allowedFiles: {'lib/core/widgets/feedback_helper.dart'},
+          ),
         ];
 
         final failures = <String>[];
@@ -90,10 +95,6 @@ void main() {
         const allowedListTileShellBypassFiles = {
           'lib/core/widgets/fx_shell_scaffold.dart',
           'lib/features/qa/screens/qa_smoke_screen.dart',
-          'lib/features/exercicios/screens/add_exercicio_screen.dart',
-          'lib/features/perfil/widgets/landing_editor_widgets.dart',
-          'lib/features/checkin/widgets/gated_pose_coach_panel.dart',
-          'lib/features/trilhas/screens/trilhas_screen.dart',
         };
 
         final failures = <String>[];

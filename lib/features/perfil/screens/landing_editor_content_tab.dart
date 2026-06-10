@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../utils/landing_default_images.dart';
 import '../widgets/landing_editor_widgets.dart';
 import 'landing_editor_controller.dart';
@@ -295,8 +296,9 @@ class LandingEditorContentTab extends StatelessWidget {
                       style: landingEditorMutedStyle(context),
                     ),
                   for (var i = 0; i < c.servicos.length; i++) ...[
-                    Card(
+                    Container(
                       margin: const EdgeInsets.only(bottom: 8),
+                      decoration: fxListCardDecoration(context),
                       child: Padding(
                         padding: const EdgeInsets.all(12),
                         child: Column(

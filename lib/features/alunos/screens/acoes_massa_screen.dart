@@ -48,10 +48,7 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
 
   void _mostrarAcoes(BuildContext context) {
     if (_selecionados.isEmpty) {
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Selecione pelo menos um aluno')),
-      );
+      FeedbackHelper.showError(context, 'Selecione pelo menos um aluno');
       return;
     }
     showModalBottomSheet(
@@ -142,22 +139,12 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
             data: {'alunoIds': _selecionados.toList()},
           );
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(
-            content: Text(
-              '${_selecionados.length} aluno(s) marcado(s) como pagos',
-            ),
-          ),
-        );
+        FeedbackHelper.showSuccess(context, '${_selecionados.length} aluno(s) marcado(s) como pagos',);
         setState(() => _selecionados.clear());
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
     if (mounted) setState(() => _processando = false);

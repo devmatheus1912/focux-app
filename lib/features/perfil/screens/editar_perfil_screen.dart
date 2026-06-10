@@ -96,10 +96,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
       if (mounted) setState(() => _logoUrl = url);
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     } finally {
       if (mounted) setState(() => _uploadingPhoto = false);

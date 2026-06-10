@@ -92,14 +92,7 @@ Future<void> confirmarGerarSenhaAlunoDetail(
     }
   } catch (e) {
     if (context.mounted) {
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(
-          content: Text(
-            friendlyError(e, fallback: 'Não foi possível gerar senha.'),
-          ),
-        ),
-      );
+      FeedbackHelper.showError(context, friendlyError(e, fallback: 'Não foi possível gerar senha.'),);
     }
   }
 }
@@ -242,16 +235,9 @@ void showAlunoNovaSenhaProvisoriaSheet(
                       await copySensitiveToClipboard(mensagem);
                       if (ctx.mounted) Navigator.of(ctx).pop();
                       if (context.mounted) {
-                        FeedbackHelper.showSnackBar(
-                          context,
-                          SnackBar(
-                            content: Text(
-                              hasWhatsapp
+                        FeedbackHelper.showSuccess(context, hasWhatsapp
                                   ? 'Mensagem copiada. Abra o WhatsApp e envie ao aluno.'
-                                  : 'Convite copiado.',
-                            ),
-                          ),
-                        );
+                                  : 'Convite copiado.',);
                       }
                     },
                     icon: Icon(
@@ -282,10 +268,7 @@ void showAlunoNovaSenhaProvisoriaSheet(
                         HapticFeedback.mediumImpact();
                         if (ctx.mounted) Navigator.of(ctx).pop();
                         if (context.mounted) {
-                          FeedbackHelper.showSnackBar(
-                            context,
-                            const SnackBar(content: Text('Convite copiado.')),
-                          );
+                          FeedbackHelper.showSuccess(context, 'Convite copiado.');
                         }
                       },
                       icon: Icon(

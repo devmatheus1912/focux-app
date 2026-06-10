@@ -310,15 +310,11 @@ class LandingSectionTemplatesPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(TokensStrip.rLg),
-        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.6)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 16, 14, 14),
-        child: Column(
+    return FxSatellitePanel(
+      padding: const EdgeInsets.fromLTRB(14, 16, 14, 14),
+      radius: TokensStrip.rLg,
+      accent: scheme.primary,
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
@@ -357,7 +353,6 @@ class LandingSectionTemplatesPanel extends StatelessWidget {
             ],
           ],
         ),
-      ),
     );
   }
 }
@@ -384,11 +379,10 @@ class LandingLivePreviewCard extends StatelessWidget {
     return Semantics(
       container: true,
       label: 'Preview da landing. $displayLabel',
-      child: Card(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(TokensStrip.rLg),
-          side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.55)),
+      child: Container(
+        decoration: fxListCardDecoration(
+          context,
+          radius: TokensStrip.rLg,
         ),
         clipBehavior: Clip.antiAlias,
         child: Column(

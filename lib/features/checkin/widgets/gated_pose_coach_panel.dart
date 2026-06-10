@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/widgets/feature_gate.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import 'pose_coach_panel.dart';
@@ -53,10 +54,13 @@ class _UpgradeHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(Icons.lock_outline, color: brand),
-      title: const Text('Pose Coach ML — Enterprise Pro'),
+    return FxSatelliteListTile(
+      title: 'Pose Coach ML — Enterprise Pro',
+      titleCase: false,
       subtitle: const Text('Análise de postura em tempo real'),
+      leading: Icon(Icons.lock_outline, color: brand),
+      accent: brand,
+      margin: EdgeInsets.zero,
     );
   }
 }

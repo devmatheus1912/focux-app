@@ -45,11 +45,11 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
     try {
       await GrupoAulaRepository(ref.read(apiClientProvider)).inscrever(aula.id);
       if (mounted) {
-        FeedbackHelper.showSnackBar(context, const SnackBar(content: Text('Inscrição confirmada!')));
+        FeedbackHelper.showSuccess(context, 'Inscrição confirmada!');
         _load();
       }
     } catch (e) {
-      if (mounted) FeedbackHelper.showSnackBar(context, SnackBar(content: Text(friendlyError(e))));
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 

@@ -195,18 +195,10 @@ class _Aluno360CopilotActionRowState
       ref.invalidate(alunoOpenIaActionsProvider(widget.aluno.id));
       ref.invalidate(commandCenterProvider);
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Tarefa concluída.')),
-        placement: FeedbackPlacement.operacaoTop,
-      );
+      FeedbackHelper.showSuccess(context, 'Tarefa concluída.');
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(content: Text(friendlyError(e))),
-        placement: FeedbackPlacement.operacaoTop,
-      );
+      FeedbackHelper.showError(context, friendlyError(e));
     } finally {
       if (mounted) setState(() => _completing = false);
     }

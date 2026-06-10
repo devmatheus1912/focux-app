@@ -16,10 +16,7 @@ Future<void> openPoseCameraCoach(
   required VoidCallback onRep,
 }) async {
   if (kIsWeb || Platform.environment.containsKey('FLUTTER_TEST')) {
-    FeedbackHelper.showSnackBar(
-      context,
-      const SnackBar(content: Text('Coach com camera disponivel apenas no celular.')),
-    );
+    FeedbackHelper.showWarn(context, 'Coach com camera disponivel apenas no celular.');
     return;
   }
 

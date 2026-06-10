@@ -110,12 +110,7 @@ class IaProgressaoResultView extends StatelessWidget {
   ) async {
     await Clipboard.setData(ClipboardData(text: parsed.toPlainText()));
     if (!context.mounted) return;
-    FeedbackHelper.showSnackBar(
-      context,
-      const SnackBar(
-        content: Text('Sugestão copiada para a área de transferência.'),
-      ),
-    );
+    FeedbackHelper.showSuccess(context, 'Sugestão copiada para a área de transferência.');
   }
 }
 

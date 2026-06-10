@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'landing_editor_sections.dart';
 
 /// Alvo mínimo de toque (Material 48dp / Apple 44pt).
@@ -124,15 +125,11 @@ class LandingEditorImageUploadCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(TokensStrip.rLg),
-        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.55)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
+    return FxSatellitePanel(
+      padding: const EdgeInsets.all(12),
+      radius: TokensStrip.rLg,
+      accent: scheme.primary,
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (!compact && title != null) ...[
@@ -340,7 +337,6 @@ class LandingEditorImageUploadCard extends StatelessWidget {
             ],
           ],
         ),
-      ),
     );
   }
 }

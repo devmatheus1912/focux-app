@@ -55,10 +55,7 @@ class _GrupoAulasPersonalScreenState extends ConsumerState<GrupoAulasPersonalScr
 
     if (!result.fim.isAfter(result.inicio)) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(content: Text('Horário de fim deve ser depois do início.')),
-        );
+        FeedbackHelper.showWarn(context, 'Horário de fim deve ser depois do início.');
       }
       return;
     }
@@ -73,14 +70,11 @@ class _GrupoAulasPersonalScreenState extends ConsumerState<GrupoAulasPersonalScr
         localAula: result.local,
       );
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(content: Text('Aula criada!')),
-        );
+        FeedbackHelper.showSuccess(context, 'Aula criada!');
       }
       _load();
     } catch (e) {
-      if (mounted) FeedbackHelper.showSnackBar(context, SnackBar(content: Text(friendlyError(e))));
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -226,10 +220,7 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
 
   void _salvar() {
     if (_titulo.text.trim().isEmpty) {
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Título é obrigatório.')),
-      );
+      FeedbackHelper.showError(context, 'Título é obrigatório.');
       return;
     }
     Navigator.pop(context, _NovaAulaResult(

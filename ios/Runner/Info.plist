@@ -47,6 +47,12 @@
 		<string>Usado para capturar fotos e vídeos de exercícios.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>Usado para selecionar fotos e vídeos de exercícios.</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>Usado para salvar fotos de evolução e compartilhamentos no dispositivo.</string>
+		<key>NSFaceIDUsageDescription</key>
+		<string>Usado para confirmar assinaturas e proteger dados sensíveis com Face ID.</string>
+		<key>ITSAppUsesNonExemptEncryption</key>
+		<false/>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>Usado para gravar áudios no chat, vídeos de exercícios com áudio e comandos de voz do Copiloto IA.</string>
 		<!-- Reconhecimento de voz para o Copiloto IA -->

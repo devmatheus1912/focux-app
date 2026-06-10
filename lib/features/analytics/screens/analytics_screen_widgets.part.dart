@@ -11,10 +11,7 @@ class _AnalyticsBody extends StatelessWidget {
     final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final brand = Theme.of(context).colorScheme.primary;
-    final mrr = data.totalAlunos * 79.0;
     final churn = data.taxaInadimplencia;
-    final ltv = churn <= 0 ? 0.0 : 79.0 / (churn / 100);
-    const cac = 42.0;
 
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -96,20 +93,16 @@ class _AnalyticsBody extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               childAspectRatio: 1.5,
               children: [
-                _KpiCard(label: 'MRR', value: 'R\$ ${mrr.toInt()}', dark: dark),
+                _KpiCard(label: 'WAU', value: '${data.wau}', dark: dark),
+                _KpiCard(label: 'MAU', value: '${data.mau}', dark: dark),
                 _KpiCard(
                   label: 'CHURN',
                   value: '${churn.toStringAsFixed(1)}%',
                   dark: dark,
                 ),
                 _KpiCard(
-                  label: 'LTV',
-                  value: 'R\$ ${ltv.toInt()}',
-                  dark: dark,
-                ),
-                _KpiCard(
-                  label: 'CAC',
-                  value: 'R\$ ${cac.toInt()}',
+                  label: 'RET D30',
+                  value: '${data.retencaoD30.toStringAsFixed(1)}%',
                   dark: dark,
                 ),
               ],
@@ -190,16 +183,10 @@ class _KpiCard extends StatelessWidget {
     final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final line = dark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final primary = Theme.of(context).colorScheme.primary;
-    final delta = switch (label) {
-      'CHURN' => -2.4,
-      'CAC' => -3.2,
-      'LTV' => 6.1,
-      _ => 8.4,
-    };
-    final good = label == 'CHURN' || label == 'CAC' ? delta < 0 : delta > 0;
-    final deltaColor = good ? EagleTokens.good : EagleTokens.bad;
 
-    return Container(
+    return Semantics(
+      label: '$label: $value',
+      child: Container(
       padding: const EdgeInsets.all(14),
       decoration: fxListCardDecoration(
         context,
@@ -228,27 +215,9 @@ class _KpiCard extends StatelessWidget {
               height: 1,
             ),
           ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              Icon(
-                delta >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
-                size: 12,
-                color: deltaColor,
-              ),
-              const SizedBox(width: 2),
-              Text(
-                '${delta.abs().toStringAsFixed(1)}%',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: deltaColor,
-                ),
-              ),
-            ],
-          ),
         ],
       ),
+    ),
     );
   }
 }

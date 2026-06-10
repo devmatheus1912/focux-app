@@ -45,7 +45,7 @@ class _NpsDialogState extends State<_NpsDialog> {
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(context, SnackBar(content: Text(friendlyError(e))));
+        FeedbackHelper.showError(context, friendlyError(e));
         setState(() => _saving = false);
       }
     }

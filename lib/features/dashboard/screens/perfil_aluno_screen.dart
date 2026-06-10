@@ -157,10 +157,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
       await _save(silent: true);
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     } finally {
       if (mounted) {
@@ -204,17 +201,11 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
       });
       ref.invalidate(alunoMeProvider);
       if (!silent && mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(content: Text('Perfil do aluno atualizado.')),
-        );
+        FeedbackHelper.showSuccess(context, 'Perfil do aluno atualizado.');
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     } finally {
       if (mounted) {
@@ -254,17 +245,11 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
       await ref.read(apiClientProvider).dio.delete('/api/lgpd/me/delete');
       await ref.read(authProvider.notifier).logout();
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Conta excluida com sucesso.')),
-      );
+      FeedbackHelper.showSuccess(context, 'Conta excluida com sucesso.');
       context.go('/login');
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(content: Text(friendlyError(e))),
-      );
+      FeedbackHelper.showError(context, friendlyError(e));
     } finally {
       if (mounted) {
         setState(() => _deleting = false);
@@ -400,10 +385,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                 setModalState(() => fotoUrl = url);
               } catch (e) {
                 if (mounted) {
-                  FeedbackHelper.showSnackBar(
-                    context,
-                    SnackBar(content: Text(friendlyError(e))),
-                  );
+                  FeedbackHelper.showError(context, friendlyError(e));
                 }
               } finally {
                 if (ctx.mounted) {
@@ -440,16 +422,10 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                 }
                 if (!ctx.mounted || !mounted) return;
                 Navigator.of(ctx).pop();
-                FeedbackHelper.showSnackBar(
-                  context,
-                  const SnackBar(content: Text('Nova medida registrada.')),
-                );
+                FeedbackHelper.showSuccess(context, 'Nova medida registrada.');
               } catch (e) {
                 if (!mounted) return;
-                FeedbackHelper.showSnackBar(
-                  context,
-                  SnackBar(content: Text(friendlyError(e))),
-                );
+                FeedbackHelper.showError(context, friendlyError(e));
               } finally {
                 if (ctx.mounted) {
                   setModalState(() => saving = false);

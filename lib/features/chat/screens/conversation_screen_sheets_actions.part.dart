@@ -113,10 +113,7 @@ void _showMessageActions(ChatMsg msg) {
                               ),
                             );
                             if (!mounted) return;
-                            FeedbackHelper.showSnackBar(
-                              context,
-                              const SnackBar(content: Text('Mensagem copiada')),
-                            );
+                            FeedbackHelper.showSuccess(context, 'Mensagem copiada');
                           },
                         ),
                       ],

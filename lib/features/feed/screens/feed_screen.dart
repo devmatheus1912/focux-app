@@ -68,10 +68,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       await _load();
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -82,10 +79,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       await _load();
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -100,10 +94,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -401,12 +392,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                             setModalState(
                                               () => salvando = false,
                                             );
-                                            FeedbackHelper.showSnackBar(
-                                              ctx,
-                                              SnackBar(
-                                                content: Text(friendlyError(e)),
-                                              ),
-                                            );
+                                            FeedbackHelper.showError(ctx, friendlyError(e));
                                           }
                                         }
                                       },
@@ -422,10 +408,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       if (created != true || !mounted) return;
       await _load();
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(content: Text('Publicação criada com sucesso!')),
-      );
+      FeedbackHelper.showSuccess(context, 'Publicação criada com sucesso!');
     });
   }
 

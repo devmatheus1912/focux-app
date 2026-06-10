@@ -65,19 +65,11 @@ class Aluno360CopilotIaRefreshButtonState
           friendlyError(e, fallback: 'IA indisponível agora.'),
         );
       } else {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(
-            content: Text(
-              friendlyError(
+        FeedbackHelper.showOperacaoError(context, friendlyError(
                 e,
                 fallback:
                     'IA indisponível agora — mantendo sugestão do Aluno 360.',
-              ),
-            ),
-          ),
-          placement: FeedbackPlacement.operacaoTop,
-        );
+              ),);
       }
     } finally {
       ref.read(alunoCopilotIaRefreshingProvider(widget.alunoId).notifier).state =

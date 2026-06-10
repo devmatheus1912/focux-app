@@ -64,20 +64,11 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
       final repo = AlertasRepository(ref.read(apiClientProvider));
       await repo.atualizarConfiguracao(_diasSemTreino, _aderenciaMinima);
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(
-            content: Text('Configurações salvas com sucesso!'),
-            backgroundColor: EagleTokens.good,
-          ),
-        );
+        FeedbackHelper.showSuccess(context, 'Configurações salvas com sucesso!');
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     } finally {
       if (mounted) setState(() => _salvando = false);

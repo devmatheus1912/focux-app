@@ -51,12 +51,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
     );
     await Clipboard.setData(ClipboardData(text: text));
     if (mounted) {
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(
-          content: Text('Convite copiado! Cole no WhatsApp ou Instagram.'),
-        ),
-      );
+      FeedbackHelper.showSuccess(context, 'Convite copiado! Cole no WhatsApp ou Instagram.');
     }
   }
 
@@ -116,10 +111,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                       final link = _info?.linkCompartilhamento ?? '';
                       if (link.isEmpty) return;
                       Clipboard.setData(ClipboardData(text: link));
-                      FeedbackHelper.showSnackBar(
-                        context,
-                        const SnackBar(content: Text('Link copiado!')),
-                      );
+                      FeedbackHelper.showSuccess(context, 'Link copiado!');
                     },
                     child: const Text('Copiar link'),
                   ),
