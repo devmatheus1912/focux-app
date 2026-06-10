@@ -10,6 +10,7 @@ class IaProgressaoResultActionBar extends StatelessWidget {
     this.onApplyTreino,
     this.onReviewSuggestions,
     this.showApplyTreino = true,
+    this.pendingSuggestions = 0,
   });
 
   final VoidCallback onCopy;
@@ -17,6 +18,7 @@ class IaProgressaoResultActionBar extends StatelessWidget {
   final VoidCallback? onApplyTreino;
   final VoidCallback? onReviewSuggestions;
   final bool showApplyTreino;
+  final int pendingSuggestions;
 
   @override
   Widget build(BuildContext context) {
@@ -74,11 +76,17 @@ class IaProgressaoResultActionBar extends StatelessWidget {
           const SizedBox(height: TokensStrip.s2),
           Semantics(
             button: true,
-            label: 'Revisar sugestões pendentes de progressão',
+            label: pendingSuggestions > 0
+                ? 'Revisar $pendingSuggestions sugestões pendentes de progressão'
+                : 'Revisar sugestões pendentes de progressão',
             child: TextButton.icon(
               onPressed: onReviewSuggestions,
               icon: const Icon(Icons.fact_check_outlined, size: 18),
-              label: const Text('Revisar sugestões pendentes'),
+              label: Text(
+                pendingSuggestions > 0
+                    ? 'Revisar $pendingSuggestions sugestões pendentes'
+                    : 'Revisar sugestões pendentes',
+              ),
             ),
           ),
         ],

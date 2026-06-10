@@ -18,6 +18,7 @@ import '../data/ia_repository.dart';
 import '../models/ia_progressao_carga_result.dart';
 import '../widgets/ia_progressao_loading_skeleton.dart';
 import '../widgets/ia_progressao_result_view.dart';
+import '../utils/ia_progressao_input_normalizer.dart';
 import '../utils/progressao_aceitar_route_args.dart';
 import '../widgets/ia_quota_upgrade.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
@@ -148,11 +149,25 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
       _erro = null;
     });
     try {
+      final historico = normalizeIaProgressaoHistorico(_historico.text);
+      final objetivo = normalizeIaProgressaoObjetivo(_objetivo.text);
+      if (iaProgressaoHistoricoWasNormalized(_historico.text, historico) &&
+          mounted) {
+        FeedbackHelper.showSnackBar(
+          context,
+          const SnackBar(
+            content: Text(
+              'Histórico ajustado (séries e nomes de exercício padronizados).',
+            ),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
       final repo = IaRepository(ref.read(apiClientProvider));
       final r = await repo.progressaoCarga(
         widget.alunoId,
-        objetivo: _objetivo.text,
-        historicoTreinos: _historico.text,
+        objetivo: objetivo.isEmpty ? null : objetivo,
+        historicoTreinos: historico.isEmpty ? null : historico,
       );
       if (!mounted) return;
       setState(() => _resultado = r);

@@ -80,6 +80,7 @@ class IaProgressaoResultView extends StatelessWidget {
               onExportPdf: onExportPdf,
               onApplyTreino: onApplyTreino,
               onReviewSuggestions: onReviewSuggestions,
+              pendingSuggestions: result.sugestoesRegistradas,
             )
           : _FallbackMarkdown(
               key: ValueKey(result.resposta),
@@ -114,6 +115,7 @@ class _StructuredResult extends StatelessWidget {
     this.onExportPdf,
     this.onApplyTreino,
     this.onReviewSuggestions,
+    this.pendingSuggestions = 0,
   });
 
   final IaProgressaoParsedResult parsed;
@@ -125,6 +127,7 @@ class _StructuredResult extends StatelessWidget {
   final VoidCallback? onExportPdf;
   final VoidCallback? onApplyTreino;
   final VoidCallback? onReviewSuggestions;
+  final int pendingSuggestions;
 
   @override
   Widget build(BuildContext context) {
@@ -187,6 +190,7 @@ class _StructuredResult extends StatelessWidget {
           onApplyTreino: onApplyTreino,
           onReviewSuggestions: onReviewSuggestions,
           showApplyTreino: showApplyTreino,
+          pendingSuggestions: pendingSuggestions,
         ),
       ],
     );
