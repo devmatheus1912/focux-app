@@ -54,11 +54,11 @@ class IaSafetyDisclaimer extends StatelessWidget {
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: (isDark ? Colors.amber.shade900 : Colors.amber.shade50)
-            .withValues(alpha: 0.5),
+        color: (isDark ? EagleTokens.warn : EagleTokens.warnSoft)
+            .withValues(alpha: isDark ? 0.22 : 0.85),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: (isDark ? Colors.amber.shade700 : Colors.amber.shade200),
+          color: EagleTokens.warn.withValues(alpha: isDark ? 0.45 : 0.35),
           width: 1,
         ),
       ),
@@ -68,7 +68,7 @@ class IaSafetyDisclaimer extends StatelessWidget {
           Icon(
             Icons.health_and_safety_outlined,
             size: 20,
-            color: Colors.amber.shade700,
+            color: EagleTokens.warn,
           ),
           const SizedBox(width: 10),
           Expanded(

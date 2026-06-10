@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
 import 'landing_editor_sections.dart';
@@ -28,7 +29,7 @@ Widget landingEditorDeleteIconButton({
     icon: const Icon(Icons.delete_outline),
     style: IconButton.styleFrom(
       minimumSize: const Size(kLandingEditorMinTouch, kLandingEditorMinTouch),
-      foregroundColor: Colors.red.shade700,
+      foregroundColor: EagleTokens.bad,
     ),
   );
 }

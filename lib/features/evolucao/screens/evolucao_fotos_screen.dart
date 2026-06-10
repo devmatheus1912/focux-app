@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 
 class EvolucaoFotosScreen extends ConsumerStatefulWidget {
@@ -273,7 +274,7 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isB ? Colors.orange : Colors.green,
+                            color: isB ? EagleTokens.warn : EagleTokens.good,
                             width: 3,
                           ),
                         ),

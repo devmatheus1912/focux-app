@@ -10,6 +10,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 
@@ -88,7 +89,7 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
                 child: const Text('Cancelar'),
               ),
               TextButton(
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                style: TextButton.styleFrom(foregroundColor: EagleTokens.bad),
                 onPressed: () => Navigator.pop(ctx, true),
                 child: const Text('Excluir'),
               ),
@@ -337,13 +338,13 @@ class _BottomSheetAcoesState extends State<_BottomSheetAcoes> {
           const SizedBox(height: 8),
           OutlinedButton.icon(
             onPressed: widget.onExcluir,
-            icon: const Icon(Icons.delete_outline, color: Colors.red),
+            icon: const Icon(Icons.delete_outline, color: EagleTokens.bad),
             label: const Text(
               'Excluir selecionados',
-              style: TextStyle(color: Colors.red),
+              style: TextStyle(color: EagleTokens.bad),
             ),
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Colors.red),
+              side: const BorderSide(color: EagleTokens.bad),
             ),
           ),
         ],

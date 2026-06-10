@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -39,7 +43,10 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _loading = false);
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
     }
   }
 
@@ -57,6 +64,7 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return FxShellScaffold(
       appBar: FxShellAppBar(title: 'NPS & Satisfação', onBack: () => context.pop()),
       body: _loading
@@ -67,36 +75,48 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
                 padding: const EdgeInsets.all(TokensStrip.s4),
                 children: [
                   if (_resumo != null) ...[
-                    Card(
-                      color: primary.withValues(alpha: 0.08),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _kpi('NPS', _resumo!.npsScore.toStringAsFixed(1)),
-                            _kpi('Média', _resumo!.media.toStringAsFixed(1)),
-                            _kpi('Respostas', '${_resumo!.total}'),
-                          ],
-                        ),
+                    FxSatellitePanel(
+                      accent: primary,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _kpi('NPS', _resumo!.npsScore.toStringAsFixed(1)),
+                          _kpi('Média', _resumo!.media.toStringAsFixed(1)),
+                          _kpi('Respostas', '${_resumo!.total}'),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
                         Expanded(
-                          child: _segmento('Promotores', _resumo!.promotores, _resumo!.total,
-                              const Color(0xFF2E7D32), Icons.sentiment_very_satisfied),
+                          child: _segmento(
+                            'Promotores',
+                            _resumo!.promotores,
+                            _resumo!.total,
+                            EagleTokens.good,
+                            Icons.sentiment_very_satisfied,
+                          ),
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: _segmento('Neutros', _resumo!.neutros, _resumo!.total,
-                              const Color(0xFFF9A825), Icons.sentiment_neutral),
+                          child: _segmento(
+                            'Neutros',
+                            _resumo!.neutros,
+                            _resumo!.total,
+                            EagleTokens.gold,
+                            Icons.sentiment_neutral,
+                          ),
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: _segmento('Detratores', _resumo!.detratores, _resumo!.total,
-                              const Color(0xFFC62828), Icons.sentiment_very_dissatisfied),
+                          child: _segmento(
+                            'Detratores',
+                            _resumo!.detratores,
+                            _resumo!.total,
+                            EagleTokens.bad,
+                            Icons.sentiment_very_dissatisfied,
+                          ),
                         ),
                       ],
                     ),
@@ -106,16 +126,20 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
                   const SizedBox(height: 8),
                   ..._recentes.map((n) {
                     if (n.score <= 6) {
-                      return _detratorCard(n);
+                      return _detratorCard(n, isDark: isDark);
                     }
-                    return ListTile(
+                    final scoreColor = EagleTokens.npsScoreColor(n.score, isDark: isDark);
+                    return FxSatelliteListTile(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      title: n.comentario?.isNotEmpty == true ? n.comentario! : 'Sem comentário',
+                      titleCase: false,
+                      accent: scoreColor,
+                      subtitle: Text('${_classify(n.score)} · ${n.criadoEm}'),
                       leading: CircleAvatar(
-                        backgroundColor: _scoreColor(n.score),
+                        backgroundColor: scoreColor,
                         foregroundColor: Colors.white,
                         child: Text('${n.score}'),
                       ),
-                      title: Text(n.comentario?.isNotEmpty == true ? n.comentario! : 'Sem comentário'),
-                      subtitle: Text('${_classify(n.score)} · ${n.criadoEm}'),
                     );
                   }),
                 ],
@@ -124,68 +148,60 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
     );
   }
 
-  Widget _detratorCard(NpsItem n) {
-    final detractorColor = const Color(0xFFC62828);
-    return Card(
+  Widget _detratorCard(NpsItem n, {required bool isDark}) {
+    final detractorColor = EagleTokens.npsScoreColor(n.score, isDark: isDark);
+    return FxSatellitePanel(
+      accent: detractorColor,
       margin: const EdgeInsets.only(bottom: 8),
-      color: detractorColor.withValues(alpha: 0.06),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  backgroundColor: detractorColor,
-                  foregroundColor: Colors.white,
-                  radius: 18,
-                  child: Text('${n.score}', style: const TextStyle(fontSize: 13)),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        n.alunoNome?.isNotEmpty == true ? n.alunoNome! : 'Detrator',
-                        style: const TextStyle(fontWeight: FontWeight.w700),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: detractorColor,
+                foregroundColor: Colors.white,
+                radius: 18,
+                child: Text('${n.score}', style: const TextStyle(fontSize: 13)),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      n.alunoNome?.isNotEmpty == true ? n.alunoNome! : 'Detrator',
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    Text(
+                      'Detrator · ${n.criadoEm}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
                       ),
-                      Text(
-                        'Detrator · ${n.criadoEm}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.65),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            if (n.comentario?.isNotEmpty == true) ...[
-              const SizedBox(height: 10),
-              Text(
-                n.comentario!,
-                style: const TextStyle(height: 1.4),
               ),
             ],
-            const SizedBox(height: 12),
-            const Text(
-              'Playbook: entre em contato para entender o problema e recuperar a confiança.',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-            ),
+          ),
+          if (n.comentario?.isNotEmpty == true) ...[
             const SizedBox(height: 10),
-            FilledButton.icon(
-              onPressed: n.alunoId != null ? () => _contatarDetrator(n) : null,
-              icon: const Icon(Icons.chat_bubble_outline, size: 18),
-              label: const Text('Entrar em contato'),
-            ),
+            Text(n.comentario!, style: const TextStyle(height: 1.4)),
           ],
-        ),
+          const SizedBox(height: 12),
+          const Text(
+            'Playbook: entre em contato para entender o problema e recuperar a confiança.',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 10),
+          FilledButton.icon(
+            onPressed: n.alunoId != null ? () => _contatarDetrator(n) : null,
+            icon: const Icon(Icons.chat_bubble_outline, size: 18),
+            label: const Text('Entrar em contato'),
+          ),
+        ],
       ),
     );
   }
@@ -199,19 +215,23 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
 
   Widget _segmento(String label, int valor, int total, Color color, IconData icon) {
     final pct = total > 0 ? (valor * 100 / total).round() : 0;
-    return Card(
-      color: color.withValues(alpha: 0.08),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 20),
-            const SizedBox(height: 4),
-            Text('$valor', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: color)),
-            Text('$pct% · $label',
-                style: const TextStyle(fontSize: 11), textAlign: TextAlign.center),
-          ],
-        ),
+    return FxSatellitePanel(
+      accent: color,
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(height: 4),
+          Text(
+            '$valor',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: color),
+          ),
+          Text(
+            '$pct% · $label',
+            style: const TextStyle(fontSize: 11),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
@@ -220,11 +240,5 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
     if (score >= 9) return 'Promotor';
     if (score >= 7) return 'Neutro';
     return 'Detrator';
-  }
-
-  Color _scoreColor(int score) {
-    if (score >= 9) return const Color(0xFF2E7D32);
-    if (score >= 7) return const Color(0xFFF9A825);
-    return const Color(0xFFC62828);
   }
 }

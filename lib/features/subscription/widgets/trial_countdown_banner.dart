@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../planos/data/planos_repository.dart';
 import '../../planos/providers/plano_features_provider.dart';
@@ -24,7 +25,7 @@ class TrialCountdownBanner extends ConsumerWidget {
 
         final dias = trial.diasRestantes;
         final primary = Theme.of(context).colorScheme.primary;
-        final warn = dias <= 3 ? Colors.orangeAccent : primary;
+        final warn = dias <= 3 ? EagleTokens.warn : primary;
 
         return Padding(
           padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 0, TokensStrip.s5, 8),

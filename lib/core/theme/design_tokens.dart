@@ -144,4 +144,27 @@ abstract class EagleTokens {
     if (taxa >= 50) return isDark ? const Color(0xFFE2B46F) : warn;
     return isDark ? const Color(0xFFFF8B8B) : bad;
   }
+
+  /// Cor semântica para scores 0–100 (form check, qualidade, etc.).
+  static Color scoreColor(int? score, {bool isDark = false}) {
+    if (score == null) return isDark ? darkInkMute : inkMute;
+    if (score >= 80) return isDark ? const Color(0xFF6FE296) : good;
+    if (score >= 60) return isDark ? const Color(0xFFE2B46F) : warn;
+    return isDark ? const Color(0xFFFF8B8B) : bad;
+  }
+
+  /// NPS: promotor (9–10), neutro (7–8), detrator (0–6).
+  static Color npsScoreColor(int score, {bool isDark = false}) {
+    if (score >= 9) return isDark ? const Color(0xFF6FE296) : good;
+    if (score >= 7) return isDark ? const Color(0xFFE2B46F) : gold;
+    return isDark ? const Color(0xFFFF8B8B) : bad;
+  }
+
+  /// Barra de força de senha (0–1).
+  static Color passwordStrengthColor(double score) {
+    if (score <= 0.25) return bad;
+    if (score <= 0.5) return warn;
+    if (score <= 0.75) return gold;
+    return good;
+  }
 }

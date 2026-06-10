@@ -496,7 +496,7 @@ class _SlotTile extends StatelessWidget {
               done
                   ? Icons.check_circle_rounded
                   : Icons.add_circle_outline_rounded,
-              color: done ? Colors.green : scheme.primary,
+              color: done ? EagleTokens.good : scheme.primary,
               size: 21,
             ),
             const SizedBox(width: 14),

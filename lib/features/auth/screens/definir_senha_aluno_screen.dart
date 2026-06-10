@@ -66,13 +66,7 @@ class _DefinirSenhaAlunoScreenState
     return score.clamp(0, 1);
   }
 
-  Color _strengthColor() {
-    final s = _passwordStrength();
-    if (s <= 0.25) return EagleTokens.bad;
-    if (s <= 0.5) return Colors.orange;
-    if (s <= 0.75) return Colors.amber;
-    return EagleTokens.good;
-  }
+  Color _strengthColor() => EagleTokens.passwordStrengthColor(_passwordStrength());
 
   String _strengthLabel() {
     final s = _passwordStrength();

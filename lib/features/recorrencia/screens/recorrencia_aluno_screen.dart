@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -57,7 +58,7 @@ class _RecorrenciaAlunoScreenState extends ConsumerState<RecorrenciaAlunoScreen>
                       subtitle: _erro!,
                       cta: 'Tentar novamente',
                       onCta: _load,
-                      color: Colors.red.shade700,
+                      color: EagleTokens.bad,
                     )
                   else if (_assinatura == null)
                     _empty(
@@ -68,10 +69,10 @@ class _RecorrenciaAlunoScreenState extends ConsumerState<RecorrenciaAlunoScreen>
                       color: primary,
                     )
                   else
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
+                    FxSatellitePanel(
+                      accent: primary,
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Row(
@@ -109,7 +110,6 @@ class _RecorrenciaAlunoScreenState extends ConsumerState<RecorrenciaAlunoScreen>
                               ),
                           ],
                         ),
-                      ),
                     ),
                 ],
               ),

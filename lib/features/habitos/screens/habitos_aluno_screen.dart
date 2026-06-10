@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -184,7 +185,7 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                                     child: Text(
                                       '🔥 ${h.streakAtual}',
                                       style: const TextStyle(
-                                          color: Colors.orange,
+                                          color: EagleTokens.warn,
                                           fontSize: 12,
                                           fontWeight: FontWeight.w800),
                                     ),
@@ -194,13 +195,13 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 10, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: Colors.green.withValues(alpha: .12),
+                                      color: EagleTokens.goodSoft,
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Text(
                                       '${h.feitosNaSemana}/${h.metaSemanal}',
                                       style: const TextStyle(
-                                          color: Colors.green,
+                                          color: EagleTokens.good,
                                           fontSize: 12,
                                           fontWeight: FontWeight.w800),
                                     ),

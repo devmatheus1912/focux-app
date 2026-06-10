@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -81,10 +82,8 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
   }
 
   Color _scoreColor(int? score) {
-    if (score == null) return Colors.grey;
-    if (score >= 80) return Colors.green;
-    if (score >= 60) return Colors.amber.shade700;
-    return Colors.red;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return EagleTokens.scoreColor(score, isDark: isDark);
   }
 
   @override
