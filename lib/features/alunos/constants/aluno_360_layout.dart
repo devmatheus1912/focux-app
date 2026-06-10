@@ -12,11 +12,15 @@ abstract final class Aluno360Layout {
   Aluno360Layout._();
 
   static const double screenPadding = TokensStrip.s4;
-  static const double sectionGap = TokensStrip.s3;
+  static const double sectionGap = TokensStrip.s4;
   static const double cardPadding = TokensStrip.s4;
   static const double insetCardRadius = TokensStrip.rCard;
   static const double tabBarHeight = 44;
-  static const double tabContentGap = 12;
+  static const double tabContentGap = TokensStrip.s4;
+  static const EdgeInsets emptyMiniStatePadding =
+      EdgeInsets.symmetric(horizontal: 14, vertical: 12);
+  static const EdgeInsets moduleTilePadding =
+      EdgeInsets.symmetric(horizontal: 12, vertical: 10);
   static const double stickyBarContentHeight = 60;
   static const double snackbarStickyReserve = 76;
   static const double operacaoTopSnackHeight = 52;

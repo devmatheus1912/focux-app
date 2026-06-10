@@ -176,10 +176,8 @@ class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandC
                       children: [
                         Text(
                           title,
-                          style: TextStyle(
-                            fontSize: 12.8,
+                          style: dashboardCardTitleStyle(ink).copyWith(
                             fontWeight: FontWeight.w800,
-                            color: ink,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -187,7 +185,10 @@ class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandC
                         const SizedBox(height: 3),
                         Text(
                           subtitle,
-                          style: TextStyle(fontSize: 11.2, color: mute),
+                          style: dashboardCardSubtitleStyle(
+                            context,
+                            isDark: isDark,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -267,13 +268,11 @@ class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandC
                             isCommandPreparing
                                 ? 'lendo sinais'
                                 : 'Ver prioridades',
-                            style: TextStyle(
-                              color: dashboardPrioritiesChipForeground(
+                            style: dashboardChipLabelStyle(
+                              dashboardPrioritiesChipForeground(
                                 primary,
                                 isDark: isDark,
                               ),
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w800,
                             ),
                           ),
                           if (!isCommandPreparing) ...[

@@ -35,7 +35,7 @@ class Aluno360MeasurementCard extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final child = Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      padding: Aluno360Layout.moduleTilePadding,
       decoration: fxListCardDecoration(context),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -249,7 +249,7 @@ class Aluno360ModuleTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          padding: Aluno360Layout.moduleTilePadding,
           decoration:
               highlight
                   ? fxListCardDecoration(

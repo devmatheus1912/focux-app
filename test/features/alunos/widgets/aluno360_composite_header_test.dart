@@ -3,6 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:focux_app/core/theme/tokens_strip.dart';
 import 'package:focux_app/features/alunos/constants/aluno_360_layout.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_composite_header.dart';
 
@@ -69,7 +70,7 @@ void main() {
     final gap = tabTop - heroBottom;
 
     expect(gap, lessThanOrEqualTo(1.0));
-    expect(Aluno360Layout.tabContentGap, 12);
+    expect(Aluno360Layout.tabContentGap, TokensStrip.s4);
 
     await expectLater(
       find.byType(CustomScrollView),

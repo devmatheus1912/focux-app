@@ -28,6 +28,7 @@ import '../../subscription/widgets/dashboard_activation_cta.dart';
 import '../../onboarding/providers/onboarding_provider.dart';
 import '../utils/dashboard_day_focus.dart';
 import '../utils/dashboard_a11y.dart';
+import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_sparkline_helpers.dart';
 import '../widgets/dashboard_day_focus_banner.dart';
 import '../widgets/dashboard_attention_card.dart';
@@ -849,11 +850,7 @@ class _PersonalDashboardScreenState
                               ),
                               child: Text(
                                 stickyCommandActionsLabel,
-                                style: AppTypography.inter(
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: link,
-                                ),
+                                style: dashboardChipLabelStyle(link),
                               ),
                             ),
                           ),

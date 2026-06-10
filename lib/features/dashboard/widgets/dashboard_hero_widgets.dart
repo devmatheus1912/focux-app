@@ -31,10 +31,10 @@ class DashboardHeroProgressRail extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: Text(
               percentLabel!,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.78),
-                fontSize: 11.5,
+              style: dashboardHeroCaptionOnTealStyle(
                 fontWeight: FontWeight.w800,
+              ).copyWith(
+                color: Colors.white.withValues(alpha: 0.78),
                 letterSpacing: 0.2,
               ),
             ),
@@ -161,11 +161,9 @@ class DashboardHeroMiniStat extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
-            color: dashboardHeroLabelOnTeal(),
-            fontSize: 10.5,
+          style: dashboardHeroEyebrowOnTeal().copyWith(
+            fontSize: 12,
             letterSpacing: 0.08,
-            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 2),

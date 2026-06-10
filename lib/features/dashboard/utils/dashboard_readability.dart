@@ -51,3 +51,84 @@ Color dashboardPrioritiesChipForeground(Color primary, {required bool isDark}) =
     isDark
         ? Colors.white.withValues(alpha: 0.96)
         : BrandPalette.sectionAction(primary, dark: false);
+
+/// Eyebrow / micro labels em cards do hub (≥13px, tracking premium).
+TextStyle dashboardMicroLabelStyle(
+  BuildContext context, {
+  required bool isDark,
+  Color? color,
+  FontWeight fontWeight = FontWeight.w700,
+  double letterSpacing = 0.28,
+}) {
+  return AppTypography.inter(
+    fontSize: TokensStrip.fontBodySm,
+    fontWeight: fontWeight,
+    letterSpacing: letterSpacing,
+    height: 1.15,
+    color: color ?? dashboardReadableCaption(context, isDark: isDark),
+  );
+}
+
+TextStyle dashboardHeroEyebrowOnTeal() {
+  return AppTypography.inter(
+    color: dashboardHeroLabelOnTeal(),
+    fontSize: TokensStrip.fontBodySm,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0.14,
+    height: 1.1,
+  );
+}
+
+TextStyle dashboardHeroCaptionOnTealStyle({
+  FontWeight fontWeight = FontWeight.w500,
+}) {
+  return AppTypography.inter(
+    color: dashboardHeroCaptionOnTeal(),
+    fontSize: TokensStrip.fontBodySm,
+    fontWeight: fontWeight,
+    height: 1.3,
+  );
+}
+
+TextStyle dashboardHeroMutedOnTealStyle({
+  FontWeight fontWeight = FontWeight.w700,
+}) {
+  return AppTypography.inter(
+    color: dashboardHeroMutedOnTeal(),
+    fontSize: TokensStrip.fontBodySm,
+    fontWeight: fontWeight,
+    height: 1.2,
+  );
+}
+
+TextStyle dashboardCardTitleStyle(Color ink) {
+  return AppTypography.inter(
+    fontSize: TokensStrip.fontBodySm,
+    fontWeight: FontWeight.w700,
+    color: ink,
+    letterSpacing: -0.1,
+    height: 1.2,
+  );
+}
+
+TextStyle dashboardCardSubtitleStyle(
+  BuildContext context, {
+  required bool isDark,
+  FontWeight fontWeight = FontWeight.w500,
+}) {
+  return AppTypography.inter(
+    fontSize: TokensStrip.fontBodySm,
+    fontWeight: fontWeight,
+    color: dashboardReadableCaption(context, isDark: isDark),
+    height: 1.25,
+  );
+}
+
+TextStyle dashboardChipLabelStyle(Color foreground) {
+  return AppTypography.inter(
+    color: foreground,
+    fontSize: TokensStrip.fontBodySm,
+    fontWeight: FontWeight.w800,
+    height: 1.1,
+  );
+}

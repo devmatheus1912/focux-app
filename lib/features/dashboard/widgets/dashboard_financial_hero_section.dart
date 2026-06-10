@@ -193,21 +193,12 @@ class DashboardFinancialHeroSection extends StatelessWidget {
       children: [
         Text(
           'Receita recebida · $mes',
-          style: TextStyle(
-            color: dashboardHeroLabelOnTeal(),
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.12,
-          ),
+          style: dashboardHeroEyebrowOnTeal(),
         ),
         const SizedBox(height: 4),
         Text(
           'Nenhuma receita lançada em $mes. Registre cobranças para acompanhar a meta.',
-          style: TextStyle(
-            color: dashboardHeroCaptionOnTeal(),
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
+          style: dashboardHeroCaptionOnTealStyle(),
         ),
         const SizedBox(height: 8),
         Row(
@@ -218,10 +209,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
               padding: const EdgeInsets.only(left: 8, bottom: 5),
               child: Text(
                 'recebido',
-                style: TextStyle(
-                  color: dashboardHeroLabelOnTeal(),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                style: dashboardHeroEyebrowOnTeal().copyWith(
                   letterSpacing: 0.1,
                 ),
               ),
@@ -231,11 +219,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           _metaLine(),
-          style: TextStyle(
-            color: dashboardHeroMutedOnTeal(),
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-          ),
+          style: dashboardHeroMutedOnTealStyle(),
         ),
         const SizedBox(height: 12),
         _financeHeroCta(context),
@@ -269,12 +253,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
       children: [
         Text(
           'Receita recebida · $mes',
-          style: TextStyle(
-            color: dashboardHeroLabelOnTeal(),
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.12,
-          ),
+          style: dashboardHeroEyebrowOnTeal(),
         ),
         const SizedBox(height: 4),
         Text(
@@ -283,11 +262,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
               : pendente > 0
               ? 'Recebido agora. Faltam R\$ ${pendente.toInt()} para a meta.'
               : 'Recebido agora. Meta do mês sob controle.',
-          style: TextStyle(
-            color: dashboardHeroCaptionOnTeal(),
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
+          style: dashboardHeroCaptionOnTealStyle(),
         ),
         const SizedBox(height: 8),
         Row(
@@ -298,10 +273,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
               padding: const EdgeInsets.only(left: 8, bottom: 5),
               child: Text(
                 'recebido',
-                style: TextStyle(
-                  color: dashboardHeroLabelOnTeal(),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                style: dashboardHeroEyebrowOnTeal().copyWith(
                   letterSpacing: 0.1,
                 ),
               ),
@@ -313,11 +285,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
           children: [
             Text(
               _metaLine(),
-              style: TextStyle(
-                color: dashboardHeroMutedOnTeal(),
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-              ),
+              style: dashboardHeroMutedOnTealStyle(),
             ),
             if (metaSuperada) ...[
               const SizedBox(width: 8),
@@ -358,11 +326,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Text(
                     'Histórico mensal aparece ao registrar cobranças',
-                    style: TextStyle(
-                      color: dashboardHeroCaptionOnTeal(),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: dashboardHeroCaptionOnTealStyle(),
                   ),
                 );
               }
@@ -374,9 +338,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
                     children: [
                       Text(
                         'Receita · últimos meses',
-                        style: TextStyle(
-                          color: dashboardHeroCaptionOnTeal(),
-                          fontSize: 11,
+                        style: dashboardHeroCaptionOnTealStyle(
                           fontWeight: FontWeight.w600,
                         ),
                       ),

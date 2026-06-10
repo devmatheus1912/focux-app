@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_ferramentas_logic.dart';
 import 'aluno360_module_tile.dart';
@@ -62,20 +63,17 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
     );
   }
 
-  Widget _section(String title, List<Widget> tiles) {
+  Widget _section(BuildContext context, String title, List<Widget> tiles) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: AppTypography.inter(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.2,
-            color:
-                isDark
-                    ? EagleTokens.darkInkMute.withValues(alpha: 0.92)
-                    : TokensStrip.textPrimary.withValues(alpha: 0.76),
+          style: Aluno360Layout.eyebrowLabelStyle(
+            context,
+            isDark
+                ? EagleTokens.darkInkMute.withValues(alpha: 0.92)
+                : TokensStrip.textPrimary.withValues(alpha: 0.76),
           ),
         ),
         const SizedBox(height: 8),
@@ -239,9 +237,9 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _section('Treino & evolução', treinoTiles),
+          _section(context, 'Treino & evolução', treinoTiles),
           const SizedBox(height: _sectionGap),
-          _section('Perfil & gestão', perfilTiles),
+          _section(context, 'Perfil & gestão', perfilTiles),
         ],
       ),
     );

@@ -23,7 +23,7 @@ class Aluno360EmptyMiniState extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final shell = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: Aluno360Layout.emptyMiniStatePadding,
       decoration: BoxDecoration(
         color: primary.withValues(alpha: isDark ? 0.10 : 0.06),
         borderRadius: BorderRadius.circular(16),
@@ -38,11 +38,7 @@ class Aluno360EmptyMiniState extends StatelessWidget {
               text,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: Aluno360Layout.captionStyle(context).copyWith(
-                color: mute,
-                fontWeight: FontWeight.w600,
-                height: 1.25,
-              ),
+              style: Aluno360Layout.panelTitleStyle(context, mute),
             ),
           ),
         ],

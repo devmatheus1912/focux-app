@@ -41,7 +41,6 @@ class DashboardAttentionCard extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = dashboardReadableMuted(context, isDark: isDark);
     final accent = statusAccent ?? EagleTokens.warn;
 
     final semanticsLabel =
@@ -101,10 +100,8 @@ class DashboardAttentionCard extends StatelessWidget {
                           fxTitleCaseName(nome),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTypography.inter(
-                            fontSize: 13,
+                          style: dashboardCardTitleStyle(ink).copyWith(
                             fontWeight: FontWeight.w600,
-                            color: ink,
                           ),
                         ),
                         Text(
@@ -113,10 +110,9 @@ class DashboardAttentionCard extends StatelessWidget {
                               : 'Objetivo não definido',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTypography.inter(
-                            fontSize: 11,
-                            color: mute,
-                            height: 1.2,
+                          style: dashboardCardSubtitleStyle(
+                            context,
+                            isDark: isDark,
                           ),
                         ),
                       ],
@@ -142,9 +138,9 @@ class DashboardAttentionCard extends StatelessWidget {
                         titulo.toUpperCase(),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTypography.inter(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w700,
+                        style: dashboardMicroLabelStyle(
+                          context,
+                          isDark: isDark,
                           color: accent,
                           letterSpacing: 0.35,
                         ),
@@ -158,12 +154,12 @@ class DashboardAttentionCard extends StatelessWidget {
                 showStatusBadge ? subt : titulo,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppTypography.inter(
-                  fontSize: 12.2,
-                  color: ink,
-                  height: 1.25,
-                  fontWeight: showStatusBadge ? FontWeight.w400 : FontWeight.w600,
-                ),
+                style: dashboardCardSubtitleStyle(
+                  context,
+                  isDark: isDark,
+                  fontWeight:
+                      showStatusBadge ? FontWeight.w400 : FontWeight.w600,
+                ).copyWith(color: ink),
               ),
               if (!showStatusBadge) ...[
                 const SizedBox(height: 4),
@@ -171,10 +167,9 @@ class DashboardAttentionCard extends StatelessWidget {
                   subt,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTypography.inter(
-                    fontSize: 11.5,
-                    color: mute,
-                    height: 1.25,
+                  style: dashboardCardSubtitleStyle(
+                    context,
+                    isDark: isDark,
                   ),
                 ),
               ],
