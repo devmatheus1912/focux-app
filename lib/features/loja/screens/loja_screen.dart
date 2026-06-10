@@ -318,31 +318,19 @@ class _LojaScreenState extends ConsumerState<LojaScreen>
 
               button: true,
 
-              child: Card(
+              child: FxSatelliteListTile(
                 margin: const EdgeInsets.only(bottom: TokensStrip.s3),
-
-                child: ListTile(
-                  title: Text(
-                    p.titulo,
-
-                    style: AppTypography.inter(
-                      fontWeight: FontWeight.w700,
-
-                      color: scheme.onSurface,
-                    ),
-                  ),
-
-                  subtitle: Text(
-                    p.descricao?.isNotEmpty == true
-                        ? p.descricao!
-                        : '${p.duracaoMeses} mês(es)',
-                  ),
-
-                  trailing: FilledButton(
-                    onPressed: () => _checkoutPacote(p),
-
-                    child: Text('R\$ ${p.valor.toStringAsFixed(0)}'),
-                  ),
+                accent: scheme.primary,
+                title: p.titulo,
+                titleCase: false,
+                subtitle: Text(
+                  p.descricao?.isNotEmpty == true
+                      ? p.descricao!
+                      : '${p.duracaoMeses} mês(es)',
+                ),
+                trailing: FilledButton(
+                  onPressed: () => _checkoutPacote(p),
+                  child: Text('R\$ ${p.valor.toStringAsFixed(0)}'),
                 ),
               ),
             ),
@@ -396,17 +384,15 @@ class _LojaScreenState extends ConsumerState<LojaScreen>
             child: Semantics(
               label: 'Pedido ${p['buyerEmail']}, status $status',
 
-              child: ListTile(
-                title: Text(p['buyerEmail'] as String? ?? 'Comprador'),
-
+              child: FxSatelliteListTile(
+                accent: scheme.primary,
+                title: p['buyerEmail'] as String? ?? 'Comprador',
+                titleCase: false,
                 subtitle: Text('Status: $status'),
-
                 trailing: Text(
                   'R\$ ${p['valor']}',
-
                   style: AppTypography.inter(
                     fontWeight: FontWeight.w700,
-
                     color: scheme.primary,
                   ),
                 ),

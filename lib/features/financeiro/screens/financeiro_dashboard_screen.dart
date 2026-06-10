@@ -10,6 +10,7 @@ import '../data/financeiro_repository.dart';
 import '../../pricing/widgets/smart_pricing_card.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
 
 class FinanceiroDashboardScreen extends ConsumerStatefulWidget {
   const FinanceiroDashboardScreen({super.key});
@@ -23,6 +24,7 @@ class _FinanceiroDashboardScreenState
     extends ConsumerState<FinanceiroDashboardScreen> {
   FinanceiroDashboard? _data;
   bool _loading = true;
+  String? _erro;
 
   @override
   void initState() {
@@ -31,7 +33,10 @@ class _FinanceiroDashboardScreenState
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final repo = FinanceiroRepository(ref.read(apiClientProvider));
       final dashboard = await repo.dashboard();
@@ -42,8 +47,13 @@ class _FinanceiroDashboardScreenState
         });
       }
     } catch (e) {
-      debugPrint('[Focux] Error: $e');
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _erro = friendlyError(e);
+          _data = null;
+          _loading = false;
+        });
+      }
     }
   }
 
@@ -95,7 +105,7 @@ class _FinanceiroDashboardScreenState
               ),
               const SizedBox(height: 4),
               Text(
-                'Verifique sua conexão e tente novamente.',
+                _erro ?? 'Verifique sua conexão e tente novamente.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: muteErr, fontSize: 13, height: 1.35),
               ),

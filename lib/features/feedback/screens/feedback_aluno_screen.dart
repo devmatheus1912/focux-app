@@ -114,7 +114,10 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
                             .where((e) => e.id == f.exercicioId)
                             .map((e) => e.nome)
                             .firstOrNull ?? 'Exercício #${f.exercicioId}';
-                        return Card(
+                        final primary = Theme.of(context).colorScheme.primary;
+                        return FxSatellitePanel(
+                          accent: primary,
+                          padding: EdgeInsets.zero,
                           child: ExpansionTile(
                             title: Text(exNome),
                             subtitle: Text('${f.statusAnalise ?? 'PENDENTE'} · ${f.criadoEm.toLocal().toString().substring(0, 16)}'),

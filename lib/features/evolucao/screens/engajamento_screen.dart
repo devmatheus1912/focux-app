@@ -4,6 +4,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -112,42 +113,65 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
           ),
         ],
       ),
-      body:
-          _loading
-              ? const FxLoading()
-              : _erro != null
-              ? Center(child: Text('Erro: $_erro'))
+      body: _loading
+          ? const Center(child: FxLoading())
+          : _erro != null
+              ? ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    FxEmptyState(
+                      icon: 'cloud',
+                      title: 'Não conseguimos carregar o engajamento',
+                      subtitle: _erro!,
+                      action: FxEmptyAction(
+                        label: 'Tentar novamente',
+                        onTap: _load,
+                      ),
+                    ),
+                  ],
+                )
               : _eventos.isEmpty
-              ? const Center(child: Text('Nenhum evento registrado'))
-              : ListView.separated(
-                padding: const EdgeInsets.all(TokensStrip.s4),
-                itemCount: _eventos.length,
-                separatorBuilder:
-                    (_, __) => const Divider(height: 1, indent: 56),
-                itemBuilder: (_, i) {
-                  final e = _eventos[i];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor:
-                          Theme.of(context).colorScheme.primaryContainer,
-                      child: Icon(
-                        _iconForTipo(e.tipo),
-                        color: Theme.of(context).colorScheme.primary,
-                        size: 20,
-                      ),
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: const [
+                        FxEmptyState(
+                          icon: 'chart',
+                          title: 'Nenhum evento registrado',
+                          subtitle:
+                              'Check-ins e treinos do aluno aparecerão aqui nos últimos dias.',
+                        ),
+                      ],
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(TokensStrip.s4),
+                      itemCount: _eventos.length,
+                      itemBuilder: (_, i) {
+                        final e = _eventos[i];
+                        final primary = Theme.of(context).colorScheme.primary;
+                        return FxSatelliteListTile(
+                          accent: primary,
+                          title: e.descricao,
+                          titleCase: false,
+                          subtitle: Text(e.tipo),
+                          trailing: Text(
+                            _formatarDataHora(e.dataHora),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: TokensStrip.textSecondary,
+                            ),
+                          ),
+                          leading: CircleAvatar(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primaryContainer,
+                            child: Icon(
+                              _iconForTipo(e.tipo),
+                              color: primary,
+                              size: 20,
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                    title: Text(e.descricao),
-                    subtitle: Text(e.tipo),
-                    trailing: Text(
-                      _formatarDataHora(e.dataHora),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: TokensStrip.textSecondary,
-                      ),
-                    ),
-                  );
-                },
-              ),
     );
   }
 }

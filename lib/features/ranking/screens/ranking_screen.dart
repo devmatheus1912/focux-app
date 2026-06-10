@@ -272,7 +272,12 @@ class _RankingTile extends StatelessWidget {
       Theme.of(context).colorScheme.primary,
       dark: isDark,
     );
-    return ListTile(
+    final primary = Theme.of(context).colorScheme.primary;
+    return FxSatelliteListTile(
+      accent: primary,
+      title: item.nome,
+      titleCase: false,
+      subtitle: Text('${item.totalAlunosAtivos} alunos ativos'),
       leading: CircleAvatar(
         backgroundColor: isDark ? EagleTokens.darkCard : primarySoft,
         child: Text(
@@ -283,8 +288,6 @@ class _RankingTile extends StatelessWidget {
           ),
         ),
       ),
-      title: Text(item.nome),
-      subtitle: Text('${item.totalAlunosAtivos} alunos ativos'),
     );
   }
 }

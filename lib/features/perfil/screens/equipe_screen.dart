@@ -306,20 +306,15 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
 
                                 label: 'Membro ${m['userEmail']}',
 
-                                child: ListTile(
-
-                                  leading: Icon(
-
-                                    Icons.person_outline,
-
-                                    color: scheme.primary,
-
-                                  ),
-
-                                  title: Text(m['userEmail'] as String? ?? 'Membro'),
-
+                                child: FxSatelliteListTile(
+                                  accent: scheme.primary,
+                                  title: m['userEmail'] as String? ?? 'Membro',
+                                  titleCase: false,
                                   subtitle: Text('${m['role']} · ${m['status']}'),
-
+                                  leading: Icon(
+                                    Icons.person_outline,
+                                    color: scheme.primary,
+                                  ),
                                 ),
 
                               ),

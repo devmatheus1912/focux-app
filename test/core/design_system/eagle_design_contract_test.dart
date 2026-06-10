@@ -78,7 +78,97 @@ void main() {
         );
       },
     );
+
+    test(
+      'blocks Card+ListTile and bare ListTile without fxListTileCardShell',
+      () {
+        const allowedListTileShellBypassFiles = {
+          'lib/core/widgets/fx_shell_scaffold.dart',
+          'lib/features/qa/screens/qa_smoke_screen.dart',
+          'lib/features/exercicios/screens/add_exercicio_screen.dart',
+          'lib/features/perfil/widgets/landing_editor_widgets.dart',
+          'lib/features/checkin/widgets/gated_pose_coach_panel.dart',
+          'lib/features/trilhas/screens/trilhas_screen.dart',
+        };
+
+        final failures = <String>[];
+        final files = Directory('lib')
+            .listSync(recursive: true)
+            .whereType<File>()
+            .where((file) => file.path.endsWith('.dart'));
+
+        for (final file in files) {
+          final path = file.path.replaceAll(r'\', '/');
+          final normalizedPath = path.substring(path.indexOf('lib/'));
+          final source = file.readAsStringSync();
+
+          if (!allowedListTileShellBypassFiles.contains(normalizedPath)) {
+            failures.addAll(
+              _findCardWrappedListTiles(source, normalizedPath),
+            );
+          }
+
+          if (allowedListTileShellBypassFiles.contains(normalizedPath)) continue;
+          failures.addAll(
+            _findBareListTilesWithoutShell(source, normalizedPath),
+          );
+        }
+
+        expect(
+          failures,
+          isEmpty,
+          reason:
+              'ListTile must use fxListTileCardShell or FxSatelliteListTile:\n'
+              '${failures.join('\n')}',
+        );
+      },
+    );
   });
+}
+
+List<String> _findCardWrappedListTiles(String source, String path) {
+  final failures = <String>[];
+  final cardPattern = RegExp(r'\bCard\s*\(');
+
+  for (final cardMatch in cardPattern.allMatches(source)) {
+    final sliceEnd = (cardMatch.start + 1200).clamp(0, source.length);
+    final slice = source.substring(cardMatch.start, sliceEnd);
+    final listTileMatch = RegExp(r'child:\s*ListTile\s*\(').firstMatch(slice);
+    if (listTileMatch == null) continue;
+
+    final beforeListTile = slice.substring(0, listTileMatch.start);
+    if (beforeListTile.contains('fxListTileCardShell') ||
+        beforeListTile.contains('FxSatelliteListTile')) {
+      continue;
+    }
+
+    final line =
+        '\n'.allMatches(source.substring(0, cardMatch.start + listTileMatch.start)).length +
+        1;
+    failures.add('Card+ListTile: $path:$line');
+  }
+
+  return failures;
+}
+
+List<String> _findBareListTilesWithoutShell(String source, String path) {
+  final failures = <String>[];
+  final listTilePattern = RegExp(r'(?:return|child)\s*:\s*ListTile\s*\(');
+
+  for (final match in listTilePattern.allMatches(source)) {
+    final windowStart = (match.start - 600).clamp(0, source.length);
+    final before = source.substring(windowStart, match.start);
+    if (before.contains('fxListTileCardShell') ||
+        before.contains('FxSatelliteListTile')) {
+      continue;
+    }
+
+    final line =
+        '\n'.allMatches(source.substring(0, match.start)).length + 1;
+    failures.add('bare ListTile: $path:$line');
+  }
+
+  return failures;
 }
 
 class _EagleGateRule {

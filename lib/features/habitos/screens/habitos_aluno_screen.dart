@@ -125,14 +125,19 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                       itemCount: _habitos.length,
                       itemBuilder: (_, i) {
                         final h = _habitos[i];
-                        return Card(
+                        final primary = Theme.of(context).colorScheme.primary;
+                        return FxSatellitePanel(
                           margin: const EdgeInsets.only(bottom: 12),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(12),
-                            onTap: () => _toggle(h),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Row(
+                          accent: h.feitoHoje ? EagleTokens.good : primary,
+                          padding: EdgeInsets.zero,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(20),
+                              onTap: () => _toggle(h),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
                                 children: [
                                   Semantics(
                                     label: h.feitoHoje
@@ -210,6 +215,7 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                               ),
                             ),
                           ),
+                        ),
                         );
                       },
                     ),
