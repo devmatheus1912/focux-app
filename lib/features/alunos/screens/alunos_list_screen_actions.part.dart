@@ -502,11 +502,13 @@ class _ExcluirAlunosSheet extends StatelessWidget {
 class _AlunosErrorState extends StatelessWidget {
   final bool isDark;
   final Color primary;
+  final String message;
   final VoidCallback onRetry;
 
   const _AlunosErrorState({
     required this.isDark,
     required this.primary,
+    required this.message,
     required this.onRetry,
   });
 
@@ -550,7 +552,7 @@ class _AlunosErrorState extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Verifique sua conexão e tente novamente.',
+                message,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: mute, fontSize: 13, height: 1.35),
               ),

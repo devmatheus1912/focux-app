@@ -351,12 +351,12 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
     String statusText;
 
     if (aluno.statusFinanceiro == 'INADIMPLENTE' || aluno.inadimplente) {
-      statusBg = isDark ? const Color(0x24FF8B8B) : EagleTokens.badSoft;
-      statusColor = isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad;
+      statusBg = EagleTokens.badSoft;
+      statusColor = EagleTokens.bad;
       statusText = 'Inadimplente';
     } else if (aluno.status == 'INATIVO') {
-      statusBg = isDark ? const Color(0x24E2B46F) : EagleTokens.warnSoft;
-      statusColor = isDark ? const Color(0xFFE2B46F) : EagleTokens.warn;
+      statusBg = EagleTokens.warnSoft;
+      statusColor = EagleTokens.warn;
       statusText = 'Inativo';
     } else if (aluno.emRisco) {
       final riscoColors = alunoRiscoAltoBadgeColors(isDark);
@@ -364,8 +364,8 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
       statusColor = riscoColors.$1;
       statusText = 'Risco alto';
     } else {
-      statusBg = isDark ? const Color(0x1F6FE296) : EagleTokens.goodSoft;
-      statusColor = isDark ? const Color(0xFF6FE296) : EagleTokens.good;
+      statusBg = EagleTokens.goodSoft;
+      statusColor = EagleTokens.good;
       statusText = 'Ativo';
     }
 

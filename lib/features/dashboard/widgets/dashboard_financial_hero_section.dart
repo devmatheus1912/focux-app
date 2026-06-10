@@ -58,7 +58,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
         style: FilledButton.styleFrom(
           minimumSize: const Size.fromHeight(44),
           backgroundColor: Colors.white,
-          foregroundColor: const Color(0xFF0A2E2E),
+          foregroundColor: BrandPalette.deep(heroDeep),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(TokensStrip.rButton),
           ),
@@ -147,10 +147,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
                   gradient: LinearGradient(
-                    colors:
-                        themeDark
-                            ? const [Color(0xFF128989), Color(0xFF0A2E2E)]
-                            : [heroPrimary, heroDeep],
+                    colors: [heroPrimary, heroDeep],
                     begin: begin,
                     end: end,
                   ),

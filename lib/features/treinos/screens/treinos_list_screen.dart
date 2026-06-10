@@ -8,6 +8,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -298,6 +299,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
               (e, _) => _TreinosErrorState(
                 isDark: isDark,
                 primary: primary,
+                message: friendlyError(e),
                 onRetry: refresh,
               ),
           data: (treinos) {
@@ -2402,11 +2404,13 @@ class _TinyBadge extends StatelessWidget {
 class _TreinosErrorState extends StatelessWidget {
   final bool isDark;
   final Color primary;
+  final String message;
   final VoidCallback onRetry;
 
   const _TreinosErrorState({
     required this.isDark,
     required this.primary,
+    required this.message,
     required this.onRetry,
   });
 
@@ -2433,7 +2437,7 @@ class _TreinosErrorState extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              'Verifique a conexão e tente novamente.',
+              message,
               textAlign: TextAlign.center,
               style: AppTypography.inter(color: mute, fontSize: 13),
             ),

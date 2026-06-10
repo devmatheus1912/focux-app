@@ -4,7 +4,6 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/fx_utils.dart';
-import '../../../core/theme/theme_provider.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -243,7 +242,7 @@ class _PersonalDashboardScreenState
     final chromeOnDark = themeDark;
 
     return Scaffold(
-      backgroundColor: shellScaffoldColor,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
         child: homeAsync.when(

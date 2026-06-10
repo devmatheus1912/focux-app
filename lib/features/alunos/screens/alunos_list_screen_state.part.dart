@@ -142,7 +142,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showError(context, 'Erro ao marcar pagamentos: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -166,7 +166,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showError(context, 'Erro ao atualizar status: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -640,7 +640,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
         if (_hasActiveFilter) _handleHeaderBack();
       },
       child: Scaffold(
-      backgroundColor: shellScaffoldColor,
+      backgroundColor: Colors.transparent,
       body: alunosAsync.when(
         loading:
             () => const SafeArea(
@@ -653,6 +653,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
             (e, _) => _AlunosErrorState(
               isDark: isDark,
               primary: primary,
+              message: friendlyError(e),
               onRetry: () {
                 ref.invalidate(alunosProvider);
                 ref.invalidate(alunosStatsProvider);

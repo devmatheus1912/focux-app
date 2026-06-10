@@ -436,21 +436,21 @@ class _State extends ConsumerState<ModoPresencialScreen> {
                 Container(
                   padding: const EdgeInsets.all(TokensStrip.s4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF22C55E).withValues(alpha: 0.2),
+                    color: EagleTokens.good.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: const Column(
                     children: [
                       Icon(
                         Icons.check_circle,
-                        color: Color(0xFF22C55E),
+                        color: EagleTokens.good,
                         size: 40,
                       ),
                       SizedBox(height: 8),
                       Text(
                         'CONCLUÍDO',
                         style: TextStyle(
-                          color: Color(0xFF22C55E),
+                          color: EagleTokens.good,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),

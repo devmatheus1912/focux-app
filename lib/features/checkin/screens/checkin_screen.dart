@@ -8,6 +8,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
@@ -31,6 +32,7 @@ class CheckinScreen extends ConsumerStatefulWidget {
 class _CheckinScreenState extends ConsumerState<CheckinScreen> {
   ExecucaoTreino? _execucao;
   bool _loading = true;
+  String? _loadError;
   bool _concluindo = false;
   Timer? _timer;
   Duration _duration = Duration.zero;
@@ -53,6 +55,10 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
   }
 
   Future<void> _iniciar() async {
+    setState(() {
+      _loading = true;
+      _loadError = null;
+    });
     try {
       final execucao = await ref
           .read(checkinRepositoryProvider)
@@ -77,9 +83,8 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       if (!mounted) return;
       setState(() {
         _loading = false;
+        _loadError = friendlyError(e);
       });
-      FeedbackHelper.showError(context, friendlyError(e));
-      safePopOrGo(context, '/checkin/treinos');
     }
   }
 
@@ -436,6 +441,37 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       return Scaffold(
         backgroundColor: Colors.transparent,
         body: Center(child: FxLoading(color: brand)),
+      );
+    }
+
+    if (_loadError != null) {
+      return Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FxEmptyState(
+                  icon: 'alert-triangle',
+                  title: 'Não foi possível iniciar',
+                  subtitle: _loadError!,
+                  action: FxEmptyAction(
+                    label: 'Tentar novamente',
+                    onTap: _iniciar,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => safePopOrGo(context, '/checkin/treinos'),
+                  child: Text(
+                    'Voltar aos treinos',
+                    style: TextStyle(color: mute),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       );
     }
 
