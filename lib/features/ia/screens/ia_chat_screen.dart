@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -49,7 +51,10 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
         setState(
           () => _msgs.add(
             _IaMsg(
-              texto: e is IaOperationalException ? e.message : 'Erro: $e',
+              texto:
+                  e is IaOperationalException
+                      ? e.message
+                      : friendlyError(e),
               isUser: false,
             ),
           ),
@@ -76,10 +81,13 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: Colors.transparent,
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    return FxShellScaffold(
+    useMesh: true,
     appBar: FxShellAppBar(
       title: 'Assistente IA',
+      subtitle: 'Chat inteligente para o seu negócio',
       onBack: () => safePopOrGo(context, '/dashboard/personal'),
     ),
     body: Column(
@@ -87,12 +95,16 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
         Expanded(
           child:
               _msgs.isEmpty
-                  ? const Column(
+                  ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Pergunte ao seu assistente de fitness!'),
-                      SizedBox(height: 16),
-                      IaSafetyDisclaimer(),
+                      Text(
+                        'Pergunte ao seu assistente de fitness!',
+                        style: TextStyle(color: chrome.mute),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      const IaSafetyDisclaimer(),
                     ],
                   )
                   : ListView.builder(
@@ -177,4 +189,5 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
       ],
     ),
   );
+  }
 }

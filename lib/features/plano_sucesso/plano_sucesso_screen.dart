@@ -45,10 +45,11 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
     final primary = Theme.of(context).colorScheme.primary;
 
     if (provider.isLoading) {
-      return Scaffold(
-        backgroundColor: Colors.transparent,
+      return FxShellScaffold(
+        useMesh: true,
         appBar: FxShellAppBar(
           title: 'Plano de Sucesso',
+          subtitle: 'Marcos e metas do aluno',
           onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
         ),
         body: const SafeArea(child: SkeletonList(count: 5)),
@@ -57,10 +58,11 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
 
     final plano = provider.plano;
     if (plano == null) {
-      return Scaffold(
-        backgroundColor: Colors.transparent,
+      return FxShellScaffold(
+        useMesh: true,
         appBar: FxShellAppBar(
           title: 'Plano de Sucesso',
+          subtitle: 'Marcos e metas do aluno',
           onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
         ),
         body: SafeArea(

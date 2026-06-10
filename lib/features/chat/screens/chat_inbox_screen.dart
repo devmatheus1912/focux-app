@@ -219,8 +219,8 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
     final ink = chrome.ink;
     final mute = chrome.mute;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       floatingActionButton:
           _isSearching || _selectionActive
               ? null

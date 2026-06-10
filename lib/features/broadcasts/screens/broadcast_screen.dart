@@ -85,8 +85,9 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final brand = Theme.of(context).colorScheme.primary;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
+      safeArea: false,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async => ref.invalidate(_broadcastHistoricoProvider),

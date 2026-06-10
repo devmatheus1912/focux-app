@@ -330,8 +330,8 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       appBar:
           _selected.isEmpty
               ? FxShellAppBar(

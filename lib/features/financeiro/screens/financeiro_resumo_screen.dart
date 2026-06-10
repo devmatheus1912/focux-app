@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -68,7 +69,7 @@ class _FinanceiroResumoScreenState
     } catch (e) {
       if (mounted) {
         setState(() {
-          _erro = e.toString();
+          _erro = friendlyError(e);
           _loading = false;
         });
       }
@@ -106,9 +107,9 @@ class _FinanceiroResumoScreenState
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = Theme.of(context).colorScheme.primary;
 
-    return Scaffold(
+    return FxShellScaffold(
+      useMesh: true,
       extendBody: true,
-      backgroundColor: Colors.transparent,
       body: Column(
         children: [
           // Month/year picker

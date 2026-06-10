@@ -77,10 +77,11 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: Colors.transparent,
+  Widget build(BuildContext context) => FxShellScaffold(
+    useMesh: true,
     appBar: FxShellAppBar(
       title: 'Novo Lead',
+      subtitle: 'Cadastre um prospect no CRM',
       onBack: () => safePopOrGo(context, '/leads'),
     ),
     body: SingleChildScrollView(

@@ -110,7 +110,7 @@ class _SuporteScreenState extends ConsumerState<SuporteScreen> {
         );
         _enviandoChat = false;
       });
-      FeedbackHelper.showSuccess(context, 'Erro no chat: $e');
+      FeedbackHelper.showError(context, friendlyError(e));
       _scrollToBottom();
     }
   }
@@ -167,9 +167,10 @@ class _SuporteScreenState extends ConsumerState<SuporteScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return FxShellScaffold(
+      useMesh: true,
       extendBody: true,
-      backgroundColor: Colors.transparent,
+      safeArea: false,
       body: SafeArea(
         child: Column(
           children: [

@@ -199,9 +199,10 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
       'dez',
     ];
 
-    return Scaffold(
+    return FxShellScaffold(
+      useMesh: true,
       extendBody: true,
-      backgroundColor: Colors.transparent,
+      safeArea: false,
       body: SafeArea(
         bottom: false,
         child: Column(

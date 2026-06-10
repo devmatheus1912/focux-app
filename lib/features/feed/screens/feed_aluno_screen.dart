@@ -9,6 +9,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../data/feed_repository.dart';
 import '../widgets/feed_comments_sheet.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
@@ -124,42 +125,19 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    return Scaffold(
+    return FxShellScaffold(
+      useMesh: true,
       extendBody: true,
-      backgroundColor: Colors.transparent,
       body: SafeArea(
         child:
             _loading
                 ? Center(child: FxLoading(color: primary))
                 : _posts.isEmpty
-                ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          color: primary.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.article_outlined,
-                          color: primary,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      Text(
-                        'Nenhuma publicação disponível.',
-                        style: TextStyle(
-                          color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
+                ? const FxEmptyState(
+                  icon: 'file-text',
+                  title: 'Nenhuma publicação ainda',
+                  subtitle:
+                      'Seu personal ainda não publicou no feed. Volte em breve.',
                 )
                 : RefreshIndicator(
                   color: primary,
