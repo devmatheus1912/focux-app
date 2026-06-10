@@ -685,7 +685,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                     carregando
                         ? const SizedBox(height: 80, child: FxLoading())
                         : erro != null
-                        ? Text('Erro ao gerar PIX: $erro')
+                        ? Text(erro!)
                         : Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [

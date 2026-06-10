@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/config/env.dart';
 import '../../../core/api/media_upload_service.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_celebration_overlay.dart';
@@ -69,7 +70,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
           title: 'Landing pronta!',
           subtitle: 'Todos os textos revisados. Pode publicar com confiança.',
           icon: Icons.verified_rounded,
-          accent: const Color(0xFF0F9D7A),
+          accent: EagleTokens.good,
         );
       });
     }

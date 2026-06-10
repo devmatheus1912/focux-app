@@ -137,7 +137,7 @@ void _showMessageActions(ChatMsg msg) {
                           contentPadding: EdgeInsets.zero,
                           leading: const Icon(
                             Icons.delete_outline_rounded,
-                            color: Color(0xFFE5484D),
+                            color: EagleTokens.bad,
                           ),
                           title: const Text('Apagar mensagem'),
                           onTap: () {

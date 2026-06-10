@@ -147,6 +147,7 @@ class TreinoDetailScreen extends ConsumerWidget {
             (e, _) => _DetailErrorState(
               isDark: isDark,
               primary: primary,
+              message: friendlyError(e),
               onRetry: () => ref.invalidate(treinoProvider(treinoId)),
               onBack: () => _popTreinoDetail(context, alunoId: alunoId),
             ),

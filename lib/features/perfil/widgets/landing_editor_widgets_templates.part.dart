@@ -187,7 +187,7 @@ class LandingTemplateCatalogSections extends StatelessWidget {
                 _iconFor(section.iconName),
                 size: 18,
                 color: activeKeys.contains(section.key)
-                    ? const Color(0xFF0F9D7A)
+                    ? EagleTokens.good
                     : scheme.outline,
               ),
               const SizedBox(width: 10),

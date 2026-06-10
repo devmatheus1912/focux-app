@@ -20,7 +20,7 @@ import '../providers/perfil_provider.dart';
 import '../utils/brand_slogan_display.dart';
 import '../../subscription/utils/landing_editor_access.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
-import '../../../core/theme/app_typography.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 
 part 'identidade_visual_screen_widgets.part.dart';

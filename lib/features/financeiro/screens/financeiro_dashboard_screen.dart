@@ -339,13 +339,10 @@ class _HeroRing extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(28),
           gradient: LinearGradient(
-            colors:
-                isDark
-                    ? const [Color(0xFF128989), Color(0xFF0A2E2E)]
-                    : [
-                      BrandPalette.softened(primary),
-                      BrandPalette.deep(primary),
-                    ],
+            colors: [
+              BrandPalette.softened(primary),
+              BrandPalette.deep(primary),
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -460,10 +457,7 @@ class _HeroRing extends StatelessWidget {
                         vertical: 5,
                       ),
                       decoration: BoxDecoration(
-                        color:
-                            isDark
-                                ? const Color(0x1FFF8B8B)
-                                : EagleTokens.badSoft,
+                        color: EagleTokens.badSoft,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Row(
@@ -472,10 +466,7 @@ class _HeroRing extends StatelessWidget {
                           Icon(
                             Icons.warning_amber_rounded,
                             size: 12,
-                            color:
-                                isDark
-                                    ? const Color(0xFFFF8B8B)
-                                    : EagleTokens.bad,
+                            color: EagleTokens.bad,
                           ),
                           const SizedBox(width: 6),
                           Text(
@@ -483,10 +474,7 @@ class _HeroRing extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
-                              color:
-                                  isDark
-                                      ? const Color(0xFFFF8B8B)
-                                      : EagleTokens.bad,
+                              color: EagleTokens.bad,
                             ),
                           ),
                         ],
@@ -810,10 +798,7 @@ class _VencimentoRow extends StatelessWidget {
     final primaryDeep = BrandPalette.deep(primary);
 
     final isAtrasado = item.status == 'ATRASADO';
-    final color =
-        isAtrasado
-            ? (isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad)
-            : (isDark ? const Color(0xFFE2B46F) : EagleTokens.warn);
+    final color = isAtrasado ? EagleTokens.bad : EagleTokens.warn;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),

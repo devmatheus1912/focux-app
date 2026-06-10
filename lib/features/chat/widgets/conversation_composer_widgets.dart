@@ -171,7 +171,7 @@ class ConversationRecordingComposerBar extends StatelessWidget {
             width: 10,
             height: 10,
             decoration: const BoxDecoration(
-              color: Color(0xFFE5484D),
+              color: EagleTokens.bad,
               shape: BoxShape.circle,
             ),
           ),

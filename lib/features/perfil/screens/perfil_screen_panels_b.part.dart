@@ -547,9 +547,7 @@ class _ActionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink =
-        danger
-            ? (isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad)
-            : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
+        danger ? EagleTokens.bad : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
     final inkMuted = locked ? ink.withValues(alpha: 0.55) : ink;
 
     final link = actionInk ?? accent;
@@ -581,8 +579,7 @@ class _ActionTile extends StatelessWidget {
                 _LeadingIcon(
                   icon: icon,
                   background:
-                      danger
-                          ? (isDark ? const Color(0x24FF8B8B) : EagleTokens.badSoft)
+                      danger ? EagleTokens.badSoft
                           : (isDark
                               ? accent.withValues(alpha: locked ? 0.08 : 0.14)
                               : BrandPalette.soft(accent).withValues(
@@ -601,7 +598,7 @@ class _ActionTile extends StatelessWidget {
                       width: 16,
                       height: 16,
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1A2228) : Colors.white,
+                        color: isDark ? EagleTokens.darkCard : TokensStrip.cardBg,
                         shape: BoxShape.circle,
                         border: Border.all(color: line),
                       ),

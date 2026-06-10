@@ -293,7 +293,7 @@ class _MenuActionTile extends StatelessWidget {
             color:
                 isDark
                     ? Colors.white.withValues(alpha: 0.035)
-                    : const Color(0xFFFEFEFF),
+                    : TokensStrip.cardBg,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: border),
             boxShadow:

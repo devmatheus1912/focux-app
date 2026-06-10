@@ -214,7 +214,7 @@ class _ExercicioRow extends StatelessWidget {
                 color:
                     isDark
                         ? Colors.white.withValues(alpha: 0.05)
-                        : const Color(0xFFF8F9FC),
+                        : TokensStrip.cardBg,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color:
@@ -457,7 +457,7 @@ class _ExerciseActionTile extends StatelessWidget {
             color:
                 isDark
                     ? Colors.white.withValues(alpha: 0.035)
-                    : const Color(0xFFFEFEFF),
+                    : TokensStrip.cardBg,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: border),
           ),

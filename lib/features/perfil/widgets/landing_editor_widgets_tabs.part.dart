@@ -242,7 +242,7 @@ class LandingReadinessProgressBars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const ready = Color(0xFF0F9D7A);
+    const ready = EagleTokens.good;
     final scheme = Theme.of(context).colorScheme;
     final percent = landingPublicationPercent(
       configDone: configDone,
@@ -297,7 +297,7 @@ class _ProgressLegendChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    const ready = Color(0xFF0F9D7A);
+    const ready = EagleTokens.good;
 
     return Expanded(
       child: Container(

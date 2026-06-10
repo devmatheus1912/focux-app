@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -170,13 +171,13 @@ class LandingChecklistCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(TokensStrip.rLg),
             side: BorderSide(
               color: allReady
-                  ? const Color(0xFF0F9D7A).withValues(alpha: 0.55)
+                  ? EagleTokens.good.withValues(alpha: 0.55)
                   : scheme.outlineVariant.withValues(alpha: 0.6),
               width: allReady ? 1.5 : 1,
             ),
           ),
           color: allReady
-              ? const Color(0xFF0F9D7A).withValues(alpha: 0.06)
+              ? EagleTokens.good.withValues(alpha: 0.06)
               : scheme.surface,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(12, 16, 12, 8),
@@ -247,7 +248,7 @@ class LandingChecklistCard extends StatelessWidget {
                     Icon(
                       Icons.verified_outlined,
                       size: 16,
-                      color: const Color(0xFF0F9D7A),
+                      color: EagleTokens.good,
                     ),
                     const SizedBox(width: 6),
                     Text(
@@ -255,7 +256,7 @@ class LandingChecklistCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF0F9D7A),
+                        color: EagleTokens.good,
                       ),
                     ),
                   ],
@@ -273,7 +274,7 @@ class LandingChecklistCard extends StatelessWidget {
                 onTap: tappable ? () => onItemTap!(item) : null,
                 leading: Icon(
                   item.done ? Icons.check_circle_rounded : Icons.circle_outlined,
-                  color: item.done ? const Color(0xFF0F9D7A) : scheme.outline,
+                  color: item.done ? EagleTokens.good : scheme.outline,
                 ),
                 title: Text(
                   label,

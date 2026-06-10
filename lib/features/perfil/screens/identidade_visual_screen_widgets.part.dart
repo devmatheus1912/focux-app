@@ -93,7 +93,7 @@ class _LiveBrandHero extends StatelessWidget {
                         width: 6,
                         height: 6,
                         decoration: const BoxDecoration(
-                          color: Color(0xFF6FE296),
+                          color: EagleTokens.good,
                           shape: BoxShape.circle,
                         ),
                       ),

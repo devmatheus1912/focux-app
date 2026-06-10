@@ -14,8 +14,7 @@ class _RemoveExerciseSheet extends StatelessWidget {
         isDark
             ? Colors.white.withValues(alpha: 0.08)
             : TokensStrip.borderDefault.withValues(alpha: 0.9);
-    final dangerFill =
-        isDark ? const Color(0xFFB24646) : const Color(0xFFA83A3A);
+    final dangerFill = EagleTokens.badSoft;
 
     return SafeArea(
       top: false,

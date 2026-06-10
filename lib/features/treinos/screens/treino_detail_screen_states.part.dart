@@ -3,12 +3,14 @@ part of 'treino_detail_screen.dart';
 class _DetailErrorState extends StatelessWidget {
   final bool isDark;
   final Color primary;
+  final String message;
   final VoidCallback onRetry;
   final VoidCallback onBack;
 
   const _DetailErrorState({
     required this.isDark,
     required this.primary,
+    required this.message,
     required this.onRetry,
     required this.onBack,
   });
@@ -54,7 +56,7 @@ class _DetailErrorState extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Verifique a conexão e tente novamente. Se o problema persistir, volte e reabra.',
+                message,
                 textAlign: TextAlign.center,
                 style: AppTypography.inter(
                   color: mute,

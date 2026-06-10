@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -72,7 +73,11 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
         ref.read(apiClientProvider),
       ).globalSearch(query.trim());
       if (mounted) setState(() => _searchResults = results);
-    } catch (_) {}
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    }
   }
 
   void _toggleSearch() {
@@ -158,15 +163,9 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
           behavior: SnackBarBehavior.floating,
         ),
       );
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        const SnackBar(
-          content: Text('Erro ao excluir mensagens'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -198,15 +197,9 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
           ),
         );
       }
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(
-            content: Text('Erro ao executar ação'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -463,7 +456,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
           (e, _) => _InboxState(
             icon: Icons.wifi_off_rounded,
             title: 'Não foi possível carregar',
-            message: 'Toque para tentar novamente.',
+            message: friendlyError(e),
             color: mute,
             onTap: () => ref.invalidate(provider),
           ),
@@ -649,10 +642,14 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
                   child: async.when(
                     loading: () => Center(child: FxLoading(color: primary)),
                     error:
-                        (_, __) => Center(
-                          child: Text(
-                            'Nao foi possivel carregar alunos.',
-                            style: TextStyle(color: mute),
+                        (e, _) => Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(TokensStrip.s5),
+                            child: Text(
+                              friendlyError(e),
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: mute),
+                            ),
                           ),
                         ),
                     data: (alunos) {

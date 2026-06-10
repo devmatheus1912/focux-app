@@ -677,7 +677,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                           decoration: BoxDecoration(
                                             color:
                                                 _recordingAudio
-                                                    ? const Color(0xFFE5484D)
+                                                    ? EagleTokens.bad
                                                     : primary,
                                             shape: BoxShape.circle,
                                           ),
