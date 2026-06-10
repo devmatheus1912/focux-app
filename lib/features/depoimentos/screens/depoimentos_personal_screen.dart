@@ -59,17 +59,20 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     return FxShellScaffold(
       useMesh: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Depoimentos'),
+      appBar: FxShellAppBar(
+        title: 'Depoimentos',
+        subtitle: 'Prova social dos seus alunos',
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _load),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Atualizar depoimentos',
+            onPressed: _load,
+          ),
         ],
       ),
       body:
           _loading
-              ? const FxLoading()
+              ? const Center(child: FxLoading())
               : (_items == null || _items!.isEmpty)
               ? Center(
                 child: Text(

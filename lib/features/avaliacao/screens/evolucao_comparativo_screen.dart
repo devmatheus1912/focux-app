@@ -10,6 +10,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 
 String _fmtData(String? iso) {
   if (iso == null || iso.isEmpty) return '—';
@@ -81,23 +82,16 @@ class _EvolucaoComparativoScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor:
-          Theme.of(context).brightness == Brightness.dark
-              ? EagleTokens.darkBg
-              : TokensStrip.pageBg,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-        ),
-        title: Text('Evolução de ${widget.alunoNome}'),
+    return FxShellScaffold(
+      useMesh: true,
+      appBar: FxShellAppBar(
+        title: 'Evolução de ${widget.alunoNome}',
+        subtitle: 'Comparativo de avaliações físicas',
+        onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
       ),
       body:
           _loading
-              ? const FxLoading()
+              ? const Center(child: FxLoading())
               : _erro != null
               ? Center(
                 child: Padding(

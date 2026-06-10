@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/anamnese_repository.dart';
-import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 
 class AnamneseScreen extends ConsumerStatefulWidget {
@@ -201,7 +202,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Erro: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
     if (mounted) setState(() => _saving = false);
@@ -210,60 +211,59 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(body: FxLoading());
+      return const FxShellScaffold(
+        useMesh: true,
+        body: Center(child: FxLoading()),
+      );
     }
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     return FxShellScaffold(
       useMesh: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          'Anamnese',
-          style: TextStyle(
-            color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        iconTheme: IconThemeData(
-          color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-        ),
-        bottom: TabBar(
-          indicatorColor: primary,
-          labelColor: primary,
-          unselectedLabelColor:
-              isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
-          indicatorWeight: 2.5,
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Básico'),
-            Tab(text: 'Saúde'),
-            Tab(text: 'Treino & Nutrição'),
-          ],
-        ),
+      appBar: FxShellAppBar(
+        title: 'Anamnese',
+        subtitle: 'Ficha de saúde e objetivos do aluno',
         actions: [
           IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
+            icon: const Icon(Icons.picture_as_pdf_outlined),
             tooltip: 'Exportar PDF',
             onPressed: _exportarPdf,
           ),
-          TextButton(
-            onPressed: _saving ? null : _salvar,
-            child:
-                _saving
-                    ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: FxLoading(strokeWidth: 2),
-                    )
-                    : const Text('Salvar'),
+          Semantics(
+            button: true,
+            label: _saving ? 'Salvando anamnese' : 'Salvar anamnese',
+            child: TextButton(
+              onPressed: _saving ? null : _salvar,
+              child:
+                  _saving
+                      ? const FxLoading(size: 18, strokeWidth: 2)
+                      : const Text('Salvar'),
+            ),
           ),
         ],
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [_tabBasico(), _tabSaude(), _tabTreinoNutricao()],
+      body: Column(
+        children: [
+          TabBar(
+            indicatorColor: primary,
+            labelColor: primary,
+            unselectedLabelColor: chrome.mute,
+            indicatorWeight: 2.5,
+            dividerColor: Colors.transparent,
+            controller: _tabController,
+            tabs: const [
+              Tab(text: 'Básico'),
+              Tab(text: 'Saúde'),
+              Tab(text: 'Treino & Nutrição'),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [_tabBasico(), _tabSaude(), _tabTreinoNutricao()],
+            ),
+          ),
+        ],
       ),
     );
   }

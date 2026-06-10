@@ -1,9 +1,12 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 
 class RankingItem {
@@ -51,15 +54,22 @@ class RankingScreen extends ConsumerWidget {
     final rankingAsync = ref.watch(rankingProvider);
     final theme = Theme.of(context);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: const Text('Ranking de Personais'),
+    return FxShellScaffold(
+      useMesh: true,
+      appBar: FxShellAppBar(
+        title: 'Ranking de Personais',
+        subtitle: 'Pódio do mês e classificação geral',
+        onBack: () => safePopOrGo(context, '/dashboard/personal'),
       ),
       body: rankingAsync.when(
         loading: () => const SkeletonList(count: 5),
-        error: (e, _) => Center(child: Text('Erro: $e')),
+        error:
+            (e, _) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(TokensStrip.s5),
+                child: Text(friendlyError(e), textAlign: TextAlign.center),
+              ),
+            ),
         data: (ranking) {
           final top3 = ranking.where((r) => r.posicao <= 3).toList();
           final demais = ranking.where((r) => r.posicao > 3).toList();

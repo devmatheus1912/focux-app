@@ -14,7 +14,10 @@ import '../../../core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
+import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 
 class IaAlunoScreen extends ConsumerStatefulWidget {
   const IaAlunoScreen({super.key});
@@ -61,29 +64,46 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen>
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: Colors.transparent,
-    appBar: AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      title: const Text('Assistente IA'),
-      bottom: TabBar(
-        controller: _tabs,
-        tabs: const [
-          Tab(icon: Icon(Icons.chat), text: 'Chat'),
-          Tab(icon: Icon(Icons.trending_up), text: 'Progressão'),
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    return FxShellScaffold(
+      useMesh: true,
+      appBar: FxShellAppBar(
+        title: 'Assistente IA',
+        subtitle: 'Chat e progressão personalizados',
+        onBack: () => safePopOrGo(context, '/dashboard/aluno'),
+      ),
+      body: Column(
+        children: [
+          Semantics(
+            container: true,
+            label: 'Abas do assistente: Chat e Progressão',
+            child: TabBar(
+              controller: _tabs,
+              labelColor: primary,
+              unselectedLabelColor: chrome.mute,
+              indicatorColor: primary,
+              dividerColor: Colors.transparent,
+              tabs: const [
+                Tab(icon: Icon(Icons.chat_bubble_outline_rounded), text: 'Chat'),
+                Tab(icon: Icon(Icons.trending_up_rounded), text: 'Progressão'),
+              ],
+            ),
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabs,
+              children: [
+                _ChatTab(alunoId: _alunoId),
+                _ProgressaoTab(alunoId: _alunoId),
+              ],
+            ),
+          ),
         ],
       ),
-    ),
-    body: TabBarView(
-      controller: _tabs,
-      children: [
-        _ChatTab(alunoId: _alunoId),
-        _ProgressaoTab(alunoId: _alunoId),
-      ],
-    ),
-  );
+    );
+  }
 }
 
 // ─── Chat Tab ─────────────────────────────────────────────────────────────────

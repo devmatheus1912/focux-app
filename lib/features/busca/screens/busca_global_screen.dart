@@ -1,7 +1,9 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/loading_shimmer.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -310,27 +312,34 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
     final query = ref.watch(buscaQueryProvider);
     final filter = ref.watch(buscaFilterProvider);
 
-    return Scaffold(
+    final chrome = ShellChrome.of(context);
+    return FxShellScaffold(
+      useMesh: true,
       extendBody: true,
-      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: TextField(
-          controller: _ctrl,
-          autofocus: true,
-          style: const TextStyle(fontSize: 16),
-          decoration: const InputDecoration(
-            hintText: 'Buscar alunos, treinos, cobranças...',
-            border: InputBorder.none,
-            hintStyle: TextStyle(color: Color(0xFF717171)),
+        scrolledUnderElevation: 0,
+        title: Semantics(
+          textField: true,
+          label: 'Campo de busca global',
+          child: TextField(
+            controller: _ctrl,
+            autofocus: true,
+            style: TextStyle(fontSize: 16, color: chrome.ink),
+            decoration: InputDecoration(
+              hintText: 'Buscar alunos, treinos, cobranças...',
+              border: InputBorder.none,
+              hintStyle: TextStyle(color: chrome.mute),
+            ),
+            onChanged: (v) => ref.read(buscaQueryProvider.notifier).state = v,
           ),
-          onChanged: (v) => ref.read(buscaQueryProvider.notifier).state = v,
         ),
         actions: [
           if (query.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.clear),
+              tooltip: 'Limpar busca',
               onPressed: () {
                 _ctrl.clear();
                 ref.read(buscaQueryProvider.notifier).state = '';
@@ -348,9 +357,13 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
                   () => const ShimmerListLoading(itemCount: 6, itemHeight: 64),
               error:
                   (e, _) => Center(
-                    child: Text(
-                      'Erro: $e',
-                      style: const TextStyle(color: EagleTokens.bad),
+                    child: Padding(
+                      padding: const EdgeInsets.all(TokensStrip.s5),
+                      child: Text(
+                        friendlyError(e),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: EagleTokens.bad),
+                      ),
                     ),
                   ),
               data: (result) {
@@ -359,11 +372,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
-                          Icons.search,
-                          size: 64,
-                          color: Color(0xFFD1D5DB),
-                        ),
+                        Icon(Icons.search, size: 64, color: chrome.mute),
                         const SizedBox(height: TokensStrip.s4),
                         Text(
                           'Digite ao menos 2 caracteres',
@@ -378,11 +387,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
-                          Icons.search_off,
-                          size: 64,
-                          color: Color(0xFFD1D5DB),
-                        ),
+                        Icon(Icons.search_off, size: 64, color: chrome.mute),
                         const SizedBox(height: TokensStrip.s4),
                         Text(
                           'Nenhum resultado para "$query"',

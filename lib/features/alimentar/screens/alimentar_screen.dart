@@ -55,14 +55,10 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
   Widget build(BuildContext context) {
     return FxShellScaffold(
       useMesh: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-        ),
-        title: const Text('Planos Alimentares'),
+      appBar: FxShellAppBar(
+        title: 'Planos Alimentares',
+        subtitle: 'Nutrição prescrita para o aluno',
+        onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
@@ -309,15 +305,11 @@ class _NovoPlanoScreenState extends ConsumerState<_NovoPlanoScreen> {
   Widget build(BuildContext context) {
     return FxShellScaffold(
       useMesh: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed:
-              () => safePopOrGo(context, '/alunos/${widget.alunoId}/alimentar'),
-        ),
-        title: const Text('Novo Plano Alimentar'),
+      appBar: FxShellAppBar(
+        title: 'Novo Plano Alimentar',
+        subtitle: 'Defina metas e refeições do plano',
+        onBack:
+            () => safePopOrGo(context, '/alunos/${widget.alunoId}/alimentar'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(TokensStrip.s4),

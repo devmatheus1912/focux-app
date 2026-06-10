@@ -12,6 +12,7 @@ import 'widgets/wizard_step_loading.dart';
 import 'widgets/wizard_step_modalidades.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 
 class OnboardingBibliotecaWizard extends ConsumerStatefulWidget {
   const OnboardingBibliotecaWizard({super.key});
@@ -114,13 +115,14 @@ class _OnboardingBibliotecaWizardState
         (_step == 0 && _modalidades.isNotEmpty) ||
         (_step == 1 && _espacos.isNotEmpty);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: const Text('Biblioteca curada'),
+    return FxShellScaffold(
+      useMesh: true,
+      appBar: FxShellAppBar(
+        title: 'Biblioteca curada',
+        subtitle: 'Monte sua base de exercícios em minutos',
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
+          tooltip: 'Pular configuração',
           onPressed:
               _importing
                   ? null

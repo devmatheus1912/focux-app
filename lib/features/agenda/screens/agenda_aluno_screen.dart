@@ -97,13 +97,12 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) => FxShellScaffold(
+    useMesh: true,
     extendBody: true,
-    backgroundColor: Colors.transparent,
-    appBar: AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      title: const Text('Minha Agenda'),
+    appBar: FxShellAppBar(
+      title: 'Minha Agenda',
+      subtitle: 'Seus próximos compromissos',
       actions: [
         IconButton(
           tooltip: 'Exportar iCal',
@@ -116,7 +115,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
       onRefresh: _load,
       child:
           _loading
-              ? const FxLoading()
+              ? const Center(child: FxLoading())
               : _ags.isEmpty
               ? ListView(
                 children: const [

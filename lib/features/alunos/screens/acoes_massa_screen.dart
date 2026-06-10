@@ -10,6 +10,7 @@ import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 
 class AcoesMassaScreen extends ConsumerStatefulWidget {
   const AcoesMassaScreen({super.key});
@@ -190,15 +191,12 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
   Widget build(BuildContext context) {
     final alunosAsync = ref.watch(alunosProvider);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: const Text('Ações em Massa'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => safePopOrGo(context, '/alunos'),
-        ),
+    return FxShellScaffold(
+      useMesh: true,
+      appBar: FxShellAppBar(
+        title: 'Ações em Massa',
+        subtitle: 'Aplique mudanças a vários alunos de uma vez',
+        onBack: () => safePopOrGo(context, '/alunos'),
         actions: [
           alunosAsync.whenOrNull(
                 data:

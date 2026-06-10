@@ -115,16 +115,15 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: const Text('Saúde & Wearables'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+    return FxShellScaffold(
+      useMesh: true,
+      appBar: const FxShellAppBar(
+        title: 'Saúde & Wearables',
+        subtitle: 'Dados do Apple Health e Google Fit',
       ),
       body:
           _loading
-              ? const FxLoading()
+              ? const Center(child: FxLoading())
               : !_authorized
               ? _buildAuthPrompt(primary)
               : _buildDashboard(isDark, primary),

@@ -11,6 +11,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/widgets/aluno360_action_empty_panel.dart';
 
@@ -101,29 +102,21 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final primaryDeep = BrandPalette.deep(primary);
-    return Scaffold(
+    return FxShellScaffold(
+      useMesh: true,
       extendBody: true,
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: IconThemeData(
-          color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-        ),
-        title: Text(
-          widget.alunoNome != null
-              ? 'Feedbacks — ${widget.alunoNome}'
-              : 'Todos os Feedbacks de Vídeo',
-        ),
+      appBar: FxShellAppBar(
+        title:
+            widget.alunoNome != null
+                ? 'Feedbacks — ${widget.alunoNome}'
+                : 'Feedbacks de Vídeo',
+        subtitle: 'Análises técnicas de execução',
         actions: [
           IconButton(
-            icon: Icon(
-              Icons.refresh,
-              color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
-            ),
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Atualizar feedbacks',
             onPressed: _load,
           ),
         ],

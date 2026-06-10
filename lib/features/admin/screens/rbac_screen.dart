@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../auth/providers/auth_provider.dart';
-import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
+
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../auth/providers/auth_provider.dart';
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 
@@ -59,38 +62,36 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
 
     return FxShellScaffold(
       useMesh: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Controle de Acessos (RBAC)'),
+      appBar: FxShellAppBar(
+        title: 'Controle de Acessos',
+        subtitle: 'Permissões da equipe (RBAC)',
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.add_rounded),
             tooltip: 'Conceder novo acesso',
             onPressed: () => _showConcederAcesso(context, ref),
           ),
         ],
       ),
       body: permissoesAsync.when(
-        loading: () => const FxLoading(),
-        error: (e, _) => Center(child: Text('Erro: $e')),
+        loading: () => const Center(child: FxLoading()),
+        error:
+            (e, _) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(TokensStrip.s5),
+                child: Text(friendlyError(e), textAlign: TextAlign.center),
+              ),
+            ),
         data: (permissoes) {
           if (permissoes.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.shield_outlined,
-                    size: 64,
-                    color: const Color(0xFF9CA3AF),
-                  ),
-                  const SizedBox(height: TokensStrip.s4),
-                  const Text(
-                    'Nenhuma permissão especial concedida.',
-                    style: TextStyle(color: TokensStrip.textSecondary),
-                  ),
-                ],
+            return FxEmptyState(
+              icon: 'shield',
+              title: 'Nenhuma permissão especial concedida',
+              subtitle:
+                  'Conceda acessos pontuais para assistentes da sua equipe.',
+              action: FxEmptyAction(
+                label: 'Conceder acesso',
+                onTap: () => _showConcederAcesso(context, ref),
               ),
             );
           }
@@ -99,12 +100,9 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
             padding: const EdgeInsets.all(TokensStrip.s4),
             itemBuilder: (ctx, i) {
               final p = permissoes[i];
-              return Card(
-                elevation: 2,
+              return Container(
                 margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                decoration: fxListCardDecoration(ctx),
                 child: ListTile(
                   leading: CircleAvatar(
                     backgroundColor:
@@ -125,7 +123,8 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
                     'ID Assistente: ${p.usuarioConvidadoId} • Nível: ${p.nivelAcesso}',
                   ),
                   trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: EagleTokens.bad),
+                    icon: const Icon(Icons.delete_outline, color: EagleTokens.bad),
+                    tooltip: 'Revogar acesso',
                     onPressed:
                         () => _revogarAcesso(
                           ref,

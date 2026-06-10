@@ -5,6 +5,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
@@ -89,8 +90,12 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
       featureName: 'Habit Coaching',
       requiredPlan: SubscriptionPlan.PREMIUM,
       capability: 'habitCoaching',
-      child: Scaffold(
-      appBar: AppBar(title: const Text('Meus hábitos')),
+      child: FxShellScaffold(
+      useMesh: true,
+      appBar: const FxShellAppBar(
+        title: 'Meus hábitos',
+        subtitle: 'Sua jornada de consistência diária',
+      ),
       body: _loading
           ? const Center(child: FxLoading())
           : _error != null

@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/business_repository.dart';
 
@@ -44,15 +49,23 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Relatório de Negócio')),
+    return FxShellScaffold(
+      useMesh: true,
+      appBar: FxShellAppBar(
+        title: 'Relatório de Negócio',
+        subtitle: 'MRR, retenção e saúde financeira',
+        onBack: () => safePopOrGo(context, '/dashboard/personal'),
+      ),
       body: _loading
           ? const Center(child: FxLoading())
           : _snapshot == null
-              ? Center(
-                  child: TextButton(
-                    onPressed: _carregar,
-                    child: const Text('Tentar novamente'),
+              ? FxEmptyState(
+                  icon: 'bar-chart-2',
+                  title: 'Não foi possível carregar o relatório',
+                  subtitle: 'Verifique sua conexão e tente novamente.',
+                  action: FxEmptyAction(
+                    label: 'Tentar novamente',
+                    onTap: _carregar,
                   ),
                 )
               : RefreshIndicator(
@@ -69,13 +82,14 @@ class _Body extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     final ndrColor = snapshot.ndrPct >= 100
-        ? Colors.green
+        ? EagleTokens.good
         : snapshot.ndrPct >= 90
-            ? Colors.orange
-            : Colors.red;
+            ? EagleTokens.warn
+            : EagleTokens.bad;
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       children: [
         _MetricCard(
           titulo: 'MRR (Receita recorrente)',
@@ -83,7 +97,7 @@ class _Body extends StatelessWidget {
           delta:
               'Mês anterior: R\$ ${snapshot.mrrAnterior.toStringAsFixed(2)}  ·  Previsto: R\$ ${snapshot.mrrPrevisto.toStringAsFixed(2)}',
           icon: Icons.attach_money,
-          color: Colors.green,
+          color: EagleTokens.good,
         ),
         _MetricCard(
           titulo: 'NDR (Net Dollar Retention)',
@@ -140,7 +154,7 @@ class _Body extends StatelessWidget {
           delta:
               '${snapshot.dunningAbertas} falhas em aberto. Benchmark global: 55-70%.',
           icon: Icons.replay_circle_filled_outlined,
-          color: Colors.indigo,
+          color: primary,
           onTap: () => context.push('/dunning'),
         ),
         _MetricCard(
@@ -148,7 +162,7 @@ class _Body extends StatelessWidget {
           valor: '${snapshot.pqlScore} pts',
           delta: 'Classificação: ${snapshot.pqlClassificacao}',
           icon: Icons.rocket_launch_outlined,
-          color: Colors.teal,
+          color: primary,
         ),
         const SizedBox(height: 24),
         Text(
@@ -195,9 +209,12 @@ class _MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: fxListCardDecoration(context, accent: color),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
+        borderRadius: BorderRadius.circular(TokensStrip.rCard),
         onTap: onTap,
         child: Padding(
         padding: const EdgeInsets.all(16),
@@ -248,7 +265,8 @@ class _MiniMetric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Container(
+      decoration: fxListCardDecoration(context),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(

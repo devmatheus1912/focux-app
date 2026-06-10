@@ -202,15 +202,11 @@ class _PlanoAlimentarDetailScreenState
     final p = widget.plano;
     return FxShellScaffold(
       useMesh: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed:
-              () => safePopOrGo(context, '/alunos/${widget.alunoId}/alimentar'),
-        ),
-        title: Text(p.nome),
+      appBar: FxShellAppBar(
+        title: p.nome,
+        subtitle: 'Plano alimentar do aluno',
+        onBack:
+            () => safePopOrGo(context, '/alunos/${widget.alunoId}/alimentar'),
         actions: [
           IconButton(
             icon: Icon(

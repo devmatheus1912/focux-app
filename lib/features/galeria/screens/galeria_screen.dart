@@ -113,23 +113,19 @@ class _State extends ConsumerState<GaleriaScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return FxShellScaffold(
       useMesh: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text('Galeria (${_fotos.length}/9)'),
+      appBar: FxShellAppBar(
+        title: 'Galeria',
+        subtitle: '${_fotos.length} de 9 fotos',
         actions: [
           if (_uploading)
             const Padding(
               padding: EdgeInsets.all(TokensStrip.s4),
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: FxLoading(strokeWidth: 2),
-              ),
+              child: FxLoading(size: 20, strokeWidth: 2),
             ),
           if (!_uploading && _fotos.length < 9)
             IconButton(
               icon: const Icon(Icons.add_photo_alternate_outlined),
+              tooltip: 'Adicionar foto',
               onPressed: _add,
             ),
         ],

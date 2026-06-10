@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../features/auth/providers/auth_provider.dart';
-import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
+
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../features/auth/providers/auth_provider.dart';
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 
@@ -108,58 +112,40 @@ class TrilhasScreen extends ConsumerWidget {
 
     return FxShellScaffold(
       useMesh: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Trilhas de Progresso', style: TextStyle(fontSize: 16)),
-            Text(
-              alunoNome,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-          ],
-        ),
+      appBar: FxShellAppBar(
+        title: 'Trilhas de Progresso',
+        subtitle: alunoNome,
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.add_rounded),
+            tooltip: 'Criar nova trilha',
             onPressed: () => _showCriarTrilha(context, ref),
           ),
         ],
       ),
       body: trilhasAsync.when(
-        loading: () => const FxLoading(),
+        loading: () => const Center(child: FxLoading()),
         error:
             (e, _) => Center(
-              child: Text(
-                'Erro: $e',
-                style: const TextStyle(color: EagleTokens.bad),
+              child: Padding(
+                padding: const EdgeInsets.all(TokensStrip.s5),
+                child: Text(
+                  friendlyError(e),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: EagleTokens.bad),
+                ),
               ),
             ),
         data: (trilhas) {
           if (trilhas.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.route, size: 64, color: const Color(0xFFD1D5DB)),
-                  const SizedBox(height: TokensStrip.s4),
-                  const Text(
-                    'Nenhuma trilha criada ainda',
-                    style: TextStyle(color: TokensStrip.textSecondary),
-                  ),
-                  const SizedBox(height: 12),
-                  FxLiquidPrimaryButton(
-                    label: 'Criar primeira trilha',
-                    icon: Icons.add,
-                    expand: false,
-                    onPressed: () => _showCriarTrilha(context, ref),
-                  ),
-                ],
+            return FxEmptyState(
+              icon: 'map',
+              title: 'Nenhuma trilha criada ainda',
+              subtitle:
+                  'Crie metas com marcos para acompanhar a evolução de $alunoNome.',
+              action: FxEmptyAction(
+                label: 'Criar primeira trilha',
+                onTap: () => _showCriarTrilha(context, ref),
               ),
             );
           }
@@ -292,19 +278,25 @@ class _TrilhaCard extends StatelessWidget {
     required this.ref,
   });
 
-  Color get _progressColor {
-    if (trilha.concluida) return const Color(0xFF22C55E);
-    if (trilha.percentualConclusao >= 70) return const Color(0xFF1EC8C8);
-    if (trilha.percentualConclusao >= 30) return const Color(0xFFF59E0B);
-    return const Color(0xFF717171);
+  Color _progressColor(BuildContext context) {
+    if (trilha.concluida) return EagleTokens.good;
+    if (trilha.percentualConclusao >= 70) {
+      return Theme.of(context).colorScheme.primary;
+    }
+    if (trilha.percentualConclusao >= 30) return EagleTokens.warn;
+    return ShellChrome.of(context).mute;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    final chrome = ShellChrome.of(context);
+    final progressColor = _progressColor(context);
+    return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      decoration: fxListCardDecoration(
+        context,
+        accent: trilha.concluida ? EagleTokens.good : null,
+      ),
       child: Padding(
         padding: const EdgeInsets.all(TokensStrip.s4),
         child: Column(
@@ -316,9 +308,10 @@ class _TrilhaCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     trilha.titulo,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 15,
+                      color: chrome.ink,
                     ),
                   ),
                 ),
@@ -329,14 +322,14 @@ class _TrilhaCard extends StatelessWidget {
                       vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF22C55E).withValues(alpha: 0.1),
+                      color: EagleTokens.good.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text(
                       '✓ CONCLUÍDA',
                       style: TextStyle(
                         fontSize: 10,
-                        color: Color(0xFF22C55E),
+                        color: EagleTokens.good,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -347,7 +340,7 @@ class _TrilhaCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 trilha.descricao!,
-                style: const TextStyle(fontSize: 12, color: Color(0xFF717171)),
+                style: TextStyle(fontSize: 12, color: chrome.mute),
               ),
             ],
             const SizedBox(height: 14),
@@ -358,36 +351,41 @@ class _TrilhaCard extends StatelessWidget {
               children: [
                 Text(
                   'Progresso',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: const Color(0xFF4B5563),
-                  ),
+                  style: TextStyle(fontSize: 12, color: chrome.mute),
                 ),
                 Text(
                   '${trilha.percentualConclusao.toStringAsFixed(0)}%',
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: _progressColor,
+                    color: progressColor,
                     fontSize: 12,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 6),
-            LinearProgressIndicator(
-              value: (trilha.percentualConclusao / 100).clamp(0.0, 1.0),
-              backgroundColor: _progressColor.withValues(alpha: 0.1),
-              color: _progressColor,
-              minHeight: 6,
-              borderRadius: BorderRadius.circular(4),
+            Semantics(
+              label:
+                  'Progresso da trilha: ${trilha.percentualConclusao.toStringAsFixed(0)} por cento',
+              child: LinearProgressIndicator(
+                value: (trilha.percentualConclusao / 100).clamp(0.0, 1.0),
+                backgroundColor: progressColor.withValues(alpha: 0.1),
+                color: progressColor,
+                minHeight: 6,
+                borderRadius: BorderRadius.circular(4),
+              ),
             ),
 
             // Marcos
             if (trilha.marcos.isNotEmpty) ...[
               const SizedBox(height: 14),
-              const Text(
+              Text(
                 'Marcos',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: chrome.ink,
+                ),
               ),
               const SizedBox(height: 6),
               ...trilha.marcos.map(
@@ -425,10 +423,11 @@ class _MarcoTile extends StatelessWidget {
       dense: true,
       contentPadding: EdgeInsets.zero,
       leading: IconButton(
+        tooltip: marco.concluido ? 'Marco concluído' : 'Concluir marco',
         icon: Icon(
           marco.concluido ? Icons.check_circle : Icons.radio_button_unchecked,
           color:
-              marco.concluido ? const Color(0xFF22C55E) : TokensStrip.textSecondary,
+              marco.concluido ? EagleTokens.good : ShellChrome.of(context).mute,
         ),
         onPressed:
             marco.concluido

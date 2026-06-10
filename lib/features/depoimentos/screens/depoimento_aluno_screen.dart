@@ -6,6 +6,7 @@ import '../data/depoimento_repository.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 
 class DepoimentoAlunoScreen extends ConsumerStatefulWidget {
   const DepoimentoAlunoScreen({super.key});
@@ -44,13 +45,12 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Scaffold(
+    return FxShellScaffold(
+      useMesh: true,
       extendBody: true,
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text('Deixar Depoimento'),
+      appBar: const FxShellAppBar(
+        title: 'Deixar Depoimento',
+        subtitle: 'Conte como foi sua experiência',
       ),
       body:
           _enviado

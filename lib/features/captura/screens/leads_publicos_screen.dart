@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/captura_repository.dart';
 
@@ -44,8 +45,12 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Leads do link público')),
+    return FxShellScaffold(
+      useMesh: true,
+      appBar: const FxShellAppBar(
+        title: 'Leads do link público',
+        subtitle: 'Contatos captados pela sua página',
+      ),
       floatingActionButton: _leads.isEmpty || _loading
           ? null
           : FloatingActionButton.extended(
