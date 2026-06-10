@@ -34,10 +34,7 @@ class PaywallVitrineSnapshot {
     final comparison = _parseComparisonRows(json['comparisonRows']);
     final trial = (json['trialDaysOffer'] as num?)?.toInt();
     final version = json['version'] as String?;
-    if (social.isEmpty &&
-        roi.isEmpty &&
-        comparison.isEmpty &&
-        trial == null) {
+    if (social.isEmpty && roi.isEmpty && comparison.isEmpty && trial == null) {
       return PaywallVitrineSnapshot.fromCatalog();
     }
     return PaywallVitrineSnapshot(
@@ -106,9 +103,7 @@ class PaywallVitrineSnapshot {
             premium: m['premium'] as String? ?? '—',
             enterprise: m['enterprise'] as String? ?? '—',
             enterprisePro:
-                m['enterprisePro'] as String? ??
-                m['entPro'] as String? ??
-                '—',
+                m['enterprisePro'] as String? ?? m['entPro'] as String? ?? '—',
           );
         })
         .whereType<PaywallComparisonRow>()

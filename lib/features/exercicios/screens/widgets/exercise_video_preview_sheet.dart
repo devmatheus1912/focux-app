@@ -430,7 +430,11 @@ class _ExerciseVideoPreviewSheetState extends State<ExerciseVideoPreviewSheet> {
       Uri.parse(_cloudinaryH264VideoUrl(widget.url)),
     );
     _controller = controller;
-    if (mounted) setState(() { _ready = false; _failed = false; });
+    if (mounted)
+      setState(() {
+        _ready = false;
+        _failed = false;
+      });
 
     try {
       await controller.initialize();
@@ -496,9 +500,10 @@ class _ExerciseVideoPreviewSheetState extends State<ExerciseVideoPreviewSheet> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: AspectRatio(
-                  aspectRatio: _ready && _controller != null
-                      ? _controller!.value.aspectRatio
-                      : 16 / 9,
+                  aspectRatio:
+                      _ready && _controller != null
+                          ? _controller!.value.aspectRatio
+                          : 16 / 9,
                   child: ColoredBox(
                     color: Colors.black,
                     child:

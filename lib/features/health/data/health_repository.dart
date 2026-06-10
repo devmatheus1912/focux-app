@@ -26,18 +26,19 @@ class RecoverySnapshot {
     this.sincronizadoEm,
   });
 
-  factory RecoverySnapshot.fromJson(Map<String, dynamic> json) =>
-      RecoverySnapshot(
-        dataReferencia: DateTime.tryParse(json['dataReferencia'] as String? ?? ''),
-        steps: (json['steps'] as num?)?.toInt() ?? 0,
-        caloriesBurned: (json['caloriesBurned'] as num?)?.toDouble() ?? 0,
-        avgHeartRate: (json['avgHeartRate'] as num?)?.toDouble() ?? 0,
-        sleepHours: (json['sleepHours'] as num?)?.toDouble() ?? 0,
-        recoveryScore: (json['recoveryScore'] as num?)?.toInt() ?? 0,
-        recoveryLabel: json['recoveryLabel'] as String? ?? '',
-        recoveryHint: json['recoveryHint'] as String? ?? '',
-        sincronizadoEm: DateTime.tryParse(json['sincronizadoEm'] as String? ?? ''),
-      );
+  factory RecoverySnapshot.fromJson(
+    Map<String, dynamic> json,
+  ) => RecoverySnapshot(
+    dataReferencia: DateTime.tryParse(json['dataReferencia'] as String? ?? ''),
+    steps: (json['steps'] as num?)?.toInt() ?? 0,
+    caloriesBurned: (json['caloriesBurned'] as num?)?.toDouble() ?? 0,
+    avgHeartRate: (json['avgHeartRate'] as num?)?.toDouble() ?? 0,
+    sleepHours: (json['sleepHours'] as num?)?.toDouble() ?? 0,
+    recoveryScore: (json['recoveryScore'] as num?)?.toInt() ?? 0,
+    recoveryLabel: json['recoveryLabel'] as String? ?? '',
+    recoveryHint: json['recoveryHint'] as String? ?? '',
+    sincronizadoEm: DateTime.tryParse(json['sincronizadoEm'] as String? ?? ''),
+  );
 
   factory RecoverySnapshot.fromSummary(HealthSummary summary) {
     final recovery = RecoveryScoreView.compute(
@@ -79,7 +80,9 @@ class HealthRepository {
 
   Future<RecoverySnapshot?> fetchRecoveryForAluno(int alunoId) async {
     try {
-      final response = await _dio.get('/api/personal/alunos/$alunoId/saude/recovery');
+      final response = await _dio.get(
+        '/api/personal/alunos/$alunoId/saude/recovery',
+      );
       if (response.statusCode == 204 || response.data == null) return null;
       return RecoverySnapshot.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (error) {

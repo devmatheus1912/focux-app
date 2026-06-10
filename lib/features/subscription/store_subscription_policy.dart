@@ -8,9 +8,7 @@ bool get subscriptionUsesNativeStore =>
         defaultTargetPlatform == TargetPlatform.android);
 
 String subscriptionChannelLabel() =>
-    subscriptionUsesNativeStore
-        ? 'App Store ou Google Play'
-        : 'checkout web';
+    subscriptionUsesNativeStore ? 'App Store ou Google Play' : 'checkout web';
 
 Future<bool> openNativeSubscriptionManagement() async {
   if (!subscriptionUsesNativeStore) return false;

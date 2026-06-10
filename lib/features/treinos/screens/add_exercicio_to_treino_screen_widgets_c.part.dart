@@ -135,7 +135,10 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
                           color: EagleTokens.brandSofter,
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        child: Icon(Icons.fitness_center_rounded, color: primary),
+                        child: Icon(
+                          Icons.fitness_center_rounded,
+                          color: primary,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -214,14 +217,13 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
                               query: _query,
                               isDark: isDark,
                               primary: primary,
-                              onClear:
-                                  () {
-                                    _searchCtrl.clear();
-                                    setState(() {
-                                      _query = '';
-                                      _highlightQuery = '';
-                                    });
-                                  },
+                              onClear: () {
+                                _searchCtrl.clear();
+                                setState(() {
+                                  _query = '';
+                                  _highlightQuery = '';
+                                });
+                              },
                             )
                             : ListView.separated(
                               controller: scrollController,
@@ -238,10 +240,8 @@ class _ExercisePickerSheetState extends State<_ExercisePickerSheet> {
                                 return _ExercisePickerTile(
                                   exercicio: exercicio,
                                   selected: selected,
-                                  alreadyInTreino:
-                                      widget.alreadyInTreinoIds.contains(
-                                        exercicio.id,
-                                      ),
+                                  alreadyInTreino: widget.alreadyInTreinoIds
+                                      .contains(exercicio.id),
                                   highlightQuery: _highlightQuery,
                                   primary: primary,
                                   isDark: isDark,
@@ -502,8 +502,7 @@ String _exerciseMeta(Exercicio exercicio) {
 }
 
 Color _metaTextColor(bool isDark, {bool muted = true}) {
-  final base =
-      isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+  final base = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
   if (isDark) return base;
   final lerp = muted ? 0.55 : 0.38;
   return Color.lerp(base, TokensStrip.textPrimary, lerp)!;
@@ -755,7 +754,11 @@ class _ExercicioErrorState extends StatelessWidget {
             Text(
               'Verifique sua conexão e tente novamente.',
               textAlign: TextAlign.center,
-              style: AppTypography.inter(color: mute, fontSize: 13, height: 1.35),
+              style: AppTypography.inter(
+                color: mute,
+                fontSize: 13,
+                height: 1.35,
+              ),
             ),
             const SizedBox(height: 18),
             OutlinedButton.icon(

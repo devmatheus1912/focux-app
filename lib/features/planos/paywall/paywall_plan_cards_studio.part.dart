@@ -26,9 +26,8 @@ class PaywallPlanFeatureSections extends StatelessWidget {
     if (!hideLockedOnlySections) return sections;
     return sections
         .where(
-          (section) => section.items.any(
-            (item) => item.included || item.comingSoon,
-          ),
+          (section) =>
+              section.items.any((item) => item.included || item.comingSoon),
         )
         .toList();
   }
@@ -85,19 +84,20 @@ class PaywallPlanFeatureSections extends StatelessWidget {
                     curve: Curves.easeOutCubic,
                     reverseCurve: Curves.easeInCubic,
                   ),
-                  children: section.items
-                      .where((item) => !item.comingSoon)
-                      .map(
-                        (item) => PaywallFeatureLine(
-                          feature: _education(item),
-                          accent: accent,
-                          mute: mute,
-                          ink: ink,
-                          onHelp: onFeatureHelp,
-                          allowLockedTap: allowLockedTap,
-                        ),
-                      )
-                      .toList(),
+                  children:
+                      section.items
+                          .where((item) => !item.comingSoon)
+                          .map(
+                            (item) => PaywallFeatureLine(
+                              feature: _education(item),
+                              accent: accent,
+                              mute: mute,
+                              ink: ink,
+                              onHelp: onFeatureHelp,
+                              allowLockedTap: allowLockedTap,
+                            ),
+                          )
+                          .toList(),
                 ),
               )
             else ...[
@@ -107,16 +107,18 @@ class PaywallPlanFeatureSections extends StatelessWidget {
                 mute: mute,
                 ink: ink,
               ),
-              ...section.items.where((item) => !item.comingSoon).map(
-                (item) => PaywallFeatureLine(
-                  feature: _education(item),
-                  accent: accent,
-                  mute: mute,
-                  ink: ink,
-                  onHelp: onFeatureHelp,
-                  allowLockedTap: allowLockedTap,
-                ),
-              ),
+              ...section.items
+                  .where((item) => !item.comingSoon)
+                  .map(
+                    (item) => PaywallFeatureLine(
+                      feature: _education(item),
+                      accent: accent,
+                      mute: mute,
+                      ink: ink,
+                      onHelp: onFeatureHelp,
+                      allowLockedTap: allowLockedTap,
+                    ),
+                  ),
             ],
             const SizedBox(height: 4),
           ],
@@ -158,7 +160,11 @@ class _PaywallFeatureLegend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = TextStyle(fontSize: 11, height: 1.35, color: mute.withValues(alpha: 0.88));
+    final style = TextStyle(
+      fontSize: 11,
+      height: 1.35,
+      color: mute.withValues(alpha: 0.88),
+    );
     return Semantics(
       label:
           'Legenda: check verde incluído no plano; cadeado requer upgrade; '
@@ -259,12 +265,19 @@ class PaywallEnterpriseProRoiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = PaywallCatalog.accentForPlan(SubscriptionPlan.ENTERPRISE_PRO);
-    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    final accent = PaywallCatalog.accentForPlan(
+      SubscriptionPlan.ENTERPRISE_PRO,
+    );
+    final secondary = PaywallCatalog.readableSecondary(
+      ink,
+      mute,
+      isDark: isDark,
+    );
     final delta = monthlyDelta;
-    final deltaLabel = delta != null && delta > 0
-        ? '+R\$ ${delta.toStringAsFixed(0)}/mês'
-        : null;
+    final deltaLabel =
+        delta != null && delta > 0
+            ? '+R\$ ${delta.toStringAsFixed(0)}/mês'
+            : null;
 
     return PaywallGlassCard(
       margin: EdgeInsets.zero,
@@ -298,9 +311,14 @@ class PaywallEnterpriseProRoiCard extends StatelessWidget {
                 ),
                 if (deltaLabel != null)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
-                      color: PaywallCatalog.green.withValues(alpha: isDark ? 0.18 : 0.12),
+                      color: PaywallCatalog.green.withValues(
+                        alpha: isDark ? 0.18 : 0.12,
+                      ),
                       borderRadius: BorderRadius.circular(TokensStrip.rPill),
                       border: Border.all(
                         color: PaywallCatalog.green.withValues(alpha: 0.35),
@@ -329,10 +347,9 @@ class PaywallEnterpriseProRoiCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         bullet.text,
-                        style: TokensStrip.body(color: secondary).copyWith(
-                          fontSize: 13,
-                          height: 1.35,
-                        ),
+                        style: TokensStrip.body(
+                          color: secondary,
+                        ).copyWith(fontSize: 13, height: 1.35),
                       ),
                     ),
                   ],
@@ -348,12 +365,19 @@ class PaywallEnterpriseProRoiCard extends StatelessWidget {
                     HapticFeedback.selectionClick();
                     onExplorePro!();
                   },
-                  icon: Icon(Icons.chevron_right_rounded, size: 18, color: accent),
+                  icon: Icon(
+                    Icons.chevron_right_rounded,
+                    size: 18,
+                    color: accent,
+                  ),
                   label: Text(
                     'Ver Enterprise Pro',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: PaywallCatalog.readableTierAccent(accent, isDark: isDark),
+                      color: PaywallCatalog.readableTierAccent(
+                        accent,
+                        isDark: isDark,
+                      ),
                     ),
                   ),
                 ),

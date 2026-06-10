@@ -214,9 +214,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
               : '',
     );
     _obsCtrl = TextEditingController(text: item.observacoes ?? '');
-    _supersetCtrl = TextEditingController(
-      text: '${item.grupoSuperset ?? 1}',
-    );
+    _supersetCtrl = TextEditingController(text: '${item.grupoSuperset ?? 1}');
     _tipoSerie = item.tipoSerie;
   }
 
@@ -245,9 +243,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
         observacoes: _obsCtrl.text,
         tipoSerie: _tipoSerie,
         grupoSuperset:
-            _tipoSerie == 'SUPERSET'
-                ? int.tryParse(_supersetCtrl.text)
-                : null,
+            _tipoSerie == 'SUPERSET' ? int.tryParse(_supersetCtrl.text) : null,
       );
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
@@ -375,10 +371,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
                       value: 'SUPERSET',
                       child: Text('Superset'),
                     ),
-                    DropdownMenuItem(
-                      value: 'DROPSET',
-                      child: Text('Drop set'),
-                    ),
+                    DropdownMenuItem(value: 'DROPSET', child: Text('Drop set')),
                   ],
                   onChanged:
                       _saving

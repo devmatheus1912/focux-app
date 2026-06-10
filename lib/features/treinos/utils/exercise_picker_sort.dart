@@ -23,13 +23,13 @@ List<Exercicio> sortExerciciosForPicker(
   Iterable<Exercicio> items, {
   required Set<int> alreadyInTreinoIds,
 }) {
-  final list = items.toList()
-    ..sort(
-      (a, b) => compareExerciciosForPicker(
-        a,
-        b,
-        alreadyInTreinoIds: alreadyInTreinoIds,
-      ),
-    );
+  final list =
+      items.toList()..sort(
+        (a, b) => compareExerciciosForPicker(
+          a,
+          b,
+          alreadyInTreinoIds: alreadyInTreinoIds,
+        ),
+      );
   return list;
 }

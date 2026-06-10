@@ -121,11 +121,10 @@ class _AlunoEquipmentFilterBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final labels =
-        equipamentos
-            .map((e) => TaxonomyLabels.equipamento[e] ?? e.name)
-            .take(3)
-            .join(', ');
+    final labels = equipamentos
+        .map((e) => TaxonomyLabels.equipamento[e] ?? e.name)
+        .take(3)
+        .join(', ');
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Container(
@@ -319,7 +318,11 @@ class _BuscarFilterEmptyState extends StatelessWidget {
       decoration: fxListCardDecoration(context, accent: primary),
       child: Column(
         children: [
-          Icon(Icons.search_off_rounded, color: primary.withValues(alpha: 0.75), size: 40),
+          Icon(
+            Icons.search_off_rounded,
+            color: primary.withValues(alpha: 0.75),
+            size: 40,
+          ),
           const SizedBox(height: 12),
           Text(
             title,
@@ -388,7 +391,11 @@ class _CompactSelectedExerciseBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: fxListCardDecoration(context, accent: primary, selected: true),
+      decoration: fxListCardDecoration(
+        context,
+        accent: primary,
+        selected: true,
+      ),
       child: Row(
         children: [
           if (onPreview != null)
@@ -493,7 +500,10 @@ class _QuickSearchResultTile extends StatelessWidget {
                 if (onPreviewThumb != null)
                   GestureDetector(
                     onTap: onPreviewThumb,
-                    child: ExerciseMediaThumb.fromExercicio(exercicio, size: 40),
+                    child: ExerciseMediaThumb.fromExercicio(
+                      exercicio,
+                      size: 40,
+                    ),
                   )
                 else
                   ExerciseMediaThumb.fromExercicio(exercicio, size: 40),
@@ -682,7 +692,9 @@ class _ActivePrescriptionStrip extends StatelessWidget {
             MediaQuery.paddingOf(context).bottom > 0 ? 8 : 14,
           ),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.94),
+            color: Theme.of(
+              context,
+            ).colorScheme.surface.withValues(alpha: 0.94),
             border: Border(top: BorderSide(color: line.withValues(alpha: 0.8))),
           ),
           child: Row(
@@ -799,9 +811,9 @@ class _StickyAddExerciseBar extends StatelessWidget {
           const SizedBox(height: 8),
           Theme(
             data: Theme.of(context).copyWith(
-              colorScheme: Theme.of(context).colorScheme.copyWith(
-                onPrimary: Colors.white,
-              ),
+              colorScheme: Theme.of(
+                context,
+              ).colorScheme.copyWith(onPrimary: Colors.white),
             ),
             child: FxLiquidPrimaryButton(
               label: 'Adicionar e continuar',

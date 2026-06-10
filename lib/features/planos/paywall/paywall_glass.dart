@@ -43,7 +43,10 @@ abstract class PaywallTierChrome {
     PaywallTierEmphasis.low => 0.45,
   };
 
-  static Widget accentRail(Color accent, {PaywallTierEmphasis emphasis = PaywallTierEmphasis.mid}) {
+  static Widget accentRail(
+    Color accent, {
+    PaywallTierEmphasis emphasis = PaywallTierEmphasis.mid,
+  }) {
     final rail = accent.withValues(alpha: _railAlpha(emphasis));
     return Positioned(
       top: 0,
@@ -55,14 +58,13 @@ abstract class PaywallTierChrome {
           borderRadius: const BorderRadius.vertical(
             top: Radius.circular(cardRadius),
           ),
-          color: emphasis == PaywallTierEmphasis.high
-              ? rail
-              : null,
-          gradient: emphasis == PaywallTierEmphasis.high
-              ? null
-              : LinearGradient(
-                  colors: [rail, accent.withValues(alpha: 0.08)],
-                ),
+          color: emphasis == PaywallTierEmphasis.high ? rail : null,
+          gradient:
+              emphasis == PaywallTierEmphasis.high
+                  ? null
+                  : LinearGradient(
+                    colors: [rail, accent.withValues(alpha: 0.08)],
+                  ),
         ),
       ),
     );
@@ -131,6 +133,7 @@ class PaywallGlassCard extends StatelessWidget {
   final EdgeInsetsGeometry? margin;
   final int elevationLevel;
   final double radius;
+
   /// Atenua glow de tiers (ouro/teal profundo) para não competir com o CTA do app.
   final double glowStrength;
 
@@ -220,9 +223,10 @@ class PaywallTierCard extends StatelessWidget {
     final showGlow = glow ?? (isCurrent || isSelected);
 
     return PaywallGlassCard(
-      margin: nestedInAccordion
-          ? const EdgeInsets.fromLTRB(4, 0, 4, 8)
-          : const EdgeInsets.only(bottom: TokensStrip.s4),
+      margin:
+          nestedInAccordion
+              ? const EdgeInsets.fromLTRB(4, 0, 4, 8)
+              : const EdgeInsets.only(bottom: TokensStrip.s4),
       accent: accent,
       glow: showGlow && !TokensStrip.prefersReducedMotion(context),
       glowStrength: isCurrent ? 0.42 : 0.32,
@@ -262,9 +266,8 @@ class PaywallInsetPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fill = isDark
-        ? Colors.white.withValues(alpha: 0.05)
-        : TokensStrip.cardBg;
+    final fill =
+        isDark ? Colors.white.withValues(alpha: 0.05) : TokensStrip.cardBg;
     return Container(
       width: double.infinity,
       padding: padding,
@@ -345,11 +348,9 @@ class PaywallTierBrandPill extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: ShellChrome.forDark(isDark).panel(
-        radius: TokensStrip.rPill,
-        accent: accent,
-        elevationLevel: 2,
-      ),
+      decoration: ShellChrome.forDark(
+        isDark,
+      ).panel(radius: TokensStrip.rPill, accent: accent, elevationLevel: 2),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -464,37 +465,41 @@ class _PaywallGlassAccordionState extends State<PaywallGlassAccordion> {
               expanded: _expanded,
               label: titleSemantics,
               child: ExpansionTile(
-              key: widget.tileKey,
-              initiallyExpanded: widget.initiallyExpanded,
-              onExpansionChanged: (open) {
-                setState(() {
-                  _expanded = open;
-                  if (open) _mountedChildren = true;
-                });
-                widget.onExpansionChanged?.call(open);
-              },
-              tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              childrenPadding: const EdgeInsets.fromLTRB(6, 0, 6, 10),
-              title: Text(
-                widget.title,
-                style: AppTypography.inter(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15,
-                  color: widget.ink,
+                key: widget.tileKey,
+                initiallyExpanded: widget.initiallyExpanded,
+                onExpansionChanged: (open) {
+                  setState(() {
+                    _expanded = open;
+                    if (open) _mountedChildren = true;
+                  });
+                  widget.onExpansionChanged?.call(open);
+                },
+                tilePadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 6,
                 ),
+                childrenPadding: const EdgeInsets.fromLTRB(6, 0, 6, 10),
+                title: Text(
+                  widget.title,
+                  style: AppTypography.inter(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                    color: widget.ink,
+                  ),
+                ),
+                subtitle:
+                    widget.subtitle == null
+                        ? null
+                        : Text(
+                          widget.subtitle!,
+                          style: TextStyle(
+                            fontSize: 13,
+                            height: 1.35,
+                            color: secondary,
+                          ),
+                        ),
+                children: _mountedChildren ? widget.children : const [],
               ),
-              subtitle: widget.subtitle == null
-                  ? null
-                  : Text(
-                      widget.subtitle!,
-                      style: TextStyle(
-                        fontSize: 13,
-                        height: 1.35,
-                        color: secondary,
-                      ),
-                    ),
-              children: _mountedChildren ? widget.children : const [],
-            ),
             ),
           ),
         ],
@@ -552,7 +557,11 @@ class PaywallSubscriberHeroGlass extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = PaywallCatalog.accentForPlan(plan);
-    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    final secondary = PaywallCatalog.readableSecondary(
+      ink,
+      mute,
+      isDark: isDark,
+    );
 
     return PaywallGlassCard(
       margin: const EdgeInsets.fromLTRB(0, 4, 0, TokensStrip.s3),
@@ -582,7 +591,11 @@ class PaywallSubscriberHeroGlass extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    PaywallTierMedallion(plan: plan, accent: accent, isDark: isDark),
+                    PaywallTierMedallion(
+                      plan: plan,
+                      accent: accent,
+                      isDark: isDark,
+                    ),
                     const SizedBox(width: TokensStrip.s3),
                     Expanded(
                       child: Column(
@@ -596,7 +609,9 @@ class PaywallSubscriberHeroGlass extends StatelessWidget {
                           ),
                           const SizedBox(height: TokensStrip.s3),
                           Text(
-                            isMaxTier ? 'Plano máximo' : 'Você está no $planLabel',
+                            isMaxTier
+                                ? 'Plano máximo'
+                                : 'Você está no $planLabel',
                             style: AppTypography.inter(
                               fontWeight: FontWeight.w800,
                               fontSize: 22,
@@ -613,10 +628,9 @@ class PaywallSubscriberHeroGlass extends StatelessWidget {
                 const SizedBox(height: TokensStrip.s3),
                 Text(
                   _subtitle,
-                  style: TokensStrip.bodyMuted(color: secondary).copyWith(
-                    fontSize: TokensStrip.fontBodySm,
-                    height: 1.45,
-                  ),
+                  style: TokensStrip.bodyMuted(
+                    color: secondary,
+                  ).copyWith(fontSize: TokensStrip.fontBodySm, height: 1.45),
                 ),
               ],
             ),

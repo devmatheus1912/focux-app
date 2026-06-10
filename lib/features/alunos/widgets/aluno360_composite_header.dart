@@ -30,7 +30,9 @@ class Aluno360DetailTabBar extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: chrome.sheetFill,
-          border: Border(bottom: BorderSide(color: line.withValues(alpha: 0.65))),
+          border: Border(
+            bottom: BorderSide(color: line.withValues(alpha: 0.65)),
+          ),
         ),
         child: Semantics(
           container: true,
@@ -195,7 +197,11 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => minExtent + heroBodyHeight;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     final chrome = ShellChrome.of(context);
     final currentExtent = math.max(minExtent, maxExtent - shrinkOffset);
     final heroSlot = math.max(
@@ -207,8 +213,7 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness:
-            isDark ? Brightness.light : Brightness.dark,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
         statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
       ),
       child: Material(

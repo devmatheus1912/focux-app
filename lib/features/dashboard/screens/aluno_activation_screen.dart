@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,6 +18,7 @@ import 'aluno_dashboard_screen.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 class AlunoActivationScreen extends ConsumerWidget {
   const AlunoActivationScreen({super.key});
@@ -54,320 +55,330 @@ class AlunoActivationScreen extends ConsumerWidget {
     final historicoAsync = ref.watch(historicoCheckinProvider);
     final chatAsync = ref.watch(chatAlunoDashboardProvider);
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Boas-vindas',
-        leading: const SizedBox(width: 8),
-        actions: [
-          alunoAsync.when(
-            data:
-                (aluno) => TextButton(
-                  onPressed: () async {
-                    await _markSeen(aluno.id);
-                    if (context.mounted) {
-                      context.go('/dashboard/aluno');
-                    }
-                  },
-                  child: const Text('Pular'),
-                ),
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
-        ],
-      ),
-      body: alunoAsync.when(
-        loading: () => const FxLoading(),
-        error:
-            (e, _) => Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        color: EagleTokens.bad.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Icon(
-                        Icons.error_outline_rounded,
-                        color: EagleTokens.bad,
-                        size: 32,
-                      ),
-                    ),
-                    const SizedBox(height: TokensStrip.s4),
-                    Text(
-                      friendlyError(e),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    FxLiquidPrimaryButton(
-                      expand: false,
-                      icon: Icons.refresh_rounded,
-                      label: 'Tentar novamente',
-                      onPressed: () => ref.invalidate(alunoMeProvider),
-                    ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: () => context.go('/dashboard/aluno'),
-                      child: const Text('Ir para o dashboard'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        data: (aluno) {
-          final medidas = medidasAsync.valueOrNull ?? const <MedidaCorporal>[];
-          final historico =
-              historicoAsync.valueOrNull ?? const <ExecucaoTreino>[];
-          final mensagens = chatAsync.valueOrNull ?? const <ChatMsg>[];
-          final profileCompletion = _profileCompletion(aluno);
-
-          final steps = <_ActivationStep>[
-            _ActivationStep(
-              title: 'Completar seu perfil',
-              description:
-                  'Foto, objetivo, dados corporais e contato deixam o acompanhamento mais inteligente.',
-              done: profileCompletion >= 80,
-              icon: Icons.person_outline,
-              cta: 'Ir para perfil',
-              route: '/aluno/perfil',
-            ),
-            _ActivationStep(
-              title: 'Registrar a primeira medida',
-              description:
-                  'Seu corpo precisa de um ponto de partida para mostrar evolucao de verdade.',
-              done: medidas.isNotEmpty,
-              icon: Icons.straighten_outlined,
-              cta: 'Registrar medida',
-              route: '/aluno/perfil',
-            ),
-            _ActivationStep(
-              title: 'Fazer o primeiro treino',
-              description:
-                  'Quando voce treina pelo app, o personal ganha historico para ajustar carga e frequencia.',
-              done: historico.any(
-                (item) => item.status.toUpperCase() == 'CONCLUIDO',
-              ),
-              icon: Icons.play_circle_outline,
-              cta: 'Abrir treinos',
-              route: '/checkin/treinos',
-            ),
-            _ActivationStep(
-              title: 'Abrir seu chat com o personal',
-              description:
-                  'Duvidas, feedback e alinhamento precisam acontecer no mesmo lugar do treino.',
-              done: mensagens.isNotEmpty,
-              icon: Icons.chat_bubble_outline,
-              cta: 'Abrir chat',
-              route: '/chat/aluno',
-            ),
-          ];
-
-          final doneCount = steps.where((item) => item.done).length;
-          final percentage = (doneCount / steps.length * 100).round();
-          final nextStep = steps.firstWhere(
-            (item) => !item.done,
-            orElse: () => steps.last,
-          );
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
-              TokensStrip.s4,
-              TokensStrip.s4,
-              TokensStrip.s4,
-              28,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(22),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Theme.of(context).colorScheme.primary,
-                        Theme.of(context).colorScheme.tertiary,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(28),
+    return fxScreenA11yScope(
+      label: 'Boas-vindas',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Boas-vindas',
+          leading: const SizedBox(width: 8),
+          actions: [
+            alunoAsync.when(
+              data:
+                  (aluno) => TextButton(
+                    onPressed: () async {
+                      await _markSeen(aluno.id);
+                      if (context.mounted) {
+                        context.go('/dashboard/aluno');
+                      }
+                    },
+                    child: const Text('Pular'),
                   ),
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+          ],
+        ),
+        body: alunoAsync.when(
+          loading: () => const FxLoading(),
+          error:
+              (e, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        'Bem-vindo, ${aluno.nome.split(' ').first}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: EagleTokens.bad.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(20),
                         ),
+                        child: const Icon(
+                          Icons.error_outline_rounded,
+                          color: EagleTokens.bad,
+                          size: 32,
+                        ),
+                      ),
+                      const SizedBox(height: TokensStrip.s4),
+                      Text(
+                        friendlyError(e),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color:
+                              isDark
+                                  ? EagleTokens.darkInk
+                                  : TokensStrip.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      FxLiquidPrimaryButton(
+                        expand: false,
+                        icon: Icons.refresh_rounded,
+                        label: 'Tentar novamente',
+                        onPressed: () => ref.invalidate(alunoMeProvider),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        FocuxBrandCopy.alunoActivationHeroSubtitle,
-                        style: TextStyle(color: Colors.white70, height: 1.45),
+                      TextButton(
+                        onPressed: () => context.go('/dashboard/aluno'),
+                        child: const Text('Ir para o dashboard'),
                       ),
-                      const SizedBox(height: 18),
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(18),
+                    ],
+                  ),
+                ),
+              ),
+          data: (aluno) {
+            final medidas =
+                medidasAsync.valueOrNull ?? const <MedidaCorporal>[];
+            final historico =
+                historicoAsync.valueOrNull ?? const <ExecucaoTreino>[];
+            final mensagens = chatAsync.valueOrNull ?? const <ChatMsg>[];
+            final profileCompletion = _profileCompletion(aluno);
+
+            final steps = <_ActivationStep>[
+              _ActivationStep(
+                title: 'Completar seu perfil',
+                description:
+                    'Foto, objetivo, dados corporais e contato deixam o acompanhamento mais inteligente.',
+                done: profileCompletion >= 80,
+                icon: Icons.person_outline,
+                cta: 'Ir para perfil',
+                route: '/aluno/perfil',
+              ),
+              _ActivationStep(
+                title: 'Registrar a primeira medida',
+                description:
+                    'Seu corpo precisa de um ponto de partida para mostrar evolucao de verdade.',
+                done: medidas.isNotEmpty,
+                icon: Icons.straighten_outlined,
+                cta: 'Registrar medida',
+                route: '/aluno/perfil',
+              ),
+              _ActivationStep(
+                title: 'Fazer o primeiro treino',
+                description:
+                    'Quando voce treina pelo app, o personal ganha historico para ajustar carga e frequencia.',
+                done: historico.any(
+                  (item) => item.status.toUpperCase() == 'CONCLUIDO',
+                ),
+                icon: Icons.play_circle_outline,
+                cta: 'Abrir treinos',
+                route: '/checkin/treinos',
+              ),
+              _ActivationStep(
+                title: 'Abrir seu chat com o personal',
+                description:
+                    'Duvidas, feedback e alinhamento precisam acontecer no mesmo lugar do treino.',
+                done: mensagens.isNotEmpty,
+                icon: Icons.chat_bubble_outline,
+                cta: 'Abrir chat',
+                route: '/chat/aluno',
+              ),
+            ];
+
+            final doneCount = steps.where((item) => item.done).length;
+            final percentage = (doneCount / steps.length * 100).round();
+            final nextStep = steps.firstWhere(
+              (item) => !item.done,
+              orElse: () => steps.last,
+            );
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(
+                TokensStrip.s4,
+                TokensStrip.s4,
+                TokensStrip.s4,
+                28,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(22),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Theme.of(context).colorScheme.primary,
+                          Theme.of(context).colorScheme.tertiary,
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Bem-vindo, ${aluno.nome.split(' ').first}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
-                        child: Row(
+                        const SizedBox(height: 8),
+                        const Text(
+                          FocuxBrandCopy.alunoActivationHeroSubtitle,
+                          style: TextStyle(color: Colors.white70, height: 1.45),
+                        ),
+                        const SizedBox(height: 18),
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Base inicial pronta',
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '$doneCount de ${steps.length} marcos concluidos',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                width: 58,
+                                height: 58,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.14),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  '$percentage%',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: TokensStrip.s4),
+                  Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: fxListCardDecoration(
+                      context,
+                      accent: Theme.of(context).colorScheme.primary,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          doneCount == steps.length
+                              ? FocuxBrandCopy.alunoActivationReadyTitle
+                              : 'Proximo melhor passo',
+                          style: TextStyle(
+                            color:
+                                isDark
+                                    ? EagleTokens.darkInkMute
+                                    : TokensStrip.textSecondary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          doneCount == steps.length
+                              ? FocuxBrandCopy.alunoActivationReadyBody
+                              : nextStep.title,
+                          style: TextStyle(
+                            color:
+                                isDark
+                                    ? EagleTokens.darkInk
+                                    : TokensStrip.textPrimary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          doneCount == steps.length
+                              ? 'Voce pode seguir para a home e usar o app normalmente.'
+                              : nextStep.description,
+                          style: TextStyle(
+                            color:
+                                isDark
+                                    ? EagleTokens.darkInkMute
+                                    : TokensStrip.textSecondary,
+                            height: 1.45,
+                          ),
+                        ),
+                        const SizedBox(height: TokensStrip.s4),
+                        Row(
                           children: [
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Base inicial pronta',
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '$doneCount de ${steps.length} marcos concluidos',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              width: 58,
-                              height: 58,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.14),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                '$percentage%',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 16,
-                                ),
+                              child: FxLiquidPrimaryButton(
+                                icon: Icons.arrow_forward,
+                                label:
+                                    doneCount == steps.length
+                                        ? 'Entrar no app'
+                                        : nextStep.cta,
+                                onPressed: () async {
+                                  await _markSeen(aluno.id);
+                                  if (context.mounted) {
+                                    context.go(
+                                      doneCount == steps.length
+                                          ? '/dashboard/aluno'
+                                          : nextStep.route,
+                                    );
+                                  }
+                                },
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: TokensStrip.s4),
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: fxListCardDecoration(
-                    context,
-                    accent: Theme.of(context).colorScheme.primary,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        doneCount == steps.length
-                            ? FocuxBrandCopy.alunoActivationReadyTitle
-                            : 'Proximo melhor passo',
-                        style: TextStyle(
-                          color:
-                              isDark
-                                  ? EagleTokens.darkInkMute
-                                  : TokensStrip.textSecondary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        doneCount == steps.length
-                            ? FocuxBrandCopy.alunoActivationReadyBody
-                            : nextStep.title,
-                        style: TextStyle(
-                          color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        doneCount == steps.length
-                            ? 'Voce pode seguir para a home e usar o app normalmente.'
-                            : nextStep.description,
-                        style: TextStyle(
-                          color:
-                              isDark
-                                  ? EagleTokens.darkInkMute
-                                  : TokensStrip.textSecondary,
-                          height: 1.45,
-                        ),
-                      ),
-                      const SizedBox(height: TokensStrip.s4),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: FxLiquidPrimaryButton(
-                              icon: Icons.arrow_forward,
-                              label:
-                                  doneCount == steps.length
-                                      ? 'Entrar no app'
-                                      : nextStep.cta,
-                              onPressed: () async {
-                                await _markSeen(aluno.id);
-                                if (context.mounted) {
-                                  context.go(
-                                    doneCount == steps.length
-                                        ? '/dashboard/aluno'
-                                        : nextStep.route,
-                                  );
-                                }
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: TokensStrip.s4),
-                ...steps.map(
-                  (step) => Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: _ActivationStepCard(
-                      step: step,
-                      isDark: isDark,
-                      onTap: () async {
-                        await _markSeen(aluno.id);
-                        if (context.mounted) {
-                          context.go(step.route);
-                        }
-                      },
+                      ],
                     ),
                   ),
-                ),
-              ],
-            ),
-          );
-        },
+                  const SizedBox(height: TokensStrip.s4),
+                  ...steps.map(
+                    (step) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: _ActivationStepCard(
+                        step: step,
+                        isDark: isDark,
+                        onTap: () async {
+                          await _markSeen(aluno.id);
+                          if (context.mounted) {
+                            context.go(step.route);
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

@@ -88,7 +88,9 @@ class _SupportHeader extends StatelessWidget {
                         child: Text(
                           '  /  Ticket #${ticket!.id}',
                           overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(
                             color: TokensStrip.textSecondary,
                             fontWeight: FontWeight.w700,
                           ),
@@ -291,53 +293,56 @@ class _BubbleMensagem extends StatelessWidget {
       label: isUser ? 'Você: ${msg.texto}' : 'Suporte: ${msg.texto}',
       container: true,
       child: Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
-      child: Row(
-        mainAxisAlignment:
-            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (!isUser) ...[
-            CircleAvatar(
-              radius: 13,
-              backgroundColor: primary.withValues(alpha: 0.12),
-              child: Icon(
-                Icons.support_agent_rounded,
-                size: 15,
-                color: primary,
+        padding: const EdgeInsets.symmetric(vertical: 5),
+        child: Row(
+          mainAxisAlignment:
+              isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            if (!isUser) ...[
+              CircleAvatar(
+                radius: 13,
+                backgroundColor: primary.withValues(alpha: 0.12),
+                child: Icon(
+                  Icons.support_agent_rounded,
+                  size: 15,
+                  color: primary,
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
+            Flexible(
+              child: Container(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.76,
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: isUser ? primary : bubbleColor,
+                  borderRadius: BorderRadius.only(
+                    topLeft: const Radius.circular(18),
+                    topRight: const Radius.circular(18),
+                    bottomLeft: Radius.circular(isUser ? 18 : 5),
+                    bottomRight: Radius.circular(isUser ? 5 : 18),
+                  ),
+                ),
+                child: Text(
+                  msg.texto,
+                  style: TextStyle(
+                    color:
+                        isUser
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Theme.of(context).colorScheme.onSurface,
+                    height: 1.25,
+                  ),
+                ),
               ),
             ),
-            const SizedBox(width: 8),
           ],
-          Flexible(
-            child: Container(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.76,
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: isUser ? primary : bubbleColor,
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(18),
-                  topRight: const Radius.circular(18),
-                  bottomLeft: Radius.circular(isUser ? 18 : 5),
-                  bottomRight: Radius.circular(isUser ? 5 : 18),
-                ),
-              ),
-              child: Text(
-                msg.texto,
-                style: TextStyle(
-                  color:
-                      isUser
-                          ? Theme.of(context).colorScheme.onPrimary
-                          : Theme.of(context).colorScheme.onSurface,
-                  height: 1.25,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
       ),
     );
   }
@@ -508,7 +513,8 @@ class _NovoTicketSheetState extends ConsumerState<_NovoTicketSheet> {
                                 Icons.circle,
                                 size: 10,
                                 color:
-                                    _severidadeColors[s] ?? TokensStrip.textSecondary,
+                                    _severidadeColors[s] ??
+                                    TokensStrip.textSecondary,
                               ),
                               const SizedBox(width: 8),
                               Text(s),
@@ -680,61 +686,66 @@ class _TicketCard extends StatelessWidget {
                   ? ExpansionTile(
                     backgroundColor: Colors.transparent,
                     collapsedBackgroundColor: Colors.transparent,
-              tilePadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 4,
-              ),
-              childrenPadding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 12),
-              title: _TicketTileContent(
-                ticket: ticket,
-                statusColor: statusColor,
-                sevColor: sevColor,
-              ),
-              children: [
-                const Divider(),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(
-                      Icons.support_agent,
-                      size: 18,
-                      color: EagleTokens.good,
+                    tilePadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
+                    childrenPadding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s4,
+                      0,
+                      16,
+                      12,
+                    ),
+                    title: _TicketTileContent(
+                      ticket: ticket,
+                      statusColor: statusColor,
+                      sevColor: sevColor,
+                    ),
+                    children: [
+                      const Divider(),
+                      Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Resposta do suporte',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 12,
-                            ),
+                          const Icon(
+                            Icons.support_agent,
+                            size: 18,
+                            color: EagleTokens.good,
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            ticket.respostaAdmin!,
-                            style: const TextStyle(fontSize: 13),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Resposta do suporte',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  ticket.respostaAdmin!,
+                                  style: const TextStyle(fontSize: 13),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            )
+                    ],
+                  )
                   : ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 4,
-              ),
-              title: _TicketTileContent(
-                ticket: ticket,
-                statusColor: statusColor,
-                sevColor: sevColor,
-              ),
-            ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
+                    title: _TicketTileContent(
+                      ticket: ticket,
+                      statusColor: statusColor,
+                      sevColor: sevColor,
+                    ),
+                  ),
         ),
       ),
     );

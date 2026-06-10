@@ -100,10 +100,7 @@ class FxStripChip extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           decoration: BoxDecoration(
-            color:
-                selected
-                    ? TokensStrip.chipSelectedFill
-                    : Colors.white,
+            color: selected ? TokensStrip.chipSelectedFill : Colors.white,
             borderRadius: BorderRadius.circular(TokensStrip.rButton),
             border: Border.all(
               color: selected ? primary : primary.withValues(alpha: 0.55),
@@ -444,10 +441,7 @@ class FxStripStepper extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            Text(
-              labels[step],
-              style: TextStyle(fontSize: 10.5, color: mute),
-            ),
+            Text(labels[step], style: TextStyle(fontSize: 10.5, color: mute)),
           ],
         );
       }),
@@ -472,13 +466,19 @@ class FxStripBreadcrumbs extends StatelessWidget {
           Text(
             segments[i],
             style: AppTypography.inter(
-              color: primary.withValues(alpha: i == segments.length - 1 ? 1 : 0.72),
+              color: primary.withValues(
+                alpha: i == segments.length - 1 ? 1 : 0.72,
+              ),
               fontWeight: FontWeight.w600,
               fontSize: 12.5,
             ),
           ),
           if (i < segments.length - 1)
-            Icon(Icons.chevron_right_rounded, size: 16, color: primary.withValues(alpha: 0.5)),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 16,
+              color: primary.withValues(alpha: 0.5),
+            ),
         ],
       ],
     );
@@ -647,16 +647,18 @@ class FxStripCard extends StatelessWidget {
       color: isDark ? TokensStrip.cinematicSurface : TokensStrip.cardBg,
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(
-        color: isDark
-            ? TokensStrip.glassBorder(dark: true, accent: primary)
-            : TokensStrip.borderDefault,
+        color:
+            isDark
+                ? TokensStrip.glassBorder(dark: true, accent: primary)
+                : TokensStrip.borderDefault,
       ),
-      boxShadow: isDark
-          ? TokensStrip.elevation(4, dark: true, accent: primary)
-          : [
-              ...TokensStrip.cardShadow(),
-              ...TokensStrip.coloredDepthGlow(primary, strength: 0.28),
-            ],
+      boxShadow:
+          isDark
+              ? TokensStrip.elevation(4, dark: true, accent: primary)
+              : [
+                ...TokensStrip.cardShadow(),
+                ...TokensStrip.coloredDepthGlow(primary, strength: 0.28),
+              ],
     );
 
     final content = Padding(padding: padding, child: child);
@@ -688,11 +690,7 @@ class FxStripSectionLabel extends StatelessWidget {
       label.toUpperCase(),
       style: TokensStrip.bodyMuted(
         fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
-      ).copyWith(
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 0.6,
-      ),
+      ).copyWith(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.6),
     );
   }
 }
@@ -711,9 +709,7 @@ class FxStripSectionTitle extends StatelessWidget {
     return Text(
       title,
       style: TokensStrip.h2(
-        color:
-            color ??
-            BrandPalette.sectionHeading(primary, dark: isDark),
+        color: color ?? BrandPalette.sectionHeading(primary, dark: isDark),
         fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
       ),
     );

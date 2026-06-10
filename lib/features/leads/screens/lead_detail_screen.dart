@@ -13,6 +13,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 const _statusOpcoes = ['LEAD', 'TESTE', 'ATIVO', 'INADIMPLENTE', 'CANCELADO'];
 const _statusLabels = {
@@ -141,7 +142,10 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       ).atualizar(_activeLead.id, {'status': novoStatus});
       setState(() => _lead = updated);
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Status atualizado para ${_statusLabels[novoStatus]}',);
+        FeedbackHelper.showSuccess(
+          context,
+          'Status atualizado para ${_statusLabels[novoStatus]}',
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -156,7 +160,9 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       builder:
           (ctx) => AlertDialog(
             title: const Text('Converter em Aluno?'),
-            content: Text('${_activeLead.nome} será criado como aluno na sua lista.'),
+            content: Text(
+              '${_activeLead.nome} será criado como aluno na sua lista.',
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
@@ -172,7 +178,9 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
     );
     if (confirm != true) return;
     try {
-      await LeadRepository(ref.read(apiClientProvider)).converter(_activeLead.id);
+      await LeadRepository(
+        ref.read(apiClientProvider),
+      ).converter(_activeLead.id);
       if (mounted) {
         FeedbackHelper.showSuccess(context, 'Lead convertido!');
         safePopOrGo(context, '/leads');
@@ -206,7 +214,9 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
     );
     if (confirm != true) return;
     try {
-      await LeadRepository(ref.read(apiClientProvider)).arquivar(_activeLead.id);
+      await LeadRepository(
+        ref.read(apiClientProvider),
+      ).arquivar(_activeLead.id);
       if (mounted) safePopOrGo(context, '/leads');
     } catch (e) {
       if (mounted) {
@@ -325,7 +335,10 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                           onPressed: () async {
                             final desc = descCtrl.text.trim();
                             if (desc.isEmpty) {
-                              FeedbackHelper.showError(ctx, 'Informe a descrição');
+                              FeedbackHelper.showError(
+                                ctx,
+                                'Informe a descrição',
+                              );
                               return;
                             }
                             Navigator.pop(ctx);
@@ -335,11 +348,17 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                               ).adicionarInteracao(_activeLead.id, tipo, desc);
                               await _carregarInteracoes();
                               if (mounted) {
-                                FeedbackHelper.showSuccess(context, 'Interação registrada!');
+                                FeedbackHelper.showSuccess(
+                                  context,
+                                  'Interação registrada!',
+                                );
                               }
                             } catch (e) {
                               if (mounted) {
-                                FeedbackHelper.showError(context, friendlyError(e));
+                                FeedbackHelper.showError(
+                                  context,
+                                  friendlyError(e),
+                                );
                               }
                             }
                           },
@@ -356,13 +375,16 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
   @override
   Widget build(BuildContext context) {
     if (_loadingLead || _lead == null) {
-      return FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Lead',
-          onBack: () => safePopOrGo(context, '/leads'),
+      return fxScreenA11yScope(
+        label: 'Lead',
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Lead',
+            onBack: () => safePopOrGo(context, '/leads'),
+          ),
+          body: const Center(child: FxLoading()),
         ),
-        body: const Center(child: FxLoading()),
       );
     }
 
@@ -371,8 +393,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       lead.status,
       Theme.of(context).colorScheme.primary,
     );
-    final podeConverter =
-        lead.status != 'CONVERTIDO' && lead.status != 'ATIVO';
+    final podeConverter = lead.status != 'CONVERTIDO' && lead.status != 'ATIVO';
 
     return FxShellScaffold(
       useMesh: true,
@@ -602,9 +623,9 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                 if (!_loadingInteracoes)
                   Text(
                     '${_interacoes.length}',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: TokensStrip.textSecondary),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: TokensStrip.textSecondary,
+                    ),
                   ),
               ],
             ),
@@ -614,7 +635,9 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
               Center(
                 child: Padding(
                   padding: const EdgeInsets.all(TokensStrip.s4),
-                  child: FxLoading(color: Theme.of(context).colorScheme.primary),
+                  child: FxLoading(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
               )
             else if (_interacoes.isEmpty)

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/brand_palette.dart';class DashboardHeaderProfileAvatar extends StatelessWidget {
+import '../../../core/theme/brand_palette.dart';
+
+class DashboardHeaderProfileAvatar extends StatelessWidget {
   const DashboardHeaderProfileAvatar({
     super.key,
     required this.primary,

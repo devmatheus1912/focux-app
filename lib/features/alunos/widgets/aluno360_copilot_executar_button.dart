@@ -67,10 +67,7 @@ class _Aluno360CopilotExecutarAcaoButtonState
     unawaited(
       AnalyticsService.instance.track(
         ProductEvents.aluno360CopilotExecutarAcao,
-        props: {
-          'aluno_id': widget.alunoId,
-          'tipo_acao': spec.backendTipo,
-        },
+        props: {'aluno_id': widget.alunoId, 'tipo_acao': spec.backendTipo},
       ),
     );
     try {

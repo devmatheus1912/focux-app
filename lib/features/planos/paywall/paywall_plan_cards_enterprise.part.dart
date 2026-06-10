@@ -19,9 +19,15 @@ class PaywallProExploreStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = PaywallCatalog.brandDeep;
-    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    final secondary = PaywallCatalog.readableSecondary(
+      ink,
+      mute,
+      isDark: isDark,
+    );
     final tag = roiTag?.trim();
-    final proAccent = PaywallCatalog.accentForPlan(SubscriptionPlan.ENTERPRISE_PRO);
+    final proAccent = PaywallCatalog.accentForPlan(
+      SubscriptionPlan.ENTERPRISE_PRO,
+    );
     return Semantics(
       button: true,
       label:
@@ -55,44 +61,54 @@ class PaywallProExploreStrip extends StatelessWidget {
                 ),
               ),
               PaywallInsetPanel(
-            accent: accent,
-            isDark: isDark,
-            child: Row(
-              children: [
-                Icon(Icons.workspace_premium_rounded, size: 20, color: accent),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'Landing, Loja e Pose Coach estão no Enterprise Pro',
-                    style: TokensStrip.body(color: secondary).copyWith(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
+                accent: accent,
+                isDark: isDark,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.workspace_premium_rounded,
+                      size: 20,
+                      color: accent,
                     ),
-                  ),
-                ),
-                if (tag != null && tag.isNotEmpty) ...[
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: PaywallCatalog.green.withValues(alpha: isDark ? 0.16 : 0.1),
-                      borderRadius: BorderRadius.circular(TokensStrip.rPill),
-                    ),
-                    child: Text(
-                      tag,
-                      style: const TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.2,
-                        color: PaywallCatalog.green,
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Landing, Loja e Pose Coach estão no Enterprise Pro',
+                        style: TokensStrip.body(
+                          color: secondary,
+                        ).copyWith(fontSize: 12.5, fontWeight: FontWeight.w600),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 4),
-                ],
-                Icon(Icons.chevron_right_rounded, color: accent, size: 22),
-              ],
-            ),
-          ),
+                    if (tag != null && tag.isNotEmpty) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: PaywallCatalog.green.withValues(
+                            alpha: isDark ? 0.16 : 0.1,
+                          ),
+                          borderRadius: BorderRadius.circular(
+                            TokensStrip.rPill,
+                          ),
+                        ),
+                        child: Text(
+                          tag,
+                          style: const TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.2,
+                            color: PaywallCatalog.green,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                    ],
+                    Icon(Icons.chevron_right_rounded, color: accent, size: 22),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -117,9 +133,16 @@ class _PlanSectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final labelColor = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    final labelColor = PaywallCatalog.readableSecondary(
+      ink,
+      mute,
+      isDark: isDark,
+    );
     return Padding(
-      padding: const EdgeInsets.only(top: TokensStrip.s3, bottom: TokensStrip.s2),
+      padding: const EdgeInsets.only(
+        top: TokensStrip.s3,
+        bottom: TokensStrip.s2,
+      ),
       child: Row(
         children: [
           Container(
@@ -128,8 +151,10 @@ class _PlanSectionTitle extends StatelessWidget {
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(2),
-              color: PaywallCatalog.readableTierAccent(accent, isDark: isDark)
-                  .withValues(alpha: 0.55),
+              color: PaywallCatalog.readableTierAccent(
+                accent,
+                isDark: isDark,
+              ).withValues(alpha: 0.55),
             ),
           ),
           Expanded(
@@ -252,15 +277,21 @@ class _PlanReferenceStoreHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    final secondary = PaywallCatalog.readableSecondary(
+      ink,
+      mute,
+      isDark: isDark,
+    );
     final channel = subscriptionChannelLabel();
-    final headline = plan == SubscriptionPlan.FREE
-        ? 'Plano gratuito · referência'
-        : 'Alteração só na $channel';
-    final body = plan == SubscriptionPlan.FREE
-        ? 'Compare limites com seu plano atual. Para voltar ao gratuito, use as assinaturas do dispositivo.'
-        : 'Downgrade e cancelamento só na loja do dispositivo. '
-            'Em Assinaturas, escolha o tier desejado.';
+    final headline =
+        plan == SubscriptionPlan.FREE
+            ? 'Plano gratuito · referência'
+            : 'Alteração só na $channel';
+    final body =
+        plan == SubscriptionPlan.FREE
+            ? 'Compare limites com seu plano atual. Para voltar ao gratuito, use as assinaturas do dispositivo.'
+            : 'Downgrade e cancelamento só na loja do dispositivo. '
+                'Em Assinaturas, escolha o tier desejado.';
 
     return PaywallInsetPanel(
       accent: accent,
@@ -293,10 +324,9 @@ class _PlanReferenceStoreHint extends StatelessWidget {
                 Text(
                   body,
                   softWrap: true,
-                  style: TokensStrip.bodyMuted(color: secondary).copyWith(
-                    fontSize: 13,
-                    height: 1.35,
-                  ),
+                  style: TokensStrip.bodyMuted(
+                    color: secondary,
+                  ).copyWith(fontSize: 13, height: 1.35),
                 ),
               ],
             ),

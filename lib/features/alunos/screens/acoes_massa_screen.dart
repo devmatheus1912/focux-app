@@ -14,6 +14,7 @@ import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class AcoesMassaScreen extends ConsumerStatefulWidget {
   const AcoesMassaScreen({super.key});
@@ -118,10 +119,7 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
           '$sucesso excluído(s), $falha não puderam ser removidos.',
         );
       } else {
-        FeedbackHelper.showSuccess(
-          context,
-          '$sucesso aluno(s) excluído(s).',
-        );
+        FeedbackHelper.showSuccess(context, '$sucesso aluno(s) excluído(s).');
       }
       setState(() => _selecionados.clear());
     }
@@ -139,7 +137,10 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
             data: {'alunoIds': _selecionados.toList()},
           );
       if (mounted) {
-        FeedbackHelper.showSuccess(context, '${_selecionados.length} aluno(s) marcado(s) como pagos',);
+        FeedbackHelper.showSuccess(
+          context,
+          '${_selecionados.length} aluno(s) marcado(s) como pagos',
+        );
         setState(() => _selecionados.clear());
       }
     } catch (e) {
@@ -171,10 +172,7 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
           '$sucesso atualizado(s), $falha não puderam ser alterados.',
         );
       } else {
-        FeedbackHelper.showSuccess(
-          context,
-          '$sucesso aluno(s) atualizado(s).',
-        );
+        FeedbackHelper.showSuccess(context, '$sucesso aluno(s) atualizado(s).');
       }
       setState(() => _selecionados.clear());
     }
@@ -185,84 +183,88 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
   Widget build(BuildContext context) {
     final alunosAsync = ref.watch(alunosProvider);
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Ações em Massa',
-        subtitle: 'Aplique mudanças a vários alunos de uma vez',
-        onBack: () => safePopOrGo(context, '/alunos'),
-        actions: [
-          alunosAsync.whenOrNull(
-                data:
-                    (alunos) => TextButton(
-                      onPressed: () => _toggleTodos(alunos),
-                      child: Text(
-                        _selecionados.length == alunos.length
-                            ? 'Desmarcar todos'
-                            : 'Selecionar todos',
-                      ),
-                    ),
-              ) ??
-              const SizedBox(),
-        ],
-      ),
-      body: alunosAsync.when(
-        loading: () => const FxLoading(),
-        error:
-            (e, _) => Center(
-              child: Padding(
-                padding: const EdgeInsets.all(TokensStrip.s5),
-                child: Text(friendlyError(e), textAlign: TextAlign.center),
-              ),
-            ),
-        data:
-            (alunos) =>
-                alunos.isEmpty
-                    ? const FxEmptyState(
-                      icon: 'users',
-                      title: 'Nenhum aluno cadastrado',
-                      subtitle:
-                          'Cadastre alunos na lista principal para usar ações em massa.',
-                    )
-                    : Stack(
-                      children: [
-                        ListView.builder(
-                          padding: const EdgeInsets.only(bottom: 80),
-                          itemCount: alunos.length,
-                          itemBuilder: (_, i) {
-                            final a = alunos[i];
-                            final sel = _selecionados.contains(a.id);
-                            return CheckboxListTile(
-                              value: sel,
-                              onChanged: (_) => _toggleSelecionado(a.id),
-                              title: Text(a.nome),
-                              subtitle: Text(
-                                '${maskEmailForList(a.email)} · ${a.status}',
-                              ),
-                              secondary: CircleAvatar(
-                                child: Text(a.nome[0].toUpperCase()),
-                              ),
-                              controlAffinity: ListTileControlAffinity.leading,
-                            );
-                          },
+    return fxScreenA11yScope(
+      label: 'Ações em Massa',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Ações em Massa',
+          subtitle: 'Aplique mudanças a vários alunos de uma vez',
+          onBack: () => safePopOrGo(context, '/alunos'),
+          actions: [
+            alunosAsync.whenOrNull(
+                  data:
+                      (alunos) => TextButton(
+                        onPressed: () => _toggleTodos(alunos),
+                        child: Text(
+                          _selecionados.length == alunos.length
+                              ? 'Desmarcar todos'
+                              : 'Selecionar todos',
                         ),
-                        if (_processando)
-                          const Positioned.fill(
-                            child: ColoredBox(
-                              color: Color(0x44000000),
-                              child: FxLoading(),
-                            ),
+                      ),
+                ) ??
+                const SizedBox(),
+          ],
+        ),
+        body: alunosAsync.when(
+          loading: () => const FxLoading(),
+          error:
+              (e, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(TokensStrip.s5),
+                  child: Text(friendlyError(e), textAlign: TextAlign.center),
+                ),
+              ),
+          data:
+              (alunos) =>
+                  alunos.isEmpty
+                      ? const FxEmptyState(
+                        icon: 'users',
+                        title: 'Nenhum aluno cadastrado',
+                        subtitle:
+                            'Cadastre alunos na lista principal para usar ações em massa.',
+                      )
+                      : Stack(
+                        children: [
+                          ListView.builder(
+                            padding: const EdgeInsets.only(bottom: 80),
+                            itemCount: alunos.length,
+                            itemBuilder: (_, i) {
+                              final a = alunos[i];
+                              final sel = _selecionados.contains(a.id);
+                              return CheckboxListTile(
+                                value: sel,
+                                onChanged: (_) => _toggleSelecionado(a.id),
+                                title: Text(a.nome),
+                                subtitle: Text(
+                                  '${maskEmailForList(a.email)} · ${a.status}',
+                                ),
+                                secondary: CircleAvatar(
+                                  child: Text(a.nome[0].toUpperCase()),
+                                ),
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                              );
+                            },
                           ),
-                      ],
-                    ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _processando ? null : () => _mostrarAcoes(context),
-        icon: const Icon(Icons.bolt),
-        label: Text(
-          _selecionados.isEmpty
-              ? 'Aplicar ação'
-              : 'Aplicar (${_selecionados.length})',
+                          if (_processando)
+                            const Positioned.fill(
+                              child: ColoredBox(
+                                color: Color(0x44000000),
+                                child: FxLoading(),
+                              ),
+                            ),
+                        ],
+                      ),
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: _processando ? null : () => _mostrarAcoes(context),
+          icon: const Icon(Icons.bolt),
+          label: Text(
+            _selecionados.isEmpty
+                ? 'Aplicar ação'
+                : 'Aplicar (${_selecionados.length})',
+          ),
         ),
       ),
     );

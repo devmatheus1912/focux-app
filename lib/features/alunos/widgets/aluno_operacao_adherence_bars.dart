@@ -126,8 +126,7 @@ class _AdherenceDayMarker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isToday = isIsoDateToday(isoDate);
-    final semanticsValue =
-        hasActivity ? 'Com check-in' : 'Sem registro';
+    final semanticsValue = hasActivity ? 'Com check-in' : 'Sem registro';
     final weekday = weekdayNameFromIso(isoDate);
     final tooltip =
         weekday.isEmpty
@@ -252,9 +251,7 @@ class _AdherenceDayBar extends StatelessWidget {
     final hasActivity = value > 0;
     final isToday = isIsoDateToday(isoDate);
     final fraction =
-        hasActivity
-            ? (value / maxVal).clamp(minFraction, 1.0)
-            : minFraction;
+        hasActivity ? (value / maxVal).clamp(minFraction, 1.0) : minFraction;
     final semanticsValue =
         hasActivity
             ? '${value.round()} registro${value == 1 ? '' : 's'}'
@@ -267,9 +264,7 @@ class _AdherenceDayBar extends StatelessWidget {
             : '$weekday · $semanticsValue${isToday ? ' · hoje' : ''}';
 
     final barFill =
-        hasActivity
-            ? activeColor
-            : missColor.withValues(alpha: 0.38);
+        hasActivity ? activeColor : missColor.withValues(alpha: 0.38);
     final barBorder =
         hasActivity
             ? Border.all(color: activeColor.withValues(alpha: 0.35), width: 1)

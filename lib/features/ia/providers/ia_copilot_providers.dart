@@ -49,11 +49,9 @@ final copilotRecoveryProvider = FutureProvider.family<RecoverySnapshot?, int>((
   ).fetchRecoveryForAluno(alunoId);
 });
 
-
 class IaCopilotTaskDraft {
   const IaCopilotTaskDraft({required this.acao, required this.motivo});
 
   final String acao;
   final String motivo;
 }
-

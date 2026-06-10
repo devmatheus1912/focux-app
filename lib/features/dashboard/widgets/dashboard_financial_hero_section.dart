@@ -130,8 +130,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
       child: AnimatedBuilder(
         animation: gradientCtrl,
         builder: (ctx, _) {
-          final angle =
-              reduceMotion ? 0.0 : gradientCtrl.value * 2 * math.pi;
+          final angle = reduceMotion ? 0.0 : gradientCtrl.value * 2 * math.pi;
           final begin = Alignment(-math.cos(angle), -math.sin(angle));
           final end = Alignment(math.cos(angle), math.sin(angle));
           return Semantics(
@@ -191,10 +190,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Receita recebida · $mes',
-          style: dashboardHeroEyebrowOnTeal(),
-        ),
+        Text('Receita recebida · $mes', style: dashboardHeroEyebrowOnTeal()),
         const SizedBox(height: 4),
         Text(
           'Nenhuma receita lançada em $mes. Registre cobranças para acompanhar a meta.',
@@ -217,10 +213,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 6),
-        Text(
-          _metaLine(),
-          style: dashboardHeroMutedOnTealStyle(),
-        ),
+        Text(_metaLine(), style: dashboardHeroMutedOnTealStyle()),
         const SizedBox(height: 12),
         _financeHeroCta(context),
         const SizedBox(height: 10),
@@ -251,10 +244,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Receita recebida · $mes',
-          style: dashboardHeroEyebrowOnTeal(),
-        ),
+        Text('Receita recebida · $mes', style: dashboardHeroEyebrowOnTeal()),
         const SizedBox(height: 4),
         Text(
           metaSuperada
@@ -283,22 +273,14 @@ class DashboardFinancialHeroSection extends StatelessWidget {
         const SizedBox(height: 5),
         Row(
           children: [
-            Text(
-              _metaLine(),
-              style: dashboardHeroMutedOnTealStyle(),
-            ),
+            Text(_metaLine(), style: dashboardHeroMutedOnTealStyle()),
             if (metaSuperada) ...[
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(
-                    TokensStrip.rInput,
-                  ),
+                  borderRadius: BorderRadius.circular(TokensStrip.rInput),
                   border: Border.all(
                     color: Colors.white.withValues(alpha: 0.28),
                   ),
@@ -365,8 +347,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
             progressRaw,
             exceeded: metaSuperada,
           ),
-          excessBeyondMeta:
-              metaSuperada ? math.max(0, progressRaw - 1) : 0,
+          excessBeyondMeta: metaSuperada ? math.max(0, progressRaw - 1) : 0,
         ),
         const SizedBox(height: TokensStrip.s3),
         Row(
@@ -393,8 +374,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
             ),
             DashboardHeroMiniStat(
               label: 'Ticket médio',
-              value:
-                  'R\$ ${finData?.ticketMedio.toStringAsFixed(0) ?? '0'}',
+              value: 'R\$ ${finData?.ticketMedio.toStringAsFixed(0) ?? '0'}',
             ),
           ],
         ),

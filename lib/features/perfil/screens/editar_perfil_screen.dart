@@ -111,25 +111,27 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
       _error = null;
     });
     try {
-      await ref.read(perfilRepositoryProvider).atualizar(
-        nome: _nomeCtrl.text.trim(),
-        cref: _crefCtrl.text.trim().isEmpty ? null : _crefCtrl.text.trim(),
-        especialidade:
-            _especialidadeCtrl.text.trim().isEmpty
-                ? null
-                : _especialidadeCtrl.text.trim(),
-        logoUrl: _logoUrl,
-        especialidades:
-            _especialidadesCtrl.text.trim().isEmpty
-                ? null
-                : _especialidadesCtrl.text.trim(),
-        instagram:
-            _instagramCtrl.text.trim().isEmpty
-                ? null
-                : _instagramCtrl.text.trim(),
-        descricaoProfissional:
-            _bioCtrl.text.trim().isEmpty ? null : _bioCtrl.text.trim(),
-      );
+      await ref
+          .read(perfilRepositoryProvider)
+          .atualizar(
+            nome: _nomeCtrl.text.trim(),
+            cref: _crefCtrl.text.trim().isEmpty ? null : _crefCtrl.text.trim(),
+            especialidade:
+                _especialidadeCtrl.text.trim().isEmpty
+                    ? null
+                    : _especialidadeCtrl.text.trim(),
+            logoUrl: _logoUrl,
+            especialidades:
+                _especialidadesCtrl.text.trim().isEmpty
+                    ? null
+                    : _especialidadesCtrl.text.trim(),
+            instagram:
+                _instagramCtrl.text.trim().isEmpty
+                    ? null
+                    : _instagramCtrl.text.trim(),
+            descricaoProfissional:
+                _bioCtrl.text.trim().isEmpty ? null : _bioCtrl.text.trim(),
+          );
       if (mounted) context.pop(true);
     } catch (e) {
       setState(() => _error = 'Erro ao salvar. Tente novamente.');
@@ -160,7 +162,12 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                 .withValues(alpha: 0.96),
             border: Border(top: BorderSide(color: chrome.line)),
           ),
-          padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 12, TokensStrip.s5, 12),
+          padding: const EdgeInsets.fromLTRB(
+            TokensStrip.s5,
+            12,
+            TokensStrip.s5,
+            12,
+          ),
           child: SafeArea(
             top: false,
             child: Semantics(
@@ -184,7 +191,12 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
         child: SafeArea(
           bottom: false,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 8, TokensStrip.s5, 24),
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s5,
+              8,
+              TokensStrip.s5,
+              24,
+            ),
             child: Form(
               key: _formKey,
               child: Column(
@@ -217,7 +229,8 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                                   _logoUrl == null
                                       ? Text(
                                         widget.perfil.nome.isNotEmpty
-                                            ? widget.perfil.nome[0].toUpperCase()
+                                            ? widget.perfil.nome[0]
+                                                .toUpperCase()
                                             : '?',
                                         style: AppTypography.inter(
                                           fontSize: 36,
@@ -420,8 +433,7 @@ class _SectionCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final a11y =
-        showHint ? '$title. $_hintCopy' : title;
+    final a11y = showHint ? '$title. $_hintCopy' : title;
 
     return Semantics(
       container: true,

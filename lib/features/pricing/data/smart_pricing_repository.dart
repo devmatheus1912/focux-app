@@ -43,9 +43,10 @@ class SmartPricingRecomendacao {
         alunosAtivos: (j['alunosAtivos'] as num?)?.toInt() ?? 0,
         mensalidadesPagas: (j['mensalidadesPagas'] as num?)?.toInt() ?? 0,
         rationale: j['rationale'] as String? ?? '',
-        pacotesSugeridos: (j['pacotesSugeridos'] as List<dynamic>? ?? [])
-            .map((e) => PacoteSugerido.fromJson(e as Map<String, dynamic>))
-            .toList(),
+        pacotesSugeridos:
+            (j['pacotesSugeridos'] as List<dynamic>? ?? [])
+                .map((e) => PacoteSugerido.fromJson(e as Map<String, dynamic>))
+                .toList(),
       );
 }
 

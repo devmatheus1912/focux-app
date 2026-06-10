@@ -26,13 +26,13 @@ class CancelSaveOferta {
   });
 
   factory CancelSaveOferta.fromJson(Map<String, dynamic> j) => CancelSaveOferta(
-        tipo: j['tipo'] as String? ?? '',
-        titulo: j['titulo'] as String? ?? '',
-        descricao: j['descricao'] as String? ?? '',
-        ctaLabel: j['ctaLabel'] as String? ?? 'Aceitar oferta',
-        billingChannel: j['billingChannel'] as String? ?? 'MERCADO_PAGO',
-        requiresStoreAction: j['requiresStoreAction'] as bool? ?? false,
-      );
+    tipo: j['tipo'] as String? ?? '',
+    titulo: j['titulo'] as String? ?? '',
+    descricao: j['descricao'] as String? ?? '',
+    ctaLabel: j['ctaLabel'] as String? ?? 'Aceitar oferta',
+    billingChannel: j['billingChannel'] as String? ?? 'MERCADO_PAGO',
+    requiresStoreAction: j['requiresStoreAction'] as bool? ?? false,
+  );
 }
 
 class CancelSaveResposta {
@@ -58,9 +58,10 @@ class CancelSaveResposta {
       CancelSaveResposta(
         id: (j['id'] as num).toInt(),
         aceita: j['aceita'] as bool? ?? false,
-        pausaAte: j['pausaAte'] != null
-            ? DateTime.tryParse(j['pausaAte'] as String)
-            : null,
+        pausaAte:
+            j['pausaAte'] != null
+                ? DateTime.tryParse(j['pausaAte'] as String)
+                : null,
         descontoPct: (j['descontoPct'] as num?)?.toInt(),
         mensagem: j['mensagem'] as String? ?? '',
         billingApplied: j['billingApplied'] as bool? ?? false,

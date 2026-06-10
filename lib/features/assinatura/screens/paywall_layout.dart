@@ -20,7 +20,8 @@ List<({String label, bool included})> _paywallFeatureRowsWithUsage(
 
   return [
     for (final row in rows)
-      if (row.included && (row.label.startsWith('Até') || row.label.contains('ilimitados')))
+      if (row.included &&
+          (row.label.startsWith('Até') || row.label.contains('ilimitados')))
         (
           label:
               usage.limiteAlunos == null
@@ -62,9 +63,10 @@ List<({String label, bool included})> _paywallFeatureRows(
   ),
   if (plan != SubscriptionPlan.FREE)
     (
-      label: plan == SubscriptionPlan.PREMIUM
-          ? '${PlanoIaLimits.premium} interações de IA/mês'
-          : '${PlanoIaLimits.enterprise}+ interações de IA/mês',
+      label:
+          plan == SubscriptionPlan.PREMIUM
+              ? '${PlanoIaLimits.premium} interações de IA/mês'
+              : '${PlanoIaLimits.enterprise}+ interações de IA/mês',
       included: true,
     ),
   if (plan == SubscriptionPlan.ENTERPRISE_PRO)
@@ -74,7 +76,10 @@ List<({String label, bool included})> _paywallFeatureRows(
     ),
   (label: 'IA Copiloto avançada', included: plan != SubscriptionPlan.FREE),
   (label: 'Financeiro e CRM', included: plano.temFinanceiro),
-  (label: 'Agenda e relatórios', included: plano.temAgenda && plano.temRelatorios),
+  (
+    label: 'Agenda e relatórios',
+    included: plano.temAgenda && plano.temRelatorios,
+  ),
   (label: 'Marca própria e identidade visual', included: plano.temWhiteLabel),
   if (plan == SubscriptionPlan.ENTERPRISE_PRO)
     (label: 'Landing page COMPLETA', included: plano.temLandingCompleta),
@@ -87,7 +92,8 @@ List<({String label, bool included})> _paywallUpgradeGains(
   SubscriptionPlan targetPlan,
 ) {
   final currentByLabel = {
-    for (final r in _paywallFeatureRows(currentPlano, currentPlan)) r.label: r.included,
+    for (final r in _paywallFeatureRows(currentPlano, currentPlan))
+      r.label: r.included,
   };
   return [
     for (final r in _paywallFeatureRows(targetPlano, targetPlan))
@@ -102,7 +108,8 @@ List<({String label, bool included})> _paywallDowngradeLosses(
   SubscriptionPlan targetPlan,
 ) {
   final targetByLabel = {
-    for (final r in _paywallFeatureRows(targetPlano, targetPlan)) r.label: r.included,
+    for (final r in _paywallFeatureRows(targetPlano, targetPlan))
+      r.label: r.included,
   };
   return [
     for (final r in _paywallFeatureRows(currentPlano, currentPlan))
@@ -180,7 +187,10 @@ class _PaywallFeaturePanel extends StatelessWidget {
     final motion = _paywallMotion(context);
     final secondary = _paywallSecondaryText(ink, mute, isDark: isDark);
     final planLabel = PaywallCatalog.displayNameFor(plano, plan);
-    final currentLabel = PaywallCatalog.displayNameFor(currentPlano, currentPlan);
+    final currentLabel = PaywallCatalog.displayNameFor(
+      currentPlano,
+      currentPlan,
+    );
     final checkColor = switch (true) {
       true when isDowngrade => PaywallCatalog.warning,
       true when isCurrent => PaywallCatalog.accentForPlan(plan),
@@ -189,10 +199,18 @@ class _PaywallFeaturePanel extends StatelessWidget {
 
     final rows = switch (true) {
       true when isCurrent => _paywallFeatureRowsWithUsage(plano, plan, usage),
-      true when isUpgrade =>
-        _paywallUpgradeGains(currentPlano, currentPlan, plano, plan),
-      true when isDowngrade =>
-        _paywallDowngradeLosses(currentPlano, currentPlan, plano, plan),
+      true when isUpgrade => _paywallUpgradeGains(
+        currentPlano,
+        currentPlan,
+        plano,
+        plan,
+      ),
+      true when isDowngrade => _paywallDowngradeLosses(
+        currentPlano,
+        currentPlan,
+        plano,
+        plan,
+      ),
       _ => _paywallFeatureRows(plano, plan),
     };
 
@@ -221,7 +239,9 @@ class _PaywallFeaturePanel extends StatelessWidget {
       child: PaywallGlassCard(
         key: ValueKey('${plan.apiName}-${currentPlan.apiName}-$isCurrent'),
         accent: tierAccent,
-        glow: (isCurrent || isUpgrade) && !TokensStrip.prefersReducedMotion(context),
+        glow:
+            (isCurrent || isUpgrade) &&
+            !TokensStrip.prefersReducedMotion(context),
         glowStrength: 0.7,
         blur: false,
         elevationLevel: 8,
@@ -233,108 +253,133 @@ class _PaywallFeaturePanel extends StatelessWidget {
               isDark: isDark,
               emphasis: PaywallTierEmphasis.mid,
             ),
-            PaywallTierChrome.accentRail(tierAccent, emphasis: PaywallTierEmphasis.mid),
-            Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TokensStrip.h2(
-              color: ink,
-              fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
-            ).copyWith(fontSize: 17),
-          ),
-          if (subtitle != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              subtitle,
-              style: TokensStrip.bodyMuted(color: secondary),
+            PaywallTierChrome.accentRail(
+              tierAccent,
+              emphasis: PaywallTierEmphasis.mid,
             ),
-          ],
-          if (isDowngrade) ...[
-            const SizedBox(height: 10),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: PaywallCatalog.warning.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: PaywallCatalog.warning.withValues(alpha: 0.35),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TokensStrip.h2(
+                    color: ink,
+                    fontFamily:
+                        Theme.of(context).textTheme.bodyLarge?.fontFamily,
+                  ).copyWith(fontSize: 17),
                 ),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.info_outline, size: 18, color: PaywallCatalog.warning),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Para mudar ou cancelar, use as assinaturas do dispositivo. '
-                      'Você pode perder acesso a recursos do $currentLabel.',
-                      style: TokensStrip.body(color: ink).copyWith(fontSize: 13),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    subtitle,
+                    style: TokensStrip.bodyMuted(color: secondary),
+                  ),
+                ],
+                if (isDowngrade) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: PaywallCatalog.warning.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: PaywallCatalog.warning.withValues(alpha: 0.35),
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          size: 18,
+                          color: PaywallCatalog.warning,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Para mudar ou cancelar, use as assinaturas do dispositivo. '
+                            'Você pode perder acesso a recursos do $currentLabel.',
+                            style: TokensStrip.body(
+                              color: ink,
+                            ).copyWith(fontSize: 13),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
-              ),
-            ),
-          ],
-          if (isUpgrade && rows.isEmpty) ...[
-            const SizedBox(height: 10),
-            Text(
-              'Você já tem os principais recursos deste tier. Toque em um plano superior para ver ganhos.',
-              style: TokensStrip.bodyMuted(color: secondary),
-            ),
-          ],
-          const SizedBox(height: 14),
-          ...rows.map(
-            (row) => Semantics(
-              label: row.included
-                  ? 'Incluído: ${row.label}'
-                  : 'Não incluído: ${row.label}',
-              child: Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    row.included ? Icons.check_circle_rounded : Icons.cancel_rounded,
-                    size: 20,
-                    color: row.included ? checkColor : mute.withValues(alpha: 0.4),
+                if (isUpgrade && rows.isEmpty) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    'Você já tem os principais recursos deste tier. Toque em um plano superior para ver ganhos.',
+                    style: TokensStrip.bodyMuted(color: secondary),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      row.label,
-                      style: TokensStrip.body(
-                        color: row.included ? ink : mute.withValues(alpha: 0.5),
-                      ).copyWith(
-                        decoration:
-                            row.included ? null : TextDecoration.lineThrough,
+                ],
+                const SizedBox(height: 14),
+                ...rows.map(
+                  (row) => Semantics(
+                    label:
+                        row.included
+                            ? 'Incluído: ${row.label}'
+                            : 'Não incluído: ${row.label}',
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            row.included
+                                ? Icons.check_circle_rounded
+                                : Icons.cancel_rounded,
+                            size: 20,
+                            color:
+                                row.included
+                                    ? checkColor
+                                    : mute.withValues(alpha: 0.4),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              row.label,
+                              style: TokensStrip.body(
+                                color:
+                                    row.included
+                                        ? ink
+                                        : mute.withValues(alpha: 0.5),
+                              ).copyWith(
+                                decoration:
+                                    row.included
+                                        ? null
+                                        : TextDecoration.lineThrough,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              Icon(Icons.lock_outline, size: 14, color: primary.withValues(alpha: 0.8)),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  subscriptionUsesNativeStore
-                      ? 'Pagamento seguro · Cancele quando quiser · ${subscriptionChannelLabel()}'
-                      : 'Checkout seguro via Mercado Pago',
-                  style: TokensStrip.bodyMuted(color: secondary),
                 ),
-              ),
-            ],
-          ),
-        ],
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.lock_outline,
+                      size: 14,
+                      color: primary.withValues(alpha: 0.8),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        subscriptionUsesNativeStore
+                            ? 'Pagamento seguro · Cancele quando quiser · ${subscriptionChannelLabel()}'
+                            : 'Checkout seguro via Mercado Pago',
+                        style: TokensStrip.bodyMuted(color: secondary),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ],
         ),
@@ -399,7 +444,8 @@ class _PaywallLegalConsentLine extends StatefulWidget {
   });
 
   @override
-  State<_PaywallLegalConsentLine> createState() => _PaywallLegalConsentLineState();
+  State<_PaywallLegalConsentLine> createState() =>
+      _PaywallLegalConsentLineState();
 }
 
 class _PaywallLegalConsentLineState extends State<_PaywallLegalConsentLine> {
@@ -428,10 +474,9 @@ class _PaywallLegalConsentLineState extends State<_PaywallLegalConsentLine> {
       widget.mute,
       isDark: isDark,
     );
-    final body = TokensStrip.bodyMuted(color: secondary).copyWith(
-      fontSize: 12,
-      height: 1.45,
-    );
+    final body = TokensStrip.bodyMuted(
+      color: secondary,
+    ).copyWith(fontSize: 12, height: 1.45);
     final link = body.copyWith(
       fontWeight: FontWeight.w600,
       color: widget.primary,
@@ -439,12 +484,14 @@ class _PaywallLegalConsentLineState extends State<_PaywallLegalConsentLine> {
       decorationColor: widget.primary.withValues(alpha: 0.45),
     );
 
-    final lead = widget.isUpgrade
-        ? 'Ao confirmar upgrade, você concorda com os '
-        : 'Ao assinar, você concorda com os ';
-    final semanticsLead = widget.isUpgrade
-        ? 'Ao confirmar upgrade, você concorda com os Termos de uso e a Política de privacidade'
-        : 'Ao assinar, você concorda com os Termos de uso e a Política de privacidade';
+    final lead =
+        widget.isUpgrade
+            ? 'Ao confirmar upgrade, você concorda com os '
+            : 'Ao assinar, você concorda com os ';
+    final semanticsLead =
+        widget.isUpgrade
+            ? 'Ao confirmar upgrade, você concorda com os Termos de uso e a Política de privacidade'
+            : 'Ao assinar, você concorda com os Termos de uso e a Política de privacidade';
 
     return Semantics(
       label: semanticsLead,
@@ -454,17 +501,9 @@ class _PaywallLegalConsentLineState extends State<_PaywallLegalConsentLine> {
           style: body,
           children: [
             TextSpan(text: lead),
-            TextSpan(
-              text: 'Termos',
-              style: link,
-              recognizer: _termsTap,
-            ),
+            TextSpan(text: 'Termos', style: link, recognizer: _termsTap),
             const TextSpan(text: ' e a '),
-            TextSpan(
-              text: 'Privacidade',
-              style: link,
-              recognizer: _privacyTap,
-            ),
+            TextSpan(text: 'Privacidade', style: link, recognizer: _privacyTap),
             const TextSpan(text: '.'),
           ],
         ),

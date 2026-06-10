@@ -96,8 +96,7 @@ class ExerciseVideoUploadStrip extends StatelessWidget {
             ? 'Envie sua demonstração. A demo oficial Focux chega em breve.'
             : 'Envie sua demonstração antes de prescrever.';
 
-    final uploadLabel =
-        hasPersonalVideo ? 'Trocar vídeo' : 'Enviar vídeo';
+    final uploadLabel = hasPersonalVideo ? 'Trocar vídeo' : 'Enviar vídeo';
 
     final decoration = fxListCardDecoration(
       context,

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/friendly_error.dart';
 
@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 final _broadcastRepositoryProvider = Provider<BroadcastRepository>(
   (ref) => BroadcastRepository(ref.read(apiClientProvider)),
@@ -59,7 +60,10 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
       setState(() => _publicoAlvo = 'TODOS');
       ref.invalidate(_broadcastHistoricoProvider);
       if (!mounted) return;
-      FeedbackHelper.showSuccess(context, 'Enviado para ${resultado.totalEnviados} alunos.');
+      FeedbackHelper.showSuccess(
+        context,
+        'Enviado para ${resultado.totalEnviados} alunos.',
+      );
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(context, friendlyError(e));
@@ -76,156 +80,157 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final brand = Theme.of(context).colorScheme.primary;
 
-    return FxShellScaffold(
-      useMesh: true,
-      safeArea: false,
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () async => ref.invalidate(_broadcastHistoricoProvider),
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 28),
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(4, 0, 4, 18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'CENTRAL DE MENSAGERIA',
-                      style: TextStyle(
-                        color: brand,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Broadcasts',
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 26,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.4,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(18),
-                decoration: fxListCardDecoration(
-                  context,
-                  accent: brand,
-                  radius: 22,
-                ),
-                child: Form(
-                  key: _formKey,
+    return fxScreenA11yScope(
+      label: 'Broadcast',
+      child: FxShellScaffold(
+        useMesh: true,
+        safeArea: false,
+        body: SafeArea(
+          child: RefreshIndicator(
+            onRefresh: () async => ref.invalidate(_broadcastHistoricoProvider),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 28),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(4, 0, 4, 18),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Nova mensagem',
+                        'CENTRAL DE MENSAGERIA',
+                        style: TextStyle(
+                          color: brand,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Broadcasts',
                         style: TextStyle(
                           color: ink,
-                          fontSize: 13,
+                          fontSize: 26,
                           fontWeight: FontWeight.w800,
+                          letterSpacing: -0.4,
                         ),
-                      ),
-                      const SizedBox(height: 14),
-                      _DesignField(
-                        controller: _tituloCtrl,
-                        label: 'Titulo',
-                        hint: 'Ex.: Lembrete de treino...',
-                        maxLength: 100,
-                        validatorText: 'Informe o titulo',
-                      ),
-                      const SizedBox(height: 12),
-                      _DesignField(
-                        controller: _mensagemCtrl,
-                        label: 'Mensagem',
-                        hint: 'Digite sua mensagem para os alunos...',
-                        minLines: 3,
-                        validatorText: 'Informe a mensagem',
-                      ),
-                      const SizedBox(height: 14),
-                      Text(
-                        'Publico-alvo',
-                        style: TextStyle(
-                          color: mute,
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          for (final p in _publicos) ...[
-                            Expanded(
-                              child: _AudienceChip(
-                                label: p,
-                                selected: _publicoAlvo == p,
-                                onTap: () => setState(() => _publicoAlvo = p),
-                              ),
-                            ),
-                            if (p != _publicos.last) const SizedBox(width: 7),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(height: 18),
-                      FxLiquidPrimaryButton(
-                        label:
-                            _enviando
-                                ? 'Enviando...'
-                                : 'Enviar notificacao',
-                        icon: Icons.send_rounded,
-                        loading: _enviando,
-                        onPressed: _enviando ? null : _enviar,
                       ),
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 22),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Text(
-                  'Historico',
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.2,
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: fxListCardDecoration(
+                    context,
+                    accent: brand,
+                    radius: 22,
                   ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              historicoAsync.when(
-                loading:
-                    () => const Padding(
-                      padding: EdgeInsets.all(TokensStrip.s5),
-                      child: FxLoading(),
-                    ),
-                error:
-                    (e, _) =>
-                        _StateCard(text: 'Erro ao carregar historico: $e'),
-                data: (lista) {
-                  if (lista.isEmpty) {
-                    return const _StateCard(
-                      text: 'Nenhum broadcast enviado ainda.',
-                    );
-                  }
-                  return Column(
-                    children: [
-                      for (final b in lista) ...[
-                        _BroadcastCard(broadcast: b),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Nova mensagem',
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        _DesignField(
+                          controller: _tituloCtrl,
+                          label: 'Titulo',
+                          hint: 'Ex.: Lembrete de treino...',
+                          maxLength: 100,
+                          validatorText: 'Informe o titulo',
+                        ),
+                        const SizedBox(height: 12),
+                        _DesignField(
+                          controller: _mensagemCtrl,
+                          label: 'Mensagem',
+                          hint: 'Digite sua mensagem para os alunos...',
+                          minLines: 3,
+                          validatorText: 'Informe a mensagem',
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          'Publico-alvo',
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                         const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            for (final p in _publicos) ...[
+                              Expanded(
+                                child: _AudienceChip(
+                                  label: p,
+                                  selected: _publicoAlvo == p,
+                                  onTap: () => setState(() => _publicoAlvo = p),
+                                ),
+                              ),
+                              if (p != _publicos.last) const SizedBox(width: 7),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 18),
+                        FxLiquidPrimaryButton(
+                          label:
+                              _enviando ? 'Enviando...' : 'Enviar notificacao',
+                          icon: Icons.send_rounded,
+                          loading: _enviando,
+                          onPressed: _enviando ? null : _enviar,
+                        ),
                       ],
-                    ],
-                  );
-                },
-              ),
-            ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 22),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    'Historico',
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                historicoAsync.when(
+                  loading:
+                      () => const Padding(
+                        padding: EdgeInsets.all(TokensStrip.s5),
+                        child: FxLoading(),
+                      ),
+                  error:
+                      (e, _) =>
+                          _StateCard(text: 'Erro ao carregar historico: $e'),
+                  data: (lista) {
+                    if (lista.isEmpty) {
+                      return const _StateCard(
+                        text: 'Nenhum broadcast enviado ainda.',
+                      );
+                    }
+                    return Column(
+                      children: [
+                        for (final b in lista) ...[
+                          _BroadcastCard(broadcast: b),
+                          const SizedBox(height: 8),
+                        ],
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

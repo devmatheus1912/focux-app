@@ -1,4 +1,5 @@
-﻿part of 'alunos_list_screen.dart';
+part of 'alunos_list_screen.dart';
+
 class _AlunosTriageBanner extends StatelessWidget {
   final int count;
   final String title;
@@ -124,10 +125,7 @@ class _AlunoOutreachActions extends ConsumerWidget {
           tooltip: 'Chat in-app',
           color: BrandPalette.sectionAction(primary, dark: isDark),
           onTap:
-              () => context.push(
-                '/alunos/$alunoId/chat',
-                extra: displayName,
-              ),
+              () => context.push('/alunos/$alunoId/chat', extra: displayName),
         ),
         if (hasWhatsapp) ...[
           const SizedBox(width: 3),
@@ -136,12 +134,13 @@ class _AlunoOutreachActions extends ConsumerWidget {
             icon: Icons.chat_rounded,
             tooltip: 'WhatsApp',
             color: const Color(0xFF25D366),
-            onTap: () => openAlunoWhatsappOutreach(
-              context,
-              displayName: displayName,
-              whatsappNumber: whatsappNumber,
-              emRisco: emRisco,
-            ),
+            onTap:
+                () => openAlunoWhatsappOutreach(
+                  context,
+                  displayName: displayName,
+                  whatsappNumber: whatsappNumber,
+                  emRisco: emRisco,
+                ),
           ),
         ],
         const SizedBox(width: 3),
@@ -164,7 +163,9 @@ class _AlunoOutreachActions extends ConsumerWidget {
           tooltip: 'Contato feito',
           color: EagleTokens.good,
           onTap: () async {
-            await ref.read(alunoFollowUpActionsProvider).markContactDone(alunoId);
+            await ref
+                .read(alunoFollowUpActionsProvider)
+                .markContactDone(alunoId);
             if (context.mounted) {
               FeedbackHelper.showSuccess(context, 'Contato registrado');
             }
@@ -251,7 +252,8 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
   @override
   Widget build(BuildContext context) {
     final ink = widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final line = widget.isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final line =
+        widget.isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final primary = Theme.of(context).colorScheme.primary;
     final maxHeight = MediaQuery.sizeOf(context).height * 0.72;
 

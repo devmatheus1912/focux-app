@@ -371,11 +371,13 @@ class RiscoResumo {
 
   factory RiscoResumo.fromJson(Map<String, dynamic> json) => RiscoResumo(
     score: (json['score'] as num?)?.toInt() ?? 0,
-    motivos: (json['motivos'] as List<dynamic>? ?? const [])
-        .map((e) => e.toString())
-        .toList(),
+    motivos:
+        (json['motivos'] as List<dynamic>? ?? const [])
+            .map((e) => e.toString())
+            .toList(),
     nivel: (json['nivel'] as String?) ?? 'BAIXO',
-    emRisco: json['emRisco'] as bool? ?? ((json['score'] as num?)?.toInt() ?? 0) > 0,
+    emRisco:
+        json['emRisco'] as bool? ?? ((json['score'] as num?)?.toInt() ?? 0) > 0,
   );
 }
 
@@ -392,14 +394,18 @@ class Timeline360Page {
   final int? nextOffset;
   final int totalCount;
 
-  factory Timeline360Page.fromJson(Map<String, dynamic> json) => Timeline360Page(
-    events: (json['events'] as List<dynamic>? ?? const [])
-        .map((e) => Timeline360Event.fromJson(e as Map<String, dynamic>))
-        .toList(),
-    hasMore: json['hasMore'] as bool? ?? false,
-    nextOffset: (json['nextOffset'] as num?)?.toInt(),
-    totalCount: (json['totalCount'] as num?)?.toInt() ?? 0,
-  );
+  factory Timeline360Page.fromJson(Map<String, dynamic> json) =>
+      Timeline360Page(
+        events:
+            (json['events'] as List<dynamic>? ?? const [])
+                .map(
+                  (e) => Timeline360Event.fromJson(e as Map<String, dynamic>),
+                )
+                .toList(),
+        hasMore: json['hasMore'] as bool? ?? false,
+        nextOffset: (json['nextOffset'] as num?)?.toInt(),
+        totalCount: (json['totalCount'] as num?)?.toInt() ?? 0,
+      );
 }
 
 class Aluno360 {
@@ -432,9 +438,10 @@ class Aluno360 {
     autonomiaResumo: AlunoAutonomiaResumo.fromJson(
       json['autonomiaResumo'] as Map<String, dynamic>,
     ),
-    timelinePreview: (json['timelinePreview'] as List<dynamic>? ?? const [])
-        .map((e) => Timeline360Event.fromJson(e as Map<String, dynamic>))
-        .toList(),
+    timelinePreview:
+        (json['timelinePreview'] as List<dynamic>? ?? const [])
+            .map((e) => Timeline360Event.fromJson(e as Map<String, dynamic>))
+            .toList(),
     proximaAcao: ProximaAcaoResumo.fromJson(
       json['proximaAcao'] as Map<String, dynamic>,
     ),
@@ -452,9 +459,7 @@ class Aluno360 {
             : null,
     riscoResumo:
         json['riscoResumo'] != null
-            ? RiscoResumo.fromJson(
-              json['riscoResumo'] as Map<String, dynamic>,
-            )
+            ? RiscoResumo.fromJson(json['riscoResumo'] as Map<String, dynamic>)
             : null,
   );
 }
@@ -542,7 +547,10 @@ class AlunoRepository {
     return Aluno.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<Aluno> atualizarOperacaoFocus(int id, {required bool focusMode}) async {
+  Future<Aluno> atualizarOperacaoFocus(
+    int id, {
+    required bool focusMode,
+  }) async {
     final response = await _dio.patch(
       '/api/alunos/$id/operacao-focus',
       data: {'focusMode': focusMode},
@@ -672,10 +680,7 @@ class AlunoRepository {
   }) async {
     final response = await _dio.get(
       '/api/alunos/$alunoId/timeline-360/page',
-      queryParameters: {
-        'limit': limit,
-        'offset': offset,
-      },
+      queryParameters: {'limit': limit, 'offset': offset},
     );
     return Timeline360Page.fromJson(response.data as Map<String, dynamic>);
   }

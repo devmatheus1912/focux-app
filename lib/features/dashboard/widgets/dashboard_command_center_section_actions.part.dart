@@ -267,114 +267,115 @@ class CommandActionTile extends StatelessWidget {
       label: '${item.title}. ${item.subtitle}',
       button: true,
       child: InkWell(
-      onTap: onTap ?? () => context.go(item.route),
-      borderRadius: BorderRadius.circular(TokensStrip.rCard),
-      child: AnimatedScale(
-        scale: 1,
-        duration: dashboardMotionDuration(
-          context,
-          normal: const Duration(milliseconds: 110),
-        ),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: fxStripCardDecoration(
+        onTap: onTap ?? () => context.go(item.route),
+        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        child: AnimatedScale(
+          scale: 1,
+          duration: dashboardMotionDuration(
             context,
-            accent: accent,
-            radius: TokensStrip.rCard,
+            normal: const Duration(milliseconds: 110),
           ),
-          child: Row(
-            children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: isDark ? 0.24 : 0.14),
-                  borderRadius: BorderRadius.circular(TokensStrip.rInput),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: fxStripCardDecoration(
+              context,
+              accent: accent,
+              radius: TokensStrip.rCard,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: isDark ? 0.24 : 0.14),
+                    borderRadius: BorderRadius.circular(TokensStrip.rInput),
+                  ),
+                  child: Center(
+                    child: FxIcon(name: item.icon, color: accent, size: 18),
+                  ),
                 ),
-                child: Center(
-                  child: FxIcon(name: item.icon, color: accent, size: 18),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            item.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: ink,
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w900,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              item.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: ink,
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w900,
+                              ),
                             ),
                           ),
-                        ),
-                        if (badge != null && badge.isNotEmpty) ...[
-                          const SizedBox(width: 6),
-                          Builder(
-                            builder: (context) {
-                              final badgeColors = dashboardPriorityBadgeColors(
-                                isDark: isDark,
-                                accent: accent,
-                              );
-                              return Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: badgeColors.background,
-                                  borderRadius: BorderRadius.circular(6),
-                                  border:
-                                      isDark
-                                          ? Border.all(
-                                            color: Colors.white.withValues(
-                                              alpha: 0.12,
-                                            ),
-                                          )
-                                          : null,
-                                ),
-                                child: Text(
-                                  badge,
-                                  style: TextStyle(
-                                    color: badgeColors.foreground,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 0.2,
+                          if (badge != null && badge.isNotEmpty) ...[
+                            const SizedBox(width: 6),
+                            Builder(
+                              builder: (context) {
+                                final badgeColors =
+                                    dashboardPriorityBadgeColors(
+                                      isDark: isDark,
+                                      accent: accent,
+                                    );
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
                                   ),
-                                ),
-                              );
-                            },
-                          ),
+                                  decoration: BoxDecoration(
+                                    color: badgeColors.background,
+                                    borderRadius: BorderRadius.circular(6),
+                                    border:
+                                        isDark
+                                            ? Border.all(
+                                              color: Colors.white.withValues(
+                                                alpha: 0.12,
+                                              ),
+                                            )
+                                            : null,
+                                  ),
+                                  child: Text(
+                                    badge,
+                                    style: TextStyle(
+                                      color: badgeColors.foreground,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
                         ],
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      item.subtitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: mute,
-                        fontSize: 11.6,
-                        height: 1.2,
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 2),
+                      Text(
+                        item.subtitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: mute,
+                          fontSize: 11.6,
+                          height: 1.2,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              FxIcon(name: 'chevron-right', color: mute, size: 20),
-            ],
+                const SizedBox(width: 8),
+                FxIcon(name: 'chevron-right', color: mute, size: 20),
+              ],
+            ),
           ),
         ),
       ),
-    ),
     );
   }
 }
@@ -482,10 +483,9 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
                         style: TokensStrip.h2(
                           color: primary,
                           fontFamily:
-                              Theme.of(widget.sheetContext)
-                                  .textTheme
-                                  .bodyLarge
-                                  ?.fontFamily,
+                              Theme.of(
+                                widget.sheetContext,
+                              ).textTheme.bodyLarge?.fontFamily,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -494,10 +494,9 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
                         style: TokensStrip.bodyMuted(
                           color: mute,
                           fontFamily:
-                              Theme.of(widget.sheetContext)
-                                  .textTheme
-                                  .bodyLarge
-                                  ?.fontFamily,
+                              Theme.of(
+                                widget.sheetContext,
+                              ).textTheme.bodyLarge?.fontFamily,
                         ),
                       ),
                     ],
@@ -516,7 +515,11 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
                 shrinkWrap: true,
                 physics: const BouncingScrollPhysics(),
                 children: [
-                  for (var index = 0; index < impactActions.length; index++) ...[
+                  for (
+                    var index = 0;
+                    index < impactActions.length;
+                    index++
+                  ) ...[
                     if (index > 0) const SizedBox(height: 8),
                     CommandActionTile(
                       item: impactActions[index],
@@ -573,7 +576,11 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
                     ),
                     if (_radarExpanded) ...[
                       const SizedBox(height: 8),
-                      for (var index = 0; index < radarActions.length; index++) ...[
+                      for (
+                        var index = 0;
+                        index < radarActions.length;
+                        index++
+                      ) ...[
                         if (index > 0) const SizedBox(height: 8),
                         CommandActionTile(
                           item: radarActions[index],

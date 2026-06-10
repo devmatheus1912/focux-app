@@ -16,7 +16,6 @@ import '../../../core/theme/tokens_strip.dart';
 
 part 'notificacoes_screen_widgets.part.dart';
 
-
 class NotificacoesScreen extends ConsumerWidget {
   const NotificacoesScreen({super.key});
 
@@ -26,8 +25,7 @@ class NotificacoesScreen extends ConsumerWidget {
     final async = ref.watch(notificacoesProvider);
     final repo = ref.read(notificacoesRepositoryProvider);
     final primary = Theme.of(context).colorScheme.primary;
-    final actionInk =
-        isDark ? primary : BrandPalette.deep(primary);
+    final actionInk = isDark ? primary : BrandPalette.deep(primary);
 
     Future<void> reload() async {
       ref.invalidate(notificacoesProvider);
@@ -61,7 +59,10 @@ class NotificacoesScreen extends ConsumerWidget {
                 await repo.marcarTodasLidas();
                 await reload();
                 if (!context.mounted) return;
-                FeedbackHelper.showSuccess(context, 'Todas marcadas como lidas.');
+                FeedbackHelper.showSuccess(
+                  context,
+                  'Todas marcadas como lidas.',
+                );
               },
               child: const Text('Ler todas'),
             ),
@@ -175,4 +176,3 @@ sealed class _NotificationEntry {
   const _NotificationEntry();
   DateTime? get createdAt;
 }
-

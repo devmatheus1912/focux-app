@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/dunning_repository.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 final dunningRepositoryProvider = Provider(
   (ref) => DunningRepository(ref.read(apiClientProvider)),
@@ -73,87 +74,93 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
     final snap = _snapshot;
     final primary = Theme.of(context).colorScheme.primary;
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Recuperação de pagamentos',
-        subtitle: 'Falhas e taxa de recuperação',
-        onBack: () => context.pop(),
-      ),
-      body: _loading
-          ? const Center(child: FxLoading())
-          : RefreshIndicator(
-              onRefresh: _carregar,
-              child: ListView(
-                padding: const EdgeInsets.all(TokensStrip.s4),
-                children: [
-                  if (snap != null)
-                    FxSatellitePanel(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Taxa de recuperação: ${snap.recoveryRate.toStringAsFixed(1)}%',
-                            style: AppTypography.inter(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 16,
-                              color: fxScreenInk(context),
-                            ),
+    return fxScreenA11yScope(
+      label: 'Recuperação de pagamentos',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Recuperação de pagamentos',
+          subtitle: 'Falhas e taxa de recuperação',
+          onBack: () => context.pop(),
+        ),
+        body:
+            _loading
+                ? const Center(child: FxLoading())
+                : RefreshIndicator(
+                  onRefresh: _carregar,
+                  child: ListView(
+                    padding: const EdgeInsets.all(TokensStrip.s4),
+                    children: [
+                      if (snap != null)
+                        FxSatellitePanel(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Taxa de recuperação: ${snap.recoveryRate.toStringAsFixed(1)}%',
+                                style: AppTypography.inter(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16,
+                                  color: fxScreenInk(context),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                '${snap.abertas} falhas em aberto · ${snap.recuperadas} recuperadas de ${snap.total}',
+                                style: TextStyle(color: fxScreenMute(context)),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            '${snap.abertas} falhas em aberto · ${snap.recuperadas} recuperadas de ${snap.total}',
-                            style: TextStyle(color: fxScreenMute(context)),
-                          ),
-                        ],
+                        ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Falhas em aberto (${_falhas.length})',
+                        style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
-                    ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Falhas em aberto (${_falhas.length})',
-                    style: const TextStyle(fontWeight: FontWeight.w700),
+                      const SizedBox(height: 8),
+                      if (_falhas.isEmpty)
+                        const FxEmptyState(
+                          icon: 'check-circle',
+                          title: 'Tudo em dia',
+                          subtitle: 'Nenhuma falha de pagamento em aberto.',
+                        )
+                      else
+                        ..._falhas.map((f) {
+                          final recuperando = _marcandoId == f.id;
+                          return FxSatelliteListTile(
+                            accent: EagleTokens.bad,
+                            title: f.contexto,
+                            titleCase: false,
+                            subtitle: Text(
+                              [
+                                if (f.motivo != null && f.motivo!.isNotEmpty)
+                                  f.motivo!,
+                                if (f.valor != null)
+                                  'R\$ ${f.valor!.toStringAsFixed(2)}',
+                                if (f.alunoId != null) 'Aluno #${f.alunoId}',
+                                'Tentativa ${f.tentativa}',
+                              ].join(' · '),
+                            ),
+                            trailing: FilledButton.tonal(
+                              onPressed:
+                                  recuperando
+                                      ? null
+                                      : () => _marcarRecuperado(f),
+                              child:
+                                  recuperando
+                                      ? FxLoading(
+                                        size: 18,
+                                        strokeWidth: 2,
+                                        color: primary,
+                                      )
+                                      : const Text('Recuperado'),
+                            ),
+                          );
+                        }),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  if (_falhas.isEmpty)
-                    const FxEmptyState(
-                      icon: 'check-circle',
-                      title: 'Tudo em dia',
-                      subtitle: 'Nenhuma falha de pagamento em aberto.',
-                    )
-                  else
-                    ..._falhas.map((f) {
-                      final recuperando = _marcandoId == f.id;
-                      return FxSatelliteListTile(
-                        accent: EagleTokens.bad,
-                        title: f.contexto,
-                        titleCase: false,
-                        subtitle: Text(
-                          [
-                            if (f.motivo != null && f.motivo!.isNotEmpty)
-                              f.motivo!,
-                            if (f.valor != null)
-                              'R\$ ${f.valor!.toStringAsFixed(2)}',
-                            if (f.alunoId != null) 'Aluno #${f.alunoId}',
-                            'Tentativa ${f.tentativa}',
-                          ].join(' · '),
-                        ),
-                        trailing: FilledButton.tonal(
-                          onPressed:
-                              recuperando ? null : () => _marcarRecuperado(f),
-                          child:
-                              recuperando
-                                  ? FxLoading(
-                                    size: 18,
-                                    strokeWidth: 2,
-                                    color: primary,
-                                  )
-                                  : const Text('Recuperado'),
-                        ),
-                      );
-                    }),
-                ],
-              ),
-            ),
+                ),
+      ),
     );
   }
 }

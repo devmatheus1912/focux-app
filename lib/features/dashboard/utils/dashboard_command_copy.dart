@@ -13,14 +13,13 @@ String dashboardFormatActionCopy(String raw) {
     (r'\boperacao\b', 'operação', 'Operação'),
     (r'\bevolucao\b', 'evolução', 'Evolução'),
   ]) {
-    text = text.replaceAllMapped(
-      RegExp(pair.$1, caseSensitive: false),
-      (match) {
-        final word = match.group(0)!;
-        final capitalized = word[0].toUpperCase() == word[0];
-        return capitalized ? pair.$3 : pair.$2;
-      },
-    );
+    text = text.replaceAllMapped(RegExp(pair.$1, caseSensitive: false), (
+      match,
+    ) {
+      final word = match.group(0)!;
+      final capitalized = word[0].toUpperCase() == word[0];
+      return capitalized ? pair.$3 : pair.$2;
+    });
   }
 
   final radar = RegExp(r'^Radar Focux:\s*(.+)$', caseSensitive: false);
@@ -96,11 +95,7 @@ String dashboardFormatCountCopy(String raw) {
   ).firstMatch(text.trim());
   if (cobranca != null) {
     final n = int.tryParse(cobranca.group(1)!) ?? 0;
-    return dashboardCountLabel(
-      n,
-      'cobrança pendente',
-      'cobranças pendentes',
-    );
+    return dashboardCountLabel(n, 'cobrança pendente', 'cobranças pendentes');
   }
   final mensalidade = RegExp(
     r'^(\d+)\s+mensalidades?\s+',

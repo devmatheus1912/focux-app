@@ -60,8 +60,7 @@ class AuthLogoMark extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final logoUrl =
-        forceOfficial ? null : ref.watch(logoUrlProvider);
+    final logoUrl = forceOfficial ? null : ref.watch(logoUrlProvider);
 
     return Semantics(
       label: 'Focux Personal',
@@ -189,9 +188,10 @@ class AuthWordmark extends ConsumerWidget {
         center ? CrossAxisAlignment.center : CrossAxisAlignment.start;
 
     if (hideFocux) {
-      final displayName = (appName != null && appName.trim().isNotEmpty)
-          ? appName.trim()
-          : (personalName != null && personalName.trim().isNotEmpty)
+      final displayName =
+          (appName != null && appName.trim().isNotEmpty)
+              ? appName.trim()
+              : (personalName != null && personalName.trim().isNotEmpty)
               ? personalName.trim()
               : 'Meu Personal';
       return Column(
@@ -210,10 +210,7 @@ class AuthWordmark extends ConsumerWidget {
           ),
           if (showTagline) ...[
             const SizedBox(height: 10),
-            FocuxBrandTagline(
-              center: center,
-              fontSize: taglineSize,
-            ),
+            FocuxBrandTagline(center: center, fontSize: taglineSize),
           ],
         ],
       );
@@ -221,10 +218,7 @@ class AuthWordmark extends ConsumerWidget {
 
     if (!showTagline) return const SizedBox.shrink();
 
-    return FocuxBrandTagline(
-      center: center,
-      fontSize: taglineSize,
-    );
+    return FocuxBrandTagline(center: center, fontSize: taglineSize);
   }
 }
 
@@ -430,9 +424,7 @@ class AuthField extends StatelessWidget {
             ),
             enabledBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(
-                color: primary.withValues(alpha: 0.28),
-              ),
+              borderSide: BorderSide(color: primary.withValues(alpha: 0.28)),
             ),
             focusedBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(14),
@@ -713,10 +705,7 @@ class AuthPlanCard extends StatelessWidget {
                   )
                   : null,
           color: selected ? null : EagleTokens.glassFill,
-          border:
-              selected
-                  ? null
-                  : Border.all(color: EagleTokens.glassBorder),
+          border: selected ? null : Border.all(color: EagleTokens.glassBorder),
           boxShadow:
               selected
                   ? [
@@ -768,4 +757,3 @@ class AuthPlanCard extends StatelessWidget {
     );
   }
 }
-

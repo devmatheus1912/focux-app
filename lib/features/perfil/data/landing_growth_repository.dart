@@ -32,7 +32,9 @@ class LandingNichePreset {
     this.sectionOrder = const [],
   });
 
-  factory LandingNichePreset.fromJson(Map<String, dynamic> j) => LandingNichePreset(
+  factory LandingNichePreset.fromJson(
+    Map<String, dynamic> j,
+  ) => LandingNichePreset(
     id: j['id'] as String? ?? '',
     label: j['label'] as String? ?? '',
     heroTitle: j['heroTitle'] as String? ?? '',
@@ -42,12 +44,14 @@ class LandingNichePreset {
     offerCta: j['offerCta'] as String? ?? '',
     finalCta: j['finalCta'] as String? ?? '',
     contactCta: j['contactCta'] as String? ?? '',
-    servicos: (j['servicos'] as List<dynamic>? ?? [])
-        .map((e) => LandingServiceItem.fromJson(e as Map<String, dynamic>))
-        .toList(),
-    faq: (j['faq'] as List<dynamic>? ?? [])
-        .map((e) => LandingFaqItem.fromJson(e as Map<String, dynamic>))
-        .toList(),
+    servicos:
+        (j['servicos'] as List<dynamic>? ?? [])
+            .map((e) => LandingServiceItem.fromJson(e as Map<String, dynamic>))
+            .toList(),
+    faq:
+        (j['faq'] as List<dynamic>? ?? [])
+            .map((e) => LandingFaqItem.fromJson(e as Map<String, dynamic>))
+            .toList(),
     sectionOrder: (j['sectionOrder'] as List<dynamic>? ?? []).cast<String>(),
   );
 }
@@ -75,13 +79,18 @@ class LandingChecklistItem {
   final String label;
   final bool done;
 
-  LandingChecklistItem({required this.id, required this.label, required this.done});
+  LandingChecklistItem({
+    required this.id,
+    required this.label,
+    required this.done,
+  });
 
-  factory LandingChecklistItem.fromJson(Map<String, dynamic> j) => LandingChecklistItem(
-    id: j['id'] as String? ?? '',
-    label: j['label'] as String? ?? '',
-    done: j['done'] as bool? ?? false,
-  );
+  factory LandingChecklistItem.fromJson(Map<String, dynamic> j) =>
+      LandingChecklistItem(
+        id: j['id'] as String? ?? '',
+        label: j['label'] as String? ?? '',
+        done: j['done'] as bool? ?? false,
+      );
 }
 
 class LandingGrowthRepository {
@@ -97,7 +106,10 @@ class LandingGrowthRepository {
   }
 
   Future<void> applyPreset(String presetId) async {
-    await _dio.post('/api/personal/landing/aplicar-preset', data: {'presetId': presetId});
+    await _dio.post(
+      '/api/personal/landing/aplicar-preset',
+      data: {'presetId': presetId},
+    );
   }
 
   Future<LandingHeroCopy> generateHero() async {
@@ -114,6 +126,8 @@ class LandingGrowthRepository {
   }
 }
 
-final landingGrowthRepositoryProvider = Provider<LandingGrowthRepository>((ref) {
+final landingGrowthRepositoryProvider = Provider<LandingGrowthRepository>((
+  ref,
+) {
   return LandingGrowthRepository(ref.read(apiClientProvider).dio);
 });

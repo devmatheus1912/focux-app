@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import 'conversation_screen.dart';
 
 class ChatAlunoScreen extends StatelessWidget {
@@ -6,6 +7,9 @@ class ChatAlunoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ConversationScreen.aluno();
+    return fxScreenA11yScope(
+      label: 'Chat',
+      child: const ConversationScreen.aluno(),
+    );
   }
 }

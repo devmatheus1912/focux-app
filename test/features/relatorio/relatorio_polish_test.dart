@@ -17,6 +17,8 @@ void main() {
     expect(screen, contains('Semantics('));
     expect(screen, contains("label: 'Exportar relatório em PDF'"));
 
+    expect(global, contains('FxContentWidthLimiter'));
+    expect(global, contains('fxScreenA11yScope'));
     expect(global, contains('dashboardHeroCaptionOnTeal'));
     expect(global, contains('dashboardHeroMutedOnTealStyle'));
     expect(global, contains('fxListCardDecoration'));

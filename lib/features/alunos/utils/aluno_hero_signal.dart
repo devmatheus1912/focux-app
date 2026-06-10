@@ -80,7 +80,9 @@ AlunoHeroPrimarySignal alunoHeroPrimarySignal(Aluno aluno) {
       diasCritico ||
       (dias != null && dias >= 3);
 
-  if (aluno.emRisco && (dias == null || dias == 0) && (ader == null || ader == 0)) {
+  if (aluno.emRisco &&
+      (dias == null || dias == 0) &&
+      (ader == null || ader == 0)) {
     return AlunoHeroPrimarySignal(
       label: 'Risco operacional',
       value: formatRiscoNivel(aluno.riscoNivel),

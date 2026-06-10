@@ -54,7 +54,9 @@ class SubscriptionProducts {
     return null;
   }
 
-  static SubscriptionBillingPeriod? billingPeriodForProductId(String productId) {
+  static SubscriptionBillingPeriod? billingPeriodForProductId(
+    String productId,
+  ) {
     final id = productId.toLowerCase();
     if (id.contains('yearly') || id.contains('annual')) {
       return SubscriptionBillingPeriod.yearly;

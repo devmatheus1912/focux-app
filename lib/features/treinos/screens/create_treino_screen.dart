@@ -337,41 +337,43 @@ class _StickyCreateBar extends StatelessWidget {
         enabled: enabled,
         label: loading ? 'Criando treino' : 'Criar treino',
         child: ClipRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(22, 10, 22, 12),
-            decoration: BoxDecoration(
-              color: bg,
-              border: Border(
-                top: BorderSide(
-                  color:
-                      isDark
-                          ? Colors.white.withValues(alpha: 0.08)
-                          : Colors.white.withValues(alpha: 0.58),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(22, 10, 22, 12),
+              decoration: BoxDecoration(
+                color: bg,
+                border: Border(
+                  top: BorderSide(
+                    color:
+                        isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : Colors.white.withValues(alpha: 0.58),
+                  ),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(
+                      alpha: isDark ? 0.18 : 0.035,
+                    ),
+                    blurRadius: 22,
+                    offset: const Offset(0, -12),
+                    spreadRadius: -18,
+                  ),
+                ],
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.035),
-                  blurRadius: 22,
-                  offset: const Offset(0, -12),
-                  spreadRadius: -18,
+              child: Opacity(
+                opacity: enabled ? 1 : 0.48,
+                child: FxLiquidPrimaryButton(
+                  label: 'Criar treino',
+                  icon: Icons.add_rounded,
+                  onPressed: enabled ? onSubmit : null,
+                  loading: loading,
                 ),
-              ],
-            ),
-            child: Opacity(
-              opacity: enabled ? 1 : 0.48,
-              child: FxLiquidPrimaryButton(
-                label: 'Criar treino',
-                icon: Icons.add_rounded,
-                onPressed: enabled ? onSubmit : null,
-                loading: loading,
               ),
             ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -714,55 +716,62 @@ class _LevelSelector extends StatelessWidget {
                 onChanged(_niveis[i]);
               },
               child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              margin: EdgeInsets.only(right: i < 2 ? 8 : 0),
-              padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 8),
-              decoration: BoxDecoration(
-                color:
-                    sel
-                        ? _niveisCor[i].withValues(alpha: isDark ? 0.15 : 0.10)
-                        : idleFill,
-                borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                border: Border.all(
-                  color:
-                      sel ? _niveisCor[i].withValues(alpha: 0.42) : idleBorder,
+                duration: const Duration(milliseconds: 180),
+                margin: EdgeInsets.only(right: i < 2 ? 8 : 0),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 11,
+                  horizontal: 8,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(
-                      alpha: isDark ? 0.10 : 0.035,
+                decoration: BoxDecoration(
+                  color:
+                      sel
+                          ? _niveisCor[i].withValues(
+                            alpha: isDark ? 0.15 : 0.10,
+                          )
+                          : idleFill,
+                  borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                  border: Border.all(
+                    color:
+                        sel
+                            ? _niveisCor[i].withValues(alpha: 0.42)
+                            : idleBorder,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(
+                        alpha: isDark ? 0.10 : 0.035,
+                      ),
+                      blurRadius: 14,
+                      offset: const Offset(0, 8),
+                      spreadRadius: -14,
                     ),
-                    blurRadius: 14,
-                    offset: const Offset(0, 8),
-                    spreadRadius: -14,
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    _niveisIcon[i],
-                    color: sel ? _niveisCor[i] : idleInk,
-                    size: 16,
-                  ),
-                  const SizedBox(width: 5),
-                  Flexible(
-                    child: Text(
-                      _niveisLabel[i],
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTypography.inter(
-                        color: sel ? _niveisCor[i] : idleInk,
-                        fontSize: 11,
-                        fontWeight: sel ? FontWeight.w800 : FontWeight.w700,
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      _niveisIcon[i],
+                      color: sel ? _niveisCor[i] : idleInk,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 5),
+                    Flexible(
+                      child: Text(
+                        _niveisLabel[i],
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.inter(
+                          color: sel ? _niveisCor[i] : idleInk,
+                          fontSize: 11,
+                          fontWeight: sel ? FontWeight.w800 : FontWeight.w700,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
           ),
         );
       }),

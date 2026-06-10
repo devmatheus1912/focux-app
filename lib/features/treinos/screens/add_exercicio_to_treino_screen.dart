@@ -16,6 +16,7 @@ import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -149,7 +150,9 @@ class _AddExercicioToTreinoScreenState
     final primary = Theme.of(context).colorScheme.primary;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
 
-    return PopScope(
+    return fxScreenA11yScope(
+      label: 'Adicionar exercício',
+      child: PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
@@ -496,7 +499,8 @@ class _AddExercicioToTreinoScreenState
           ],
         ),
       ),
-        ),
+      ),
+      ),
       ),
       ),
     );

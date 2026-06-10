@@ -16,9 +16,7 @@ class AlunoListPreferencesStore {
 
   static Future<AlunoListPreferences> load() async {
     final prefs = await SharedPreferences.getInstance();
-    return AlunoListPreferences(
-      compact: prefs.getBool(_compactKey) ?? false,
-    );
+    return AlunoListPreferences(compact: prefs.getBool(_compactKey) ?? false);
   }
 
   static Future<void> saveCompact(bool compact) async {

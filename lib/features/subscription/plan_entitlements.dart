@@ -175,7 +175,8 @@ class PlanEntitlements {
         'Venda programas digitais com checkout PIX no Enterprise Pro.',
       'poseCoach' =>
         'Análise de postura por ML em tempo real no Enterprise Pro.',
-      _ => '"$featureName" faz parte do plano $planLabel. Faça upgrade em um passo.',
+      _ =>
+        '"$featureName" faz parte do plano $planLabel. Faça upgrade em um passo.',
     };
 
     return LockedOffer(
@@ -195,7 +196,8 @@ class PlanEntitlements {
     SubscriptionPlan? targetPlan,
     int? limiteAtual,
   }) {
-    if (currentPlan == SubscriptionPlan.FREE || targetPlan == SubscriptionPlan.PREMIUM) {
+    if (currentPlan == SubscriptionPlan.FREE ||
+        targetPlan == SubscriptionPlan.PREMIUM) {
       return lockedOffer(
         featureName: 'IA Copiloto',
         capability: 'iaCopiloto',

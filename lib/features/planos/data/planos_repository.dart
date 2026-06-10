@@ -337,8 +337,10 @@ class PlanoFeatures {
       limiteAssistentes: (j['limiteAssistentes'] as num?)?.toInt(),
       alunosAtivos: (j['alunosAtivos'] as num?)?.toInt() ?? 0,
       iaUsadaMes: (j['iaUsadaMes'] as num?)?.toInt() ?? 0,
-      limiteMigracaoFotoMensal: (j['limiteMigracaoFotoMensal'] as num?)?.toInt(),
-      migracaoFotosUsadasMes: (j['migracaoFotosUsadasMes'] as num?)?.toInt() ?? 0,
+      limiteMigracaoFotoMensal:
+          (j['limiteMigracaoFotoMensal'] as num?)?.toInt(),
+      migracaoFotosUsadasMes:
+          (j['migracaoFotosUsadasMes'] as num?)?.toInt() ?? 0,
     ).normalizeForTier();
   }
 
@@ -355,9 +357,13 @@ class PlanoFeatures {
     };
     final limiteIaEff = switch (billing) {
       SubscriptionPlan.ENTERPRISE || SubscriptionPlan.ENTERPRISE_PRO =>
-        (limiteIaMensal == null || limiteIaMensal! <= 0) ? 400 : limiteIaMensal!,
+        (limiteIaMensal == null || limiteIaMensal! <= 0)
+            ? 400
+            : limiteIaMensal!,
       SubscriptionPlan.PREMIUM =>
-        (limiteIaMensal == null || limiteIaMensal! <= 0) ? 120 : limiteIaMensal!,
+        (limiteIaMensal == null || limiteIaMensal! <= 0)
+            ? 120
+            : limiteIaMensal!,
       _ => limiteIaMensal ?? 0,
     };
     return PlanoFeatures(

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/brand_palette.dart';
@@ -17,6 +17,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/widgets/aluno360_action_empty_panel.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 // ─── Providers ───────────────────────────────────────────────────────────────
 final medidasProvider = FutureProvider.family<List<MedidaCorporal>, int>((
@@ -89,75 +90,78 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
       data: (lista) => _variacaoPeso(lista),
     );
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Evolução — ${widget.alunoNome}',
-        onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          TabBar(
-            controller: _tabController,
-            indicatorColor: primary,
-            labelColor: primary,
-            unselectedLabelColor:
-                isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
-            indicatorWeight: 2.5,
-            tabs: const [
-              Tab(text: 'Medidas Corporais'),
-              Tab(text: 'Recordes Pessoais'),
-            ],
-          ),
-          if (variacaoText != null && variacaoText.isNotEmpty)
-            _BannerVariacao(texto: variacaoText),
-          Expanded(
-            child: TabBarView(
+    return fxScreenA11yScope(
+      label: 'Evolução — ${widget.alunoNome}',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Evolução — ${widget.alunoNome}',
+          onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TabBar(
               controller: _tabController,
-              children: [
-                _TabMedidas(
-                  alunoId: widget.alunoId,
-                  alunoNome: widget.alunoNome,
-                  medidasAsync: medidasAsync,
-                  onRegister: () => _mostrarDialogMedida(context),
-                ),
-                _TabRecordes(
-                  alunoId: widget.alunoId,
-                  alunoNome: widget.alunoNome,
-                  recordesAsync: recordesAsync,
-                  onRegister: () => _mostrarDialogRecorde(context),
-                ),
+              indicatorColor: primary,
+              labelColor: primary,
+              unselectedLabelColor:
+                  isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+              indicatorWeight: 2.5,
+              tabs: const [
+                Tab(text: 'Medidas Corporais'),
+                Tab(text: 'Recordes Pessoais'),
               ],
             ),
-          ),
-        ],
-      ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [primary, BrandPalette.deep(primary)],
-          ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: primary.withValues(alpha: 0.4),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
+            if (variacaoText != null && variacaoText.isNotEmpty)
+              _BannerVariacao(texto: variacaoText),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _TabMedidas(
+                    alunoId: widget.alunoId,
+                    alunoNome: widget.alunoNome,
+                    medidasAsync: medidasAsync,
+                    onRegister: () => _mostrarDialogMedida(context),
+                  ),
+                  _TabRecordes(
+                    alunoId: widget.alunoId,
+                    alunoNome: widget.alunoNome,
+                    recordesAsync: recordesAsync,
+                    onRegister: () => _mostrarDialogRecorde(context),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
-        child: FloatingActionButton(
-          onPressed: () {
-            if (_tabController.index == 0) {
-              _mostrarDialogMedida(context);
-            } else {
-              _mostrarDialogRecorde(context);
-            }
-          },
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: const Icon(Icons.add, color: Colors.white),
+        floatingActionButton: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [primary, BrandPalette.deep(primary)],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: primary.withValues(alpha: 0.4),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: FloatingActionButton(
+            onPressed: () {
+              if (_tabController.index == 0) {
+                _mostrarDialogMedida(context);
+              } else {
+                _mostrarDialogRecorde(context);
+              }
+            },
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            child: const Icon(Icons.add, color: Colors.white),
+          ),
         ),
       ),
     );
@@ -313,7 +317,10 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                     );
                     ref.invalidate(recordesProvider(widget.alunoId));
                     if (context.mounted) {
-                      FeedbackHelper.showSuccess(context, 'Recorde adicionado!');
+                      FeedbackHelper.showSuccess(
+                        context,
+                        'Recorde adicionado!',
+                      );
                     }
                   } catch (e) {
                     if (context.mounted) {
@@ -404,8 +411,7 @@ class _TabMedidas extends StatelessWidget {
                 Aluno360SecondaryAction(
                   label: 'Voltar ao Aluno 360',
                   icon: Icons.arrow_back_rounded,
-                  onTap:
-                      () => safePopOrGo(context, '/alunos/$alunoId'),
+                  onTap: () => safePopOrGo(context, '/alunos/$alunoId'),
                 ),
               ],
             ),
@@ -555,8 +561,7 @@ class _TabRecordes extends StatelessWidget {
                 Aluno360SecondaryAction(
                   label: 'Voltar ao Aluno 360',
                   icon: Icons.arrow_back_rounded,
-                  onTap:
-                      () => safePopOrGo(context, '/alunos/$alunoId'),
+                  onTap: () => safePopOrGo(context, '/alunos/$alunoId'),
                 ),
               ],
             ),
@@ -585,45 +590,48 @@ class _CardRecorde extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       accent: primary,
       child: ListTile(
-          leading: Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: EagleTokens.goldSoft.withValues(alpha: 0.55),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            alignment: Alignment.center,
-            child: const Icon(Icons.emoji_events, color: EagleTokens.gold),
+        leading: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: EagleTokens.goldSoft.withValues(alpha: 0.55),
+            borderRadius: BorderRadius.circular(12),
           ),
-          title: Text(
-            recorde.exercicioNome,
-            style: const TextStyle(fontWeight: FontWeight.w600),
+          alignment: Alignment.center,
+          child: const Icon(Icons.emoji_events, color: EagleTokens.gold),
+        ),
+        title: Text(
+          recorde.exercicioNome,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Text(
+          [
+            if (recorde.cargaKg != null)
+              '${recorde.cargaKg!.toStringAsFixed(1)}kg',
+            if (recorde.repeticoes != null) '${recorde.repeticoes} reps',
+            fxDateShort(DateTime.parse(recorde.data)),
+          ].join(' × '),
+          style: const TextStyle(
+            fontSize: 12,
+            color: TokensStrip.textSecondary,
           ),
-          subtitle: Text(
-            [
-              if (recorde.cargaKg != null)
-                '${recorde.cargaKg!.toStringAsFixed(1)}kg',
-              if (recorde.repeticoes != null) '${recorde.repeticoes} reps',
-              fxDateShort(DateTime.parse(recorde.data)),
-            ].join(' × '),
-            style: const TextStyle(fontSize: 12, color: TokensStrip.textSecondary),
+        ),
+        trailing: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: primary.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(999),
           ),
-          trailing: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Text(
-              'NOVO PR',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                color: primary,
-              ),
+          child: Text(
+            'NOVO PR',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: primary,
             ),
           ),
         ),
+      ),
     );
   }
 }
@@ -647,7 +655,10 @@ class _Chip extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 10, color: TokensStrip.textSecondary),
+            style: const TextStyle(
+              fontSize: 10,
+              color: TokensStrip.textSecondary,
+            ),
           ),
           Text(
             valor,

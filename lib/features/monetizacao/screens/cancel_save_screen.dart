@@ -27,7 +27,11 @@ class CancelSaveScreen extends ConsumerStatefulWidget {
 class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
   static const _motivos = <_Motivo>[
     _Motivo('MUITO_CARO', 'Está caro demais agora', Icons.attach_money_rounded),
-    _Motivo('NAO_USO', 'Não estou usando o suficiente', Icons.timelapse_rounded),
+    _Motivo(
+      'NAO_USO',
+      'Não estou usando o suficiente',
+      Icons.timelapse_rounded,
+    ),
     _Motivo(
       'FALTA_FUNCIONALIDADE',
       'Faltou uma funcionalidade que preciso',
@@ -51,9 +55,7 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
   @override
   void initState() {
     super.initState();
-    unawaited(
-      AnalyticsService.instance.track(ProductEvents.cancelSaveOpened),
-    );
+    unawaited(AnalyticsService.instance.track(ProductEvents.cancelSaveOpened));
   }
 
   Future<void> _selecionarMotivo(String motivo) async {
@@ -65,7 +67,9 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
       _erroOferta = null;
     });
     try {
-      final oferta = await ref.read(cancelSaveRepositoryProvider).oferta(motivo);
+      final oferta = await ref
+          .read(cancelSaveRepositoryProvider)
+          .oferta(motivo);
       if (!mounted) return;
       unawaited(
         AnalyticsService.instance.track(
@@ -102,7 +106,9 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
     HapticFeedback.lightImpact();
     setState(() => _enviando = true);
     try {
-      final resposta = await ref.read(cancelSaveRepositoryProvider).responder(
+      final resposta = await ref
+          .read(cancelSaveRepositoryProvider)
+          .responder(
             motivo: _motivoSelecionado!,
             ofertaApresentada: _oferta!.tipo,
             aceitar: aceitar,
@@ -134,7 +140,10 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
       _showResultado(resposta);
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, 'Não foi possível concluir agora. Tente novamente em instantes.',);
+      FeedbackHelper.showError(
+        context,
+        'Não foi possível concluir agora. Tente novamente em instantes.',
+      );
     } finally {
       if (mounted) setState(() => _enviando = false);
     }
@@ -145,31 +154,35 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        icon: Icon(
-          r.aceita ? Icons.celebration_rounded : Icons.exit_to_app_rounded,
-          color: r.aceita ? PaywallCatalog.green : theme.colorScheme.outline,
-          size: 48,
-        ),
-        title: Text(r.aceita ? 'Oferta registrada' : 'Cancelamento registrado'),
-        content: Text(
-          r.mensagem,
-          style: theme.textTheme.bodyMedium?.copyWith(height: 1.45),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              if (r.aceita) {
-                context.go('/assinatura');
-              } else {
-                context.go('/dashboard/personal');
-              }
-            },
-            child: const Text('Continuar'),
+      builder:
+          (ctx) => AlertDialog(
+            icon: Icon(
+              r.aceita ? Icons.celebration_rounded : Icons.exit_to_app_rounded,
+              color:
+                  r.aceita ? PaywallCatalog.green : theme.colorScheme.outline,
+              size: 48,
+            ),
+            title: Text(
+              r.aceita ? 'Oferta registrada' : 'Cancelamento registrado',
+            ),
+            content: Text(
+              r.mensagem,
+              style: theme.textTheme.bodyMedium?.copyWith(height: 1.45),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  if (r.aceita) {
+                    context.go('/assinatura');
+                  } else {
+                    context.go('/dashboard/personal');
+                  }
+                },
+                child: const Text('Continuar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -180,13 +193,18 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = theme.colorScheme.primary;
-    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    final secondary = PaywallCatalog.readableSecondary(
+      ink,
+      mute,
+      isDark: isDark,
+    );
 
     return FxShellScaffold(
       useMesh: true,
       appBar: FxShellAppBar(
         title: 'Antes de cancelar…',
-        onBack: () => context.canPop() ? context.pop() : context.go('/assinatura'),
+        onBack:
+            () => context.canPop() ? context.pop() : context.go('/assinatura'),
       ),
       body: ListView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -204,10 +222,9 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
           const SizedBox(height: 8),
           Text(
             'Selecione um motivo — mostramos uma alternativa personalizada aqui embaixo.',
-            style: TokensStrip.bodyMuted(color: secondary).copyWith(
-              fontSize: TokensStrip.fontBodySm,
-              height: 1.45,
-            ),
+            style: TokensStrip.bodyMuted(
+              color: secondary,
+            ).copyWith(fontSize: TokensStrip.fontBodySm, height: 1.45),
           ),
           const SizedBox(height: 20),
           for (final m in _motivos) ...[
@@ -224,40 +241,42 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
           ],
           const SizedBox(height: 8),
           AnimatedSwitcher(
-            duration: TokensStrip.prefersReducedMotion(context)
-                ? Duration.zero
-                : const Duration(milliseconds: 220),
+            duration:
+                TokensStrip.prefersReducedMotion(context)
+                    ? Duration.zero
+                    : const Duration(milliseconds: 220),
             switchInCurve: Curves.easeOutCubic,
             switchOutCurve: Curves.easeInCubic,
-            child: _carregandoOferta
-                ? const Padding(
-                    key: ValueKey('loading'),
-                    padding: EdgeInsets.symmetric(vertical: 24),
-                    child: Center(child: FxLoading()),
-                  )
-                : _erroOferta != null
-                ? _ErroOfertaPanel(
-                    key: const ValueKey('error'),
-                    message: _erroOferta!,
-                    ink: ink,
-                    mute: mute,
-                    isDark: isDark,
-                    onRetry: () => _selecionarMotivo(_motivoSelecionado!),
-                  )
-                : _oferta != null
-                ? _OfertaCard(
-                    key: ValueKey(_oferta!.tipo),
-                    oferta: _oferta!,
-                    enviando: _enviando,
-                    ink: ink,
-                    mute: mute,
-                    primary: primary,
-                    isDark: isDark,
-                    onAceitar: () => _responder(true),
-                    onRecusar: () => _responder(false),
-                    onFeedback: (txt) => _feedback = txt,
-                  )
-                : const SizedBox.shrink(key: ValueKey('empty')),
+            child:
+                _carregandoOferta
+                    ? const Padding(
+                      key: ValueKey('loading'),
+                      padding: EdgeInsets.symmetric(vertical: 24),
+                      child: Center(child: FxLoading()),
+                    )
+                    : _erroOferta != null
+                    ? _ErroOfertaPanel(
+                      key: const ValueKey('error'),
+                      message: _erroOferta!,
+                      ink: ink,
+                      mute: mute,
+                      isDark: isDark,
+                      onRetry: () => _selecionarMotivo(_motivoSelecionado!),
+                    )
+                    : _oferta != null
+                    ? _OfertaCard(
+                      key: ValueKey(_oferta!.tipo),
+                      oferta: _oferta!,
+                      enviando: _enviando,
+                      ink: ink,
+                      mute: mute,
+                      primary: primary,
+                      isDark: isDark,
+                      onAceitar: () => _responder(true),
+                      onRecusar: () => _responder(false),
+                      onFeedback: (txt) => _feedback = txt,
+                    )
+                    : const SizedBox.shrink(key: ValueKey('empty')),
           ),
         ],
       ),
@@ -286,7 +305,11 @@ class _MotivoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    final secondary = PaywallCatalog.readableSecondary(
+      ink,
+      mute,
+      isDark: isDark,
+    );
     return Semantics(
       button: true,
       selected: selected,
@@ -301,11 +324,12 @@ class _MotivoTile extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: selected
-                    ? primary
-                    : TokensStrip.borderDefault.withValues(
-                        alpha: isDark ? 0.5 : 1,
-                      ),
+                color:
+                    selected
+                        ? primary
+                        : TokensStrip.borderDefault.withValues(
+                          alpha: isDark ? 0.5 : 1,
+                        ),
                 width: selected ? 2 : 1,
               ),
             ),
@@ -369,7 +393,10 @@ class _ErroOfertaPanel extends StatelessWidget {
           const SizedBox(height: 10),
           Align(
             alignment: Alignment.centerRight,
-            child: TextButton(onPressed: onRetry, child: const Text('Tentar de novo')),
+            child: TextButton(
+              onPressed: onRetry,
+              child: const Text('Tentar de novo'),
+            ),
           ),
         ],
       ),
@@ -403,7 +430,11 @@ class _OfertaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    final secondary = PaywallCatalog.readableSecondary(
+      ink,
+      mute,
+      isDark: isDark,
+    );
     return PaywallInsetPanel(
       accent: primary,
       isDark: isDark,
@@ -420,7 +451,11 @@ class _OfertaCard extends StatelessWidget {
                   color: primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.local_offer_outlined, color: primary, size: 22),
+                child: Icon(
+                  Icons.local_offer_outlined,
+                  color: primary,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -439,10 +474,9 @@ class _OfertaCard extends StatelessWidget {
                       const SizedBox(height: 6),
                       Text(
                         'Conclusão na ${subscriptionChannelLabel()}',
-                        style: TokensStrip.bodyMuted(color: secondary).copyWith(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: TokensStrip.bodyMuted(
+                          color: secondary,
+                        ).copyWith(fontSize: 12, fontWeight: FontWeight.w600),
                       ),
                     ],
                   ],
@@ -453,10 +487,9 @@ class _OfertaCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             oferta.descricao,
-            style: TokensStrip.bodyMuted(color: secondary).copyWith(
-              fontSize: 14,
-              height: 1.45,
-            ),
+            style: TokensStrip.bodyMuted(
+              color: secondary,
+            ).copyWith(fontSize: 14, height: 1.45),
           ),
           const SizedBox(height: 16),
           TextField(
@@ -465,9 +498,9 @@ class _OfertaCard extends StatelessWidget {
             decoration: InputDecoration(
               labelText: 'Feedback (opcional)',
               hintText: 'Conte o que faltou ou o que podemos melhorar',
-              counterStyle: TokensStrip.bodyMuted(color: secondary).copyWith(
-                fontSize: 11,
-              ),
+              counterStyle: TokensStrip.bodyMuted(
+                color: secondary,
+              ).copyWith(fontSize: 11),
             ),
             onChanged: onFeedback,
           ),
@@ -483,9 +516,7 @@ class _OfertaCard extends StatelessWidget {
           Center(
             child: TextButton(
               onPressed: enviando ? null : onRecusar,
-              style: TextButton.styleFrom(
-                minimumSize: const Size(44, 44),
-              ),
+              style: TextButton.styleFrom(minimumSize: const Size(44, 44)),
               child: Text(
                 'Cancelar mesmo assim',
                 style: TextStyle(

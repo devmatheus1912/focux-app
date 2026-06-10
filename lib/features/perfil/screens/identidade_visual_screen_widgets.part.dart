@@ -207,9 +207,7 @@ class _LogoUploadRing extends StatelessWidget {
             height: 108,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: SweepGradient(
-                colors: [primary, secondary, primary],
-              ),
+              gradient: SweepGradient(colors: [primary, secondary, primary]),
               boxShadow: [
                 BoxShadow(
                   color: primary.withValues(alpha: 0.28),
@@ -282,10 +280,7 @@ class _LogoUploadRing extends StatelessWidget {
 }
 
 class _CuratedPaletteGrid extends StatelessWidget {
-  const _CuratedPaletteGrid({
-    required this.selected,
-    this.onSelect,
-  });
+  const _CuratedPaletteGrid({required this.selected, this.onSelect});
 
   final CuratedBrandPalette selected;
   final ValueChanged<CuratedBrandPalette>? onSelect;
@@ -597,11 +592,7 @@ class _PanelTitle extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: TextStyle(
-                  color: mute,
-                  fontSize: 11.5,
-                  height: 1.3,
-                ),
+                style: TextStyle(color: mute, fontSize: 11.5, height: 1.3),
               ),
             ],
           ),
@@ -633,7 +624,9 @@ class _SaveBar extends StatelessWidget {
         border: Border(top: BorderSide(color: chrome.line)),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+            color: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.08),
             blurRadius: 22,
             offset: const Offset(0, -8),
           ),
@@ -652,10 +645,7 @@ class _SaveBar extends StatelessWidget {
 }
 
 class _PaywallCard extends StatelessWidget {
-  const _PaywallCard({
-    required this.onTap,
-    required this.chrome,
-  });
+  const _PaywallCard({required this.onTap, required this.chrome});
 
   final VoidCallback onTap;
   final ShellPalette chrome;
@@ -686,17 +676,10 @@ class _PaywallCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Logo, slogan e paletas curadas para deixar seu app com cara de marca premium.',
-            style: TextStyle(
-              color: chrome.mute,
-              fontSize: 12.5,
-              height: 1.35,
-            ),
+            style: TextStyle(color: chrome.mute, fontSize: 12.5, height: 1.35),
           ),
           const SizedBox(height: 14),
-          FxLiquidPrimaryButton(
-            label: 'Assinar Premium',
-            onPressed: onTap,
-          ),
+          FxLiquidPrimaryButton(label: 'Assinar Premium', onPressed: onTap),
         ],
       ),
     );

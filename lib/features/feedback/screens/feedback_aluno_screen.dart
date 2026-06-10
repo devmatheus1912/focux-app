@@ -10,12 +10,14 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/feedback_video_repository.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 class FeedbackAlunoScreen extends ConsumerStatefulWidget {
   const FeedbackAlunoScreen({super.key});
 
   @override
-  ConsumerState<FeedbackAlunoScreen> createState() => _FeedbackAlunoScreenState();
+  ConsumerState<FeedbackAlunoScreen> createState() =>
+      _FeedbackAlunoScreenState();
 }
 
 class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
@@ -38,7 +40,12 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
       try {
         exs = await repo.exerciciosDisponiveis();
       } catch (_) {}
-      if (mounted) setState(() { _items = items; _exercicios = exs; _loading = false; });
+      if (mounted)
+        setState(() {
+          _items = items;
+          _exercicios = exs;
+          _loading = false;
+        });
     } catch (e) {
       if (mounted) setState(() => _loading = false);
     }
@@ -46,7 +53,10 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
 
   Future<void> _enviar() async {
     if (_exercicios.isEmpty) {
-      FeedbackHelper.showError(context, 'Você precisa de um treino atribuído pelo personal antes de enviar form-check.');
+      FeedbackHelper.showError(
+        context,
+        'Você precisa de um treino atribuído pelo personal antes de enviar form-check.',
+      );
       return;
     }
 
@@ -68,7 +78,10 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
         comentario: result.comentario,
       );
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Vídeo enviado! Análise IA em andamento — atualize em alguns segundos.');
+        FeedbackHelper.showSuccess(
+          context,
+          'Vídeo enviado! Análise IA em andamento — atualize em alguns segundos.',
+        );
         _load();
       }
     } catch (e) {
@@ -83,71 +96,104 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FxShellScaffold(
-      appBar: FxShellAppBar(title: 'Form check', subtitle: 'Análise IA da sua execução', onBack: () => context.pop()),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _enviar,
-        icon: const Icon(Icons.videocam_outlined),
-        label: const Text('Enviar vídeo'),
-      ),
-      body: _loading
-          ? const Center(child: FxLoading())
-          : RefreshIndicator(
-              onRefresh: _load,
-              child: _items.isEmpty
-                  ? ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: const [
-                        FxEmptyState(
-                          icon: 'spark',
-                          title: 'Nenhum vídeo enviado ainda',
-                          subtitle:
-                              'Toque em Enviar vídeo para receber análise IA da sua execução.',
-                        ),
-                      ],
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.all(TokensStrip.s4),
-                      itemCount: _items.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
-                      itemBuilder: (_, i) {
-                        final f = _items[i];
-                        final exNome = _exercicios
-                            .where((e) => e.id == f.exercicioId)
-                            .map((e) => e.nome)
-                            .firstOrNull ?? 'Exercício #${f.exercicioId}';
-                        final primary = Theme.of(context).colorScheme.primary;
-                        return FxSatellitePanel(
-                          accent: primary,
-                          padding: EdgeInsets.zero,
-                          child: ExpansionTile(
-                            title: Text(exNome),
-                            subtitle: Text('${f.statusAnalise ?? 'PENDENTE'} · ${f.criadoEm.toLocal().toString().substring(0, 16)}'),
-                            leading: f.aiScore != null
-                                ? CircleAvatar(
-                                    backgroundColor: _scoreColor(f.aiScore),
-                                    foregroundColor: Colors.white,
-                                    child: Text('${f.aiScore}'),
-                                  )
-                                : const CircleAvatar(child: Icon(Icons.hourglass_empty)),
-                            children: [
-                              if (f.aiAnalise != null && f.aiAnalise!.isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Text(f.aiAnalise!, style: const TextStyle(height: 1.4)),
-                                ),
-                              if (f.comentario.isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                                  child: Text('Sua nota: ${f.comentario}',
-                                      style: TextStyle(color: Theme.of(context).hintColor)),
-                                ),
+    return fxScreenA11yScope(
+      label: 'Form check',
+      child: FxShellScaffold(
+        appBar: FxShellAppBar(
+          title: 'Form check',
+          subtitle: 'Análise IA da sua execução',
+          onBack: () => context.pop(),
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: _enviar,
+          icon: const Icon(Icons.videocam_outlined),
+          label: const Text('Enviar vídeo'),
+        ),
+        body:
+            _loading
+                ? const Center(child: FxLoading())
+                : RefreshIndicator(
+                  onRefresh: _load,
+                  child:
+                      _items.isEmpty
+                          ? ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: const [
+                              FxEmptyState(
+                                icon: 'spark',
+                                title: 'Nenhum vídeo enviado ainda',
+                                subtitle:
+                                    'Toque em Enviar vídeo para receber análise IA da sua execução.',
+                              ),
                             ],
+                          )
+                          : ListView.separated(
+                            padding: const EdgeInsets.all(TokensStrip.s4),
+                            itemCount: _items.length,
+                            separatorBuilder:
+                                (_, __) => const SizedBox(height: 8),
+                            itemBuilder: (_, i) {
+                              final f = _items[i];
+                              final exNome =
+                                  _exercicios
+                                      .where((e) => e.id == f.exercicioId)
+                                      .map((e) => e.nome)
+                                      .firstOrNull ??
+                                  'Exercício #${f.exercicioId}';
+                              final primary =
+                                  Theme.of(context).colorScheme.primary;
+                              return FxSatellitePanel(
+                                accent: primary,
+                                padding: EdgeInsets.zero,
+                                child: ExpansionTile(
+                                  title: Text(exNome),
+                                  subtitle: Text(
+                                    '${f.statusAnalise ?? 'PENDENTE'} · ${f.criadoEm.toLocal().toString().substring(0, 16)}',
+                                  ),
+                                  leading:
+                                      f.aiScore != null
+                                          ? CircleAvatar(
+                                            backgroundColor: _scoreColor(
+                                              f.aiScore,
+                                            ),
+                                            foregroundColor: Colors.white,
+                                            child: Text('${f.aiScore}'),
+                                          )
+                                          : const CircleAvatar(
+                                            child: Icon(Icons.hourglass_empty),
+                                          ),
+                                  children: [
+                                    if (f.aiAnalise != null &&
+                                        f.aiAnalise!.isNotEmpty)
+                                      Padding(
+                                        padding: const EdgeInsets.all(16),
+                                        child: Text(
+                                          f.aiAnalise!,
+                                          style: const TextStyle(height: 1.4),
+                                        ),
+                                      ),
+                                    if (f.comentario.isNotEmpty)
+                                      Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                          16,
+                                          0,
+                                          16,
+                                          16,
+                                        ),
+                                        child: Text(
+                                          'Sua nota: ${f.comentario}',
+                                          style: TextStyle(
+                                            color: Theme.of(context).hintColor,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
-            ),
+                ),
+      ),
     );
   }
 }
@@ -156,7 +202,11 @@ class _FormResult {
   final int exercicioId;
   final String videoUrl;
   final String? comentario;
-  _FormResult({required this.exercicioId, required this.videoUrl, this.comentario});
+  _FormResult({
+    required this.exercicioId,
+    required this.videoUrl,
+    this.comentario,
+  });
 }
 
 class _EnviarFormSheet extends StatefulWidget {
@@ -188,21 +238,31 @@ class _EnviarFormSheetState extends State<_EnviarFormSheet> {
   void _salvar() {
     final url = _videoUrl.text.trim();
     if (_exercicioId == null) return;
-    if (url.isEmpty || !(url.startsWith('http://') || url.startsWith('https://'))) {
-      FeedbackHelper.showError(context, 'Cole uma URL válida (https://) do vídeo no YouTube ou Drive.',);
+    if (url.isEmpty ||
+        !(url.startsWith('http://') || url.startsWith('https://'))) {
+      FeedbackHelper.showError(
+        context,
+        'Cole uma URL válida (https://) do vídeo no YouTube ou Drive.',
+      );
       return;
     }
-    Navigator.pop(context, _FormResult(
-      exercicioId: _exercicioId!,
-      videoUrl: url,
-      comentario: _comentario.text.trim().isEmpty ? null : _comentario.text.trim(),
-    ));
+    Navigator.pop(
+      context,
+      _FormResult(
+        exercicioId: _exercicioId!,
+        videoUrl: url,
+        comentario:
+            _comentario.text.trim().isEmpty ? null : _comentario.text.trim(),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
         child: Column(
@@ -218,19 +278,30 @@ class _EnviarFormSheetState extends State<_EnviarFormSheet> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const Text('Enviar vídeo para análise',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            const Text(
+              'Enviar vídeo para análise',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 4),
-            Text('A IA da Focux retorna pontos positivos, correções e score em segundos.',
-                style: TextStyle(color: Theme.of(context).hintColor, fontSize: 13)),
+            Text(
+              'A IA da Focux retorna pontos positivos, correções e score em segundos.',
+              style: TextStyle(
+                color: Theme.of(context).hintColor,
+                fontSize: 13,
+              ),
+            ),
             const SizedBox(height: 20),
             DropdownButtonFormField<int>(
               initialValue: _exercicioId,
               isExpanded: true,
               decoration: const InputDecoration(labelText: 'Exercício *'),
-              items: widget.exercicios
-                  .map((e) => DropdownMenuItem(value: e.id, child: Text(e.nome)))
-                  .toList(),
+              items:
+                  widget.exercicios
+                      .map(
+                        (e) =>
+                            DropdownMenuItem(value: e.id, child: Text(e.nome)),
+                      )
+                      .toList(),
               onChanged: (v) => setState(() => _exercicioId = v),
             ),
             const SizedBox(height: 12),
@@ -256,7 +327,9 @@ class _EnviarFormSheetState extends State<_EnviarFormSheet> {
               onPressed: _salvar,
               icon: const Icon(Icons.send),
               label: const Text('Enviar para análise'),
-              style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+              ),
             ),
           ],
         ),

@@ -73,7 +73,7 @@ class _LandingTemplatesSheet extends StatelessWidget {
                             const SizedBox(height: 4),
                             Text(
                               '8 seções · padrão Focux'
-                                  '${templates.length > 1 ? ' + ${templates.length - 1} nichos' : ''}',
+                              '${templates.length > 1 ? ' + ${templates.length - 1} nichos' : ''}',
                               style: TextStyle(
                                 fontSize: 13,
                                 height: 1.35,
@@ -124,17 +124,23 @@ class _LandingTemplatesSheet extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
                   child: Semantics(
                     button: true,
-                    label: defaultTemplate == null
-                        ? 'Aplicar modelo padrão Focux'
-                        : 'Aplicar ${defaultTemplate.label}',
+                    label:
+                        defaultTemplate == null
+                            ? 'Aplicar modelo padrão Focux'
+                            : 'Aplicar ${defaultTemplate.label}',
                     enabled: !applying && defaultTemplate != null,
                     child: OutlinedButton.icon(
-                      onPressed: applying || defaultTemplate == null
-                          ? null
-                          : () => onApplyTemplate(defaultTemplate),
-                      icon: applying
-                          ? const FxLoading(size: 16, strokeWidth: 2)
-                          : const Icon(Icons.auto_fix_high_outlined, size: 18),
+                      onPressed:
+                          applying || defaultTemplate == null
+                              ? null
+                              : () => onApplyTemplate(defaultTemplate),
+                      icon:
+                          applying
+                              ? const FxLoading(size: 16, strokeWidth: 2)
+                              : const Icon(
+                                Icons.auto_fix_high_outlined,
+                                size: 18,
+                              ),
                       label: Text(
                         defaultTemplate == null
                             ? 'Aplicar modelo padrão Focux'
@@ -186,9 +192,10 @@ class LandingTemplateCatalogSections extends StatelessWidget {
               Icon(
                 _iconFor(section.iconName),
                 size: 18,
-                color: activeKeys.contains(section.key)
-                    ? EagleTokens.good
-                    : scheme.outline,
+                color:
+                    activeKeys.contains(section.key)
+                        ? EagleTokens.good
+                        : scheme.outline,
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -281,8 +288,7 @@ class LandingTemplateNichePicker extends StatelessWidget {
                 enabled: !applying,
                 child: ActionChip(
                   label: Text(template.label),
-                  onPressed:
-                      applying ? null : () => onApplyTemplate(template),
+                  onPressed: applying ? null : () => onApplyTemplate(template),
                 ),
               ),
           ],
@@ -315,44 +321,45 @@ class LandingSectionTemplatesPanel extends StatelessWidget {
       radius: TokensStrip.rLg,
       accent: scheme.primary,
       child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'Modelo completo da landing',
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'Modelo completo da landing',
+            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Sua página tem 8 seções editáveis. Use um modelo para preencher textos de abertura, serviços, FAQ e botões.',
+            style: TextStyle(
+              fontSize: 13,
+              height: 1.35,
+              color: scheme.onSurface.withValues(alpha: 0.72),
             ),
-            const SizedBox(height: 4),
-            Text(
-              'Sua página tem 8 seções editáveis. Use um modelo para preencher textos de abertura, serviços, FAQ e botões.',
-              style: TextStyle(
-                fontSize: 13,
-                height: 1.35,
-                color: scheme.onSurface.withValues(alpha: 0.72),
-              ),
+          ),
+          const SizedBox(height: 12),
+          LandingTemplateCatalogSections(sectionOrder: sectionOrder),
+          OutlinedButton.icon(
+            onPressed:
+                applying || templates.isEmpty
+                    ? null
+                    : () => onApplyTemplate(templates.first),
+            icon: const Icon(Icons.auto_fix_high_outlined, size: 18),
+            label: Text(
+              templates.isEmpty
+                  ? 'Aplicar modelo padrão Focux'
+                  : 'Aplicar ${templates.first.label}',
             ),
-            const SizedBox(height: 12),
-            LandingTemplateCatalogSections(sectionOrder: sectionOrder),
-            OutlinedButton.icon(
-              onPressed: applying || templates.isEmpty
-                  ? null
-                  : () => onApplyTemplate(templates.first),
-              icon: const Icon(Icons.auto_fix_high_outlined, size: 18),
-              label: Text(
-                templates.isEmpty
-                    ? 'Aplicar modelo padrão Focux'
-                    : 'Aplicar ${templates.first.label}',
-              ),
+          ),
+          if (templates.length > 1) ...[
+            const SizedBox(height: 14),
+            LandingTemplateNichePicker(
+              templates: templates,
+              applying: applying,
+              onApplyTemplate: onApplyTemplate,
             ),
-            if (templates.length > 1) ...[
-              const SizedBox(height: 14),
-              LandingTemplateNichePicker(
-                templates: templates,
-                applying: applying,
-                onApplyTemplate: onApplyTemplate,
-              ),
-            ],
           ],
-        ),
+        ],
+      ),
     );
   }
 }
@@ -380,10 +387,7 @@ class LandingLivePreviewCard extends StatelessWidget {
       container: true,
       label: 'Preview da landing. $displayLabel',
       child: Container(
-        decoration: fxListCardDecoration(
-          context,
-          radius: TokensStrip.rLg,
-        ),
+        decoration: fxListCardDecoration(context, radius: TokensStrip.rLg),
         clipBehavior: Clip.antiAlias,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -396,23 +400,24 @@ class LandingLivePreviewCard extends StatelessWidget {
                   Image.network(
                     previewImageUrl,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            scheme.primary.withValues(alpha: 0.35),
-                            scheme.surfaceContainerHighest,
-                          ],
+                    errorBuilder:
+                        (_, __, ___) => DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                scheme.primary.withValues(alpha: 0.35),
+                                scheme.surfaceContainerHighest,
+                              ],
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.image_outlined,
+                            size: 40,
+                            color: scheme.onSurface.withValues(alpha: 0.35),
+                          ),
                         ),
-                      ),
-                      child: Icon(
-                        Icons.image_outlined,
-                        size: 40,
-                        color: scheme.onSurface.withValues(alpha: 0.35),
-                      ),
-                    ),
                   ),
                   DecoratedBox(
                     decoration: BoxDecoration(
@@ -447,7 +452,10 @@ class LandingLivePreviewCard extends StatelessWidget {
                       top: 10,
                       right: 10,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.black.withValues(alpha: 0.62),
                           borderRadius: BorderRadius.circular(999),
@@ -469,7 +477,11 @@ class LandingLivePreviewCard extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
               child: Row(
                 children: [
-                  Icon(Icons.visibility_outlined, size: 18, color: scheme.primary),
+                  Icon(
+                    Icons.visibility_outlined,
+                    size: 18,
+                    color: scheme.primary,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(

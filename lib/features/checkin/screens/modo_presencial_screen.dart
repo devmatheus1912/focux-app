@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +8,7 @@ import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 /// Landscape-optimized training screen for in-person coaching sessions.
 ///
@@ -123,9 +124,14 @@ class _State extends ConsumerState<ModoPresencialScreen> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return Scaffold(
-        backgroundColor: EagleTokens.darkBg,
-        body: Center(child: FxLoading(color: Theme.of(context).colorScheme.primary)),
+      return fxScreenA11yScope(
+        label: 'Modo Presencial',
+        child: Scaffold(
+          backgroundColor: EagleTokens.darkBg,
+          body: Center(
+            child: FxLoading(color: Theme.of(context).colorScheme.primary),
+          ),
+        ),
       );
     }
     if (_exec == null || _exec!.exercicios.isEmpty) {
@@ -135,14 +141,15 @@ class _State extends ConsumerState<ModoPresencialScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.error_outline, color: EagleTokens.darkInkMute, size: 48),
+              Icon(
+                Icons.error_outline,
+                color: EagleTokens.darkInkMute,
+                size: 48,
+              ),
               const SizedBox(height: TokensStrip.s4),
               Text(
                 'Treino não encontrado',
-                style: TextStyle(
-                  color: EagleTokens.darkInkMute,
-                  fontSize: 18,
-                ),
+                style: TextStyle(color: EagleTokens.darkInkMute, fontSize: 18),
               ),
               const SizedBox(height: TokensStrip.s5),
               FxLiquidPrimaryButton(

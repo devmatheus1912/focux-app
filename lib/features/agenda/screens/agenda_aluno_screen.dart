@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/config/env.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -10,6 +10,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/theme/tokens_strip.dart';
 
 class AgendaAlunoScreen extends ConsumerStatefulWidget {
@@ -66,11 +67,15 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
 
   Future<void> _copyIcalLink() async {
     try {
-      final info = await AgendaRepository(ref.read(apiClientProvider)).icalTokenAluno();
+      final info =
+          await AgendaRepository(ref.read(apiClientProvider)).icalTokenAluno();
       final fullUrl = _resolveAbsoluteApiUrl(info.url);
       await Clipboard.setData(ClipboardData(text: fullUrl));
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Link iCal copiado — cole no Google Calendar ou Apple Calendar.');
+        FeedbackHelper.showSuccess(
+          context,
+          'Link iCal copiado — cole no Google Calendar ou Apple Calendar.',
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -96,42 +101,45 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => FxShellScaffold(
-    useMesh: true,
-    extendBody: true,
-    appBar: FxShellAppBar(
-      title: 'Minha Agenda',
-      subtitle: 'Seus próximos compromissos',
-      actions: [
-        IconButton(
-          tooltip: 'Exportar iCal',
-          icon: const Icon(Icons.calendar_month_outlined),
-          onPressed: _copyIcalLink,
-        ),
-      ],
-    ),
-    body: RefreshIndicator(
-      onRefresh: _load,
-      child:
-          _loading
-              ? const Center(child: FxLoading())
-              : _ags.isEmpty
-              ? ListView(
-                children: const [
-                  Padding(
-                    padding: EdgeInsets.all(32),
-                    child: Center(
-                      child: Text('Nenhum agendamento encontrado.'),
+  Widget build(BuildContext context) => fxScreenA11yScope(
+    label: 'Minha Agenda',
+    child: FxShellScaffold(
+      useMesh: true,
+      extendBody: true,
+      appBar: FxShellAppBar(
+        title: 'Minha Agenda',
+        subtitle: 'Seus próximos compromissos',
+        actions: [
+          IconButton(
+            tooltip: 'Exportar iCal',
+            icon: const Icon(Icons.calendar_month_outlined),
+            onPressed: _copyIcalLink,
+          ),
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: _load,
+        child:
+            _loading
+                ? const Center(child: FxLoading())
+                : _ags.isEmpty
+                ? ListView(
+                  children: const [
+                    Padding(
+                      padding: EdgeInsets.all(32),
+                      child: Center(
+                        child: Text('Nenhum agendamento encontrado.'),
+                      ),
                     ),
-                  ),
-                ],
-              )
-              : ListView.builder(
-                padding: const EdgeInsets.all(TokensStrip.s4),
-                itemCount: _ags.length,
-                itemBuilder:
-                    (_, i) => _AgCard(ag: _ags[i], onConfirmar: _confirmar),
-              ),
+                  ],
+                )
+                : ListView.builder(
+                  padding: const EdgeInsets.all(TokensStrip.s4),
+                  itemCount: _ags.length,
+                  itemBuilder:
+                      (_, i) => _AgCard(ag: _ags[i], onConfirmar: _confirmar),
+                ),
+      ),
     ),
   );
 }

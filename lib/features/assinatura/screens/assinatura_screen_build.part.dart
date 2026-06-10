@@ -15,7 +15,8 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
     final vitrineAsync = ref.watch(paywallVitrineProvider);
     final vitrine = vitrineAsync.valueOrNull;
     final trialDaysFromVitrine = vitrine?.trialDaysOffer;
-    final vitrineComparison = vitrine?.effectiveComparisonRows ?? PaywallCatalog.comparisonRows;
+    final vitrineComparison =
+        vitrine?.effectiveComparisonRows ?? PaywallCatalog.comparisonRows;
     final featuresAsync = ref.watch(planoFeaturesProvider);
 
     final planos = planosAsync.valueOrNull;
@@ -38,7 +39,8 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
       }
       paywallHasUpgradeAbove = paywallNextTier != null;
       if (enterprisePlano != null && enterpriseProPlano != null) {
-        final delta = enterpriseProPlano.precoMensal - enterprisePlano.precoMensal;
+        final delta =
+            enterpriseProPlano.precoMensal - enterprisePlano.precoMensal;
         if (delta > 0) {
           enterpriseProRoiTag = '+R\$ ${delta.toStringAsFixed(0)}/mês';
         }
@@ -105,9 +107,10 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
             paywallHasUpgradeAbove &&
             paywallNextTier == SubscriptionPlan.ENTERPRISE_PRO &&
             subscriptionUsesNativeStore) {
-          footnote = enterpriseProRoiTag != null
-              ? 'Enterprise Pro: Landing, Loja e Pose Coach · $enterpriseProRoiTag'
-              : 'Enterprise Pro desbloqueia Landing, Loja digital e Pose Coach.';
+          footnote =
+              enterpriseProRoiTag != null
+                  ? 'Enterprise Pro: Landing, Loja e Pose Coach · $enterpriseProRoiTag'
+                  : 'Enterprise Pro desbloqueia Landing, Loja digital e Pose Coach.';
         } else {
           footnote = '';
         }
@@ -142,15 +145,16 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
             _trialStatus?.trialEligible == true;
         final isUpgrade = selectedPlan.level > currentPlan.level;
         final selectedLabel = PaywallCatalog.displayPlanName(selectedPlan);
-        ctaLabel = trialOffer
-            ? 'Começar $trialDays dias grátis — ${PaywallCatalog.displayPlanName(SubscriptionPlan.ENTERPRISE)}'
-            : isUpgrade
-            ? 'Confirmar upgrade'
-            : selectedPlan == SubscriptionPlan.ENTERPRISE_PRO
-            ? 'Continuar com $selectedLabel'
-            : selectedPlan == SubscriptionPlan.ENTERPRISE
-            ? 'Continuar com $selectedLabel'
-            : 'Continuar com ${PaywallCatalog.displayPlanName(SubscriptionPlan.PREMIUM)}';
+        ctaLabel =
+            trialOffer
+                ? 'Começar $trialDays dias grátis — ${PaywallCatalog.displayPlanName(SubscriptionPlan.ENTERPRISE)}'
+                : isUpgrade
+                ? 'Confirmar upgrade'
+                : selectedPlan == SubscriptionPlan.ENTERPRISE_PRO
+                ? 'Continuar com $selectedLabel'
+                : selectedPlan == SubscriptionPlan.ENTERPRISE
+                ? 'Continuar com $selectedLabel'
+                : 'Continuar com ${PaywallCatalog.displayPlanName(SubscriptionPlan.PREMIUM)}';
         footnote =
             subscriptionUsesNativeStore
                 ? (_billingPeriod == SubscriptionBillingPeriod.yearly
@@ -164,22 +168,25 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
         selectedPlan == SubscriptionPlan.ENTERPRISE &&
         !isCurrentPlan &&
         _trialStatus?.trialEligible == true;
-    final planSummary = planos == null
-        ? null
-        : isCurrentPlan
-        ? '${PaywallCatalog.displayPlanName(currentPlan)} · Ativo'
-        : selectedPlan.level > currentPlan.level
-        ? 'Upgrade · ${PaywallCatalog.displayPlanName(selectedPlan)}'
-        : null;
+    final planSummary =
+        planos == null
+            ? null
+            : isCurrentPlan
+            ? '${PaywallCatalog.displayPlanName(currentPlan)} · Ativo'
+            : selectedPlan.level > currentPlan.level
+            ? 'Upgrade · ${PaywallCatalog.displayPlanName(selectedPlan)}'
+            : null;
 
     final isUpgradeSelection =
         planos != null &&
-        subscriptionPlanFromApi(_selectedPlanName ?? currentPlan.apiName).level >
+        subscriptionPlanFromApi(
+              _selectedPlanName ?? currentPlan.apiName,
+            ).level >
             currentPlan.level;
-    final stickyTierAccent = isUpgradeSelection &&
-            selectedPlan == SubscriptionPlan.ENTERPRISE_PRO
-        ? PaywallCatalog.accentForPlan(SubscriptionPlan.ENTERPRISE_PRO)
-        : null;
+    final stickyTierAccent =
+        isUpgradeSelection && selectedPlan == SubscriptionPlan.ENTERPRISE_PRO
+            ? PaywallCatalog.accentForPlan(SubscriptionPlan.ENTERPRISE_PRO)
+            : null;
     if (_paymentBlocked) {
       return FxShellScaffold(
         appBar: FxShellAppBar(
@@ -251,17 +258,17 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                     mute: mute,
                     line: line,
                     primary: primary,
-                    secondaryLabel: showEnterpriseProStickySecondary
-                        ? 'Ver Enterprise Pro'
-                        : null,
-                    onSecondary: showEnterpriseProStickySecondary
-                        ? _focusEnterpriseProUpgrade
-                        : null,
+                    secondaryLabel:
+                        showEnterpriseProStickySecondary
+                            ? 'Ver Enterprise Pro'
+                            : null,
+                    onSecondary:
+                        showEnterpriseProStickySecondary
+                            ? _focusEnterpriseProUpgrade
+                            : null,
                     onSubscribe:
-                        () => _startCheckout(
-                          selectedPlan,
-                          selectedBackendPlan!,
-                        ),
+                        () =>
+                            _startCheckout(selectedPlan, selectedBackendPlan!),
                     onManage: _openSubscriptionManagement,
                     onRestore:
                         hideScrollUpgradeLegal && subscriptionUsesNativeStore
@@ -271,41 +278,49 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                     onBillingDetails:
                         hideScrollUpgradeLegal
                             ? () => PaywallUpgradeLegalCompact.showBillingSheet(
-                                context,
-                                ink: ink,
-                                mute: mute,
-                                primary: primary,
-                                showStoreBillingNote: subscriptionUsesNativeStore,
-                                restoring: _restoringPurchases,
-                                onRestore:
-                                    subscriptionUsesNativeStore
-                                        ? _restorePurchases
-                                        : null,
-                              )
+                              context,
+                              ink: ink,
+                              mute: mute,
+                              primary: primary,
+                              showStoreBillingNote: subscriptionUsesNativeStore,
+                              restoring: _restoringPurchases,
+                              onRestore:
+                                  subscriptionUsesNativeStore
+                                      ? _restorePurchases
+                                      : null,
+                            )
                             : null,
                   ),
                 ),
               ),
       body: planosAsync.when(
         loading: () => const PaywallLoadingSkeleton(),
-        error: (error, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Não foi possível carregar os planos.', style: TextStyle(color: mute)),
-                const SizedBox(height: 8),
-                Text('$error', textAlign: TextAlign.center, style: TokensStrip.bodyMuted(color: mute)),
-                const SizedBox(height: 16),
-                FilledButton(
-                  onPressed: () => ref.invalidate(planosProvider),
-                  child: const Text('Tentar novamente'),
+        error:
+            (error, _) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Não foi possível carregar os planos.',
+                      style: TextStyle(color: mute),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '$error',
+                      textAlign: TextAlign.center,
+                      style: TokensStrip.bodyMuted(color: mute),
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton(
+                      onPressed: () => ref.invalidate(planosProvider),
+                      child: const Text('Tentar novamente'),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
         data: (planosList) {
           return buildPaywallPlansScroll(
             planosList: planosList,

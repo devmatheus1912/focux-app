@@ -23,18 +23,17 @@ LandingCompleteTemplate landingCompleteTemplateFromPreset(
     contactCta: preset.contactCta,
     servicos: List<LandingServiceItem>.from(preset.servicos),
     faq: List<LandingFaqItem>.from(preset.faq),
-    sectionOrder: preset.sectionOrder.isNotEmpty
-        ? normalizeLandingSectionOrder(preset.sectionOrder)
-        : List<String>.from(landingEditorCanonicalSections),
+    sectionOrder:
+        preset.sectionOrder.isNotEmpty
+            ? normalizeLandingSectionOrder(preset.sectionOrder)
+            : List<String>.from(landingEditorCanonicalSections),
   );
 }
 
 List<LandingCompleteTemplate> landingCompleteTemplatesFromPresets(
   List<LandingNichePreset> presets,
 ) {
-  return presets
-      .map(landingCompleteTemplateFromPreset)
-      .toList(growable: false);
+  return presets.map(landingCompleteTemplateFromPreset).toList(growable: false);
 }
 
 /// Catálogo unificado: modelo padrão Focux + nichos da API.

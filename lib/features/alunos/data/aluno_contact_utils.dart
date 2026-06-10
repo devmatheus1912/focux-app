@@ -57,8 +57,11 @@ int alunoContatoPriorityBoost(
   var boost = 4;
   final followDate = aluno.followUpDate;
   if (followDate != null) {
-    final today = DateTime(now?.year ?? DateTime.now().year,
-        now?.month ?? DateTime.now().month, now?.day ?? DateTime.now().day);
+    final today = DateTime(
+      now?.year ?? DateTime.now().year,
+      now?.month ?? DateTime.now().month,
+      now?.day ?? DateTime.now().day,
+    );
     final followDay = DateTime(
       followDate.year,
       followDate.month,
@@ -122,6 +125,9 @@ Future<void> openAlunoWhatsappOutreach(
   }
   await Clipboard.setData(ClipboardData(text: mensagem));
   if (context.mounted) {
-    FeedbackHelper.showSuccess(context, 'Mensagem copiada para a área de transferência');
+    FeedbackHelper.showSuccess(
+      context,
+      'Mensagem copiada para a área de transferência',
+    );
   }
 }

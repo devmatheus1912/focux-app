@@ -19,9 +19,7 @@ class BibliotecaSyncStatus extends ChangeNotifier {
   String? get warningMessage => _warningMessage;
 
   bool get showPendingHint =>
-      !kBibliotecaLibraryVideosStandby &&
-      !_syncing &&
-      _pendingMediaCount > 0;
+      !kBibliotecaLibraryVideosStandby && !_syncing && _pendingMediaCount > 0;
 
   void start(String message) {
     _syncing = true;

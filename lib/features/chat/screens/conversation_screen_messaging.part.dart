@@ -1,7 +1,7 @@
 part of 'conversation_screen.dart';
 
 extension ConversationScreenMessaging on _ConversationScreenState {
-Future<void> _sendText() async {
+  Future<void> _sendText() async {
     final text = _ctrl.text.trim();
     if (text.isEmpty || _sending || _uploading) return;
     if (_isDuplicateOutgoing(text)) {
@@ -139,7 +139,10 @@ Future<void> _sendText() async {
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showError(context, 'Nao foi possivel selecionar o arquivo: $e');
+        FeedbackHelper.showError(
+          context,
+          'Nao foi possivel selecionar o arquivo: $e',
+        );
       }
       return;
     }
@@ -197,7 +200,10 @@ Future<void> _sendText() async {
       final allowed = await _audioRecorder.hasPermission();
       if (!allowed) {
         if (!mounted) return;
-        FeedbackHelper.showError(context, 'Permita o microfone para gravar audio.');
+        FeedbackHelper.showError(
+          context,
+          'Permita o microfone para gravar audio.',
+        );
         return;
       }
 
@@ -256,7 +262,10 @@ Future<void> _sendText() async {
       path = await _audioRecorder.stop();
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, 'Nao foi possivel finalizar o audio: $e');
+      FeedbackHelper.showError(
+        context,
+        'Nao foi possivel finalizar o audio: $e',
+      );
       return;
     }
 
@@ -502,7 +511,10 @@ Future<void> _sendText() async {
   void _jumpToReplySource(ChatMsg msg) {
     final original = _findMessageById(msg.replyToMessageId);
     if (original == null) {
-      FeedbackHelper.showInfo(context, 'Mensagem original nao encontrada aqui.');
+      FeedbackHelper.showInfo(
+        context,
+        'Mensagem original nao encontrada aqui.',
+      );
       return;
     }
     _focusMessage(original);

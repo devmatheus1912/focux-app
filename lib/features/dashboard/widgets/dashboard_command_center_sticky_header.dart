@@ -52,11 +52,11 @@ class DashboardCommandCenterStickyHeaderDelegate
 
     return Semantics(
       header: true,
-      label: showSubtitle
-          ? 'Central de Comando. $subtitle'
-          : 'Central de Comando',
+      label:
+          showSubtitle ? 'Central de Comando. $subtitle' : 'Central de Comando',
       child: Material(
-        color: isDark ? EagleTokens.darkBg : Theme.of(context).colorScheme.surface,
+        color:
+            isDark ? EagleTokens.darkBg : Theme.of(context).colorScheme.surface,
         elevation: overlapsContent ? 1 : 0,
         shadowColor: Colors.black.withValues(alpha: isDark ? 0.28 : 0.08),
         child: DecoratedBox(
@@ -75,9 +75,7 @@ class DashboardCommandCenterStickyHeaderDelegate
               final showSubtitleLine =
                   showSubtitle && !compact && !showPrioritiesAction;
               final chipLabel =
-                  compact && hasTrailing
-                      ? 'Prioridades'
-                      : trailingActionLabel;
+                  compact && hasTrailing ? 'Prioridades' : trailingActionLabel;
               final topPad = compact ? 4.0 : (8 - (4 * progress));
               final bottomPad = compact ? 4.0 : 8.0;
 
@@ -172,7 +170,9 @@ class DashboardCommandCenterStickyHeaderDelegate
   }
 
   @override
-  bool shouldRebuild(covariant DashboardCommandCenterStickyHeaderDelegate oldDelegate) {
+  bool shouldRebuild(
+    covariant DashboardCommandCenterStickyHeaderDelegate oldDelegate,
+  ) {
     return oldDelegate.isDark != isDark ||
         oldDelegate.primary != primary ||
         oldDelegate.subtitle != subtitle ||

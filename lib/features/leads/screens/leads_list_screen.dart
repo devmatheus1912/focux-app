@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
@@ -13,6 +13,7 @@ import '../../subscription/models/subscription_plan.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class LeadsListScreen extends ConsumerStatefulWidget {
   const LeadsListScreen({super.key});
@@ -68,163 +69,180 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
     final showLeadsLimitBanner =
         plano?.plano == SubscriptionPlan.FREE && _leads.length >= 4;
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Funil de Leads',
-        onBack: () => safePopOrGo(context, '/dashboard/personal'),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.view_column,
-              color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+    return fxScreenA11yScope(
+      label: 'Funil de Leads',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Funil de Leads',
+          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+          actions: [
+            IconButton(
+              icon: Icon(
+                Icons.view_column,
+                color:
+                    isDark
+                        ? EagleTokens.darkInkMute
+                        : TokensStrip.textSecondary,
+              ),
+              tooltip: 'Visão Kanban',
+              onPressed: () async {
+                await context.push('/leads/kanban');
+                _load();
+              },
             ),
-            tooltip: 'Visão Kanban',
-            onPressed: () async {
-              await context.push('/leads/kanban');
-              _load();
-            },
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.refresh,
-              color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
-            ),
-            onPressed: _load,
-          ),
-        ],
-      ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: [primary, primaryDeep]),
-          borderRadius: BorderRadius.circular(TokensStrip.rXl),
-          boxShadow: [
-            BoxShadow(
-              color: primary.withValues(alpha: 0.4),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
+            IconButton(
+              icon: Icon(
+                Icons.refresh,
+                color:
+                    isDark
+                        ? EagleTokens.darkInkMute
+                        : TokensStrip.textSecondary,
+              ),
+              onPressed: _load,
             ),
           ],
         ),
-        child: FloatingActionButton.extended(
-          onPressed: () async {
-            await context.push('/leads/novo');
-            _load();
-          },
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          icon: const Icon(Icons.person_add, color: Colors.white),
-          label: const Text(
-            'Novo Lead',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        floatingActionButton: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: [primary, primaryDeep]),
+            borderRadius: BorderRadius.circular(TokensStrip.rXl),
+            boxShadow: [
+              BoxShadow(
+                color: primary.withValues(alpha: 0.4),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: FloatingActionButton.extended(
+            onPressed: () async {
+              await context.push('/leads/novo');
+              _load();
+            },
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            icon: const Icon(Icons.person_add, color: Colors.white),
+            label: const Text(
+              'Novo Lead',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (showLeadsLimitBanner)
-            Material(
-              color: primary.withValues(alpha: 0.1),
-              child: InkWell(
-                onTap: () => context.push('/assinatura', extra: 'Premium'),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          _leads.length >= 5
-                              ? 'Limite de 5 leads atingido no Free.'
-                              : '${_leads.length}/5 leads no plano Free.',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13,
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (showLeadsLimitBanner)
+              Material(
+                color: primary.withValues(alpha: 0.1),
+                child: InkWell(
+                  onTap: () => context.push('/assinatura', extra: 'Premium'),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _leads.length >= 5
+                                ? 'Limite de 5 leads atingido no Free.'
+                                : '${_leads.length}/5 leads no plano Free.',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
-                      ),
-                      Text(
-                        'Premium →',
-                        style: TextStyle(
-                          color: primary,
-                          fontWeight: FontWeight.w800,
+                        Text(
+                          'Premium →',
+                          style: TextStyle(
+                            color: primary,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
+            Expanded(
+              child:
+                  _loading
+                      ? Center(child: FxLoading(color: primary))
+                      : _leads.isEmpty
+                      ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 56,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                color: primary.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.person_search,
+                                color: primary,
+                                size: 28,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Nenhum lead cadastrado',
+                              style: TextStyle(
+                                color:
+                                    isDark
+                                        ? EagleTokens.darkInkMute
+                                        : TokensStrip.textSecondary,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                      : SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          16,
+                          16,
+                          96,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _KanbanColumn(
+                              title: 'LEAD',
+                              color: primary,
+                              leads: leadLeads,
+                              isDark: isDark,
+                              onTap: openLead,
+                            ),
+                            const SizedBox(width: 12),
+                            _KanbanColumn(
+                              title: 'TESTE',
+                              color: EagleTokens.warn,
+                              leads: testeLeads,
+                              isDark: isDark,
+                              onTap: openLead,
+                            ),
+                            const SizedBox(width: 12),
+                            _KanbanColumn(
+                              title: 'ATIVO',
+                              color: EagleTokens.good,
+                              leads: ativoLeads,
+                              isDark: isDark,
+                              onTap: openLead,
+                            ),
+                          ],
+                        ),
+                      ),
             ),
-          Expanded(
-            child:
-          _loading
-              ? Center(child: FxLoading(color: primary))
-              : _leads.isEmpty
-              ? Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color: primary.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.person_search,
-                        color: primary,
-                        size: 28,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Nenhum lead cadastrado',
-                      style: TextStyle(
-                        color:
-                            isDark
-                                ? EagleTokens.darkInkMute
-                                : TokensStrip.textSecondary,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              )
-              : SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 96),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _KanbanColumn(
-                      title: 'LEAD',
-                      color: primary,
-                      leads: leadLeads,
-                      isDark: isDark,
-                      onTap: openLead,
-                    ),
-                    const SizedBox(width: 12),
-                    _KanbanColumn(
-                      title: 'TESTE',
-                      color: EagleTokens.warn,
-                      leads: testeLeads,
-                      isDark: isDark,
-                      onTap: openLead,
-                    ),
-                    const SizedBox(width: 12),
-                    _KanbanColumn(
-                      title: 'ATIVO',
-                      color: EagleTokens.good,
-                      leads: ativoLeads,
-                      isDark: isDark,
-                      onTap: openLead,
-                    ),
-                  ],
-                ),
-              ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

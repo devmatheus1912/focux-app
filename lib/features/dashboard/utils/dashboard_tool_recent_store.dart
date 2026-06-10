@@ -13,9 +13,11 @@ class DashboardToolRecentStore {
     if (route.isEmpty) return;
     final prefs = await SharedPreferences.getInstance();
     final current = prefs.getStringList(_prefsKey) ?? <String>[];
-    final next = <String>[route, ...current.where((r) => r != route)]
-        .take(_maxRecent)
-        .toList();
+    final next =
+        <String>[
+          route,
+          ...current.where((r) => r != route),
+        ].take(_maxRecent).toList();
     await prefs.setStringList(_prefsKey, next);
   }
 

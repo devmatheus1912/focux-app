@@ -20,7 +20,9 @@ class _PerfilStickyBar extends StatelessWidget {
         decoration: BoxDecoration(
           color: (isDark ? EagleTokens.darkCard : TokensStrip.cardBg)
               .withValues(alpha: 0.96),
-          border: Border(top: BorderSide(color: chrome.line.withValues(alpha: 0.7))),
+          border: Border(
+            top: BorderSide(color: chrome.line.withValues(alpha: 0.7)),
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: isDark ? 0.28 : 0.08),
@@ -478,7 +480,11 @@ class _PerfilPublicLinkCard extends StatelessWidget {
                           successMessage: 'Link copiado para compartilhar.',
                         );
                       },
-                      icon: Icon(Icons.copy_rounded, size: 18, color: actionInk),
+                      icon: Icon(
+                        Icons.copy_rounded,
+                        size: 18,
+                        color: actionInk,
+                      ),
                     ),
                   ),
                 ],
@@ -530,4 +536,3 @@ class _PerfilPublicLinkCard extends StatelessWidget {
     );
   }
 }
-

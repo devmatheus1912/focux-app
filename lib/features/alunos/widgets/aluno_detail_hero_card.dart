@@ -169,13 +169,13 @@ class AlunoDetailHeroCard extends StatelessWidget {
                                       subtitle,
                                       maxLines: subtitleMaxLines,
                                       overflow: TextOverflow.ellipsis,
-                                      style:
-                                          Aluno360Layout.captionStyle(context)
-                                              .copyWith(
-                                                color: mute,
-                                                fontWeight: FontWeight.w600,
-                                                height: 1.3,
-                                              ),
+                                      style: Aluno360Layout.captionStyle(
+                                        context,
+                                      ).copyWith(
+                                        color: mute,
+                                        fontWeight: FontWeight.w600,
+                                        height: 1.3,
+                                      ),
                                     ),
                                 ],
                               ),
@@ -270,9 +270,10 @@ class _IdentityObjectiveRow extends StatelessWidget {
             ),
             child: Text(
               'Definir',
-              style: Aluno360Layout.ctaLabelStyle(context, primary).copyWith(
-                decoration: TextDecoration.underline,
-              ),
+              style: Aluno360Layout.ctaLabelStyle(
+                context,
+                primary,
+              ).copyWith(decoration: TextDecoration.underline),
             ),
           ),
         ),
@@ -282,10 +283,7 @@ class _IdentityObjectiveRow extends StatelessWidget {
 }
 
 class _IdentityStatusChip extends StatelessWidget {
-  const _IdentityStatusChip({
-    required this.status,
-    required this.isDark,
-  });
+  const _IdentityStatusChip({required this.status, required this.isDark});
 
   final AlunoHeroStatusVisual status;
   final bool isDark;
@@ -297,9 +295,7 @@ class _IdentityStatusChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: status.background.withValues(alpha: isDark ? 0.35 : 0.18),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: status.foreground.withValues(alpha: 0.35),
-        ),
+        border: Border.all(color: status.foreground.withValues(alpha: 0.35)),
       ),
       child: Text(
         status.label,
@@ -438,10 +434,7 @@ class _IdentityMetricChip extends StatelessWidget {
             if (eyebrow != null)
               Text(
                 eyebrow,
-                style: Aluno360Layout.eyebrowLabelStyle(
-                  context,
-                  eyebrowColor,
-                ),
+                style: Aluno360Layout.eyebrowLabelStyle(context, eyebrowColor),
               ),
             if (eyebrow != null) const SizedBox(height: 3),
             Row(

@@ -54,9 +54,9 @@ class IaProgressaoExerciseCard extends StatelessWidget {
               ],
               Text(
                 exercicio,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 10),
               Row(

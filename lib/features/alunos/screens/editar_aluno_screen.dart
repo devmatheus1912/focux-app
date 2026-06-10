@@ -93,10 +93,11 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
     } catch (e) {
       if (mounted) {
         setState(
-          () => _error = friendlyError(
-            e,
-            fallback: 'Erro ao salvar. Tente novamente.',
-          ),
+          () =>
+              _error = friendlyError(
+                e,
+                fallback: 'Erro ao salvar. Tente novamente.',
+              ),
         );
       }
     } finally {
@@ -340,12 +341,16 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                           _ChipGroup(
                             label: 'Gênero',
                             options: const [
-                              _ChipOption(value: 'MASCULINO', label: 'Masculino'),
+                              _ChipOption(
+                                value: 'MASCULINO',
+                                label: 'Masculino',
+                              ),
                               _ChipOption(value: 'FEMININO', label: 'Feminino'),
                               _ChipOption(value: 'OUTRO', label: 'Outro'),
                             ],
                             selected: _genero,
-                            onSelected: (value) => setState(() => _genero = value),
+                            onSelected:
+                                (value) => setState(() => _genero = value),
                           ),
                           const SizedBox(height: 14),
                           _ChipGroup(
@@ -492,8 +497,7 @@ class _SectionCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final a11y =
-        showHint && hint != null ? '$title. $hint' : title;
+    final a11y = showHint && hint != null ? '$title. $hint' : title;
 
     return Semantics(
       container: true,

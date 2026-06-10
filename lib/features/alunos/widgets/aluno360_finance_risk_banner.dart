@@ -35,7 +35,9 @@ class Aluno360FinanceRiskBanner extends StatelessWidget {
             decoration: BoxDecoration(
               color: EagleTokens.bad.withValues(alpha: isDark ? 0.16 : 0.08),
               borderRadius: BorderRadius.circular(TokensStrip.rCard),
-              border: Border.all(color: EagleTokens.bad.withValues(alpha: 0.28)),
+              border: Border.all(
+                color: EagleTokens.bad.withValues(alpha: 0.28),
+              ),
             ),
             child: Row(
               children: [
@@ -52,9 +54,9 @@ class Aluno360FinanceRiskBanner extends StatelessWidget {
                         ),
                         Text(
                           'Abrir mensalidades deste aluno',
-                          style: Aluno360Layout.captionStyle(context).copyWith(
-                            color: mute,
-                          ),
+                          style: Aluno360Layout.captionStyle(
+                            context,
+                          ).copyWith(color: mute),
                         ),
                       ],
                     ),

@@ -1,6 +1,7 @@
 part of 'add_exercicio_to_treino_screen.dart';
 
-extension AddExercicioToTreinoScreenActionsB on _AddExercicioToTreinoScreenState {
+extension AddExercicioToTreinoScreenActionsB
+    on _AddExercicioToTreinoScreenState {
   Future<void> _submit() async {
     if (_selecionado == null) {
       setState(() {
@@ -92,7 +93,10 @@ extension AddExercicioToTreinoScreenActionsB on _AddExercicioToTreinoScreenState
         _buscaCtrl.clear();
         _loading = false;
       });
-      FeedbackHelper.showSuccess(context, '$nome adicionado. Escolha o próximo.');
+      FeedbackHelper.showSuccess(
+        context,
+        '$nome adicionado. Escolha o próximo.',
+      );
     } catch (_) {
       if (mounted) {
         setState(() {
@@ -405,7 +409,9 @@ extension AddExercicioToTreinoScreenActionsB on _AddExercicioToTreinoScreenState
                   onClear:
                       () => setState(
                         () =>
-                            _pickerFilter = _pickerFilter.copyWith(clearAluno: true),
+                            _pickerFilter = _pickerFilter.copyWith(
+                              clearAluno: true,
+                            ),
                       ),
                 ),
               ExercisePickerFilterBar(
@@ -423,7 +429,9 @@ extension AddExercicioToTreinoScreenActionsB on _AddExercicioToTreinoScreenState
                   pickerFilter: _pickerFilter,
                   onAdicionar: _selectExercise,
                   onClearFilters:
-                      () => setState(() => _pickerFilter = const ExercisePickerFilter()),
+                      () => setState(
+                        () => _pickerFilter = const ExercisePickerFilter(),
+                      ),
                 ),
               ),
             ],
@@ -462,9 +470,7 @@ extension AddExercicioToTreinoScreenActionsB on _AddExercicioToTreinoScreenState
                   alreadyInTreinoIds: alreadyInTreinoIds,
                 ).take(6).toList();
         final curatedSuggestions =
-            !compact &&
-                    query.isEmpty &&
-                    favoriteShortcuts.isEmpty
+            !compact && query.isEmpty && favoriteShortcuts.isEmpty
                 ? curatedPickerSuggestions(
                   exercicios,
                   alreadyInTreinoIds: alreadyInTreinoIds,
@@ -487,10 +493,11 @@ extension AddExercicioToTreinoScreenActionsB on _AddExercicioToTreinoScreenState
                 isDark: isDark,
                 primary: primary,
                 celebrateVideoSuccess: _celebrateVideoSuccess,
-                onChange: () => _openExercisePicker(
-                  allExercicios,
-                  alreadyInTreinoIds: alreadyInTreinoIds,
-                ),
+                onChange:
+                    () => _openExercisePicker(
+                      allExercicios,
+                      alreadyInTreinoIds: alreadyInTreinoIds,
+                    ),
                 onPreview:
                     canPreviewExerciseMedia(_selecionado!)
                         ? _previewSelectedExerciseVideo
@@ -542,7 +549,9 @@ extension AddExercicioToTreinoScreenActionsB on _AddExercicioToTreinoScreenState
                   onClear:
                       () => setState(
                         () =>
-                            _pickerFilter = _pickerFilter.copyWith(clearAluno: true),
+                            _pickerFilter = _pickerFilter.copyWith(
+                              clearAluno: true,
+                            ),
                       ),
                 ),
               ExercisePickerFilterBar(
@@ -606,14 +615,19 @@ extension AddExercicioToTreinoScreenActionsB on _AddExercicioToTreinoScreenState
                 },
               ),
             ],
-            if (!showFilterEmpty && !compact && favoriteShortcuts.isNotEmpty) ...[
+            if (!showFilterEmpty &&
+                !compact &&
+                favoriteShortcuts.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
                 'Seus favoritos',
                 style: AppTypography.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
-                  color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+                  color:
+                      isDark
+                          ? EagleTokens.darkInkMute
+                          : TokensStrip.textSecondary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -689,7 +703,11 @@ extension AddExercicioToTreinoScreenActionsB on _AddExercicioToTreinoScreenState
                 alignment: Alignment.centerLeft,
                 child: TextButton.icon(
                   onPressed: () => _openSimilarPicker(allExercicios),
-                  icon: Icon(Icons.swap_horiz_rounded, color: primary, size: 18),
+                  icon: Icon(
+                    Icons.swap_horiz_rounded,
+                    color: primary,
+                    size: 18,
+                  ),
                   label: Text(
                     'Trocar por similar',
                     style: AppTypography.inter(

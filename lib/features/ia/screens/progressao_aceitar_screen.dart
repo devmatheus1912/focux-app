@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -31,7 +31,8 @@ class ProgressaoAceitarScreen extends ConsumerStatefulWidget {
       _ProgressaoAceitarScreenState();
 }
 
-class _ProgressaoAceitarScreenState extends ConsumerState<ProgressaoAceitarScreen> {
+class _ProgressaoAceitarScreenState
+    extends ConsumerState<ProgressaoAceitarScreen> {
   int? _actingOnId;
   String? _successBanner;
 
@@ -53,9 +54,12 @@ class _ProgressaoAceitarScreenState extends ConsumerState<ProgressaoAceitarScree
             label: 'Atualizar sugestões pendentes',
             child: IconButton(
               icon: const Icon(Icons.refresh),
-              onPressed: _actingOnId == null
-                  ? () => ref.invalidate(progressaoSugestoesProvider(args.alunoId))
-                  : null,
+              onPressed:
+                  _actingOnId == null
+                      ? () => ref.invalidate(
+                        progressaoSugestoesProvider(args.alunoId),
+                      )
+                      : null,
             ),
           ),
         ],
@@ -72,7 +76,9 @@ class _ProgressaoAceitarScreenState extends ConsumerState<ProgressaoAceitarScree
                 primaryLabel: 'Tentar novamente',
                 primaryIcon: Icons.refresh,
                 onPrimary:
-                    () => ref.invalidate(progressaoSugestoesProvider(args.alunoId)),
+                    () => ref.invalidate(
+                      progressaoSugestoesProvider(args.alunoId),
+                    ),
                 secondaryActions: [
                   if (args.alunoId != null)
                     Aluno360SecondaryAction(
@@ -99,9 +105,10 @@ class _ProgressaoAceitarScreenState extends ConsumerState<ProgressaoAceitarScree
                   ],
                   Aluno360ActionEmptyPanel(
                     icon: Icons.check_circle_outline,
-                    title: _successBanner != null
-                        ? 'Tudo em dia'
-                        : 'Nenhuma sugestão pendente',
+                    title:
+                        _successBanner != null
+                            ? 'Tudo em dia'
+                            : 'Nenhuma sugestão pendente',
                     subtitle:
                         args.alunoId == null
                             ? 'Quando a IA sugerir progressão de carga, ela aparecerá aqui para você revisar e aplicar.'
@@ -110,7 +117,8 @@ class _ProgressaoAceitarScreenState extends ConsumerState<ProgressaoAceitarScree
                             : 'Gere uma progressão com IA para $firstName e volte aqui para revisar antes de aplicar no treino.',
                     primaryLabel:
                         args.alunoId == null ? null : 'Gerar progressão com IA',
-                    primaryIcon: args.alunoId == null ? null : Icons.auto_awesome,
+                    primaryIcon:
+                        args.alunoId == null ? null : Icons.auto_awesome,
                     onPrimary:
                         args.alunoId == null
                             ? null
@@ -158,7 +166,8 @@ class _ProgressaoAceitarScreenState extends ConsumerState<ProgressaoAceitarScree
                       header: Row(
                         children: [
                           AlunoAvatar(
-                            name: sugestao.alunoNome ?? args.alunoNome ?? 'Aluno',
+                            name:
+                                sugestao.alunoNome ?? args.alunoNome ?? 'Aluno',
                             photoUrl: args.alunoFotoUrl,
                             variant: AlunoAvatarVariant.strip,
                           ),
@@ -179,14 +188,24 @@ class _ProgressaoAceitarScreenState extends ConsumerState<ProgressaoAceitarScree
                           Expanded(
                             child: Semantics(
                               button: true,
-                              label: 'Rejeitar sugestão de ${sugestao.exercicio}',
+                              label:
+                                  'Rejeitar sugestão de ${sugestao.exercicio}',
                               child: OutlinedButton.icon(
-                                onPressed: busy
-                                    ? null
-                                    : () => _confirmarRejeicao(args, sugestao),
-                                icon: busy
-                                    ? const FxLoading(size: 18, strokeWidth: 2)
-                                    : const Icon(Icons.close_rounded, size: 18),
+                                onPressed:
+                                    busy
+                                        ? null
+                                        : () =>
+                                            _confirmarRejeicao(args, sugestao),
+                                icon:
+                                    busy
+                                        ? const FxLoading(
+                                          size: 18,
+                                          strokeWidth: 2,
+                                        )
+                                        : const Icon(
+                                          Icons.close_rounded,
+                                          size: 18,
+                                        ),
                                 label: const Text('Rejeitar'),
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: EagleTokens.bad,
@@ -201,16 +220,25 @@ class _ProgressaoAceitarScreenState extends ConsumerState<ProgressaoAceitarScree
                               label:
                                   'Aceitar sugestão de ${sugestao.exercicio} e aplicar no treino',
                               child: FilledButton.icon(
-                                onPressed: busy
-                                    ? null
-                                    : () => _acao(args, sugestao, aceitar: true),
-                                icon: busy
-                                    ? const FxLoading(
-                                        size: 18,
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      )
-                                    : const Icon(Icons.check_rounded, size: 18),
+                                onPressed:
+                                    busy
+                                        ? null
+                                        : () => _acao(
+                                          args,
+                                          sugestao,
+                                          aceitar: true,
+                                        ),
+                                icon:
+                                    busy
+                                        ? const FxLoading(
+                                          size: 18,
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        )
+                                        : const Icon(
+                                          Icons.check_rounded,
+                                          size: 18,
+                                        ),
                                 label: const Text('Aceitar'),
                                 style: FilledButton.styleFrom(
                                   backgroundColor: EagleTokens.good,
@@ -237,22 +265,23 @@ class _ProgressaoAceitarScreenState extends ConsumerState<ProgressaoAceitarScree
   ) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Descartar sugestão?'),
-        content: Text(
-          'A sugestão de ${sugestao.exercicio} (${sugestao.cargaSugerida}) será removida.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Descartar sugestão?'),
+            content: Text(
+              'A sugestão de ${sugestao.exercicio} (${sugestao.cargaSugerida}) será removida.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Descartar'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Descartar'),
-          ),
-        ],
-      ),
     );
     if (confirmed == true && mounted) {
       await _acao(args, sugestao, aceitar: false);

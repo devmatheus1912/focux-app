@@ -13,6 +13,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 class EvolucaoFotosScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -110,25 +111,29 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Evolução · ${widget.alunoNome}',
-        onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}/evolucao'),
-        actions: [
-          IconButton(
-            tooltip: 'Adicionar foto',
-            icon: const Icon(Icons.add_a_photo),
-            onPressed: _addFoto,
-          ),
-        ],
+    return fxScreenA11yScope(
+      label: 'Evolução · ${widget.alunoNome}',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Evolução · ${widget.alunoNome}',
+          onBack:
+              () => safePopOrGo(context, '/alunos/${widget.alunoId}/evolucao'),
+          actions: [
+            IconButton(
+              tooltip: 'Adicionar foto',
+              icon: const Icon(Icons.add_a_photo),
+              onPressed: _addFoto,
+            ),
+          ],
+        ),
+        body:
+            _loading
+                ? const FxLoading()
+                : _fotos.isEmpty
+                ? _empty(primary)
+                : _content(isDark, primary),
       ),
-      body:
-          _loading
-              ? const FxLoading()
-              : _fotos.isEmpty
-              ? _empty(primary)
-              : _content(isDark, primary),
     );
   }
 
@@ -172,7 +177,10 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
   Widget _content(bool isDark, Color primary) => Column(
     children: [
       if (_selBefore != null && _selAfter != null) ...[
-        Padding(padding: const EdgeInsets.all(TokensStrip.s4), child: _comparison()),
+        Padding(
+          padding: const EdgeInsets.all(TokensStrip.s4),
+          child: _comparison(),
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Slider(

@@ -32,15 +32,16 @@ class _LandingEditorTabChip extends StatelessWidget {
             decoration: BoxDecoration(
               color: selected ? scheme.primary : Colors.transparent,
               borderRadius: BorderRadius.circular(TokensStrip.rMd - 2),
-              boxShadow: selected
-                  ? [
-                      BoxShadow(
-                        color: scheme.primary.withValues(alpha: 0.28),
-                        blurRadius: 10,
-                        offset: const Offset(0, 3),
-                      ),
-                    ]
-                  : null,
+              boxShadow:
+                  selected
+                      ? [
+                        BoxShadow(
+                          color: scheme.primary.withValues(alpha: 0.28),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ]
+                      : null,
             ),
             child: FittedBox(
               fit: BoxFit.scaleDown,
@@ -51,9 +52,10 @@ class _LandingEditorTabChip extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                  color: selected
-                      ? Colors.white
-                      : scheme.onSurface.withValues(alpha: 0.78),
+                  color:
+                      selected
+                          ? Colors.white
+                          : scheme.onSurface.withValues(alpha: 0.78),
                 ),
               ),
             ),
@@ -86,38 +88,40 @@ class LandingStickySaveBar extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.fromLTRB(16, 10, 16, 12 + bottomInset),
         child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (dirty)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(
-                    'Alterações não salvas',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: scheme.primary.withValues(alpha: 0.95),
-                      fontWeight: FontWeight.w800,
-                      fontSize: 12.5,
-                      letterSpacing: 0.1,
-                    ),
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (dirty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  'Alterações não salvas',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: scheme.primary.withValues(alpha: 0.95),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12.5,
+                    letterSpacing: 0.1,
                   ),
                 ),
-              Semantics(
-                button: true,
-                label: dirty
-                    ? 'Salvar alterações pendentes da landing'
-                    : 'Salvar landing',
-                child: FilledButton(
-                  onPressed: saving ? null : onSave,
-                  child: saving
-                      ? const FxLoading(size: 22, strokeWidth: 2)
-                      : Text(dirty ? 'Salvar alterações' : 'Salvar landing'),
-                ),
               ),
-            ],
-          ),
+            Semantics(
+              button: true,
+              label:
+                  dirty
+                      ? 'Salvar alterações pendentes da landing'
+                      : 'Salvar landing',
+              child: FilledButton(
+                onPressed: saving ? null : onSave,
+                child:
+                    saving
+                        ? const FxLoading(size: 22, strokeWidth: 2)
+                        : Text(dirty ? 'Salvar alterações' : 'Salvar landing'),
+              ),
+            ),
+          ],
         ),
+      ),
     );
   }
 }
@@ -151,15 +155,16 @@ class LandingSectionOrderTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(TokensStrip.rMd),
-        boxShadow: highlighted
-            ? [
-                BoxShadow(
-                  color: scheme.primary.withValues(alpha: 0.28),
-                  blurRadius: 12,
-                  spreadRadius: 1,
-                ),
-              ]
-            : null,
+        boxShadow:
+            highlighted
+                ? [
+                  BoxShadow(
+                    color: scheme.primary.withValues(alpha: 0.28),
+                    blurRadius: 12,
+                    spreadRadius: 1,
+                  ),
+                ]
+                : null,
       ),
       child: Container(
         key: ValueKey('$sectionKey-$index'),
@@ -169,13 +174,15 @@ class LandingSectionOrderTile extends StatelessWidget {
           radius: TokensStrip.rMd,
           selected: highlighted,
         ).copyWith(
-          color: highlighted
-              ? scheme.primaryContainer.withValues(alpha: 0.22)
-              : scheme.surface,
+          color:
+              highlighted
+                  ? scheme.primaryContainer.withValues(alpha: 0.22)
+                  : scheme.surface,
           border: Border.all(
-            color: highlighted
-                ? scheme.primary.withValues(alpha: 0.75)
-                : scheme.outlineVariant.withValues(alpha: 0.55),
+            color:
+                highlighted
+                    ? scheme.primary.withValues(alpha: 0.75)
+                    : scheme.outlineVariant.withValues(alpha: 0.55),
             width: highlighted ? 1.5 : 1,
           ),
         ),
@@ -201,7 +208,10 @@ class LandingSectionOrderTile extends StatelessWidget {
                   children: [
                     Text(
                       landingSectionLabel(sectionKey),
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
@@ -305,22 +315,27 @@ class _ProgressLegendChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
-          color: complete
-              ? ready.withValues(alpha: 0.1)
-              : scheme.surfaceContainerHighest.withValues(alpha: 0.55),
+          color:
+              complete
+                  ? ready.withValues(alpha: 0.1)
+                  : scheme.surfaceContainerHighest.withValues(alpha: 0.55),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: complete
-                ? ready.withValues(alpha: 0.35)
-                : scheme.outlineVariant.withValues(alpha: 0.45),
+            color:
+                complete
+                    ? ready.withValues(alpha: 0.35)
+                    : scheme.outlineVariant.withValues(alpha: 0.45),
           ),
         ),
         child: Row(
           children: [
             Icon(
-              complete ? Icons.check_circle_rounded : Icons.radio_button_unchecked,
+              complete
+                  ? Icons.check_circle_rounded
+                  : Icons.radio_button_unchecked,
               size: 14,
-              color: complete ? ready : scheme.onSurface.withValues(alpha: 0.45),
+              color:
+                  complete ? ready : scheme.onSurface.withValues(alpha: 0.45),
             ),
             const SizedBox(width: 6),
             Text(
@@ -333,7 +348,8 @@ class _ProgressLegendChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
-                color: complete ? ready : scheme.onSurface.withValues(alpha: 0.72),
+                color:
+                    complete ? ready : scheme.onSurface.withValues(alpha: 0.72),
               ),
             ),
           ],
@@ -369,7 +385,10 @@ class _ProgressRow extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const Spacer(),
               Text(
@@ -419,34 +438,40 @@ class LandingReviewFocusBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       liveRegion: true,
-      label: pendingCount == 1
-          ? 'Modo foco. 1 texto pendente.'
-          : 'Modo foco. $pendingCount textos pendentes.',
+      label:
+          pendingCount == 1
+              ? 'Modo foco. 1 texto pendente.'
+              : 'Modo foco. $pendingCount textos pendentes.',
       child: Material(
-      color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.45),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
-        child: Row(
-          children: [
-            Icon(
-              Icons.center_focus_strong_outlined,
-              size: 20,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                pendingCount == 1
-                    ? 'Modo foco · 1 texto pendente'
-                    : 'Modo foco · $pendingCount textos pendentes',
-                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+        color: Theme.of(
+          context,
+        ).colorScheme.primaryContainer.withValues(alpha: 0.45),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
+          child: Row(
+            children: [
+              Icon(
+                Icons.center_focus_strong_outlined,
+                size: 20,
+                color: Theme.of(context).colorScheme.primary,
               ),
-            ),
-            TextButton(onPressed: onExit, child: const Text('Ver tudo')),
-          ],
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  pendingCount == 1
+                      ? 'Modo foco · 1 texto pendente'
+                      : 'Modo foco · $pendingCount textos pendentes',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+              TextButton(onPressed: onExit, child: const Text('Ver tudo')),
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 }
@@ -477,69 +502,74 @@ class LandingTemplatesCompactCard extends StatelessWidget {
       radius: TokensStrip.rLg,
       accent: scheme.primary,
       child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: scheme.primaryContainer.withValues(alpha: 0.45),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.auto_fix_high_outlined,
-                    color: scheme.primary,
-                    size: 22,
-                  ),
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: scheme.primaryContainer.withValues(alpha: 0.45),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Modelos prontos',
-                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '8 seções · padrão Focux'
-                            '${nicheCount > 0 ? ' + $nicheCount nichos' : ''}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          height: 1.35,
-                          color: scheme.onSurface.withValues(alpha: 0.72),
-                        ),
-                      ),
-                    ],
-                  ),
+                child: Icon(
+                  Icons.auto_fix_high_outlined,
+                  color: scheme.primary,
+                  size: 22,
                 ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            if (defaultTemplate != null)
-              OutlinedButton.icon(
-                onPressed: applying ? null : () => onApplyTemplate(defaultTemplate),
-                icon: applying
-                    ? const FxLoading(size: 16, strokeWidth: 2)
-                    : const Icon(Icons.auto_fix_high_outlined, size: 18),
-                label: Text('Aplicar ${defaultTemplate.label}'),
               ),
-            const SizedBox(height: 8),
-            TextButton.icon(
-              onPressed: onBrowseTemplates,
-              icon: const Icon(Icons.view_agenda_outlined, size: 18),
-              label: Text(
-                nicheCount > 0
-                    ? 'Ver catálogo e modelos por nicho'
-                    : 'Ver catálogo completo',
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Modelos prontos',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '8 seções · padrão Focux'
+                      '${nicheCount > 0 ? ' + $nicheCount nichos' : ''}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        height: 1.35,
+                        color: scheme.onSurface.withValues(alpha: 0.72),
+                      ),
+                    ),
+                  ],
+                ),
               ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          if (defaultTemplate != null)
+            OutlinedButton.icon(
+              onPressed:
+                  applying ? null : () => onApplyTemplate(defaultTemplate),
+              icon:
+                  applying
+                      ? const FxLoading(size: 16, strokeWidth: 2)
+                      : const Icon(Icons.auto_fix_high_outlined, size: 18),
+              label: Text('Aplicar ${defaultTemplate.label}'),
             ),
-          ],
-        ),
+          const SizedBox(height: 8),
+          TextButton.icon(
+            onPressed: onBrowseTemplates,
+            icon: const Icon(Icons.view_agenda_outlined, size: 18),
+            label: Text(
+              nicheCount > 0
+                  ? 'Ver catálogo e modelos por nicho'
+                  : 'Ver catálogo completo',
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -592,4 +622,3 @@ Future<void> showLandingTemplatesSheet(
     },
   );
 }
-

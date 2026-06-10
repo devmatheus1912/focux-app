@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -13,15 +13,12 @@ import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/widgets/aluno360_action_empty_panel.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class AlimentarScreen extends ConsumerStatefulWidget {
   final int alunoId;
   final String? alunoNome;
-  const AlimentarScreen({
-    super.key,
-    required this.alunoId,
-    this.alunoNome,
-  });
+  const AlimentarScreen({super.key, required this.alunoId, this.alunoNome});
   @override
   ConsumerState<AlimentarScreen> createState() => _AlimentarScreenState();
 }
@@ -56,158 +53,161 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Planos Alimentares',
-        subtitle: 'Nutrição prescrita para o aluno',
-        onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => _NovoPlanoScreen(alunoId: widget.alunoId),
-            ),
-          );
-          if (!context.mounted) return;
-          _load();
-        },
-        child: const Icon(Icons.add),
-      ),
-      body:
-          _loading
-              ? const FxLoading()
-              : _planos.isEmpty
-              ? satelliteEmptyBody(
-                child: Aluno360ActionEmptyPanel(
-                  key: const ValueKey('alimentar_empty'),
-                  icon: Icons.restaurant_menu_rounded,
-                  title: 'Nenhum plano alimentar',
-                  subtitle:
-                      widget.alunoNome != null
-                          ? 'Monte o primeiro plano de ${satelliteFirstName(widget.alunoNome)} com metas de calorias e macros.'
-                          : 'Crie o primeiro plano com metas de calorias e macros.',
-                  primaryLabel: 'Criar plano',
-                  primaryIcon: Icons.add_rounded,
-                  onPrimary: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (_) => _NovoPlanoScreen(alunoId: widget.alunoId),
-                      ),
-                    );
-                    if (!context.mounted) return;
-                    _load();
-                  },
-                  secondaryActions: [
-                    Aluno360SecondaryAction(
-                      label: 'Voltar ao Aluno 360',
-                      icon: Icons.arrow_back_rounded,
-                      onTap:
-                          () => safePopOrGo(
-                            context,
-                            '/alunos/${widget.alunoId}',
-                          ),
-                    ),
-                  ],
-                ),
-              )
-              : ListView.builder(
-                padding: const EdgeInsets.all(TokensStrip.s4),
-                itemCount: _planos.length,
-                itemBuilder: (_, i) {
-                  final p = _planos[i];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: DecoratedBox(
-                      decoration: fxListCardDecoration(context),
-                      child: InkWell(
+    return fxScreenA11yScope(
+      label: 'Planos Alimentares',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Planos Alimentares',
+          subtitle: 'Nutrição prescrita para o aluno',
+          onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => _NovoPlanoScreen(alunoId: widget.alunoId),
+              ),
+            );
+            if (!context.mounted) return;
+            _load();
+          },
+          child: const Icon(Icons.add),
+        ),
+        body:
+            _loading
+                ? const FxLoading()
+                : _planos.isEmpty
+                ? satelliteEmptyBody(
+                  child: Aluno360ActionEmptyPanel(
+                    key: const ValueKey('alimentar_empty'),
+                    icon: Icons.restaurant_menu_rounded,
+                    title: 'Nenhum plano alimentar',
+                    subtitle:
+                        widget.alunoNome != null
+                            ? 'Monte o primeiro plano de ${satelliteFirstName(widget.alunoNome)} com metas de calorias e macros.'
+                            : 'Crie o primeiro plano com metas de calorias e macros.',
+                    primaryLabel: 'Criar plano',
+                    primaryIcon: Icons.add_rounded,
+                    onPrimary: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (_) => _NovoPlanoScreen(alunoId: widget.alunoId),
+                        ),
+                      );
+                      if (!context.mounted) return;
+                      _load();
+                    },
+                    secondaryActions: [
+                      Aluno360SecondaryAction(
+                        label: 'Voltar ao Aluno 360',
+                        icon: Icons.arrow_back_rounded,
                         onTap:
-                            () => Navigator.push(
+                            () => safePopOrGo(
                               context,
-                              MaterialPageRoute(
-                                builder:
-                                    (_) => PlanoAlimentarDetailScreen(
-                                      alunoId: widget.alunoId,
-                                      plano: p,
-                                    ),
-                              ),
+                              '/alunos/${widget.alunoId}',
                             ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(TokensStrip.s4),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      p.nome,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 16,
+                      ),
+                    ],
+                  ),
+                )
+                : ListView.builder(
+                  padding: const EdgeInsets.all(TokensStrip.s4),
+                  itemCount: _planos.length,
+                  itemBuilder: (_, i) {
+                    final p = _planos[i];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: DecoratedBox(
+                        decoration: fxListCardDecoration(context),
+                        child: InkWell(
+                          onTap:
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (_) => PlanoAlimentarDetailScreen(
+                                        alunoId: widget.alunoId,
+                                        plano: p,
+                                      ),
+                                ),
+                              ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(TokensStrip.s4),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        p.nome,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 16,
+                                        ),
                                       ),
                                     ),
+                                    const Icon(
+                                      Icons.chevron_right,
+                                      color: TokensStrip.textSecondary,
+                                    ),
+                                  ],
+                                ),
+                                if (p.caloriasDia != null)
+                                  Text(
+                                    '${p.caloriasDia} kcal/dia',
+                                    style: TextStyle(
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                    ),
                                   ),
-                                  const Icon(
-                                    Icons.chevron_right,
-                                    color: TokensStrip.textSecondary,
+                                if (p.proteinaG != null ||
+                                    p.carboidratoG != null ||
+                                    p.gorduraG != null) ...[
+                                  const SizedBox(height: 10),
+                                  _MacroBar(
+                                    proteinaG: p.proteinaG,
+                                    carboidratoG: p.carboidratoG,
+                                    gorduraG: p.gorduraG,
                                   ),
                                 ],
-                              ),
-                              if (p.caloriasDia != null)
-                                Text(
-                                  '${p.caloriasDia} kcal/dia',
-                                  style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                ),
-                              if (p.proteinaG != null ||
-                                  p.carboidratoG != null ||
-                                  p.gorduraG != null) ...[
-                                const SizedBox(height: 10),
-                                _MacroBar(
-                                  proteinaG: p.proteinaG,
-                                  carboidratoG: p.carboidratoG,
-                                  gorduraG: p.gorduraG,
+                                const SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 16,
+                                  children: [
+                                    if (p.proteinaG != null)
+                                      _macro(
+                                        'Proteína',
+                                        '${p.proteinaG}g',
+                                        EagleTokens.bad,
+                                      ),
+                                    if (p.carboidratoG != null)
+                                      _macro(
+                                        'Carbo',
+                                        '${p.carboidratoG}g',
+                                        EagleTokens.warn,
+                                      ),
+                                    if (p.gorduraG != null)
+                                      _macro(
+                                        'Gordura',
+                                        '${p.gorduraG}g',
+                                        Colors.yellow.shade700,
+                                      ),
+                                  ],
                                 ),
                               ],
-                              const SizedBox(height: 8),
-                              Wrap(
-                                spacing: 16,
-                                children: [
-                                  if (p.proteinaG != null)
-                                    _macro(
-                                      'Proteína',
-                                      '${p.proteinaG}g',
-                                      EagleTokens.bad,
-                                    ),
-                                  if (p.carboidratoG != null)
-                                    _macro(
-                                      'Carbo',
-                                      '${p.carboidratoG}g',
-                                      EagleTokens.warn,
-                                    ),
-                                  if (p.gorduraG != null)
-                                    _macro(
-                                      'Gordura',
-                                      '${p.gorduraG}g',
-                                      Colors.yellow.shade700,
-                                    ),
-                                ],
-                              ),
-                            ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                },
-              ),
+                    );
+                  },
+                ),
+      ),
     );
   }
 

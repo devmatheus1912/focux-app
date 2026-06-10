@@ -51,38 +51,45 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     );
     await showDialog<void>(
       context: context,
-      builder: (ctx) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(TokensStrip.rCard),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                offer.headline,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+      builder:
+          (ctx) => Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(TokensStrip.rCard),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    offer.headline,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(offer.body, style: const TextStyle(height: 1.45)),
+                  const SizedBox(height: 20),
+                  FilledButton(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      context.push(
+                        '/assinatura',
+                        extra: offer.targetPlan?.apiName,
+                      );
+                    },
+                    child: Text(offer.ctaLabel),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('Agora não'),
+                  ),
+                ],
               ),
-              const SizedBox(height: 10),
-              Text(offer.body, style: const TextStyle(height: 1.45)),
-              const SizedBox(height: 20),
-              FilledButton(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  context.push('/assinatura', extra: offer.targetPlan?.apiName);
-                },
-                child: Text(offer.ctaLabel),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Agora não'),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
     );
   }
 
@@ -194,9 +201,10 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
                   style: AppTypography.inter(
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
-                    color: Theme.of(ctx).brightness == Brightness.dark
-                        ? EagleTokens.darkInk
-                        : TokensStrip.textPrimary,
+                    color:
+                        Theme.of(ctx).brightness == Brightness.dark
+                            ? EagleTokens.darkInk
+                            : TokensStrip.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -205,9 +213,10 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
                   style: TextStyle(
                     fontSize: 13,
                     height: 1.4,
-                    color: Theme.of(ctx).brightness == Brightness.dark
-                        ? EagleTokens.darkInkMute
-                        : TokensStrip.textSecondary,
+                    color:
+                        Theme.of(ctx).brightness == Brightness.dark
+                            ? EagleTokens.darkInkMute
+                            : TokensStrip.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -333,7 +342,10 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     final text = data?.text?.trim();
     if (text == null || text.isEmpty) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, 'Nada para colar da área de transferência.');
+      FeedbackHelper.showError(
+        context,
+        'Nada para colar da área de transferência.',
+      );
       return;
     }
     setState(() {
@@ -388,8 +400,9 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     final alunos = _alunosEncontrados;
     if (alunos == null || alunos.isEmpty) return;
 
-    final toSave =
-        alunos.where((a) => a['duplicado'] != true).toList(growable: false);
+    final toSave = alunos
+        .where((a) => a['duplicado'] != true)
+        .toList(growable: false);
     if (toSave.isEmpty) {
       FeedbackHelper.showError(
         context,
@@ -442,7 +455,8 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
         final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-        final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+        final mute =
+            isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
         final brand = Theme.of(ctx).colorScheme.primary;
 
         Widget stat(String label, int value, Color color) {
@@ -508,11 +522,19 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    stat('Importados', importados is int ? importados : int.tryParse('$importados') ?? 0, brand),
+                    stat(
+                      'Importados',
+                      importados is int
+                          ? importados
+                          : int.tryParse('$importados') ?? 0,
+                      brand,
+                    ),
                     const SizedBox(width: 8),
                     stat(
                       'Duplicados',
-                      duplicados is int ? duplicados : int.tryParse('$duplicados') ?? 0,
+                      duplicados is int
+                          ? duplicados
+                          : int.tryParse('$duplicados') ?? 0,
                       EagleTokens.warn,
                     ),
                     const SizedBox(width: 8),
@@ -792,9 +814,10 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
                   'Há texto ou alunos revisados que ainda não foram salvos.',
                   style: TextStyle(
                     height: 1.45,
-                    color: Theme.of(ctx).brightness == Brightness.dark
-                        ? EagleTokens.darkInkMute
-                        : TokensStrip.textSecondary,
+                    color:
+                        Theme.of(ctx).brightness == Brightness.dark
+                            ? EagleTokens.darkInkMute
+                            : TokensStrip.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -804,9 +827,7 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
                 ),
                 const SizedBox(height: 8),
                 TextButton(
-                  style: TextButton.styleFrom(
-                    foregroundColor: EagleTokens.bad,
-                  ),
+                  style: TextButton.styleFrom(foregroundColor: EagleTokens.bad),
                   onPressed: () => Navigator.pop(ctx, true),
                   child: const Text('Sair sem salvar'),
                 ),

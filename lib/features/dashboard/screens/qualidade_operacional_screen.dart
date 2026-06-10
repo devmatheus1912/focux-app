@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 // ─── Model ───────────────────────────────────────────────────────────────────
 
@@ -58,26 +59,29 @@ class QualidadeOperacionalScreen extends ConsumerWidget {
     final asyncData = ref.watch(qualidadeProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Qualidade Operacional',
-        onBack: () => safePopOrGo(context, '/dashboard/personal'),
-      ),
-      body: asyncData.when(
-        loading: () => const FxLoading(),
-        error:
-            (e, _) => Center(
-              child: Padding(
-                padding: const EdgeInsets.all(TokensStrip.s5),
-                child: Text(
-                  friendlyError(e),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: EagleTokens.bad),
+    return fxScreenA11yScope(
+      label: 'Qualidade Operacional',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Qualidade Operacional',
+          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+        ),
+        body: asyncData.when(
+          loading: () => const FxLoading(),
+          error:
+              (e, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(TokensStrip.s5),
+                  child: Text(
+                    friendlyError(e),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: EagleTokens.bad),
+                  ),
                 ),
               ),
-            ),
-        data: (data) => _QualidadeBody(data: data, isDark: isDark),
+          data: (data) => _QualidadeBody(data: data, isDark: isDark),
+        ),
       ),
     );
   }
@@ -239,10 +243,7 @@ class _QualidadeBody extends StatelessWidget {
           // ── Score Breakdown ──
           Container(
             padding: const EdgeInsets.all(18),
-            decoration: fxListCardDecoration(
-              context,
-              accent: primary,
-            ),
+            decoration: fxListCardDecoration(context, accent: primary),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -499,10 +500,7 @@ class _MetricCompareCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(18),
-      decoration: fxListCardDecoration(
-        context,
-        accent: primary,
-      ),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

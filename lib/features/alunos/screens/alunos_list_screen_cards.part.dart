@@ -1,4 +1,5 @@
-﻿part of 'alunos_list_screen.dart';
+part of 'alunos_list_screen.dart';
+
 class _FxChip extends StatelessWidget {
   final String label;
   final int count;
@@ -24,7 +25,10 @@ class _FxChip extends StatelessWidget {
             : (isDark
                 ? Colors.white.withValues(alpha: 0.055)
                 : Colors.white.withValues(alpha: 0.78));
-    final color = isSelected ? Colors.white : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
+    final color =
+        isSelected
+            ? Colors.white
+            : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
     final border =
         isSelected
             ? Border.all(color: action.withValues(alpha: isDark ? 0.45 : 0.28))
@@ -146,7 +150,9 @@ class _SheetShortcutChip extends StatelessWidget {
             color:
                 selected
                     ? primary
-                    : (isDark ? EagleTokens.darkLine : TokensStrip.borderDefault),
+                    : (isDark
+                        ? EagleTokens.darkLine
+                        : TokensStrip.borderDefault),
           ),
         ),
         child: Text(

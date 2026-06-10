@@ -17,8 +17,7 @@ class AlunoFollowUpEntry {
   }) {
     return AlunoFollowUpEntry(
       snoozedUntil: clearSnooze ? null : (snoozedUntil ?? this.snoozedUntil),
-      followUpDate:
-          clearFollowUp ? null : (followUpDate ?? this.followUpDate),
+      followUpDate: clearFollowUp ? null : (followUpDate ?? this.followUpDate),
     );
   }
 
@@ -101,18 +100,16 @@ class AlunoFollowUpStore {
     final until = DateTime.now().add(duration);
     return _upsert(
       alunoId,
-      (current) => (current ?? const AlunoFollowUpEntry()).copyWith(
-        snoozedUntil: until,
-      ),
+      (current) =>
+          (current ?? const AlunoFollowUpEntry()).copyWith(snoozedUntil: until),
     );
   }
 
   static Future<Map<int, AlunoFollowUpEntry>> clearSnooze(int alunoId) {
     return _upsert(
       alunoId,
-      (current) => (current ?? const AlunoFollowUpEntry()).copyWith(
-        clearSnooze: true,
-      ),
+      (current) =>
+          (current ?? const AlunoFollowUpEntry()).copyWith(clearSnooze: true),
     );
   }
 
@@ -133,9 +130,8 @@ class AlunoFollowUpStore {
   static Future<Map<int, AlunoFollowUpEntry>> clearFollowUp(int alunoId) {
     return _upsert(
       alunoId,
-      (current) => (current ?? const AlunoFollowUpEntry()).copyWith(
-        clearFollowUp: true,
-      ),
+      (current) =>
+          (current ?? const AlunoFollowUpEntry()).copyWith(clearFollowUp: true),
     );
   }
 }

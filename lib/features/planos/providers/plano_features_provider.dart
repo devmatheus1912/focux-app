@@ -54,7 +54,10 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
     await refresh(forceLoading: true);
   }
 
-  Future<void> refresh({bool forceLoading = false, bool reconcileFirst = false}) async {
+  Future<void> refresh({
+    bool forceLoading = false,
+    bool reconcileFirst = false,
+  }) async {
     if (_refreshing) return;
     _refreshing = true;
     final previous = state.valueOrNull;
@@ -63,9 +66,10 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
     }
 
     try {
-      final fresh = reconcileFirst
-          ? await _repo.reconcilePlanoFeatures()
-          : await _fetchWithRetry();
+      final fresh =
+          reconcileFirst
+              ? await _repo.reconcilePlanoFeatures()
+              : await _fetchWithRetry();
       state = AsyncData(fresh.normalizeForTier());
     } catch (error) {
       if (previous != null &&
@@ -86,10 +90,11 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
         );
       } else {
         final forAluno = await _isAlunoSession();
-        final fallback = (forAluno
-                ? PlanoFeatures.optimisticAluno
-                : PlanoFeatures.optimisticEnterprise)
-            .normalizeForTier();
+        final fallback =
+            (forAluno
+                    ? PlanoFeatures.optimisticAluno
+                    : PlanoFeatures.optimisticEnterprise)
+                .normalizeForTier();
         state = AsyncData(fallback);
         unawaited(
           AnalyticsService.instance.track(

@@ -101,9 +101,7 @@ class _RemoveExerciseSheet extends StatelessWidget {
                       ),
                       child: Text(
                         'Cancelar',
-                        style: AppTypography.inter(
-                          fontWeight: FontWeight.w800,
-                        ),
+                        style: AppTypography.inter(fontWeight: FontWeight.w800),
                       ),
                     ),
                   ),

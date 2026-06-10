@@ -28,9 +28,10 @@ class IaQuotaUpgrade {
   }) {
     if (error != null && error.suggestsUpgrade) {
       return PlanEntitlements.iaQuotaUpgradeOffer(
-        currentPlan: error.suggestedUpgradePlan != null
-            ? _inferCurrentFromUpgrade(error)
-            : (features?.plano ?? SubscriptionPlan.FREE),
+        currentPlan:
+            error.suggestedUpgradePlan != null
+                ? _inferCurrentFromUpgrade(error)
+                : (features?.plano ?? SubscriptionPlan.FREE),
         targetPlan: error.suggestedUpgradePlan,
         limiteAtual: features?.limiteIaMensal,
       );
@@ -48,7 +49,9 @@ class IaQuotaUpgrade {
     );
   }
 
-  static SubscriptionPlan _inferCurrentFromUpgrade(IaOperationalException error) {
+  static SubscriptionPlan _inferCurrentFromUpgrade(
+    IaOperationalException error,
+  ) {
     final target = error.suggestedUpgradePlan;
     if (target == SubscriptionPlan.ENTERPRISE) {
       return SubscriptionPlan.PREMIUM;
@@ -62,7 +65,10 @@ class IaQuotaUpgrade {
     PlanoFeatures? features,
   }) async {
     final offer = offerFor(error: error, features: features);
-    if (error == null && features != null && !features.iaQuotaEsgotada && features.iaCopiloto) {
+    if (error == null &&
+        features != null &&
+        !features.iaQuotaEsgotada &&
+        features.iaCopiloto) {
       return false;
     }
 
@@ -79,42 +85,46 @@ class IaQuotaUpgrade {
 
     final upgrade = await showDialog<bool>(
       context: context,
-      builder: (ctx) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(TokensStrip.rCard),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                offer.headline,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+      builder:
+          (ctx) => Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(TokensStrip.rCard),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    offer.headline,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(offer.body, style: const TextStyle(height: 1.45)),
+                  const SizedBox(height: 20),
+                  if (offer.targetPlan != null)
+                    FilledButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: Text(offer.ctaLabel),
+                    )
+                  else
+                    FilledButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('Entendi'),
+                    ),
+                  if (offer.targetPlan != null)
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('Agora não'),
+                    ),
+                ],
               ),
-              const SizedBox(height: 10),
-              Text(offer.body, style: const TextStyle(height: 1.45)),
-              const SizedBox(height: 20),
-              if (offer.targetPlan != null)
-                FilledButton(
-                  onPressed: () => Navigator.pop(ctx, true),
-                  child: Text(offer.ctaLabel),
-                )
-              else
-                FilledButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Entendi'),
-                ),
-              if (offer.targetPlan != null)
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Agora não'),
-                ),
-            ],
+            ),
           ),
-        ),
-      ),
     );
 
     if (upgrade == true && offer.targetPlan != null && context.mounted) {

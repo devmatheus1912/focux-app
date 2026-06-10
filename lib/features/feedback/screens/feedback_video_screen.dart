@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
@@ -14,6 +14,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/widgets/aluno360_action_empty_panel.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class FeedbackVideoScreen extends ConsumerStatefulWidget {
   final int? alunoId;
@@ -100,130 +101,133 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final primaryDeep = BrandPalette.deep(primary);
-    return FxShellScaffold(
-      useMesh: true,
-      extendBody: true,
-      appBar: FxShellAppBar(
-        title:
-            widget.alunoNome != null
-                ? 'Feedbacks — ${widget.alunoNome}'
-                : 'Feedbacks de Vídeo',
-        subtitle: 'Análises técnicas de execução',
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Atualizar feedbacks',
-            onPressed: _load,
-          ),
-        ],
-      ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: [primary, primaryDeep]),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: primary.withValues(alpha: 0.4),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
+    return fxScreenA11yScope(
+      label: 'Feedback Video',
+      child: FxShellScaffold(
+        useMesh: true,
+        extendBody: true,
+        appBar: FxShellAppBar(
+          title:
+              widget.alunoNome != null
+                  ? 'Feedbacks — ${widget.alunoNome}'
+                  : 'Feedbacks de Vídeo',
+          subtitle: 'Análises técnicas de execução',
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              tooltip: 'Atualizar feedbacks',
+              onPressed: _load,
             ),
           ],
         ),
-        child: FloatingActionButton(
-          onPressed: _novoFeedback,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: const Icon(Icons.add, color: Colors.white),
-        ),
-      ),
-      body:
-          _loading
-              ? Center(child: FxLoading(color: primary))
-              : _feedbacks.isEmpty
-              ? satelliteEmptyBody(
-                child: Aluno360ActionEmptyPanel(
-                  key: const ValueKey('feedback_video_empty'),
-                  icon: Icons.video_camera_back_outlined,
-                  title: 'Nenhum feedback de vídeo',
-                  subtitle:
-                      widget.alunoNome != null
-                          ? 'Peça a ${satelliteFirstName(widget.alunoNome)} um vídeo de execução ou registre o primeiro feedback técnico.'
-                          : 'Registre o primeiro feedback técnico com URL do vídeo e comentário.',
-                  primaryLabel: 'Novo feedback',
-                  primaryIcon: Icons.add_rounded,
-                  onPrimary: _novoFeedback,
-                  secondaryActions:
-                      widget.alunoId != null
-                          ? [
-                            Aluno360SecondaryAction(
-                              label: 'Voltar ao Aluno 360',
-                              icon: Icons.arrow_back_rounded,
-                              onTap:
-                                  () => Navigator.maybePop(context),
-                            ),
-                          ]
-                          : const [],
-                ),
-              )
-              : ListView.builder(
-                padding: const EdgeInsets.all(TokensStrip.s4),
-                itemCount: _feedbacks.length,
-                itemBuilder: (_, i) {
-                  final f = _feedbacks[i];
-                  return FxSatelliteListTile(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    accent: primary,
-                    titleCase: false,
-                    title: 'Exercício #${f.exercicioId}',
-                    leading: Icon(
-                      Icons.video_library_rounded,
-                      size: 32,
-                      color: primary,
-                    ),
-                    isThreeLine: true,
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 4),
-                        Text('Comentário: ${f.comentario}'),
-                        if (f.aiScore != null) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            'Score IA: ${f.aiScore}/100 · ${f.statusAnalise ?? ''}',
-                          ),
-                        ],
-                        if (f.aiAnalise != null && f.aiAnalise!.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            f.aiAnalise!,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                        const SizedBox(height: 4),
-                        Text('Data: ${fxDateShort(f.criadoEm)}'),
-                      ],
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.open_in_new_rounded),
-                          tooltip: 'Assistir vídeo',
-                          onPressed: () => _abrirVideo(f.videoUrl),
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.delete_outline_rounded,
-                            color: EagleTokens.bad,
-                          ),
-                          onPressed: () => _deletar(f.id),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+        floatingActionButton: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: [primary, primaryDeep]),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: primary.withValues(alpha: 0.4),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
               ),
+            ],
+          ),
+          child: FloatingActionButton(
+            onPressed: _novoFeedback,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            child: const Icon(Icons.add, color: Colors.white),
+          ),
+        ),
+        body:
+            _loading
+                ? Center(child: FxLoading(color: primary))
+                : _feedbacks.isEmpty
+                ? satelliteEmptyBody(
+                  child: Aluno360ActionEmptyPanel(
+                    key: const ValueKey('feedback_video_empty'),
+                    icon: Icons.video_camera_back_outlined,
+                    title: 'Nenhum feedback de vídeo',
+                    subtitle:
+                        widget.alunoNome != null
+                            ? 'Peça a ${satelliteFirstName(widget.alunoNome)} um vídeo de execução ou registre o primeiro feedback técnico.'
+                            : 'Registre o primeiro feedback técnico com URL do vídeo e comentário.',
+                    primaryLabel: 'Novo feedback',
+                    primaryIcon: Icons.add_rounded,
+                    onPrimary: _novoFeedback,
+                    secondaryActions:
+                        widget.alunoId != null
+                            ? [
+                              Aluno360SecondaryAction(
+                                label: 'Voltar ao Aluno 360',
+                                icon: Icons.arrow_back_rounded,
+                                onTap: () => Navigator.maybePop(context),
+                              ),
+                            ]
+                            : const [],
+                  ),
+                )
+                : ListView.builder(
+                  padding: const EdgeInsets.all(TokensStrip.s4),
+                  itemCount: _feedbacks.length,
+                  itemBuilder: (_, i) {
+                    final f = _feedbacks[i];
+                    return FxSatelliteListTile(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      accent: primary,
+                      titleCase: false,
+                      title: 'Exercício #${f.exercicioId}',
+                      leading: Icon(
+                        Icons.video_library_rounded,
+                        size: 32,
+                        color: primary,
+                      ),
+                      isThreeLine: true,
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 4),
+                          Text('Comentário: ${f.comentario}'),
+                          if (f.aiScore != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              'Score IA: ${f.aiScore}/100 · ${f.statusAnalise ?? ''}',
+                            ),
+                          ],
+                          if (f.aiAnalise != null &&
+                              f.aiAnalise!.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              f.aiAnalise!,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                          const SizedBox(height: 4),
+                          Text('Data: ${fxDateShort(f.criadoEm)}'),
+                        ],
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.open_in_new_rounded),
+                            tooltip: 'Assistir vídeo',
+                            onPressed: () => _abrirVideo(f.videoUrl),
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.delete_outline_rounded,
+                              color: EagleTokens.bad,
+                            ),
+                            onPressed: () => _deletar(f.id),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+      ),
     );
   }
 }
@@ -260,8 +264,7 @@ class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
   }
 
   Future<void> _salvar() async {
-    final alunoId =
-        widget.alunoIdPreenchido ?? int.tryParse(_alunoIdCtrl.text);
+    final alunoId = widget.alunoIdPreenchido ?? int.tryParse(_alunoIdCtrl.text);
     final exercicioId = int.tryParse(_exercicioIdCtrl.text);
     final video = _videoUrlCtrl.text.trim();
     final com = _comentarioCtrl.text.trim();
@@ -304,9 +307,7 @@ class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Chip(
-                  label: Text(
-                    'Para ${satelliteFirstName(widget.alunoNome)}',
-                  ),
+                  label: Text('Para ${satelliteFirstName(widget.alunoNome)}'),
                 ),
               ),
               const SizedBox(height: 8),

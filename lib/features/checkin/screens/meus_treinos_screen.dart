@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class MeusTreinosScreen extends ConsumerWidget {
   const MeusTreinosScreen({super.key});
@@ -21,112 +22,130 @@ class MeusTreinosScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Sua rotina',
-        subtitle: 'TREINOS',
-        onBack: () => safePopOrGo(context, '/dashboard/aluno'),
-        actions: [
-          IconButton(
-            onPressed: () => ref.invalidate(meusTreinosProvider),
-            icon: Icon(Icons.refresh_rounded, color: fxScreenMute(context)),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        bottom: false,
-        child: treinosAsync.when(
-          loading: () => Center(child: FxLoading(color: primary)),
-          error:
-              (e, _) => _TrainingEmptyState(
-                title: 'Nao foi possivel carregar',
-                message: 'Toque para tentar novamente.',
-                icon: Icons.wifi_off_rounded,
-                isDark: isDark,
-                onTap: () => ref.invalidate(meusTreinosProvider),
-              ),
-          data: (treinos) {
-            if (treinos.isEmpty) {
-              return Column(
-                children: [
-                  const Spacer(),
-                  _TrainingEmptyState(
-                    title: 'Nenhum treino atribuido',
-                    message:
-                        'Assim que seu personal liberar um treino, ele aparece aqui com execucao guiada.',
-                    icon: Icons.fitness_center_outlined,
-                    isDark: isDark,
-                  ),
-                  const Spacer(flex: 2),
-                ],
+    return fxScreenA11yScope(
+      label: 'Sua rotina',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Sua rotina',
+          subtitle: 'TREINOS',
+          onBack: () => safePopOrGo(context, '/dashboard/aluno'),
+          actions: [
+            IconButton(
+              onPressed: () => ref.invalidate(meusTreinosProvider),
+              icon: Icon(Icons.refresh_rounded, color: fxScreenMute(context)),
+            ),
+          ],
+        ),
+        body: SafeArea(
+          bottom: false,
+          child: treinosAsync.when(
+            loading: () => Center(child: FxLoading(color: primary)),
+            error:
+                (e, _) => _TrainingEmptyState(
+                  title: 'Nao foi possivel carregar',
+                  message: 'Toque para tentar novamente.',
+                  icon: Icons.wifi_off_rounded,
+                  isDark: isDark,
+                  onTap: () => ref.invalidate(meusTreinosProvider),
+                ),
+            data: (treinos) {
+              if (treinos.isEmpty) {
+                return Column(
+                  children: [
+                    const Spacer(),
+                    _TrainingEmptyState(
+                      title: 'Nenhum treino atribuido',
+                      message:
+                          'Assim que seu personal liberar um treino, ele aparece aqui com execucao guiada.',
+                      icon: Icons.fitness_center_outlined,
+                      isDark: isDark,
+                    ),
+                    const Spacer(flex: 2),
+                  ],
+                );
+              }
+
+              final ativos =
+                  treinos
+                      .where((t) => t.status.toUpperCase() != 'CONCLUIDO')
+                      .length;
+              final totalExercicios = treinos.fold<int>(
+                0,
+                (sum, t) => sum + t.exercicios.length,
               );
-            }
+              final totalConcluidos = treinos.fold<int>(
+                0,
+                (sum, t) => sum + t.exercicios.where((e) => e.concluido).length,
+              );
 
-            final ativos =
-                treinos
-                    .where((t) => t.status.toUpperCase() != 'CONCLUIDO')
-                    .length;
-            final totalExercicios = treinos.fold<int>(
-              0,
-              (sum, t) => sum + t.exercicios.length,
-            );
-            final totalConcluidos = treinos.fold<int>(
-              0,
-              (sum, t) => sum + t.exercicios.where((e) => e.concluido).length,
-            );
-
-            return RefreshIndicator(
-              color: primary,
-              onRefresh: () async => ref.invalidate(meusTreinosProvider),
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  const SliverToBoxAdapter(child: SizedBox(height: 8)),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 0, 20, 18),
-                      child: _TrainingHero(
-                        ativos: ativos,
-                        total: treinos.length,
-                        totalExercicios: totalExercicios,
-                        totalConcluidos: totalConcluidos,
-                        isDark: isDark,
+              return RefreshIndicator(
+                color: primary,
+                onRefresh: () async => ref.invalidate(meusTreinosProvider),
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    const SliverToBoxAdapter(child: SizedBox(height: 8)),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s5,
+                          0,
+                          20,
+                          18,
+                        ),
+                        child: _TrainingHero(
+                          ativos: ativos,
+                          total: treinos.length,
+                          totalExercicios: totalExercicios,
+                          totalConcluidos: totalConcluidos,
+                          isDark: isDark,
+                        ),
                       ),
                     ),
-                  ),
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 0, 20, 14),
-                    sliver: SliverList.separated(
-                      itemCount: treinos.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder:
-                          (context, index) => _TrainingPlanCard(
-                            treino: treinos[index],
-                            isDark: isDark,
-                            onStart:
-                                () => context.push(
-                                  '/checkin/executar',
-                                  extra: treinos[index].treinoId,
-                                ),
-                          ),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 0, 20, 110),
-                      child: _TrainingReadinessSection(
-                        totalExercicios: totalExercicios,
-                        totalConcluidos: totalConcluidos,
-                        ativos: ativos,
-                        isDark: isDark,
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(
+                        TokensStrip.s5,
+                        0,
+                        20,
+                        14,
+                      ),
+                      sliver: SliverList.separated(
+                        itemCount: treinos.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        itemBuilder:
+                            (context, index) => _TrainingPlanCard(
+                              treino: treinos[index],
+                              isDark: isDark,
+                              onStart:
+                                  () => context.push(
+                                    '/checkin/executar',
+                                    extra: treinos[index].treinoId,
+                                  ),
+                            ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s5,
+                          0,
+                          20,
+                          110,
+                        ),
+                        child: _TrainingReadinessSection(
+                          totalExercicios: totalExercicios,
+                          totalConcluidos: totalConcluidos,
+                          ativos: ativos,
+                          isDark: isDark,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -403,7 +422,8 @@ class _TrainingPlanCard extends StatelessWidget {
               Container(
                 height: 7,
                 decoration: BoxDecoration(
-                  color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
+                  color:
+                      isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
@@ -476,97 +496,94 @@ void _showTrainingPendingSheet({
     useSafeArea: true,
     showDragHandle: true,
     backgroundColor: Colors.transparent,
-    builder: (sheetContext) => Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 18),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(TokensStrip.rXl),
-        child: DecoratedBox(
-          decoration: fxListCardDecoration(
-            sheetContext,
-            accent: primary,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(22, 12, 22, 22),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+    builder:
+        (sheetContext) => Padding(
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 18),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(TokensStrip.rXl),
+            child: DecoratedBox(
+              decoration: fxListCardDecoration(sheetContext, accent: primary),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(22, 12, 22, 22),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 46,
-                      height: 46,
-                      decoration: BoxDecoration(
-                        color: BrandPalette.soft(primary, dark: isDark),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child:
-                          Icon(
+                    Row(
+                      children: [
+                        Container(
+                          width: 46,
+                          height: 46,
+                          decoration: BoxDecoration(
+                            color: BrandPalette.soft(primary, dark: isDark),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Icon(
                             Icons.pending_actions_rounded,
                             color: primary,
                           ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                treinoNome,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: ink,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                'Em preparacao',
+                                style: TextStyle(
+                                  color: mute,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            treinoNome,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: ink,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            'Em preparacao',
-                            style: TextStyle(
-                              color: mute,
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
+                    const SizedBox(height: 18),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(TokensStrip.s4),
+                      decoration: fxListCardDecoration(
+                        sheetContext,
+                        accent: primary,
+                      ),
+                      child: Text(
+                        'Seu personal ja reservou este treino. Assim que os exercicios forem liberados, o botao Iniciar aparece com registro de series, videos e feedback.',
+                        style: TextStyle(
+                          color: ink,
+                          fontSize: 13,
+                          height: 1.42,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: TokensStrip.s4),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FxLiquidPrimaryButton(
+                        label: 'Entendi',
+                        onPressed: () => Navigator.of(sheetContext).pop(),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 18),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(TokensStrip.s4),
-                  decoration: fxListCardDecoration(
-                    sheetContext,
-                    accent: primary,
-                  ),
-                  child: Text(
-                    'Seu personal ja reservou este treino. Assim que os exercicios forem liberados, o botao Iniciar aparece com registro de series, videos e feedback.',
-                    style: TextStyle(
-                      color: ink,
-                      fontSize: 13,
-                      height: 1.42,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: TokensStrip.s4),
-                SizedBox(
-                  width: double.infinity,
-                  child: FxLiquidPrimaryButton(
-                    label: 'Entendi',
-                    onPressed: () => Navigator.of(sheetContext).pop(),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
-      ),
-    ),
   );
 }
 
@@ -592,10 +609,7 @@ class _TrainingReadinessSection extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(TokensStrip.s4),
-      decoration: fxListCardDecoration(
-        context,
-        accent: primary,
-      ),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -703,10 +717,7 @@ class _ReadinessMarker extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(10),
-      decoration: fxListCardDecoration(
-        context,
-        accent: color,
-      ),
+      decoration: fxListCardDecoration(context, accent: color),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

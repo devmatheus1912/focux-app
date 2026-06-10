@@ -24,7 +24,8 @@ const landingSectionTemplateCatalog = [
   LandingSectionTemplateInfo(
     key: 'bio',
     title: 'Sobre você',
-    description: 'Foto, história e credenciais — quem você é e por que confiar.',
+    description:
+        'Foto, história e credenciais — quem você é e por que confiar.',
     example: 'Personal há 8 anos · CREF ativo · Especialista em hipertrofia',
     iconName: 'person',
   ),

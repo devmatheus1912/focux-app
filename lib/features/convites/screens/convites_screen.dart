@@ -18,6 +18,7 @@ import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/convite_repository.dart';
 import '../providers/convite_provider.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 class ConvitesScreen extends ConsumerStatefulWidget {
   const ConvitesScreen({super.key});
@@ -90,9 +91,7 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
     HapticFeedback.selectionClick();
     final texto =
         'Olá! Use este link para criar sua conta no app do seu personal: $_shareLink';
-    final uri = Uri.parse(
-      'https://wa.me/?text=${Uri.encodeComponent(texto)}',
-    );
+    final uri = Uri.parse('https://wa.me/?text=${Uri.encodeComponent(texto)}');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
@@ -115,136 +114,149 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final chrome = ShellChrome.forDark(isDark);
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Convidar aluno',
-        onBack: () => safePopOrGo(context, '/dashboard/personal'),
-      ),
-      body: FxPremiumEntrance(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 8, 20, 32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _HeroCard(isDark: isDark, primary: primary, ink: ink, mute: mute),
-              const SizedBox(height: 20),
-              FxLiquidPrimaryButton(
-                label: 'Gerar novo link',
-                icon: Icons.link_rounded,
-                loading: _loading,
-                onPressed: _loading ? null : _gerar,
-              ),
-              if (_error != null) ...[
-                const SizedBox(height: 14),
-                Text(_error!, style: const TextStyle(color: EagleTokens.bad)),
-              ],
-              if (_convite != null) ...[
-                const SizedBox(height: 20),
-                FxGlassSurface(
-                  glow: true,
-                  radius: TokensStrip.rCard,
-                  padding: const EdgeInsets.all(TokensStrip.s4),
-                  accent: primary,
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: primary.withValues(alpha: 0.12),
-                                borderRadius:
-                                    BorderRadius.circular(TokensStrip.rInput),
-                              ),
-                              child: Icon(
-                                Icons.verified_outlined,
-                                color: primary,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Link gerado',
-                                    style: AppTypography.inter(
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 16,
-                                      color: ink,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Expira em ${_formatRemaining(_remaining)}',
-                                    style: TextStyle(
-                                      color: mute,
-                                      fontSize: 12.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 14),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: chrome.cardFill,
-                            borderRadius:
-                                BorderRadius.circular(TokensStrip.rInput),
-                            border: Border.all(color: chrome.line),
-                          ),
-                          child: SelectableText(
-                            _shareLink,
-                            style: GoogleFonts.jetBrainsMono(
-                              fontSize: 12.5,
-                              height: 1.45,
-                              color: ink,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: _copiar,
-                                icon: const Icon(Icons.copy_rounded, size: 18),
-                                label: const Text('Copiar'),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: FxLiquidPrimaryButton(
-                                label: 'WhatsApp',
-                                icon: Icons.chat_rounded,
-                                onPressed: _compartilharWhatsApp,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                )
-                    .animate()
-                    .fadeIn(duration: 320.ms, curve: Curves.easeOutCubic)
-                    .slideY(begin: 0.06, curve: Curves.easeOutCubic),
-                const SizedBox(height: 12),
-                Text(
-                  'Compartilhe este link com o aluno. Ele expira em 24h e pode ser usado uma única vez.',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: mute,
-                    height: 1.4,
-                  ),
+    return fxScreenA11yScope(
+      label: 'Convidar aluno',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Convidar aluno',
+          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+        ),
+        body: FxPremiumEntrance(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 8, 20, 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _HeroCard(
+                  isDark: isDark,
+                  primary: primary,
+                  ink: ink,
+                  mute: mute,
                 ),
+                const SizedBox(height: 20),
+                FxLiquidPrimaryButton(
+                  label: 'Gerar novo link',
+                  icon: Icons.link_rounded,
+                  loading: _loading,
+                  onPressed: _loading ? null : _gerar,
+                ),
+                if (_error != null) ...[
+                  const SizedBox(height: 14),
+                  Text(_error!, style: const TextStyle(color: EagleTokens.bad)),
+                ],
+                if (_convite != null) ...[
+                  const SizedBox(height: 20),
+                  FxGlassSurface(
+                        glow: true,
+                        radius: TokensStrip.rCard,
+                        padding: const EdgeInsets.all(TokensStrip.s4),
+                        accent: primary,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: primary.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(
+                                      TokensStrip.rInput,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    Icons.verified_outlined,
+                                    color: primary,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Link gerado',
+                                        style: AppTypography.inter(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 16,
+                                          color: ink,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Expira em ${_formatRemaining(_remaining)}',
+                                        style: TextStyle(
+                                          color: mute,
+                                          fontSize: 12.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 14),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: chrome.cardFill,
+                                borderRadius: BorderRadius.circular(
+                                  TokensStrip.rInput,
+                                ),
+                                border: Border.all(color: chrome.line),
+                              ),
+                              child: SelectableText(
+                                _shareLink,
+                                style: GoogleFonts.jetBrainsMono(
+                                  fontSize: 12.5,
+                                  height: 1.45,
+                                  color: ink,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    onPressed: _copiar,
+                                    icon: const Icon(
+                                      Icons.copy_rounded,
+                                      size: 18,
+                                    ),
+                                    label: const Text('Copiar'),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: FxLiquidPrimaryButton(
+                                    label: 'WhatsApp',
+                                    icon: Icons.chat_rounded,
+                                    onPressed: _compartilharWhatsApp,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      )
+                      .animate()
+                      .fadeIn(duration: 320.ms, curve: Curves.easeOutCubic)
+                      .slideY(begin: 0.06, curve: Curves.easeOutCubic),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Compartilhe este link com o aluno. Ele expira em 24h e pode ser usado uma única vez.',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: mute, height: 1.4),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
@@ -276,8 +288,9 @@ class _HeroCard extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             primary.withValues(alpha: isDark ? 0.22 : 0.12),
-            (isDark ? EagleTokens.darkCard : TokensStrip.cardBg)
-                .withValues(alpha: 0.96),
+            (isDark ? EagleTokens.darkCard : TokensStrip.cardBg).withValues(
+              alpha: 0.96,
+            ),
           ],
         ),
         border: Border.all(color: primary.withValues(alpha: 0.18)),

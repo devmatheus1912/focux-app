@@ -13,6 +13,7 @@ import '../providers/gamificacao_provider.dart';
 import 'package:focux_app/core/widgets/fx_rive_player.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../dashboard/widgets/dashboard_error_state.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 const _badgeCatalog = <String, ({String icon, String label})>{
   'STREAK_10': (icon: '🔥', label: 'Sequencia 10d'),
@@ -68,46 +69,49 @@ class GamificacaoScreen extends ConsumerWidget {
     final brand = Theme.of(context).colorScheme.primary;
     final async = ref.watch(gamificacaoProvider);
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Minha evolução',
-        onBack: () => safePopOrGo(context, '/dashboard/personal'),
-      ),
-      body: FxContentWidthLimiter(
-        child: async.when(
-          loading: () => Center(child: FxLoading(color: brand)),
-          error:
-              (e, _) => RefreshIndicator(
-                color: brand,
-                onRefresh: () => _refresh(ref),
-                child: ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: [
-                    SizedBox(
-                      height: MediaQuery.sizeOf(context).height * 0.55,
-                      child: DashboardErrorState(
-                        chromeOnDark: dark,
-                        primary: brand,
-                        message: friendlyError(e),
-                        onRetry: () => _refresh(ref),
+    return fxScreenA11yScope(
+      label: 'Minha evolução',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Minha evolução',
+          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+        ),
+        body: FxContentWidthLimiter(
+          child: async.when(
+            loading: () => Center(child: FxLoading(color: brand)),
+            error:
+                (e, _) => RefreshIndicator(
+                  color: brand,
+                  onRefresh: () => _refresh(ref),
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.sizeOf(context).height * 0.55,
+                        child: DashboardErrorState(
+                          chromeOnDark: dark,
+                          primary: brand,
+                          message: friendlyError(e),
+                          onRetry: () => _refresh(ref),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-          data:
-              (data) => RefreshIndicator(
-                color: brand,
-                onRefresh: () => _refresh(ref),
-                child: _GamificacaoBody(
-                  data: data,
-                  dark: dark,
-                  ink: ink,
-                  mute: mute,
-                  brand: brand,
+            data:
+                (data) => RefreshIndicator(
+                  color: brand,
+                  onRefresh: () => _refresh(ref),
+                  child: _GamificacaoBody(
+                    data: data,
+                    dark: dark,
+                    ink: ink,
+                    mute: mute,
+                    brand: brand,
+                  ),
                 ),
-              ),
+          ),
         ),
       ),
     );
@@ -304,10 +308,7 @@ class _GamificacaoBody extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s4),
             child: Container(
               padding: const EdgeInsets.all(TokensStrip.s4),
-              decoration: fxListCardDecoration(
-                context,
-                accent: brand,
-              ),
+              decoration: fxListCardDecoration(context, accent: brand),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -421,10 +422,7 @@ class _StreakHeroStatic extends StatelessWidget {
                         ),
                         Text(
                           'Sequência ativa!',
-                          style: TextStyle(
-                            color: heroInkMute,
-                            fontSize: 14,
-                          ),
+                          style: TextStyle(color: heroInkMute, fontSize: 14),
                         ),
                       ],
                     ),

@@ -63,10 +63,16 @@ class _EnterpriseProUpgradePriceHint extends StatelessWidget {
       'R\$ ${value.toStringAsFixed(2).replaceAll('.', ',')}';
 
   String? _storeDeltaCopy() {
-    final currentProduct = productDetails[
-      SubscriptionProducts.productIdFor(currentPlan, billingPeriod)];
-    final targetProduct = productDetails[
-      SubscriptionProducts.productIdFor(targetPlan, billingPeriod)];
+    final currentProduct =
+        productDetails[SubscriptionProducts.productIdFor(
+          currentPlan,
+          billingPeriod,
+        )];
+    final targetProduct =
+        productDetails[SubscriptionProducts.productIdFor(
+          targetPlan,
+          billingPeriod,
+        )];
     if (currentProduct == null || targetProduct == null) return null;
 
     final currentRaw = currentProduct.rawPrice;
@@ -86,11 +92,16 @@ class _EnterpriseProUpgradePriceHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = PaywallCatalog.accentForPlan(targetPlan);
-    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    final secondary = PaywallCatalog.readableSecondary(
+      ink,
+      mute,
+      isDark: isDark,
+    );
     final storeCopy = _storeDeltaCopy();
     final fallbackMonthly =
         targetBackend.precoMensal - currentBackend.precoMensal;
-    final body = storeCopy ??
+    final body =
+        storeCopy ??
         (fallbackMonthly > 0
             ? 'Referência: +${_formatBrl(fallbackMonthly)}/mês. '
                 'Valor final na ${subscriptionChannelLabel()}, '
@@ -122,10 +133,9 @@ class _EnterpriseProUpgradePriceHint extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   body,
-                  style: TokensStrip.bodyMuted(color: secondary).copyWith(
-                    fontSize: 13,
-                    height: 1.4,
-                  ),
+                  style: TokensStrip.bodyMuted(
+                    color: secondary,
+                  ).copyWith(fontSize: 13, height: 1.4),
                 ),
               ],
             ),
@@ -136,7 +146,13 @@ class _EnterpriseProUpgradePriceHint extends StatelessWidget {
   }
 }
 
-enum _AssinaturaCtaMode { subscribe, manageStore, currentPlan, blocked, syncing }
+enum _AssinaturaCtaMode {
+  subscribe,
+  manageStore,
+  currentPlan,
+  blocked,
+  syncing,
+}
 
 class _AssinaturaStickyGlassBar extends StatelessWidget {
   final bool isDark;
@@ -154,9 +170,7 @@ class _AssinaturaStickyGlassBar extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         border: Border(
-          top: BorderSide(
-            color: line.withValues(alpha: isDark ? 0.42 : 0.55),
-          ),
+          top: BorderSide(color: line.withValues(alpha: isDark ? 0.42 : 0.55)),
         ),
       ),
       child: ClipRect(
@@ -297,10 +311,9 @@ class _AssinaturaStickyFooter extends StatelessWidget {
               return Text(
                 planSummary!,
                 textAlign: TextAlign.center,
-                style: TokensStrip.body(color: ink).copyWith(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                ),
+                style: TokensStrip.body(
+                  color: ink,
+                ).copyWith(fontWeight: FontWeight.w700, fontSize: 14),
               );
             },
           ),
@@ -362,19 +375,15 @@ class _AssinaturaStickyFooter extends StatelessWidget {
                 onPressed: onPressed,
               )
         else
-          FxLiquidPrimaryButton(
-            label: label,
-            onPressed: null,
-          ),
+          FxLiquidPrimaryButton(label: label, onPressed: null),
         if (footnote.isNotEmpty) ...[
           const SizedBox(height: 10),
           Text(
             footnote,
             textAlign: TextAlign.center,
-            style: TokensStrip.bodyMuted(color: secondary).copyWith(
-              fontSize: 12,
-              height: 1.45,
-            ),
+            style: TokensStrip.bodyMuted(
+              color: secondary,
+            ).copyWith(fontSize: 12, height: 1.45),
           ),
         ],
         if (onBillingDetails != null || onRestore != null) ...[
@@ -408,9 +417,7 @@ class _AssinaturaStickyFooter extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                   ),
                   child: Text(
-                    restoringPurchases
-                        ? 'Restaurando…'
-                        : 'Restaurar compras',
+                    restoringPurchases ? 'Restaurando…' : 'Restaurar compras',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -443,8 +450,7 @@ String _formatPrice(
   SubscriptionBillingPeriod period,
 ) {
   if (plano.precoMensal == 0) return 'Grátis';
-  final suffix =
-      period == SubscriptionBillingPeriod.yearly ? '/ano' : '/mês';
+  final suffix = period == SubscriptionBillingPeriod.yearly ? '/ano' : '/mês';
   if (productDetails != null) return '${productDetails.price}$suffix';
   if (period == SubscriptionBillingPeriod.yearly) {
     final annual = plano.annualPriceOrComputed();

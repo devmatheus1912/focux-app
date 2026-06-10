@@ -23,28 +23,28 @@ class AlunoOperacaoAdherenceLegend extends StatelessWidget {
       label: 'Legenda: check-in, sem registro, hoje',
       child: ExcludeSemantics(
         child: Wrap(
-        spacing: 12,
-        runSpacing: 6,
-        children: [
-          _LegendItem(
-            color: activeColor,
-            label: 'Check-in',
-            mute: mute,
-            filled: true,
-          ),
-          _LegendItem(
-            color: missColor,
-            label: 'Sem registro',
-            mute: mute,
-            hollow: true,
-          ),
-          _LegendItem(
-            color: todayRingColor,
-            label: 'Hoje',
-            mute: mute,
-            ring: true,
-          ),
-        ],
+          spacing: 12,
+          runSpacing: 6,
+          children: [
+            _LegendItem(
+              color: activeColor,
+              label: 'Check-in',
+              mute: mute,
+              filled: true,
+            ),
+            _LegendItem(
+              color: missColor,
+              label: 'Sem registro',
+              mute: mute,
+              hollow: true,
+            ),
+            _LegendItem(
+              color: todayRingColor,
+              label: 'Hoje',
+              mute: mute,
+              ring: true,
+            ),
+          ],
         ),
       ),
     );
@@ -107,11 +107,9 @@ class _LegendItem extends StatelessWidget {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: Aluno360Layout.captionStyle(context).copyWith(
-              color: mute,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-            ),
+            style: Aluno360Layout.captionStyle(
+              context,
+            ).copyWith(color: mute, fontSize: 12, fontWeight: FontWeight.w700),
           ),
         ),
       ],

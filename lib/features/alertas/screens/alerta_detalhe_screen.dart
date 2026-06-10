@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +10,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 class AlertaDetalheScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -65,52 +66,55 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Análise — ${widget.alunoNome}',
-        onBack: () => safePopOrGo(context, '/alertas'),
-        actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _load),
-        ],
-      ),
-      body:
-          _loading
-              ? const FxLoading()
-              : _erro != null
-              ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(TokensStrip.s5),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 48,
-                        color: theme.colorScheme.error,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Erro ao carregar: $_erro',
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 12),
-                      FxLiquidPrimaryButton(
-                        label: 'Tentar novamente',
-                        expand: false,
-                        onPressed: _load,
-                      ),
-                    ],
+    return fxScreenA11yScope(
+      label: 'Análise — ${widget.alunoNome}',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Análise — ${widget.alunoNome}',
+          onBack: () => safePopOrGo(context, '/alertas'),
+          actions: [
+            IconButton(icon: const Icon(Icons.refresh), onPressed: _load),
+          ],
+        ),
+        body:
+            _loading
+                ? const FxLoading()
+                : _erro != null
+                ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(TokensStrip.s5),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: theme.colorScheme.error,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Erro ao carregar: $_erro',
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        FxLiquidPrimaryButton(
+                          label: 'Tentar novamente',
+                          expand: false,
+                          onPressed: _load,
+                        ),
+                      ],
+                    ),
                   ),
+                )
+                : _detalhe == null
+                ? const SizedBox.shrink()
+                : _Body(
+                  detalhe: _detalhe!,
+                  alunoId: widget.alunoId,
+                  alunoNome: widget.alunoNome,
                 ),
-              )
-              : _detalhe == null
-              ? const SizedBox.shrink()
-              : _Body(
-                detalhe: _detalhe!,
-                alunoId: widget.alunoId,
-                alunoNome: widget.alunoNome,
-              ),
+      ),
     );
   }
 }
@@ -200,7 +204,10 @@ class _CardUltimoTreino extends StatelessWidget {
                     ultimoTreino ?? 'Sem treinos recentes',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: ultimoTreino == null ? TokensStrip.textSecondary : null,
+                      color:
+                          ultimoTreino == null
+                              ? TokensStrip.textSecondary
+                              : null,
                     ),
                   ),
                 ],
@@ -239,9 +246,9 @@ class _CardCheckIns extends StatelessWidget {
                 const SizedBox(width: 12),
                 Text(
                   'Check-ins (30d)',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(color: TokensStrip.textSecondary),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: TokensStrip.textSecondary,
+                  ),
                 ),
                 const Spacer(),
                 Text(
@@ -303,9 +310,9 @@ class _CardFinanceiro extends StatelessWidget {
               children: [
                 Text(
                   'Situação Financeira',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(color: TokensStrip.textSecondary),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: TokensStrip.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Chip(

@@ -75,7 +75,8 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
 
   @override
   Widget build(BuildContext context) {
-    final mute = widget.isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final mute =
+        widget.isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final showFull = _expanded;
 
     if (!showFull) {
@@ -85,21 +86,20 @@ class _ExercisePickerFilterBarState extends State<ExercisePickerFilterBar> {
         child: Row(
           children: [
             if (widget.filter.filtrarPorAluno &&
-                widget.filter.equipamentosAluno.isNotEmpty)
-              ...[
-                _FilterChip(
-                  label: 'Do aluno',
-                  icon: Icons.person_rounded,
-                  selected: true,
-                  primary: widget.primary,
-                  isDark: widget.isDark,
-                  onTap:
-                      () => widget.onChanged(
-                        widget.filter.copyWith(clearAluno: true),
-                      ),
-                ),
-                const SizedBox(width: 8),
-              ],
+                widget.filter.equipamentosAluno.isNotEmpty) ...[
+              _FilterChip(
+                label: 'Do aluno',
+                icon: Icons.person_rounded,
+                selected: true,
+                primary: widget.primary,
+                isDark: widget.isDark,
+                onTap:
+                    () => widget.onChanged(
+                      widget.filter.copyWith(clearAluno: true),
+                    ),
+              ),
+              const SizedBox(width: 8),
+            ],
             _FilterChip(
               label: 'Favoritos',
               icon: Icons.star_rounded,

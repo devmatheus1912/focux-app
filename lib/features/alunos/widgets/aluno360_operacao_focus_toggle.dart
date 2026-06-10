@@ -39,7 +39,9 @@ class Aluno360OperacaoFocusModeToggle extends ConsumerWidget {
                       .read(alunoOperacaoFocusModeProvider(alunoId).notifier)
                       .toggle(),
           icon: Icon(
-            focusMode ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+            focusMode
+                ? Icons.visibility_off_outlined
+                : Icons.visibility_outlined,
             size: 18,
             color: focusMode ? primary : ink.withValues(alpha: 0.78),
           ),
@@ -58,10 +60,9 @@ class Aluno360OperacaoFocusModeToggle extends ConsumerWidget {
         label: 'Ativar modo foco — mostra só follow-up e copiloto',
         child: TextButton(
           onPressed:
-              () =>
-                  ref
-                      .read(alunoOperacaoFocusModeProvider(alunoId).notifier)
-                      .setFocus(true),
+              () => ref
+                  .read(alunoOperacaoFocusModeProvider(alunoId).notifier)
+                  .setFocus(true),
           style: TextButton.styleFrom(
             minimumSize: const Size(0, 32),
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
@@ -73,10 +74,7 @@ class Aluno360OperacaoFocusModeToggle extends ConsumerWidget {
             children: [
               Icon(Icons.visibility_outlined, size: 15, color: primary),
               const SizedBox(width: 4),
-              Text(
-                'Modo foco',
-                style: Aluno360Layout.chipLabelStyle(context),
-              ),
+              Text('Modo foco', style: Aluno360Layout.chipLabelStyle(context)),
             ],
           ),
         ),
@@ -98,7 +96,9 @@ class Aluno360OperacaoFocusModeToggle extends ConsumerWidget {
                       .read(alunoOperacaoFocusModeProvider(alunoId).notifier)
                       .toggle(),
           icon: Icon(
-            focusMode ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+            focusMode
+                ? Icons.visibility_off_outlined
+                : Icons.visibility_outlined,
             size: 16,
             color: focusMode ? primary : ink.withValues(alpha: 0.75),
           ),
@@ -118,7 +118,9 @@ class Aluno360OperacaoFocusModeToggle extends ConsumerWidget {
               color: primary.withValues(alpha: focusMode ? 0.32 : 0.22),
             ),
             backgroundColor:
-                focusMode ? primary.withValues(alpha: 0.08) : Colors.transparent,
+                focusMode
+                    ? primary.withValues(alpha: 0.08)
+                    : Colors.transparent,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),

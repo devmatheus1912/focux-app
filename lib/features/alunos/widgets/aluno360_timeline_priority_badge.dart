@@ -18,7 +18,8 @@ class Aluno360TimelinePriorityBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = priority.trim().isEmpty ? 'P2' : priority.trim().toUpperCase();
+    final label =
+        priority.trim().isEmpty ? 'P2' : priority.trim().toUpperCase();
     final color = timeline360PriorityColor(label, primary: accent);
     final ink = timeline360PriorityInk(color, isDark: isDark);
     final isP0 = label.startsWith('P0');
@@ -30,7 +31,9 @@ class Aluno360TimelinePriorityBadge extends StatelessWidget {
         decoration: BoxDecoration(
           color: color.withValues(alpha: bgAlpha),
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: ink.withValues(alpha: isDark ? 0.55 : 0.38)),
+          border: Border.all(
+            color: ink.withValues(alpha: isDark ? 0.55 : 0.38),
+          ),
         ),
         child: Text(
           label,

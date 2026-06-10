@@ -41,12 +41,13 @@ class AutomacaoTemplate {
     required this.triggerTipo,
   });
 
-  factory AutomacaoTemplate.fromJson(Map<String, dynamic> j) => AutomacaoTemplate(
-    id: j['id'] as String? ?? '',
-    nome: j['nome'] as String? ?? '',
-    descricao: j['descricao'] as String? ?? '',
-    triggerTipo: j['triggerTipo'] as String? ?? '',
-  );
+  factory AutomacaoTemplate.fromJson(Map<String, dynamic> j) =>
+      AutomacaoTemplate(
+        id: j['id'] as String? ?? '',
+        nome: j['nome'] as String? ?? '',
+        descricao: j['descricao'] as String? ?? '',
+        triggerTipo: j['triggerTipo'] as String? ?? '',
+      );
 }
 
 class AutomacaoRepository {
@@ -55,12 +56,16 @@ class AutomacaoRepository {
 
   Future<List<AutomacaoFluxo>> listar() async {
     final r = await _dio.get('/api/automacoes');
-    return (r.data as List).map((e) => AutomacaoFluxo.fromJson(e as Map<String, dynamic>)).toList();
+    return (r.data as List)
+        .map((e) => AutomacaoFluxo.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<List<AutomacaoTemplate>> templates() async {
     final r = await _dio.get('/api/automacoes/templates');
-    return (r.data as List).map((e) => AutomacaoTemplate.fromJson(e as Map<String, dynamic>)).toList();
+    return (r.data as List)
+        .map((e) => AutomacaoTemplate.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<void> ativarTemplate(String templateId) async {

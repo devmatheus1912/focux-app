@@ -12,7 +12,8 @@ class CheckinExerciseThumbnailPreview extends StatelessWidget {
   final Color brand;
   final bool dark;
 
-  const CheckinExerciseThumbnailPreview({super.key, 
+  const CheckinExerciseThumbnailPreview({
+    super.key,
     required this.url,
     required this.videoSource,
     required this.licenseStatus,
@@ -47,7 +48,8 @@ class CheckinExerciseThumbnailPreview extends StatelessWidget {
             errorBuilder:
                 (_, __, ___) => Container(
                   height: 120,
-                  color: dark ? EagleTokens.darkCardHi : TokensStrip.borderDefault,
+                  color:
+                      dark ? EagleTokens.darkCardHi : TokensStrip.borderDefault,
                   alignment: Alignment.center,
                   child: Icon(Icons.play_circle_outline_rounded, color: brand),
                 ),
@@ -103,7 +105,8 @@ class CheckinExerciseMediaPreview extends StatelessWidget {
   final Color brand;
   final bool dark;
 
-  const CheckinExerciseMediaPreview({super.key, 
+  const CheckinExerciseMediaPreview({
+    super.key,
     required this.url,
     required this.brand,
     required this.dark,
@@ -123,7 +126,8 @@ class CheckinExerciseMediaPreview extends StatelessWidget {
             errorBuilder:
                 (_, __, ___) => Container(
                   height: 120,
-                  color: dark ? EagleTokens.darkCardHi : TokensStrip.borderDefault,
+                  color:
+                      dark ? EagleTokens.darkCardHi : TokensStrip.borderDefault,
                   alignment: Alignment.center,
                   child: Icon(Icons.play_circle_outline_rounded, color: brand),
                 ),
@@ -179,17 +183,20 @@ class CheckinExerciseVideoPreview extends StatefulWidget {
   final Color brand;
   final bool dark;
 
-  const CheckinExerciseVideoPreview({super.key, 
+  const CheckinExerciseVideoPreview({
+    super.key,
     required this.url,
     required this.brand,
     required this.dark,
   });
 
   @override
-  State<CheckinExerciseVideoPreview> createState() => _CheckinExerciseVideoPreviewState();
+  State<CheckinExerciseVideoPreview> createState() =>
+      _CheckinExerciseVideoPreviewState();
 }
 
-class _CheckinExerciseVideoPreviewState extends State<CheckinExerciseVideoPreview> {
+class _CheckinExerciseVideoPreviewState
+    extends State<CheckinExerciseVideoPreview> {
   late final VideoPlayerController _controller;
   bool _ready = false;
   bool _failed = false;
@@ -225,7 +232,8 @@ class _CheckinExerciseVideoPreviewState extends State<CheckinExerciseVideoPrevie
         height: 168,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: widget.dark ? EagleTokens.darkCardHi : TokensStrip.borderDefault,
+          color:
+              widget.dark ? EagleTokens.darkCardHi : TokensStrip.borderDefault,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: widget.brand.withValues(alpha: 0.22)),
         ),
@@ -314,7 +322,11 @@ class CheckinVideoFallback extends StatelessWidget {
   final Color brand;
   final bool dark;
 
-  const CheckinVideoFallback({super.key, required this.brand, required this.dark});
+  const CheckinVideoFallback({
+    super.key,
+    required this.brand,
+    required this.dark,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -345,4 +357,3 @@ class CheckinVideoFallback extends StatelessWidget {
     );
   }
 }
-

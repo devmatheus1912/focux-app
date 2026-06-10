@@ -47,10 +47,10 @@ class RecorrenciaRepository {
     required int alunoId,
     required double valor,
   }) async {
-    final r = await _dio.post('/api/recorrencia', data: {
-      'alunoId': alunoId,
-      'valor': valor,
-    });
+    final r = await _dio.post(
+      '/api/recorrencia',
+      data: {'alunoId': alunoId, 'valor': valor},
+    );
     return RecorrenciaAssinatura.fromJson(r.data as Map<String, dynamic>);
   }
 

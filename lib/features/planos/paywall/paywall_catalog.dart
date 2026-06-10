@@ -11,10 +11,13 @@ class PaywallCatalog {
   PaywallCatalog._();
 
   static const Color brand = Color(0xFF13C2C2);
+
   /// Teal profundo — tier ENTERPRISE PRO e CTAs de upgrade.
   static const Color brandDeep = Color(0xFF0D9494);
+
   /// Teal slate — tier ENTERPRISE (premium, sem ouro).
   static const Color tierEnterprise = Color(0xFF1A5F5F);
+
   /// Legado vitrine/API (`badgeColor: gold`) — mapeado para [tierEnterprise] na UI.
   static const Color gold = tierEnterprise;
   static const Color green = Color(0xFF4ADE80);
@@ -25,8 +28,11 @@ class PaywallCatalog {
       isDark ? const Color(0xFF5C6B78) : ink.withValues(alpha: 0.38);
 
   /// Texto secundário com contraste AA em fundos claros (ui-ux-pro-max).
-  static Color readableSecondary(Color ink, Color mute, {required bool isDark}) =>
-      isDark ? mute.withValues(alpha: 0.92) : ink.withValues(alpha: 0.58);
+  static Color readableSecondary(
+    Color ink,
+    Color mute, {
+    required bool isDark,
+  }) => isDark ? mute.withValues(alpha: 0.92) : ink.withValues(alpha: 0.58);
 
   /// Remove marcadores tipográficos (✦/✨) — o ícone vai no widget, não no texto.
   static ({String label, bool pro}) parseFeatureLabel(String raw) {
@@ -147,15 +153,18 @@ class PaywallCatalog {
     (value: '25%+', label: 'Lucro com +5% retenção', color: tierEnterprise),
     (value: 'R\$ 8.000', label: 'MRR com 20 alunos', color: green),
     (value: '< 1%', label: 'Faturamento = Premium', color: brand),
-    (value: 'R\$ 50/mês', label: 'Substitui R\$ 1–3k agência', color: brandDeep),
+    (
+      value: 'R\$ 50/mês',
+      label: 'Substitui R\$ 1–3k agência',
+      color: brandDeep,
+    ),
     (value: '40%', label: 'Menos inadimplência c/ PIX', color: green),
   ];
 
   static List<PaywallPlanFeatureSection> featureSectionsForPlan(
     Plano plano,
     SubscriptionPlan plan,
-  ) =>
-      PaywallPlanSections.forPlan(plano, plan);
+  ) => PaywallPlanSections.forPlan(plano, plan);
 
   static List<PaywallFeatureEducation> featuresForPlan(
     Plano plano,
@@ -165,7 +174,11 @@ class PaywallCatalog {
     final alunosLabel =
         unlimited ? 'Alunos ILIMITADOS' : 'Até ${plano.limiteAlunos} alunos';
     final rows = <PaywallFeatureRow>[
-      PaywallFeatureRow(label: alunosLabel, included: true, highlight: unlimited),
+      PaywallFeatureRow(
+        label: alunosLabel,
+        included: true,
+        highlight: unlimited,
+      ),
       if (plan != SubscriptionPlan.FREE)
         PaywallFeatureRow(
           label: _iaCopilotoLabel(plan),
@@ -184,7 +197,8 @@ class PaywallCatalog {
           included: plano.temRelatorios,
           highlight: plano.temRelatorios,
         ),
-      if (plan == SubscriptionPlan.ENTERPRISE || plan == SubscriptionPlan.ENTERPRISE_PRO)
+      if (plan == SubscriptionPlan.ENTERPRISE ||
+          plan == SubscriptionPlan.ENTERPRISE_PRO)
         PaywallFeatureRow(
           label: 'Marca própria — seu logo e suas cores',
           included: plano.temWhiteLabel,
@@ -239,8 +253,7 @@ class PaywallCatalog {
     'IA Copiloto — 400+ interações/mês': PaywallEducationContent(
       id: 'ia_copiloto_ent',
       title: 'IA Copiloto — 400+ interações/mês',
-      whatIs:
-          'Mesma IA com mais interações e contexto avançado por aluno.',
+      whatIs: 'Mesma IA com mais interações e contexto avançado por aluno.',
       whyMatters:
           'Ideal para operações com muitos alunos e alto volume de ajustes.',
       roiStatement: 'Escala sem contratar assistente full-time',
@@ -251,8 +264,7 @@ class PaywallCatalog {
       title: 'Command Center + Focux Score™',
       whatIs:
           'Painel do CEO do personal: quem vai cancelar, inadimplência e próxima ação.',
-      whyMatters:
-          'Em 2 minutos você sabe o que priorizar — sem planilha.',
+      whyMatters: 'Em 2 minutos você sabe o que priorizar — sem planilha.',
       roiStatement: 'Salvar 1 aluno/mês = R\$ 300–600',
       plans: ['PREMIUM', 'ENTERPRISE'],
     ),
@@ -261,8 +273,7 @@ class PaywallCatalog {
       title: 'Marca própria',
       whatIs:
           'Seus alunos abrem o app com SEU logo e SUAS cores — não um visual genérico.',
-      whyMatters:
-          'Posicionamento premium que justifica cobrar 20–30% mais.',
+      whyMatters: 'Posicionamento premium que justifica cobrar 20–30% mais.',
       roiStatement: 'Diferencial de marca = ticket maior',
       plans: ['ENTERPRISE'],
     ),
@@ -522,7 +533,8 @@ class PaywallCatalog {
       title: 'Habit Coaching ✦',
       badge: 'LIVE',
       badgeColor: green,
-      description: 'Hábitos diários: água, sono, passos. Acompanhe a vida, não só o treino.',
+      description:
+          'Hábitos diários: água, sono, passos. Acompanhe a vida, não só o treino.',
       roiMoney: 'Personais que acompanham hábitos retêm 35% mais',
       planChips: ['PREMIUM', 'ENTERPRISE', 'ENT. PRO'],
     ),
@@ -532,7 +544,8 @@ class PaywallCatalog {
       title: 'Pose Coach — análise de postura ✦',
       badge: 'LIVE',
       badgeColor: green,
-      description: 'Análise de postura por ML em tempo real. Nenhum app nacional chega perto.',
+      description:
+          'Análise de postura por ML em tempo real. Nenhum app nacional chega perto.',
       roiMoney: 'Diferencial sem custo extra — ML na stack',
       planChips: ['ENT. PRO'],
     ),
@@ -542,7 +555,8 @@ class PaywallCatalog {
       title: 'Loja de programas digitais ✦',
       badge: 'LIVE',
       badgeColor: green,
-      description: 'Venda treinos avulsos e desafios com checkout PIX integrado.',
+      description:
+          'Venda treinos avulsos e desafios com checkout PIX integrado.',
       roiMoney: 'Receita passiva enquanto dorme',
       planChips: ['ENT. PRO'],
     ),
@@ -552,17 +566,15 @@ class PaywallCatalog {
       title: 'Equipe & RBAC ✦',
       badge: 'LIVE',
       badgeColor: green,
-      description: 'Assistentes ou sócios com permissões granulares. Escala com controle.',
+      description:
+          'Assistentes ou sócios com permissões granulares. Escala com controle.',
       roiMoney: 'Escala sem contratar full-time',
       planChips: ['ENTERPRISE', 'ENT. PRO'],
     ),
   ];
 
   /// Mensagem do catálogo de gatilhos para modal in-app (não usar na vitrine Planos).
-  static String? modalMessageFor({
-    String? capability,
-    String? featureName,
-  }) {
+  static String? modalMessageFor({String? capability, String? featureName}) {
     final cap = (capability ?? '').trim().toLowerCase();
     final feat = (featureName ?? '').trim().toLowerCase();
     if (cap.isEmpty && feat.isEmpty) return null;
@@ -572,7 +584,8 @@ class PaywallCatalog {
       case 'financeiro':
         index = 1;
       case 'iacopiloto':
-        final quotaExhausted = feat.contains('limite') ||
+        final quotaExhausted =
+            feat.contains('limite') ||
             feat.contains('cota') ||
             feat.contains('esgot') ||
             feat.contains('110');
@@ -588,7 +601,9 @@ class PaywallCatalog {
           index = 4;
         } else if (feat.contains('landing')) {
           index = 6;
-        } else if (feat.contains('meta') || feat.contains('tráfego') || feat.contains('trafego')) {
+        } else if (feat.contains('meta') ||
+            feat.contains('tráfego') ||
+            feat.contains('trafego')) {
           index = 7;
         } else if (feat.contains('copiloto') || feat.contains(' ia')) {
           index = 2;

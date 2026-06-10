@@ -84,103 +84,103 @@ class _ExercicioRow extends StatelessWidget {
                     children: [
                       Text(
                         te.exercicio.nomeDisplay,
-                  style: AppTypography.inter(
-                    color: ink,
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Text(
-                      '${te.series}×${te.repeticoes}',
-                      style: AppTypography.mono(
-                        color: ink,
-                        fontSize: 12.2,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      width: 3,
-                      height: 3,
-                      decoration: BoxDecoration(
-                        color: mute,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      _formatLoadKg(te.cargaKg),
-                      style: AppTypography.mono(
-                        color: ink,
-                        fontSize: 12.2,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      width: 3,
-                      height: 3,
-                      decoration: BoxDecoration(
-                        color: mute,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(Icons.timer_outlined, size: 11, color: mute),
-                    const SizedBox(width: 3),
-                    Text(
-                      '${te.descansoSegundos ?? 60}s',
-                      style: AppTypography.mono(
-                        color: mute,
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                if (isAdvanced ||
-                    te.exercicio.showMediaBadgeInWorkoutList ||
-                    te.observacoes?.trim().isNotEmpty == true) ...[
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 6,
-                    children: [
-                      if (te.exercicio.showMediaBadgeInWorkoutList)
-                        _ExerciseMeta(
-                          icon: _trustIcon(te.exercicio),
-                          text: te.exercicio.mediaTrustLabel,
-                          color: trustColor,
+                        style: AppTypography.inter(
+                          color: ink,
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0,
                         ),
-                      if (isAdvanced)
-                        _ExerciseMeta(
-                          icon:
-                              te.tipoSerie == 'SUPERSET'
-                                  ? Icons.link_rounded
-                                  : Icons.trending_down_rounded,
-                          text:
-                              te.tipoSerie == 'SUPERSET'
-                                  ? 'superset ${te.grupoSuperset ?? '-'}'
-                                  : 'drop set',
-                          color:
-                              te.tipoSerie == 'SUPERSET'
-                                  ? primary
-                                  : EagleTokens.warn,
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Text(
+                            '${te.series}×${te.repeticoes}',
+                            style: AppTypography.mono(
+                              color: ink,
+                              fontSize: 12.2,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            width: 3,
+                            height: 3,
+                            decoration: BoxDecoration(
+                              color: mute,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            _formatLoadKg(te.cargaKg),
+                            style: AppTypography.mono(
+                              color: ink,
+                              fontSize: 12.2,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            width: 3,
+                            height: 3,
+                            decoration: BoxDecoration(
+                              color: mute,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(Icons.timer_outlined, size: 11, color: mute),
+                          const SizedBox(width: 3),
+                          Text(
+                            '${te.descansoSegundos ?? 60}s',
+                            style: AppTypography.mono(
+                              color: mute,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (isAdvanced ||
+                          te.exercicio.showMediaBadgeInWorkoutList ||
+                          te.observacoes?.trim().isNotEmpty == true) ...[
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 6,
+                          children: [
+                            if (te.exercicio.showMediaBadgeInWorkoutList)
+                              _ExerciseMeta(
+                                icon: _trustIcon(te.exercicio),
+                                text: te.exercicio.mediaTrustLabel,
+                                color: trustColor,
+                              ),
+                            if (isAdvanced)
+                              _ExerciseMeta(
+                                icon:
+                                    te.tipoSerie == 'SUPERSET'
+                                        ? Icons.link_rounded
+                                        : Icons.trending_down_rounded,
+                                text:
+                                    te.tipoSerie == 'SUPERSET'
+                                        ? 'superset ${te.grupoSuperset ?? '-'}'
+                                        : 'drop set',
+                                color:
+                                    te.tipoSerie == 'SUPERSET'
+                                        ? primary
+                                        : EagleTokens.warn,
+                              ),
+                            if (te.observacoes?.trim().isNotEmpty == true)
+                              _ExerciseMeta(
+                                icon: Icons.notes_rounded,
+                                text: te.observacoes!.trim(),
+                                color: mute,
+                              ),
+                          ],
                         ),
-                      if (te.observacoes?.trim().isNotEmpty == true)
-                        _ExerciseMeta(
-                          icon: Icons.notes_rounded,
-                          text: te.observacoes!.trim(),
-                          color: mute,
-                        ),
+                      ],
                     ],
-                  ),
-                ],
-              ],
                   ),
                 ),
               ),
@@ -291,10 +291,7 @@ class _ExerciseActionsSheet extends StatelessWidget {
   final String title;
   final bool isDark;
 
-  const _ExerciseActionsSheet({
-    required this.title,
-    required this.isDark,
-  });
+  const _ExerciseActionsSheet({required this.title, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -491,4 +488,3 @@ class _ExerciseActionTile extends StatelessWidget {
     );
   }
 }
-

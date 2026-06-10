@@ -10,7 +10,8 @@ class ConversationAttachOption extends StatelessWidget {
   final bool isDark;
   final VoidCallback onTap;
 
-  const ConversationAttachOption({super.key, 
+  const ConversationAttachOption({
+    super.key,
     required this.icon,
     required this.label,
     required this.isDark,
@@ -44,7 +45,8 @@ class ConversationReplyComposerBar extends StatelessWidget {
   final String preview;
   final VoidCallback onClose;
 
-  const ConversationReplyComposerBar({super.key, 
+  const ConversationReplyComposerBar({
+    super.key,
     required this.isDark,
     required this.sender,
     required this.preview,
@@ -89,7 +91,9 @@ class ConversationReplyComposerBar extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color:
-                        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+                        isDark
+                            ? EagleTokens.darkInkMute
+                            : TokensStrip.textSecondary,
                     fontSize: 12,
                   ),
                 ),
@@ -112,7 +116,8 @@ class ConversationSearchState extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  const ConversationSearchState({super.key, 
+  const ConversationSearchState({
+    super.key,
     required this.icon,
     required this.title,
     required this.subtitle,
@@ -148,7 +153,8 @@ class ConversationRecordingComposerBar extends StatelessWidget {
   final VoidCallback onCancel;
   final VoidCallback onSend;
 
-  const ConversationRecordingComposerBar({super.key, 
+  const ConversationRecordingComposerBar({
+    super.key,
     required this.isDark,
     required this.duration,
     required this.onCancel,
@@ -207,4 +213,3 @@ class ConversationRecordingComposerBar extends StatelessWidget {
     );
   }
 }
-

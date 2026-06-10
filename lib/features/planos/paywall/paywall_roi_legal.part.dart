@@ -1,4 +1,4 @@
-﻿part of 'paywall_components.dart';
+part of 'paywall_components.dart';
 
 // ─── ROI calculator ─────────────────────────────────────────────────────────
 
@@ -31,7 +31,9 @@ class _PaywallRoiCalculatorState extends State<PaywallRoiCalculator> {
   @override
   void initState() {
     super.initState();
-    _feeController = TextEditingController(text: _monthlyFee.toStringAsFixed(0));
+    _feeController = TextEditingController(
+      text: _monthlyFee.toStringAsFixed(0),
+    );
   }
 
   @override
@@ -61,13 +63,22 @@ class _PaywallRoiCalculatorState extends State<PaywallRoiCalculator> {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    Icon(Icons.calculate_outlined, size: 26, color: PaywallCatalog.brand),
+                    Icon(
+                      Icons.calculate_outlined,
+                      size: 26,
+                      color: PaywallCatalog.brand,
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Calcule seu ROI', style: TokensStrip.h2(color: widget.ink).copyWith(fontSize: 17)),
+                          Text(
+                            'Calcule seu ROI',
+                            style: TokensStrip.h2(
+                              color: widget.ink,
+                            ).copyWith(fontSize: 17),
+                          ),
                           Text(
                             'Veja qual plano faz sentido agora',
                             style: TokensStrip.bodyMuted(color: widget.mute),
@@ -75,7 +86,10 @@ class _PaywallRoiCalculatorState extends State<PaywallRoiCalculator> {
                         ],
                       ),
                     ),
-                    Icon(_expanded ? Icons.expand_less : Icons.expand_more, color: widget.mute),
+                    Icon(
+                      _expanded ? Icons.expand_less : Icons.expand_more,
+                      color: widget.mute,
+                    ),
                   ],
                 ),
               ),
@@ -88,7 +102,10 @@ class _PaywallRoiCalculatorState extends State<PaywallRoiCalculator> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Alunos ativos hoje', style: TokensStrip.bodyMuted(color: widget.mute)),
+                  Text(
+                    'Alunos ativos hoje',
+                    style: TokensStrip.bodyMuted(color: widget.mute),
+                  ),
                   Slider(
                     value: _students.toDouble(),
                     min: 0,
@@ -124,7 +141,10 @@ class _PaywallRoiCalculatorState extends State<PaywallRoiCalculator> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Seu MRR atual', style: TokensStrip.bodyMuted(color: widget.mute)),
+                        Text(
+                          'Seu MRR atual',
+                          style: TokensStrip.bodyMuted(color: widget.mute),
+                        ),
                         Text(
                           'R\$ ${mrr.toStringAsFixed(0)}',
                           style: TextStyle(
@@ -142,7 +162,8 @@ class _PaywallRoiCalculatorState extends State<PaywallRoiCalculator> {
                     final plan = subscriptionPlanFromApi(p.nome);
                     final price = p.precoMensal;
                     final pct = mrr > 0 ? (price / mrr * 100) : 0.0;
-                    final payback = price > 0 ? (price / _monthlyFee).ceil() : 0;
+                    final payback =
+                        price > 0 ? (price / _monthlyFee).ceil() : 0;
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Row(
@@ -164,7 +185,9 @@ class _PaywallRoiCalculatorState extends State<PaywallRoiCalculator> {
                           const SizedBox(width: 8),
                           Text(
                             payback <= 1 ? '1 aluno paga' : '$payback alunos',
-                            style: TokensStrip.bodyMuted(color: widget.mute).copyWith(fontSize: 11),
+                            style: TokensStrip.bodyMuted(
+                              color: widget.mute,
+                            ).copyWith(fontSize: 11),
                           ),
                         ],
                       ),
@@ -207,12 +230,13 @@ class PaywallComparisonTable extends StatelessWidget {
   static const double _featureColWidth = 168;
   static const double _tierColWidth = 64;
 
-  TextStyle _cellStyle({bool header = false, bool feature = false}) => TextStyle(
-    color: header ? ink : (feature ? ink : mute),
-    fontSize: header ? 12 : 12,
-    fontWeight: header || feature ? FontWeight.w700 : FontWeight.w500,
-    height: 1.25,
-  );
+  TextStyle _cellStyle({bool header = false, bool feature = false}) =>
+      TextStyle(
+        color: header ? ink : (feature ? ink : mute),
+        fontSize: header ? 12 : 12,
+        fontWeight: header || feature ? FontWeight.w700 : FontWeight.w500,
+        height: 1.25,
+      );
 
   Widget _cell(
     String text, {
@@ -243,7 +267,8 @@ class PaywallComparisonTable extends StatelessWidget {
     final tableWidth = _featureColWidth + _tierColWidth * 4;
 
     return Semantics(
-      label: 'Tabela de comparação de planos, 4 tiers, ${PaywallCatalog.comparisonRows.length} recursos',
+      label:
+          'Tabela de comparação de planos, 4 tiers, ${PaywallCatalog.comparisonRows.length} recursos',
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.only(bottom: 4),
@@ -267,20 +292,56 @@ class PaywallComparisonTable extends StatelessWidget {
                 decoration: BoxDecoration(color: headerBg),
                 children: [
                   _cell('Recurso', header: true, width: _featureColWidth),
-                  _cell('FREE', header: true, width: _tierColWidth, align: TextAlign.center),
-                  _cell('PREM.', header: true, width: _tierColWidth, align: TextAlign.center),
-                  _cell('ENT.', header: true, width: _tierColWidth, align: TextAlign.center),
-                  _cell('PRO', header: true, width: _tierColWidth, align: TextAlign.center),
+                  _cell(
+                    'FREE',
+                    header: true,
+                    width: _tierColWidth,
+                    align: TextAlign.center,
+                  ),
+                  _cell(
+                    'PREM.',
+                    header: true,
+                    width: _tierColWidth,
+                    align: TextAlign.center,
+                  ),
+                  _cell(
+                    'ENT.',
+                    header: true,
+                    width: _tierColWidth,
+                    align: TextAlign.center,
+                  ),
+                  _cell(
+                    'PRO',
+                    header: true,
+                    width: _tierColWidth,
+                    align: TextAlign.center,
+                  ),
                 ],
               ),
               ...PaywallCatalog.comparisonRows.map(
                 (r) => TableRow(
                   children: [
                     _cell(r.feature, feature: true, width: _featureColWidth),
-                    _cell(r.free, width: _tierColWidth, align: TextAlign.center),
-                    _cell(r.premium, width: _tierColWidth, align: TextAlign.center),
-                    _cell(r.enterprise, width: _tierColWidth, align: TextAlign.center),
-                    _cell(r.enterprisePro, width: _tierColWidth, align: TextAlign.center),
+                    _cell(
+                      r.free,
+                      width: _tierColWidth,
+                      align: TextAlign.center,
+                    ),
+                    _cell(
+                      r.premium,
+                      width: _tierColWidth,
+                      align: TextAlign.center,
+                    ),
+                    _cell(
+                      r.enterprise,
+                      width: _tierColWidth,
+                      align: TextAlign.center,
+                    ),
+                    _cell(
+                      r.enterprisePro,
+                      width: _tierColWidth,
+                      align: TextAlign.center,
+                    ),
                   ],
                 ),
               ),
@@ -342,14 +403,18 @@ class PaywallFeaturesGrid extends StatelessWidget {
                     children: [
                       Text(
                         '#${f.rank} ${f.title}',
-                        style: TokensStrip.h2(color: ink).copyWith(fontSize: 15),
+                        style: TokensStrip.h2(
+                          color: ink,
+                        ).copyWith(fontSize: 15),
                       ),
                       const SizedBox(height: 6),
                       _PlanChip(label: f.badge, color: f.badgeColor),
                       const SizedBox(height: 8),
                       Text(
                         f.description,
-                        style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 13),
+                        style: TokensStrip.bodyMuted(
+                          color: mute,
+                        ).copyWith(fontSize: 13),
                       ),
                       const SizedBox(height: 10),
                       _RoiMoneyTag(text: f.roiMoney),
@@ -357,9 +422,15 @@ class PaywallFeaturesGrid extends StatelessWidget {
                       Wrap(
                         spacing: 6,
                         runSpacing: 6,
-                        children: f.planChips
-                            .map((p) => _PlanChip(label: p, color: paywallChipColorForLabel(p)))
-                            .toList(),
+                        children:
+                            f.planChips
+                                .map(
+                                  (p) => _PlanChip(
+                                    label: p,
+                                    color: paywallChipColorForLabel(p),
+                                  ),
+                                )
+                                .toList(),
                       ),
                     ],
                   ),
@@ -421,12 +492,7 @@ class PaywallRoiRowsList extends StatelessWidget {
                     children: [
                       Text(r.label, style: TokensStrip.body(color: ink)),
                       const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(child: value),
-                          chip,
-                        ],
-                      ),
+                      Row(children: [Expanded(child: value), chip]),
                     ],
                   );
                 }
@@ -540,22 +606,25 @@ class PaywallUpgradeLegalCompact extends StatelessWidget {
           Text(
             'Sem fidelidade · Cancele quando quiser',
             textAlign: TextAlign.center,
-            style: TokensStrip.bodyMuted(color: secondary).copyWith(fontSize: 13),
+            style: TokensStrip.bodyMuted(
+              color: secondary,
+            ).copyWith(fontSize: 13),
           ),
           const SizedBox(height: 8),
           Semantics(
             button: true,
             label: 'Abrir termos, privacidade e informações de cobrança',
             child: TextButton.icon(
-              onPressed: () => showBillingSheet(
-                context,
-                ink: ink,
-                mute: mute,
-                primary: primary,
-                showStoreBillingNote: showStoreBillingNote,
-                restoring: restoring,
-                onRestore: onRestore,
-              ),
+              onPressed:
+                  () => showBillingSheet(
+                    context,
+                    ink: ink,
+                    mute: mute,
+                    primary: primary,
+                    showStoreBillingNote: showStoreBillingNote,
+                    restoring: restoring,
+                    onRestore: onRestore,
+                  ),
               icon: Icon(Icons.policy_outlined, size: 18, color: primary),
               label: Text(
                 'Termos, privacidade e cobrança',
@@ -593,7 +662,11 @@ class PaywallBillingLegalPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    final secondary = PaywallCatalog.readableSecondary(
+      ink,
+      mute,
+      isDark: isDark,
+    );
 
     return Column(
       children: [
@@ -625,7 +698,11 @@ class PaywallTrustFooter extends StatelessWidget {
   final Color mute;
   final Color primary;
 
-  const PaywallTrustFooter({super.key, required this.mute, required this.primary});
+  const PaywallTrustFooter({
+    super.key,
+    required this.mute,
+    required this.primary,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -695,9 +772,21 @@ class PaywallLoadingSkeleton extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Container(height: 120, decoration: BoxDecoration(color: base, borderRadius: BorderRadius.circular(16))),
+          Container(
+            height: 120,
+            decoration: BoxDecoration(
+              color: base,
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
           const SizedBox(height: 16),
-          Container(height: 56, decoration: BoxDecoration(color: base, borderRadius: BorderRadius.circular(14))),
+          Container(
+            height: 56,
+            decoration: BoxDecoration(
+              color: base,
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
           const SizedBox(height: 16),
           for (var i = 0; i < 3; i++)
             Container(
@@ -722,9 +811,12 @@ String formatPaywallPriceBrl(double value) {
       : 'R\$ ${value.toStringAsFixed(2)}';
 }
 
-String paywallMonthlyFromPlano(Plano plano) => formatPaywallPriceBrl(plano.precoMensal);
+String paywallMonthlyFromPlano(Plano plano) =>
+    formatPaywallPriceBrl(plano.precoMensal);
 
 String paywallAnnualMonthlyEquiv(Plano plano) {
-  final annual = plano.precoAnual ?? SubscriptionProducts.referenceAnnualPrice(plano.precoMensal);
+  final annual =
+      plano.precoAnual ??
+      SubscriptionProducts.referenceAnnualPrice(plano.precoMensal);
   return formatPaywallPriceBrl(annual / 12);
 }

@@ -16,8 +16,7 @@ bool _evolucaoSemDados(AsyncValue<EvolucaoInteligente> evolucaoAsync) {
 bool _hasRadarP0(List<Timeline360Event> events) {
   return events.any(
     (e) =>
-        e.tipo == 'RADAR' &&
-        e.prioridade.trim().toUpperCase().startsWith('P0'),
+        e.tipo == 'RADAR' && e.prioridade.trim().toUpperCase().startsWith('P0'),
   );
 }
 
@@ -51,8 +50,7 @@ class Aluno360DetailEvolucaoTab extends StatelessWidget {
     final timelineHasSignals = timelineEvents.isNotEmpty;
     final hasRadarP0 = _hasRadarP0(timelineEvents);
     final evolucaoEmpty = _evolucaoSemDados(evolucaoAsync);
-    final timelineEmpty =
-        timeline360Async.hasValue && timelineEvents.isEmpty;
+    final timelineEmpty = timeline360Async.hasValue && timelineEvents.isEmpty;
     final bothEmpty =
         evolucaoEmpty &&
         timelineEmpty &&

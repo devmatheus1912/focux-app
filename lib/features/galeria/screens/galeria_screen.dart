@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -12,6 +12,7 @@ import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class GaleriaScreen extends ConsumerStatefulWidget {
   const GaleriaScreen({super.key});
@@ -112,102 +113,105 @@ class _State extends ConsumerState<GaleriaScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Galeria',
-        subtitle: '${_fotos.length} de 9 fotos',
-        actions: [
-          if (_uploading)
-            const Padding(
-              padding: EdgeInsets.all(TokensStrip.s4),
-              child: FxLoading(size: 20, strokeWidth: 2),
-            ),
-          if (!_uploading && _fotos.length < 9)
-            IconButton(
-              icon: const Icon(Icons.add_photo_alternate_outlined),
-              tooltip: 'Adicionar foto',
-              onPressed: _add,
-            ),
-        ],
-      ),
-      body:
-          _loading
-              ? const FxLoading()
-              : _fotos.isEmpty
-              ? Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.photo_library_outlined,
-                      size: 64,
-                      color:
-                          isDark
-                              ? EagleTokens.darkInkMute
-                              : TokensStrip.textSecondary,
-                    ),
-                    const SizedBox(height: TokensStrip.s4),
-                    Text(
-                      'Nenhuma foto ainda.',
-                      style: TextStyle(
+    return fxScreenA11yScope(
+      label: 'Galeria',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Galeria',
+          subtitle: '${_fotos.length} de 9 fotos',
+          actions: [
+            if (_uploading)
+              const Padding(
+                padding: EdgeInsets.all(TokensStrip.s4),
+                child: FxLoading(size: 20, strokeWidth: 2),
+              ),
+            if (!_uploading && _fotos.length < 9)
+              IconButton(
+                icon: const Icon(Icons.add_photo_alternate_outlined),
+                tooltip: 'Adicionar foto',
+                onPressed: _add,
+              ),
+          ],
+        ),
+        body:
+            _loading
+                ? const FxLoading()
+                : _fotos.isEmpty
+                ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.photo_library_outlined,
+                        size: 64,
                         color:
                             isDark
                                 ? EagleTokens.darkInkMute
                                 : TokensStrip.textSecondary,
                       ),
-                    ),
-                    const SizedBox(height: TokensStrip.s4),
-                    FxLiquidPrimaryButton(
-                      icon: Icons.add_photo_alternate_outlined,
-                      label: 'Adicionar foto',
-                      expand: false,
-                      onPressed: _add,
-                    ),
-                  ],
-                ),
-              )
-              : GridView.builder(
-                padding: const EdgeInsets.all(12),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 6,
-                  mainAxisSpacing: 6,
-                ),
-                itemCount: _fotos.length,
-                itemBuilder: (_, i) {
-                  final f = _fotos[i];
-                  return Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(f.fotoUrl, fit: BoxFit.cover),
+                      const SizedBox(height: TokensStrip.s4),
+                      Text(
+                        'Nenhuma foto ainda.',
+                        style: TextStyle(
+                          color:
+                              isDark
+                                  ? EagleTokens.darkInkMute
+                                  : TokensStrip.textSecondary,
+                        ),
                       ),
-                      Positioned(
-                        top: 4,
-                        right: 4,
-                        child: GestureDetector(
-                          onTap: () => _delete(f.id),
-                          child: Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.65),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.close,
-                              color: Colors.white,
-                              size: 14,
+                      const SizedBox(height: TokensStrip.s4),
+                      FxLiquidPrimaryButton(
+                        icon: Icons.add_photo_alternate_outlined,
+                        label: 'Adicionar foto',
+                        expand: false,
+                        onPressed: _add,
+                      ),
+                    ],
+                  ),
+                )
+                : GridView.builder(
+                  padding: const EdgeInsets.all(12),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 6,
+                    mainAxisSpacing: 6,
+                  ),
+                  itemCount: _fotos.length,
+                  itemBuilder: (_, i) {
+                    final f = _fotos[i];
+                    return Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(f.fotoUrl, fit: BoxFit.cover),
+                        ),
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: GestureDetector(
+                            onTap: () => _delete(f.id),
+                            child: Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.65),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.close,
+                                color: Colors.white,
+                                size: 14,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  );
-                },
-              ),
+                      ],
+                    );
+                  },
+                ),
+      ),
     );
   }
 }

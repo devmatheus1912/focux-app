@@ -1,4 +1,4 @@
-﻿import 'dart:io' show Platform;
+import 'dart:io' show Platform;
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -19,6 +19,7 @@ import '../widgets/auth_shell.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../widgets/password_strength_meter.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   final String? referralCodigo;
@@ -195,193 +196,202 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
-      ),
-      child: Scaffold(
-        body: AuthShell(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(22, 54, 22, 30),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AuthBackButton(onTap: () => context.go('/login?role=personal')),
-                  const SizedBox(height: TokensStrip.s4),
-                  const AuthRoleHeader(roleLabel: 'PERSONAL'),
-                  const SizedBox(height: 22),
-                  const Text(
-                    'Criar conta',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.7,
-                      height: 1.15,
+    return fxScreenA11yScope(
+      label: 'Criar conta personal',
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
+        child: Scaffold(
+          body: AuthShell(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(22, 54, 22, 30),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AuthBackButton(
+                      onTap: () => context.go('/login?role=personal'),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Comece com sua conta e escolha o plano depois.',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.5),
-                      fontSize: 13.5,
-                    ),
-                  ),
-                  const SizedBox(height: 26),
-                  AuthField(
-                    label: 'Nome completo',
-                    controller: _nameController,
-                    hintText: 'Seu nome',
-                    icon: Icons.person_outline_rounded,
-                    textInputAction: TextInputAction.next,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Informe o nome.';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  AuthField(
-                    label: 'E-mail',
-                    controller: _emailController,
-                    hintText: 'seu@email.com',
-                    icon: Icons.mail_outline_rounded,
-                    keyboardType: TextInputType.emailAddress,
-                    textInputAction: TextInputAction.next,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Informe o e-mail.';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  AuthField(
-                    label: 'Senha',
-                    controller: _passwordController,
-                    hintText: 'Mín. 8 caracteres',
-                    icon: Icons.lock_outline_rounded,
-                    obscureText: !_showPassword,
-                    textInputAction: TextInputAction.next,
-                    focusNode: _passwordFocus,
-                    validator: (value) {
-                      if (value == null || value.length < 8) {
-                        return 'A senha precisa ter no mínimo 8 caracteres.';
-                      }
-                      return null;
-                    },
-                    suffix: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _showPassword = !_showPassword;
-                        });
-                      },
-                      icon: Icon(
-                        _showPassword
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
-                        color: Colors.white.withValues(alpha: 0.72),
-                        size: 18,
+                    const SizedBox(height: TokensStrip.s4),
+                    const AuthRoleHeader(roleLabel: 'PERSONAL'),
+                    const SizedBox(height: 22),
+                    const Text(
+                      'Criar conta',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.7,
+                        height: 1.15,
                       ),
                     ),
-                  ),
-                  if (_passwordFocused || _passwordController.text.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    PasswordStrengthMeter(password: _passwordController.text),
-                  ],
-                  const SizedBox(height: 12),
-                  AuthField(
-                    label: 'Telefone / WhatsApp',
-                    controller: _phoneController,
-                    hintText: '(11) 99999-0000',
-                    icon: Icons.phone_iphone_rounded,
-                    keyboardType: TextInputType.phone,
-                    textInputAction: TextInputAction.done,
-                    onFieldSubmitted: (_) => _submit(),
-                  ),
-                  const SizedBox(height: 28),
-                  if (_error != null) ...[
+                    const SizedBox(height: 6),
                     Text(
-                      _error!,
-                      style: const TextStyle(
-                        color: Color(0xFFFFB6B6),
-                        fontSize: 12.5,
+                      'Comece com sua conta e escolha o plano depois.',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.5),
+                        fontSize: 13.5,
                       ),
                     ),
-                    const SizedBox(height: 14),
-                  ],
-                  FxLiquidSecondaryButton(
-                    label: FocuxBrandCopy.onboardingExistingAccountCta,
-                    icon: Icons.login_rounded,
-                    onPressed: _loading ? null : () => context.go('/login?role=personal'),
-                  ),
-                  const SizedBox(height: 10),
-                  FxLiquidPrimaryButton(
-                    label: 'Criar minha conta',
-                    loading: _loading,
-                    onPressed: _loading ? null : _submit,
-                  ),
-                  const SizedBox(height: 12),
-                  const _AuthDivider(label: 'ou cadastre com'),
-                  const SizedBox(height: 12),
-                  GoogleSignInButton(
-                    label: 'Cadastrar com Google',
-                    isLoading: _loadingGoogle,
-                    onPressed: _loadingGoogle ? null : _submitGoogle,
-                  ),
-                  const SizedBox(height: 12),
-                  Center(
-                    child: Text.rich(
-                      TextSpan(
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.35),
-                          fontSize: 11.5,
-                          height: 1.5,
+                    const SizedBox(height: 26),
+                    AuthField(
+                      label: 'Nome completo',
+                      controller: _nameController,
+                      hintText: 'Seu nome',
+                      icon: Icons.person_outline_rounded,
+                      textInputAction: TextInputAction.next,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Informe o nome.';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    AuthField(
+                      label: 'E-mail',
+                      controller: _emailController,
+                      hintText: 'seu@email.com',
+                      icon: Icons.mail_outline_rounded,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Informe o e-mail.';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    AuthField(
+                      label: 'Senha',
+                      controller: _passwordController,
+                      hintText: 'Mín. 8 caracteres',
+                      icon: Icons.lock_outline_rounded,
+                      obscureText: !_showPassword,
+                      textInputAction: TextInputAction.next,
+                      focusNode: _passwordFocus,
+                      validator: (value) {
+                        if (value == null || value.length < 8) {
+                          return 'A senha precisa ter no mínimo 8 caracteres.';
+                        }
+                        return null;
+                      },
+                      suffix: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _showPassword = !_showPassword;
+                          });
+                        },
+                        icon: Icon(
+                          _showPassword
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: Colors.white.withValues(alpha: 0.72),
+                          size: 18,
                         ),
-                        children: [
-                          const TextSpan(
-                            text: 'Ao criar, você concorda com os ',
-                          ),
-                          TextSpan(
-                            text: 'Termos de uso',
-                            style: TextStyle(color: primary),
-                            recognizer:
-                                TapGestureRecognizer()
-                                  ..onTap =
-                                      () => launchUrl(
-                                        Uri.parse(
-                                          'https://focux-backend-production.up.railway.app/termos.html',
-                                        ),
-                                        mode: LaunchMode.externalApplication,
-                                      ),
-                          ),
-                          const TextSpan(text: ' e a '),
-                          TextSpan(
-                            text: 'Política de privacidade',
-                            style: TextStyle(color: primary),
-                            recognizer:
-                                TapGestureRecognizer()
-                                  ..onTap =
-                                      () => launchUrl(
-                                        Uri.parse(
-                                          'https://focux-backend-production.up.railway.app/privacidade.html',
-                                        ),
-                                        mode: LaunchMode.externalApplication,
-                                      ),
-                          ),
-                          const TextSpan(text: '.'),
-                        ],
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                  ),
-                ],
+                    if (_passwordFocused ||
+                        _passwordController.text.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      PasswordStrengthMeter(password: _passwordController.text),
+                    ],
+                    const SizedBox(height: 12),
+                    AuthField(
+                      label: 'Telefone / WhatsApp',
+                      controller: _phoneController,
+                      hintText: '(11) 99999-0000',
+                      icon: Icons.phone_iphone_rounded,
+                      keyboardType: TextInputType.phone,
+                      textInputAction: TextInputAction.done,
+                      onFieldSubmitted: (_) => _submit(),
+                    ),
+                    const SizedBox(height: 28),
+                    if (_error != null) ...[
+                      Text(
+                        _error!,
+                        style: const TextStyle(
+                          color: Color(0xFFFFB6B6),
+                          fontSize: 12.5,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                    ],
+                    FxLiquidSecondaryButton(
+                      label: FocuxBrandCopy.onboardingExistingAccountCta,
+                      icon: Icons.login_rounded,
+                      onPressed:
+                          _loading
+                              ? null
+                              : () => context.go('/login?role=personal'),
+                    ),
+                    const SizedBox(height: 10),
+                    FxLiquidPrimaryButton(
+                      label: 'Criar minha conta',
+                      loading: _loading,
+                      onPressed: _loading ? null : _submit,
+                    ),
+                    const SizedBox(height: 12),
+                    const _AuthDivider(label: 'ou cadastre com'),
+                    const SizedBox(height: 12),
+                    GoogleSignInButton(
+                      label: 'Cadastrar com Google',
+                      isLoading: _loadingGoogle,
+                      onPressed: _loadingGoogle ? null : _submitGoogle,
+                    ),
+                    const SizedBox(height: 12),
+                    Center(
+                      child: Text.rich(
+                        TextSpan(
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.35),
+                            fontSize: 11.5,
+                            height: 1.5,
+                          ),
+                          children: [
+                            const TextSpan(
+                              text: 'Ao criar, você concorda com os ',
+                            ),
+                            TextSpan(
+                              text: 'Termos de uso',
+                              style: TextStyle(color: primary),
+                              recognizer:
+                                  TapGestureRecognizer()
+                                    ..onTap =
+                                        () => launchUrl(
+                                          Uri.parse(
+                                            'https://focux-backend-production.up.railway.app/termos.html',
+                                          ),
+                                          mode: LaunchMode.externalApplication,
+                                        ),
+                            ),
+                            const TextSpan(text: ' e a '),
+                            TextSpan(
+                              text: 'Política de privacidade',
+                              style: TextStyle(color: primary),
+                              recognizer:
+                                  TapGestureRecognizer()
+                                    ..onTap =
+                                        () => launchUrl(
+                                          Uri.parse(
+                                            'https://focux-backend-production.up.railway.app/privacidade.html',
+                                          ),
+                                          mode: LaunchMode.externalApplication,
+                                        ),
+                            ),
+                            const TextSpan(text: '.'),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

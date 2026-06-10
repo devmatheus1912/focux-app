@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+
 class DashboardErrorState extends StatelessWidget {
   final bool chromeOnDark;
   final Color primary;
@@ -19,7 +20,8 @@ class DashboardErrorState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ink = chromeOnDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = chromeOnDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final mute =
+        chromeOnDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -30,7 +32,9 @@ class DashboardErrorState extends StatelessWidget {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: EagleTokens.bad.withValues(alpha: chromeOnDark ? 0.18 : 0.08),
+                color: EagleTokens.bad.withValues(
+                  alpha: chromeOnDark ? 0.18 : 0.08,
+                ),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Icon(

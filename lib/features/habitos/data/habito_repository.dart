@@ -122,16 +122,19 @@ class HabitoRepository {
     String? lembreteHora,
     int? alunoId,
   }) async {
-    final r = await _dio.post('/api/habitos', data: {
-      'titulo': titulo,
-      'descricao': descricao,
-      'icone': icone,
-      'tipo': tipo,
-      'metaDiaria': metaDiaria,
-      'metaSemanal': metaSemanal,
-      'lembreteHora': lembreteHora,
-      'alunoId': alunoId,
-    });
+    final r = await _dio.post(
+      '/api/habitos',
+      data: {
+        'titulo': titulo,
+        'descricao': descricao,
+        'icone': icone,
+        'tipo': tipo,
+        'metaDiaria': metaDiaria,
+        'metaSemanal': metaSemanal,
+        'lembreteHora': lembreteHora,
+        'alunoId': alunoId,
+      },
+    );
     return Habito.fromJson(r.data as Map<String, dynamic>);
   }
 

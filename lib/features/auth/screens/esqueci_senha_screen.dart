@@ -1,4 +1,4 @@
-﻿import 'package:dio/dio.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +9,7 @@ import '../data/auth_repository.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 class EsqueciSenhaScreen extends StatefulWidget {
   const EsqueciSenhaScreen({super.key});
@@ -143,29 +144,29 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
-      ),
-      child: Scaffold(
-        body: AuthShell(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(
-              22,
-              48,
-              22,
-              24 + MediaQuery.viewPaddingOf(context).bottom,
-            ),
-            child: Form(
+    return fxScreenA11yScope(
+      label: 'Recuperar senha',
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
+        child: Scaffold(
+          body: AuthShell(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(
+                22,
+                48,
+                22,
+                24 + MediaQuery.viewPaddingOf(context).bottom,
+              ),
+              child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AuthBackButton(
-                      onTap: () => context.go('/login'),
-                    ),
+                    AuthBackButton(onTap: () => context.go('/login')),
                     const SizedBox(height: 28),
                     Container(
                       width: 72,
@@ -370,6 +371,7 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
             ),
           ),
         ),
+      ),
     );
   }
 }

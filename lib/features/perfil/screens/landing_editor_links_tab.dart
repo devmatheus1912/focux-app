@@ -35,7 +35,9 @@ class LandingEditorLinksTab extends StatelessWidget {
             child: Text(
               'Defina seu slug no perfil para gerar os links da sua página.',
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.72),
               ),
             ),
           ),
@@ -49,7 +51,10 @@ class LandingEditorLinksTab extends StatelessWidget {
     final nicheCount = templates.length > 1 ? templates.length - 1 : 0;
     final applying = controller.applyingTemplate || controller.saving;
 
-    final previewImage = landingResolvedHeroImageUrl(slug, controller.heroImageUrl);
+    final previewImage = landingResolvedHeroImageUrl(
+      slug,
+      controller.heroImageUrl,
+    );
 
     return ListView(
       padding: const EdgeInsets.all(TokensStrip.s4),
@@ -69,11 +74,12 @@ class LandingEditorLinksTab extends StatelessWidget {
           displayLabel: Env.landingPageDisplayLabel(slug),
           copyUrl: landingUrl,
           onOpen: () => openLandingLink(context, url: landingUrl),
-          onCopy: () => copyLandingLink(
-            context,
-            url: landingUrl,
-            successMessage: 'Link da página copiado.',
-          ),
+          onCopy:
+              () => copyLandingLink(
+                context,
+                url: landingUrl,
+                successMessage: 'Link da página copiado.',
+              ),
         ),
         const SizedBox(height: 12),
         KeyedSubtree(
@@ -86,11 +92,12 @@ class LandingEditorLinksTab extends StatelessWidget {
             displayLabel: Env.capturaPageDisplayLabel(slug),
             copyUrl: capturaUrl,
             onOpen: () => openLandingLink(context, url: capturaUrl),
-            onCopy: () => copyLandingLink(
-              context,
-              url: capturaUrl,
-              successMessage: 'Link do formulário copiado.',
-            ),
+            onCopy:
+                () => copyLandingLink(
+                  context,
+                  url: capturaUrl,
+                  successMessage: 'Link do formulário copiado.',
+                ),
           ),
         ),
         if (controller.checklistLoading) ...[
@@ -113,13 +120,14 @@ class LandingEditorLinksTab extends StatelessWidget {
           nicheCount: nicheCount,
           applying: applying,
           onApplyTemplate: onApplyTemplate,
-          onBrowseTemplates: () => showLandingTemplatesSheet(
-            context,
-            sectionOrder: controller.sectionOrder,
-            templates: templates,
-            applying: applying,
-            onApplyTemplate: onApplyTemplate,
-          ),
+          onBrowseTemplates:
+              () => showLandingTemplatesSheet(
+                context,
+                sectionOrder: controller.sectionOrder,
+                templates: templates,
+                applying: applying,
+                onApplyTemplate: onApplyTemplate,
+              ),
         ),
       ],
     );

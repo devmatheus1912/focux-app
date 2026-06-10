@@ -28,16 +28,22 @@ class TrialCountdownBanner extends ConsumerWidget {
         final warn = dias <= 3 ? EagleTokens.warn : primary;
 
         return Padding(
-          padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 0, TokensStrip.s5, 8),
+          padding: const EdgeInsets.fromLTRB(
+            TokensStrip.s5,
+            0,
+            TokensStrip.s5,
+            8,
+          ),
           child: Material(
             color: warn.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(14),
             child: InkWell(
               borderRadius: BorderRadius.circular(14),
-              onTap: () => context.push(
-                '/assinatura',
-                extra: SubscriptionPlan.ENTERPRISE.apiName,
-              ),
+              onTap:
+                  () => context.push(
+                    '/assinatura',
+                    extra: SubscriptionPlan.ENTERPRISE.apiName,
+                  ),
               child: Padding(
                 padding: const EdgeInsets.all(14),
                 child: Row(
@@ -52,7 +58,10 @@ class TrialCountdownBanner extends ConsumerWidget {
                             dias <= 1
                                 ? 'Trial Enterprise acaba hoje'
                                 : 'Trial Enterprise · $dias dias restantes',
-                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                            ),
                           ),
                           const SizedBox(height: 2),
                           const Text(

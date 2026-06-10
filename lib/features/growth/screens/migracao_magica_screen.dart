@@ -29,7 +29,6 @@ import '../utils/migracao_ocr_service.dart';
 
 part 'migracao_magica_screen_actions.part.dart';
 
-
 class MigracaoMagicaScreen extends ConsumerStatefulWidget {
   const MigracaoMagicaScreen({super.key});
 
@@ -98,8 +97,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     return FxStaggerItem(
       key: key,
       index: index,
-      staggerDelay:
-          reduce ? Duration.zero : const Duration(milliseconds: 60),
+      staggerDelay: reduce ? Duration.zero : const Duration(milliseconds: 60),
       duration: reduce ? Duration.zero : const Duration(milliseconds: 400),
       slideOffset: reduce ? 0 : 20,
       child: child,
@@ -124,10 +122,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
       },
       child: FxShellScaffold(
         useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Migração Focux',
-          onBack: _handleBack,
-        ),
+        appBar: FxShellAppBar(title: 'Migração Focux', onBack: _handleBack),
         body: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(
             TokensStrip.s4,
@@ -194,7 +189,11 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       Text(
                         'Planilha (.csv, .xlsx), print de app concorrente ou texto — '
                         'análise automática no app. Você revisa antes de salvar.',
-                        style: TextStyle(fontSize: 14, color: mute, height: 1.55),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: mute,
+                          height: 1.55,
+                        ),
                       ),
                     ],
                   ),
@@ -219,7 +218,11 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.screenshot_monitor_rounded, color: brand, size: 22),
+                        Icon(
+                          Icons.screenshot_monitor_rounded,
+                          color: brand,
+                          size: 22,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -260,78 +263,82 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                 child: Semantics(
                   label: 'Como funciona em três passos',
                   child: Container(
-                  padding: const EdgeInsets.fromLTRB(
-                    TokensStrip.s5,
-                    20,
-                    TokensStrip.s5,
-                    18,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
-                    gradient:
-                        isDark
-                            ? LinearGradient(
-                              colors: [brandDeep, const Color(0xFF080C10)],
-                            )
-                            : LinearGradient(colors: [brand, brandDeep]),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Como funciona',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      ..._passos.asMap().entries.map((entry) {
-                        return Semantics(
-                          label: 'Passo ${entry.key + 1}. ${entry.value}',
-                          child: Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                width: 22,
-                                height: 22,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.2),
-                                  shape: BoxShape.circle,
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  '${entry.key + 1}',
-                                  style: AppTypography.mono(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  entry.value,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.white.withValues(alpha: 0.88),
-                                    height: 1.45,
-                                  ),
-                                ),
-                              ),
-                            ],
+                    padding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s5,
+                      20,
+                      TokensStrip.s5,
+                      18,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      gradient:
+                          isDark
+                              ? LinearGradient(
+                                colors: [brandDeep, const Color(0xFF080C10)],
+                              )
+                              : LinearGradient(colors: [brand, brandDeep]),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Como funciona',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
                           ),
                         ),
-                        );
-                      }),
-                    ],
+                        const SizedBox(height: 10),
+                        ..._passos.asMap().entries.map((entry) {
+                          return Semantics(
+                            label: 'Passo ${entry.key + 1}. ${entry.value}',
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    width: 22,
+                                    height: 22,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.2,
+                                      ),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      '${entry.key + 1}',
+                                      style: AppTypography.mono(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      entry.value,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.white.withValues(
+                                          alpha: 0.88,
+                                        ),
+                                        height: 1.45,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
                   ),
                 ),
-              ),
               ),
               const SizedBox(height: TokensStrip.s4),
               _stagger(
@@ -354,7 +361,11 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       const SizedBox(height: 4),
                       Text(
                         'Planilha estruturada vai direto para revisão. Foto usa OCR gratuito no app.',
-                        style: TextStyle(fontSize: 12, color: mute, height: 1.35),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: mute,
+                          height: 1.35,
+                        ),
                       ),
                       Builder(
                         builder: (context) {
@@ -431,7 +442,9 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                         Semantics(
                           label: 'Preview do print enviado',
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(TokensStrip.rSm),
+                            borderRadius: BorderRadius.circular(
+                              TokensStrip.rSm,
+                            ),
                             child: Image.memory(
                               _importedPhotoBytes!,
                               height: 120,
@@ -461,7 +474,10 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                                           color: brand,
                                         ),
                                       )
-                                      : const Icon(Icons.upload_file_rounded, size: 18),
+                                      : const Icon(
+                                        Icons.upload_file_rounded,
+                                        size: 18,
+                                      ),
                               label: Text(
                                 _isImportingFile ? 'Lendo...' : 'Planilha',
                               ),
@@ -471,7 +487,10 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                           Expanded(
                             child: TextButton.icon(
                               onPressed: _isLoading ? null : _colarClipboard,
-                              icon: const Icon(Icons.content_paste_go_rounded, size: 18),
+                              icon: const Icon(
+                                Icons.content_paste_go_rounded,
+                                size: 18,
+                              ),
                               label: const Text('Colar texto'),
                             ),
                           ),
@@ -483,7 +502,9 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                         label: 'Subir foto ou print de app concorrente',
                         child: OutlinedButton.icon(
                           onPressed:
-                              (_isLoading || _isImportingFile) ? null : _subirFoto,
+                              (_isLoading || _isImportingFile)
+                                  ? null
+                                  : _subirFoto,
                           icon:
                               _isLoading && _importedPhotoBytes != null
                                   ? SizedBox(
@@ -495,7 +516,10 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                                       color: brand,
                                     ),
                                   )
-                                  : const Icon(Icons.add_a_photo_outlined, size: 18),
+                                  : const Icon(
+                                    Icons.add_a_photo_outlined,
+                                    size: 18,
+                                  ),
                           label: Text(
                             _isLoading && _importedPhotoBytes != null
                                 ? 'Lendo print (OCR)...'
@@ -504,7 +528,8 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                         ),
                       ),
                       Semantics(
-                        label: 'Campo para colar dados desestruturados dos alunos',
+                        label:
+                            'Campo para colar dados desestruturados dos alunos',
                         child: Container(
                           padding: const EdgeInsets.all(TokensStrip.s3),
                           decoration: BoxDecoration(
@@ -512,7 +537,9 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                                 isDark
                                     ? Colors.white.withValues(alpha: 0.04)
                                     : brandSofter,
-                            borderRadius: BorderRadius.circular(TokensStrip.rSm),
+                            borderRadius: BorderRadius.circular(
+                              TokensStrip.rSm,
+                            ),
                             border: Border.all(
                               color:
                                   isDark
@@ -562,9 +589,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                 switchInCurve: Curves.easeOutCubic,
                 switchOutCurve: Curves.easeInCubic,
                 child: _buildResultsSection(
-                  key: ValueKey(
-                    '${alunos?.length ?? 0}-$_emptyResult',
-                  ),
+                  key: ValueKey('${alunos?.length ?? 0}-$_emptyResult'),
                   isDark: isDark,
                   ink: ink,
                   mute: mute,
@@ -639,7 +664,8 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
           children: [
             Semantics(
               header: true,
-              label: '${alunos.length} alunos encontrados para revisão. Toque para editar.',
+              label:
+                  '${alunos.length} alunos encontrados para revisão. Toque para editar.',
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -689,93 +715,98 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       onTap: () => _editarAluno(index),
                       borderRadius: BorderRadius.circular(TokensStrip.rCard),
                       child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 13,
-                    ),
-                    decoration: fxListCardDecoration(context, accent: brand),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 42,
-                          height: 42,
-                          decoration: BoxDecoration(
-                            color: isDark ? brandDeep : brand,
-                            shape: BoxShape.circle,
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            nome.isNotEmpty ? nome[0].toUpperCase() : '?',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 13,
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                nome,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: ink,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                        decoration: fxListCardDecoration(
+                          context,
+                          accent: brand,
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 42,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                color: isDark ? brandDeep : brand,
+                                shape: BoxShape.circle,
                               ),
-                              if (meta.isNotEmpty) ...[
-                                const SizedBox(height: 2),
-                                Text(
-                                  meta,
-                                  style: TextStyle(
-                                    fontSize: 11.5,
-                                    color: mute,
-                                    height: 1.35,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
+                              alignment: Alignment.center,
+                              child: Text(
+                                nome.isNotEmpty ? nome[0].toUpperCase() : '?',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
                                 ),
-                              ],
-                              if (duplicado) ...[
-                                const SizedBox(height: 6),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 3,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: EagleTokens.warnSoft,
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
-                                  child: Text(
-                                    'Já cadastrado',
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    nome,
                                     style: TextStyle(
-                                      fontSize: 10.5,
+                                      fontSize: 14,
                                       fontWeight: FontWeight.w700,
-                                      color: EagleTokens.warn,
+                                      color: ink,
                                     ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                              ],
-                            ],
-                          ),
+                                  if (meta.isNotEmpty) ...[
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      meta,
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        color: mute,
+                                        height: 1.35,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                  if (duplicado) ...[
+                                    const SizedBox(height: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 3,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: EagleTokens.warnSoft,
+                                        borderRadius: BorderRadius.circular(
+                                          999,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'Já cadastrado',
+                                        style: TextStyle(
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w700,
+                                          color: EagleTokens.warn,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: 'Remover da lista',
+                              onPressed: () => _removerAluno(index),
+                              icon: Icon(
+                                Icons.close_rounded,
+                                size: 20,
+                                color: mute,
+                              ),
+                            ),
+                          ],
                         ),
-                        IconButton(
-                          tooltip: 'Remover da lista',
-                          onPressed: () => _removerAluno(index),
-                          icon: Icon(
-                            Icons.close_rounded,
-                            size: 20,
-                            color: mute,
-                          ),
-                        ),
-                      ],
-                    ),
                       ),
                     ),
                   ),
@@ -784,7 +815,8 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
             }),
             const SizedBox(height: TokensStrip.s3),
             FxLiquidPrimaryButton(
-              label: 'Confirmar e salvar ${alunos.where((a) => a['duplicado'] != true).length} alunos',
+              label:
+                  'Confirmar e salvar ${alunos.where((a) => a['duplicado'] != true).length} alunos',
               icon: Icons.check_rounded,
               loading: _isSaving,
               loadingLabel: 'Salvando alunos...',

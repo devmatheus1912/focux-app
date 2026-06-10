@@ -774,4 +774,3 @@ class _PerformanceEvolutionCard extends StatelessWidget {
     return '$formatted $unidade';
   }
 }
-

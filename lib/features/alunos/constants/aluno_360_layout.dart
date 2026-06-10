@@ -17,10 +17,14 @@ abstract final class Aluno360Layout {
   static const double insetCardRadius = TokensStrip.rCard;
   static const double tabBarHeight = 44;
   static const double tabContentGap = TokensStrip.s4;
-  static const EdgeInsets emptyMiniStatePadding =
-      EdgeInsets.symmetric(horizontal: 14, vertical: 12);
-  static const EdgeInsets moduleTilePadding =
-      EdgeInsets.symmetric(horizontal: 12, vertical: 10);
+  static const EdgeInsets emptyMiniStatePadding = EdgeInsets.symmetric(
+    horizontal: 14,
+    vertical: 12,
+  );
+  static const EdgeInsets moduleTilePadding = EdgeInsets.symmetric(
+    horizontal: 12,
+    vertical: 10,
+  );
   static const double stickyBarContentHeight = 60;
   static const double snackbarStickyReserve = 76;
   static const double operacaoTopSnackHeight = 52;
@@ -30,10 +34,7 @@ abstract final class Aluno360Layout {
   static EdgeInsets operacaoTopSnackMargin(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
     final top =
-        MediaQuery.paddingOf(context).top +
-        kToolbarHeight +
-        tabBarHeight +
-        8;
+        MediaQuery.paddingOf(context).top + kToolbarHeight + tabBarHeight + 8;
     const snackBelowHeaderGap = 12.0;
     return EdgeInsets.fromLTRB(
       screenPadding,
@@ -48,8 +49,7 @@ abstract final class Aluno360Layout {
     BuildContext context, {
     bool compactContactPriority = false,
   }) {
-    final textScale =
-        MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0);
+    final textScale = MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0);
     final base = compactContactPriority ? 58.0 : 70.0;
     return base + ((textScale - 1) * 20);
   }
@@ -65,10 +65,7 @@ abstract final class Aluno360Layout {
     bool compactContactPriority = false,
   }) {
     return heroHeaderMinExtent(context) +
-        heroBodyHeight(
-          context,
-          compactContactPriority: compactContactPriority,
-        );
+        heroBodyHeight(context, compactContactPriority: compactContactPriority);
   }
 
   /// Pinned toolbar + tab bar (content should not scroll under this stack).
@@ -78,9 +75,7 @@ abstract final class Aluno360Layout {
 
   /// Bottom padding so Operação content clears the sticky CTA bar.
   static double operacaoScrollBottomReserve(BuildContext context) {
-    return stickyBarContentHeight +
-        MediaQuery.paddingOf(context).bottom +
-        40;
+    return stickyBarContentHeight + MediaQuery.paddingOf(context).bottom + 40;
   }
 
   /// Centers Operação tab content on wide screens.
@@ -134,9 +129,7 @@ abstract final class Aluno360Layout {
               ? Colors.white.withValues(alpha: 0.04)
               : primary.withValues(alpha: 0.035),
       borderRadius: BorderRadius.circular(insetCardRadius),
-      border: Border.all(
-        color: isDark ? line : line.withValues(alpha: 0.85),
-      ),
+      border: Border.all(color: isDark ? line : line.withValues(alpha: 0.85)),
     );
   }
 
@@ -229,11 +222,9 @@ abstract final class Aluno360Layout {
 
   /// Module tile subtitle.
   static TextStyle moduleTileSubtitleStyle(BuildContext context, Color mute) {
-    return captionStyle(context).copyWith(
-      color: mute,
-      fontSize: 12,
-      height: 1.25,
-    );
+    return captionStyle(
+      context,
+    ).copyWith(color: mute, fontSize: 12, height: 1.25);
   }
 
   /// Tab bar selected label (Operação · Evolução · Ferramentas).
@@ -255,10 +246,7 @@ abstract final class Aluno360Layout {
 
   /// Compact secondary actions in empty states.
   static TextStyle secondaryActionLabelStyle() {
-    return AppTypography.inter(
-      fontSize: 12,
-      fontWeight: FontWeight.w600,
-    );
+    return AppTypography.inter(fontSize: 12, fontWeight: FontWeight.w600);
   }
 
   /// Chip / button labels inside Operação cards.
@@ -384,7 +372,10 @@ abstract final class Aluno360Layout {
     );
   }
 
-  static Color operacaoOutlinedForeground(Color primary, {required bool isDark}) {
+  static Color operacaoOutlinedForeground(
+    Color primary, {
+    required bool isDark,
+  }) {
     return isDark ? primary : Color.lerp(primary, Colors.black, 0.32)!;
   }
 
@@ -426,10 +417,7 @@ abstract final class Aluno360Layout {
   static const double timelineSpineWidth = 2;
 
   /// Pill background for mini autonomy / signal chips (WCAG-friendly contrast).
-  static BoxDecoration miniChipDecoration(
-    Color color, {
-    required bool isDark,
-  }) {
+  static BoxDecoration miniChipDecoration(Color color, {required bool isDark}) {
     return BoxDecoration(
       color: color.withValues(alpha: isDark ? 0.22 : 0.12),
       borderRadius: BorderRadius.circular(999),

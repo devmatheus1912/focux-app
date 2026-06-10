@@ -31,8 +31,8 @@ class IaProgressaoResultActionBar extends StatelessWidget {
         if (showApplyTreino && onApplyTreino != null) ...[
           Semantics(
             button: true,
-              label: 'Ver treinos do aluno para conferir cargas',
-              child: FilledButton.icon(
+            label: 'Ver treinos do aluno para conferir cargas',
+            child: FilledButton.icon(
               onPressed: onApplyTreino,
               icon: const Icon(Icons.fitness_center_rounded, size: 18),
               label: const Text('Ver treinos do aluno'),

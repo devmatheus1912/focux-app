@@ -20,10 +20,7 @@ class DashboardHorizontalScrollPeek extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        Semantics(
-          label: 'Deslize horizontalmente para ver mais',
-          child: child,
-        ),
+        Semantics(label: 'Deslize horizontalmente para ver mais', child: child),
         Positioned(
           right: 0,
           top: 0,

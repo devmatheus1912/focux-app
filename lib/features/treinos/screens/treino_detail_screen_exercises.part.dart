@@ -28,7 +28,8 @@ class _TreinoExerciseReorderList extends StatefulWidget {
       _TreinoExerciseReorderListState();
 }
 
-class _TreinoExerciseReorderListState extends State<_TreinoExerciseReorderList> {
+class _TreinoExerciseReorderListState
+    extends State<_TreinoExerciseReorderList> {
   late List<TreinoExercicioItem> _items;
 
   @override
@@ -122,9 +123,7 @@ class _TreinoExerciseReorderListState extends State<_TreinoExerciseReorderList> 
         final isFirstInGroup = showHeader;
         final isLastInGroup = _isLastInExerciseGroup(_items, index);
         final mute =
-            widget.isDark
-                ? EagleTokens.darkInkMute
-                : TokensStrip.textSecondary;
+            widget.isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
         final row = _ExercicioRow(
           te: te,
@@ -140,7 +139,10 @@ class _TreinoExerciseReorderListState extends State<_TreinoExerciseReorderList> 
               widget.ref.invalidate(treinoProvider(widget.treinoId));
             } catch (error) {
               if (mounted) {
-                FeedbackHelper.showError(this.context, 'Erro ao duplicar: $error');
+                FeedbackHelper.showError(
+                  this.context,
+                  'Erro ao duplicar: $error',
+                );
               }
             }
           },
@@ -674,11 +676,7 @@ class _TreinoHeroActions extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.add_rounded,
-                      color: primary,
-                      size: 19,
-                    ),
+                    Icon(Icons.add_rounded, color: primary, size: 19),
                     const SizedBox(width: 6),
                     Text(
                       'Adicionar exercício',
@@ -704,9 +702,10 @@ class _TreinoHeroActions extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.08)
-                    : TokensStrip.cardBg,
+                color:
+                    isDark
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : TokensStrip.cardBg,
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
                   color: primary.withValues(alpha: isDark ? 0.18 : 0.12),
@@ -772,4 +771,3 @@ class _HeroMetricChip extends StatelessWidget {
     );
   }
 }
-

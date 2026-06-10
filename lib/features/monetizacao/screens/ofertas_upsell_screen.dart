@@ -7,6 +7,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/upsell_repository.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 final upsellRepositoryProvider = Provider(
   (ref) => UpsellRepository(ref.read(apiClientProvider)),
@@ -46,7 +47,11 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
   Future<void> _load() async {
     try {
       final list = await ref.read(upsellRepositoryProvider).listarOfertas();
-      if (mounted) setState(() { _ofertas = list; _loading = false; });
+      if (mounted)
+        setState(() {
+          _ofertas = list;
+          _loading = false;
+        });
     } catch (_) {
       if (mounted) setState(() => _loading = false);
     }
@@ -60,12 +65,14 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
     }
     setState(() => _saving = true);
     try {
-      await ref.read(upsellRepositoryProvider).criar(
-        titulo: _titulo.text.trim(),
-        descricao: _descricao.text.trim(),
-        valor: valor,
-        tipoGatilho: _tipoGatilho,
-      );
+      await ref
+          .read(upsellRepositoryProvider)
+          .criar(
+            titulo: _titulo.text.trim(),
+            descricao: _descricao.text.trim(),
+            valor: valor,
+            tipoGatilho: _tipoGatilho,
+          );
       _titulo.clear();
       _descricao.clear();
       _valor.clear();
@@ -84,68 +91,87 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FxShellScaffold(
-      appBar: FxShellAppBar(title: 'Ofertas para alunos'),
-      body: _loading
-          ? const Center(child: FxLoading())
-          : ListView(
-              padding: const EdgeInsets.all(TokensStrip.s4),
-              children: [
-                Text(
-                  'Ofertas disparam automaticamente quando o aluno conclui uma trilha.',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _titulo,
-                  decoration: const InputDecoration(labelText: 'Título'),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _descricao,
-                  decoration: const InputDecoration(labelText: 'Descrição'),
-                  maxLines: 2,
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _valor,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Valor (R\$)'),
-                ),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  initialValue: _tipoGatilho,
-                  decoration: const InputDecoration(labelText: 'Gatilho'),
-                  items: const [
-                    DropdownMenuItem(value: 'MANUAL', child: Text('Manual')),
-                    DropdownMenuItem(value: 'CHECKIN', child: Text('Check-in')),
-                    DropdownMenuItem(value: 'TRILHA', child: Text('Trilha')),
+    return fxScreenA11yScope(
+      label: 'Ofertas para alunos',
+      child: FxShellScaffold(
+        appBar: FxShellAppBar(title: 'Ofertas para alunos'),
+        body:
+            _loading
+                ? const Center(child: FxLoading())
+                : ListView(
+                  padding: const EdgeInsets.all(TokensStrip.s4),
+                  children: [
+                    Text(
+                      'Ofertas disparam automaticamente quando o aluno conclui uma trilha.',
+                      style: TextStyle(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.7),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _titulo,
+                      decoration: const InputDecoration(labelText: 'Título'),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _descricao,
+                      decoration: const InputDecoration(labelText: 'Descrição'),
+                      maxLines: 2,
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _valor,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Valor (R\$)',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      initialValue: _tipoGatilho,
+                      decoration: const InputDecoration(labelText: 'Gatilho'),
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'MANUAL',
+                          child: Text('Manual'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'CHECKIN',
+                          child: Text('Check-in'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'TRILHA',
+                          child: Text('Trilha'),
+                        ),
+                      ],
+                      onChanged: (v) {
+                        if (v != null) setState(() => _tipoGatilho = v);
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    FilledButton(
+                      onPressed: _saving ? null : _criar,
+                      child: Text(_saving ? 'Salvando…' : 'Criar oferta'),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Ativas (${_ofertas.length})',
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 8),
+                    ..._ofertas.map(
+                      (o) => ListTile(
+                        title: Text(o.titulo),
+                        subtitle: Text(
+                          'R\$ ${o.valor.toStringAsFixed(2)} · ${o.tipoGatilho}',
+                        ),
+                      ),
+                    ),
                   ],
-                  onChanged: (v) {
-                    if (v != null) setState(() => _tipoGatilho = v);
-                  },
                 ),
-                const SizedBox(height: 12),
-                FilledButton(
-                  onPressed: _saving ? null : _criar,
-                  child: Text(_saving ? 'Salvando…' : 'Criar oferta'),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Ativas (${_ofertas.length})',
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 8),
-                ..._ofertas.map(
-                  (o) => ListTile(
-                    title: Text(o.titulo),
-                    subtitle: Text('R\$ ${o.valor.toStringAsFixed(2)} · ${o.tipoGatilho}'),
-                  ),
-                ),
-              ],
-            ),
+      ),
     );
   }
 }

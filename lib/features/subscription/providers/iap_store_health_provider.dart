@@ -21,29 +21,28 @@ class IapStoreHealth {
     this.detail,
   });
 
-  bool get isHealthy =>
-      storeAvailable && (backendReachable ?? true);
+  bool get isHealthy => storeAvailable && (backendReachable ?? true);
 }
 
 final iapStoreHealthProvider =
     StateNotifierProvider<IapStoreHealthNotifier, IapStoreHealth>((ref) {
-  final notifier = IapStoreHealthNotifier(
-    ref.read(iapServiceProvider),
-    ref.read(paymentApiClientProvider),
-  );
-  notifier.start();
-  ref.onDispose(notifier.dispose);
-  return notifier;
-});
+      final notifier = IapStoreHealthNotifier(
+        ref.read(iapServiceProvider),
+        ref.read(paymentApiClientProvider),
+      );
+      notifier.start();
+      ref.onDispose(notifier.dispose);
+      return notifier;
+    });
 
 class IapStoreHealthNotifier extends StateNotifier<IapStoreHealth> {
   IapStoreHealthNotifier(this._iap, this._payment)
-      : super(
-          IapStoreHealth(
-            storeAvailable: false,
-            checkedAt: DateTime.fromMillisecondsSinceEpoch(0),
-          ),
-        );
+    : super(
+        IapStoreHealth(
+          storeAvailable: false,
+          checkedAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+      );
 
   final IapService _iap;
   final PaymentApiClient _payment;

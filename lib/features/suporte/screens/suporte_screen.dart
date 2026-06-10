@@ -14,9 +14,9 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import '../../../core/theme/tokens_strip.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 part 'suporte_screen_widgets.part.dart';
-
 
 const _severidades = ['BAIXA', 'MEDIA', 'ALTA', 'CRITICA'];
 
@@ -168,56 +168,63 @@ class _SuporteScreenState extends ConsumerState<SuporteScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FxShellScaffold(
-      useMesh: true,
-      extendBody: true,
-      safeArea: false,
-      body: FxContentWidthLimiter(
-        child: SafeArea(
-        child: Column(
-          children: [
-            Flexible(
-              fit: FlexFit.loose,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _SupportHeader(
-                      ticket: _ticketCriado,
-                      onTicketsTap: _abrirTicketsSheet,
+    return fxScreenA11yScope(
+      label: 'Suporte',
+      child: FxShellScaffold(
+        useMesh: true,
+        extendBody: true,
+        safeArea: false,
+        body: FxContentWidthLimiter(
+          child: SafeArea(
+            child: Column(
+              children: [
+                Flexible(
+                  fit: FlexFit.loose,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _SupportHeader(
+                          ticket: _ticketCriado,
+                          onTicketsTap: _abrirTicketsSheet,
+                        ),
+                        _QuickActions(
+                          onPromptTap: _enviarMensagem,
+                          onOpenTicketTap: _abrirTicketSheet,
+                          onTicketsTap: _abrirTicketsSheet,
+                        ),
+                      ],
                     ),
-                    _QuickActions(
-                      onPromptTap: _enviarMensagem,
-                      onOpenTicketTap: _abrirTicketSheet,
-                      onTicketsTap: _abrirTicketsSheet,
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollCtrl,
+                    padding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s4,
+                      14,
+                      16,
+                      18,
+                    ),
+                    itemCount: _mensagens.length + (_enviandoChat ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index >= _mensagens.length) {
+                        return const _TypingIndicator();
+                      }
+                      return _BubbleMensagem(msg: _mensagens[index]);
+                    },
+                  ),
+                ),
+                _ChatComposer(
+                  controller: _chatCtrl,
+                  sending: _enviandoChat,
+                  onSend: () => _enviarMensagem(),
+                ),
+              ],
             ),
-            Expanded(
-              child: ListView.builder(
-                controller: _scrollCtrl,
-                padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 14, 16, 18),
-                itemCount: _mensagens.length + (_enviandoChat ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index >= _mensagens.length) {
-                    return const _TypingIndicator();
-                  }
-                  return _BubbleMensagem(msg: _mensagens[index]);
-                },
-              ),
-            ),
-            _ChatComposer(
-              controller: _chatCtrl,
-              sending: _enviandoChat,
-              onSend: () => _enviarMensagem(),
-            ),
-          ],
+          ),
         ),
-      ),
       ),
     );
   }
 }
-

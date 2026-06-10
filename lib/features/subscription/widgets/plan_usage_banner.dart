@@ -61,7 +61,10 @@ class PlanUsageBanner extends ConsumerWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 13,
-                          color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+                          color:
+                              isDark
+                                  ? EagleTokens.darkInk
+                                  : TokensStrip.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),

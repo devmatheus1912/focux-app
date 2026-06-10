@@ -57,7 +57,9 @@ class FeedbackVideoRepository {
 
   Future<List<FeedbackVideo>> meus() async {
     final r = await _dio.get('/api/feedback-videos/me');
-    return (r.data as List).map((e) => FeedbackVideo.fromJson(e as Map<String, dynamic>)).toList();
+    return (r.data as List)
+        .map((e) => FeedbackVideo.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<FeedbackVideo> registrar({
@@ -83,11 +85,14 @@ class FeedbackVideoRepository {
     required int exercicioId,
     String? comentario,
   }) async {
-    final r = await _dio.post('/api/feedback-videos/me', data: {
-      'videoUrl': videoUrl,
-      'exercicioId': exercicioId,
-      'comentario': comentario,
-    });
+    final r = await _dio.post(
+      '/api/feedback-videos/me',
+      data: {
+        'videoUrl': videoUrl,
+        'exercicioId': exercicioId,
+        'comentario': comentario,
+      },
+    );
     return FeedbackVideo.fromJson(r.data as Map<String, dynamic>);
   }
 
@@ -109,6 +114,8 @@ class ExercicioOpcao {
 
   ExercicioOpcao({required this.id, required this.nome});
 
-  factory ExercicioOpcao.fromJson(Map<String, dynamic> j) =>
-      ExercicioOpcao(id: (j['id'] as num).toInt(), nome: j['nome'] as String? ?? '');
+  factory ExercicioOpcao.fromJson(Map<String, dynamic> j) => ExercicioOpcao(
+    id: (j['id'] as num).toInt(),
+    nome: j['nome'] as String? ?? '',
+  );
 }

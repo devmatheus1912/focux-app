@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -36,12 +36,12 @@ import '../services/subscription_biometric_gate.dart';
 import '../services/subscription_device_guard.dart';
 import '../assinatura_route_args.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/theme/tokens_strip.dart';
 
 part 'assinatura_screen_footer.part.dart';
 part 'assinatura_screen_build.part.dart';
 part 'assinatura_screen_build_body.part.dart';
-
 
 part 'paywall_layout.dart';
 
@@ -158,12 +158,14 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     FeedbackHelper.showInfo(context, 'Verificando compras anteriores...');
 
     try {
-      final result = await ref.read(iapServiceProvider).restoreAndVerifyPurchases(
-        onVerified: (_, __) async {
-          ref.invalidate(perfilProvider);
-          ref.invalidate(planoFeaturesProvider);
-        },
-      );
+      final result = await ref
+          .read(iapServiceProvider)
+          .restoreAndVerifyPurchases(
+            onVerified: (_, __) async {
+              ref.invalidate(perfilProvider);
+              ref.invalidate(planoFeaturesProvider);
+            },
+          );
       ref.invalidate(perfilProvider);
       ref.invalidate(planoFeaturesProvider);
 
@@ -260,7 +262,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   Future<void> _reconcilePlanFromServer() async {
     await ref.read(assinaturaRepositoryProvider).clearVitrineCache();
     ref.invalidate(paywallVitrineProvider);
-    await ref.read(planoFeaturesProvider.notifier).refresh(reconcileFirst: true);
+    await ref
+        .read(planoFeaturesProvider.notifier)
+        .refresh(reconcileFirst: true);
     ref.invalidate(perfilProvider);
   }
 
@@ -290,21 +294,22 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     }
 
     final GlobalKey anchorKey = switch (target) {
-      PaywallScrollTarget.planos || PaywallScrollTarget.seuPlano =>
-        _paywallPlanosKey,
+      PaywallScrollTarget.planos ||
+      PaywallScrollTarget.seuPlano => _paywallPlanosKey,
       PaywallScrollTarget.upgrade => _paywallUpgradeKey,
       PaywallScrollTarget.comparar => _paywallCompareKey,
       PaywallScrollTarget.legal => _paywallLegalKey,
-      PaywallScrollTarget.features || PaywallScrollTarget.roi =>
-        _paywallPlanosKey,
+      PaywallScrollTarget.features ||
+      PaywallScrollTarget.roi => _paywallPlanosKey,
     };
 
     final ctx = anchorKey.currentContext;
     if (ctx == null) return;
     HapticFeedback.selectionClick();
-    final motion = TokensStrip.prefersReducedMotion(context)
-        ? Duration.zero
-        : const Duration(milliseconds: 420);
+    final motion =
+        TokensStrip.prefersReducedMotion(context)
+            ? Duration.zero
+            : const Duration(milliseconds: 420);
     Scrollable.ensureVisible(
       ctx,
       duration: motion,
@@ -316,9 +321,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   void _scrollToUpgradeTargetCard() {
     final ctx = _paywallUpgradeTargetKey.currentContext;
     if (ctx == null) return;
-    final motion = TokensStrip.prefersReducedMotion(context)
-        ? Duration.zero
-        : const Duration(milliseconds: 420);
+    final motion =
+        TokensStrip.prefersReducedMotion(context)
+            ? Duration.zero
+            : const Duration(milliseconds: 420);
     Scrollable.ensureVisible(
       ctx,
       duration: motion,
@@ -455,7 +461,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         ProductEvents.checkoutCompleted,
         props: {
           'plan_id': purchasedPlan.apiName,
-          if (purchase.purchaseID != null) 'transaction_id': purchase.purchaseID,
+          if (purchase.purchaseID != null)
+            'transaction_id': purchase.purchaseID,
         },
       );
 
@@ -531,9 +538,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   Future<void> _startCheckout(SubscriptionPlan plan, Plano backendPlan) async {
     if (_loadingCheckout || _syncingPurchase) return;
 
-    if (!kIsWeb &&
-        subscriptionUsesNativeStore &&
-        !_storeAvailable) {
+    if (!kIsWeb && subscriptionUsesNativeStore && !_storeAvailable) {
       FeedbackHelper.showError(
         context,
         'Loja do dispositivo indisponível. Tente novamente em instantes.',
@@ -556,13 +561,12 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       );
       if (!mounted || !biometricOk) return;
 
-      final product = _productDetails[
-        SubscriptionProducts.productIdFor(plan, _billingPeriod)];
-      final priceDisplay = _formatPrice(
-        backendPlan,
-        product,
-        _billingPeriod,
-      );
+      final product =
+          _productDetails[SubscriptionProducts.productIdFor(
+            plan,
+            _billingPeriod,
+          )];
+      final priceDisplay = _formatPrice(backendPlan, product, _billingPeriod);
       final trialNote =
           plan == SubscriptionPlan.ENTERPRISE &&
                   _trialStatus?.trialEligible == true
@@ -656,5 +660,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => buildAssinaturaScreen(context);
+  Widget build(BuildContext context) => fxScreenA11yScope(
+    label: 'Assinatura',
+    child: buildAssinaturaScreen(context),
+  );
 }

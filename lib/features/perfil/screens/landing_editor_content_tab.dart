@@ -55,10 +55,12 @@ class LandingEditorContentTab extends StatelessWidget {
   final ValueChanged<bool> onFaqExpandedChanged;
   final VoidCallback onAddServico;
   final ValueChanged<int> onRemoveServico;
-  final void Function(int index, {String? titulo, String? descricao}) onUpdateServico;
+  final void Function(int index, {String? titulo, String? descricao})
+  onUpdateServico;
   final VoidCallback onAddFaq;
   final ValueChanged<int> onRemoveFaq;
-  final void Function(int index, {String? pergunta, String? resposta}) onUpdateFaq;
+  final void Function(int index, {String? pergunta, String? resposta})
+  onUpdateFaq;
   final VoidCallback onExitReviewFocus;
   final ValueChanged<LandingEditorContentSection> onJumpToSection;
 
@@ -68,9 +70,10 @@ class LandingEditorContentTab extends StatelessWidget {
     final focusFaq = c.reviewFocusMode ? c.focusFaqIndices() : null;
     final showHero = !c.reviewFocusMode || c.focusHeroIssue();
     final showSecondarySections = !c.reviewFocusMode;
-    final visibleFaqIndices = focusFaq == null
-        ? List<int>.generate(c.faq.length, (i) => i)
-        : (focusFaq.toList()..sort());
+    final visibleFaqIndices =
+        focusFaq == null
+            ? List<int>.generate(c.faq.length, (i) => i)
+            : (focusFaq.toList()..sort());
     final hiddenFaqCount = c.faq.length - visibleFaqIndices.length;
     final faqPayload = c.faqPayload();
 
@@ -113,9 +116,10 @@ class LandingEditorContentTab extends StatelessWidget {
                 children: [
                   OutlinedButton.icon(
                     onPressed: c.generatingHero ? null : onGenerateHero,
-                    icon: c.generatingHero
-                        ? const FxLoading(size: 16, strokeWidth: 2)
-                        : const Icon(Icons.auto_awesome_outlined),
+                    icon:
+                        c.generatingHero
+                            ? const FxLoading(size: 16, strokeWidth: 2)
+                            : const Icon(Icons.auto_awesome_outlined),
                     label: const Text('Sugerir textos com IA'),
                   ),
                   const SizedBox(height: 12),
@@ -146,8 +150,9 @@ class LandingEditorContentTab extends StatelessWidget {
                   const SizedBox(height: 8),
                   Builder(
                     builder: (context) {
-                      final accentFix =
-                          landingCtaAccentSuggestion(c.primaryCta.text);
+                      final accentFix = landingCtaAccentSuggestion(
+                        c.primaryCta.text,
+                      );
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -156,7 +161,8 @@ class LandingEditorContentTab extends StatelessWidget {
                             decoration: landingEditorFieldDecoration(
                               context,
                               labelText: 'Texto do botão principal',
-                              helperText: 'Ex.: Quero começar · Agendar avaliação',
+                              helperText:
+                                  'Ex.: Quero começar · Agendar avaliação',
                             ),
                             scrollPadding: const EdgeInsets.only(bottom: 120),
                             textInputAction: TextInputAction.done,
@@ -168,13 +174,17 @@ class LandingEditorContentTab extends StatelessWidget {
                               child: TextButton.icon(
                                 onPressed: () {
                                   c.primaryCta.text = accentFix;
-                                  c.primaryCta.selection = TextSelection.collapsed(
+                                  c
+                                      .primaryCta
+                                      .selection = TextSelection.collapsed(
                                     offset: accentFix.length,
                                   );
                                   onMarkDirty();
                                 },
                                 icon: const Icon(Icons.spellcheck, size: 18),
-                                label: const Text('Corrigir acento em "avaliação"'),
+                                label: const Text(
+                                  'Corrigir acento em "avaliação"',
+                                ),
                               ),
                             ),
                           ],
@@ -188,20 +198,25 @@ class LandingEditorContentTab extends StatelessWidget {
                     hint:
                         'Mostra quem você é em "Quem vai te acompanhar". Por padrão usamos sua foto de perfil — envie outra aqui só para a landing, sem alterar o perfil.',
                     imageUrl: c.bioImageUrl,
-                    defaultPreviewUrl: landingBioEditorPreviewUrl(c.logoUrl, c.slug),
+                    defaultPreviewUrl: landingBioEditorPreviewUrl(
+                      c.logoUrl,
+                      c.slug,
+                    ),
                     uploading: c.uploadingBio,
                     onUpload: onUploadBio,
                     onPreview: onPreviewLanding,
-                    onRemove: c.bioImageUrl != null && c.bioImageUrl!.isNotEmpty
-                        ? onRemoveBio
-                        : null,
+                    onRemove:
+                        c.bioImageUrl != null && c.bioImageUrl!.isNotEmpty
+                            ? onRemoveBio
+                            : null,
                     onUseDefault: onUseDefaultBio,
                     useDefaultLabel: 'Usar foto do perfil',
-                    defaultActiveHint: landingUsesDefaultBioImage(c.bioImageUrl)
-                        ? (c.logoUrl != null && c.logoUrl!.isNotEmpty
-                            ? 'Usando sua foto de perfil. Envie outra aqui só para a landing.'
-                            : 'Sem foto de perfil — adicione no perfil ou envie uma foto aqui.')
-                        : null,
+                    defaultActiveHint:
+                        landingUsesDefaultBioImage(c.bioImageUrl)
+                            ? (c.logoUrl != null && c.logoUrl!.isNotEmpty
+                                ? 'Usando sua foto de perfil. Envie outra aqui só para a landing.'
+                                : 'Sem foto de perfil — adicione no perfil ou envie uma foto aqui.')
+                            : null,
                   ),
                 ],
               ),
@@ -212,32 +227,34 @@ class LandingEditorContentTab extends StatelessWidget {
           KeyedSubtree(
             key: c.coverSectionKey,
             child: LandingCollapsibleSection(
-            title: 'Foto de capa',
-            hint:
-                'Opcional — aparece como fundo do topo com gradiente da sua cor de marca.',
-            badgeLabel: 'Opcional',
-            expanded: c.coverExpanded,
-            onExpandedChanged: onCoverExpandedChanged,
-            child: LandingEditorImageUploadCard(
-              compact: true,
-              imageUrl: c.heroImageUrl,
-              defaultPreviewUrl: landingDefaultHeroImageUrl(c.slug),
-              uploading: c.uploadingHero,
-              onUpload: onUploadHero,
-              optional: true,
-              emptyHint:
-                  'Sem capa personalizada — usamos foto premium de academia no topo.',
-              defaultActiveHint: landingUsesDefaultHeroImage(c.heroImageUrl)
-                  ? 'Padrão ativo — ambiente de academia profissional. Envie sua foto para personalizar.'
-                  : null,
-              onPreview: onPreviewLanding,
-              onRemove: c.heroImageUrl != null && c.heroImageUrl!.isNotEmpty
-                  ? onRemoveHero
-                  : null,
-              onUseDefault: onUseDefaultHero,
-              useDefaultLabel: 'Usar padrão',
+              title: 'Foto de capa',
+              hint:
+                  'Opcional — aparece como fundo do topo com gradiente da sua cor de marca.',
+              badgeLabel: 'Opcional',
+              expanded: c.coverExpanded,
+              onExpandedChanged: onCoverExpandedChanged,
+              child: LandingEditorImageUploadCard(
+                compact: true,
+                imageUrl: c.heroImageUrl,
+                defaultPreviewUrl: landingDefaultHeroImageUrl(c.slug),
+                uploading: c.uploadingHero,
+                onUpload: onUploadHero,
+                optional: true,
+                emptyHint:
+                    'Sem capa personalizada — usamos foto premium de academia no topo.',
+                defaultActiveHint:
+                    landingUsesDefaultHeroImage(c.heroImageUrl)
+                        ? 'Padrão ativo — ambiente de academia profissional. Envie sua foto para personalizar.'
+                        : null,
+                onPreview: onPreviewLanding,
+                onRemove:
+                    c.heroImageUrl != null && c.heroImageUrl!.isNotEmpty
+                        ? onRemoveHero
+                        : null,
+                onUseDefault: onUseDefaultHero,
+                useDefaultLabel: 'Usar padrão',
+              ),
             ),
-          ),
           ),
         if (showHero) const SizedBox(height: 12),
         if (showSecondarySections)
@@ -284,7 +301,8 @@ class LandingEditorContentTab extends StatelessWidget {
             key: c.servicosSectionKey,
             child: LandingCollapsibleSection(
               title: 'Serviços',
-              hint: 'Formatos que você oferece — online, presencial ou híbrido.',
+              hint:
+                  'Formatos que você oferece — online, presencial ou híbrido.',
               expanded: c.servicosExpanded,
               onExpandedChanged: onServicosExpandedChanged,
               onAdd: onAddServico,
@@ -307,7 +325,9 @@ class LandingEditorContentTab extends StatelessWidget {
                               children: [
                                 Text(
                                   'Serviço ${i + 1}',
-                                  style: const TextStyle(fontWeight: FontWeight.w700),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                                 const Spacer(),
                                 landingEditorDeleteIconButton(
@@ -322,7 +342,9 @@ class LandingEditorContentTab extends StatelessWidget {
                               decoration: landingEditorFieldDecoration(
                                 context,
                                 labelText: 'Nome do serviço',
-                                helperText: landingPolishPreviewHint(c.servicos[i].titulo),
+                                helperText: landingPolishPreviewHint(
+                                  c.servicos[i].titulo,
+                                ),
                               ),
                               onChanged: (v) => onUpdateServico(i, titulo: v),
                             ),
@@ -335,7 +357,8 @@ class LandingEditorContentTab extends StatelessWidget {
                                 labelText: 'Descrição curta',
                               ),
                               maxLines: 3,
-                              onChanged: (v) => onUpdateServico(i, descricao: v),
+                              onChanged:
+                                  (v) => onUpdateServico(i, descricao: v),
                             ),
                           ],
                         ),
@@ -351,9 +374,10 @@ class LandingEditorContentTab extends StatelessWidget {
           key: c.faqSectionKey,
           child: LandingCollapsibleSection(
             title: 'Dúvidas frequentes',
-            hint: c.reviewFocusMode
-                ? 'Mostrando só perguntas que precisam de revisão.'
-                : 'Respostas que removem objeções antes do cliente chamar.',
+            hint:
+                c.reviewFocusMode
+                    ? 'Mostrando só perguntas que precisam de revisão.'
+                    : 'Respostas que removem objeções antes do cliente chamar.',
             expanded: c.faqExpanded,
             onExpandedChanged: onFaqExpandedChanged,
             onAdd: c.reviewFocusMode ? null : onAddFaq,
@@ -373,7 +397,9 @@ class LandingEditorContentTab extends StatelessWidget {
                           : '$hiddenFaqCount perguntas ok — ocultas no modo foco.',
                       style: landingEditorMutedStyle(context).copyWith(
                         fontWeight: FontWeight.w700,
-                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.9),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.9),
                       ),
                     ),
                   ),
@@ -381,18 +407,22 @@ class LandingEditorContentTab extends StatelessWidget {
                   KeyedSubtree(
                     key: c.faqKeyFor(i),
                     child: LandingHighlightCard(
-                      highlighted: c.highlightedFaqIndex == i ||
+                      highlighted:
+                          c.highlightedFaqIndex == i ||
                           landingFaqItemHasIssue(faq: faqPayload, index: i),
-                      issueHint: landingFaqItemHasIssue(faq: faqPayload, index: i)
-                          ? 'Revise o texto desta pergunta'
-                          : null,
+                      issueHint:
+                          landingFaqItemHasIssue(faq: faqPayload, index: i)
+                              ? 'Revise o texto desta pergunta'
+                              : null,
                       child: Column(
                         children: [
                           Row(
                             children: [
                               Text(
                                 'Pergunta ${i + 1}',
-                                style: const TextStyle(fontWeight: FontWeight.w700),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                               const Spacer(),
                               landingEditorDeleteIconButton(
@@ -407,7 +437,9 @@ class LandingEditorContentTab extends StatelessWidget {
                             decoration: landingEditorFieldDecoration(
                               context,
                               labelText: 'Pergunta',
-                              helperText: landingPolishPreviewHint(c.faq[i].pergunta),
+                              helperText: landingPolishPreviewHint(
+                                c.faq[i].pergunta,
+                              ),
                             ),
                             onChanged: (v) => onUpdateFaq(i, pergunta: v),
                           ),
@@ -418,7 +450,9 @@ class LandingEditorContentTab extends StatelessWidget {
                             decoration: landingEditorFieldDecoration(
                               context,
                               labelText: 'Resposta',
-                              helperText: landingPolishPreviewHint(c.faq[i].resposta),
+                              helperText: landingPolishPreviewHint(
+                                c.faq[i].resposta,
+                              ),
                             ),
                             maxLines: 3,
                             onChanged: (v) => onUpdateFaq(i, resposta: v),

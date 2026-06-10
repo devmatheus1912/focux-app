@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/onboarding_repository.dart';
 import '../widgets/setup_step_widgets.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 class OnboardingWizardScreen extends ConsumerStatefulWidget {
   const OnboardingWizardScreen({super.key});
@@ -17,7 +18,8 @@ class OnboardingWizardScreen extends ConsumerStatefulWidget {
       _OnboardingWizardScreenState();
 }
 
-class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen> {
+class _OnboardingWizardScreenState
+    extends ConsumerState<OnboardingWizardScreen> {
   OnboardingWizard? _wizard;
   bool _loading = true;
   int _previousCompleted = 0;
@@ -32,7 +34,8 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final w = await OnboardingRepository(ref.read(apiClientProvider)).wizard();
+      final w =
+          await OnboardingRepository(ref.read(apiClientProvider)).wizard();
       if (!mounted) return;
       final completed = w.completedCount;
       if (completed > _previousCompleted && _previousCompleted > 0) {
@@ -67,83 +70,86 @@ class _OnboardingWizardScreenState extends ConsumerState<OnboardingWizardScreen>
   Widget build(BuildContext context) {
     final wizard = _wizard;
 
-    return FxShellScaffold(
-      appBar: FxShellAppBar(
-        title: 'Setup D0',
-        subtitle: 'Primeira vitória em 10 min',
-        onBack: () => context.go('/dashboard/personal'),
-      ),
-      body:
-          _loading
-              ? const SetupWizardSkeleton()
-              : wizard == null
-              ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(TokensStrip.s5),
+    return fxScreenA11yScope(
+      label: 'Setup D0',
+      child: FxShellScaffold(
+        appBar: FxShellAppBar(
+          title: 'Setup D0',
+          subtitle: 'Primeira vitória em 10 min',
+          onBack: () => context.go('/dashboard/personal'),
+        ),
+        body:
+            _loading
+                ? const SetupWizardSkeleton()
+                : wizard == null
+                ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(TokensStrip.s5),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'Não foi possível carregar o setup.',
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: TokensStrip.s4),
+                        SetupWizardCta(
+                          label: 'Tentar novamente',
+                          onPressed: _load,
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+                : RefreshIndicator(
+                  onRefresh: _load,
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text(
-                        'Não foi possível carregar o setup.',
-                        textAlign: TextAlign.center,
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          TokensStrip.s3,
+                          TokensStrip.s4,
+                          0,
+                        ),
+                        child: SetupProgressHeader(
+                          progressPercent: wizard.progressPercent,
+                          completedCount: wizard.completedCount,
+                          totalCount: wizard.totalCount,
+                          nextActionLabel: wizard.nextActionLabel,
+                        ),
                       ),
-                      const SizedBox(height: TokensStrip.s4),
-                      SetupWizardCta(
-                        label: 'Tentar novamente',
-                        onPressed: _load,
+                      Expanded(
+                        child: ListView(
+                          padding: const EdgeInsets.fromLTRB(
+                            TokensStrip.s4,
+                            TokensStrip.s4,
+                            TokensStrip.s4,
+                            TokensStrip.s2,
+                          ),
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: _buildStepList(wizard),
+                        ),
+                      ),
+                      SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.all(TokensStrip.s4),
+                          child: SetupWizardCta(
+                            label:
+                                wizard.allStepsDone
+                                    ? 'Concluir setup'
+                                    : 'Continuar setup',
+                            onPressed:
+                                wizard.allStepsDone || wizard.wizardCompleto
+                                    ? _concluir
+                                    : () => _abrirStep(wizard.nextActionRoute),
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
-              )
-              : RefreshIndicator(
-                onRefresh: _load,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        TokensStrip.s4,
-                        TokensStrip.s3,
-                        TokensStrip.s4,
-                        0,
-                      ),
-                      child: SetupProgressHeader(
-                        progressPercent: wizard.progressPercent,
-                        completedCount: wizard.completedCount,
-                        totalCount: wizard.totalCount,
-                        nextActionLabel: wizard.nextActionLabel,
-                      ),
-                    ),
-                    Expanded(
-                      child: ListView(
-                        padding: const EdgeInsets.fromLTRB(
-                          TokensStrip.s4,
-                          TokensStrip.s4,
-                          TokensStrip.s4,
-                          TokensStrip.s2,
-                        ),
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        children: _buildStepList(wizard),
-                      ),
-                    ),
-                    SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.all(TokensStrip.s4),
-                        child: SetupWizardCta(
-                          label:
-                              wizard.allStepsDone
-                                  ? 'Concluir setup'
-                                  : 'Continuar setup',
-                          onPressed:
-                              wizard.allStepsDone || wizard.wizardCompleto
-                                  ? _concluir
-                                  : () => _abrirStep(wizard.nextActionRoute),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+      ),
     );
   }
 

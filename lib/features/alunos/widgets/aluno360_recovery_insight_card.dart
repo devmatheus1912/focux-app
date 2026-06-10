@@ -42,7 +42,11 @@ class _Aluno360RecoveryInsightCardState
               decoration: chrome.panel(radius: TokensStrip.rCard),
               child: Row(
                 children: [
-                  Icon(Icons.watch_off_outlined, color: EagleTokens.warn, size: 18),
+                  Icon(
+                    Icons.watch_off_outlined,
+                    color: EagleTokens.warn,
+                    size: 18,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -72,7 +76,10 @@ class _Aluno360RecoveryInsightCardState
                 borderRadius: BorderRadius.circular(TokensStrip.rCard),
                 child: Container(
                   constraints: const BoxConstraints(minHeight: 52),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 14,
+                  ),
                   decoration: chrome.panel(radius: TokensStrip.rCard),
                   child: Row(
                     children: [
@@ -87,10 +94,9 @@ class _Aluno360RecoveryInsightCardState
                           _expanded
                               ? 'Aluno ainda não conectou Apple Health ou Google Fit. Peça para conectar no app se fizer sentido.'
                               : 'Wearable · não conectado',
-                          style: Aluno360Layout.captionStyle(context).copyWith(
-                            color: chrome.mute,
-                            height: 1.35,
-                          ),
+                          style: Aluno360Layout.captionStyle(
+                            context,
+                          ).copyWith(color: chrome.mute, height: 1.35),
                         ),
                       ),
                       Icon(
@@ -146,10 +152,9 @@ class _Aluno360RecoveryInsightCardState
                         snapshot.recoveryHint,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: Aluno360Layout.captionStyle(context).copyWith(
-                          color: chrome.mute,
-                          height: 1.3,
-                        ),
+                        style: Aluno360Layout.captionStyle(
+                          context,
+                        ).copyWith(color: chrome.mute, height: 1.3),
                       ),
                     ],
                   ),

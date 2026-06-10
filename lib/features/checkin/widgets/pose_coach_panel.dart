@@ -36,9 +36,10 @@ class _PoseCoachPanelState extends State<PoseCoachPanel> {
     setState(() {
       _reps++;
       if (widget.enhancedFeedback) {
-        _formHint = _reps.isEven
-            ? 'Joelhos alinhados — boa profundidade.'
-            : 'Mantenha o core ativo — costas retas.';
+        _formHint =
+            _reps.isEven
+                ? 'Joelhos alinhados — boa profundidade.'
+                : 'Mantenha o core ativo — costas retas.';
       }
     });
     widget.onRepCompleted();
@@ -67,7 +68,11 @@ class _PoseCoachPanelState extends State<PoseCoachPanel> {
         children: [
           Row(
             children: [
-              Icon(Icons.accessibility_new_rounded, color: widget.brand, size: 18),
+              Icon(
+                Icons.accessibility_new_rounded,
+                color: widget.brand,
+                size: 18,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -80,12 +85,13 @@ class _PoseCoachPanelState extends State<PoseCoachPanel> {
                 ),
               ),
               TextButton.icon(
-                onPressed: () => openPoseCameraCoach(
-                  context,
-                  exerciseName: widget.exerciseName,
-                  brand: widget.brand,
-                  onRep: _registerRep,
-                ),
+                onPressed:
+                    () => openPoseCameraCoach(
+                      context,
+                      exerciseName: widget.exerciseName,
+                      brand: widget.brand,
+                      onRep: _registerRep,
+                    ),
                 icon: const Icon(Icons.videocam_outlined, size: 16),
                 label: const Text('Camera'),
               ),
@@ -121,7 +127,11 @@ class _PoseCoachPanelState extends State<PoseCoachPanel> {
 }
 
 class _RepChip extends StatelessWidget {
-  const _RepChip({required this.label, required this.value, required this.brand});
+  const _RepChip({
+    required this.label,
+    required this.value,
+    required this.brand,
+  });
 
   final String label;
   final String value;
@@ -137,9 +147,19 @@ class _RepChip extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(label, style: TextStyle(fontSize: 11, color: brand.withValues(alpha: 0.8))),
+          Text(
+            label,
+            style: TextStyle(fontSize: 11, color: brand.withValues(alpha: 0.8)),
+          ),
           const SizedBox(width: 8),
-          Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: brand)),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: brand,
+            ),
+          ),
         ],
       ),
     );

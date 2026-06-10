@@ -75,7 +75,9 @@ class SetupProgressHeader extends StatelessWidget {
       borderRadius: BorderRadius.circular(TokensStrip.rInput),
       child: TweenAnimationBuilder<double>(
         tween: Tween(begin: 0, end: value),
-        duration: Duration(milliseconds: reduceMotion || !animateValue ? 0 : 420),
+        duration: Duration(
+          milliseconds: reduceMotion || !animateValue ? 0 : 420,
+        ),
         curve: Curves.easeOutCubic,
         builder:
             (_, v, __) => LinearProgressIndicator(
@@ -114,13 +116,14 @@ class SetupProgressHeader extends StatelessWidget {
             ],
           ),
           SizedBox(height: compact ? TokensStrip.s2 : 6),
-          if (!compact && nextActionLabel != null && nextActionLabel!.isNotEmpty)
+          if (!compact &&
+              nextActionLabel != null &&
+              nextActionLabel!.isNotEmpty)
             Text(
               'Próximo: $nextActionLabel',
-              style: TokensStrip.bodyMuted(color: mute).copyWith(
-                fontWeight: FontWeight.w600,
-                height: 1.35,
-              ),
+              style: TokensStrip.bodyMuted(
+                color: mute,
+              ).copyWith(fontWeight: FontWeight.w600, height: 1.35),
             ),
           if (compact) ...[
             Text(
@@ -238,9 +241,9 @@ class SetupStepCard extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             description!,
-                            style: TokensStrip.bodyMuted(color: mute).copyWith(
-                              height: 1.4,
-                            ),
+                            style: TokensStrip.bodyMuted(
+                              color: mute,
+                            ).copyWith(height: 1.4),
                           ),
                         ],
                         if (estimatedMinutes != null) ...[
@@ -388,11 +391,7 @@ class _SetupStepIconBadge extends StatelessWidget {
         child:
             completed
                 ? Icon(Icons.check_rounded, size: iconSize, color: doneColor)
-                : Icon(
-                  setupStepIcon(icon),
-                  size: iconSize,
-                  color: primary,
-                ),
+                : Icon(setupStepIcon(icon), size: iconSize, color: primary),
       ),
     );
   }
@@ -421,11 +420,7 @@ class _SetupStepTrailing extends StatelessWidget {
         color: primary.withValues(alpha: 0.10),
         shape: BoxShape.circle,
       ),
-      child: Icon(
-        Icons.chevron_right_rounded,
-        size: 18,
-        color: primary,
-      ),
+      child: Icon(Icons.chevron_right_rounded, size: 18, color: primary),
     );
   }
 }
@@ -554,10 +549,7 @@ class SetupAllDoneBanner extends StatelessWidget {
 
 /// Passos concluídos colapsados — reduz densidade no wizard.
 class SetupCompletedStepsCollapse extends StatefulWidget {
-  const SetupCompletedStepsCollapse({
-    super.key,
-    required this.titles,
-  });
+  const SetupCompletedStepsCollapse({super.key, required this.titles});
 
   final List<String> titles;
 
@@ -566,7 +558,8 @@ class SetupCompletedStepsCollapse extends StatefulWidget {
       _SetupCompletedStepsCollapseState();
 }
 
-class _SetupCompletedStepsCollapseState extends State<SetupCompletedStepsCollapse> {
+class _SetupCompletedStepsCollapseState
+    extends State<SetupCompletedStepsCollapse> {
   bool _expanded = false;
 
   @override
@@ -601,7 +594,11 @@ class _SetupCompletedStepsCollapseState extends State<SetupCompletedStepsCollaps
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.check_circle_rounded, color: doneColor, size: 18),
+                    Icon(
+                      Icons.check_circle_rounded,
+                      color: doneColor,
+                      size: 18,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -629,10 +626,7 @@ class _SetupCompletedStepsCollapseState extends State<SetupCompletedStepsCollaps
             const SizedBox(height: 4),
             ...widget.titles.map(
               (title) => Padding(
-                padding: const EdgeInsets.only(
-                  left: 8,
-                  bottom: TokensStrip.s2,
-                ),
+                padding: const EdgeInsets.only(left: 8, bottom: TokensStrip.s2),
                 child: Row(
                   children: [
                     Icon(Icons.check_rounded, size: 14, color: doneColor),

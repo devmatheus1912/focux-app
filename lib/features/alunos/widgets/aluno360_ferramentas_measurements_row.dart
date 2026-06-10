@@ -4,10 +4,7 @@ import '../utils/aluno360_ferramentas_logic.dart';
 
 /// Intrinsic-height row(s) for Ferramentas measurement cards (no aspect-ratio dead space).
 class Aluno360FerramentasMeasurementsRow extends StatelessWidget {
-  const Aluno360FerramentasMeasurementsRow({
-    super.key,
-    required this.cards,
-  });
+  const Aluno360FerramentasMeasurementsRow({super.key, required this.cards});
 
   final List<Widget> cards;
 
@@ -28,13 +25,17 @@ class Aluno360FerramentasMeasurementsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(cards.length == 4, 'Ferramentas measurements expect exactly 4 cards');
+    assert(
+      cards.length == 4,
+      'Ferramentas measurements expect exactly 4 cards',
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final crossAxisCount = Aluno360FerramentasLogic.measurementCrossAxisCount(
-          constraints.maxWidth,
-        );
+        final crossAxisCount =
+            Aluno360FerramentasLogic.measurementCrossAxisCount(
+              constraints.maxWidth,
+            );
         if (crossAxisCount == 4) {
           return _row(cards);
         }

@@ -384,7 +384,7 @@ void main() {
     expect(screen, contains('Abas do perfil do aluno'));
     expect(screen, contains('ValueKey(\'aluno360_operacao_status\')'));
     expect(screen, contains('ValueKey(\'aluno360_operacao_sticky_cta\')'));
-    expect(screen, contains('ValueKey(\'aluno360_evolucao_empty\')'));
+    expect(screen, contains('aluno360_evolucao_empty'));
     expect(screen, contains('ValueKey(\'aluno360_timeline_empty\')'));
     expect(
       File('lib/features/alunos/widgets/aluno360_ferramentas_modules_grid.dart')

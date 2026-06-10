@@ -730,7 +730,9 @@ class ExercicioRepository {
   }
 
   Future<int> enriquecerBibliotecaCurada() async {
-    final response = await _dio.post('/api/exercicios/seed/curated/v2/enriquecer');
+    final response = await _dio.post(
+      '/api/exercicios/seed/curated/v2/enriquecer',
+    );
     final data = response.data;
     if (data is Map<String, dynamic>) {
       return (data['atualizados'] as num?)?.toInt() ?? 0;
@@ -739,8 +741,9 @@ class ExercicioRepository {
   }
 
   Future<int> publicarMidiasCuradas() async {
-    final response =
-        await _dio.post('/api/exercicios/seed/curated/v2/publicar-midias');
+    final response = await _dio.post(
+      '/api/exercicios/seed/curated/v2/publicar-midias',
+    );
     final data = response.data;
     if (data is Map<String, dynamic>) {
       return (data['publicados'] as num?)?.toInt() ?? 0;

@@ -15,7 +15,8 @@ import '../utils/aluno360_operacao_logic.dart';
 import 'aluno360_section_header.dart';
 
 class Aluno360FollowUpCard extends ConsumerStatefulWidget {
-  const Aluno360FollowUpCard({super.key, 
+  const Aluno360FollowUpCard({
+    super.key,
     required this.aluno,
     required this.isDark,
     this.compactContactPriority = false,
@@ -60,10 +61,7 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
           ),
     );
     if (confirmed != true) return;
-    await _runAction(
-      () => actions.clearFollowUp(aluno.id),
-      'Follow-up limpo',
-    );
+    await _runAction(() => actions.clearFollowUp(aluno.id), 'Follow-up limpo');
   }
 
   Widget _snoozeMenuButton({
@@ -108,7 +106,10 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
         return Semantics(
           label: 'Adiar follow-up de ${aluno.nome}',
           button: true,
-          child: fullWidth ? SizedBox(width: double.infinity, child: button) : button,
+          child:
+              fullWidth
+                  ? SizedBox(width: double.infinity, child: button)
+                  : button,
         );
       },
     );
@@ -186,7 +187,9 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
     );
     if (picked == null) return;
     await _runAction(
-      () => ref.read(alunoFollowUpActionsProvider).setFollowUpDate(aluno.id, picked),
+      () => ref
+          .read(alunoFollowUpActionsProvider)
+          .setFollowUpDate(aluno.id, picked),
       'Follow-up definido para ${_formatDate(picked)}',
     );
   }
@@ -264,31 +267,31 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(12, 12, 10, 12),
                     child: Aluno360SectionHeader(
-                    icon: Icons.event_available_rounded,
-                    title: 'Próximo contato',
-                    subtitle: subtitle,
-                    compact: true,
-                    trailing: Container(
-                      width: 30,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        color:
-                            isDark
-                                ? Colors.white.withValues(alpha: 0.06)
-                                : Colors.black.withValues(alpha: 0.04),
-                        shape: BoxShape.circle,
+                      icon: Icons.event_available_rounded,
+                      title: 'Próximo contato',
+                      subtitle: subtitle,
+                      compact: true,
+                      trailing: Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color:
+                              isDark
+                                  ? Colors.white.withValues(alpha: 0.06)
+                                  : Colors.black.withValues(alpha: 0.04),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          _expanded
+                              ? Icons.expand_less_rounded
+                              : Icons.expand_more_rounded,
+                          size: 20,
+                          color: mute,
+                        ),
                       ),
-                      child: Icon(
-                        _expanded
-                            ? Icons.expand_less_rounded
-                            : Icons.expand_more_rounded,
-                        size: 20,
-                        color: mute,
-                      ),
-                    ),
-                    trailingSemanticsLabel:
-                        _expanded ? 'Recolher' : 'Expandir',
-                    isDark: isDark,
+                      trailingSemanticsLabel:
+                          _expanded ? 'Recolher' : 'Expandir',
+                      isDark: isDark,
                     ),
                   ),
                 ),
@@ -386,9 +389,9 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
             const SizedBox(height: 6),
             Text(
               'Adiado até ${_formatDate(snoozedUntil)} ${_formatTime(snoozedUntil)}',
-              style: Aluno360Layout.metaStyle(context).copyWith(
-                color: EagleTokens.warn,
-              ),
+              style: Aluno360Layout.metaStyle(
+                context,
+              ).copyWith(color: EagleTokens.warn),
             ),
           ],
           const SizedBox(height: 10),
@@ -418,126 +421,134 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
     required bool contactPrimaryOutlined,
   }) {
     return LayoutBuilder(
-            builder: (context, constraints) {
-              final narrow = constraints.maxWidth < 360;
-              final filledStyle = Aluno360Layout.operacaoFilledButtonStyle(
-                context,
-                primary,
-              );
-              final outlinedStyle = Aluno360Layout.operacaoOutlinedButtonStyle(
-                context,
-                primary,
-              );
-              Widget contactDoneButton({required bool fullWidth}) {
-                final loadingIcon = SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: FxLoading(
-                    size: 16,
-                    strokeWidth: 2,
-                    color: contactPrimaryOutlined ? primary : Colors.white,
-                  ),
-                );
-                final child = Semantics(
-                  label: 'Registrar contato realizado com ${aluno.nome}',
-                  button: true,
-                  child:
-                      contactPrimaryOutlined
-                          ? OutlinedButton.icon(
-                            onPressed: _busy ? null : () => _markContactDone(actions),
-                            icon: _busy ? loadingIcon : const Icon(Icons.check_rounded, size: 16),
-                            label: const Text('Contato feito'),
-                            style: outlinedStyle,
-                          )
-                          : FilledButton.icon(
-                            onPressed: _busy ? null : () => _markContactDone(actions),
-                            icon: _busy ? loadingIcon : const Icon(Icons.check_rounded, size: 16),
-                            label: const Text('Contato feito'),
-                            style: filledStyle,
-                          ),
-                );
-                return fullWidth
-                    ? SizedBox(width: double.infinity, child: child)
-                    : child;
-              }
+      builder: (context, constraints) {
+        final narrow = constraints.maxWidth < 360;
+        final filledStyle = Aluno360Layout.operacaoFilledButtonStyle(
+          context,
+          primary,
+        );
+        final outlinedStyle = Aluno360Layout.operacaoOutlinedButtonStyle(
+          context,
+          primary,
+        );
+        Widget contactDoneButton({required bool fullWidth}) {
+          final loadingIcon = SizedBox(
+            width: 16,
+            height: 16,
+            child: FxLoading(
+              size: 16,
+              strokeWidth: 2,
+              color: contactPrimaryOutlined ? primary : Colors.white,
+            ),
+          );
+          final child = Semantics(
+            label: 'Registrar contato realizado com ${aluno.nome}',
+            button: true,
+            child:
+                contactPrimaryOutlined
+                    ? OutlinedButton.icon(
+                      onPressed: _busy ? null : () => _markContactDone(actions),
+                      icon:
+                          _busy
+                              ? loadingIcon
+                              : const Icon(Icons.check_rounded, size: 16),
+                      label: const Text('Contato feito'),
+                      style: outlinedStyle,
+                    )
+                    : FilledButton.icon(
+                      onPressed: _busy ? null : () => _markContactDone(actions),
+                      icon:
+                          _busy
+                              ? loadingIcon
+                              : const Icon(Icons.check_rounded, size: 16),
+                      label: const Text('Contato feito'),
+                      style: filledStyle,
+                    ),
+          );
+          return fullWidth
+              ? SizedBox(width: double.infinity, child: child)
+              : child;
+        }
 
-              final primaryActions = [
-                contactDoneButton(fullWidth: false),
-                Semantics(
-                  label: 'Definir data de próximo contato para ${aluno.nome}',
-                  button: true,
-                  child: OutlinedButton.icon(
-                    onPressed: _busy ? null : _pickFollowUpDate,
-                    icon: const Icon(Icons.calendar_month_rounded, size: 16),
-                    label: const Text('Definir data'),
-                    style: outlinedStyle,
+        final primaryActions = [
+          contactDoneButton(fullWidth: false),
+          Semantics(
+            label: 'Definir data de próximo contato para ${aluno.nome}',
+            button: true,
+            child: OutlinedButton.icon(
+              onPressed: _busy ? null : _pickFollowUpDate,
+              icon: const Icon(Icons.calendar_month_rounded, size: 16),
+              label: const Text('Definir data'),
+              style: outlinedStyle,
+            ),
+          ),
+        ];
+
+        if (narrow) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              contactDoneButton(fullWidth: true),
+              const SizedBox(height: 6),
+              ...primaryActions
+                  .skip(1)
+                  .map(
+                    (action) => Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: SizedBox(width: double.infinity, child: action),
+                    ),
+                  ),
+              _snoozeMenuButton(
+                context: context,
+                primary: primary,
+                actions: actions,
+                fullWidth: true,
+              ),
+              if (followUpDate != null || isSnoozed)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed:
+                        _busy ? null : () => _confirmClearFollowUp(actions),
+                    child: const Text('Limpar'),
                   ),
                 ),
-              ];
-
-              if (narrow) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    contactDoneButton(fullWidth: true),
-                    const SizedBox(height: 6),
-                    ...primaryActions.skip(1).map(
-                      (action) => Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: SizedBox(width: double.infinity, child: action),
-                      ),
-                    ),
-                    _snoozeMenuButton(
-                      context: context,
-                      primary: primary,
-                      actions: actions,
-                      fullWidth: true,
-                    ),
-                    if (followUpDate != null || isSnoozed)
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextButton(
-                          onPressed:
-                              _busy ? null : () => _confirmClearFollowUp(actions),
-                          child: const Text('Limpar'),
-                        ),
-                      ),
-                  ],
-                );
-              }
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(child: contactDoneButton(fullWidth: false)),
-                      const SizedBox(width: 8),
-                      Expanded(child: primaryActions[1]),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _snoozeMenuButton(
-                          context: context,
-                          primary: primary,
-                          actions: actions,
-                          fullWidth: false,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (followUpDate != null || isSnoozed)
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton(
-                        onPressed:
-                            _busy ? null : () => _confirmClearFollowUp(actions),
-                        child: const Text('Limpar'),
-                      ),
-                    ),
-                ],
-              );
-            },
+            ],
           );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(child: contactDoneButton(fullWidth: false)),
+                const SizedBox(width: 8),
+                Expanded(child: primaryActions[1]),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _snoozeMenuButton(
+                    context: context,
+                    primary: primary,
+                    actions: actions,
+                    fullWidth: false,
+                  ),
+                ),
+              ],
+            ),
+            if (followUpDate != null || isSnoozed)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed:
+                      _busy ? null : () => _confirmClearFollowUp(actions),
+                  child: const Text('Limpar'),
+                ),
+              ),
+          ],
+        );
+      },
+    );
   }
 
   String _formatTime(DateTime value) {

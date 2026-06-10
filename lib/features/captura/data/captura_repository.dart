@@ -22,17 +22,16 @@ class SubmissaoCaptura {
     this.pacoteInteresseId,
   });
 
-  factory SubmissaoCaptura.fromJson(Map<String, dynamic> j) =>
-      SubmissaoCaptura(
-        id: (j['id'] as num).toInt(),
-        nome: j['nome'] as String? ?? '',
-        telefone: j['telefone'] as String?,
-        email: j['email'] as String?,
-        objetivo: j['objetivo'] as String?,
-        pacoteInteresseId: (j['pacoteInteresseId'] as num?)?.toInt(),
-        convertido: j['convertido'] as bool? ?? false,
-        criadoEm: j['criadoEm'] as String? ?? '',
-      );
+  factory SubmissaoCaptura.fromJson(Map<String, dynamic> j) => SubmissaoCaptura(
+    id: (j['id'] as num).toInt(),
+    nome: j['nome'] as String? ?? '',
+    telefone: j['telefone'] as String?,
+    email: j['email'] as String?,
+    objetivo: j['objetivo'] as String?,
+    pacoteInteresseId: (j['pacoteInteresseId'] as num?)?.toInt(),
+    convertido: j['convertido'] as bool? ?? false,
+    criadoEm: j['criadoEm'] as String? ?? '',
+  );
 }
 
 class CapturaRepository {

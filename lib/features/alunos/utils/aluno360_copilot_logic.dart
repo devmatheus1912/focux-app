@@ -66,10 +66,11 @@ int copilotProfileCompletion(Aluno aluno) {
     aluno.genero,
     aluno.tipoConsultoria,
   ];
-  final filled = fields.where((value) {
-    if (value == null) return false;
-    return value.trim().isNotEmpty;
-  }).length;
+  final filled =
+      fields.where((value) {
+        if (value == null) return false;
+        return value.trim().isNotEmpty;
+      }).length;
   return ((filled / fields.length) * 100).round().clamp(0, 100);
 }
 
@@ -77,15 +78,16 @@ String copilotCardTitle({required bool contactPriority}) =>
     contactPriority ? 'Prioridade do dia' : 'Próxima melhor ação';
 
 Map<String, dynamic> copilotActionFrom360(ProximaAcaoResumo proxima) => {
-  'titulo': proxima.fonte == 'RADAR'
-      ? 'Radar Focux'
-      : proxima.fonte == 'EVOLUCAO'
+  'titulo':
+      proxima.fonte == 'RADAR'
+          ? 'Radar Focux'
+          : proxima.fonte == 'EVOLUCAO'
           ? 'Evolução inteligente'
           : proxima.fonte == 'AUTONOMIA'
-              ? 'Autonomia'
-              : proxima.fonte == 'IA'
-                  ? 'Sugestão IA'
-                  : 'Próxima melhor ação',
+          ? 'Autonomia'
+          : proxima.fonte == 'IA'
+          ? 'Sugestão IA'
+          : 'Próxima melhor ação',
   'acao': proxima.acao,
   'motivo': proxima.motivo,
   'fonte': proxima.fonte,
@@ -116,10 +118,9 @@ ProximaAcaoResumo? resolveCopilotProximaAcaoResumo({
 }) {
   if (forceIa && iaAsync != null) {
     return iaAsync.maybeWhen(
-      data: (action) => proximaAcaoResumoFromIaPayload(
-        action,
-        fallback: proximaAcao360,
-      ),
+      data:
+          (action) =>
+              proximaAcaoResumoFromIaPayload(action, fallback: proximaAcao360),
       orElse: () => proximaAcao360,
     );
   }
@@ -161,7 +162,10 @@ ProximaAcaoResumo sanitizeProximaAcaoWearable(
   if (tipo != 'WEARABLE' && !copilotAcaoMencionaWearable(resumo.acao)) {
     return resumo;
   }
-  final acao = sanitizeCopilotAcaoWearable(resumo.acao, wearableRelevant: false);
+  final acao = sanitizeCopilotAcaoWearable(
+    resumo.acao,
+    wearableRelevant: false,
+  );
   return ProximaAcaoResumo(
     acao: acao,
     motivo: resumo.motivo,
@@ -203,9 +207,7 @@ String copilotCardSubtitle({
     return compact ? 'Atualizando 360…' : 'Atualizando sinais do Aluno 360…';
   }
   if (iaRefreshing) {
-    return compact
-        ? 'Atualizando IA…'
-        : 'Atualizando sugestão com IA…';
+    return compact ? 'Atualizando IA…' : 'Atualizando sugestão com IA…';
   }
   if (forceIa && iaAsync != null) {
     return iaAsync.when(
@@ -414,16 +416,17 @@ CopilotPrescriptionContent contactPriorityPrescriptionContent(
   bool statusMetricsVisible = false,
   bool hideMetricFooter = false,
 }) {
-  final firstName = aluno.nome.trim().isEmpty
-      ? 'o aluno'
-      : aluno.nome.trim().split(' ').first;
+  final firstName =
+      aluno.nome.trim().isEmpty
+          ? 'o aluno'
+          : aluno.nome.trim().split(' ').first;
   final aderencia = aluno.aderenciaPercent;
   final reason = sanitizeCopilotPrescriptionReason(
     aluno.emRisco
         ? 'Risco operacional · aderência ${aderencia ?? 0}% nos últimos 7 dias.'
         : aderencia != null && aderencia <= 0
-            ? 'Sem check-ins recentes · priorize contato antes de evoluir o plano.'
-            : 'Sinais do perfil pedem contato direto hoje.',
+        ? 'Sem check-ins recentes · priorize contato antes de evoluir o plano.'
+        : 'Sinais do perfil pedem contato direto hoje.',
     statusMetricsVisible: statusMetricsVisible,
     hideMetricFooter: hideMetricFooter,
   );
@@ -490,9 +493,7 @@ List<Aluno360CopilotSignal> resolveCopilotSignals({
       label: 'Perfil',
       value: '$profile%',
       detail:
-          profile >= 80
-              ? 'dados bons para prescrição'
-              : 'perfil incompleto',
+          profile >= 80 ? 'dados bons para prescrição' : 'perfil incompleto',
       color: profile >= 80 ? EagleTokens.good : primary,
     ),
     Aluno360CopilotSignal(
@@ -564,8 +565,8 @@ CopilotPrescriptionContent resolveCopilotPrescriptionFromAction(
   final rawAcao =
       (action['acao'] ?? action['mensagem'] ?? action['descricao'] ?? fallback)
           .toString();
-  final motivoRaw = (action['motivo'] ?? 'Baseado nos sinais atuais.')
-      .toString();
+  final motivoRaw =
+      (action['motivo'] ?? 'Baseado nos sinais atuais.').toString();
   final isIa = (action['fonte'] ?? '').toString().toUpperCase() == 'IA';
   final sanitizedAcao = sanitizeCopilotAcaoWearable(
     rawAcao,
@@ -581,7 +582,10 @@ CopilotPrescriptionContent resolveCopilotPrescriptionFromAction(
   if (isRoboticCopilotContactCopy(fullActionRaw) &&
       !(wearableRelevant && copilotAcaoMencionaWearable(fullActionRaw))) {
     fullAction = null;
-  } else if (copilotPrescriptionActionsEquivalent(fullActionRaw, displayAction)) {
+  } else if (copilotPrescriptionActionsEquivalent(
+    fullActionRaw,
+    displayAction,
+  )) {
     fullAction = null;
   } else {
     fullAction = fullActionRaw;

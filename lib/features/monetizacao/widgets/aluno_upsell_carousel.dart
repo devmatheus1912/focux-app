@@ -6,7 +6,9 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/upsell_repository.dart';
 
-final _alunoUpsellProvider = FutureProvider.autoDispose<List<AlunoOferta>>((ref) {
+final _alunoUpsellProvider = FutureProvider.autoDispose<List<AlunoOferta>>((
+  ref,
+) {
   return UpsellRepository(ref.read(apiClientProvider)).listarMeusPendentes();
 });
 
@@ -67,23 +69,28 @@ class AlunoUpsellCarousel extends ConsumerWidget {
     String resposta,
   ) async {
     try {
-      await UpsellRepository(ref.read(apiClientProvider)).responder(
-        oferta.alunoOfertaId,
-        resposta,
-      );
+      await UpsellRepository(
+        ref.read(apiClientProvider),
+      ).responder(oferta.alunoOfertaId, resposta);
       await AnalyticsService.instance.track(
         'upsell_aluno_resposta',
         props: {'ofertaId': oferta.ofertaId, 'resposta': resposta},
       );
       ref.invalidate(_alunoUpsellProvider);
       if (context.mounted) {
-        FeedbackHelper.showSuccess(context, resposta == 'ACEITO'
-                  ? 'Oferta aceita! Seu personal será avisado.'
-                  : 'Oferta recusada.',);
+        FeedbackHelper.showSuccess(
+          context,
+          resposta == 'ACEITO'
+              ? 'Oferta aceita! Seu personal será avisado.'
+              : 'Oferta recusada.',
+        );
       }
     } catch (_) {
       if (context.mounted) {
-        FeedbackHelper.showError(context, 'Não foi possível registrar sua resposta');
+        FeedbackHelper.showError(
+          context,
+          'Não foi possível registrar sua resposta',
+        );
       }
     }
   }
@@ -131,7 +138,9 @@ class _OfertaCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 height: 1.35,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
           ),

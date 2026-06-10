@@ -25,13 +25,13 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 part 'treino_detail_screen_body.part.dart';
 part 'treino_detail_screen_exercises.part.dart';
 part 'treino_detail_screen_rows.part.dart';
 part 'treino_detail_screen_sheets.part.dart';
 part 'treino_detail_screen_states.part.dart';
-
 
 String _workoutContextLabel(Treino treino, String? alunoNome) {
   final name = alunoNome?.trim();
@@ -118,48 +118,51 @@ class TreinoDetailScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
-        _popTreinoDetail(context, alunoId: alunoId);
-      },
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: treinoAsync.when(
-          loading:
-              () => SafeArea(
-                child: Stack(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(TokensStrip.s5, 86, 20, 0),
-                      child: SkeletonList(count: 6),
-                    ),
-                    Positioned(
-                      top: 8,
-                      left: TokensStrip.s5 - 4,
-                      child: _TreinoDetailBackButton(alunoId: alunoId),
-                    ),
-                  ],
+    return fxScreenA11yScope(
+      label: 'Detalhe do treino',
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          _popTreinoDetail(context, alunoId: alunoId);
+        },
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: treinoAsync.when(
+            loading:
+                () => SafeArea(
+                  child: Stack(
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(TokensStrip.s5, 86, 20, 0),
+                        child: SkeletonList(count: 6),
+                      ),
+                      Positioned(
+                        top: 8,
+                        left: TokensStrip.s5 - 4,
+                        child: _TreinoDetailBackButton(alunoId: alunoId),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-        error:
-            (e, _) => _DetailErrorState(
-              isDark: isDark,
-              primary: primary,
-              message: friendlyError(e),
-              onRetry: () => ref.invalidate(treinoProvider(treinoId)),
-              onBack: () => _popTreinoDetail(context, alunoId: alunoId),
-            ),
-        data:
-            (treino) => _TreinoDetailBody(
-              treino: treino,
-              treinoId: treinoId,
-              alunoId: alunoId,
-              alunoNome: alunoNome,
-              isDark: isDark,
-              ref: ref,
-            ),
+            error:
+                (e, _) => _DetailErrorState(
+                  isDark: isDark,
+                  primary: primary,
+                  message: friendlyError(e),
+                  onRetry: () => ref.invalidate(treinoProvider(treinoId)),
+                  onBack: () => _popTreinoDetail(context, alunoId: alunoId),
+                ),
+            data:
+                (treino) => _TreinoDetailBody(
+                  treino: treino,
+                  treinoId: treinoId,
+                  alunoId: alunoId,
+                  alunoNome: alunoNome,
+                  isDark: isDark,
+                  ref: ref,
+                ),
+          ),
         ),
       ),
     );
@@ -173,4 +176,3 @@ void _popTreinoDetail(BuildContext context, {int? alunoId}) {
   }
   safePopOrGo(context, '/treinos');
 }
-

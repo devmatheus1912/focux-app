@@ -51,10 +51,7 @@ class _WalletSectionCard extends StatelessWidget {
 }
 
 class _PixTipoBottomSheet extends StatelessWidget {
-  const _PixTipoBottomSheet({
-    required this.tipos,
-    required this.selected,
-  });
+  const _PixTipoBottomSheet({required this.tipos, required this.selected});
 
   final List<String> tipos;
   final String? selected;
@@ -179,7 +176,8 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
   @override
   Widget build(BuildContext context) {
     if (_loading) return const _ResumoMensalSkeleton();
-    if (_error != null) return _ResumoMensalError(message: _error!, onRetry: _load);
+    if (_error != null)
+      return _ResumoMensalError(message: _error!, onRetry: _load);
     if (_resumo == null) return const SizedBox.shrink();
 
     final primary = Theme.of(context).colorScheme.primary;
@@ -247,10 +245,7 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
                       child: _Stat(
                         label: 'Inadimplentes',
                         valor: '$inadimplentes',
-                        color:
-                            inadimplentes > 0
-                                ? EagleTokens.bad
-                                : mute,
+                        color: inadimplentes > 0 ? EagleTokens.bad : mute,
                       ),
                     ),
                   ],
@@ -309,17 +304,11 @@ class _ResumoMensalSkeleton extends StatelessWidget {
           SizedBox(height: TokensStrip.s3),
           Row(
             children: [
-              Expanded(
-                child: SkeletonLoader(height: 42, borderRadius: 10),
-              ),
+              Expanded(child: SkeletonLoader(height: 42, borderRadius: 10)),
               SizedBox(width: TokensStrip.s3),
-              Expanded(
-                child: SkeletonLoader(height: 42, borderRadius: 10),
-              ),
+              Expanded(child: SkeletonLoader(height: 42, borderRadius: 10)),
               SizedBox(width: TokensStrip.s3),
-              Expanded(
-                child: SkeletonLoader(height: 42, borderRadius: 10),
-              ),
+              Expanded(child: SkeletonLoader(height: 42, borderRadius: 10)),
             ],
           ),
         ],
@@ -336,9 +325,10 @@ class _ResumoMensalError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mute = Theme.of(context).brightness == Brightness.dark
-        ? EagleTokens.darkInkMute
-        : TokensStrip.textSecondary;
+    final mute =
+        Theme.of(context).brightness == Brightness.dark
+            ? EagleTokens.darkInkMute
+            : TokensStrip.textSecondary;
 
     return Container(
       padding: const EdgeInsets.all(TokensStrip.s4),
@@ -369,11 +359,7 @@ class _Stat extends StatelessWidget {
   final String valor;
   final Color color;
 
-  const _Stat({
-    required this.label,
-    required this.valor,
-    required this.color,
-  });
+  const _Stat({required this.label, required this.valor, required this.color});
 
   @override
   Widget build(BuildContext context) {

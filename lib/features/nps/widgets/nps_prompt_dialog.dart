@@ -41,7 +41,10 @@ class _NpsDialogState extends State<_NpsDialog> {
   Future<void> _enviar() async {
     setState(() => _saving = true);
     try {
-      await widget.repo.responder(score: _score, comentario: _comentario.text.trim());
+      await widget.repo.responder(
+        score: _score,
+        comentario: _comentario.text.trim(),
+      );
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
@@ -58,7 +61,10 @@ class _NpsDialogState extends State<_NpsDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('Nota: $_score', style: const TextStyle(fontWeight: FontWeight.w600)),
+          Text(
+            'Nota: $_score',
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
           Slider(
             value: _score.toDouble(),
             min: 0,
@@ -70,17 +76,23 @@ class _NpsDialogState extends State<_NpsDialog> {
           TextField(
             controller: _comentario,
             maxLines: 2,
-            decoration: const InputDecoration(hintText: 'Comentário (opcional)'),
+            decoration: const InputDecoration(
+              hintText: 'Comentário (opcional)',
+            ),
           ),
         ],
       ),
       actions: [
-        TextButton(onPressed: _saving ? null : () => Navigator.pop(context), child: const Text('Depois')),
+        TextButton(
+          onPressed: _saving ? null : () => Navigator.pop(context),
+          child: const Text('Depois'),
+        ),
         FilledButton(
           onPressed: _saving ? null : _enviar,
-          child: _saving
-              ? const FxLoading(size: 18, strokeWidth: 2)
-              : const Text('Enviar'),
+          child:
+              _saving
+                  ? const FxLoading(size: 18, strokeWidth: 2)
+                  : const Text('Enviar'),
         ),
       ],
     );

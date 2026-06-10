@@ -31,125 +31,132 @@ class _CompletenessCard extends StatelessWidget {
               ? 'Perfil pronto. $score por cento de prontidão comercial.'
               : 'Prontidão comercial. $score por cento.',
       child: Container(
-      padding: const EdgeInsets.all(TokensStrip.s4),
-      decoration: chrome.panel(radius: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      complete ? 'Perfil pronto' : 'Prontidão comercial',
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      complete
-                          ? 'Seu perfil comercial está pronto para operar.'
-                          : 'Faltam ${items.where((item) => !item.done).length} passos para parecer premium.',
-                      style: TextStyle(color: mute, fontSize: 12, height: 1.35),
-                    ),
-                  ],
-                ),
-              ),
-              if (complete)
-                _ReadyStamp(accent: accent)
-              else
-                Text(
-                  '$score%',
-                  style: TextStyle(
-                    color: accent,
-                    fontSize: 26,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0,
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          TweenAnimationBuilder<double>(
-            tween: Tween<double>(begin: 0, end: score / 100),
-            duration: const Duration(milliseconds: 700),
-            curve: Curves.easeOutCubic,
-            builder: (context, value, _) {
-              return ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: SizedBox(
-                  height: 9,
-                  child: Stack(
-                    fit: StackFit.expand,
+        padding: const EdgeInsets.all(TokensStrip.s4),
+        decoration: chrome.panel(radius: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ColoredBox(
-                        color:
-                            isDark
-                                ? Colors.white.withValues(alpha: 0.08)
-                                : TokensStrip.borderDefault,
+                      Text(
+                        complete ? 'Perfil pronto' : 'Prontidão comercial',
+                        style: TextStyle(
+                          color: ink,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.2,
+                        ),
                       ),
-                      FractionallySizedBox(
-                        alignment: Alignment.centerLeft,
-                        widthFactor: value,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [accent.withValues(alpha: 0.72), accent],
-                            ),
-                          ),
+                      const SizedBox(height: 4),
+                      Text(
+                        complete
+                            ? 'Seu perfil comercial está pronto para operar.'
+                            : 'Faltam ${items.where((item) => !item.done).length} passos para parecer premium.',
+                        style: TextStyle(
+                          color: mute,
+                          fontSize: 12,
+                          height: 1.35,
                         ),
                       ),
                     ],
                   ),
                 ),
-              );
-            },
-          ),
-          const SizedBox(height: 10),
-          if (complete)
-            _ReadyFocusStrip(accent: accent, isDark: isDark)
-          else
-            Wrap(
-              spacing: 7,
-              runSpacing: 7,
-              children:
-                  items
-                      .map(
-                        (item) => _ChecklistChip(
-                          item: item,
-                          accent: accent,
-                          onTap:
-                              item.done
-                                  ? null
-                                  : () => onChecklistAction(item.action),
-                        ),
-                      )
-                      .toList(),
+                if (complete)
+                  _ReadyStamp(accent: accent)
+                else
+                  Text(
+                    '$score%',
+                    style: TextStyle(
+                      color: accent,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0,
+                    ),
+                  ),
+              ],
             ),
-          if (!complete) ...[
-            const SizedBox(height: 10),
-            FxLiquidPrimaryButton(
-              icon: Icons.arrow_forward_rounded,
-              label: nextStep?.buttonLabel ?? 'Completar perfil',
-              onPressed: () {
-                HapticFeedback.selectionClick();
-                if (nextStep != null) {
-                  onChecklistAction(nextStep!.action);
-                  return;
-                }
-                onChecklistAction(PerfilChecklistAction.convites);
+            const SizedBox(height: 14),
+            TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0, end: score / 100),
+              duration: const Duration(milliseconds: 700),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, _) {
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(999),
+                  child: SizedBox(
+                    height: 9,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        ColoredBox(
+                          color:
+                              isDark
+                                  ? Colors.white.withValues(alpha: 0.08)
+                                  : TokensStrip.borderDefault,
+                        ),
+                        FractionallySizedBox(
+                          alignment: Alignment.centerLeft,
+                          widthFactor: value,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  accent.withValues(alpha: 0.72),
+                                  accent,
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
               },
             ),
+            const SizedBox(height: 10),
+            if (complete)
+              _ReadyFocusStrip(accent: accent, isDark: isDark)
+            else
+              Wrap(
+                spacing: 7,
+                runSpacing: 7,
+                children:
+                    items
+                        .map(
+                          (item) => _ChecklistChip(
+                            item: item,
+                            accent: accent,
+                            onTap:
+                                item.done
+                                    ? null
+                                    : () => onChecklistAction(item.action),
+                          ),
+                        )
+                        .toList(),
+              ),
+            if (!complete) ...[
+              const SizedBox(height: 10),
+              FxLiquidPrimaryButton(
+                icon: Icons.arrow_forward_rounded,
+                label: nextStep?.buttonLabel ?? 'Completar perfil',
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  if (nextStep != null) {
+                    onChecklistAction(nextStep!.action);
+                    return;
+                  }
+                  onChecklistAction(PerfilChecklistAction.convites);
+                },
+              ),
+            ],
           ],
-        ],
+        ),
       ),
-    ),
     );
   }
 }
@@ -235,11 +242,7 @@ class _ChecklistChip extends StatelessWidget {
   final Color accent;
   final VoidCallback? onTap;
 
-  const _ChecklistChip({
-    required this.item,
-    required this.accent,
-    this.onTap,
-  });
+  const _ChecklistChip({required this.item, required this.accent, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -507,9 +510,9 @@ class _InfoTile extends StatelessWidget {
       button: true,
       label: '$label. $value',
       child: Material(
-      color: Colors.transparent,
-      child: InkWell(onTap: onTap, child: content),
-    ),
+        color: Colors.transparent,
+        child: InkWell(onTap: onTap, child: content),
+      ),
     );
   }
 }
@@ -547,7 +550,9 @@ class _ActionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink =
-        danger ? EagleTokens.bad : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
+        danger
+            ? EagleTokens.bad
+            : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
     final inkMuted = locked ? ink.withValues(alpha: 0.55) : ink;
 
     final link = actionInk ?? accent;
@@ -562,99 +567,96 @@ class _ActionTile extends StatelessWidget {
       button: true,
       label: a11y,
       child: InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 15),
-        decoration: BoxDecoration(
-          border:
-              showDivider
-                  ? Border(bottom: BorderSide(color: line, width: 0.5))
-                  : null,
-        ),
-        child: Row(
-          children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                _LeadingIcon(
-                  icon: icon,
-                  background:
-                      danger ? EagleTokens.badSoft
-                          : (isDark
-                              ? accent.withValues(alpha: locked ? 0.08 : 0.14)
-                              : BrandPalette.soft(accent).withValues(
-                                alpha: locked ? 0.55 : 1,
-                              )),
-                  color:
-                      danger
-                          ? ink
-                          : accent.withValues(alpha: locked ? 0.55 : 1),
-                ),
-                if (locked)
-                  Positioned(
-                    right: -2,
-                    bottom: -2,
-                    child: Container(
-                      width: 16,
-                      height: 16,
-                      decoration: BoxDecoration(
-                        color: isDark ? EagleTokens.darkCard : TokensStrip.cardBg,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: line),
-                      ),
-                      child: Icon(
-                        Icons.lock_rounded,
-                        size: 10,
-                        color: mute,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              flex: 6,
-              child: Text(
-                label,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: inkMuted,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            if (value.isNotEmpty)
-              Flexible(
-                flex: 5,
-                child: Text(
-                  value,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.end,
-                  style: TextStyle(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          decoration: BoxDecoration(
+            border:
+                showDivider
+                    ? Border(bottom: BorderSide(color: line, width: 0.5))
+                    : null,
+          ),
+          child: Row(
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  _LeadingIcon(
+                    icon: icon,
+                    background:
+                        danger
+                            ? EagleTokens.badSoft
+                            : (isDark
+                                ? accent.withValues(alpha: locked ? 0.08 : 0.14)
+                                : BrandPalette.soft(
+                                  accent,
+                                ).withValues(alpha: locked ? 0.55 : 1)),
                     color:
                         danger
                             ? ink
-                            : (locked ? mute : link),
-                    fontSize: 12,
-                    fontWeight: danger ? FontWeight.w600 : FontWeight.w800,
+                            : accent.withValues(alpha: locked ? 0.55 : 1),
+                  ),
+                  if (locked)
+                    Positioned(
+                      right: -2,
+                      bottom: -2,
+                      child: Container(
+                        width: 16,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color:
+                              isDark
+                                  ? EagleTokens.darkCard
+                                  : TokensStrip.cardBg,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: line),
+                        ),
+                        child: Icon(Icons.lock_rounded, size: 10, color: mute),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 6,
+                child: Text(
+                  label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: inkMuted,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
-            if (!danger) ...[
-              const SizedBox(width: 8),
-              Icon(
-                locked ? Icons.lock_outline_rounded : Icons.chevron_right,
-                size: 18,
-                color: locked ? mute : link,
-              ),
+              if (value.isNotEmpty)
+                Flexible(
+                  flex: 5,
+                  child: Text(
+                    value,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.end,
+                    style: TextStyle(
+                      color: danger ? ink : (locked ? mute : link),
+                      fontSize: 12,
+                      fontWeight: danger ? FontWeight.w600 : FontWeight.w800,
+                    ),
+                  ),
+                ),
+              if (!danger) ...[
+                const SizedBox(width: 8),
+                Icon(
+                  locked ? Icons.lock_outline_rounded : Icons.chevron_right,
+                  size: 18,
+                  color: locked ? mute : link,
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
-    ),
     );
   }
 }
@@ -683,14 +685,12 @@ class _PerfilGrowthSection extends StatefulWidget {
 class _PerfilGrowthSectionState extends State<_PerfilGrowthSection> {
   bool _expanded = false;
 
-  static const _collapsedHint =
-      'Automações, desafios, loja, equipe e hábitos';
+  static const _collapsedHint = 'Automações, desafios, loja, equipe e hábitos';
   static const _collapsedValue = '5 ferramentas';
 
   @override
   Widget build(BuildContext context) {
-    final ink =
-        widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final ink = widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final link = widget.actionInk;
 
     return Column(
@@ -845,7 +845,10 @@ void _showDeleteAccountDialog(BuildContext context) {
                   final dio = ApiClient().dio;
                   await dio.delete('/api/lgpd/me/delete');
                   if (!context.mounted) return;
-                  FeedbackHelper.showSuccess(context, 'Conta excluída com sucesso.');
+                  FeedbackHelper.showSuccess(
+                    context,
+                    'Conta excluída com sucesso.',
+                  );
                   GoRouter.of(context).go('/login');
                 } catch (e) {
                   if (!context.mounted) return;

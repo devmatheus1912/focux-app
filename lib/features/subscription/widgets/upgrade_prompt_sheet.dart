@@ -20,15 +20,14 @@ class UpgradePromptSheet {
     String? capability,
     SubscriptionPlan? requiredPlan,
     String source = 'upgrade_prompt',
-  }) =>
-      _present(
-        context: context,
-        featureName: featureName,
-        capability: capability,
-        requiredPlan: requiredPlan,
-        source: source,
-        respectCooldown: false,
-      );
+  }) => _present(
+    context: context,
+    featureName: featureName,
+    capability: capability,
+    requiredPlan: requiredPlan,
+    source: source,
+    respectCooldown: false,
+  );
 
   static Future<void> showIfAllowed({
     required BuildContext context,
@@ -138,9 +137,10 @@ class UpgradePromptSheet {
                     },
                   );
                   Navigator.pop(ctx);
-                  final capQuery = capability != null && capability.isNotEmpty
-                      ? '&capability=${Uri.encodeComponent(capability)}'
-                      : '';
+                  final capQuery =
+                      capability != null && capability.isNotEmpty
+                          ? '&capability=${Uri.encodeComponent(capability)}'
+                          : '';
                   context.push(
                     '/assinatura?plano=${plan.apiName}&source=$source&feature=${Uri.encodeComponent(featureName)}$capQuery',
                   );
@@ -150,7 +150,10 @@ class UpgradePromptSheet {
                   foregroundColor: const Color(0xFF081012),
                   minimumSize: const Size.fromHeight(48),
                 ),
-                child: Text(offer.ctaLabel, style: const TextStyle(fontWeight: FontWeight.w900)),
+                child: Text(
+                  offer.ctaLabel,
+                  style: const TextStyle(fontWeight: FontWeight.w900),
+                ),
               ),
               TextButton(
                 onPressed: () {

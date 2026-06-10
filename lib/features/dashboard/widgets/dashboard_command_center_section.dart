@@ -48,7 +48,8 @@ class DashboardCommandCenterSection extends ConsumerStatefulWidget {
       DashboardCommandCenterSectionState();
 }
 
-class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandCenterSection> {
+class DashboardCommandCenterSectionState
+    extends ConsumerState<DashboardCommandCenterSection> {
   bool _quickLinksExpanded = false;
 
   @override
@@ -176,9 +177,9 @@ class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandC
                       children: [
                         Text(
                           title,
-                          style: dashboardCardTitleStyle(ink).copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
+                          style: dashboardCardTitleStyle(
+                            ink,
+                          ).copyWith(fontWeight: FontWeight.w800),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -300,8 +301,7 @@ class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandC
           loading: isCommandPreparing,
           unavailable: commandUnavailable,
           actions: nextActions.take(2).toList(growable: false),
-          prioritiesActionLabel:
-              showPrioritiesLink ? 'Ver prioridades' : null,
+          prioritiesActionLabel: showPrioritiesLink ? 'Ver prioridades' : null,
           onPrioritiesTap:
               showPrioritiesLink
                   ? () => showCommandActionsSheet(
@@ -382,61 +382,66 @@ class DashboardCommandCenterSectionState extends ConsumerState<DashboardCommandC
           secondChild: Padding(
             padding: const EdgeInsets.only(top: 8),
             child: LayoutBuilder(
-          builder: (context, constraints) {
-            final moduleWidth = (constraints.maxWidth * 0.46).clamp(150.0, 188.0);
-            return DashboardHorizontalScrollPeek(
-              showPeek: true,
-              child: SizedBox(
-              height: 82,
-              child: ListView(
-                key: const PageStorageKey('personal-command-modules'),
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                children: [
-                  card(
-                    width: moduleWidth,
-                    icon: 'zap',
-                    title: 'Copiloto',
-                    subtitle:
-                        copilotAcoes.isEmpty
-                            ? 'Abrir Copiloto'
-                            : '${copilotAcoes.length} aberta${copilotAcoes.length == 1 ? '' : 's'}',
-                    onTap:
-                        () => context.push('/dashboard/command-center/copiloto'),
+              builder: (context, constraints) {
+                final moduleWidth = (constraints.maxWidth * 0.46).clamp(
+                  150.0,
+                  188.0,
+                );
+                return DashboardHorizontalScrollPeek(
+                  showPeek: true,
+                  child: SizedBox(
+                    height: 82,
+                    child: ListView(
+                      key: const PageStorageKey('personal-command-modules'),
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      children: [
+                        card(
+                          width: moduleWidth,
+                          icon: 'zap',
+                          title: 'Copiloto',
+                          subtitle:
+                              copilotAcoes.isEmpty
+                                  ? 'Abrir Copiloto'
+                                  : '${copilotAcoes.length} aberta${copilotAcoes.length == 1 ? '' : 's'}',
+                          onTap:
+                              () => context.push(
+                                '/dashboard/command-center/copiloto',
+                              ),
+                        ),
+                        card(
+                          width: moduleWidth,
+                          icon: 'message-circle',
+                          title: 'Mensagens',
+                          subtitle: chatSubtitle,
+                          onTap: () => context.go('/chat/inbox'),
+                        ),
+                        card(
+                          width: moduleWidth,
+                          icon: 'users',
+                          title: 'Alunos',
+                          subtitle: '$alunosAtivos ativos',
+                          onTap: () => context.go('/alunos'),
+                        ),
+                        card(
+                          width: moduleWidth,
+                          icon: 'calendar',
+                          title: 'Agenda',
+                          subtitle: agendaSubtitle,
+                          onTap: () => context.go('/agenda'),
+                        ),
+                        card(
+                          width: moduleWidth,
+                          icon: 'dollar-sign',
+                          title: 'Financeiro',
+                          subtitle: finSubtitle,
+                          onTap: () => context.go('/financeiro'),
+                        ),
+                      ],
+                    ),
                   ),
-                  card(
-                    width: moduleWidth,
-                    icon: 'message-circle',
-                    title: 'Mensagens',
-                    subtitle: chatSubtitle,
-                    onTap: () => context.go('/chat/inbox'),
-                  ),
-                  card(
-                    width: moduleWidth,
-                    icon: 'users',
-                    title: 'Alunos',
-                    subtitle: '$alunosAtivos ativos',
-                    onTap: () => context.go('/alunos'),
-                  ),
-                  card(
-                    width: moduleWidth,
-                    icon: 'calendar',
-                    title: 'Agenda',
-                    subtitle: agendaSubtitle,
-                    onTap: () => context.go('/agenda'),
-                  ),
-                  card(
-                    width: moduleWidth,
-                    icon: 'dollar-sign',
-                    title: 'Financeiro',
-                    subtitle: finSubtitle,
-                    onTap: () => context.go('/financeiro'),
-                  ),
-                ],
-              ),
-            ),
-            );
-          },
+                );
+              },
             ),
           ),
           crossFadeState:
@@ -460,8 +465,7 @@ List<CommandActionItem> buildDashboardNextActions({
   required bool hideRiskSummary,
   required bool isCommandPreparing,
 }) {
-  final copilotAcoes =
-      filaAcoes.where((a) => a.tipo == 'IA_COPILOTO').toList();
+  final copilotAcoes = filaAcoes.where((a) => a.tipo == 'IA_COPILOTO').toList();
   final filaNaoCopilot =
       filaAcoes.where((a) => a.tipo != 'IA_COPILOTO').toList();
   final queueAction =
@@ -555,8 +559,7 @@ List<CommandActionItem> buildDashboardNextActions({
 }
 
 CommandActionItem _sheetItemFromFila(FilaAcaoResumo action) {
-  final rawTitle =
-      action.titulo.isNotEmpty ? action.titulo : 'Prioridade';
+  final rawTitle = action.titulo.isNotEmpty ? action.titulo : 'Prioridade';
   final radarName = dashboardRadarStudentName(rawTitle);
   final isRadar = radarName != null;
   final badge = dashboardPriorityBadgeLabel(
@@ -569,9 +572,7 @@ CommandActionItem _sheetItemFromFila(FilaAcaoResumo action) {
     title: radarName ?? dashboardFormatActionCopy(rawTitle),
     subtitle: dashboardFormatCountCopy(action.descricao),
     route:
-        action.acaoUrl.startsWith('/')
-            ? action.acaoUrl
-            : '/dashboard/personal',
+        action.acaoUrl.startsWith('/') ? action.acaoUrl : '/dashboard/personal',
     tone: CommandActionTone.primary,
     isRadarStudent: isRadar,
     priorityBadge: badge,
@@ -587,7 +588,8 @@ List<CommandActionItem> buildDashboardSheetActions({
     seenKeys.add('${item.title}|${item.route}');
   }
   final hasBillingCurated = curated.any(
-    (item) => item.route == '/financeiro' || item.tone == CommandActionTone.money,
+    (item) =>
+        item.route == '/financeiro' || item.tone == CommandActionTone.money,
   );
   final hasRiskCurated = curated.any(
     (item) =>
@@ -648,4 +650,3 @@ Color commandToneAccent(CommandActionTone tone, Color primary) {
     CommandActionTone.primary => primary,
   };
 }
-

@@ -61,16 +61,19 @@ class PacoteRepository {
     bool incluiConsultoria = false,
     bool destaque = false,
   }) async {
-    final r = await _dio.post('/api/pacotes', data: {
-      'titulo': titulo,
-      'descricao': descricao,
-      'valor': valor,
-      'duracaoMeses': duracaoMeses,
-      'incluiTreino': incluiTreino,
-      'incluiNutri': incluiNutri,
-      'incluiConsultoria': incluiConsultoria,
-      'destaque': destaque,
-    });
+    final r = await _dio.post(
+      '/api/pacotes',
+      data: {
+        'titulo': titulo,
+        'descricao': descricao,
+        'valor': valor,
+        'duracaoMeses': duracaoMeses,
+        'incluiTreino': incluiTreino,
+        'incluiNutri': incluiNutri,
+        'incluiConsultoria': incluiConsultoria,
+        'destaque': destaque,
+      },
+    );
     return Pacote.fromJson(r.data as Map<String, dynamic>);
   }
 

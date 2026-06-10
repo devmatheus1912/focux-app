@@ -22,6 +22,8 @@ final commandCenterProvider = FutureProvider<CommandCenterData>((ref) async {
   return (await ref.watch(dashboardHomeProvider.future)).commandCenter;
 });
 
-final dashboardFinanceiroProvider = FutureProvider<FinanceiroDashboard>((ref) async {
+final dashboardFinanceiroProvider = FutureProvider<FinanceiroDashboard>((
+  ref,
+) async {
   return (await ref.watch(dashboardHomeProvider.future)).financeiro;
 });

@@ -72,10 +72,7 @@ class Aluno360SectionHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: titleStyle,
-                ),
+                Text(title, style: titleStyle),
                 if (subtitle != null) ...[
                   const SizedBox(height: 2),
                   LayoutBuilder(
@@ -91,11 +88,9 @@ class Aluno360SectionHeader extends StatelessWidget {
                               subtitle!,
                               maxLines: compact ? 2 : 3,
                               overflow: TextOverflow.ellipsis,
-                              style: Aluno360Layout.captionStyle(context)
-                                  .copyWith(
-                                    color: mute,
-                                    height: 1.3,
-                                  ),
+                              style: Aluno360Layout.captionStyle(
+                                context,
+                              ).copyWith(color: mute, height: 1.3),
                             ),
                             const SizedBox(height: 4),
                             subtitleTrailing!,
@@ -110,11 +105,9 @@ class Aluno360SectionHeader extends StatelessWidget {
                               subtitle!,
                               maxLines: compact ? 2 : 3,
                               overflow: TextOverflow.ellipsis,
-                              style: Aluno360Layout.captionStyle(context)
-                                  .copyWith(
-                                    color: mute,
-                                    height: 1.3,
-                                  ),
+                              style: Aluno360Layout.captionStyle(
+                                context,
+                              ).copyWith(color: mute, height: 1.3),
                             ),
                           ),
                           if (subtitleTrailing != null) ...[
@@ -136,10 +129,7 @@ class Aluno360SectionHeader extends StatelessWidget {
           if (trailing != null) ...[
             const SizedBox(width: 8),
             Flexible(
-              child: Align(
-                alignment: Alignment.topRight,
-                child: trailing!,
-              ),
+              child: Align(alignment: Alignment.topRight, child: trailing!),
             ),
           ],
         ],

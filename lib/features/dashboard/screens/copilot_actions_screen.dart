@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -12,6 +12,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 final iaActionsProvider = FutureProvider.family<List<FilaAcaoResumo>, String>((
   ref,
@@ -42,182 +43,186 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
     final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final actionsAsync = ref.watch(iaActionsProvider(_status));
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Tarefas IA',
-        subtitle: 'Command Center',
-        onBack: () => safePopOrGo(context, '/dashboard/personal'),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          TokensStrip.s4,
-          0,
-          TokensStrip.s4,
-          14,
+    return fxScreenA11yScope(
+      label: 'Tarefas IA',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Tarefas IA',
+          subtitle: 'Command Center',
+          onBack: () => safePopOrGo(context, '/dashboard/personal'),
         ),
-        child: SafeArea(
-          top: false,
-          child: FxDock(
-            items: FxDockItems.personal,
-            currentIndex: 4,
-            isDark: dark,
-            onTap: (index) {
-              final path = switch (index) {
-                0 => '/dashboard/personal',
-                1 => '/alunos',
-                2 => '/treinos',
-                3 => '/agenda',
-                _ => '/ia/copiloto',
-              };
-              context.go(path);
-            },
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            TokensStrip.s4,
+            0,
+            TokensStrip.s4,
+            14,
           ),
-        ),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              TokensStrip.s4,
-              2,
-              TokensStrip.s4,
-              TokensStrip.s2,
-            ),
-            child: _StatusSegmentedControl(
-              selected: _status,
-              brand: brand,
-              ink: ink,
-              mute: mute,
-              onChanged: (value) => setState(() => _status = value),
+          child: SafeArea(
+            top: false,
+            child: FxDock(
+              items: FxDockItems.personal,
+              currentIndex: 4,
+              isDark: dark,
+              onTap: (index) {
+                final path = switch (index) {
+                  0 => '/dashboard/personal',
+                  1 => '/alunos',
+                  2 => '/treinos',
+                  3 => '/agenda',
+                  _ => '/ia/copiloto',
+                };
+                context.go(path);
+              },
             ),
           ),
-          Expanded(
-            child: actionsAsync.when(
-              loading:
-                  () => ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
-                      10,
-                      TokensStrip.s4,
-                      120,
+        ),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                TokensStrip.s4,
+                2,
+                TokensStrip.s4,
+                TokensStrip.s2,
+              ),
+              child: _StatusSegmentedControl(
+                selected: _status,
+                brand: brand,
+                ink: ink,
+                mute: mute,
+                onChanged: (value) => setState(() => _status = value),
+              ),
+            ),
+            Expanded(
+              child: actionsAsync.when(
+                loading:
+                    () => ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(
+                        TokensStrip.s4,
+                        10,
+                        TokensStrip.s4,
+                        120,
+                      ),
+                      itemCount: 5,
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemBuilder:
+                          (_, __) => Container(
+                            height: 94,
+                            decoration: fxListCardDecoration(context),
+                          ),
                     ),
-                    itemCount: 5,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder:
-                        (_, __) => Container(
-                          height: 94,
-                          decoration: fxListCardDecoration(context),
-                        ),
-                  ),
-              error:
-                  (_, __) => _IaActionsEmpty(
-                    title: 'Não foi possível carregar',
-                    subtitle: 'Puxe para atualizar ou tente novamente.',
-                    ink: ink,
-                    mute: mute,
-                    brand: brand,
-                    onRefresh: _refresh,
-                  ),
-              data: (actions) {
-                final copilot =
-                    actions
-                        .where((action) => action.tipo == 'IA_COPILOTO')
-                        .toList();
-                final radar =
-                    actions
-                        .where((action) => action.tipo != 'IA_COPILOTO')
-                        .toList();
+                error:
+                    (_, __) => _IaActionsEmpty(
+                      title: 'Não foi possível carregar',
+                      subtitle: 'Puxe para atualizar ou tente novamente.',
+                      ink: ink,
+                      mute: mute,
+                      brand: brand,
+                      onRefresh: _refresh,
+                    ),
+                data: (actions) {
+                  final copilot =
+                      actions
+                          .where((action) => action.tipo == 'IA_COPILOTO')
+                          .toList();
+                  final radar =
+                      actions
+                          .where((action) => action.tipo != 'IA_COPILOTO')
+                          .toList();
 
-                if (actions.isEmpty) {
+                  if (actions.isEmpty) {
+                    return RefreshIndicator(
+                      onRefresh: _refresh,
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          TokensStrip.s4,
+                          TokensStrip.s4,
+                          120,
+                        ),
+                        children: [
+                          _IaActionsEmptyCard(
+                            title: _emptyTitle(_status),
+                            subtitle: _emptySubtitle(_status),
+                            ink: ink,
+                            mute: mute,
+                            brand: brand,
+                            onRefresh: _refresh,
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
                   return RefreshIndicator(
                     onRefresh: _refresh,
                     child: ListView(
                       padding: const EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
-                      TokensStrip.s4,
-                      TokensStrip.s4,
-                      120,
-                    ),
+                        TokensStrip.s4,
+                        10,
+                        TokensStrip.s4,
+                        120,
+                      ),
                       children: [
-                        _IaActionsEmptyCard(
-                          title: _emptyTitle(_status),
-                          subtitle: _emptySubtitle(_status),
-                          ink: ink,
-                          mute: mute,
-                          brand: brand,
-                          onRefresh: _refresh,
-                        ),
+                        if (copilot.isNotEmpty) ...[
+                          _SectionHeader(
+                            title: 'Copiloto',
+                            detail: _sectionDetail(_status, copilot.length),
+                            ink: ink,
+                            mute: mute,
+                          ),
+                          const SizedBox(height: 8),
+                          for (final entry in copilot.asMap().entries) ...[
+                            _CopilotTaskCard(
+                              action: entry.value,
+                              status: _status,
+                              highlighted:
+                                  _status == 'ABERTO' && entry.key == 0,
+                              ink: ink,
+                              mute: mute,
+                              brand: brand,
+                              onOpen: () => _openAction(context, entry.value),
+                              onComplete: () => _complete(entry.value),
+                              onSnooze: () => _snooze(entry.value),
+                              onReopen: () => _reopen(entry.value),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                        ],
+                        if (radar.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          _SectionHeader(
+                            title: 'Sinais automáticos',
+                            detail: '${radar.length} sinais',
+                            ink: ink,
+                            mute: mute,
+                          ),
+                          const SizedBox(height: 8),
+                          for (final action in radar) ...[
+                            _RadarSignalCard(
+                              action: action,
+                              status: _status,
+                              ink: ink,
+                              mute: mute,
+                              brand: brand,
+                              onOpen: () => _openAction(context, action),
+                              onComplete: () => _complete(action),
+                              onSnooze: () => _snooze(action),
+                              onReopen: () => _reopen(action),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                        ],
                       ],
                     ),
                   );
-                }
-
-                return RefreshIndicator(
-                  onRefresh: _refresh,
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
-                      10,
-                      TokensStrip.s4,
-                      120,
-                    ),
-                    children: [
-                      if (copilot.isNotEmpty) ...[
-                        _SectionHeader(
-                          title: 'Copiloto',
-                          detail: _sectionDetail(_status, copilot.length),
-                          ink: ink,
-                          mute: mute,
-                        ),
-                        const SizedBox(height: 8),
-                        for (final entry in copilot.asMap().entries) ...[
-                          _CopilotTaskCard(
-                            action: entry.value,
-                            status: _status,
-                            highlighted: _status == 'ABERTO' && entry.key == 0,
-                            ink: ink,
-                            mute: mute,
-                            brand: brand,
-                            onOpen: () => _openAction(context, entry.value),
-                            onComplete: () => _complete(entry.value),
-                            onSnooze: () => _snooze(entry.value),
-                            onReopen: () => _reopen(entry.value),
-                          ),
-                          const SizedBox(height: 8),
-                        ],
-                      ],
-                      if (radar.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        _SectionHeader(
-                          title: 'Sinais automáticos',
-                          detail: '${radar.length} sinais',
-                          ink: ink,
-                          mute: mute,
-                        ),
-                        const SizedBox(height: 8),
-                        for (final action in radar) ...[
-                          _RadarSignalCard(
-                            action: action,
-                            status: _status,
-                            ink: ink,
-                            mute: mute,
-                            brand: brand,
-                            onOpen: () => _openAction(context, action),
-                            onComplete: () => _complete(action),
-                            onSnooze: () => _snooze(action),
-                            onReopen: () => _reopen(action),
-                          ),
-                          const SizedBox(height: 8),
-                        ],
-                      ],
-                    ],
-                  ),
-                );
-              },
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -425,11 +430,7 @@ class _CopilotTaskCard extends StatelessWidget {
       ),
       decoration:
           highlighted
-              ? fxListCardDecoration(
-                context,
-                accent: brand,
-                selected: true,
-              )
+              ? fxListCardDecoration(context, accent: brand, selected: true)
               : fxListCardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -740,11 +741,11 @@ class _IaActionsEmpty extends StatelessWidget {
       onRefresh: onRefresh,
       child: ListView(
         padding: const EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
-                      TokensStrip.s4,
-                      TokensStrip.s4,
-                      120,
-                    ),
+          TokensStrip.s4,
+          TokensStrip.s4,
+          TokensStrip.s4,
+          120,
+        ),
         children: [
           _IaActionsEmptyCard(
             title: title,

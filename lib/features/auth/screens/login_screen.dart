@@ -1,4 +1,4 @@
-﻿import 'dart:io' show Platform;
+import 'dart:io' show Platform;
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -20,6 +20,7 @@ import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -48,7 +49,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void initState() {
     super.initState();
     _loadCapabilities();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _resetPublicAuthBranding());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _resetPublicAuthBranding(),
+    );
   }
 
   void _resetPublicAuthBranding() {
@@ -64,7 +67,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (_roleFromQueryApplied) return;
     _roleFromQueryApplied = true;
     final role =
-        GoRouterState.of(context).uri.queryParameters['role']?.trim().toLowerCase();
+        GoRouterState.of(
+          context,
+        ).uri.queryParameters['role']?.trim().toLowerCase();
     if (role == 'aluno') {
       _isAluno = true;
     } else if (role == 'personal') {
@@ -291,186 +296,196 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
-      ),
-      child: Scaffold(
-        body: AuthShell(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 52, TokensStrip.s5, 36),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: MediaQuery.of(context).size.height - 100,
+    return fxScreenA11yScope(
+      label: 'Entrar no Focux',
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
+        child: Scaffold(
+          body: AuthShell(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(
+                TokensStrip.s5,
+                52,
+                TokensStrip.s5,
+                36,
               ),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    const SizedBox(height: 4),
-                    AuthLoginBrandHeader(
-                      isAluno: _isAluno,
-                      taglineSize: 14.5,
-                    ),
-                    const SizedBox(height: 26),
-                    AuthGlassCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Entrar',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.4,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height - 100,
+                ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 4),
+                      AuthLoginBrandHeader(
+                        isAluno: _isAluno,
+                        taglineSize: 14.5,
+                      ),
+                      const SizedBox(height: 26),
+                      AuthGlassCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Entrar',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.4,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 18),
-                          AuthRoleToggle(
-                            isAluno: _isAluno,
-                            onPersonalTap: () {
-                              if (_isAluno) {
-                                HapticFeedback.selectionClick();
-                                setState(() => _isAluno = false);
-                              }
-                            },
-                            onAlunoTap: () {
-                              if (!_isAluno) {
-                                HapticFeedback.selectionClick();
-                                setState(() => _isAluno = true);
-                              }
-                            },
-                          ),
-                          const SizedBox(height: 18),
-                          AuthField(
-                            label: 'E-mail',
-                            controller: _emailController,
-                            hintText: 'seu@email.com',
-                            icon: Icons.person_outline_rounded,
-                            keyboardType: TextInputType.emailAddress,
-                            textInputAction: TextInputAction.next,
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Informe o e-mail.';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 14),
-                          AuthField(
-                            label: 'Senha',
-                            controller: _passwordController,
-                            hintText: '••••••••',
-                            icon: Icons.lock_outline_rounded,
-                            obscureText: !_showPassword,
-                            textInputAction: TextInputAction.done,
-                            onFieldSubmitted: (_) => _submit(),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Informe a senha.';
-                              }
-                              return null;
-                            },
-                            suffix: TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  _showPassword = !_showPassword;
-                                });
+                            const SizedBox(height: 18),
+                            AuthRoleToggle(
+                              isAluno: _isAluno,
+                              onPersonalTap: () {
+                                if (_isAluno) {
+                                  HapticFeedback.selectionClick();
+                                  setState(() => _isAluno = false);
+                                }
                               },
-                              child: Text(
-                                _showPassword ? 'Ocultar' : 'Ver',
-                                style: TextStyle(
-                                  color: primary,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                              onAlunoTap: () {
+                                if (!_isAluno) {
+                                  HapticFeedback.selectionClick();
+                                  setState(() => _isAluno = true);
+                                }
+                              },
                             ),
-                          ),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
-                              onPressed: () => context.go('/esqueci-senha'),
-                              child: Text(
-                                'Esqueci minha senha',
-                                style: TextStyle(
-                                  color: primary,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                          if (_error != null) ...[
-                            Text(
-                              _error!,
-                              style: const TextStyle(
-                                color: Color(0xFFFFB6B6),
-                                fontSize: 12.5,
-                              ),
+                            const SizedBox(height: 18),
+                            AuthField(
+                              label: 'E-mail',
+                              controller: _emailController,
+                              hintText: 'seu@email.com',
+                              icon: Icons.person_outline_rounded,
+                              keyboardType: TextInputType.emailAddress,
+                              textInputAction: TextInputAction.next,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Informe o e-mail.';
+                                }
+                                return null;
+                              },
                             ),
                             const SizedBox(height: 14),
-                          ],
-                          FxLiquidPrimaryButton(
-                            label: 'Entrar',
-                            onPressed: _loading ? null : _submit,
-                            loading: _loading,
-                          ),
-                          if (_googleEnabled || _googleStatusNote != null) ...[
-                            const SizedBox(height: 12),
-                            const _AuthDivider(label: 'ou continue com'),
-                            const SizedBox(height: 12),
-                          ],
-                          if (_googleEnabled) ...[
-                            GoogleSignInButton(
-                              onPressed: _loadingGoogle ? null : _submitGoogle,
-                              isLoading: _loadingGoogle,
-                            ),
-                          ],
-                          if (_googleStatusNote != null) ...[
-                            if (_googleEnabled) const SizedBox(height: 12),
-                            AuthOperationalNotice(
-                              icon: Icons.g_mobiledata_rounded,
-                              title:
-                                  _googleStatusTitle ??
-                                  'Google pendente no ambiente',
-                              text: _googleStatusNote!,
-                              action: _googleStatusAction,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    GestureDetector(
-                      onTap:
-                          () => context.go(
-                            _isAluno ? '/register/aluno' : '/register',
-                          ),
-                      child: RichText(
-                        textAlign: TextAlign.center,
-                        text: TextSpan(
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.78),
-                            fontSize: 14,
-                          ),
-                          children: [
-                            const TextSpan(text: 'Não tem conta? '),
-                            TextSpan(
-                              text: 'Criar conta grátis',
-                              style: TextStyle(
-                                color: primary,
-                                fontWeight: FontWeight.w700,
+                            AuthField(
+                              label: 'Senha',
+                              controller: _passwordController,
+                              hintText: '••••••••',
+                              icon: Icons.lock_outline_rounded,
+                              obscureText: !_showPassword,
+                              textInputAction: TextInputAction.done,
+                              onFieldSubmitted: (_) => _submit(),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Informe a senha.';
+                                }
+                                return null;
+                              },
+                              suffix: TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _showPassword = !_showPassword;
+                                  });
+                                },
+                                child: Text(
+                                  _showPassword ? 'Ocultar' : 'Ver',
+                                  style: TextStyle(
+                                    color: primary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ),
                             ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () => context.go('/esqueci-senha'),
+                                child: Text(
+                                  'Esqueci minha senha',
+                                  style: TextStyle(
+                                    color: primary,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            if (_error != null) ...[
+                              Text(
+                                _error!,
+                                style: const TextStyle(
+                                  color: Color(0xFFFFB6B6),
+                                  fontSize: 12.5,
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                            ],
+                            FxLiquidPrimaryButton(
+                              label: 'Entrar',
+                              onPressed: _loading ? null : _submit,
+                              loading: _loading,
+                            ),
+                            if (_googleEnabled ||
+                                _googleStatusNote != null) ...[
+                              const SizedBox(height: 12),
+                              const _AuthDivider(label: 'ou continue com'),
+                              const SizedBox(height: 12),
+                            ],
+                            if (_googleEnabled) ...[
+                              GoogleSignInButton(
+                                onPressed:
+                                    _loadingGoogle ? null : _submitGoogle,
+                                isLoading: _loadingGoogle,
+                              ),
+                            ],
+                            if (_googleStatusNote != null) ...[
+                              if (_googleEnabled) const SizedBox(height: 12),
+                              AuthOperationalNotice(
+                                icon: Icons.g_mobiledata_rounded,
+                                title:
+                                    _googleStatusTitle ??
+                                    'Google pendente no ambiente',
+                                text: _googleStatusNote!,
+                                action: _googleStatusAction,
+                              ),
+                            ],
                           ],
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 20),
+                      GestureDetector(
+                        onTap:
+                            () => context.go(
+                              _isAluno ? '/register/aluno' : '/register',
+                            ),
+                        child: RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.78),
+                              fontSize: 14,
+                            ),
+                            children: [
+                              const TextSpan(text: 'Não tem conta? '),
+                              TextSpan(
+                                text: 'Criar conta grátis',
+                                style: TextStyle(
+                                  color: primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

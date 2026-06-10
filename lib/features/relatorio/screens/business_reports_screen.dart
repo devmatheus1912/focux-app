@@ -10,6 +10,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/business_repository.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 final _repoProvider = Provider(
   (ref) => BusinessRepository(ref.read(apiClientProvider)),
@@ -49,17 +50,20 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Relatório de Negócio',
-        subtitle: 'MRR, retenção e saúde financeira',
-        onBack: () => safePopOrGo(context, '/dashboard/personal'),
-      ),
-      body: _loading
-          ? const Center(child: FxLoading())
-          : _snapshot == null
-              ? FxEmptyState(
+    return fxScreenA11yScope(
+      label: 'Relatório de Negócio',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Relatório de Negócio',
+          subtitle: 'MRR, retenção e saúde financeira',
+          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+        ),
+        body:
+            _loading
+                ? const Center(child: FxLoading())
+                : _snapshot == null
+                ? FxEmptyState(
                   icon: 'bar-chart-2',
                   title: 'Não foi possível carregar o relatório',
                   subtitle: 'Verifique sua conexão e tente novamente.',
@@ -68,10 +72,11 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
                     onTap: _carregar,
                   ),
                 )
-              : RefreshIndicator(
+                : RefreshIndicator(
                   onRefresh: _carregar,
                   child: _Body(snapshot: _snapshot!),
                 ),
+      ),
     );
   }
 }
@@ -83,9 +88,10 @@ class _Body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ndrColor = snapshot.ndrPct >= 100
-        ? EagleTokens.good
-        : snapshot.ndrPct >= 90
+    final ndrColor =
+        snapshot.ndrPct >= 100
+            ? EagleTokens.good
+            : snapshot.ndrPct >= 90
             ? EagleTokens.warn
             : EagleTokens.bad;
     return ListView(
@@ -102,9 +108,10 @@ class _Body extends StatelessWidget {
         _MetricCard(
           titulo: 'NDR (Net Dollar Retention)',
           valor: '${snapshot.ndrPct.toStringAsFixed(1)}%',
-          delta: snapshot.ndrPct >= 100
-              ? 'Você está expandindo. Mantenha.'
-              : 'Abaixo de 100% = contração. Reduza churn ou suba preço.',
+          delta:
+              snapshot.ndrPct >= 100
+                  ? 'Você está expandindo. Mantenha.'
+                  : 'Abaixo de 100% = contração. Reduza churn ou suba preço.',
           icon: Icons.trending_up,
           color: ndrColor,
         ),
@@ -167,8 +174,9 @@ class _Body extends StatelessWidget {
         const SizedBox(height: 24),
         Text(
           'Dicas',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 8),
         const _Tip(
@@ -217,36 +225,42 @@ class _MetricCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(TokensStrip.rCard),
         onTap: onTap,
         child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: .15),
-                borderRadius: BorderRadius.circular(12),
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: .15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: color),
               ),
-              child: Icon(icon, color: color),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(titulo,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      titulo,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.outline)),
-                  Text(valor,
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                    ),
+                    Text(
+                      valor,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w900, color: color)),
-                  const SizedBox(height: 2),
-                  Text(delta,
-                      style: Theme.of(context).textTheme.bodySmall),
-                ],
+                        fontWeight: FontWeight.w900,
+                        color: color,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(delta, style: Theme.of(context).textTheme.bodySmall),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
         ),
       ),
     );
@@ -275,9 +289,12 @@ class _MiniMetric extends StatelessWidget {
             Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 6),
             Text(titulo, style: Theme.of(context).textTheme.bodySmall),
-            Text(valor,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w900)),
+            Text(
+              valor,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+            ),
           ],
         ),
       ),
@@ -300,8 +317,7 @@ class _Tip extends StatelessWidget {
           Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(texto,
-                style: Theme.of(context).textTheme.bodySmall),
+            child: Text(texto, style: Theme.of(context).textTheme.bodySmall),
           ),
         ],
       ),

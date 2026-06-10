@@ -71,11 +71,12 @@ class PerfilReadinessView {
 
     final next = items.firstWhere(
       (item) => !item.done,
-      orElse: () => const PerfilChecklistItem(
-        label: '',
-        done: true,
-        action: PerfilChecklistAction.brand,
-      ),
+      orElse:
+          () => const PerfilChecklistItem(
+            label: '',
+            done: true,
+            action: PerfilChecklistAction.brand,
+          ),
     );
 
     final PerfilNextStep? nextStep =
@@ -87,11 +88,7 @@ class PerfilReadinessView {
               action: next.action,
             );
 
-    return PerfilReadinessView(
-      score: score,
-      items: items,
-      nextStep: nextStep,
-    );
+    return PerfilReadinessView(score: score, items: items, nextStep: nextStep);
   }
 
   static Set<String> _missingLabels(

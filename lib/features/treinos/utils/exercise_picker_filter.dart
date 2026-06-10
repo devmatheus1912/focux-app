@@ -38,8 +38,7 @@ class ExercisePickerFilter {
   }) {
     return ExercisePickerFilter(
       espaco: clearEspaco ? null : (espaco ?? this.espaco),
-      equipamento:
-          clearEquipamento ? null : (equipamento ?? this.equipamento),
+      equipamento: clearEquipamento ? null : (equipamento ?? this.equipamento),
       equipamentosAluno:
           clearAluno ? const {} : (equipamentosAluno ?? this.equipamentosAluno),
       filtrarPorAluno:

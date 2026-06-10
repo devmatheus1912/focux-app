@@ -10,6 +10,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/data/perfil_repository.dart';
 import '../data/pacote_repository.dart';
 import '../widgets/pacotes_storefront_widgets.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 final _pacoteRepoProvider = Provider(
   (ref) => PacoteRepository(ref.read(apiClientProvider)),
@@ -99,81 +100,84 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FxShellScaffold(
-      appBar: FxShellAppBar(
-        title: 'Planos & link de vendas',
-        subtitle: 'Planos com preço e link para WhatsApp',
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.link_rounded),
-            tooltip: 'Copiar link da página de vendas',
-            onPressed: _copiarLink,
-          ),
-        ],
-      ),
-      floatingActionButton:
-          _loading || _loadFailed || _pacotes.isEmpty
-              ? null
-              : FloatingActionButton.extended(
-                onPressed: _novoPacote,
-                icon: const Icon(Icons.add_rounded),
-                label: const Text('Novo plano'),
-              ),
-      body:
-          _loading
-              ? const PacotesStorefrontSkeleton()
-              : _loadFailed
-              ? PacotesLoadErrorState(onRetry: _carregar)
-              : RefreshIndicator(
-                onRefresh: _carregar,
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(
-                    TokensStrip.s4,
-                    TokensStrip.s2,
-                    TokensStrip.s4,
-                    96,
-                  ),
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: [
-                    const PacotesComoFuncionaCard(),
-                    if (_slug != null && _slug!.isNotEmpty) ...[
-                      StorefrontLinkCard(
-                        slug: _slug!,
-                        onCopy: _copiarLink,
-                        onPreview: _verVitrine,
-                      ),
-                      const SizedBox(height: TokensStrip.s3),
-                    ],
-                    if (_pacotes.isNotEmpty) ...[
-                      PacotesOverviewStrip(pacotes: _pacotes),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: 2,
-                          bottom: TokensStrip.s2,
+    return fxScreenA11yScope(
+      label: 'Planos & link de vendas',
+      child: FxShellScaffold(
+        appBar: FxShellAppBar(
+          title: 'Planos & link de vendas',
+          subtitle: 'Planos com preço e link para WhatsApp',
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.link_rounded),
+              tooltip: 'Copiar link da página de vendas',
+              onPressed: _copiarLink,
+            ),
+          ],
+        ),
+        floatingActionButton:
+            _loading || _loadFailed || _pacotes.isEmpty
+                ? null
+                : FloatingActionButton.extended(
+                  onPressed: _novoPacote,
+                  icon: const Icon(Icons.add_rounded),
+                  label: const Text('Novo plano'),
+                ),
+        body:
+            _loading
+                ? const PacotesStorefrontSkeleton()
+                : _loadFailed
+                ? PacotesLoadErrorState(onRetry: _carregar)
+                : RefreshIndicator(
+                  onRefresh: _carregar,
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s4,
+                      TokensStrip.s2,
+                      TokensStrip.s4,
+                      96,
+                    ),
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      const PacotesComoFuncionaCard(),
+                      if (_slug != null && _slug!.isNotEmpty) ...[
+                        StorefrontLinkCard(
+                          slug: _slug!,
+                          onCopy: _copiarLink,
+                          onPreview: _verVitrine,
                         ),
-                        child: Text(
-                          'Seus planos (aparecem no link acima)',
-                          style: TextStyle(
-                            color: fxScreenMute(context),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
+                        const SizedBox(height: TokensStrip.s3),
+                      ],
+                      if (_pacotes.isNotEmpty) ...[
+                        PacotesOverviewStrip(pacotes: _pacotes),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 2,
+                            bottom: TokensStrip.s2,
+                          ),
+                          child: Text(
+                            'Seus planos (aparecem no link acima)',
+                            style: TextStyle(
+                              color: fxScreenMute(context),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
-                      ),
+                      ],
+                      if (_pacotes.isEmpty)
+                        PacotesEmptyState(onCreate: _novoPacote)
+                      else ...[
+                        for (var i = 0; i < _pacotes.length; i++)
+                          PacoteStorefrontCard(
+                            pacote: _pacotes[i],
+                            entranceIndex: i,
+                            onDelete: () => _desativar(_pacotes[i]),
+                          ),
+                      ],
                     ],
-                    if (_pacotes.isEmpty)
-                      PacotesEmptyState(onCreate: _novoPacote)
-                    else ...[
-                      for (var i = 0; i < _pacotes.length; i++)
-                        PacoteStorefrontCard(
-                          pacote: _pacotes[i],
-                          entranceIndex: i,
-                          onDelete: () => _desativar(_pacotes[i]),
-                        ),
-                    ],
-                  ],
+                  ),
                 ),
-              ),
+      ),
     );
   }
 }

@@ -34,10 +34,8 @@ Future<void> confirmarExclusaoAlunoDetail(
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder:
-        (ctx) => AlunoDeleteConfirmSheet(
-          aluno: aluno,
-          confirmToken: confirmToken,
-        ),
+        (ctx) =>
+            AlunoDeleteConfirmSheet(aluno: aluno, confirmToken: confirmToken),
   );
   if (confirm != true || !context.mounted) return;
   try {
@@ -92,7 +90,10 @@ Future<void> confirmarGerarSenhaAlunoDetail(
     }
   } catch (e) {
     if (context.mounted) {
-      FeedbackHelper.showError(context, friendlyError(e, fallback: 'Não foi possível gerar senha.'),);
+      FeedbackHelper.showError(
+        context,
+        friendlyError(e, fallback: 'Não foi possível gerar senha.'),
+      );
     }
   }
 }
@@ -164,20 +165,13 @@ void showAlunoNovaSenhaProvisoriaSheet(
                 Text(
                   'A senha anterior não funciona mais. ${aluno.nome} deve trocar no primeiro acesso.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: mute,
-                    fontSize: 13.4,
-                    height: 1.35,
-                  ),
+                  style: TextStyle(color: mute, fontSize: 13.4, height: 1.35),
                 ),
                 const SizedBox(height: 20),
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(18, 15, 18, 14),
-                  decoration: fxListCardDecoration(
-                    ctx,
-                    accent: primary,
-                  ),
+                  decoration: fxListCardDecoration(ctx, accent: primary),
                   child: Column(
                     children: [
                       Text(
@@ -235,9 +229,12 @@ void showAlunoNovaSenhaProvisoriaSheet(
                       await copySensitiveToClipboard(mensagem);
                       if (ctx.mounted) Navigator.of(ctx).pop();
                       if (context.mounted) {
-                        FeedbackHelper.showSuccess(context, hasWhatsapp
-                                  ? 'Mensagem copiada. Abra o WhatsApp e envie ao aluno.'
-                                  : 'Convite copiado.',);
+                        FeedbackHelper.showSuccess(
+                          context,
+                          hasWhatsapp
+                              ? 'Mensagem copiada. Abra o WhatsApp e envie ao aluno.'
+                              : 'Convite copiado.',
+                        );
                       }
                     },
                     icon: Icon(
@@ -268,14 +265,13 @@ void showAlunoNovaSenhaProvisoriaSheet(
                         HapticFeedback.mediumImpact();
                         if (ctx.mounted) Navigator.of(ctx).pop();
                         if (context.mounted) {
-                          FeedbackHelper.showSuccess(context, 'Convite copiado.');
+                          FeedbackHelper.showSuccess(
+                            context,
+                            'Convite copiado.',
+                          );
                         }
                       },
-                      icon: Icon(
-                        Icons.copy_rounded,
-                        size: 18,
-                        color: ink,
-                      ),
+                      icon: Icon(Icons.copy_rounded, size: 18, color: ink),
                       label: Text(
                         'Copiar nova senha',
                         style: TextStyle(color: ink),

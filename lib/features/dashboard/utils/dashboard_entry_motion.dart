@@ -13,7 +13,10 @@ Widget dashboardEntryMotion({
   return FadeTransition(
     opacity: fade,
     child: SlideTransition(
-      position: Tween<Offset>(begin: slideBegin, end: Offset.zero).animate(fade),
+      position: Tween<Offset>(
+        begin: slideBegin,
+        end: Offset.zero,
+      ).animate(fade),
       child: child,
     ),
   );
@@ -22,5 +25,4 @@ Widget dashboardEntryMotion({
 Duration dashboardMotionDuration(
   BuildContext context, {
   Duration normal = const Duration(milliseconds: 220),
-}) =>
-    TokensStrip.prefersReducedMotion(context) ? Duration.zero : normal;
+}) => TokensStrip.prefersReducedMotion(context) ? Duration.zero : normal;

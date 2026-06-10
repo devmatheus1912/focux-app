@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -83,7 +83,10 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
                   _batchLabel!,
                   style: TextStyle(
                     fontSize: 11,
-                    color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+                    color:
+                        isDark
+                            ? EagleTokens.darkInkMute
+                            : TokensStrip.textSecondary,
                   ),
                 ),
               ),
@@ -180,7 +183,8 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
                   'API Endpoints (${qaSmokeEndpoints.length})',
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+                    color:
+                        isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                   ),
                 ),
               ],
@@ -222,11 +226,7 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
     );
   }
 
-  String _routeSubtitle(
-    QaSmokeRoute route,
-    _RouteResult? result,
-    bool isDark,
-  ) {
+  String _routeSubtitle(QaSmokeRoute route, _RouteResult? result, bool isDark) {
     if (result != null && !result.ok && result.error != null) {
       return result.error!;
     }
@@ -348,15 +348,11 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
     }
   }
 
-  Future<void> _runPublicRoutes() => _runRouteBatch(
-    qaPublicRoutes,
-    label: 'Testando rotas públicas…',
-  );
+  Future<void> _runPublicRoutes() =>
+      _runRouteBatch(qaPublicRoutes, label: 'Testando rotas públicas…');
 
-  Future<void> _runPrivateRoutes() => _runRouteBatch(
-    qaPrivateRoutes,
-    label: 'Testando rotas logadas…',
-  );
+  Future<void> _runPrivateRoutes() =>
+      _runRouteBatch(qaPrivateRoutes, label: 'Testando rotas logadas…');
 
   Future<void> _runRouteBatch(
     List<QaSmokeRoute> routes, {

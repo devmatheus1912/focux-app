@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -14,6 +14,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/theme/tokens_strip.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class PlanoAlimentarDetailScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -188,93 +189,99 @@ class _PlanoAlimentarDetailScreenState
   @override
   Widget build(BuildContext context) {
     final p = widget.plano;
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: p.nome,
-        subtitle: 'Plano alimentar do aluno',
-        onBack:
-            () => safePopOrGo(context, '/alunos/${widget.alunoId}/alimentar'),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.auto_awesome,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            tooltip: 'Gerar Dieta IA',
-            onPressed: _abrirGerarIa,
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _abrirNovaRefeicao,
-        icon: const Icon(Icons.add),
-        label: const Text('Refeição'),
-      ),
-      body: Column(
-        children: [
-          // Resumo de macros do plano
-          if (p.caloriasDia != null ||
-              p.proteinaG != null ||
-              p.carboidratoG != null ||
-              p.gorduraG != null)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 4,
-                    children: [
-                      if (p.caloriasDia != null)
-                        _MacroChip('${p.caloriasDia} kcal', EagleTokens.warn),
-                      if (p.proteinaG != null)
-                        _MacroChip('${p.proteinaG}g prot', EagleTokens.bad),
-                      if (p.carboidratoG != null)
-                        _MacroChip(
-                          '${p.carboidratoG}g carbo',
-                          EagleTokens.warn,
-                        ),
-                      if (p.gorduraG != null)
-                        _MacroChip(
-                          '${p.gorduraG}g gord',
-                          Colors.yellow.shade700,
-                        ),
-                    ],
-                  ),
-                  _MacroBar(
-                    proteinaG: p.proteinaG,
-                    carboidratoG: p.carboidratoG,
-                    gorduraG: p.gorduraG,
-                  ),
-                ],
+    return fxScreenA11yScope(
+      label: 'Plano Alimentar Detail',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: p.nome,
+          subtitle: 'Plano alimentar do aluno',
+          onBack:
+              () => safePopOrGo(context, '/alunos/${widget.alunoId}/alimentar'),
+          actions: [
+            IconButton(
+              icon: Icon(
+                Icons.auto_awesome,
+                color: Theme.of(context).colorScheme.primary,
               ),
+              tooltip: 'Gerar Dieta IA',
+              onPressed: _abrirGerarIa,
             ),
-          Expanded(
-            child:
-                _loading
-                    ? const FxLoading()
-                    : _refeicoes.isEmpty
-                    ? const Center(
-                      child: Text(
-                        'Nenhuma refeição cadastrada.\nToque em + para adicionar.',
-                        textAlign: TextAlign.center,
-                      ),
-                    )
-                    : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 100),
-                      itemCount: _refeicoes.length,
-                      itemBuilder:
-                          (_, i) => _RefeicaoCard(
-                            refeicao: _refeicoes[i],
-                            onDelete: () => _excluir(_refeicoes[i]),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: _abrirNovaRefeicao,
+          icon: const Icon(Icons.add),
+          label: const Text('Refeição'),
+        ),
+        body: Column(
+          children: [
+            // Resumo de macros do plano
+            if (p.caloriasDia != null ||
+                p.proteinaG != null ||
+                p.carboidratoG != null ||
+                p.gorduraG != null)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        if (p.caloriasDia != null)
+                          _MacroChip('${p.caloriasDia} kcal', EagleTokens.warn),
+                        if (p.proteinaG != null)
+                          _MacroChip('${p.proteinaG}g prot', EagleTokens.bad),
+                        if (p.carboidratoG != null)
+                          _MacroChip(
+                            '${p.carboidratoG}g carbo',
+                            EagleTokens.warn,
                           ),
+                        if (p.gorduraG != null)
+                          _MacroChip(
+                            '${p.gorduraG}g gord',
+                            Colors.yellow.shade700,
+                          ),
+                      ],
                     ),
-          ),
-        ],
+                    _MacroBar(
+                      proteinaG: p.proteinaG,
+                      carboidratoG: p.carboidratoG,
+                      gorduraG: p.gorduraG,
+                    ),
+                  ],
+                ),
+              ),
+            Expanded(
+              child:
+                  _loading
+                      ? const FxLoading()
+                      : _refeicoes.isEmpty
+                      ? const Center(
+                        child: Text(
+                          'Nenhuma refeição cadastrada.\nToque em + para adicionar.',
+                          textAlign: TextAlign.center,
+                        ),
+                      )
+                      : ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(12, 12, 12, 100),
+                        itemCount: _refeicoes.length,
+                        itemBuilder:
+                            (_, i) => _RefeicaoCard(
+                              refeicao: _refeicoes[i],
+                              onDelete: () => _excluir(_refeicoes[i]),
+                            ),
+                      ),
+            ),
+          ],
+        ),
       ),
     );
   }

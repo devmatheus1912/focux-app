@@ -7,12 +7,7 @@ import '../data/aluno_repository.dart';
 import 'aluno360_copilot_logic.dart';
 import 'aluno_hero_signal.dart';
 
-enum OperacaoStickyDestination {
-  chat,
-  commandCenter,
-  evolucao,
-  editAluno,
-}
+enum OperacaoStickyDestination { chat, commandCenter, evolucao, editAluno }
 
 /// Sticky bar action resolved from 360 payload and queue state.
 class OperacaoStickyAction {
@@ -51,14 +46,11 @@ class OperacaoDominantMetric {
 }
 
 class AderenciaWeekPoint {
-  const AderenciaWeekPoint({
-    required this.checkins,
-    this.date,
-    this.dayLetter,
-  });
+  const AderenciaWeekPoint({required this.checkins, this.date, this.dayLetter});
 
   final double checkins;
   final String? date;
+
   /// Optional API label (ignored na UI — exibimos via [adherenceDayLetter]).
   final String? dayLetter;
 }
@@ -76,8 +68,7 @@ class AderenciaWeekSummary {
 
   String get caption {
     if (points.isEmpty) return 'Sem dados';
-    final daysWith =
-        points.where((p) => p.checkins > 0).length;
+    final daysWith = points.where((p) => p.checkins > 0).length;
     if (!hasAnyCheckin) {
       return '0 de ${points.length} dias';
     }
@@ -188,11 +179,7 @@ OperacaoStickyAction resolveOperacaoStickyAction({
   final label =
       backendLabel != null && backendLabel.isNotEmpty
           ? backendLabel
-          : copilotStickyLabel(
-            aluno,
-            acao,
-            wearableRelevant: wearableRelevant,
-          );
+          : copilotStickyLabel(aluno, acao, wearableRelevant: wearableRelevant);
   return OperacaoStickyAction(
     label: label,
     icon: stickyIconForDestination(destination),
@@ -323,10 +310,7 @@ List<AderenciaWeekPoint> padAderenciaWeekToSevenDays(
         '${day.year.toString().padLeft(4, '0')}-'
         '${day.month.toString().padLeft(2, '0')}-'
         '${day.day.toString().padLeft(2, '0')}';
-    return AderenciaWeekPoint(
-      checkins: byDate[iso] ?? 0,
-      date: iso,
-    );
+    return AderenciaWeekPoint(checkins: byDate[iso] ?? 0, date: iso);
   });
 }
 
@@ -396,15 +380,7 @@ String weekdayLetterFromIso(String? isoDate) {
 String weekdayNameFromIso(String? isoDate) {
   final parsed = parseIsoDateLocal(isoDate);
   if (parsed == null) return '';
-  const labels = [
-    'Dom',
-    'Seg',
-    'Ter',
-    'Qua',
-    'Qui',
-    'Sex',
-    'Sáb',
-  ];
+  const labels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
   return labels[parsed.weekday % 7];
 }
 
@@ -440,9 +416,7 @@ Duration operacaoSectionDelay({
 bool operacaoHeroShowsRisco(Aluno aluno) =>
     alunoHeroPrimarySignal(aluno).label == 'Risco operacional';
 
-bool shouldCompactFollowUpForContactPriority({
-  required bool contactPriority,
-}) =>
+bool shouldCompactFollowUpForContactPriority({required bool contactPriority}) =>
     contactPriority;
 
 /// Auto-enable focus mode for high-friction operational profiles.
@@ -598,8 +572,7 @@ bool shouldShowStickySecondaryChat({
 bool shouldShowStickySecondaryCommandCenter({
   required OperacaoStickyAction sticky,
   required bool hasOpenTask,
-}) =>
-    hasOpenTask && sticky.isChatAction;
+}) => hasOpenTask && sticky.isChatAction;
 
 /// True when the sticky bar shows Tarefa or Chat beside the primary CTA.
 bool hasOperacaoStickySecondary({
@@ -633,10 +606,7 @@ String checkinMensagemPronta(String nomeAluno) {
 }
 
 /// Extra do GoRouter para `/alunos/:id/chat` com rascunho opcional.
-Map<String, String> alunoChatRouteExtra({
-  required String nome,
-  String? draft,
-}) {
+Map<String, String> alunoChatRouteExtra({required String nome, String? draft}) {
   final extra = <String, String>{
     'nome': nome.trim().isEmpty ? 'Aluno' : nome.trim(),
   };
@@ -678,10 +648,7 @@ bool stickyCompactLabelAlignedWithAction({
     return false;
   }
   if (acao.isEmpty) return true;
-  final expected = resolveOperacaoStickyDestination(
-    acao,
-    followUpDue: false,
-  );
+  final expected = resolveOperacaoStickyDestination(acao, followUpDue: false);
   return sticky.destination == expected;
 }
 
@@ -723,8 +690,7 @@ bool isOperacaoContatoPrioritario({
 bool shouldHideCopilotTaskRowWhenContactPriority({
   required bool contactPriority,
   required bool hasOpenTask,
-}) =>
-    contactPriority && !hasOpenTask;
+}) => contactPriority && !hasOpenTask;
 
 /// Quando o hero pede contato mas o 360 ainda sugere mapa/perfil, o sticky alinha ao contato.
 OperacaoStickyAction applyContactPriorityStickyOverride({

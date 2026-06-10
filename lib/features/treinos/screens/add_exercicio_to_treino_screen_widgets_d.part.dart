@@ -248,11 +248,8 @@ class _CreateExerciseButton extends StatelessWidget {
         message: 'Criar exercício personalizado',
         preferBelow: false,
         child:
-            expand
-                ? SizedBox(width: double.infinity, child: button)
-                : button,
+            expand ? SizedBox(width: double.infinity, child: button) : button,
       ),
     );
   }
 }
-

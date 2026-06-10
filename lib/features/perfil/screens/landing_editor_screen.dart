@@ -27,6 +27,7 @@ import 'landing_editor_quality.dart';
 import 'landing_editor_sections.dart';
 import 'landing_preset_mapper.dart';
 import 'landing_section_templates.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 class LandingEditorScreen extends ConsumerStatefulWidget {
   const LandingEditorScreen({super.key});
@@ -233,23 +234,24 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
   Future<bool> _confirmApplyTemplate(String label) async {
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Aplicar $label?'),
-        content: const Text(
-          'Os textos atuais da abertura, serviços, dúvidas e botões serão substituídos. '
-          'Fotos e planos da vitrine não mudam.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+      builder:
+          (ctx) => AlertDialog(
+            title: Text('Aplicar $label?'),
+            content: const Text(
+              'Os textos atuais da abertura, serviços, dúvidas e botões serão substituídos. '
+              'Fotos e planos da vitrine não mudam.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Aplicar modelo'),
+              ),
+            ],
           ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Aplicar modelo'),
-          ),
-        ],
-      ),
     );
     return ok ?? false;
   }
@@ -307,23 +309,24 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
 
     final publish = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Publicar mesmo assim?'),
-        content: Text(
-          '${issues.map((e) => '• ${e.message}').join('\n')}\n\n'
-          'Sua página pode parecer incompleta para quem visita.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Revisar conteúdo'),
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Publicar mesmo assim?'),
+            content: Text(
+              '${issues.map((e) => '• ${e.message}').join('\n')}\n\n'
+              'Sua página pode parecer incompleta para quem visita.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Revisar conteúdo'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Publicar assim'),
+              ),
+            ],
           ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Publicar assim'),
-          ),
-        ],
-      ),
     );
     if (publish == false) _openContentReview();
     return publish ?? false;
@@ -335,36 +338,44 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
     final scheme = Theme.of(context).colorScheme;
     final choice = await showDialog<LandingEditorLeaveChoice>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Salvar antes de sair?'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'Você fez alterações na landing. O que prefere fazer?',
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Salvar antes de sair?'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Você fez alterações na landing. O que prefere fazer?',
+                ),
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed:
+                      () => Navigator.pop(
+                        ctx,
+                        LandingEditorLeaveChoice.saveAndLeave,
+                      ),
+                  child: const Text('Salvar e sair'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  onPressed:
+                      () => Navigator.pop(ctx, LandingEditorLeaveChoice.stay),
+                  child: const Text('Continuar editando'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  onPressed:
+                      () =>
+                          Navigator.pop(ctx, LandingEditorLeaveChoice.discard),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: scheme.error,
+                  ),
+                  child: const Text('Sair sem salvar'),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () =>
-                  Navigator.pop(ctx, LandingEditorLeaveChoice.saveAndLeave),
-              child: const Text('Salvar e sair'),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: () => Navigator.pop(ctx, LandingEditorLeaveChoice.stay),
-              child: const Text('Continuar editando'),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: () =>
-                  Navigator.pop(ctx, LandingEditorLeaveChoice.discard),
-              style: OutlinedButton.styleFrom(foregroundColor: scheme.error),
-              child: const Text('Sair sem salvar'),
-            ),
-          ],
-        ),
-      ),
+          ),
     );
 
     switch (choice) {
@@ -382,20 +393,23 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
   Future<bool> _confirmDelete(String label) async {
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Remover $label?'),
-        content: const Text('Essa ação não pode ser desfeita até você salvar.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+      builder:
+          (ctx) => AlertDialog(
+            title: Text('Remover $label?'),
+            content: const Text(
+              'Essa ação não pode ser desfeita até você salvar.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Remover'),
+              ),
+            ],
           ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Remover'),
-          ),
-        ],
-      ),
     );
     return ok ?? false;
   }
@@ -413,7 +427,8 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
   Future<void> _generateHero() async {
     setState(() => _c.generatingHero = true);
     try {
-      final copy = await ref.read(landingGrowthRepositoryProvider).generateHero();
+      final copy =
+          await ref.read(landingGrowthRepositoryProvider).generateHero();
       _c.heroTitle.text = copy.heroTitle;
       _c.heroSubtitle.text = copy.heroSubtitle;
       _c.primaryCta.text = copy.primaryCta;
@@ -443,7 +458,9 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       }
     });
     try {
-      final url = await MediaUploadService(ref.read(apiClientProvider)).uploadBytes(
+      final url = await MediaUploadService(
+        ref.read(apiClientProvider),
+      ).uploadBytes(
         bytes: await file.readAsBytes(),
         filename: file.name,
         folder: hero ? 'landing/hero' : 'landing/bio',
@@ -477,19 +494,27 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
 
   Future<void> _removeImage({required bool hero}) async {
     final label = hero ? 'foto de capa' : 'foto customizada da seção sobre';
-    final content = hero
-        ? 'A imagem será removida da landing. Toque em Salvar para publicar a alteração.'
-        : 'A foto customizada será removida. A seção sobre voltará a usar sua foto de perfil.';
+    final content =
+        hero
+            ? 'A imagem será removida da landing. Toque em Salvar para publicar a alteração.'
+            : 'A foto customizada será removida. A seção sobre voltará a usar sua foto de perfil.';
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Remover $label?'),
-        content: Text(content),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Remover')),
-        ],
-      ),
+      builder:
+          (ctx) => AlertDialog(
+            title: Text('Remover $label?'),
+            content: Text(content),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Remover'),
+              ),
+            ],
+          ),
     );
     if (confirmed != true || !mounted) return;
     setState(() {
@@ -499,13 +524,17 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
         _c.clearBioImage();
       }
     });
-    FeedbackHelper.showSuccess(context, '$label removida. Salve para publicar.');
+    FeedbackHelper.showSuccess(
+      context,
+      '$label removida. Salve para publicar.',
+    );
   }
 
   void _useDefaultImage({required bool hero}) {
-    final alreadyDefault = hero
-        ? (_c.heroImageUrl == null || _c.heroImageUrl!.isEmpty)
-        : (_c.bioImageUrl == null || _c.bioImageUrl!.isEmpty);
+    final alreadyDefault =
+        hero
+            ? (_c.heroImageUrl == null || _c.heroImageUrl!.isEmpty)
+            : (_c.bioImageUrl == null || _c.bioImageUrl!.isEmpty);
     if (alreadyDefault) {
       FeedbackHelper.showInfo(context, 'Já está no padrão.');
       return;
@@ -543,7 +572,9 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
       final contactCta = _c.polishCta(_c.contactCta.text.trim());
       final servicos = _c.servicosForSave();
       final faq = _c.faqForSave();
-      await ref.read(perfilRepositoryProvider).atualizarLanding(
+      await ref
+          .read(perfilRepositoryProvider)
+          .atualizarLanding(
             heroTitle: heroTitle,
             heroSubtitle: _c.heroSubtitle.text.trim(),
             primaryCta: primaryCta,
@@ -587,182 +618,200 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
   Widget build(BuildContext context) {
     final perfilAsync = ref.watch(perfilProvider);
 
-    return FeatureGate(
-      requiredPlan: SubscriptionPlan.ENTERPRISE_PRO,
-      capability: 'landingCompleta',
-      featureName: 'Landing page completa',
-      child: perfilAsync.when(
-      loading: () => const FxShellScaffold(
-        appBar: FxShellAppBar(title: 'Editor da landing'),
-        body: Center(child: FxLoading()),
-      ),
-      error: (e, _) => FxShellScaffold(
-        appBar: FxShellAppBar(
-          title: 'Editor da landing',
-          onBack: () => context.pop(),
-        ),
-        body: Center(child: Text(friendlyError(e))),
-      ),
-      data: (perfil) {
-        if (!_c.loaded) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) setState(() => _c.applyPerfil(perfil));
-          });
-        }
-
-        return PopScope(
-          canPop: !_c.dirty,
-          onPopInvokedWithResult: (didPop, _) async {
-            if (didPop) return;
-            await _tryPopAfterLeaveConfirm();
-          },
-          child: FxShellScaffold(
-            appBar: FxShellAppBar(
-              title: 'Editor da landing',
-              subtitle: _c.dirty ? 'Alterações pendentes' : null,
-              onBack: _tryPopAfterLeaveConfirm,
-            ),
-            bottomNavigationBar: LandingStickySaveBar(
-              dirty: _c.dirty,
-              saving: _c.saving,
-              onSave: _salvar,
-            ),
-            body: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (_c.loaded)
-                  LandingContentWarningBanner(
-                    reviewCount: _c.contentReviewCount(),
-                    configComplete: _c.checklist.isNotEmpty &&
-                        _c.checklist.every((item) => item.done),
-                    onReview: () => _enterReviewFocus(),
-                  ),
-                LandingEditorTabBar(
-                  index: _c.tabIndex,
-                  onChanged: (value) => setState(() => _c.tabIndex = value),
+    return fxScreenA11yScope(
+      label: 'Editor da landing',
+      child: FeatureGate(
+        requiredPlan: SubscriptionPlan.ENTERPRISE_PRO,
+        capability: 'landingCompleta',
+        featureName: 'Landing page completa',
+        child: perfilAsync.when(
+          loading:
+              () => const FxShellScaffold(
+                appBar: FxShellAppBar(title: 'Editor da landing'),
+                body: Center(child: FxLoading()),
+              ),
+          error:
+              (e, _) => FxShellScaffold(
+                appBar: FxShellAppBar(
+                  title: 'Editor da landing',
+                  onBack: () => context.pop(),
                 ),
-                Expanded(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 260),
-                    switchInCurve: Curves.easeOutCubic,
-                    switchOutCurve: Curves.easeInCubic,
-                    transitionBuilder: (child, animation) {
-                      final offsetAnimation = Tween<Offset>(
-                        begin: const Offset(0.04, 0),
-                        end: Offset.zero,
-                      ).animate(animation);
-                      return FadeTransition(
-                        opacity: animation,
-                        child: SlideTransition(
-                          position: offsetAnimation,
-                          child: child,
-                        ),
-                      );
-                    },
-                    child: switch (_c.tabIndex) {
-                      0 => KeyedSubtree(
-                          key: const ValueKey('tab-links'),
-                          child: LandingEditorLinksTab(
-                            controller: _c,
-                            onReviewFocus: () => _enterReviewFocus(),
-                            onChecklistTap: _onChecklistTap,
-                            onApplyTemplate: _applyTemplate,
-                          ),
-                        ),
-                      1 => KeyedSubtree(
-                          key: const ValueKey('tab-conteudo'),
-                          child: LandingEditorContentTab(
-                            controller: _c,
-                            onGenerateHero: _generateHero,
-                            onUploadHero: () => _uploadImage(hero: true),
-                            onUploadBio: () => _uploadImage(hero: false),
-                            onRemoveHero: () => _removeImage(hero: true),
-                            onRemoveBio: () => _removeImage(hero: false),
-                            onUseDefaultHero: () => _useDefaultImage(hero: true),
-                            onUseDefaultBio: () => _useDefaultImage(hero: false),
-                            onMarkDirty: () => _c.markDirty(),
-                            onHeroExpandedChanged: (v) =>
-                                setState(() => _c.heroExpanded = v),
-                            onCoverExpandedChanged: (v) =>
-                                setState(() => _c.coverExpanded = v),
-                            onPreviewLanding: () {
-                              final slug = _c.slug;
-                              if (slug == null || slug.isEmpty) return;
-                              openLandingLink(
-                                context,
-                                url: Env.landingPageUrl(slug),
-                              );
-                            },
-                            onCtasExpandedChanged: (v) =>
-                                setState(() => _c.ctasExpanded = v),
-                            onServicosExpandedChanged: (v) =>
-                                setState(() => _c.servicosExpanded = v),
-                            onFaqExpandedChanged: (v) =>
-                                setState(() => _c.faqExpanded = v),
-                            onAddServico: () => setState(() => _c.addServico()),
-                            onRemoveServico: _removeServico,
-                            onUpdateServico: (i, {titulo, descricao}) => setState(
-                              () => _c.updateServico(
-                                i,
-                                titulo: titulo,
-                                descricao: descricao,
-                              ),
+                body: Center(child: Text(friendlyError(e))),
+              ),
+          data: (perfil) {
+            if (!_c.loaded) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) setState(() => _c.applyPerfil(perfil));
+              });
+            }
+
+            return PopScope(
+              canPop: !_c.dirty,
+              onPopInvokedWithResult: (didPop, _) async {
+                if (didPop) return;
+                await _tryPopAfterLeaveConfirm();
+              },
+              child: FxShellScaffold(
+                appBar: FxShellAppBar(
+                  title: 'Editor da landing',
+                  subtitle: _c.dirty ? 'Alterações pendentes' : null,
+                  onBack: _tryPopAfterLeaveConfirm,
+                ),
+                bottomNavigationBar: LandingStickySaveBar(
+                  dirty: _c.dirty,
+                  saving: _c.saving,
+                  onSave: _salvar,
+                ),
+                body: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (_c.loaded)
+                      LandingContentWarningBanner(
+                        reviewCount: _c.contentReviewCount(),
+                        configComplete:
+                            _c.checklist.isNotEmpty &&
+                            _c.checklist.every((item) => item.done),
+                        onReview: () => _enterReviewFocus(),
+                      ),
+                    LandingEditorTabBar(
+                      index: _c.tabIndex,
+                      onChanged: (value) => setState(() => _c.tabIndex = value),
+                    ),
+                    Expanded(
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 260),
+                        switchInCurve: Curves.easeOutCubic,
+                        switchOutCurve: Curves.easeInCubic,
+                        transitionBuilder: (child, animation) {
+                          final offsetAnimation = Tween<Offset>(
+                            begin: const Offset(0.04, 0),
+                            end: Offset.zero,
+                          ).animate(animation);
+                          return FadeTransition(
+                            opacity: animation,
+                            child: SlideTransition(
+                              position: offsetAnimation,
+                              child: child,
                             ),
-                            onAddFaq: () => setState(() => _c.addFaq()),
-                            onRemoveFaq: _removeFaq,
-                            onUpdateFaq: (i, {pergunta, resposta}) => setState(
-                              () => _c.updateFaq(
-                                i,
-                                pergunta: pergunta,
-                                resposta: resposta,
-                              ),
+                          );
+                        },
+                        child: switch (_c.tabIndex) {
+                          0 => KeyedSubtree(
+                            key: const ValueKey('tab-links'),
+                            child: LandingEditorLinksTab(
+                              controller: _c,
+                              onReviewFocus: () => _enterReviewFocus(),
+                              onChecklistTap: _onChecklistTap,
+                              onApplyTemplate: _applyTemplate,
                             ),
-                            onExitReviewFocus: _exitReviewFocus,
-                            onJumpToSection: _jumpToContentSection,
                           ),
-                        ),
-                      _ => KeyedSubtree(
-                          key: const ValueKey('tab-ordem'),
-                          child: LandingEditorOrderTab(
-                            controller: _c,
-                            onReorder: (old, newIndex) {
-                              setState(() => _c.reorderSection(
+                          1 => KeyedSubtree(
+                            key: const ValueKey('tab-conteudo'),
+                            child: LandingEditorContentTab(
+                              controller: _c,
+                              onGenerateHero: _generateHero,
+                              onUploadHero: () => _uploadImage(hero: true),
+                              onUploadBio: () => _uploadImage(hero: false),
+                              onRemoveHero: () => _removeImage(hero: true),
+                              onRemoveBio: () => _removeImage(hero: false),
+                              onUseDefaultHero:
+                                  () => _useDefaultImage(hero: true),
+                              onUseDefaultBio:
+                                  () => _useDefaultImage(hero: false),
+                              onMarkDirty: () => _c.markDirty(),
+                              onHeroExpandedChanged:
+                                  (v) => setState(() => _c.heroExpanded = v),
+                              onCoverExpandedChanged:
+                                  (v) => setState(() => _c.coverExpanded = v),
+                              onPreviewLanding: () {
+                                final slug = _c.slug;
+                                if (slug == null || slug.isEmpty) return;
+                                openLandingLink(
+                                  context,
+                                  url: Env.landingPageUrl(slug),
+                                );
+                              },
+                              onCtasExpandedChanged:
+                                  (v) => setState(() => _c.ctasExpanded = v),
+                              onServicosExpandedChanged:
+                                  (v) =>
+                                      setState(() => _c.servicosExpanded = v),
+                              onFaqExpandedChanged:
+                                  (v) => setState(() => _c.faqExpanded = v),
+                              onAddServico:
+                                  () => setState(() => _c.addServico()),
+                              onRemoveServico: _removeServico,
+                              onUpdateServico:
+                                  (i, {titulo, descricao}) => setState(
+                                    () => _c.updateServico(
+                                      i,
+                                      titulo: titulo,
+                                      descricao: descricao,
+                                    ),
+                                  ),
+                              onAddFaq: () => setState(() => _c.addFaq()),
+                              onRemoveFaq: _removeFaq,
+                              onUpdateFaq:
+                                  (i, {pergunta, resposta}) => setState(
+                                    () => _c.updateFaq(
+                                      i,
+                                      pergunta: pergunta,
+                                      resposta: resposta,
+                                    ),
+                                  ),
+                              onExitReviewFocus: _exitReviewFocus,
+                              onJumpToSection: _jumpToContentSection,
+                            ),
+                          ),
+                          _ => KeyedSubtree(
+                            key: const ValueKey('tab-ordem'),
+                            child: LandingEditorOrderTab(
+                              controller: _c,
+                              onReorder: (old, newIndex) {
+                                setState(
+                                  () => _c.reorderSection(
                                     old,
                                     newIndex,
                                     onHighlightEnd: () {
                                       if (mounted) _c.clearSectionHighlight();
                                     },
-                                  ));
-                            },
-                            onMoveUp: (i) {
-                              setState(() => _c.moveSection(
+                                  ),
+                                );
+                              },
+                              onMoveUp: (i) {
+                                setState(
+                                  () => _c.moveSection(
                                     i,
                                     -1,
                                     onHighlightEnd: () {
                                       if (mounted) _c.clearSectionHighlight();
                                     },
-                                  ));
-                            },
-                            onMoveDown: (i) {
-                              setState(() => _c.moveSection(
+                                  ),
+                                );
+                              },
+                              onMoveDown: (i) {
+                                setState(
+                                  () => _c.moveSection(
                                     i,
                                     1,
                                     onHighlightEnd: () {
                                       if (mounted) _c.clearSectionHighlight();
                                     },
-                                  ));
-                            },
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                    },
-                  ),
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        );
-      },
-    ),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }

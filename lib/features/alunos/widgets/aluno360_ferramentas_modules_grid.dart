@@ -102,8 +102,8 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
             aluno.diasSemTreino == null
                 ? 'Histórico'
                 : aluno.diasSemTreino! >= 7
-                    ? '${aluno.diasSemTreino}d sem treino'
-                    : 'Ativo recentemente',
+                ? '${aluno.diasSemTreino}d sem treino'
+                : 'Ativo recentemente',
         isDark: isDark,
         onTap:
             () => context.push(
@@ -136,10 +136,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
       Aluno360ModuleTile(
         icon: Icons.show_chart,
         label: 'Composição',
-        sub:
-            bf != null || massaMagra != null
-                ? 'Última avaliação'
-                : 'Medida',
+        sub: bf != null || massaMagra != null ? 'Última avaliação' : 'Medida',
         badge: bf == null && massaMagra == null ? 'Pend.' : null,
         isDark: isDark,
         onTap: () => context.push(evolucaoRoute, extra: aluno.nome),
@@ -160,10 +157,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
           ),
         ),
         onTap:
-            () => context.push(
-              '/alunos/$alunoId/relatorio',
-              extra: aluno.nome,
-            ),
+            () => context.push('/alunos/$alunoId/relatorio', extra: aluno.nome),
       ),
       Aluno360ModuleTile(
         icon: Icons.flag_outlined,
@@ -189,10 +183,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
       Aluno360ModuleTile(
         icon: Icons.attach_money,
         label: 'Mensalidades',
-        sub:
-            aluno.statusFinanceiro == 'INADIMPLENTE'
-                ? 'Em atraso'
-                : 'Em dia',
+        sub: aluno.statusFinanceiro == 'INADIMPLENTE' ? 'Em atraso' : 'Em dia',
         badge: aluno.statusFinanceiro == 'INADIMPLENTE' ? 'Ação' : null,
         isDark: isDark,
         onTap: () => context.push('/financeiro?alunoId=$alunoId'),
@@ -202,11 +193,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
         label: 'Chat',
         sub: 'Última ação',
         isDark: isDark,
-        onTap:
-            () => context.push(
-              '/alunos/$alunoId/chat',
-              extra: aluno.nome,
-            ),
+        onTap: () => context.push('/alunos/$alunoId/chat', extra: aluno.nome),
       ),
       Aluno360ModuleTile(
         icon: Icons.restaurant_menu,
@@ -214,10 +201,7 @@ class Aluno360FerramentasModulesGrid extends StatelessWidget {
         sub: 'Plano atual',
         isDark: isDark,
         onTap:
-            () => context.push(
-              '/alunos/$alunoId/alimentar',
-              extra: aluno.nome,
-            ),
+            () => context.push('/alunos/$alunoId/alimentar', extra: aluno.nome),
       ),
       Aluno360ModuleTile(
         icon: Icons.video_camera_back,

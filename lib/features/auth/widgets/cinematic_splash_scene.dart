@@ -65,7 +65,9 @@ class CinematicSplashScene extends StatelessWidget {
                         child: Transform.translate(
                           offset: Offset(
                             0,
-                            reduceMotion ? 0 : (1 - entryT) * (compact ? 8 : 12),
+                            reduceMotion
+                                ? 0
+                                : (1 - entryT) * (compact ? 8 : 12),
                           ),
                           child: _SplashHeroMark(
                             phase: phase,
@@ -83,9 +85,15 @@ class CinematicSplashScene extends StatelessWidget {
                               reduceMotion
                                   ? 1
                                   : Curves.easeOut.transform(
-                                    ((entry.value - 0.20) / 0.45).clamp(0.0, 1.0),
+                                    ((entry.value - 0.20) / 0.45).clamp(
+                                      0.0,
+                                      1.0,
+                                    ),
                                   ),
-                          child: const FocuxBrandTagline(center: true, fontSize: 14),
+                          child: const FocuxBrandTagline(
+                            center: true,
+                            fontSize: 14,
+                          ),
                         ),
                       ],
                       const Spacer(),

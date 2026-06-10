@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 import '../../../core/utils/friendly_error.dart';
@@ -35,12 +35,12 @@ import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import '../widgets/conversation_message_widgets.dart';
 import '../widgets/conversation_composer_widgets.dart';
 import '../widgets/conversation_media_widgets.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 part 'conversation_screen_messaging.part.dart';
 part 'conversation_screen_sheets_actions.part.dart';
 part 'conversation_screen_sheets_search.part.dart';
 part 'conversation_screen_sheets_menu_media.part.dart';
 part 'conversation_screen_sheets_helpers.part.dart';
-
 
 enum ConversationMode { personal, aluno }
 
@@ -341,384 +341,403 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final title = _displayName(brand);
     final subtitle = _subtitle(brand);
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: title,
-        subtitle: subtitle,
-        onBack:
-            () => safePopOrGo(
-              context,
-              _isAlunoMode ? '/dashboard/aluno' : '/dashboard/personal',
-            ),
-        actions:
-            [
-              Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: SizedBox(
-                  height: 40,
-                  width: 40,
-                  child: CircleAvatar(
-                    radius: 18,
-                    backgroundColor: primarySoft,
-                    backgroundImage:
-                        _avatarImage(brand) == null
-                            ? null
-                            : NetworkImage(_avatarImage(brand)!),
-                    child:
-                        _avatarImage(brand) == null
-                            ? Text(
-                              fxInitials(title),
-                              style: TextStyle(
-                                color: primary,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 12,
-                              ),
-                            )
-                            : null,
-                  ),
+    return fxScreenA11yScope(
+      label: 'Conversation',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: title,
+          subtitle: subtitle,
+          onBack:
+              () => safePopOrGo(
+                context,
+                _isAlunoMode ? '/dashboard/aluno' : '/dashboard/personal',
+              ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: SizedBox(
+                height: 40,
+                width: 40,
+                child: CircleAvatar(
+                  radius: 18,
+                  backgroundColor: primarySoft,
+                  backgroundImage:
+                      _avatarImage(brand) == null
+                          ? null
+                          : NetworkImage(_avatarImage(brand)!),
+                  child:
+                      _avatarImage(brand) == null
+                          ? Text(
+                            fxInitials(title),
+                            style: TextStyle(
+                              color: primary,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
+                            ),
+                          )
+                          : null,
                 ),
               ),
-              IconButton(
-                onPressed: _showSearchSheet,
-                icon: const Icon(Icons.search_rounded),
+            ),
+            IconButton(
+              onPressed: _showSearchSheet,
+              icon: const Icon(Icons.search_rounded),
+            ),
+            IconButton(
+              onPressed: _showChatMenu,
+              icon: const Icon(Icons.more_horiz),
+            ),
+          ],
+        ),
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: ConversationChatBackdrop(
+                isDark: isDark,
+                accentColor: primary,
               ),
-              IconButton(
-                onPressed: _showChatMenu,
-                icon: const Icon(Icons.more_horiz),
-              ),
-            ],
-      ),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: ConversationChatBackdrop(isDark: isDark, accentColor: primary),
-          ),
-          Column(
-            children: [
-              if (_uploading)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+            ),
+            Column(
+              children: [
+                if (_uploading)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    color: primarySoft,
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: FxLoading(strokeWidth: 2, color: primary),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Enviando anexo...',
+                          style: TextStyle(
+                            color:
+                                isDark
+                                    ? EagleTokens.darkInk
+                                    : TokensStrip.textPrimary,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  color: primarySoft,
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: FxLoading(strokeWidth: 2, color: primary),
+                Expanded(
+                  child:
+                      _loading
+                          ? Center(child: FxLoading(color: primary))
+                          : _loadFailed
+                          ? ConversationErrorState(
+                            isDark: isDark,
+                            accentColor: primary,
+                            onRetry: () {
+                              setState(() {
+                                _loading = true;
+                                _loadFailed = false;
+                              });
+                              unawaited(_loadHistorico());
+                            },
+                          )
+                          : _msgs.isEmpty
+                          ? ConversationEmptyState(
+                            isDark: isDark,
+                            accentColor: primary,
+                            title: 'Comece uma conversa',
+                            subtitle:
+                                'Fotos, videos, audios e ajustes do treino vao aparecer aqui em tempo real.',
+                          )
+                          : ListView.builder(
+                            controller: _scroll,
+                            padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                            itemCount:
+                                _msgs.length +
+                                (_hasMoreMessages || _loadingOlder ? 1 : 0) +
+                                (_sending || _uploading ? 1 : 0),
+                            itemBuilder: (_, index) {
+                              final hasLoader =
+                                  _hasMoreMessages || _loadingOlder;
+                              if (hasLoader && index == 0) {
+                                return ConversationOlderMessagesLoader(
+                                  loading: _loadingOlder,
+                                  onTap: _loadOlderMessages,
+                                );
+                              }
+                              final typingIndex =
+                                  _msgs.length + (hasLoader ? 1 : 0);
+                              if ((_sending || _uploading) &&
+                                  index == typingIndex) {
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 4,
+                                  ),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: ConversationTypingIndicator(
+                                      isDark: isDark,
+                                      accentColor: primary,
+                                    ),
+                                  ),
+                                );
+                              }
+                              final msgIndex = hasLoader ? index - 1 : index;
+                              final msg = _msgs[msgIndex];
+                              final previous =
+                                  msgIndex > 0 ? _msgs[msgIndex - 1] : null;
+                              final showDate =
+                                  previous == null ||
+                                  !_sameDay(previous.enviadoEm, msg.enviadoEm);
+                              return Column(
+                                children: [
+                                  if (showDate)
+                                    ConversationDateDivider(
+                                      date: msg.enviadoEm,
+                                    ),
+                                  KeyedSubtree(
+                                    key: _messageKey(msg),
+                                    child: ConversationSwipeReplyWrapper(
+                                      alignRight: _isMine(msg),
+                                      accentColor:
+                                          _isMine(msg) ? Colors.white : primary,
+                                      onReply: () => _setReply(msg),
+                                      child: ConversationBubble(
+                                        msg: msg,
+                                        mine: _isMine(msg),
+                                        isDark: isDark,
+                                        accentColor: primary,
+                                        highlighted:
+                                            _highlightedMessageId == msg.id,
+                                        replyLabelBuilder: _replySenderLabel,
+                                        onLongPress:
+                                            () => _showMessageActions(msg),
+                                        onReplyTap:
+                                            msg.replyToMessageId == null
+                                                ? null
+                                                : () => _jumpToReplySource(msg),
+                                        onOpenMedia: () => _openMedia(msg),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                ),
+                Container(
+                  // Scaffold already resizes the body above the keyboard.
+                  // Do not add viewInsets here, or the composer jumps upward.
+                  padding: EdgeInsets.fromLTRB(
+                    12,
+                    10,
+                    12,
+                    10 +
+                        (MediaQuery.of(context).viewInsets.bottom > 0
+                            ? 0
+                            : MediaQuery.of(context).padding.bottom),
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(
+                          alpha: isDark ? 0.14 : 0.035,
+                        ),
+                        blurRadius: 18,
+                        offset: const Offset(0, -6),
                       ),
-                      const SizedBox(width: 10),
-                      Text(
-                        'Enviando anexo...',
-                        style: TextStyle(
-                          color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-                          fontSize: 13,
+                    ],
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        onPressed:
+                            (_sending || _uploading)
+                                ? null
+                                : _showAttachmentSheet,
+                        icon: const Icon(Icons.add_circle),
+                        color: TokensStrip.textSecondary,
+                      ),
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(28),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                            child: Container(
+                              decoration: fxListCardDecoration(context),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (_replyingTo != null)
+                                    ConversationReplyComposerBar(
+                                      isDark: isDark,
+                                      sender: _replySenderLabel(
+                                        _replyingTo!.remetente,
+                                      ),
+                                      preview: _previewText(_replyingTo!),
+                                      onClose:
+                                          () => setState(
+                                            () => _replyingTo = null,
+                                          ),
+                                    ),
+                                  if (_recordingAudio)
+                                    ConversationRecordingComposerBar(
+                                      isDark: isDark,
+                                      duration: _formatDuration(
+                                        _recordDuration,
+                                      ),
+                                      onCancel:
+                                          () =>
+                                              _stopAudioRecording(send: false),
+                                      onSend:
+                                          () => _stopAudioRecording(send: true),
+                                    ),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Expanded(
+                                        child: TextField(
+                                          controller: _ctrl,
+                                          style: TextStyle(
+                                            color:
+                                                isDark
+                                                    ? EagleTokens.darkInk
+                                                    : TokensStrip.textPrimary,
+                                            fontSize: 15,
+                                          ),
+                                          cursorColor: primary,
+                                          decoration: InputDecoration(
+                                            hintText: 'Digite sua mensagem…',
+                                            hintStyle: TextStyle(
+                                              color:
+                                                  isDark
+                                                      ? EagleTokens.darkInkMute
+                                                      : TokensStrip
+                                                          .textSecondary,
+                                            ),
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                  horizontal: 16,
+                                                  vertical: 12,
+                                                ),
+                                            border: InputBorder.none,
+                                            enabledBorder: InputBorder.none,
+                                            focusedBorder: InputBorder.none,
+                                            disabledBorder: InputBorder.none,
+                                            errorBorder: InputBorder.none,
+                                            focusedErrorBorder:
+                                                InputBorder.none,
+                                          ),
+                                          minLines: 1,
+                                          maxLines: 5,
+                                          textInputAction: TextInputAction.send,
+                                          onSubmitted: (_) => _sendText(),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        onPressed: _showEmojiSheet,
+                                        icon: const Icon(Icons.auto_awesome),
+                                        color: TokensStrip.textSecondary,
+                                      ),
+                                      if (_composerHasText || _sending)
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            right: 6,
+                                            bottom: 6,
+                                          ),
+                                          child: Container(
+                                            width: 32,
+                                            height: 32,
+                                            decoration: BoxDecoration(
+                                              color: primary,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: IconButton(
+                                              padding: EdgeInsets.zero,
+                                              onPressed:
+                                                  (_sending || _uploading)
+                                                      ? null
+                                                      : _sendText,
+                                              icon:
+                                                  _sending
+                                                      ? const SizedBox(
+                                                        width: 14,
+                                                        height: 14,
+                                                        child: FxLoading(
+                                                          strokeWidth: 2,
+                                                          color: Colors.white,
+                                                        ),
+                                                      )
+                                                      : const Icon(
+                                                        Icons.arrow_upward,
+                                                        color: Colors.white,
+                                                        size: 18,
+                                                      ),
+                                            ),
+                                          ),
+                                        ),
+                                      if (!_composerHasText && !_sending)
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            right: 6,
+                                            bottom: 6,
+                                          ),
+                                          child: Container(
+                                            width: 32,
+                                            height: 32,
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  _recordingAudio
+                                                      ? EagleTokens.bad
+                                                      : primary,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: IconButton(
+                                              padding: EdgeInsets.zero,
+                                              tooltip:
+                                                  _recordingAudio
+                                                      ? 'Enviar audio'
+                                                      : 'Gravar audio',
+                                              onPressed:
+                                                  (_uploading || _sending)
+                                                      ? null
+                                                      : _recordingAudio
+                                                      ? () =>
+                                                          _stopAudioRecording(
+                                                            send: true,
+                                                          )
+                                                      : _startAudioRecording,
+                                              icon: Icon(
+                                                _recordingAudio
+                                                    ? Icons.stop_rounded
+                                                    : Icons.mic_rounded,
+                                                color: Colors.white,
+                                                size: 18,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              Expanded(
-                child:
-                    _loading
-                        ? Center(child: FxLoading(color: primary))
-                        : _loadFailed
-                        ? ConversationErrorState(
-                          isDark: isDark,
-                          accentColor: primary,
-                          onRetry: () {
-                            setState(() {
-                              _loading = true;
-                              _loadFailed = false;
-                            });
-                            unawaited(_loadHistorico());
-                          },
-                        )
-                        : _msgs.isEmpty
-                        ? ConversationEmptyState(
-                          isDark: isDark,
-                          accentColor: primary,
-                          title: 'Comece uma conversa',
-                          subtitle:
-                              'Fotos, videos, audios e ajustes do treino vao aparecer aqui em tempo real.',
-                        )
-                        : ListView.builder(
-                          controller: _scroll,
-                          padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-                          itemCount:
-                              _msgs.length +
-                              (_hasMoreMessages || _loadingOlder ? 1 : 0) +
-                              (_sending || _uploading ? 1 : 0),
-                          itemBuilder: (_, index) {
-                            final hasLoader = _hasMoreMessages || _loadingOlder;
-                            if (hasLoader && index == 0) {
-                              return ConversationOlderMessagesLoader(
-                                loading: _loadingOlder,
-                                onTap: _loadOlderMessages,
-                              );
-                            }
-                            final typingIndex =
-                                _msgs.length + (hasLoader ? 1 : 0);
-                            if ((_sending || _uploading) &&
-                                index == typingIndex) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4,
-                                ),
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: ConversationTypingIndicator(
-                                    isDark: isDark,
-                                    accentColor: primary,
-                                  ),
-                                ),
-                              );
-                            }
-                            final msgIndex = hasLoader ? index - 1 : index;
-                            final msg = _msgs[msgIndex];
-                            final previous =
-                                msgIndex > 0 ? _msgs[msgIndex - 1] : null;
-                            final showDate =
-                                previous == null ||
-                                !_sameDay(previous.enviadoEm, msg.enviadoEm);
-                            return Column(
-                              children: [
-                                if (showDate) ConversationDateDivider(date: msg.enviadoEm),
-                                KeyedSubtree(
-                                  key: _messageKey(msg),
-                                  child: ConversationSwipeReplyWrapper(
-                                    alignRight: _isMine(msg),
-                                    accentColor:
-                                        _isMine(msg) ? Colors.white : primary,
-                                    onReply: () => _setReply(msg),
-                                    child: ConversationBubble(
-                                      msg: msg,
-                                      mine: _isMine(msg),
-                                      isDark: isDark,
-                                      accentColor: primary,
-                                      highlighted:
-                                          _highlightedMessageId == msg.id,
-                                      replyLabelBuilder: _replySenderLabel,
-                                      onLongPress:
-                                          () => _showMessageActions(msg),
-                                      onReplyTap:
-                                          msg.replyToMessageId == null
-                                              ? null
-                                              : () => _jumpToReplySource(msg),
-                                      onOpenMedia: () => _openMedia(msg),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-              ),
-              Container(
-                // Scaffold already resizes the body above the keyboard.
-                // Do not add viewInsets here, or the composer jumps upward.
-                padding: EdgeInsets.fromLTRB(
-                  12,
-                  10,
-                  12,
-                  10 +
-                      (MediaQuery.of(context).viewInsets.bottom > 0
-                          ? 0
-                          : MediaQuery.of(context).padding.bottom),
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(
-                        alpha: isDark ? 0.14 : 0.035,
-                      ),
-                      blurRadius: 18,
-                      offset: const Offset(0, -6),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      onPressed:
-                          (_sending || _uploading)
-                              ? null
-                              : _showAttachmentSheet,
-                      icon: const Icon(Icons.add_circle),
-                      color: TokensStrip.textSecondary,
-                    ),
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(28),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-                          child: Container(
-                            decoration: fxListCardDecoration(context),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (_replyingTo != null)
-                                  ConversationReplyComposerBar(
-                                    isDark: isDark,
-                                    sender: _replySenderLabel(
-                                      _replyingTo!.remetente,
-                                    ),
-                                    preview: _previewText(_replyingTo!),
-                                    onClose:
-                                        () =>
-                                            setState(() => _replyingTo = null),
-                                  ),
-                                if (_recordingAudio)
-                                  ConversationRecordingComposerBar(
-                                    isDark: isDark,
-                                    duration: _formatDuration(_recordDuration),
-                                    onCancel:
-                                        () => _stopAudioRecording(send: false),
-                                    onSend:
-                                        () => _stopAudioRecording(send: true),
-                                  ),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Expanded(
-                                      child: TextField(
-                                        controller: _ctrl,
-                                        style: TextStyle(
-                                          color:
-                                              isDark
-                                                  ? EagleTokens.darkInk
-                                                  : TokensStrip.textPrimary,
-                                          fontSize: 15,
-                                        ),
-                                        cursorColor: primary,
-                                        decoration: InputDecoration(
-                                          hintText: 'Digite sua mensagem…',
-                                          hintStyle: TextStyle(
-                                            color:
-                                                isDark
-                                                    ? EagleTokens.darkInkMute
-                                                    : TokensStrip.textSecondary,
-                                          ),
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                horizontal: 16,
-                                                vertical: 12,
-                                              ),
-                                          border: InputBorder.none,
-                                          enabledBorder: InputBorder.none,
-                                          focusedBorder: InputBorder.none,
-                                          disabledBorder: InputBorder.none,
-                                          errorBorder: InputBorder.none,
-                                          focusedErrorBorder: InputBorder.none,
-                                        ),
-                                        minLines: 1,
-                                        maxLines: 5,
-                                        textInputAction: TextInputAction.send,
-                                        onSubmitted: (_) => _sendText(),
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: _showEmojiSheet,
-                                      icon: const Icon(Icons.auto_awesome),
-                                      color: TokensStrip.textSecondary,
-                                    ),
-                                    if (_composerHasText || _sending)
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          right: 6,
-                                          bottom: 6,
-                                        ),
-                                        child: Container(
-                                          width: 32,
-                                          height: 32,
-                                          decoration: BoxDecoration(
-                                            color: primary,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: IconButton(
-                                            padding: EdgeInsets.zero,
-                                            onPressed:
-                                                (_sending || _uploading)
-                                                    ? null
-                                                    : _sendText,
-                                            icon:
-                                                _sending
-                                                    ? const SizedBox(
-                                                      width: 14,
-                                                      height: 14,
-                                                      child: FxLoading(
-                                                        strokeWidth: 2,
-                                                        color: Colors.white,
-                                                      ),
-                                                    )
-                                                    : const Icon(
-                                                      Icons.arrow_upward,
-                                                      color: Colors.white,
-                                                      size: 18,
-                                                    ),
-                                          ),
-                                        ),
-                                      ),
-                                    if (!_composerHasText && !_sending)
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          right: 6,
-                                          bottom: 6,
-                                        ),
-                                        child: Container(
-                                          width: 32,
-                                          height: 32,
-                                          decoration: BoxDecoration(
-                                            color:
-                                                _recordingAudio
-                                                    ? EagleTokens.bad
-                                                    : primary,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: IconButton(
-                                            padding: EdgeInsets.zero,
-                                            tooltip:
-                                                _recordingAudio
-                                                    ? 'Enviar audio'
-                                                    : 'Gravar audio',
-                                            onPressed:
-                                                (_uploading || _sending)
-                                                    ? null
-                                                    : _recordingAudio
-                                                    ? () => _stopAudioRecording(
-                                                      send: true,
-                                                    )
-                                                    : _startAudioRecording,
-                                            icon: Icon(
-                                              _recordingAudio
-                                                  ? Icons.stop_rounded
-                                                  : Icons.mic_rounded,
-                                              color: Colors.white,
-                                              size: 18,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -729,5 +748,3 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     return la.year == lb.year && la.month == lb.month && la.day == lb.day;
   }
 }
-
-

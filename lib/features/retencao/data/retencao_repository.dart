@@ -28,9 +28,10 @@ class RetencaoAlunoScore {
         scoreAnterior: (j['scoreAnterior'] as num?)?.toInt(),
         delta: (j['delta'] as num?)?.toInt() ?? 0,
         riscoChurn: j['riscoChurn'] as String? ?? 'MEDIO',
-        dataCalculo: j['dataCalculo'] != null
-            ? DateTime.tryParse(j['dataCalculo'] as String)
-            : null,
+        dataCalculo:
+            j['dataCalculo'] != null
+                ? DateTime.tryParse(j['dataCalculo'] as String)
+                : null,
       );
 }
 

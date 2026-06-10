@@ -296,7 +296,8 @@ class PerfilRepository {
         if (descricaoProfissional != null)
           'descricaoProfissional': descricaoProfissional,
         if (sectionOrder != null) 'sectionOrder': sectionOrder,
-        if (servicos != null) 'servicos': servicos.map((e) => e.toJson()).toList(),
+        if (servicos != null)
+          'servicos': servicos.map((e) => e.toJson()).toList(),
         if (faq != null) 'faq': faq.map((e) => e.toJson()).toList(),
         if (heroImageUrl != null) 'heroImageUrl': heroImageUrl,
         if (bioImageUrl != null) 'bioImageUrl': bioImageUrl,

@@ -42,9 +42,13 @@ class WhiteLabelConfig {
     landingModo: j['landingModo'] as String? ?? 'CAPTURA',
     publicLandingUrl: j['publicLandingUrl'] as String? ?? '',
     publicCapturaUrl: j['publicCapturaUrl'] as String? ?? '',
-    checklist: (j['checklist'] as List<dynamic>? ?? [])
-        .map((e) => WhiteLabelChecklistItem.fromJson(e as Map<String, dynamic>))
-        .toList(),
+    checklist:
+        (j['checklist'] as List<dynamic>? ?? [])
+            .map(
+              (e) =>
+                  WhiteLabelChecklistItem.fromJson(e as Map<String, dynamic>),
+            )
+            .toList(),
     checklistScore: j['checklistScore'] as int? ?? 0,
   );
 }
@@ -86,8 +90,10 @@ class WhiteLabelRepository {
   }) async {
     final body = <String, dynamic>{};
     if (appDisplayName != null) body['appDisplayName'] = appDisplayName;
-    if (ocultarMarcaFocux != null) body['ocultarMarcaFocux'] = ocultarMarcaFocux;
-    if (dominioCustomizado != null) body['dominioCustomizado'] = dominioCustomizado;
+    if (ocultarMarcaFocux != null)
+      body['ocultarMarcaFocux'] = ocultarMarcaFocux;
+    if (dominioCustomizado != null)
+      body['dominioCustomizado'] = dominioCustomizado;
     if (landingModo != null) body['landingModo'] = landingModo;
     final r = await _dio.put('/api/personal/white-label', data: body);
     return WhiteLabelConfig.fromJson(r.data as Map<String, dynamic>);

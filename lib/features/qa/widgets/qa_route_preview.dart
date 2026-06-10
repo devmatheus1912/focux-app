@@ -58,19 +58,18 @@ GoRouter buildQaPreviewRouter(String initialLocation) {
       for (final path in paths)
         GoRoute(
           path: path,
-          builder: (context, state) => MeshScope(
-            active: true,
-            child: _buildQaRouteScreen(state.uri),
-          ),
+          builder:
+              (context, state) => MeshScope(
+                active: true,
+                child: _buildQaRouteScreen(state.uri),
+              ),
         ),
     ],
   );
 }
 
 Widget buildQaRoutePreviewApp(String path) {
-  return MaterialApp.router(
-    routerConfig: buildQaPreviewRouter(path),
-  );
+  return MaterialApp.router(routerConfig: buildQaPreviewRouter(path));
 }
 
 Widget _buildQaRouteScreen(Uri uri) {
@@ -177,12 +176,9 @@ class QaRoutePreviewDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final preview = MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        size: Size(
-          430,
-          MediaQuery.sizeOf(context).height,
-        ),
-      ),
+      data: MediaQuery.of(
+        context,
+      ).copyWith(size: Size(430, MediaQuery.sizeOf(context).height)),
       child: ClipRect(child: buildQaRoutePreview(path)),
     );
 

@@ -22,50 +22,56 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(8, 8, 8, 10),
                     child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (_isPersonalMode)
-                  ListTile(
-                    leading: Icon(Icons.person_outline, color: primary),
-                    title: const Text('Ver perfil do aluno'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.push('/alunos/${widget.alunoId}');
-                    },
-                  ),
-                ListTile(
-                  leading: Icon(Icons.search_rounded, color: primary),
-                  title: const Text('Buscar conversa'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _showSearchSheet();
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.perm_media_outlined, color: primary),
-                  title: const Text('Midias da conversa'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _showMediaGallerySheet();
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.refresh, color: primary),
-                  title: const Text('Atualizar conversa'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _loadHistorico();
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.emoji_emotions_outlined, color: primary),
-                  title: const Text('Adicionar emoji'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _showEmojiSheet();
-                  },
-                ),
-              ],
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_isPersonalMode)
+                          ListTile(
+                            leading: Icon(Icons.person_outline, color: primary),
+                            title: const Text('Ver perfil do aluno'),
+                            onTap: () {
+                              Navigator.pop(context);
+                              context.push('/alunos/${widget.alunoId}');
+                            },
+                          ),
+                        ListTile(
+                          leading: Icon(Icons.search_rounded, color: primary),
+                          title: const Text('Buscar conversa'),
+                          onTap: () {
+                            Navigator.pop(context);
+                            _showSearchSheet();
+                          },
+                        ),
+                        ListTile(
+                          leading: Icon(
+                            Icons.perm_media_outlined,
+                            color: primary,
+                          ),
+                          title: const Text('Midias da conversa'),
+                          onTap: () {
+                            Navigator.pop(context);
+                            _showMediaGallerySheet();
+                          },
+                        ),
+                        ListTile(
+                          leading: Icon(Icons.refresh, color: primary),
+                          title: const Text('Atualizar conversa'),
+                          onTap: () {
+                            Navigator.pop(context);
+                            _loadHistorico();
+                          },
+                        ),
+                        ListTile(
+                          leading: Icon(
+                            Icons.emoji_emotions_outlined,
+                            color: primary,
+                          ),
+                          title: const Text('Adicionar emoji'),
+                          onTap: () {
+                            Navigator.pop(context);
+                            _showEmojiSheet();
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -115,117 +121,140 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
                 ),
                 child: SafeArea(
                   child: StatefulBuilder(
-              builder: (context, setSheetState) {
-                final items = filtered(selected);
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 14, 16, 18),
-                  child: SizedBox(
-                    height: MediaQuery.of(sheetContext).size.height * 0.72,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Center(
-                          child: Container(
-                            width: 36,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color:
-                                  isDark
-                                      ? EagleTokens.darkLine
-                                      : TokensStrip.borderDefault,
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                          ),
+                    builder: (context, setSheetState) {
+                      final items = filtered(selected);
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          14,
+                          16,
+                          18,
                         ),
-                        const SizedBox(height: 18),
-                        Text(
-                          'Midias da conversa',
-                          style: TextStyle(
-                            color:
-                                isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
+                        child: SizedBox(
+                          height:
+                              MediaQuery.of(sheetContext).size.height * 0.72,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              ConversationMediaFilterChip(
-                                label: 'Tudo',
-                                selected: selected == null,
-                                onTap:
-                                    () => setSheetState(() => selected = null),
-                                primary: primary,
-                                isDark: isDark,
+                              Center(
+                                child: Container(
+                                  width: 36,
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    color:
+                                        isDark
+                                            ? EagleTokens.darkLine
+                                            : TokensStrip.borderDefault,
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                ),
                               ),
-                              ConversationMediaFilterChip(
-                                label: 'Fotos',
-                                selected: selected == ConversationMediaType.photo,
-                                onTap:
-                                    () => setSheetState(
-                                      () => selected = ConversationMediaType.photo,
-                                    ),
-                                primary: primary,
-                                isDark: isDark,
+                              const SizedBox(height: 18),
+                              Text(
+                                'Midias da conversa',
+                                style: TextStyle(
+                                  color:
+                                      isDark
+                                          ? EagleTokens.darkInk
+                                          : TokensStrip.textPrimary,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
-                              ConversationMediaFilterChip(
-                                label: 'Videos',
-                                selected: selected == ConversationMediaType.video,
-                                onTap:
-                                    () => setSheetState(
-                                      () => selected = ConversationMediaType.video,
+                              const SizedBox(height: 12),
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: [
+                                    ConversationMediaFilterChip(
+                                      label: 'Tudo',
+                                      selected: selected == null,
+                                      onTap:
+                                          () => setSheetState(
+                                            () => selected = null,
+                                          ),
+                                      primary: primary,
+                                      isDark: isDark,
                                     ),
-                                primary: primary,
-                                isDark: isDark,
+                                    ConversationMediaFilterChip(
+                                      label: 'Fotos',
+                                      selected:
+                                          selected ==
+                                          ConversationMediaType.photo,
+                                      onTap:
+                                          () => setSheetState(
+                                            () =>
+                                                selected =
+                                                    ConversationMediaType.photo,
+                                          ),
+                                      primary: primary,
+                                      isDark: isDark,
+                                    ),
+                                    ConversationMediaFilterChip(
+                                      label: 'Videos',
+                                      selected:
+                                          selected ==
+                                          ConversationMediaType.video,
+                                      onTap:
+                                          () => setSheetState(
+                                            () =>
+                                                selected =
+                                                    ConversationMediaType.video,
+                                          ),
+                                      primary: primary,
+                                      isDark: isDark,
+                                    ),
+                                    ConversationMediaFilterChip(
+                                      label: 'Audios',
+                                      selected:
+                                          selected ==
+                                          ConversationMediaType.audio,
+                                      onTap:
+                                          () => setSheetState(
+                                            () =>
+                                                selected =
+                                                    ConversationMediaType.audio,
+                                          ),
+                                      primary: primary,
+                                      isDark: isDark,
+                                    ),
+                                  ],
+                                ),
                               ),
-                              ConversationMediaFilterChip(
-                                label: 'Audios',
-                                selected: selected == ConversationMediaType.audio,
-                                onTap:
-                                    () => setSheetState(
-                                      () => selected = ConversationMediaType.audio,
-                                    ),
-                                primary: primary,
-                                isDark: isDark,
+                              const SizedBox(height: 14),
+                              Expanded(
+                                child:
+                                    items.isEmpty
+                                        ? const ConversationSearchState(
+                                          icon: Icons.perm_media_outlined,
+                                          title: 'Sem midias aqui',
+                                          subtitle:
+                                              'Fotos, videos e audios enviados aparecerao nesta area.',
+                                        )
+                                        : ListView.separated(
+                                          itemCount: items.length,
+                                          separatorBuilder:
+                                              (_, __) =>
+                                                  const SizedBox(height: 8),
+                                          itemBuilder: (_, index) {
+                                            final msg = items[index];
+                                            return ConversationMediaGalleryTile(
+                                              msg: msg,
+                                              isDark: isDark,
+                                              onTap: () {
+                                                Navigator.pop(sheetContext);
+                                                _focusMessage(msg);
+                                                _openMedia(msg);
+                                              },
+                                            );
+                                          },
+                                        ),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 14),
-                        Expanded(
-                          child:
-                              items.isEmpty
-                                  ? const ConversationSearchState(
-                                    icon: Icons.perm_media_outlined,
-                                    title: 'Sem midias aqui',
-                                    subtitle:
-                                        'Fotos, videos e audios enviados aparecerao nesta area.',
-                                  )
-                                  : ListView.separated(
-                                    itemCount: items.length,
-                                    separatorBuilder:
-                                        (_, __) => const SizedBox(height: 8),
-                                    itemBuilder: (_, index) {
-                                      final msg = items[index];
-                                      return ConversationMediaGalleryTile(
-                                        msg: msg,
-                                        isDark: isDark,
-                                        onTap: () {
-                                          Navigator.pop(sheetContext);
-                                          _focusMessage(msg);
-                                          _openMedia(msg);
-                                        },
-                                      );
-                                    },
-                                  ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+                      );
+                    },
                   ),
                 ),
               ),

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/health/health_service.dart';
@@ -10,6 +10,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/health/home_widget_service.dart';
 import '../data/health_repository.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 /// Screen showing synced Apple Health / Google Fit data.
 ///
@@ -65,7 +66,10 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
         setState(() {
           _loading = false;
         });
-        FeedbackHelper.showError(context, 'Saúde não disponível neste dispositivo');
+        FeedbackHelper.showError(
+          context,
+          'Saúde não disponível neste dispositivo',
+        );
       }
     }
   }
@@ -75,9 +79,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
       final summary = await HealthService.getTodaySummary();
       RecoverySnapshot? synced;
       try {
-        final repo = HealthRepository.fromClient(
-          ApiClient(),
-        );
+        final repo = HealthRepository.fromClient(ApiClient());
         synced = await repo.syncToday(summary);
         await HomeWidgetService.updateRecovery(
           recoveryScore: synced.recoveryScore,
@@ -110,18 +112,21 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: const FxShellAppBar(
-        title: 'Saúde & Wearables',
-        subtitle: 'Dados do Apple Health e Google Fit',
+    return fxScreenA11yScope(
+      label: 'Saúde & Wearables',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: const FxShellAppBar(
+          title: 'Saúde & Wearables',
+          subtitle: 'Dados do Apple Health e Google Fit',
+        ),
+        body:
+            _loading
+                ? const Center(child: FxLoading())
+                : !_authorized
+                ? _buildAuthPrompt(primary)
+                : _buildDashboard(isDark, primary),
       ),
-      body:
-          _loading
-              ? const Center(child: FxLoading())
-              : !_authorized
-              ? _buildAuthPrompt(primary)
-              : _buildDashboard(isDark, primary),
     );
   }
 
@@ -167,9 +172,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
 
   Widget _buildDashboard(bool isDark, Color primary) {
     final s = _summary!;
-    final recovery =
-        _recovery ??
-        RecoverySnapshot.fromSummary(s);
+    final recovery = _recovery ?? RecoverySnapshot.fromSummary(s);
     return RefreshIndicator(
       onRefresh: _loadData,
       child: ListView(
@@ -222,14 +225,14 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
             ),
           ),
           const SizedBox(height: TokensStrip.s4),
-            Text(
-              'Resumo de Hoje',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-              ),
+          Text(
+            'Resumo de Hoje',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
             ),
+          ),
           const SizedBox(height: TokensStrip.s4),
           Row(
             children: [

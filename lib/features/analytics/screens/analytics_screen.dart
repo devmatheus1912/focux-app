@@ -13,9 +13,9 @@ import '../providers/analytics_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../dashboard/widgets/dashboard_error_state.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 part 'analytics_screen_widgets.part.dart';
-
 
 class AnalyticsScreen extends ConsumerWidget {
   const AnalyticsScreen({super.key});
@@ -27,29 +27,32 @@ class AnalyticsScreen extends ConsumerWidget {
     final chrome = ShellChrome.of(context);
     final async = ref.watch(analyticsDashboardProvider);
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Analytics',
-        onBack: () => safePopOrGo(context, '/dashboard/personal'),
-      ),
-      body: FxContentWidthLimiter(
-        child: async.when(
-          loading: () => Center(child: FxLoading(color: primary)),
-          error:
-              (e, _) => DashboardErrorState(
-                chromeOnDark: chrome.isDark,
-                primary: primary,
-                message: friendlyError(e),
-                onRetry: () => ref.invalidate(analyticsDashboardProvider),
-              ),
-          data:
-              (data) => RefreshIndicator(
-                color: primary,
-                onRefresh:
-                    () async => ref.invalidate(analyticsDashboardProvider),
-                child: _AnalyticsBody(data: data, dark: dark),
-              ),
+    return fxScreenA11yScope(
+      label: 'Analytics',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Analytics',
+          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+        ),
+        body: FxContentWidthLimiter(
+          child: async.when(
+            loading: () => Center(child: FxLoading(color: primary)),
+            error:
+                (e, _) => DashboardErrorState(
+                  chromeOnDark: chrome.isDark,
+                  primary: primary,
+                  message: friendlyError(e),
+                  onRetry: () => ref.invalidate(analyticsDashboardProvider),
+                ),
+            data:
+                (data) => RefreshIndicator(
+                  color: primary,
+                  onRefresh:
+                      () async => ref.invalidate(analyticsDashboardProvider),
+                  child: _AnalyticsBody(data: data, dark: dark),
+                ),
+          ),
         ),
       ),
     );

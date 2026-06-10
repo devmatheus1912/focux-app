@@ -11,9 +11,10 @@ class _PacoteTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: isDark
-            ? Colors.white.withValues(alpha: 0.06)
-            : Theme.of(context).colorScheme.surfaceContainerHigh,
+        color:
+            isDark
+                ? Colors.white.withValues(alpha: 0.06)
+                : Theme.of(context).colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -175,8 +176,7 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
     try {
       await widget.repo.criar(
         titulo: _tituloCtrl.text.trim(),
-        descricao:
-            _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim(),
+        descricao: _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim(),
         valor: double.parse(_valorCtrl.text.trim().replaceAll(',', '.')),
         duracaoMeses: _duracao,
         incluiTreino: _treino,
@@ -227,9 +227,10 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                     width: 42,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? EagleTokens.darkLine
-                          : TokensStrip.borderDefault,
+                      color:
+                          isDark
+                              ? EagleTokens.darkLine
+                              : TokensStrip.borderDefault,
                       borderRadius: BorderRadius.circular(999),
                     ),
                   ),
@@ -258,7 +259,9 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                           minHeight: 48,
                         ),
                         onPressed:
-                            _enviando ? null : () => Navigator.of(context).pop(),
+                            _enviando
+                                ? null
+                                : () => Navigator.of(context).pop(),
                         icon: const Icon(Icons.close_rounded),
                       ),
                     ),
@@ -267,7 +270,9 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                 const SizedBox(height: 4),
                 Text(
                   'Quem abrir seu link verá este plano na sua página de vendas.',
-                  style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 13),
+                  style: TokensStrip.bodyMuted(
+                    color: mute,
+                  ).copyWith(fontSize: 13),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -279,8 +284,11 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                     'Título *',
                     icon: Icons.title_rounded,
                   ),
-                  validator: (v) =>
-                      v == null || v.trim().isEmpty ? 'Informe um título' : null,
+                  validator:
+                      (v) =>
+                          v == null || v.trim().isEmpty
+                              ? 'Informe um título'
+                              : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -298,7 +306,9 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                 TextFormField(
                   controller: _valorCtrl,
                   enabled: !_enviando,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   textInputAction: TextInputAction.done,
                   decoration: FxInputDeco.build(
                     context,
@@ -366,7 +376,8 @@ class _NovoPacoteSheetState extends State<_NovoPacoteSheet> {
                       onTap:
                           _enviando
                               ? null
-                              : () => setState(() => _consultoria = !_consultoria),
+                              : () =>
+                                  setState(() => _consultoria = !_consultoria),
                     ),
                   ],
                 ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../utils/dashboard_readability.dart';
+
 class DashboardHeroProgressRail extends StatelessWidget {
   const DashboardHeroProgressRail({
     super.key,
@@ -192,6 +193,7 @@ class DashboardHeroMiniStat extends StatelessWidget {
     );
   }
 }
+
 class DashboardHeroGridPainter extends CustomPainter {
   const DashboardHeroGridPainter({this.lineAlpha = 0.06});
 

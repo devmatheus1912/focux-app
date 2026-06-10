@@ -29,7 +29,9 @@ abstract final class Aluno360FerramentasLogic {
     if (aluno.aderenciaPercent != null) {
       return '${aluno.aderenciaPercent}%';
     }
-    final summary = summarizeAderenciaWeek(parseAderenciaSemanal(aderenciaSemanal));
+    final summary = summarizeAderenciaWeek(
+      parseAderenciaSemanal(aderenciaSemanal),
+    );
     if (summary.hasAnyCheckin) {
       final n = summary.totalCheckins;
       return '$n chk';

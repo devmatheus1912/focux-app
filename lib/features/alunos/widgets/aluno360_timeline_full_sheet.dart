@@ -28,10 +28,9 @@ class Aluno360TimelineFullSheet extends ConsumerWidget {
         events
             .map((e) => Aluno360TimelineCard.itemFromApi(e, primary: primary))
             .toList();
-    final filtered =
-        mapped
-            .where((item) => !isSmokeTimelineContent(item.body))
-            .toList(growable: false);
+    final filtered = mapped
+        .where((item) => !isSmokeTimelineContent(item.body))
+        .toList(growable: false);
     return sortTimeline360Items(
       dedupeAutonomiaTimelineByTask(
         dedupeChatTimelineByFingerprint(
@@ -120,11 +119,10 @@ class Aluno360TimelineFullSheet extends ConsumerWidget {
                                     children: [
                                       Text(
                                         'Histórico 360',
-                                        style:
-                                            Aluno360Layout.sectionTitleStyle(
-                                              context,
-                                              ink,
-                                            ),
+                                        style: Aluno360Layout.sectionTitleStyle(
+                                          context,
+                                          ink,
+                                        ),
                                       ),
                                       Text(
                                         totalLabel,

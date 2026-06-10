@@ -12,6 +12,7 @@ import '../../subscription/models/subscription_plan.dart';
 import 'financeiro_dashboard_screen.dart';
 import 'financeiro_mensalidades_tab.dart';
 import 'financeiro_resumo_screen.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 class FinanceiroScreen extends ConsumerStatefulWidget {
   const FinanceiroScreen({super.key, this.initialAlunoId});
@@ -67,107 +68,110 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
     final mute = chrome.mute;
     final primary = Theme.of(context).colorScheme.primary;
 
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.transparent,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(136),
-        child: FxContentWidthLimiter(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              FxShellAppBar(
-                title: 'Financeiro',
-                subtitle: 'ESTE MÊS',
-                onBack: () => safePopOrGo(context, '/dashboard/personal'),
-                actions: [
-                  PopupMenuButton<String>(
-                    initialValue: _periodFilter,
-                    tooltip: 'Filtrar periodo',
-                    onSelected: (value) {
-                      setState(() => _periodFilter = value);
-                      if (value == 'ano') {
-                        _tabController.animateTo(2);
-                      }
-                    },
-                    itemBuilder:
-                        (context) =>
-                            _periodLabels.entries
-                                .map(
-                                  (entry) => PopupMenuItem<String>(
-                                    value: entry.key,
-                                    child: Text(entry.value),
-                                  ),
-                                )
-                                .toList(),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: chrome.panel(radius: 999),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            _periodLabels[_periodFilter] ?? 'agora',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: ink,
-                              fontWeight: FontWeight.w600,
+    return fxScreenA11yScope(
+      label: 'Financeiro',
+      child: Scaffold(
+        extendBody: true,
+        backgroundColor: Colors.transparent,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(136),
+          child: FxContentWidthLimiter(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FxShellAppBar(
+                  title: 'Financeiro',
+                  subtitle: 'ESTE MÊS',
+                  onBack: () => safePopOrGo(context, '/dashboard/personal'),
+                  actions: [
+                    PopupMenuButton<String>(
+                      initialValue: _periodFilter,
+                      tooltip: 'Filtrar periodo',
+                      onSelected: (value) {
+                        setState(() => _periodFilter = value);
+                        if (value == 'ano') {
+                          _tabController.animateTo(2);
+                        }
+                      },
+                      itemBuilder:
+                          (context) =>
+                              _periodLabels.entries
+                                  .map(
+                                    (entry) => PopupMenuItem<String>(
+                                      value: entry.key,
+                                      child: Text(entry.value),
+                                    ),
+                                  )
+                                  .toList(),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: chrome.panel(radius: 999),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _periodLabels[_periodFilter] ?? 'agora',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: ink,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                          Icon(
-                            Icons.keyboard_arrow_down,
-                            size: 16,
-                            color: mute,
-                          ),
-                        ],
+                            const SizedBox(width: 6),
+                            Icon(
+                              Icons.keyboard_arrow_down,
+                              size: 16,
+                              color: mute,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              TabBar(
-                controller: _tabController,
-                indicatorColor: primary,
-                labelColor: primary,
-                unselectedLabelColor: mute,
-                indicatorWeight: 2.5,
-                dividerColor: Colors.transparent,
-                tabs: const [
-                  Tab(icon: Icon(Icons.dashboard_outlined), text: 'Resumo'),
-                  Tab(
-                    icon: Icon(Icons.receipt_long_outlined),
-                    text: 'Mensalidades',
-                  ),
-                  Tab(icon: Icon(Icons.bar_chart_outlined), text: 'Metricas'),
-                ],
+                  ],
+                ),
+                TabBar(
+                  controller: _tabController,
+                  indicatorColor: primary,
+                  labelColor: primary,
+                  unselectedLabelColor: mute,
+                  indicatorWeight: 2.5,
+                  dividerColor: Colors.transparent,
+                  tabs: const [
+                    Tab(icon: Icon(Icons.dashboard_outlined), text: 'Resumo'),
+                    Tab(
+                      icon: Icon(Icons.receipt_long_outlined),
+                      text: 'Mensalidades',
+                    ),
+                    Tab(icon: Icon(Icons.bar_chart_outlined), text: 'Metricas'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        body: FxContentWidthLimiter(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (widget.initialAlunoId != null)
+                _FinanceiroAlunoContextBanner(alunoId: widget.initialAlunoId!),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    const FinanceiroDashboardScreen(),
+                    FinanceiroMensalidadesTab(
+                      initialAlunoId: widget.initialAlunoId,
+                    ),
+                    const FinanceiroResumoScreen(),
+                  ],
+                ),
               ),
             ],
           ),
-        ),
-      ),
-      body: FxContentWidthLimiter(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (widget.initialAlunoId != null)
-              _FinanceiroAlunoContextBanner(alunoId: widget.initialAlunoId!),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  const FinanceiroDashboardScreen(),
-                  FinanceiroMensalidadesTab(
-                    initialAlunoId: widget.initialAlunoId,
-                  ),
-                  const FinanceiroResumoScreen(),
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     );
@@ -190,7 +194,9 @@ class _FinanceiroAlunoContextBanner extends ConsumerWidget {
         margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: EagleTokens.warn.withValues(alpha: chrome.isDark ? 0.14 : 0.08),
+          color: EagleTokens.warn.withValues(
+            alpha: chrome.isDark ? 0.14 : 0.08,
+          ),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: EagleTokens.warn.withValues(alpha: 0.25)),
         ),

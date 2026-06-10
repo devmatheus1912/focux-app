@@ -235,14 +235,14 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
             label: 'Exportar relatório em PDF',
             button: true,
             child: IconButton(
-            tooltip: 'Exportar PDF',
-            onPressed: _dados != null ? _exportarPdf : null,
-            icon: Icon(
-              Icons.picture_as_pdf_rounded,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
-              size: 22,
+              tooltip: 'Exportar PDF',
+              onPressed: _dados != null ? _exportarPdf : null,
+              icon: Icon(
+                Icons.picture_as_pdf_rounded,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                size: 22,
+              ),
             ),
-          ),
           ),
         ],
       ),
@@ -253,72 +253,74 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(TokensStrip.s4),
             child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _SeletorPeriodo(
-              diasSelecionado: _dias,
-              rangeCustom: _rangeCustom,
-              onChanged: (dias) {
-                setState(() {
-                  _dias = dias;
-                  _rangeCustom = null;
-                });
-                _carregarDados();
-              },
-              onCustom: _escolherPeriodoCustom,
-            ),
-            const SizedBox(height: 20),
-            if (_carregando)
-              const SizedBox(height: 200, child: FxLoading())
-            else if (_erro != null)
-              Container(
-                decoration: fxListCardDecoration(
-                  context,
-                  accent: theme.colorScheme.error,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _SeletorPeriodo(
+                  diasSelecionado: _dias,
+                  rangeCustom: _rangeCustom,
+                  onChanged: (dias) {
+                    setState(() {
+                      _dias = dias;
+                      _rangeCustom = null;
+                    });
+                    _carregarDados();
+                  },
+                  onCustom: _escolherPeriodoCustom,
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(TokensStrip.s4),
-                  child: Text(
-                    'Erro ao carregar relatório: $_erro',
-                    style: TextStyle(color: theme.colorScheme.onErrorContainer),
-                  ),
-                ),
-              )
-            else if (_dados != null) ...[
-              _CardAderencia(
-                dados: _dados!,
-                alunoId: widget.alunoId,
-                alunoNome: widget.alunoNome,
-              ),
-              const SizedBox(height: TokensStrip.s4),
-              if (_comparativo != null) ...[
-                _CardComparativo(comparativo: _comparativo!),
-                const SizedBox(height: TokensStrip.s4),
-              ],
-              Row(
-                children: [
-                  Expanded(
-                    child: _CardInfo(
-                      icone: Icons.check_circle_outline,
-                      titulo: 'Treinos Concluídos',
-                      valor:
-                          '${_dados!.treinosConcluidos} / ${_dados!.treinosTotal}',
-                      cor: theme.colorScheme.primary,
+                const SizedBox(height: 20),
+                if (_carregando)
+                  const SizedBox(height: 200, child: FxLoading())
+                else if (_erro != null)
+                  Container(
+                    decoration: fxListCardDecoration(
+                      context,
+                      accent: theme.colorScheme.error,
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _CardInfo(
-                      icone: Icons.calendar_today_outlined,
-                      titulo: 'Dias Analisados',
-                      valor: '${_dados!.diasAnalisados}',
-                      cor: theme.colorScheme.secondary,
+                    child: Padding(
+                      padding: const EdgeInsets.all(TokensStrip.s4),
+                      child: Text(
+                        'Erro ao carregar relatório: $_erro',
+                        style: TextStyle(
+                          color: theme.colorScheme.onErrorContainer,
+                        ),
+                      ),
                     ),
+                  )
+                else if (_dados != null) ...[
+                  _CardAderencia(
+                    dados: _dados!,
+                    alunoId: widget.alunoId,
+                    alunoNome: widget.alunoNome,
+                  ),
+                  const SizedBox(height: TokensStrip.s4),
+                  if (_comparativo != null) ...[
+                    _CardComparativo(comparativo: _comparativo!),
+                    const SizedBox(height: TokensStrip.s4),
+                  ],
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _CardInfo(
+                          icone: Icons.check_circle_outline,
+                          titulo: 'Treinos Concluídos',
+                          valor:
+                              '${_dados!.treinosConcluidos} / ${_dados!.treinosTotal}',
+                          cor: theme.colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _CardInfo(
+                          icone: Icons.calendar_today_outlined,
+                          titulo: 'Dias Analisados',
+                          valor: '${_dados!.diasAnalisados}',
+                          cor: theme.colorScheme.secondary,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
-              ),
-            ],
-          ],
+              ],
             ),
           ),
         ),
@@ -358,9 +360,9 @@ class _SeletorPeriodo extends StatelessWidget {
           children: [
             Text(
               'Período de análise',
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(color: TokensStrip.textSecondary),
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: TokensStrip.textSecondary,
+              ),
             ),
             const SizedBox(height: 8),
             Wrap(
@@ -433,13 +435,17 @@ class _PeriodPill extends StatelessWidget {
           color:
               active
                   ? primary
-                  : (isDark ? EagleTokens.darkCardHi : TokensStrip.borderDefault),
+                  : (isDark
+                      ? EagleTokens.darkCardHi
+                      : TokensStrip.borderDefault),
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
             color:
                 active
                     ? primary
-                    : (isDark ? EagleTokens.darkLine : TokensStrip.borderDefault),
+                    : (isDark
+                        ? EagleTokens.darkLine
+                        : TokensStrip.borderDefault),
           ),
         ),
         child: Text(

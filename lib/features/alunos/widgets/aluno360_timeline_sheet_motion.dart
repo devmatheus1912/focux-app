@@ -28,7 +28,10 @@ class _Aluno360TimelineSheetEntranceState
       vsync: this,
       duration: const Duration(milliseconds: 260),
     );
-    final curve = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
+    final curve = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    );
     _fade = curve;
     _slide = Tween<Offset>(
       begin: const Offset(0, 0.04),
@@ -79,7 +82,8 @@ class Aluno360TimelineTileEntrance extends StatefulWidget {
       _Aluno360TimelineTileEntranceState();
 }
 
-class _Aluno360TimelineTileEntranceState extends State<Aluno360TimelineTileEntrance>
+class _Aluno360TimelineTileEntranceState
+    extends State<Aluno360TimelineTileEntrance>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _fade;
@@ -93,7 +97,10 @@ class _Aluno360TimelineTileEntranceState extends State<Aluno360TimelineTileEntra
       vsync: this,
       duration: const Duration(milliseconds: 220),
     );
-    final curve = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
+    final curve = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    );
     _fade = curve;
     _slide = Tween<Offset>(
       begin: const Offset(0, 0.03),

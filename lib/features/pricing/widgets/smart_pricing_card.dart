@@ -25,8 +25,15 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
 
   Future<void> _load() async {
     try {
-      final d = await SmartPricingRepository(ref.read(apiClientProvider)).recomendacao();
-      if (mounted) setState(() { _data = d; _loading = false; });
+      final d =
+          await SmartPricingRepository(
+            ref.read(apiClientProvider),
+          ).recomendacao();
+      if (mounted)
+        setState(() {
+          _data = d;
+          _loading = false;
+        });
     } catch (e) {
       if (mounted) setState(() => _loading = false);
     }
@@ -37,7 +44,13 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
     if (_loading) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 12),
-        child: Center(child: SizedBox(width: 22, height: 22, child: FxLoading(strokeWidth: 2))),
+        child: Center(
+          child: SizedBox(
+            width: 22,
+            height: 22,
+            child: FxLoading(strokeWidth: 2),
+          ),
+        ),
       );
     }
     if (_data == null) return const SizedBox.shrink();
@@ -50,7 +63,10 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [primary.withValues(alpha: 0.15), primary.withValues(alpha: 0.05)],
+          colors: [
+            primary.withValues(alpha: 0.15),
+            primary.withValues(alpha: 0.05),
+          ],
         ),
         borderRadius: BorderRadius.circular(16),
       ),
@@ -61,20 +77,32 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
             children: [
               Icon(Icons.auto_graph),
               SizedBox(width: 8),
-              Text('Smart Pricing', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+              Text(
+                'Smart Pricing',
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+              ),
             ],
           ),
           const SizedBox(height: 8),
-          Text('Ticket atual: R\$ ${d.ticketAtual.toStringAsFixed(0)} → Sugerido: R\$ ${d.precoSugerido.toStringAsFixed(0)}'),
+          Text(
+            'Ticket atual: R\$ ${d.ticketAtual.toStringAsFixed(0)} → Sugerido: R\$ ${d.precoSugerido.toStringAsFixed(0)}',
+          ),
           const SizedBox(height: 6),
-          Text(d.rationale, style: TextStyle(color: Theme.of(context).hintColor, fontSize: 13)),
+          Text(
+            d.rationale,
+            style: TextStyle(color: Theme.of(context).hintColor, fontSize: 13),
+          ),
           if (d.pacotesSugeridos.isNotEmpty) ...[
             const SizedBox(height: 12),
-            ...d.pacotesSugeridos.map((p) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text('• ${p.nome}: R\$ ${p.valor.toStringAsFixed(0)} — ${p.descricao}',
-                  style: const TextStyle(fontSize: 12)),
-            )),
+            ...d.pacotesSugeridos.map(
+              (p) => Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(
+                  '• ${p.nome}: R\$ ${p.valor.toStringAsFixed(0)} — ${p.descricao}',
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ),
+            ),
           ],
           const SizedBox(height: 14),
           Row(

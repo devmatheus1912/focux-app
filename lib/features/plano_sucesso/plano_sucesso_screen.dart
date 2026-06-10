@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -14,15 +14,12 @@ import '../../core/widgets/skeleton_loader.dart';
 import '../alunos/utils/satellite_screen_utils.dart';
 import 'plano_sucesso_model.dart';
 import 'plano_sucesso_provider.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 class PlanoSucessoScreen extends StatefulWidget {
   final int alunoId;
   final String? alunoNome;
-  const PlanoSucessoScreen({
-    super.key,
-    required this.alunoId,
-    this.alunoNome,
-  });
+  const PlanoSucessoScreen({super.key, required this.alunoId, this.alunoNome});
 
   @override
   State<PlanoSucessoScreen> createState() => _PlanoSucessoScreenState();
@@ -45,14 +42,17 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
     final primary = Theme.of(context).colorScheme.primary;
 
     if (provider.isLoading) {
-      return FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Plano de Sucesso',
-          subtitle: 'Marcos e metas do aluno',
-          onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+      return fxScreenA11yScope(
+        label: 'Plano de Sucesso',
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Plano de Sucesso',
+            subtitle: 'Marcos e metas do aluno',
+            onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+          ),
+          body: const SafeArea(child: SkeletonList(count: 5)),
         ),
-        body: const SafeArea(child: SkeletonList(count: 5)),
       );
     }
 
@@ -75,8 +75,7 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
                     : 'Este aluno ainda não possui plano de sucesso.',
             action: FxEmptyAction(
               label: 'Voltar ao Aluno 360',
-              onTap:
-                  () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+              onTap: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
             ),
           ),
         ),
@@ -101,7 +100,12 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, TokensStrip.s1, TokensStrip.s4, TokensStrip.s7),
+          padding: const EdgeInsets.fromLTRB(
+            TokensStrip.s4,
+            TokensStrip.s1,
+            TokensStrip.s4,
+            TokensStrip.s7,
+          ),
           children: [
             Container(
               padding: const EdgeInsets.all(TokensStrip.s5),

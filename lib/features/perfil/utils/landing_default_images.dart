@@ -65,9 +65,10 @@ String _defaultBioPath(String? slug) =>
     '/landing/defaults/bio-${_pickIndex(slug, 'bio', _bioCount)}.jpg';
 
 int _pickIndex(String? slug, String salt, int poolSize) {
-  final key = (slug != null && slug.trim().isNotEmpty)
-      ? slug.trim().toLowerCase()
-      : 'focux';
+  final key =
+      (slug != null && slug.trim().isNotEmpty)
+          ? slug.trim().toLowerCase()
+          : 'focux';
   return _floorMod(_javaHashCode('$key:$salt'), poolSize);
 }
 

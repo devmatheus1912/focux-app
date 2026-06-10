@@ -1,16 +1,20 @@
-﻿part of 'paywall_components.dart';
+part of 'paywall_components.dart';
 
 /// Âncoras de scroll na vitrine de planos.
 enum PaywallScrollTarget {
   planos,
   features,
   roi,
+
   /// Assinante — plano atual.
   seuPlano,
+
   /// Assinante — accordion de upgrade.
   upgrade,
+
   /// Assinante — comparativo rápido.
   comparar,
+
   /// Assinante — termos e cobrança.
   legal,
 }
@@ -100,8 +104,7 @@ class PaywallHero extends StatelessWidget {
   Widget build(BuildContext context) {
     if (_isSubscriber) {
       final label =
-          planDisplayLabel ??
-          PaywallCatalog.displayPlanName(currentPlan!);
+          planDisplayLabel ?? PaywallCatalog.displayPlanName(currentPlan!);
       return PaywallSubscriberHeroGlass(
         plan: currentPlan!,
         planLabel: label,
@@ -133,19 +136,18 @@ class PaywallHero extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           ShaderMask(
-            shaderCallback: (bounds) => LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [ink, primary],
-            ).createShader(bounds),
+            shaderCallback:
+                (bounds) => LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [ink, primary],
+                ).createShader(bounds),
             child: Text(
               'Seu app. Sua marca.\nSeus alunos. Sem limite.',
               textAlign: TextAlign.center,
-              style: TokensStrip.h1(color: Colors.white).copyWith(
-                fontSize: 26,
-                height: 1.06,
-                letterSpacing: -1.2,
-              ),
+              style: TokensStrip.h1(
+                color: Colors.white,
+              ).copyWith(fontSize: 26, height: 1.06, letterSpacing: -1.2),
             ),
           ),
           const SizedBox(height: 12),
@@ -200,7 +202,9 @@ class PaywallWebDetailsLink extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  live ? 'Comparação completa no site' : 'Comparação detalhada em breve',
+                  live
+                      ? 'Comparação completa no site'
+                      : 'Comparação detalhada em breve',
                   style: TokensStrip.h2(color: ink).copyWith(fontSize: 16),
                 ),
                 const SizedBox(height: 4),
@@ -329,9 +333,9 @@ class PaywallSubscriberQuickCompare extends StatelessWidget {
                             diffCount == 1
                                 ? '1 recurso exclusivo no $targetLabel'
                                 : '$diffCount recursos exclusivos no $targetLabel',
-                            style: TokensStrip.bodyMuted(color: mute).copyWith(
-                              fontSize: 12.5,
-                            ),
+                            style: TokensStrip.bodyMuted(
+                              color: mute,
+                            ).copyWith(fontSize: 12.5),
                           ),
                         ],
                       ),
@@ -386,7 +390,11 @@ class PaywallSubscriberQuickCompare extends StatelessWidget {
                 ? 'Comparativo sincronizado com o servidor.'
                 : 'Tabela completa e ROI no site quando disponível.',
             style: TokensStrip.bodyMuted(
-              color: PaywallCatalog.readableSecondary(ink, mute, isDark: isDark),
+              color: PaywallCatalog.readableSecondary(
+                ink,
+                mute,
+                isDark: isDark,
+              ),
             ).copyWith(fontSize: 12),
           ),
         ],
@@ -450,7 +458,10 @@ class PaywallSubscriberLegalStrip extends StatelessWidget {
         if (onRestore != null)
           Semantics(
             button: true,
-            label: restoring ? 'Restaurando compras' : 'Restaurar compras anteriores',
+            label:
+                restoring
+                    ? 'Restaurando compras'
+                    : 'Restaurar compras anteriores',
             child: TextButton(
               onPressed: restoring ? null : onRestore,
               style: linkStyle,
@@ -478,12 +489,29 @@ class PaywallSubscriberQuickNav extends StatelessWidget {
     required this.onSectionTap,
   });
 
-  static const _items = <({PaywallScrollTarget id, String label, IconData icon})>[
-    (id: PaywallScrollTarget.seuPlano, label: 'Seu plano', icon: Icons.verified_outlined),
-    (id: PaywallScrollTarget.upgrade, label: 'Upgrade', icon: Icons.arrow_upward_rounded),
-    (id: PaywallScrollTarget.comparar, label: 'Comparar', icon: Icons.compare_arrows_rounded),
-    (id: PaywallScrollTarget.legal, label: 'Legal', icon: Icons.policy_outlined),
-  ];
+  static const _items =
+      <({PaywallScrollTarget id, String label, IconData icon})>[
+        (
+          id: PaywallScrollTarget.seuPlano,
+          label: 'Seu plano',
+          icon: Icons.verified_outlined,
+        ),
+        (
+          id: PaywallScrollTarget.upgrade,
+          label: 'Upgrade',
+          icon: Icons.arrow_upward_rounded,
+        ),
+        (
+          id: PaywallScrollTarget.comparar,
+          label: 'Comparar',
+          icon: Icons.compare_arrows_rounded,
+        ),
+        (
+          id: PaywallScrollTarget.legal,
+          label: 'Legal',
+          icon: Icons.policy_outlined,
+        ),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -545,13 +573,27 @@ class PaywallQuickNav extends StatelessWidget {
     required this.onSectionTap,
   });
 
-  static const _items = <({PaywallScrollTarget id, String label, IconData icon})>[
-    (id: PaywallScrollTarget.planos, label: 'Planos', icon: Icons.view_agenda_outlined),
-    (id: PaywallScrollTarget.features, label: 'Features', icon: Icons.star_outline_rounded),
-    (id: PaywallScrollTarget.roi, label: 'ROI', icon: Icons.savings_outlined),
-  ];
+  static const _items =
+      <({PaywallScrollTarget id, String label, IconData icon})>[
+        (
+          id: PaywallScrollTarget.planos,
+          label: 'Planos',
+          icon: Icons.view_agenda_outlined,
+        ),
+        (
+          id: PaywallScrollTarget.features,
+          label: 'Features',
+          icon: Icons.star_outline_rounded,
+        ),
+        (
+          id: PaywallScrollTarget.roi,
+          label: 'ROI',
+          icon: Icons.savings_outlined,
+        ),
+      ];
 
-  List<({PaywallScrollTarget id, String label, IconData icon})> get _visibleItems {
+  List<({PaywallScrollTarget id, String label, IconData icon})>
+  get _visibleItems {
     if (FocuxLegal.plansMarketingWebLive) return _items;
     return _items
         .where((item) => item.id == PaywallScrollTarget.planos)
@@ -578,7 +620,10 @@ class PaywallQuickNav extends StatelessWidget {
                   accent: primary,
                   radius: TokensStrip.rPill,
                   elevationLevel: 6,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 11,
+                  ),
                   onTap: () => onSectionTap(items[i].id),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -620,4 +665,3 @@ class PaywallSectionAnchor extends StatelessWidget {
     return KeyedSubtree(key: anchorKey, child: child);
   }
 }
-

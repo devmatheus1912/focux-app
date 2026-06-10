@@ -62,10 +62,9 @@ Future<bool> showCopilotExecutarConfirmSheet(
                 const SizedBox(height: 12),
                 Text(
                   body,
-                  style: Aluno360Layout.captionStyle(context).copyWith(
-                    color: mute,
-                    height: 1.35,
-                  ),
+                  style: Aluno360Layout.captionStyle(
+                    context,
+                  ).copyWith(color: mute, height: 1.35),
                 ),
                 if (spec.parametros != null && spec.parametros!.isNotEmpty) ...[
                   const SizedBox(height: 12),
@@ -93,7 +92,8 @@ Future<bool> showCopilotExecutarConfirmSheet(
                         button: true,
                         label: 'Cancelar ação',
                         child: OutlinedButton(
-                          onPressed: () => Navigator.of(sheetContext).pop(false),
+                          onPressed:
+                              () => Navigator.of(sheetContext).pop(false),
                           child: const Text('Cancelar'),
                         ),
                       ),

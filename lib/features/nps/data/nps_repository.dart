@@ -69,11 +69,10 @@ class NpsRepository {
     String? comentario,
     String contexto = 'POS_TREINO',
   }) async {
-    await _dio.post('/api/nps', data: {
-      'score': score,
-      'comentario': comentario,
-      'contexto': contexto,
-    });
+    await _dio.post(
+      '/api/nps',
+      data: {'score': score, 'comentario': comentario, 'contexto': contexto},
+    );
   }
 
   Future<NpsResumo> resumo() async {

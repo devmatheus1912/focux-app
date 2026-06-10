@@ -117,8 +117,6 @@ Color alunoAvatarHeroFallbackColor(String name) {
     Color(0xFFFDBA74),
   ];
   final hash =
-      name.isEmpty
-          ? 0
-          : name.codeUnits.fold<int>(0, (sum, unit) => sum + unit);
+      name.isEmpty ? 0 : name.codeUnits.fold<int>(0, (sum, unit) => sum + unit);
   return palette[hash % palette.length];
 }

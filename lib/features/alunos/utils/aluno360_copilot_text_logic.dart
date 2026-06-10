@@ -88,15 +88,15 @@ String sanitizeCopilotPrescriptionReason(
   if (reason.trim().isEmpty) return '';
   if (hideMetricFooter) return '';
   if (!statusMetricsVisible) return reason.trim();
-  final segments =
-      copilotPrescriptionReasonSegments(reason)
-          .where(
-            (segment) => !isRedundantCopilotReasonSegment(
+  final segments = copilotPrescriptionReasonSegments(reason)
+      .where(
+        (segment) =>
+            !isRedundantCopilotReasonSegment(
               segment,
               statusMetricsVisible: true,
             ),
-          )
-          .toList(growable: false);
+      )
+      .toList(growable: false);
   if (segments.isEmpty) return '';
   return segments.join(' · ');
 }
@@ -123,7 +123,10 @@ String normalizeIaCopilotAcao(String raw) {
   return text[0].toUpperCase() + text.substring(1);
 }
 
-String humanizeCopilotMotivoDiasFragment(int dias, {String kind = 'atividade'}) {
+String humanizeCopilotMotivoDiasFragment(
+  int dias, {
+  String kind = 'atividade',
+}) {
   if (dias >= 90) return 'sem registro recente';
   if (dias == 0) return kind == 'treino' ? 'treinou hoje' : 'sem pausa hoje';
   if (dias == 1) {
@@ -137,7 +140,8 @@ String _humanizeCopilotMotivoDiasInText(String text) {
     RegExp(r'(\d+) dia\(s\) sem (atividade|treino)', caseSensitive: false),
     (match) {
       final dias = int.tryParse(match.group(1)!) ?? 0;
-      final kind = match.group(2)!.toLowerCase() == 'treino' ? 'treino' : 'atividade';
+      final kind =
+          match.group(2)!.toLowerCase() == 'treino' ? 'treino' : 'atividade';
       return humanizeCopilotMotivoDiasFragment(dias, kind: kind);
     },
   );

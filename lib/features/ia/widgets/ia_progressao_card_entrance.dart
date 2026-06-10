@@ -32,7 +32,10 @@ class _IaProgressaoCardEntranceState extends State<IaProgressaoCardEntrance>
       vsync: this,
       duration: const Duration(milliseconds: 220),
     );
-    final curve = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
+    final curve = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    );
     _fade = curve;
     _slide = Tween<Offset>(
       begin: const Offset(0, 0.04),

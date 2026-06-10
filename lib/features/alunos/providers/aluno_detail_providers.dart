@@ -17,7 +17,10 @@ import 'alunos_provider.dart';
 
 export 'aluno_timeline360_paged_provider.dart';
 
-final aluno360Provider = FutureProvider.family<Aluno360, int>((ref, alunoId) async {
+final aluno360Provider = FutureProvider.family<Aluno360, int>((
+  ref,
+  alunoId,
+) async {
   return AlunoRepository(ref.read(apiClientProvider)).buscarAluno360(alunoId);
 });
 
@@ -25,7 +28,8 @@ final alunoRecoveryProvider = FutureProvider.family<RecoverySnapshot?, int>((
   ref,
   alunoId,
 ) async {
-  final bundled = ref.watch(aluno360Provider(alunoId)).valueOrNull?.recoverySnapshot;
+  final bundled =
+      ref.watch(aluno360Provider(alunoId)).valueOrNull?.recoverySnapshot;
   if (bundled != null) return bundled;
   return HealthRepository.fromClient(
     ref.read(apiClientProvider),
@@ -45,8 +49,8 @@ final alunoCopilotCreatingProvider = StateProvider.family<bool, int>(
 /// Operação tab focus mode — hides secondary diagnostics (status grid, wearable, quick actions).
 final alunoOperacaoFocusModeProvider =
     StateNotifierProvider.family<AlunoOperacaoFocusModeController, bool, int>(
-  (ref, alunoId) => AlunoOperacaoFocusModeController(ref, alunoId),
-);
+      (ref, alunoId) => AlunoOperacaoFocusModeController(ref, alunoId),
+    );
 
 class AlunoOperacaoFocusModeController extends StateNotifier<bool> {
   AlunoOperacaoFocusModeController(this._ref, this.alunoId) : super(false);
@@ -55,10 +59,7 @@ class AlunoOperacaoFocusModeController extends StateNotifier<bool> {
   final int alunoId;
 
   /// Server preference wins, then local explicit, then contact-priority auto-default.
-  Future<void> syncFromAluno(
-    Aluno aluno, {
-    required bool autoDefault,
-  }) async {
+  Future<void> syncFromAluno(Aluno aluno, {required bool autoDefault}) async {
     try {
       final server = aluno.operacaoFocusMode;
       if (server != null) {
@@ -97,11 +98,10 @@ class AlunoOperacaoFocusModeController extends StateNotifier<bool> {
     state = value;
     try {
       await AlunoOperacaoFocusStore.saveExplicit(alunoId, value);
-      await AlunoRepository(_ref.read(apiClientProvider))
-          .atualizarOperacaoFocus(alunoId, focusMode: value);
-      fxAnnounceGlobal(
-        value ? 'Modo foco ativado' : 'Modo foco desativado',
-      );
+      await AlunoRepository(
+        _ref.read(apiClientProvider),
+      ).atualizarOperacaoFocus(alunoId, focusMode: value);
+      fxAnnounceGlobal(value ? 'Modo foco ativado' : 'Modo foco desativado');
     } catch (error) {
       state = previous;
       fxAnnounceGlobal('Não foi possível salvar o modo foco. Tente novamente.');
@@ -128,8 +128,9 @@ final alunoCopilotoActionProvider =
         final cached = await AlunoCopilotIaCacheStore.loadIfFresh(alunoId);
         if (cached != null) return cached;
       }
-      final payload =
-          await IaRepository(ref.read(apiClientProvider)).proximaAcao(alunoId);
+      final payload = await IaRepository(
+        ref.read(apiClientProvider),
+      ).proximaAcao(alunoId);
       await AlunoCopilotIaCacheStore.save(alunoId, payload);
       ref.read(alunoCopilotIaSkipCacheProvider(alunoId).notifier).state = false;
       return payload;
@@ -206,19 +207,25 @@ final alunoEvolucaoInteligenteProvider =
     });
 
 final alunoAderenciaSemanalProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, int>((ref, alunoId) async {
+    FutureProvider.family<List<Map<String, dynamic>>, int>((
+      ref,
+      alunoId,
+    ) async {
       final aluno360 = await ref.watch(aluno360Provider(alunoId).future);
       return aluno360.aderenciaSemanal.dias;
     });
 
 /// Last weight measurements from avaliações físicas (up to 7 points, chronological).
-final alunoPesoHistoricoProvider =
-    FutureProvider.family<List<double>, int>((ref, alunoId) async {
-      final avaliacoes = await AvaliacaoRepository(
-        ref.read(apiClientProvider),
-      ).listar(alunoId);
+final alunoPesoHistoricoProvider = FutureProvider.family<List<double>, int>((
+  ref,
+  alunoId,
+) async {
+  final avaliacoes = await AvaliacaoRepository(
+    ref.read(apiClientProvider),
+  ).listar(alunoId);
 
-      final dated = avaliacoes
+  final dated =
+      avaliacoes
           .where((a) => a.pesoKg != null)
           .map(
             (a) => (
@@ -229,10 +236,10 @@ final alunoPesoHistoricoProvider =
           .toList()
         ..sort((a, b) => a.date.compareTo(b.date));
 
-      final series = dated.map((e) => e.peso).toList();
-      if (series.length <= 7) return series;
-      return series.sublist(series.length - 7);
-    });
+  final series = dated.map((e) => e.peso).toList();
+  if (series.length <= 7) return series;
+  return series.sublist(series.length - 7);
+});
 
 DateTime _avaliacaoSortKey(String? raw) {
   if (raw == null || raw.trim().isEmpty) {

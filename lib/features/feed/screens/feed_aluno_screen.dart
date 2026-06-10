@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
@@ -14,6 +14,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class FeedAlunoScreen extends ConsumerStatefulWidget {
   const FeedAlunoScreen({super.key});
@@ -124,152 +125,161 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    return FxShellScaffold(
-      useMesh: true,
-      extendBody: true,
-      body: SafeArea(
-        child:
-            _loading
-                ? Center(child: FxLoading(color: primary))
-                : _posts.isEmpty
-                ? const FxEmptyState(
-                  icon: 'file-text',
-                  title: 'Nenhuma publicação ainda',
-                  subtitle:
-                      'Seu personal ainda não publicou no feed. Volte em breve.',
-                )
-                : RefreshIndicator(
-                  color: primary,
-                  onRefresh: _load,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 110),
-                    itemCount: _posts.length + 1,
-                    itemBuilder: (_, i) {
-                      if (i == 0) {
-                        return Padding(
-                          padding: const EdgeInsets.fromLTRB(4, 0, 4, 18),
-                          child: Text(
-                            'Feed',
-                            style: TextStyle(
-                              color:
-                                  isDark
-                                      ? EagleTokens.darkInk
-                                      : TokensStrip.textPrimary,
-                              fontSize: 28,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -0.5,
+    return fxScreenA11yScope(
+      label: 'Feed Aluno',
+      child: FxShellScaffold(
+        useMesh: true,
+        extendBody: true,
+        body: SafeArea(
+          child:
+              _loading
+                  ? Center(child: FxLoading(color: primary))
+                  : _posts.isEmpty
+                  ? const FxEmptyState(
+                    icon: 'file-text',
+                    title: 'Nenhuma publicação ainda',
+                    subtitle:
+                        'Seu personal ainda não publicou no feed. Volte em breve.',
+                  )
+                  : RefreshIndicator(
+                    color: primary,
+                    onRefresh: _load,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(
+                        TokensStrip.s4,
+                        10,
+                        16,
+                        110,
+                      ),
+                      itemCount: _posts.length + 1,
+                      itemBuilder: (_, i) {
+                        if (i == 0) {
+                          return Padding(
+                            padding: const EdgeInsets.fromLTRB(4, 0, 4, 18),
+                            child: Text(
+                              'Feed',
+                              style: TextStyle(
+                                color:
+                                    isDark
+                                        ? EagleTokens.darkInk
+                                        : TokensStrip.textPrimary,
+                                fontSize: 28,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                          );
+                        }
+                        final p = _posts[i - 1];
+                        final mUrl = p.midiaUrl ?? p.imagemUrl;
+                        final badgeColor = _feedBadgeColor(p.tipoPost, primary);
+                        final curtidas =
+                            _curtidasLocais[p.id] ?? p.totalCurtidas;
+                        final comentarios =
+                            _comentariosLocais[p.id] ?? p.totalComentarios;
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          decoration: fxListCardDecoration(
+                            context,
+                            accent: p.fixado ? primary : null,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(TokensStrip.s4),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _PostAuthorHeader(post: p, primary: primary),
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    if (p.fixado) ...[
+                                      Icon(
+                                        Icons.push_pin,
+                                        color: primary,
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                    ],
+                                    Icon(
+                                      _getIconForTipo(p.tipoPost),
+                                      size: 20,
+                                      color: badgeColor,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        p.titulo,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                _TypeBadge(tipo: p.tipoPost, color: badgeColor),
+                                const SizedBox(height: 8),
+                                Text(
+                                  p.conteudo,
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                                if (mUrl != null && mUrl.isNotEmpty) ...[
+                                  const SizedBox(height: 12),
+                                  p.tipoPost == 'VIDEO'
+                                      ? _VideoAttachmentTile(primary: primary)
+                                      : ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          mUrl,
+                                          fit: BoxFit.cover,
+                                          height: 130,
+                                          width: double.infinity,
+                                          errorBuilder:
+                                              (_, __, ___) => _ImagePlaceholder(
+                                                primary: primary,
+                                              ),
+                                        ),
+                                      ),
+                                ] else if (p.tipoPost == 'IMAGEM') ...[
+                                  const SizedBox(height: 12),
+                                  _ImagePlaceholder(primary: primary),
+                                ],
+                                const SizedBox(height: 12),
+                                const Divider(height: 1),
+                                const SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 4,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    TextButton.icon(
+                                      onPressed: () => _curtir(p.id),
+                                      icon: const Icon(
+                                        Icons.thumb_up_alt_outlined,
+                                        size: 18,
+                                      ),
+                                      label: Text('$curtidas Curtir'),
+                                    ),
+                                    TextButton.icon(
+                                      onPressed: () => _abrirComentarios(p.id),
+                                      icon: const Icon(
+                                        Icons.comment_outlined,
+                                        size: 18,
+                                      ),
+                                      label: Text('$comentarios Comentar'),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                         );
-                      }
-                      final p = _posts[i - 1];
-                      final mUrl = p.midiaUrl ?? p.imagemUrl;
-                      final badgeColor = _feedBadgeColor(p.tipoPost, primary);
-                      final curtidas = _curtidasLocais[p.id] ?? p.totalCurtidas;
-                      final comentarios =
-                          _comentariosLocais[p.id] ?? p.totalComentarios;
-
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: fxListCardDecoration(
-                          context,
-                          accent: p.fixado ? primary : null,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(TokensStrip.s4),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _PostAuthorHeader(post: p, primary: primary),
-                              const SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  if (p.fixado) ...[
-                                    Icon(
-                                      Icons.push_pin,
-                                      color: primary,
-                                      size: 18,
-                                    ),
-                                    const SizedBox(width: 8),
-                                  ],
-                                  Icon(
-                                    _getIconForTipo(p.tipoPost),
-                                    size: 20,
-                                    color: badgeColor,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      p.titulo,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              _TypeBadge(tipo: p.tipoPost, color: badgeColor),
-                              const SizedBox(height: 8),
-                              Text(
-                                p.conteudo,
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                              if (mUrl != null && mUrl.isNotEmpty) ...[
-                                const SizedBox(height: 12),
-                                p.tipoPost == 'VIDEO'
-                                    ? _VideoAttachmentTile(primary: primary)
-                                    : ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.network(
-                                        mUrl,
-                                        fit: BoxFit.cover,
-                                        height: 130,
-                                        width: double.infinity,
-                                        errorBuilder:
-                                            (_, __, ___) => _ImagePlaceholder(
-                                              primary: primary,
-                                            ),
-                                      ),
-                                    ),
-                              ] else if (p.tipoPost == 'IMAGEM') ...[
-                                const SizedBox(height: 12),
-                                _ImagePlaceholder(primary: primary),
-                              ],
-                              const SizedBox(height: 12),
-                              const Divider(height: 1),
-                              const SizedBox(height: 8),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 4,
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                children: [
-                                  TextButton.icon(
-                                    onPressed: () => _curtir(p.id),
-                                    icon: const Icon(
-                                      Icons.thumb_up_alt_outlined,
-                                      size: 18,
-                                    ),
-                                    label: Text('$curtidas Curtir'),
-                                  ),
-                                  TextButton.icon(
-                                    onPressed: () => _abrirComentarios(p.id),
-                                    icon: const Icon(
-                                      Icons.comment_outlined,
-                                      size: 18,
-                                    ),
-                                    label: Text('$comentarios Comentar'),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+                      },
+                    ),
                   ),
-                ),
+        ),
       ),
     );
   }

@@ -54,8 +54,7 @@ class _PadraoMovimentoGridState extends ConsumerState<PadraoMovimentoGrid> {
               for (final padrao in _padroes)
                 _GridItemData(
                   label: TaxonomyLabels.padrao[padrao] ?? padrao.name,
-                  count:
-                      all.where((ex) => ex.padraoMovimento == padrao).length,
+                  count: all.where((ex) => ex.padraoMovimento == padrao).length,
                   icon: Icons.account_tree_rounded,
                   onTap: () => _open(padrao: padrao),
                 ),

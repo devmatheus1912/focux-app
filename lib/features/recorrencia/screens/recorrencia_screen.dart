@@ -13,6 +13,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../data/recorrencia_repository.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 class RecorrenciaScreen extends ConsumerStatefulWidget {
   const RecorrenciaScreen({super.key});
@@ -34,8 +35,13 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final items = await RecorrenciaRepository(ref.read(apiClientProvider)).listar();
-      if (mounted) setState(() { _items = items; _loading = false; });
+      final items =
+          await RecorrenciaRepository(ref.read(apiClientProvider)).listar();
+      if (mounted)
+        setState(() {
+          _items = items;
+          _loading = false;
+        });
     } catch (e) {
       if (mounted) setState(() => _loading = false);
     }
@@ -54,29 +60,46 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
     if (!mounted) return;
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Nova recorrência'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            DropdownButtonFormField<int>(
-              initialValue: alunoId,
-              items: alunos.map((a) => DropdownMenuItem(value: a.id, child: Text(a.nome))).toList(),
-              onChanged: (v) => alunoId = v,
-              decoration: const InputDecoration(labelText: 'Aluno'),
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Nova recorrência'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<int>(
+                  initialValue: alunoId,
+                  items:
+                      alunos
+                          .map(
+                            (a) => DropdownMenuItem(
+                              value: a.id,
+                              child: Text(a.nome),
+                            ),
+                          )
+                          .toList(),
+                  onChanged: (v) => alunoId = v,
+                  decoration: const InputDecoration(labelText: 'Aluno'),
+                ),
+                TextField(
+                  controller: valorCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Valor mensal (R\$)',
+                  ),
+                ),
+              ],
             ),
-            TextField(
-              controller: valorCtrl,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Valor mensal (R\$)'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Criar')),
-        ],
-      ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Criar'),
+              ),
+            ],
+          ),
     );
     if (ok != true || alunoId == null) return;
 
@@ -88,7 +111,10 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
       if (r.initPoint != null && r.initPoint!.isNotEmpty) {
         await Clipboard.setData(ClipboardData(text: r.initPoint!));
         if (!mounted) return;
-        FeedbackHelper.showSuccess(context, 'Link de assinatura copiado — envie ao aluno.');
+        FeedbackHelper.showSuccess(
+          context,
+          'Link de assinatura copiado — envie ao aluno.',
+        );
       }
       _load();
     } catch (e) {
@@ -100,67 +126,81 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Recorrência MP',
-        subtitle: 'Assinaturas Mercado Pago',
-        onBack: () => context.pop(),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _criar,
-        icon: const Icon(Icons.add),
-        label: const Text('Nova'),
-      ),
-      body: _loading
-          ? const Center(child: FxLoading())
-          : RefreshIndicator(
-              onRefresh: _load,
-              child: _items.isEmpty
-                  ? ListView(
-                    children: const [
-                      SizedBox(height: 48),
-                      FxEmptyState(
-                        icon: 'credit-card',
-                        title: 'Nenhuma assinatura ainda',
-                        subtitle:
-                            'Crie a primeira recorrência para cobrar seus alunos via Mercado Pago.',
-                      ),
-                    ],
-                  )
-                  : ListView.separated(
-                      padding: const EdgeInsets.all(TokensStrip.s4),
-                      itemCount: _items.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 2),
-                      itemBuilder: (_, i) {
-                        final item = _items[i];
-                        final pendente = item.status == 'PENDENTE';
-                        return FxSatelliteListTile(
-                          title: item.alunoNome ?? 'Aluno #${item.alunoId}',
-                          accent: pendente ? EagleTokens.warn : null,
-                          subtitle: Text(
-                            'R\$ ${item.valor.toStringAsFixed(0)} · ${item.status}'
-                            '${item.proximaCobranca != null ? ' · Próx: ${item.proximaCobranca}' : ''}',
+    return fxScreenA11yScope(
+      label: 'Recorrência MP',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Recorrência MP',
+          subtitle: 'Assinaturas Mercado Pago',
+          onBack: () => context.pop(),
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: _criar,
+          icon: const Icon(Icons.add),
+          label: const Text('Nova'),
+        ),
+        body:
+            _loading
+                ? const Center(child: FxLoading())
+                : RefreshIndicator(
+                  onRefresh: _load,
+                  child:
+                      _items.isEmpty
+                          ? ListView(
+                            children: const [
+                              SizedBox(height: 48),
+                              FxEmptyState(
+                                icon: 'credit-card',
+                                title: 'Nenhuma assinatura ainda',
+                                subtitle:
+                                    'Crie a primeira recorrência para cobrar seus alunos via Mercado Pago.',
+                              ),
+                            ],
+                          )
+                          : ListView.separated(
+                            padding: const EdgeInsets.all(TokensStrip.s4),
+                            itemCount: _items.length,
+                            separatorBuilder:
+                                (_, __) => const SizedBox(height: 2),
+                            itemBuilder: (_, i) {
+                              final item = _items[i];
+                              final pendente = item.status == 'PENDENTE';
+                              return FxSatelliteListTile(
+                                title:
+                                    item.alunoNome ?? 'Aluno #${item.alunoId}',
+                                accent: pendente ? EagleTokens.warn : null,
+                                subtitle: Text(
+                                  'R\$ ${item.valor.toStringAsFixed(0)} · ${item.status}'
+                                  '${item.proximaCobranca != null ? ' · Próx: ${item.proximaCobranca}' : ''}',
+                                ),
+                                trailing:
+                                    item.initPoint != null && pendente
+                                        ? IconButton(
+                                          icon: Icon(
+                                            Icons.link_rounded,
+                                            color: primary,
+                                          ),
+                                          onPressed: () async {
+                                            final uri = Uri.parse(
+                                              item.initPoint!,
+                                            );
+                                            if (await canLaunchUrl(uri)) {
+                                              await launchUrl(
+                                                uri,
+                                                mode:
+                                                    LaunchMode
+                                                        .externalApplication,
+                                              );
+                                            }
+                                          },
+                                        )
+                                        : null,
+                              );
+                            },
                           ),
-                          trailing:
-                              item.initPoint != null && pendente
-                                  ? IconButton(
-                                    icon: Icon(Icons.link_rounded, color: primary),
-                                    onPressed: () async {
-                                      final uri = Uri.parse(item.initPoint!);
-                                      if (await canLaunchUrl(uri)) {
-                                        await launchUrl(
-                                          uri,
-                                          mode: LaunchMode.externalApplication,
-                                        );
-                                      }
-                                    },
-                                  )
-                                  : null,
-                        );
-                      },
-                    ),
-            ),
+                ),
+      ),
     );
   }
 }

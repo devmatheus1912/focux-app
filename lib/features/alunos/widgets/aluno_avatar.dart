@@ -27,12 +27,11 @@ class AlunoAvatar extends StatelessWidget {
 
   bool get _onHero => variant == AlunoAvatarVariant.hero;
 
-  double get _size =>
-      switch (variant) {
-        AlunoAvatarVariant.hero => heroSize,
-        AlunoAvatarVariant.strip => stripSize,
-        AlunoAvatarVariant.list => listSize,
-      };
+  double get _size => switch (variant) {
+    AlunoAvatarVariant.hero => heroSize,
+    AlunoAvatarVariant.strip => stripSize,
+    AlunoAvatarVariant.list => listSize,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -41,12 +40,12 @@ class AlunoAvatar extends StatelessWidget {
     final resolvedUrl = resolveAlunoPhotoUrl(photoUrl);
     final ringColor =
         _onHero
-            ? BrandPalette.accent(primary).withValues(
-              alpha: isDark ? 0.96 : 0.88,
-            )
-            : BrandPalette.accent(primary).withValues(
-              alpha: isDark ? 0.96 : 0.88,
-            );
+            ? BrandPalette.accent(
+              primary,
+            ).withValues(alpha: isDark ? 0.96 : 0.88)
+            : BrandPalette.accent(
+              primary,
+            ).withValues(alpha: isDark ? 0.96 : 0.88);
     final glowColor =
         _onHero
             ? ringColor.withValues(alpha: isDark ? 0.28 : 0.2)
@@ -149,9 +148,10 @@ class _AlunoAvatarInitials extends StatelessWidget {
           shape: BoxShape.circle,
           color: fallback,
           border: Border.all(
-            color: BrandPalette.sectionAccent(primary, dark: isDark).withValues(
-              alpha: isDark ? 0.32 : 0.22,
-            ),
+            color: BrandPalette.sectionAccent(
+              primary,
+              dark: isDark,
+            ).withValues(alpha: isDark ? 0.32 : 0.22),
             width: 2,
           ),
           boxShadow: [
@@ -182,9 +182,10 @@ class _AlunoAvatarInitials extends StatelessWidget {
         color: fallback,
         shape: BoxShape.circle,
         border: Border.all(
-          color: BrandPalette.sectionAccent(primary, dark: isDark).withValues(
-            alpha: isDark ? 0.28 : 0.18,
-          ),
+          color: BrandPalette.sectionAccent(
+            primary,
+            dark: isDark,
+          ).withValues(alpha: isDark ? 0.28 : 0.18),
         ),
       ),
       alignment: Alignment.center,

@@ -36,25 +36,24 @@ class Plano {
     this.tierOrder,
   });
 
-  double annualPriceOrComputed() =>
-      precoAnual ?? (precoMensal * 12 * 0.8);
+  double annualPriceOrComputed() => precoAnual ?? (precoMensal * 12 * 0.8);
 
   factory Plano.fromJson(Map<String, dynamic> json) => Plano(
-        id: json['id'] as int,
-        nome: json['nome'] as String,
-        precoMensal: (json['precoMensal'] as num).toDouble(),
-        precoAnual: (json['precoAnual'] as num?)?.toDouble(),
-        precoAnualMensalEquiv: (json['precoAnualMensalEquiv'] as num?)?.toDouble(),
-        limiteAlunos: json['limiteAlunos'] as int?,
-        temWhiteLabel: json['temWhiteLabel'] as bool,
-        temFinanceiro: json['temFinanceiro'] as bool,
-        temAgenda: json['temAgenda'] as bool,
-        temRelatorios: json['temRelatorios'] as bool,
-        temLandingCompleta: json['temLandingCompleta'] as bool? ?? false,
-        displayName: json['displayName'] as String?,
-        subtitle: json['subtitle'] as String?,
-        badge: json['badge'] as String?,
-        roiTag: json['roiTag'] as String?,
-        tierOrder: (json['tierOrder'] as num?)?.toInt(),
-      );
+    id: json['id'] as int,
+    nome: json['nome'] as String,
+    precoMensal: (json['precoMensal'] as num).toDouble(),
+    precoAnual: (json['precoAnual'] as num?)?.toDouble(),
+    precoAnualMensalEquiv: (json['precoAnualMensalEquiv'] as num?)?.toDouble(),
+    limiteAlunos: json['limiteAlunos'] as int?,
+    temWhiteLabel: json['temWhiteLabel'] as bool,
+    temFinanceiro: json['temFinanceiro'] as bool,
+    temAgenda: json['temAgenda'] as bool,
+    temRelatorios: json['temRelatorios'] as bool,
+    temLandingCompleta: json['temLandingCompleta'] as bool? ?? false,
+    displayName: json['displayName'] as String?,
+    subtitle: json['subtitle'] as String?,
+    badge: json['badge'] as String?,
+    roiTag: json['roiTag'] as String?,
+    tierOrder: (json['tierOrder'] as num?)?.toInt(),
+  );
 }

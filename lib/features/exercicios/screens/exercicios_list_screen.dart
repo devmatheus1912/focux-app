@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -20,6 +20,8 @@ import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 // Legacy editorial import contract still lives in repository/tests:
 import '../../../core/theme/tokens_strip.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+
 // "Aprovar editorialmente", "Notas editoriais padrao",
 // previewMidias(midias), importarMidias(midias).
 class ExerciciosListScreen extends ConsumerStatefulWidget {
@@ -234,7 +236,12 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     });
     _refresh();
     if (blocked.isEmpty) {
-      FeedbackHelper.showSuccess(context, deleted.length == 1 ? '1 exercicio excluido.' : '${deleted.length} exercicios excluidos.',);
+      FeedbackHelper.showSuccess(
+        context,
+        deleted.length == 1
+            ? '1 exercicio excluido.'
+            : '${deleted.length} exercicios excluidos.',
+      );
       return;
     }
 
@@ -290,146 +297,154 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar:
-          _selected.isEmpty
-              ? FxShellAppBar(
-                title: 'Exercicios',
-                subtitle: 'BIBLIOTECA',
-                onBack:
-                    () => safePopOrGo(context, '/dashboard/personal'),
-                actions: [
-                  IconButton(
-                    tooltip: 'Selecionar exercicios',
-                    icon: const Icon(Icons.checklist_rounded),
-                    onPressed:
-                        () => asyncList.whenData((value) {
-                          final filtered = _applyFilter(value);
-                          if (filtered.isEmpty) return;
-                          setState(() => _selected.add(filtered.first.id));
-                        }),
-                  ),
-                  IconButton(
-                    tooltip: 'Carregar biblioteca completa',
-                    icon: const Icon(Icons.download_rounded),
-                    onPressed: () async {
-                      final imported = await context.push<bool>(
-                        '/exercicios/biblioteca-wizard',
-                      );
-                      if (imported == true) _refresh();
-                    },
-                  ),
-                  IconButton(
-                    tooltip: 'Novo exercicio',
-                    icon: const Icon(Icons.add_rounded),
-                    onPressed: () async {
-                      final created = await context.push<bool>(
-                        '/exercicios/novo',
-                      );
-                      if (created == true) _refresh();
-                    },
-                  ),
-                ],
-              )
-              : null,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final created = await context.push<bool>('/exercicios/novo');
-          if (created == true) _refresh();
-        },
-        child: const Icon(Icons.add_rounded),
-      ),
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            if (_selected.isNotEmpty)
-              ExerciciosBatchActions(
-                count: _selected.length,
-                onCancel: () => setState(_selected.clear),
-                onSelectAll:
-                    () => asyncList.whenData(
-                      (value) => _selectAllVisible(_applyFilter(value)),
+    return fxScreenA11yScope(
+      label: 'Exercicios',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar:
+            _selected.isEmpty
+                ? FxShellAppBar(
+                  title: 'Exercicios',
+                  subtitle: 'BIBLIOTECA',
+                  onBack: () => safePopOrGo(context, '/dashboard/personal'),
+                  actions: [
+                    IconButton(
+                      tooltip: 'Selecionar exercicios',
+                      icon: const Icon(Icons.checklist_rounded),
+                      onPressed:
+                          () => asyncList.whenData((value) {
+                            final filtered = _applyFilter(value);
+                            if (filtered.isEmpty) return;
+                            setState(() => _selected.add(filtered.first.id));
+                          }),
                     ),
-                onFavorite:
-                    () => asyncList.whenData((value) => _favoriteBatch(value)),
-                onDelete:
-                    () => asyncList.whenData(
-                      (value) => _deleteBatch(_applyFilter(value)),
+                    IconButton(
+                      tooltip: 'Carregar biblioteca completa',
+                      icon: const Icon(Icons.download_rounded),
+                      onPressed: () async {
+                        final imported = await context.push<bool>(
+                          '/exercicios/biblioteca-wizard',
+                        );
+                        if (imported == true) _refresh();
+                      },
                     ),
-              )
-            else
-              const SizedBox.shrink(),
-            ExerciciosFilterBar(
-              filter: _filter,
-              onChanged: (value) => setState(() => _filter = value),
-              onClear:
-                  () => setState(() => _filter = const ExerciciosUiFilter()),
-            ),
-            Expanded(
-              child: asyncList.when(
-                loading: () => const FxLoading(),
-                error:
-                    (e, _) => Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(TokensStrip.s5),
-                        child: Text(friendlyError(e)),
-                      ),
+                    IconButton(
+                      tooltip: 'Novo exercicio',
+                      icon: const Icon(Icons.add_rounded),
+                      onPressed: () async {
+                        final created = await context.push<bool>(
+                          '/exercicios/novo',
+                        );
+                        if (created == true) _refresh();
+                      },
                     ),
-                data: (exercicios) {
-                  final filtered = _applyFilter(exercicios);
-                  return Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 10),
-                        child: Row(
-                          children: [
-                            Text(
-                              '${filtered.length} exercicios',
-                              style: TextStyle(
-                                color: mute,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            const Spacer(),
-                            if (_filter.grupo != null)
-                              Text(
-                                TaxonomyLabels.grupo[_filter.grupo!] ?? '',
-                                style: TextStyle(color: mute),
-                              ),
-                          ],
-                        ),
+                  ],
+                )
+                : null,
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            final created = await context.push<bool>('/exercicios/novo');
+            if (created == true) _refresh();
+          },
+          child: const Icon(Icons.add_rounded),
+        ),
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              if (_selected.isNotEmpty)
+                ExerciciosBatchActions(
+                  count: _selected.length,
+                  onCancel: () => setState(_selected.clear),
+                  onSelectAll:
+                      () => asyncList.whenData(
+                        (value) => _selectAllVisible(_applyFilter(value)),
                       ),
-                      Expanded(
-                        child: ExerciciosListView(
-                          exercicios: filtered,
-                          selectedIds: _selected,
-                          onTap: (exercicio) {
-                            if (_selected.isNotEmpty) {
-                              setState(() {
-                                _selected.contains(exercicio.id)
-                                    ? _selected.remove(exercicio.id)
-                                    : _selected.add(exercicio.id);
-                              });
-                              return;
-                            }
-                            context.push('/exercicios/${exercicio.id}');
-                          },
-                          onLongPress:
-                              (exercicio) =>
-                                  setState(() => _selected.add(exercicio.id)),
-                          onFavorite: _favorite,
-                          onUploadVideo: _uploadVideo,
-                          onDelete: _deleteOne,
-                        ),
+                  onFavorite:
+                      () =>
+                          asyncList.whenData((value) => _favoriteBatch(value)),
+                  onDelete:
+                      () => asyncList.whenData(
+                        (value) => _deleteBatch(_applyFilter(value)),
                       ),
-                    ],
-                  );
-                },
+                )
+              else
+                const SizedBox.shrink(),
+              ExerciciosFilterBar(
+                filter: _filter,
+                onChanged: (value) => setState(() => _filter = value),
+                onClear:
+                    () => setState(() => _filter = const ExerciciosUiFilter()),
               ),
-            ),
-          ],
+              Expanded(
+                child: asyncList.when(
+                  loading: () => const FxLoading(),
+                  error:
+                      (e, _) => Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(TokensStrip.s5),
+                          child: Text(friendlyError(e)),
+                        ),
+                      ),
+                  data: (exercicios) {
+                    final filtered = _applyFilter(exercicios);
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            TokensStrip.s4,
+                            0,
+                            16,
+                            10,
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                '${filtered.length} exercicios',
+                                style: TextStyle(
+                                  color: mute,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              const Spacer(),
+                              if (_filter.grupo != null)
+                                Text(
+                                  TaxonomyLabels.grupo[_filter.grupo!] ?? '',
+                                  style: TextStyle(color: mute),
+                                ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: ExerciciosListView(
+                            exercicios: filtered,
+                            selectedIds: _selected,
+                            onTap: (exercicio) {
+                              if (_selected.isNotEmpty) {
+                                setState(() {
+                                  _selected.contains(exercicio.id)
+                                      ? _selected.remove(exercicio.id)
+                                      : _selected.add(exercicio.id);
+                                });
+                                return;
+                              }
+                              context.push('/exercicios/${exercicio.id}');
+                            },
+                            onLongPress:
+                                (exercicio) =>
+                                    setState(() => _selected.add(exercicio.id)),
+                            onFavorite: _favorite,
+                            onUploadVideo: _uploadVideo,
+                            onDelete: _deleteOne,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

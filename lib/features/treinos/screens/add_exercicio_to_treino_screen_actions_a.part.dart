@@ -1,6 +1,7 @@
 part of 'add_exercicio_to_treino_screen.dart';
 
-extension AddExercicioToTreinoScreenActionsA on _AddExercicioToTreinoScreenState {
+extension AddExercicioToTreinoScreenActionsA
+    on _AddExercicioToTreinoScreenState {
   void _syncPrescriptionVisibility() {
     if (_selecionado == null) {
       if (_prescriptionInView) {
@@ -203,10 +204,7 @@ extension AddExercicioToTreinoScreenActionsA on _AddExercicioToTreinoScreenState
                   await _adicionarRapido(exercicio);
                   AnalyticsService.instance.track(
                     'template_uso',
-                    props: {
-                      'treinoId': widget.treinoId,
-                      'exId': exercicio.id,
-                    },
+                    props: {'treinoId': widget.treinoId, 'exId': exercicio.id},
                   );
                 },
               ),

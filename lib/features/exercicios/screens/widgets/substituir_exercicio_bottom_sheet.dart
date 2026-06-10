@@ -65,11 +65,12 @@ class SubstituirExercicioBottomSheet extends ConsumerWidget {
                       ),
                     ),
                 data: (todos) {
-                  final alternativas = SubstituicaoEngine().encontrarAlternativas(
-                    alvo: alvo,
-                    candidatos: todos,
-                    equipamentosAluno: equipamentosAluno,
-                  );
+                  final alternativas = SubstituicaoEngine()
+                      .encontrarAlternativas(
+                        alvo: alvo,
+                        candidatos: todos,
+                        equipamentosAluno: equipamentosAluno,
+                      );
 
                   return Column(
                     children: [
@@ -358,7 +359,11 @@ class _EmptyState extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Icon(Icons.swap_horiz_rounded, size: 36, color: EagleTokens.inkMute),
+        const Icon(
+          Icons.swap_horiz_rounded,
+          size: 36,
+          color: EagleTokens.inkMute,
+        ),
         const SizedBox(height: 12),
         Text(
           'Nenhuma alternativa próxima encontrada.',

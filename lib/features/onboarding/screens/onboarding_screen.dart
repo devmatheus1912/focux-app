@@ -12,7 +12,6 @@ import '../../auth/widgets/auth_shell.dart';
 
 part 'onboarding_screen_widgets.part.dart';
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // FOCUX PERSONAL — FxIntroSlides (Onboarding) — Premium V2
 // Staggered entry animations, visual metric anchors, spring physics
@@ -55,11 +54,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       Icons.fitness_center_rounded,
       Icons.insights_rounded,
     ],
-    [
-      Icons.psychology_rounded,
-      Icons.pix_rounded,
-      Icons.today_rounded,
-    ],
+    [Icons.psychology_rounded, Icons.pix_rounded, Icons.today_rounded],
   ];
 
   static const _pageIconsAluno = [
@@ -101,13 +96,15 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 
   void _setupEntryAnimation({required bool reduceMotion}) {
-    final iconCurve =
-        reduceMotion ? Curves.easeOutCubic : Curves.elasticOut;
+    final iconCurve = reduceMotion ? Curves.easeOutCubic : Curves.elasticOut;
     _entryCtrl = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: reduceMotion ? 500 : 900),
     );
-    _iconScale = Tween<double>(begin: reduceMotion ? 0.94 : 0.0, end: 1.0).animate(
+    _iconScale = Tween<double>(
+      begin: reduceMotion ? 0.94 : 0.0,
+      end: 1.0,
+    ).animate(
       CurvedAnimation(
         parent: _entryCtrl,
         curve: Interval(0.0, 0.5, curve: iconCurve),
@@ -159,9 +156,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     _motionConfigured = true;
     final reduce = reduceMotionOf(context);
     _setupEntryAnimation(reduceMotion: reduce);
-    _gridFadeCtrl.duration = Duration(
-      milliseconds: reduce ? 0 : 420,
-    );
+    _gridFadeCtrl.duration = Duration(milliseconds: reduce ? 0 : 420);
     _entryCtrl.forward();
   }
 
@@ -197,8 +192,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Future<void> _goLogin() async {
     await _markDone();
     if (!mounted) return;
-    final role =
-        _persona == OnboardingPersona.aluno ? 'aluno' : 'personal';
+    final role = _persona == OnboardingPersona.aluno ? 'aluno' : 'personal';
     context.go('/login?role=$role');
   }
 
@@ -208,8 +202,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
     final currentIndex =
         _page.hasClients ? (_page.page?.round() ?? _current) : _current;
-    final targetIndex =
-        currentIndex.clamp(0, _pagesFor(persona).length - 1);
+    final targetIndex = currentIndex.clamp(0, _pagesFor(persona).length - 1);
 
     setState(() {
       _persona = persona;
@@ -250,209 +243,215 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaler: textScaler),
       child: AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
-      ),
-      child: Scaffold(
-        body: Stack(
-          fit: StackFit.expand,
-          children: [
-            // ── Background ──
-            Container(color: TokensStrip.cinematicBg),
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
+        child: Scaffold(
+          body: Stack(
+            fit: StackFit.expand,
+            children: [
+              // ── Background ──
+              Container(color: TokensStrip.cinematicBg),
 
-            // Grid pattern — fade-in suave após splash flat
-            FadeTransition(
-              opacity: CurvedAnimation(
-                parent: _gridFadeCtrl,
-                curve: Curves.easeOutCubic,
+              // Grid pattern — fade-in suave após splash flat
+              FadeTransition(
+                opacity: CurvedAnimation(
+                  parent: _gridFadeCtrl,
+                  curve: Curves.easeOutCubic,
+                ),
+                child: CustomPaint(
+                  painter: _AuthGridPainter(),
+                  size: Size.infinite,
+                ),
               ),
-              child: CustomPaint(
-                painter: _AuthGridPainter(),
-                size: Size.infinite,
-              ),
-            ),
 
-            // ── Content ──
-            SafeArea(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: AuthRoleToggle(
-                            isAluno: _persona == OnboardingPersona.aluno,
-                            onPersonalTap:
-                                () => _setPersona(OnboardingPersona.personal),
-                            onAlunoTap:
-                                () => _setPersona(OnboardingPersona.aluno),
+              // ── Content ──
+              SafeArea(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: AuthRoleToggle(
+                              isAluno: _persona == OnboardingPersona.aluno,
+                              onPersonalTap:
+                                  () => _setPersona(OnboardingPersona.personal),
+                              onAlunoTap:
+                                  () => _setPersona(OnboardingPersona.aluno),
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        Semantics(
-                          button: true,
-                          label: FocuxBrandCopy.onboardingSkip,
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: _skip,
-                              borderRadius: BorderRadius.circular(99),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 10,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.04),
-                                  borderRadius: BorderRadius.circular(99),
-                                  border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.12),
+                          const SizedBox(width: 10),
+                          Semantics(
+                            button: true,
+                            label: FocuxBrandCopy.onboardingSkip,
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: _skip,
+                                borderRadius: BorderRadius.circular(99),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.04),
+                                    borderRadius: BorderRadius.circular(99),
+                                    border: Border.all(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.12,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        FocuxBrandCopy.onboardingSkip,
+                                        style: AppTypography.inter(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.70,
+                                          ),
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.chevron_right_rounded,
+                                        size: 16,
+                                        color: Colors.white.withValues(
+                                          alpha: 0.55,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      FocuxBrandCopy.onboardingSkip,
-                                      style: AppTypography.inter(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.70,
-                                        ),
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    Icon(
-                                      Icons.chevron_right_rounded,
-                                      size: 16,
-                                      color: Colors.white.withValues(
-                                        alpha: 0.55,
-                                      ),
-                                    ),
-                                  ],
-                                ),
                               ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  Expanded(
-                    child: Semantics(
-                      label: 'Slide ${_current + 1} de ${pages.length}',
-                      child: PageView.builder(
-                        clipBehavior: Clip.none,
-                        controller: _activePage,
-                        itemCount: pages.length,
-                        onPageChanged: _onPageChanged,
-                        itemBuilder:
-                            (_, i) => _OBPageWidget(
-                              key: ValueKey('${_persona.name}-$i'),
-                              pageIndex: i,
-                              persona: _persona,
-                              data: pages[i],
-                              compact: compact,
-                              iconScale: _iconScale,
-                              titleSlide: _titleSlide,
-                              subtitleSlide: _subtitleSlide,
-                              metricsSlide: _metricsSlide,
-                              fade: _fade,
-                            ),
-                      ),
-                    ),
-                  ),
-
-                  // Prova social só no primeiro slide — menos ruído nos demais
-                  if (_current == 0)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
-                      child: _OnboardingSocialProof(primary: primary),
-                    )
-                  else
-                    const SizedBox(height: 4),
-
-                  // Dots
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4, bottom: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        pages.length,
-                        (i) => Semantics(
-                          button: true,
-                          selected: _current == i,
-                          label: 'Ir para slide ${i + 1}',
-                          child: SizedBox(
-                            width: 44,
-                            height: 44,
-                            child: Center(
-                              child: GestureDetector(
-                                onTap:
-                                    () => _activePage.animateToPage(
-                                      i,
-                                      duration: const Duration(
-                                        milliseconds: 400,
-                                      ),
-                                      curve: Curves.easeOutCubic,
-                                    ),
-                                child: _SlideDot(
-                                  active: _current == i,
-                                  primary: primary,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // CTA
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s5),
-                    child: Column(
-                      children: [
-                        FxLiquidSecondaryButton(
-                          label: FocuxBrandCopy.onboardingExistingAccountCta,
-                          icon: Icons.login_rounded,
-                          onPressed: _goLogin,
-                        ),
-                        const SizedBox(height: 10),
-                        FxLiquidPrimaryButton(
-                          label:
-                              isLast
-                                  ? FocuxBrandCopy.onboardingCtaFinish
-                                  : FocuxBrandCopy.onboardingCtaNext,
-                          onPressed: _next,
-                        ),
-                        if (isLast) ...[
-                          const SizedBox(height: 8),
-                          Text(
-                            FocuxBrandCopy.onboardingCtaFinishHint,
-                            textAlign: TextAlign.center,
-                            style: AppTypography.inter(
-                              color: Colors.white.withValues(alpha: 0.78),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
-                        SizedBox(height: MediaQuery.paddingOf(context).bottom + 4),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
+
+                    Expanded(
+                      child: Semantics(
+                        label: 'Slide ${_current + 1} de ${pages.length}',
+                        child: PageView.builder(
+                          clipBehavior: Clip.none,
+                          controller: _activePage,
+                          itemCount: pages.length,
+                          onPageChanged: _onPageChanged,
+                          itemBuilder:
+                              (_, i) => _OBPageWidget(
+                                key: ValueKey('${_persona.name}-$i'),
+                                pageIndex: i,
+                                persona: _persona,
+                                data: pages[i],
+                                compact: compact,
+                                iconScale: _iconScale,
+                                titleSlide: _titleSlide,
+                                subtitleSlide: _subtitleSlide,
+                                metricsSlide: _metricsSlide,
+                                fade: _fade,
+                              ),
+                        ),
+                      ),
+                    ),
+
+                    // Prova social só no primeiro slide — menos ruído nos demais
+                    if (_current == 0)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+                        child: _OnboardingSocialProof(primary: primary),
+                      )
+                    else
+                      const SizedBox(height: 4),
+
+                    // Dots
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4, bottom: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          pages.length,
+                          (i) => Semantics(
+                            button: true,
+                            selected: _current == i,
+                            label: 'Ir para slide ${i + 1}',
+                            child: SizedBox(
+                              width: 44,
+                              height: 44,
+                              child: Center(
+                                child: GestureDetector(
+                                  onTap:
+                                      () => _activePage.animateToPage(
+                                        i,
+                                        duration: const Duration(
+                                          milliseconds: 400,
+                                        ),
+                                        curve: Curves.easeOutCubic,
+                                      ),
+                                  child: _SlideDot(
+                                    active: _current == i,
+                                    primary: primary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // CTA
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: TokensStrip.s5,
+                      ),
+                      child: Column(
+                        children: [
+                          FxLiquidSecondaryButton(
+                            label: FocuxBrandCopy.onboardingExistingAccountCta,
+                            icon: Icons.login_rounded,
+                            onPressed: _goLogin,
+                          ),
+                          const SizedBox(height: 10),
+                          FxLiquidPrimaryButton(
+                            label:
+                                isLast
+                                    ? FocuxBrandCopy.onboardingCtaFinish
+                                    : FocuxBrandCopy.onboardingCtaNext,
+                            onPressed: _next,
+                          ),
+                          if (isLast) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              FocuxBrandCopy.onboardingCtaFinishHint,
+                              textAlign: TextAlign.center,
+                              style: AppTypography.inter(
+                                color: Colors.white.withValues(alpha: 0.78),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                          SizedBox(
+                            height: MediaQuery.paddingOf(context).bottom + 4,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 }
@@ -460,4 +459,3 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 // ═══════════════════════════════════════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════════════════════════════════════
-

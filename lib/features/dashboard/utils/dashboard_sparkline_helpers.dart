@@ -10,8 +10,11 @@ List<double> dashboardCheckinsSparklineUltimos7Dias(
       a.year == b.year && a.month == b.month && a.day == b.day;
 
   return List<double>.generate(7, (index) {
-    final day = DateTime(hoje.year, hoje.month, hoje.day)
-        .subtract(Duration(days: 6 - index));
+    final day = DateTime(
+      hoje.year,
+      hoje.month,
+      hoje.day,
+    ).subtract(Duration(days: 6 - index));
     return items
         .where((e) {
           final concluded = DateTime.tryParse(e.concluidoEm ?? '');

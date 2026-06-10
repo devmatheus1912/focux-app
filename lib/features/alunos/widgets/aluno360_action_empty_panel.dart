@@ -29,9 +29,7 @@ class Aluno360ActionEmptyPanel extends StatelessWidget {
     this.secondaryActions = const [],
   }) : assert(
          !showPrimary ||
-             (primaryLabel != null &&
-                 primaryIcon != null &&
-                 onPrimary != null),
+             (primaryLabel != null && primaryIcon != null && onPrimary != null),
        );
 
   final IconData icon;
@@ -54,101 +52,100 @@ class Aluno360ActionEmptyPanel extends StatelessWidget {
       container: true,
       label: '$title. $subtitle',
       child: Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: primary.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: primary.withValues(alpha: 0.14)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: BrandPalette.soft(primary, dark: isDark),
-                  borderRadius: BorderRadius.circular(12),
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: primary.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: primary.withValues(alpha: 0.14)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: BrandPalette.soft(primary, dark: isDark),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: primary, size: 18),
                 ),
-                child: Icon(icon, color: primary, size: 18),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: Aluno360Layout.panelTitleStyle(context, ink),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: Aluno360Layout.captionStyle(context).copyWith(
-                        color: mute,
-                        height: 1.35,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: Aluno360Layout.panelTitleStyle(context, ink),
                       ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: Aluno360Layout.captionStyle(
+                          context,
+                        ).copyWith(color: mute, height: 1.35),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (showPrimary) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 40,
+                child: Semantics(
+                  button: true,
+                  label: primaryLabel,
+                  child: OutlinedButton.icon(
+                    onPressed: onPrimary,
+                    icon: Icon(primaryIcon, size: 16),
+                    label: Text(primaryLabel!),
+                    style: Aluno360Layout.operacaoOutlinedButtonStyle(
+                      context,
+                      primary,
                     ),
-                  ],
+                  ),
                 ),
               ),
             ],
-          ),
-          if (showPrimary) ...[
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: 40,
-              child: Semantics(
-                button: true,
-                label: primaryLabel,
-                child: OutlinedButton.icon(
-                  onPressed: onPrimary,
-                  icon: Icon(primaryIcon, size: 16),
-                  label: Text(primaryLabel!),
-                  style: Aluno360Layout.operacaoOutlinedButtonStyle(
-                    context,
-                    primary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-          if (secondaryActions.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 6,
-              children: [
-                for (final action in secondaryActions)
-                  Semantics(
-                    button: true,
-                    label: action.label,
-                    child: TextButton.icon(
-                      onPressed: action.onTap,
-                      style: TextButton.styleFrom(
-                        minimumSize: const Size(48, 36),
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        foregroundColor: primary,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      icon: Icon(action.icon, size: 15),
-                      label: Text(
-                        action.label,
-                        style: Aluno360Layout.secondaryActionLabelStyle(),
+            if (secondaryActions.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                children: [
+                  for (final action in secondaryActions)
+                    Semantics(
+                      button: true,
+                      label: action.label,
+                      child: TextButton.icon(
+                        onPressed: action.onTap,
+                        style: TextButton.styleFrom(
+                          minimumSize: const Size(48, 36),
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          foregroundColor: primary,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        icon: Icon(action.icon, size: 15),
+                        label: Text(
+                          action.label,
+                          style: Aluno360Layout.secondaryActionLabelStyle(),
+                        ),
                       ),
                     ),
-                  ),
-              ],
-            ),
+                ],
+              ),
+            ],
           ],
-        ],
+        ),
       ),
-    ),
     );
   }
 }

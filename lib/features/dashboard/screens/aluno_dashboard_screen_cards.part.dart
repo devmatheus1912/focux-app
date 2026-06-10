@@ -29,7 +29,8 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = widget.isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final mute =
+        widget.isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     final medidas = widget.medidasAsync.valueOrNull ?? const <MedidaCorporal>[];
     final historico =
@@ -242,10 +243,7 @@ void _showAlunoPlanSheet(
         child: Container(
           constraints: BoxConstraints(maxHeight: media.size.height * 0.76),
           padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
-          decoration: fxListCardDecoration(
-            sheetContext,
-            accent: primary,
-          ),
+          decoration: fxListCardDecoration(sheetContext, accent: primary),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -671,4 +669,3 @@ String _taskHint(AlunoTaskKind kind) {
     AlunoTaskKind.financeiro => 'Ver financeiro',
   };
 }
-

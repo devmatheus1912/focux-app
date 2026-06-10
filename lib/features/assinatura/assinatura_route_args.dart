@@ -18,10 +18,7 @@ class AssinaturaReviewRouteArgs {
 
 /// Payload para `/assinatura/success` via GoRouter `extra`.
 class AssinaturaSuccessRouteArgs {
-  const AssinaturaSuccessRouteArgs({
-    required this.plan,
-    this.transactionId,
-  });
+  const AssinaturaSuccessRouteArgs({required this.plan, this.transactionId});
 
   final SubscriptionPlan plan;
   final String? transactionId;

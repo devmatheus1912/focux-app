@@ -14,7 +14,8 @@ class CheckinLiveCoachingCard extends StatelessWidget {
   final VoidCallback onApply;
   final VoidCallback onSkip;
 
-  const CheckinLiveCoachingCard({super.key, 
+  const CheckinLiveCoachingCard({
+    super.key,
     required this.brand,
     required this.brandDeep,
     required this.dark,
@@ -120,7 +121,8 @@ class CheckinRestTimerDock extends StatelessWidget {
   final Color line;
   final VoidCallback onSkip;
 
-  const CheckinRestTimerDock({super.key, 
+  const CheckinRestTimerDock({
+    super.key,
     required this.seconds,
     required this.totalSeconds,
     required this.brand,
@@ -142,15 +144,17 @@ class CheckinRestTimerDock extends StatelessWidget {
         child: Container(
           width: 160,
           height: 160,
-          decoration: chrome.panel(radius: 20).copyWith(
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 36,
-                offset: Offset(0, 14),
+          decoration: chrome
+              .panel(radius: 20)
+              .copyWith(
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 36,
+                    offset: Offset(0, 14),
+                  ),
+                ],
               ),
-            ],
-          ),
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -238,4 +242,3 @@ class CheckinRestRingPainter extends CustomPainter {
   @override
   bool shouldRepaint(CheckinRestRingPainter old) => old.fraction != fraction;
 }
-

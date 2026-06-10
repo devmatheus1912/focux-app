@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
@@ -24,7 +23,8 @@ class CheckinWorkoutHeader extends StatelessWidget {
   final bool dark;
   final VoidCallback onBack;
 
-  const CheckinWorkoutHeader({super.key, 
+  const CheckinWorkoutHeader({
+    super.key,
     required this.treinoNome,
     required this.duration,
     required this.progress,
@@ -154,7 +154,11 @@ class CheckinWorkoutHeader extends StatelessWidget {
                         color: brandSoft,
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      child: Icon(Icons.near_me_rounded, color: brand, size: 18),
+                      child: Icon(
+                        Icons.near_me_rounded,
+                        color: brand,
+                        size: 18,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -198,7 +202,8 @@ class CheckinHeaderMetric extends StatelessWidget {
   final String label;
   final String value;
 
-  const CheckinHeaderMetric({super.key, 
+  const CheckinHeaderMetric({
+    super.key,
     required this.label,
     required this.value,
   });

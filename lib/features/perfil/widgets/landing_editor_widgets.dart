@@ -17,7 +17,6 @@ import '../screens/landing_section_templates.dart';
 part 'landing_editor_widgets_tabs.part.dart';
 part 'landing_editor_widgets_templates.part.dart';
 
-
 class LandingLinkCard extends StatelessWidget {
   const LandingLinkCard({
     super.key,
@@ -45,9 +44,9 @@ class LandingLinkCard extends StatelessWidget {
       container: true,
       label: '$title. $subtitle. Link: $displayLabel',
       child: FxSatellitePanel(
-      padding: const EdgeInsets.all(TokensStrip.s4),
-      radius: TokensStrip.rLg,
-      child: Column(
+        padding: const EdgeInsets.all(TokensStrip.s4),
+        radius: TokensStrip.rLg,
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -166,13 +165,15 @@ class LandingChecklistCard extends StatelessWidget {
             accent: allReady ? EagleTokens.good : null,
             radius: TokensStrip.rLg,
           ).copyWith(
-            color: allReady
-                ? EagleTokens.good.withValues(alpha: 0.06)
-                : scheme.surface,
+            color:
+                allReady
+                    ? EagleTokens.good.withValues(alpha: 0.06)
+                    : scheme.surface,
             border: Border.all(
-              color: allReady
-                  ? EagleTokens.good.withValues(alpha: 0.55)
-                  : scheme.outlineVariant.withValues(alpha: 0.6),
+              color:
+                  allReady
+                      ? EagleTokens.good.withValues(alpha: 0.55)
+                      : scheme.outlineVariant.withValues(alpha: 0.6),
               width: allReady ? 1.5 : 1,
             ),
           ),
@@ -181,135 +182,145 @@ class LandingChecklistCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              Text(
-                landingReadinessTitle(
-                  configDone: done,
-                  configTotal: items.length,
-                  contentIssueCount: contentIssueCount,
+                Text(
+                  landingReadinessTitle(
+                    configDone: done,
+                    configTotal: items.length,
+                    contentIssueCount: contentIssueCount,
+                  ),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                  ),
                 ),
-                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                landingReadinessSubtitle(
-                  contentIssueCount: contentIssueCount,
-                  configDone: done,
-                  configTotal: items.length,
+                const SizedBox(height: 4),
+                Text(
+                  landingReadinessSubtitle(
+                    contentIssueCount: contentIssueCount,
+                    configDone: done,
+                    configTotal: items.length,
+                  ),
+                  style: TextStyle(
+                    color: scheme.onSurface.withValues(alpha: 0.72),
+                    fontSize: 13,
+                  ),
                 ),
-                style: TextStyle(
-                  color: scheme.onSurface.withValues(alpha: 0.72),
-                  fontSize: 13,
-                ),
-              ),
-              const SizedBox(height: 12),
-              LandingReadinessProgressBars(
-                configDone: done,
-                configTotal: items.length,
-                textsReviewed: contentReviewedCount,
-                textsTotal: contentReviewScope,
-                contentIssueCount: contentIssueCount,
-              ),
-              const SizedBox(height: 6),
-              Text(
-                landingReadinessProgressHint(
+                const SizedBox(height: 12),
+                LandingReadinessProgressBars(
                   configDone: done,
                   configTotal: items.length,
                   textsReviewed: contentReviewedCount,
                   textsTotal: contentReviewScope,
                   contentIssueCount: contentIssueCount,
                 ),
-                style: TextStyle(
-                  fontSize: 12,
-                  height: 1.35,
-                  color: scheme.onSurface.withValues(alpha: 0.72),
-                ),
-              ),
-              if (contentIssueCount > 0 && onReviewContent != null) ...[
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    onPressed: onReviewContent,
-                    icon: const Icon(Icons.rate_review_outlined, size: 18),
-                    label: Text(
-                      contentIssueCount == 1
-                          ? 'Revisar 1 texto'
-                          : 'Revisar $contentIssueCount textos',
-                    ),
+                const SizedBox(height: 6),
+                Text(
+                  landingReadinessProgressHint(
+                    configDone: done,
+                    configTotal: items.length,
+                    textsReviewed: contentReviewedCount,
+                    textsTotal: contentReviewScope,
+                    contentIssueCount: contentIssueCount,
+                  ),
+                  style: TextStyle(
+                    fontSize: 12,
+                    height: 1.35,
+                    color: scheme.onSurface.withValues(alpha: 0.72),
                   ),
                 ),
-              ] else if (allReady) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.verified_outlined,
-                      size: 16,
-                      color: EagleTokens.good,
+                if (contentIssueCount > 0 && onReviewContent != null) ...[
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: onReviewContent,
+                      icon: const Icon(Icons.rate_review_outlined, size: 18),
+                      label: Text(
+                        contentIssueCount == 1
+                            ? 'Revisar 1 texto'
+                            : 'Revisar $contentIssueCount textos',
+                      ),
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Textos revisados',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
+                  ),
+                ] else if (allReady) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.verified_outlined,
+                        size: 16,
                         color: EagleTokens.good,
                       ),
-                    ),
-                  ],
-                ),
-              ],
-              const SizedBox(height: 8),
-              ...items.map((item) {
-                final label = landingChecklistLabel(item.id, item.label);
-                final tappable =
-                    onItemTap != null && landingChecklistTarget(item.id) != null;
-
-                return fxListTileCardShell(
-                  context: context,
-                  margin: const EdgeInsets.only(bottom: 4),
-                  accent: item.done ? EagleTokens.good : null,
-                  child: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                    onTap: tappable ? () => onItemTap!(item) : null,
-                    leading: Icon(
-                      item.done ? Icons.check_circle_rounded : Icons.circle_outlined,
-                      color: item.done ? EagleTokens.good : scheme.outline,
-                    ),
-                    title: Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: item.done ? FontWeight.w600 : FontWeight.w500,
-                        color: item.done
-                            ? scheme.onSurface
-                            : scheme.onSurface.withValues(alpha: 0.72),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Textos revisados',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: EagleTokens.good,
+                        ),
                       ),
-                    ),
-                    subtitle: tappable && !item.done
-                        ? Text(
-                            landingChecklistHint(item.id),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: scheme.primary.withValues(alpha: 0.85),
-                            ),
-                          )
-                        : null,
-                    trailing: tappable
-                        ? Icon(
-                            Icons.chevron_right_rounded,
-                            color: scheme.onSurface.withValues(alpha: 0.35),
-                          )
-                        : null,
+                    ],
                   ),
-                );
-              }),
-            ],
+                ],
+                const SizedBox(height: 8),
+                ...items.map((item) {
+                  final label = landingChecklistLabel(item.id, item.label);
+                  final tappable =
+                      onItemTap != null &&
+                      landingChecklistTarget(item.id) != null;
+
+                  return fxListTileCardShell(
+                    context: context,
+                    margin: const EdgeInsets.only(bottom: 4),
+                    accent: item.done ? EagleTokens.good : null,
+                    child: ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      onTap: tappable ? () => onItemTap!(item) : null,
+                      leading: Icon(
+                        item.done
+                            ? Icons.check_circle_rounded
+                            : Icons.circle_outlined,
+                        color: item.done ? EagleTokens.good : scheme.outline,
+                      ),
+                      title: Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight:
+                              item.done ? FontWeight.w600 : FontWeight.w500,
+                          color:
+                              item.done
+                                  ? scheme.onSurface
+                                  : scheme.onSurface.withValues(alpha: 0.72),
+                        ),
+                      ),
+                      subtitle:
+                          tappable && !item.done
+                              ? Text(
+                                landingChecklistHint(item.id),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: scheme.primary.withValues(alpha: 0.85),
+                                ),
+                              )
+                              : null,
+                      trailing:
+                          tappable
+                              ? Icon(
+                                Icons.chevron_right_rounded,
+                                color: scheme.onSurface.withValues(alpha: 0.35),
+                              )
+                              : null,
+                    ),
+                  );
+                }),
+              ],
+            ),
           ),
         ),
       ),
-    ),
     );
   }
 }
@@ -325,44 +336,44 @@ class LandingChecklistSkeleton extends StatelessWidget {
       radius: TokensStrip.rLg,
       accent: scheme.primary,
       child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 16,
-              width: 180,
-              decoration: BoxDecoration(
-                color: scheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(4),
-              ),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: 16,
+            width: 180,
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(4),
             ),
-            const SizedBox(height: 12),
-            for (var i = 0; i < 4; i++) ...[
-              Row(
-                children: [
-                  Container(
-                    height: 20,
-                    width: 20,
+          ),
+          const SizedBox(height: 12),
+          for (var i = 0; i < 4; i++) ...[
+            Row(
+              children: [
+                Container(
+                  height: 20,
+                  width: 20,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: scheme.surfaceContainerHighest,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Container(
+                    height: 12,
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
                       color: scheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Container(
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: scheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              if (i < 3) const SizedBox(height: 10),
-            ],
+                ),
+              ],
+            ),
+            if (i < 3) const SizedBox(height: 10),
           ],
-        ),
+        ],
+      ),
     );
   }
 }
@@ -404,11 +415,7 @@ class LandingContentWarningBanner extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
             child: Row(
               children: [
-                const Icon(
-                  Icons.warning_amber_rounded,
-                  size: 22,
-                  color: _icon,
-                ),
+                const Icon(Icons.warning_amber_rounded, size: 22, color: _icon),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -477,9 +484,9 @@ Future<void> showLandingContentReviewSheet(
             children: [
               Text(
                 'O que revisar',
-                style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+                style: Theme.of(
+                  ctx,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 4),
               Text(
@@ -496,7 +503,10 @@ Future<void> showLandingContentReviewSheet(
                     Navigator.pop(ctx);
                     onFocusMode();
                   },
-                  icon: const Icon(Icons.center_focus_strong_outlined, size: 18),
+                  icon: const Icon(
+                    Icons.center_focus_strong_outlined,
+                    size: 18,
+                  ),
                   label: const Text('Modo foco — só textos pendentes'),
                 ),
               ],
@@ -560,15 +570,16 @@ class LandingHighlightCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(TokensStrip.rMd),
-        boxShadow: highlighted
-            ? [
-                BoxShadow(
-                  color: const Color(0xFFE6A800).withValues(alpha: 0.28),
-                  blurRadius: 12,
-                  spreadRadius: 1,
-                ),
-              ]
-            : null,
+        boxShadow:
+            highlighted
+                ? [
+                  BoxShadow(
+                    color: const Color(0xFFE6A800).withValues(alpha: 0.28),
+                    blurRadius: 12,
+                    spreadRadius: 1,
+                  ),
+                ]
+                : null,
       ),
       child: Container(
         decoration: fxListCardDecoration(
@@ -576,13 +587,15 @@ class LandingHighlightCard extends StatelessWidget {
           accent: highlighted ? const Color(0xFFE6A800) : null,
           radius: TokensStrip.rMd,
         ).copyWith(
-          color: highlighted
-              ? const Color(0xFFFFF4D6).withValues(alpha: 0.55)
-              : scheme.surface,
+          color:
+              highlighted
+                  ? const Color(0xFFFFF4D6).withValues(alpha: 0.55)
+                  : scheme.surface,
           border: Border.all(
-            color: highlighted
-                ? const Color(0xFFE6A800).withValues(alpha: 0.75)
-                : scheme.outlineVariant.withValues(alpha: 0.55),
+            color:
+                highlighted
+                    ? const Color(0xFFE6A800).withValues(alpha: 0.75)
+                    : scheme.outlineVariant.withValues(alpha: 0.55),
             width: highlighted ? 1.5 : 1,
           ),
         ),
@@ -690,7 +703,9 @@ class LandingCollapsibleSection extends StatelessWidget {
                                   ),
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(999),
-                                    color: scheme.primaryContainer.withValues(alpha: 0.55),
+                                    color: scheme.primaryContainer.withValues(
+                                      alpha: 0.55,
+                                    ),
                                   ),
                                   child: Text(
                                     badgeLabel!,
@@ -785,7 +800,12 @@ class LandingEditorTabBar extends StatelessWidget {
         final labels = compact ? _compactLabels : _labels;
 
         return Padding(
-          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, TokensStrip.s4, 8),
+          padding: const EdgeInsets.fromLTRB(
+            TokensStrip.s4,
+            0,
+            TokensStrip.s4,
+            8,
+          ),
           child: Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
@@ -818,4 +838,3 @@ class LandingEditorTabBar extends StatelessWidget {
     );
   }
 }
-

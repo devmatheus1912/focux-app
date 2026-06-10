@@ -157,7 +157,9 @@ class _DashboardCollapsibleSectionState
                                 ),
                               ),
                               if (widget.collapsedPreview != null &&
-                                  widget.collapsedPreview!.trim().isNotEmpty) ...[
+                                  widget.collapsedPreview!
+                                      .trim()
+                                      .isNotEmpty) ...[
                                 const SizedBox(height: 4),
                                 Text(
                                   widget.collapsedPreview!,
@@ -209,9 +211,10 @@ class _DashboardCollapsibleSectionState
                         ),
                       Semantics(
                         button: true,
-                        label: _expanded
-                            ? 'Recolher ${widget.title}'
-                            : 'Expandir ${widget.title}',
+                        label:
+                            _expanded
+                                ? 'Recolher ${widget.title}'
+                                : 'Expandir ${widget.title}',
                         child: InkWell(
                           onTap: _toggle,
                           customBorder: const CircleBorder(),

@@ -78,8 +78,9 @@ Future<void> showAluno360CopilotProfileGapsSheet(
                               gaps.isEmpty
                                   ? 'Perfil pronto para decisões da IA.'
                                   : '${gaps.length} lacuna(s) afetam a prescrição.',
-                              style: Aluno360Layout.captionStyle(context)
-                                  .copyWith(color: mute),
+                              style: Aluno360Layout.captionStyle(
+                                context,
+                              ).copyWith(color: mute),
                             ),
                           ],
                         ),
@@ -149,10 +150,7 @@ Future<void> showAluno360CopilotProfileGapsSheet(
                                         gap.detail,
                                         style: Aluno360Layout.captionStyle(
                                           context,
-                                        ).copyWith(
-                                          color: mute,
-                                          height: 1.25,
-                                        ),
+                                        ).copyWith(color: mute, height: 1.25),
                                       ),
                                     ],
                                   ),
@@ -169,8 +167,9 @@ Future<void> showAluno360CopilotProfileGapsSheet(
                       padding: const EdgeInsets.only(top: 2),
                       child: Text(
                         'Para ajustes gerais, use Editar nas ações rápidas.',
-                        style: Aluno360Layout.captionStyle(sheetContext)
-                            .copyWith(color: mute),
+                        style: Aluno360Layout.captionStyle(
+                          sheetContext,
+                        ).copyWith(color: mute),
                       ),
                     ),
                 ],

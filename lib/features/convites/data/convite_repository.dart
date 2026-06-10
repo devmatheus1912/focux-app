@@ -36,11 +36,7 @@ class ConviteValidacao {
   final String? personalNome;
   final String? mensagem;
 
-  ConviteValidacao({
-    required this.valido,
-    this.personalNome,
-    this.mensagem,
-  });
+  ConviteValidacao({required this.valido, this.personalNome, this.mensagem});
 
   factory ConviteValidacao.fromJson(Map<String, dynamic> json) =>
       ConviteValidacao(

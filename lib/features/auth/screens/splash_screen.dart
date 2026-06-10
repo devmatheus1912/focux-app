@@ -12,6 +12,7 @@ import '../providers/auth_provider.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/cinematic_splash_scene.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -54,9 +55,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       duration: const Duration(milliseconds: 340),
     );
 
-    _fadeOut = Tween<double>(begin: 1, end: 0).animate(
-      CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeInCubic),
-    );
+    _fadeOut = Tween<double>(
+      begin: 1,
+      end: 0,
+    ).animate(CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeInCubic));
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final compact = await _resolveQuickSplash();
@@ -117,9 +119,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   Future<String> _resolveNavigationTarget({bool quick = false}) async {
-    await Future<void>.delayed(
-      Duration(milliseconds: quick ? 100 : 420),
-    );
+    await Future<void>.delayed(Duration(milliseconds: quick ? 100 : 420));
 
     final authStatus = ref.read(authProvider);
     if (authStatus == AuthStatus.authenticated) {
@@ -176,36 +176,39 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
-      ),
-      child: Scaffold(
-        backgroundColor: TokensStrip.cinematicBg,
-        body: AuthShell(
-          forceDark: true,
-          flatBackground: true,
-          showGrid: false,
-          animateGridIn: false,
-          showCenterGlow: false,
-          showCornerGlow: false,
-          child: AnimatedBuilder(
-            animation: Listenable.merge([
-              _ambientCtrl,
-              _entryCtrl,
-              _progressCtrl,
-              _fadeCtrl,
-            ]),
-            builder:
-                (context, _) => CinematicSplashScene(
-                  progress: _progressCtrl.value,
-                  ambient: _ambientCtrl,
-                  entry: _entryCtrl,
-                  fadeOut: _fadeOut,
-                  compact: _compactSplash,
-                ),
+    return fxScreenA11yScope(
+      label: 'Focux',
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
+        child: Scaffold(
+          backgroundColor: TokensStrip.cinematicBg,
+          body: AuthShell(
+            forceDark: true,
+            flatBackground: true,
+            showGrid: false,
+            animateGridIn: false,
+            showCenterGlow: false,
+            showCornerGlow: false,
+            child: AnimatedBuilder(
+              animation: Listenable.merge([
+                _ambientCtrl,
+                _entryCtrl,
+                _progressCtrl,
+                _fadeCtrl,
+              ]),
+              builder:
+                  (context, _) => CinematicSplashScene(
+                    progress: _progressCtrl.value,
+                    ambient: _ambientCtrl,
+                    entry: _entryCtrl,
+                    fadeOut: _fadeOut,
+                    compact: _compactSplash,
+                  ),
+            ),
           ),
         ),
       ),

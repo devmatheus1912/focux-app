@@ -10,6 +10,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/nps_repository.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 class NpsDashboardScreen extends ConsumerStatefulWidget {
   const NpsDashboardScreen({super.key});
@@ -65,86 +66,104 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return FxShellScaffold(
-      appBar: FxShellAppBar(title: 'NPS & Satisfação', onBack: () => context.pop()),
-      body: _loading
-          ? const Center(child: FxLoading())
-          : RefreshIndicator(
-              onRefresh: _load,
-              child: ListView(
-                padding: const EdgeInsets.all(TokensStrip.s4),
-                children: [
-                  if (_resumo != null) ...[
-                    FxSatellitePanel(
-                      accent: primary,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _kpi('NPS', _resumo!.npsScore.toStringAsFixed(1)),
-                          _kpi('Média', _resumo!.media.toStringAsFixed(1)),
-                          _kpi('Respostas', '${_resumo!.total}'),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _segmento(
-                            'Promotores',
-                            _resumo!.promotores,
-                            _resumo!.total,
-                            EagleTokens.good,
-                            Icons.sentiment_very_satisfied,
+    return fxScreenA11yScope(
+      label: 'NPS & Satisfação',
+      child: FxShellScaffold(
+        appBar: FxShellAppBar(
+          title: 'NPS & Satisfação',
+          onBack: () => context.pop(),
+        ),
+        body:
+            _loading
+                ? const Center(child: FxLoading())
+                : RefreshIndicator(
+                  onRefresh: _load,
+                  child: ListView(
+                    padding: const EdgeInsets.all(TokensStrip.s4),
+                    children: [
+                      if (_resumo != null) ...[
+                        FxSatellitePanel(
+                          accent: primary,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              _kpi('NPS', _resumo!.npsScore.toStringAsFixed(1)),
+                              _kpi('Média', _resumo!.media.toStringAsFixed(1)),
+                              _kpi('Respostas', '${_resumo!.total}'),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _segmento(
-                            'Neutros',
-                            _resumo!.neutros,
-                            _resumo!.total,
-                            EagleTokens.gold,
-                            Icons.sentiment_neutral,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _segmento(
-                            'Detratores',
-                            _resumo!.detratores,
-                            _resumo!.total,
-                            EagleTokens.bad,
-                            Icons.sentiment_very_dissatisfied,
-                          ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _segmento(
+                                'Promotores',
+                                _resumo!.promotores,
+                                _resumo!.total,
+                                EagleTokens.good,
+                                Icons.sentiment_very_satisfied,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: _segmento(
+                                'Neutros',
+                                _resumo!.neutros,
+                                _resumo!.total,
+                                EagleTokens.gold,
+                                Icons.sentiment_neutral,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: _segmento(
+                                'Detratores',
+                                _resumo!.detratores,
+                                _resumo!.total,
+                                EagleTokens.bad,
+                                Icons.sentiment_very_dissatisfied,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
-                    ),
-                  ],
-                  const SizedBox(height: 16),
-                  const Text('Feedback recente', style: TextStyle(fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 8),
-                  ..._recentes.map((n) {
-                    if (n.score <= 6) {
-                      return _detratorCard(n, isDark: isDark);
-                    }
-                    final scoreColor = EagleTokens.npsScoreColor(n.score, isDark: isDark);
-                    return FxSatelliteListTile(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      title: n.comentario?.isNotEmpty == true ? n.comentario! : 'Sem comentário',
-                      titleCase: false,
-                      accent: scoreColor,
-                      subtitle: Text('${_classify(n.score)} · ${n.criadoEm}'),
-                      leading: CircleAvatar(
-                        backgroundColor: scoreColor,
-                        foregroundColor: Colors.white,
-                        child: Text('${n.score}'),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Feedback recente',
+                        style: TextStyle(fontWeight: FontWeight.w600),
                       ),
-                    );
-                  }),
-                ],
-              ),
-            ),
+                      const SizedBox(height: 8),
+                      ..._recentes.map((n) {
+                        if (n.score <= 6) {
+                          return _detratorCard(n, isDark: isDark);
+                        }
+                        final scoreColor = EagleTokens.npsScoreColor(
+                          n.score,
+                          isDark: isDark,
+                        );
+                        return FxSatelliteListTile(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          title:
+                              n.comentario?.isNotEmpty == true
+                                  ? n.comentario!
+                                  : 'Sem comentário',
+                          titleCase: false,
+                          accent: scoreColor,
+                          subtitle: Text(
+                            '${_classify(n.score)} · ${n.criadoEm}',
+                          ),
+                          leading: CircleAvatar(
+                            backgroundColor: scoreColor,
+                            foregroundColor: Colors.white,
+                            child: Text('${n.score}'),
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+      ),
     );
   }
 
@@ -171,14 +190,18 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      n.alunoNome?.isNotEmpty == true ? n.alunoNome! : 'Detrator',
+                      n.alunoNome?.isNotEmpty == true
+                          ? n.alunoNome!
+                          : 'Detrator',
                       style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                     Text(
                       'Detrator · ${n.criadoEm}',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.65),
                       ),
                     ),
                   ],
@@ -208,12 +231,21 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
 
   Widget _kpi(String label, String value) => Column(
     children: [
-      Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+      Text(
+        value,
+        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+      ),
       Text(label, style: const TextStyle(fontSize: 12)),
     ],
   );
 
-  Widget _segmento(String label, int valor, int total, Color color, IconData icon) {
+  Widget _segmento(
+    String label,
+    int valor,
+    int total,
+    Color color,
+    IconData icon,
+  ) {
     final pct = total > 0 ? (valor * 100 / total).round() : 0;
     return FxSatellitePanel(
       accent: color,
@@ -224,7 +256,11 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
           const SizedBox(height: 4),
           Text(
             '$valor',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: color),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
           ),
           Text(
             '$pct% · $label',

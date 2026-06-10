@@ -31,19 +31,26 @@ class IaCargaChip extends StatelessWidget {
     );
 
     return MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        textScaler: clampedTextScaler(context, maxScale: 1.3),
-      ),
+      data: MediaQuery.of(
+        context,
+      ).copyWith(textScaler: clampedTextScaler(context, maxScale: 1.3)),
       child: Semantics(
-        label: '$label: ${valor.isEmpty ? 'não informado' : valor}'
+        label:
+            '$label: ${valor.isEmpty ? 'não informado' : valor}'
             '${deltaLabel != null ? ', variação $deltaLabel' : ''}',
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           decoration: BoxDecoration(
-            color: isSuggested ? ink.withValues(alpha: 0.12) : color.withValues(alpha: 0.1),
+            color:
+                isSuggested
+                    ? ink.withValues(alpha: 0.12)
+                    : color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: isSuggested ? ink.withValues(alpha: 0.55) : color.withValues(alpha: 0.32),
+              color:
+                  isSuggested
+                      ? ink.withValues(alpha: 0.55)
+                      : color.withValues(alpha: 0.32),
               width: isSuggested ? 1.5 : 1,
             ),
           ),
@@ -65,7 +72,10 @@ class IaCargaChip extends StatelessWidget {
               if (deltaLabel != null && isSuggested) ...[
                 const SizedBox(height: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: ink,
                     borderRadius: BorderRadius.circular(999),

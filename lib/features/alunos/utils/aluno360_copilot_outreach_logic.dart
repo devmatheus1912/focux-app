@@ -20,11 +20,7 @@ String resolveOutreachMessage(
     }
     return sanitizeOutreachGenderTerms(trimmed, genero: aluno.genero);
   }
-  return copilotMensagemPronta(
-    aluno,
-    acao,
-    wearableRelevant: wearableRelevant,
-  );
+  return copilotMensagemPronta(aluno, acao, wearableRelevant: wearableRelevant);
 }
 
 String contactPriorityOutreachAcao() =>
@@ -32,7 +28,8 @@ String contactPriorityOutreachAcao() =>
 
 bool alunoTemHistoricoWearable(RecoverySnapshot? recovery) => recovery != null;
 
-bool _mensagemMencionaWearable(String text) => copilotAcaoMencionaWearable(text);
+bool _mensagemMencionaWearable(String text) =>
+    copilotAcaoMencionaWearable(text);
 
 String copilotMensagemPronta(
   Aluno aluno,

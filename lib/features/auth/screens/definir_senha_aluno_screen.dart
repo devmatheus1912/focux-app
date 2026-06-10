@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../providers/auth_provider.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class DefinirSenhaAlunoScreen extends ConsumerStatefulWidget {
   const DefinirSenhaAlunoScreen({super.key});
@@ -66,7 +67,8 @@ class _DefinirSenhaAlunoScreenState
     return score.clamp(0, 1);
   }
 
-  Color _strengthColor() => EagleTokens.passwordStrengthColor(_passwordStrength());
+  Color _strengthColor() =>
+      EagleTokens.passwordStrengthColor(_passwordStrength());
 
   String _strengthLabel() {
     final s = _passwordStrength();
@@ -115,364 +117,397 @@ class _DefinirSenhaAlunoScreenState
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final strength = _passwordStrength();
 
-    return FxShellScaffold(
-      useMesh: true,
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 440),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // ── Hero icon ──
-                    Center(
-                      child: ScaleTransition(
-                        scale: _iconScale,
-                        child: Container(
-                          width: 88,
-                          height: 88,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [primary, primary.withValues(alpha: 0.7)],
-                            ),
-                            borderRadius: BorderRadius.circular(TokensStrip.r2xl),
-                            boxShadow: [
-                              BoxShadow(
-                                color: primary.withValues(alpha: 0.3),
-                                blurRadius: 24,
-                                offset: const Offset(0, 8),
+    return fxScreenA11yScope(
+      label: 'Definir Senha Aluno',
+      child: FxShellScaffold(
+        useMesh: true,
+        body: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 32,
+                ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // ── Hero icon ──
+                      Center(
+                        child: ScaleTransition(
+                          scale: _iconScale,
+                          child: Container(
+                            width: 88,
+                            height: 88,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  primary,
+                                  primary.withValues(alpha: 0.7),
+                                ],
                               ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.lock_outline_rounded,
-                            color: Colors.white,
-                            size: 40,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-
-                    // ── Title ──
-                    Text(
-                      'Crie sua senha',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w800,
-                        color: ink,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Por segurança, defina uma senha pessoal\npara proteger sua conta.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 14, color: mute, height: 1.5),
-                    ),
-                    const SizedBox(height: 32),
-
-                    // ── Card ──
-                    Container(
-                      padding: const EdgeInsets.all(TokensStrip.s4),
-                      decoration: fxListCardDecoration(context),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // Senha provisória
-                          TextFormField(
-                            controller: _senhaAtualCtrl,
-                            obscureText: !_showSenhaAtual,
-                            decoration: InputDecoration(
-                              labelText: 'Senha provisória',
-                              prefixIcon: Icon(
-                                Icons.key_rounded,
-                                color: mute,
-                                size: 20,
+                              borderRadius: BorderRadius.circular(
+                                TokensStrip.r2xl,
                               ),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _showSenhaAtual
-                                      ? Icons.visibility_off_outlined
-                                      : Icons.visibility_outlined,
-                                  color: mute,
-                                  size: 20,
-                                ),
-                                onPressed:
-                                    () => setState(
-                                      () => _showSenhaAtual = !_showSenhaAtual,
-                                    ),
-                              ),
-                              border: FxInputDeco.outlineBorder(
-                                borderRadius:
-                                    BorderRadius.circular(TokensStrip.rInput),
-                              ),
-                              enabledBorder: FxInputDeco.outlineBorder(
-                                borderRadius:
-                                    BorderRadius.circular(TokensStrip.rInput),
-                                borderSide: BorderSide(color: line),
-                              ),
-                              focusedBorder: FxInputDeco.outlineBorder(
-                                borderRadius:
-                                    BorderRadius.circular(TokensStrip.rInput),
-                                borderSide: BorderSide(
-                                  color: primary,
-                                  width: 1.5,
-                                ),
-                              ),
-                              filled: true,
-                              fillColor:
-                                  isDark
-                                      ? Colors.white.withValues(alpha: 0.04)
-                                      : TokensStrip.pageBg,
-                            ),
-                            validator:
-                                (v) =>
-                                    v == null || v.isEmpty
-                                        ? 'Informe a senha atual'
-                                        : null,
-                          ),
-                          const SizedBox(height: TokensStrip.s4),
-
-                          // Nova senha
-                          TextFormField(
-                            controller: _novaSenhaCtrl,
-                            obscureText: !_showNovaSenha,
-                            decoration: InputDecoration(
-                              labelText: 'Nova senha',
-                              prefixIcon: Icon(
-                                Icons.lock_outline_rounded,
-                                color: mute,
-                                size: 20,
-                              ),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _showNovaSenha
-                                      ? Icons.visibility_off_outlined
-                                      : Icons.visibility_outlined,
-                                  color: mute,
-                                  size: 20,
-                                ),
-                                onPressed:
-                                    () => setState(
-                                      () => _showNovaSenha = !_showNovaSenha,
-                                    ),
-                              ),
-                              border: FxInputDeco.outlineBorder(
-                                borderRadius:
-                                    BorderRadius.circular(TokensStrip.rInput),
-                              ),
-                              enabledBorder: FxInputDeco.outlineBorder(
-                                borderRadius:
-                                    BorderRadius.circular(TokensStrip.rInput),
-                                borderSide: BorderSide(color: line),
-                              ),
-                              focusedBorder: FxInputDeco.outlineBorder(
-                                borderRadius:
-                                    BorderRadius.circular(TokensStrip.rInput),
-                                borderSide: BorderSide(
-                                  color: primary,
-                                  width: 1.5,
-                                ),
-                              ),
-                              filled: true,
-                              fillColor:
-                                  isDark
-                                      ? Colors.white.withValues(alpha: 0.04)
-                                      : TokensStrip.pageBg,
-                            ),
-                            validator: (v) {
-                              if (v == null || v.isEmpty) {
-                                return 'Informe a nova senha';
-                              }
-                              if (v.length < 6) return 'Mínimo de 6 caracteres';
-                              return null;
-                            },
-                          ),
-
-                          // ── Strength indicator ──
-                          if (_novaSenhaCtrl.text.isNotEmpty) ...[
-                            const SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(999),
-                                    child: LinearProgressIndicator(
-                                      value: strength,
-                                      minHeight: 5,
-                                      backgroundColor: line,
-                                      valueColor: AlwaysStoppedAnimation(
-                                        _strengthColor(),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  _strengthLabel(),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: _strengthColor(),
-                                  ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: primary.withValues(alpha: 0.3),
+                                  blurRadius: 24,
+                                  offset: const Offset(0, 8),
                                 ),
                               ],
                             ),
-                          ],
-                          const SizedBox(height: TokensStrip.s4),
+                            child: const Icon(
+                              Icons.lock_outline_rounded,
+                              color: Colors.white,
+                              size: 40,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 28),
 
-                          // Confirmar
-                          TextFormField(
-                            controller: _confirmacaoCtrl,
-                            obscureText: !_showConfirmacao,
-                            decoration: InputDecoration(
-                              labelText: 'Confirmar nova senha',
-                              prefixIcon: Icon(
-                                Icons.lock_reset_rounded,
-                                color: mute,
-                                size: 20,
-                              ),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _showConfirmacao
-                                      ? Icons.visibility_off_outlined
-                                      : Icons.visibility_outlined,
+                      // ── Title ──
+                      Text(
+                        'Crie sua senha',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                          color: ink,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Por segurança, defina uma senha pessoal\npara proteger sua conta.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: mute,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+
+                      // ── Card ──
+                      Container(
+                        padding: const EdgeInsets.all(TokensStrip.s4),
+                        decoration: fxListCardDecoration(context),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // Senha provisória
+                            TextFormField(
+                              controller: _senhaAtualCtrl,
+                              obscureText: !_showSenhaAtual,
+                              decoration: InputDecoration(
+                                labelText: 'Senha provisória',
+                                prefixIcon: Icon(
+                                  Icons.key_rounded,
                                   color: mute,
                                   size: 20,
                                 ),
-                                onPressed:
-                                    () => setState(
-                                      () =>
-                                          _showConfirmacao = !_showConfirmacao,
-                                    ),
-                              ),
-                              border: FxInputDeco.outlineBorder(
-                                borderRadius:
-                                    BorderRadius.circular(TokensStrip.rInput),
-                              ),
-                              enabledBorder: FxInputDeco.outlineBorder(
-                                borderRadius:
-                                    BorderRadius.circular(TokensStrip.rInput),
-                                borderSide: BorderSide(color: line),
-                              ),
-                              focusedBorder: FxInputDeco.outlineBorder(
-                                borderRadius:
-                                    BorderRadius.circular(TokensStrip.rInput),
-                                borderSide: BorderSide(
-                                  color: primary,
-                                  width: 1.5,
-                                ),
-                              ),
-                              filled: true,
-                              fillColor:
-                                  isDark
-                                      ? Colors.white.withValues(alpha: 0.04)
-                                      : TokensStrip.pageBg,
-                            ),
-                            validator: (v) {
-                              if (v == null || v.isEmpty) {
-                                return 'Confirme a nova senha';
-                              }
-                              if (v != _novaSenhaCtrl.text) {
-                                return 'As senhas não conferem';
-                              }
-                              return null;
-                            },
-                          ),
-
-                          // ── Error ──
-                          if (_error != null) ...[
-                            const SizedBox(height: 14),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                color: EagleTokens.bad.withValues(alpha: 0.08),
-                                borderRadius:
-                                    BorderRadius.circular(TokensStrip.rCard),
-                                border: Border.all(
-                                  color: EagleTokens.bad.withValues(alpha: 0.3),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.error_outline,
-                                    color: EagleTokens.bad,
-                                    size: 18,
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _showSenhaAtual
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                    color: mute,
+                                    size: 20,
                                   ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      _error!,
-                                      style: const TextStyle(
-                                        color: EagleTokens.bad,
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w500,
+                                  onPressed:
+                                      () => setState(
+                                        () =>
+                                            _showSenhaAtual = !_showSenhaAtual,
                                       ),
+                                ),
+                                border: FxInputDeco.outlineBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    TokensStrip.rInput,
+                                  ),
+                                ),
+                                enabledBorder: FxInputDeco.outlineBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    TokensStrip.rInput,
+                                  ),
+                                  borderSide: BorderSide(color: line),
+                                ),
+                                focusedBorder: FxInputDeco.outlineBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    TokensStrip.rInput,
+                                  ),
+                                  borderSide: BorderSide(
+                                    color: primary,
+                                    width: 1.5,
+                                  ),
+                                ),
+                                filled: true,
+                                fillColor:
+                                    isDark
+                                        ? Colors.white.withValues(alpha: 0.04)
+                                        : TokensStrip.pageBg,
+                              ),
+                              validator:
+                                  (v) =>
+                                      v == null || v.isEmpty
+                                          ? 'Informe a senha atual'
+                                          : null,
+                            ),
+                            const SizedBox(height: TokensStrip.s4),
+
+                            // Nova senha
+                            TextFormField(
+                              controller: _novaSenhaCtrl,
+                              obscureText: !_showNovaSenha,
+                              decoration: InputDecoration(
+                                labelText: 'Nova senha',
+                                prefixIcon: Icon(
+                                  Icons.lock_outline_rounded,
+                                  color: mute,
+                                  size: 20,
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _showNovaSenha
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                    color: mute,
+                                    size: 20,
+                                  ),
+                                  onPressed:
+                                      () => setState(
+                                        () => _showNovaSenha = !_showNovaSenha,
+                                      ),
+                                ),
+                                border: FxInputDeco.outlineBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    TokensStrip.rInput,
+                                  ),
+                                ),
+                                enabledBorder: FxInputDeco.outlineBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    TokensStrip.rInput,
+                                  ),
+                                  borderSide: BorderSide(color: line),
+                                ),
+                                focusedBorder: FxInputDeco.outlineBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    TokensStrip.rInput,
+                                  ),
+                                  borderSide: BorderSide(
+                                    color: primary,
+                                    width: 1.5,
+                                  ),
+                                ),
+                                filled: true,
+                                fillColor:
+                                    isDark
+                                        ? Colors.white.withValues(alpha: 0.04)
+                                        : TokensStrip.pageBg,
+                              ),
+                              validator: (v) {
+                                if (v == null || v.isEmpty) {
+                                  return 'Informe a nova senha';
+                                }
+                                if (v.length < 6)
+                                  return 'Mínimo de 6 caracteres';
+                                return null;
+                              },
+                            ),
+
+                            // ── Strength indicator ──
+                            if (_novaSenhaCtrl.text.isNotEmpty) ...[
+                              const SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(999),
+                                      child: LinearProgressIndicator(
+                                        value: strength,
+                                        minHeight: 5,
+                                        backgroundColor: line,
+                                        valueColor: AlwaysStoppedAnimation(
+                                          _strengthColor(),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    _strengthLabel(),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: _strengthColor(),
                                     ),
                                   ),
                                 ],
                               ),
+                            ],
+                            const SizedBox(height: TokensStrip.s4),
+
+                            // Confirmar
+                            TextFormField(
+                              controller: _confirmacaoCtrl,
+                              obscureText: !_showConfirmacao,
+                              decoration: InputDecoration(
+                                labelText: 'Confirmar nova senha',
+                                prefixIcon: Icon(
+                                  Icons.lock_reset_rounded,
+                                  color: mute,
+                                  size: 20,
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _showConfirmacao
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                    color: mute,
+                                    size: 20,
+                                  ),
+                                  onPressed:
+                                      () => setState(
+                                        () =>
+                                            _showConfirmacao =
+                                                !_showConfirmacao,
+                                      ),
+                                ),
+                                border: FxInputDeco.outlineBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    TokensStrip.rInput,
+                                  ),
+                                ),
+                                enabledBorder: FxInputDeco.outlineBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    TokensStrip.rInput,
+                                  ),
+                                  borderSide: BorderSide(color: line),
+                                ),
+                                focusedBorder: FxInputDeco.outlineBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    TokensStrip.rInput,
+                                  ),
+                                  borderSide: BorderSide(
+                                    color: primary,
+                                    width: 1.5,
+                                  ),
+                                ),
+                                filled: true,
+                                fillColor:
+                                    isDark
+                                        ? Colors.white.withValues(alpha: 0.04)
+                                        : TokensStrip.pageBg,
+                              ),
+                              validator: (v) {
+                                if (v == null || v.isEmpty) {
+                                  return 'Confirme a nova senha';
+                                }
+                                if (v != _novaSenhaCtrl.text) {
+                                  return 'As senhas não conferem';
+                                }
+                                return null;
+                              },
                             ),
+
+                            // ── Error ──
+                            if (_error != null) ...[
+                              const SizedBox(height: 14),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 10,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: EagleTokens.bad.withValues(
+                                    alpha: 0.08,
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                    TokensStrip.rCard,
+                                  ),
+                                  border: Border.all(
+                                    color: EagleTokens.bad.withValues(
+                                      alpha: 0.3,
+                                    ),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.error_outline,
+                                      color: EagleTokens.bad,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        _error!,
+                                        style: const TextStyle(
+                                          color: EagleTokens.bad,
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ],
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: TokensStrip.s5),
-
-                    FxLiquidPrimaryButton(
-                      label: 'Salvar nova senha',
-                      icon: Icons.shield_outlined,
-                      loading: _loading,
-                      onPressed: _loading ? null : _submit,
-                    ),
-                    const SizedBox(height: 20),
-
-                    // ── Tips ──
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: primary.withValues(alpha: isDark ? 0.1 : 0.05),
-                        borderRadius:
-                            BorderRadius.circular(TokensStrip.rInput),
-                        border: Border.all(
-                          color: primary.withValues(alpha: 0.15),
                         ),
                       ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.lightbulb_outline_rounded,
-                            color: primary,
-                            size: 18,
+                      const SizedBox(height: TokensStrip.s5),
+
+                      FxLiquidPrimaryButton(
+                        label: 'Salvar nova senha',
+                        icon: Icons.shield_outlined,
+                        loading: _loading,
+                        onPressed: _loading ? null : _submit,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // ── Tips ──
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: primary.withValues(alpha: isDark ? 0.1 : 0.05),
+                          borderRadius: BorderRadius.circular(
+                            TokensStrip.rInput,
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              'Use pelo menos 6 caracteres, combinando letras maiúsculas, números e símbolos para uma senha forte.',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: mute,
-                                height: 1.5,
+                          border: Border.all(
+                            color: primary.withValues(alpha: 0.15),
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.lightbulb_outline_rounded,
+                              color: primary,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Use pelo menos 6 caracteres, combinando letras maiúsculas, números e símbolos para uma senha forte.',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: mute,
+                                  height: 1.5,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

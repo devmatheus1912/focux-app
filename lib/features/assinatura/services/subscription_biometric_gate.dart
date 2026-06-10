@@ -7,9 +7,7 @@ class SubscriptionBiometricGate {
 
   static final _auth = LocalAuthentication();
 
-  static Future<bool> confirmSubscription({
-    required String planName,
-  }) async {
+  static Future<bool> confirmSubscription({required String planName}) async {
     if (kIsWeb) return true;
 
     try {

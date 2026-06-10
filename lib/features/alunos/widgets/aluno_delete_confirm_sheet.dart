@@ -140,18 +140,19 @@ class _AlunoDeleteConfirmSheetState extends State<AlunoDeleteConfirmSheet> {
                         _inputMatches =
                             value.trim().toLowerCase() == widget.confirmToken,
                   ),
-              onSubmitted:
-                  (_) {
-                    if (_inputMatches) {
-                      HapticFeedback.heavyImpact();
-                      Navigator.of(context).pop(true);
-                    }
-                  },
+              onSubmitted: (_) {
+                if (_inputMatches) {
+                  HapticFeedback.heavyImpact();
+                  Navigator.of(context).pop(true);
+                }
+              },
               decoration: InputDecoration(
                 hintText: widget.confirmToken,
                 isDense: true,
                 filled: true,
-                fillColor: EagleTokens.bad.withValues(alpha: isDark ? 0.08 : 0.05),
+                fillColor: EagleTokens.bad.withValues(
+                  alpha: isDark ? 0.08 : 0.05,
+                ),
                 enabledBorder: FxInputDeco.outlineBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: line),
@@ -200,10 +201,7 @@ class _AlunoDeleteConfirmSheetState extends State<AlunoDeleteConfirmSheet> {
                 onPressed: () => Navigator.of(context).pop(false),
                 child: Text(
                   'Cancelar',
-                  style: TextStyle(
-                    color: mute,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: TextStyle(color: mute, fontWeight: FontWeight.w700),
                 ),
               ),
             ),

@@ -16,6 +16,7 @@ import '../utils/dashboard_screen_helpers.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
 import '../utils/dashboard_tool_groups.dart';
 import '../utils/dashboard_tool_recent_store.dart';
+
 class DashboardRoiQuickLinksRow extends ConsumerWidget {
   const DashboardRoiQuickLinksRow({super.key, required this.isDark});
 
@@ -56,8 +57,7 @@ class DashboardRoiQuickLinksRow extends ConsumerWidget {
                             ? null
                             : shortcut.tierBadgeLabel(),
                     linkColor: link,
-                    onTap:
-                        () => openDashboardShortcut(context, ref, shortcut),
+                    onTap: () => openDashboardShortcut(context, ref, shortcut),
                   ),
                   const SizedBox(width: 8),
                 ],
@@ -94,8 +94,7 @@ class _RoiShortcutChip extends StatelessWidget {
         locked
             ? BrandPalette.soft(primary, dark: isDark).withValues(alpha: 0.55)
             : BrandPalette.soft(primary, dark: isDark);
-    final labelColor =
-        locked ? linkColor.withValues(alpha: 0.78) : linkColor;
+    final labelColor = locked ? linkColor.withValues(alpha: 0.78) : linkColor;
 
     return Semantics(
       button: true,
@@ -249,7 +248,8 @@ class DashboardExpandableToolGroups extends ConsumerStatefulWidget {
       DashboardExpandableToolGroupsState();
 }
 
-class DashboardExpandableToolGroupsState extends ConsumerState<DashboardExpandableToolGroups> {
+class DashboardExpandableToolGroupsState
+    extends ConsumerState<DashboardExpandableToolGroups> {
   late Set<String> _openGroups;
 
   @override
@@ -440,69 +440,69 @@ class DashboardCollapsibleToolsSectionState
                 collapsedHint: collapsedHint,
               ),
               child: InkWell(
-              onTap: () {
-                dashboardHapticCollapseToggle();
-                final nextExpanded = !_expanded;
-                setState(() => _expanded = nextExpanded);
-                if (nextExpanded) {
-                  _loadRecentShortcuts();
-                }
-              },
-              borderRadius: BorderRadius.circular(TokensStrip.rCard),
-              child: Ink(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 13,
-                ),
-                decoration: fxStripCardDecoration(
-                  context,
-                  radius: TokensStrip.rCard,
-                  glowStrength: 0.08,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Mais ferramentas',
-                            style: AppTypography.inter(
-                              fontSize: TokensStrip.fontH2,
-                              fontWeight: TokensStrip.weightH2,
-                              letterSpacing: TokensStrip.trackingH2,
-                              color: heading,
-                              height: 1.2,
+                onTap: () {
+                  dashboardHapticCollapseToggle();
+                  final nextExpanded = !_expanded;
+                  setState(() => _expanded = nextExpanded);
+                  if (nextExpanded) {
+                    _loadRecentShortcuts();
+                  }
+                },
+                borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                child: Ink(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 13,
+                  ),
+                  decoration: fxStripCardDecoration(
+                    context,
+                    radius: TokensStrip.rCard,
+                    glowStrength: 0.08,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Mais ferramentas',
+                              style: AppTypography.inter(
+                                fontSize: TokensStrip.fontH2,
+                                fontWeight: TokensStrip.weightH2,
+                                letterSpacing: TokensStrip.trackingH2,
+                                color: heading,
+                                height: 1.2,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            _expanded
-                                ? 'Acessos menos frequentes'
-                                : collapsedHint,
-                            style: AppTypography.inter(
-                              fontSize: TokensStrip.fontBodySm,
-                              fontWeight: FontWeight.w500,
-                              color: mute,
+                            const SizedBox(height: 2),
+                            Text(
+                              _expanded
+                                  ? 'Acessos menos frequentes'
+                                  : collapsedHint,
+                              style: AppTypography.inter(
+                                fontSize: TokensStrip.fontBodySm,
+                                fontWeight: FontWeight.w500,
+                                color: mute,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    AnimatedRotation(
-                      turns: _expanded ? 0.25 : 0,
-                      duration: const Duration(milliseconds: 220),
-                      curve: Curves.easeOutCubic,
-                      child: Icon(
-                        Icons.chevron_right_rounded,
-                        size: 22,
-                        color: link,
+                      AnimatedRotation(
+                        turns: _expanded ? 0.25 : 0,
+                        duration: const Duration(milliseconds: 220),
+                        curve: Curves.easeOutCubic,
+                        child: Icon(
+                          Icons.chevron_right_rounded,
+                          size: 22,
+                          color: link,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
             ),
           ),
           AnimatedCrossFade(
@@ -512,113 +512,111 @@ class DashboardCollapsibleToolsSectionState
               bottom: false,
               minimum: const EdgeInsets.only(top: 4),
               child: Padding(
-              padding: const EdgeInsets.only(top: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  DashboardRoiQuickLinksRow(isDark: widget.isDark),
-                  if (_recentShortcuts.isNotEmpty && _searchQuery.isEmpty) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      'Recentes',
-                      style: dashboardSectionKickerStyle(
-                        context,
-                        isDark: widget.isDark,
+                padding: const EdgeInsets.only(top: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    DashboardRoiQuickLinksRow(isDark: widget.isDark),
+                    if (_recentShortcuts.isNotEmpty &&
+                        _searchQuery.isEmpty) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        'Recentes',
+                        style: dashboardSectionKickerStyle(
+                          context,
+                          isDark: widget.isDark,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          for (final shortcut in _recentShortcuts) ...[
-                            _RoiShortcutChip(
-                              shortcut: shortcut,
-                              isDark: widget.isDark,
-                              locked: !shortcut.isUnlocked(features),
-                              tierLabel:
-                                  shortcut.isUnlocked(features)
-                                      ? null
-                                      : shortcut.tierBadgeLabel(),
-                              linkColor: link,
-                              onTap:
-                                  () => openDashboardShortcut(
-                                    context,
-                                    ref,
-                                    shortcut,
-                                  ),
-                            ),
-                            const SizedBox(width: 8),
+                      const SizedBox(height: 8),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            for (final shortcut in _recentShortcuts) ...[
+                              _RoiShortcutChip(
+                                shortcut: shortcut,
+                                isDark: widget.isDark,
+                                locked: !shortcut.isUnlocked(features),
+                                tierLabel:
+                                    shortcut.isUnlocked(features)
+                                        ? null
+                                        : shortcut.tierBadgeLabel(),
+                                linkColor: link,
+                                onTap:
+                                    () => openDashboardShortcut(
+                                      context,
+                                      ref,
+                                      shortcut,
+                                    ),
+                              ),
+                              const SizedBox(width: 8),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  Semantics(
-                    textField: true,
-                    label: 'Buscar ferramenta',
-                    child: TextField(
-                      onChanged: (v) => setState(() => _searchQuery = v),
-                      style: AppTypography.inter(
-                        fontSize: 14,
-                        color:
-                            widget.isDark
-                                ? EagleTokens.darkInk
-                                : TokensStrip.textPrimary,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'Buscar ferramenta…',
-                        hintStyle: TextStyle(color: mute),
-                        prefixIcon: Icon(Icons.search_rounded, color: mute),
-                        isDense: true,
-                        filled: true,
-                        fillColor:
-                            widget.isDark
-                                ? EagleTokens.darkCard
-                                : Colors.white,
-                        border: FxInputDeco.outlineBorder(
-                          borderRadius: BorderRadius.circular(
-                            TokensStrip.rInput,
-                          ),
-                          borderSide: BorderSide(
-                            color: TokensStrip.borderDefault.withValues(
-                              alpha: 0.9,
+                    ],
+                    const SizedBox(height: 12),
+                    Semantics(
+                      textField: true,
+                      label: 'Buscar ferramenta',
+                      child: TextField(
+                        onChanged: (v) => setState(() => _searchQuery = v),
+                        style: AppTypography.inter(
+                          fontSize: 14,
+                          color:
+                              widget.isDark
+                                  ? EagleTokens.darkInk
+                                  : TokensStrip.textPrimary,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Buscar ferramenta…',
+                          hintStyle: TextStyle(color: mute),
+                          prefixIcon: Icon(Icons.search_rounded, color: mute),
+                          isDense: true,
+                          filled: true,
+                          fillColor:
+                              widget.isDark
+                                  ? EagleTokens.darkCard
+                                  : Colors.white,
+                          border: FxInputDeco.outlineBorder(
+                            borderRadius: BorderRadius.circular(
+                              TokensStrip.rInput,
+                            ),
+                            borderSide: BorderSide(
+                              color: TokensStrip.borderDefault.withValues(
+                                alpha: 0.9,
+                              ),
                             ),
                           ),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  if (groups.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Text(
-                        'Nenhum atalho para "$_searchQuery".',
-                        style: AppTypography.inter(fontSize: 13, color: mute),
-                      ),
-                    )
-                  else
-                    DashboardExpandableToolGroups(
-                      groups: groups,
-                      isDark: widget.isDark,
-                      shortcutAspectRatio: widget.shortcutAspectRatio,
-                      searchQuery: _searchQuery,
-                      onShortcut:
-                          (shortcut) => openDashboardShortcut(
-                            context,
-                            ref,
-                            shortcut,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
                           ),
+                        ),
+                      ),
                     ),
-                ],
+                    const SizedBox(height: 12),
+                    if (groups.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          'Nenhum atalho para "$_searchQuery".',
+                          style: AppTypography.inter(fontSize: 13, color: mute),
+                        ),
+                      )
+                    else
+                      DashboardExpandableToolGroups(
+                        groups: groups,
+                        isDark: widget.isDark,
+                        shortcutAspectRatio: widget.shortcutAspectRatio,
+                        searchQuery: _searchQuery,
+                        onShortcut:
+                            (shortcut) =>
+                                openDashboardShortcut(context, ref, shortcut),
+                      ),
+                  ],
+                ),
               ),
-            ),
             ),
             crossFadeState:
                 _expanded
@@ -672,137 +670,133 @@ class _ShortcutBtn extends StatelessWidget {
               : (semanticsLabel ?? label),
       button: true,
       child: InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(TokensStrip.rCard),
-      child: Opacity(
-        opacity: locked ? 0.92 : 1,
-        child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
-        decoration: fxStripCardDecoration(
-          context,
-          accent: primary,
-          radius: TokensStrip.rCard,
-          glowStrength: locked ? 0.06 : 0.12,
-        ).copyWith(
-          border:
-              locked
-                  ? Border.all(
-                    color: mute.withValues(alpha: 0.22),
-                    width: 1,
-                  )
-                  : null,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Stack(
-              clipBehavior: Clip.none,
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        child: Opacity(
+          opacity: locked ? 0.92 : 1,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
+            decoration: fxStripCardDecoration(
+              context,
+              accent: primary,
+              radius: TokensStrip.rCard,
+              glowStrength: locked ? 0.06 : 0.12,
+            ).copyWith(
+              border:
+                  locked
+                      ? Border.all(
+                        color: mute.withValues(alpha: 0.22),
+                        width: 1,
+                      )
+                      : null,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        iconAccent.withValues(
-                          alpha: isDark ? 0.20 : 0.12,
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            iconAccent.withValues(alpha: isDark ? 0.20 : 0.12),
+                            iconAccent.withValues(alpha: isDark ? 0.08 : 0.04),
+                          ],
                         ),
-                        iconAccent.withValues(
-                          alpha: isDark ? 0.08 : 0.04,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: FxIcon(
+                          name: icon,
+                          size: 17,
+                          color: iconAccent,
+                          strokeWidth: 1.9,
+                        ),
+                      ),
+                    ),
+                    if (locked)
+                      Positioned(
+                        right: -4,
+                        bottom: -4,
+                        child: Container(
+                          width: 16,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            color:
+                                isDark ? const Color(0xFF1A2228) : Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: mute.withValues(alpha: 0.35),
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.lock_rounded,
+                            size: 10,
+                            color: mute.withValues(alpha: 0.85),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 12.2,
+                          fontWeight: FontWeight.w800,
+                          color: labelColor,
+                          height: 1.2,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (locked && tierLabel != null) ...[
+                        const SizedBox(height: 3),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: iconAccent.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            tierLabel!,
+                            style: TextStyle(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
+                              color: iconAccent.withValues(alpha: 0.95),
+                              height: 1,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
                         ),
                       ],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: FxIcon(
-                      name: icon,
-                      size: 17,
-                      color: iconAccent,
-                      strokeWidth: 1.9,
-                    ),
+                    ],
                   ),
                 ),
-                if (locked)
-                  Positioned(
-                    right: -4,
-                    bottom: -4,
-                    child: Container(
-                      width: 16,
-                      height: 16,
-                      decoration: BoxDecoration(
-                        color:
-                            isDark
-                                ? const Color(0xFF1A2228)
-                                : Colors.white,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: mute.withValues(alpha: 0.35),
-                        ),
-                      ),
-                      child: Icon(
-                        Icons.lock_rounded,
-                        size: 10,
-                        color: mute.withValues(alpha: 0.85),
-                      ),
-                    ),
-                  ),
+                Icon(
+                  locked
+                      ? Icons.lock_outline_rounded
+                      : Icons.chevron_right_rounded,
+                  size: locked ? 15 : 18,
+                  color: mute.withValues(alpha: locked ? 0.7 : 0.55),
+                ),
               ],
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 12.2,
-                      fontWeight: FontWeight.w800,
-                      color: labelColor,
-                      height: 1.2,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (locked && tierLabel != null) ...[
-                    const SizedBox(height: 3),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: iconAccent.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        tierLabel!,
-                        style: TextStyle(
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w800,
-                          color: iconAccent.withValues(alpha: 0.95),
-                          height: 1,
-                          letterSpacing: 0.2,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            Icon(
-              locked ? Icons.lock_outline_rounded : Icons.chevron_right_rounded,
-              size: locked ? 15 : 18,
-              color: mute.withValues(alpha: locked ? 0.7 : 0.55),
-            ),
-          ],
+          ),
         ),
       ),
-      ),
-    ),
     );
   }
 }

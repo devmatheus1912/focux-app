@@ -9,15 +9,18 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/grupo_aula_repository.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 class GrupoAulasPersonalScreen extends ConsumerStatefulWidget {
   const GrupoAulasPersonalScreen({super.key});
 
   @override
-  ConsumerState<GrupoAulasPersonalScreen> createState() => _GrupoAulasPersonalScreenState();
+  ConsumerState<GrupoAulasPersonalScreen> createState() =>
+      _GrupoAulasPersonalScreenState();
 }
 
-class _GrupoAulasPersonalScreenState extends ConsumerState<GrupoAulasPersonalScreen> {
+class _GrupoAulasPersonalScreenState
+    extends ConsumerState<GrupoAulasPersonalScreen> {
   List<GrupoAula> _aulas = [];
   bool _loading = true;
 
@@ -34,8 +37,15 @@ class _GrupoAulasPersonalScreenState extends ConsumerState<GrupoAulasPersonalScr
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final aulas = await GrupoAulaRepository(ref.read(apiClientProvider)).listarPersonal();
-      if (mounted) setState(() { _aulas = aulas; _loading = false; });
+      final aulas =
+          await GrupoAulaRepository(
+            ref.read(apiClientProvider),
+          ).listarPersonal();
+      if (mounted)
+        setState(() {
+          _aulas = aulas;
+          _loading = false;
+        });
     } catch (e) {
       if (mounted) setState(() => _loading = false);
     }
@@ -55,7 +65,10 @@ class _GrupoAulasPersonalScreenState extends ConsumerState<GrupoAulasPersonalScr
 
     if (!result.fim.isAfter(result.inicio)) {
       if (mounted) {
-        FeedbackHelper.showWarn(context, 'Horário de fim deve ser depois do início.');
+        FeedbackHelper.showWarn(
+          context,
+          'Horário de fim deve ser depois do início.',
+        );
       }
       return;
     }
@@ -80,49 +93,64 @@ class _GrupoAulasPersonalScreenState extends ConsumerState<GrupoAulasPersonalScr
 
   @override
   Widget build(BuildContext context) {
-    return FxShellScaffold(
-      appBar: FxShellAppBar(title: 'Aulas em grupo', onBack: () => context.pop()),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _criar,
-        icon: const Icon(Icons.add),
-        label: const Text('Nova aula'),
-      ),
-      body: _loading
-          ? const Center(child: FxLoading())
-          : RefreshIndicator(
-              onRefresh: _load,
-              child: _aulas.isEmpty
-                  ? ListView(children: const [
-                      SizedBox(height: 120),
-                      Center(child: Text('Nenhuma aula criada ainda. Toque em + para começar.')),
-                    ])
-                  : ListView.separated(
-                      padding: const EdgeInsets.all(TokensStrip.s4),
-                      itemCount: _aulas.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
-                      itemBuilder: (_, i) {
-                        final a = _aulas[i];
-                        final lotada = a.inscritos >= a.capacidadeMax;
-                        return FxSatelliteListTile(
-                          title: a.titulo,
-                          titleCase: false,
-                          accent: lotada ? EagleTokens.warn : null,
-                          subtitle: Text(
-                            '${_fmt(a.inicio)} · ${a.inscritos}/${a.capacidadeMax}'
-                            '${a.localAula != null ? ' · ${a.localAula}' : ''}',
+    return fxScreenA11yScope(
+      label: 'Aulas em grupo',
+      child: FxShellScaffold(
+        appBar: FxShellAppBar(
+          title: 'Aulas em grupo',
+          onBack: () => context.pop(),
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: _criar,
+          icon: const Icon(Icons.add),
+          label: const Text('Nova aula'),
+        ),
+        body:
+            _loading
+                ? const Center(child: FxLoading())
+                : RefreshIndicator(
+                  onRefresh: _load,
+                  child:
+                      _aulas.isEmpty
+                          ? ListView(
+                            children: const [
+                              SizedBox(height: 120),
+                              Center(
+                                child: Text(
+                                  'Nenhuma aula criada ainda. Toque em + para começar.',
+                                ),
+                              ),
+                            ],
+                          )
+                          : ListView.separated(
+                            padding: const EdgeInsets.all(TokensStrip.s4),
+                            itemCount: _aulas.length,
+                            separatorBuilder:
+                                (_, __) => const SizedBox(height: 8),
+                            itemBuilder: (_, i) {
+                              final a = _aulas[i];
+                              final lotada = a.inscritos >= a.capacidadeMax;
+                              return FxSatelliteListTile(
+                                title: a.titulo,
+                                titleCase: false,
+                                accent: lotada ? EagleTokens.warn : null,
+                                subtitle: Text(
+                                  '${_fmt(a.inicio)} · ${a.inscritos}/${a.capacidadeMax}'
+                                  '${a.localAula != null ? ' · ${a.localAula}' : ''}',
+                                ),
+                                trailing:
+                                    lotada
+                                        ? const Chip(label: Text('Lotada'))
+                                        : Chip(
+                                          label: Text(
+                                            '${a.capacidadeMax - a.inscritos} vagas',
+                                          ),
+                                        ),
+                              );
+                            },
                           ),
-                          trailing:
-                              lotada
-                                  ? const Chip(label: Text('Lotada'))
-                                  : Chip(
-                                    label: Text(
-                                      '${a.capacidadeMax - a.inscritos} vagas',
-                                    ),
-                                  ),
-                        );
-                      },
-                    ),
-            ),
+                ),
+      ),
     );
   }
 }
@@ -191,7 +219,13 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
     );
     if (time == null) return;
     setState(() {
-      _inicio = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+      _inicio = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time.hour,
+        time.minute,
+      );
       if (!_fim.isAfter(_inicio)) _fim = _inicio.add(const Duration(hours: 1));
     });
   }
@@ -223,14 +257,18 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
       FeedbackHelper.showError(context, 'Título é obrigatório.');
       return;
     }
-    Navigator.pop(context, _NovaAulaResult(
-      titulo: _titulo.text.trim(),
-      descricao: _descricao.text.trim().isEmpty ? null : _descricao.text.trim(),
-      local: _local.text.trim().isEmpty ? null : _local.text.trim(),
-      capacidade: int.tryParse(_capacidade.text.trim()) ?? 20,
-      inicio: _inicio,
-      fim: _fim,
-    ));
+    Navigator.pop(
+      context,
+      _NovaAulaResult(
+        titulo: _titulo.text.trim(),
+        descricao:
+            _descricao.text.trim().isEmpty ? null : _descricao.text.trim(),
+        local: _local.text.trim().isEmpty ? null : _local.text.trim(),
+        capacidade: int.tryParse(_capacidade.text.trim()) ?? 20,
+        inicio: _inicio,
+        fim: _fim,
+      ),
+    );
   }
 
   @override
@@ -254,8 +292,10 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const Text('Nova aula em grupo',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            const Text(
+              'Nova aula em grupo',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 16),
             TextField(
               controller: _titulo,
@@ -268,7 +308,9 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
             TextField(
               controller: _descricao,
               maxLines: 2,
-              decoration: const InputDecoration(labelText: 'Descrição (opcional)'),
+              decoration: const InputDecoration(
+                labelText: 'Descrição (opcional)',
+              ),
             ),
             const SizedBox(height: 12),
             Row(
@@ -316,7 +358,9 @@ class _NovaAulaSheetState extends State<_NovaAulaSheet> {
             const SizedBox(height: 20),
             FilledButton(
               onPressed: _salvar,
-              style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+              ),
               child: const Text('Criar aula'),
             ),
           ],

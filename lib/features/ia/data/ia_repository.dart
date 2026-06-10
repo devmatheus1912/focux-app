@@ -38,8 +38,7 @@ class IaOperationalException implements Exception {
         payload is Map
             ? (payload['erro'] ?? payload['message'])?.toString()
             : null;
-    final codigo =
-        payload is Map ? payload['codigo']?.toString() : null;
+    final codigo = payload is Map ? payload['codigo']?.toString() : null;
     final upgradePlano =
         payload is Map ? payload['upgradePlano']?.toString() : null;
     final fullMessage =
@@ -281,7 +280,8 @@ class IaRepository {
         data: {
           'alunoId': alunoId,
           'tipoAcao': tipoAcao,
-          if (parametros != null && parametros.isNotEmpty) 'parametros': parametros,
+          if (parametros != null && parametros.isNotEmpty)
+            'parametros': parametros,
         },
       );
       return ExecutarAcaoResponse.fromJson(
@@ -304,7 +304,10 @@ class IaRepository {
       },
     );
     return (r.data as List)
-        .map((row) => ProgressaoSugestao.fromApi(Map<String, dynamic>.from(row as Map)))
+        .map(
+          (row) =>
+              ProgressaoSugestao.fromApi(Map<String, dynamic>.from(row as Map)),
+        )
         .toList(growable: false);
   }
 

@@ -16,7 +16,10 @@ Future<void> openPoseCameraCoach(
   required VoidCallback onRep,
 }) async {
   if (kIsWeb || Platform.environment.containsKey('FLUTTER_TEST')) {
-    FeedbackHelper.showWarn(context, 'Coach com camera disponivel apenas no celular.');
+    FeedbackHelper.showWarn(
+      context,
+      'Coach com camera disponivel apenas no celular.',
+    );
     return;
   }
 
@@ -24,11 +27,12 @@ Future<void> openPoseCameraCoach(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (ctx) => _CameraCoachSheet(
-      exerciseName: exerciseName,
-      brand: brand,
-      onRep: onRep,
-    ),
+    builder:
+        (ctx) => _CameraCoachSheet(
+          exerciseName: exerciseName,
+          brand: brand,
+          onRep: onRep,
+        ),
   );
 }
 
@@ -104,7 +108,8 @@ class _CameraCoachSheetState extends State<_CameraCoachSheet> {
       setState(() {
         _controller = controller;
         _ready = true;
-        _status = 'Enquadre corpo inteiro. Flexione e estenda para contar reps.';
+        _status =
+            'Enquadre corpo inteiro. Flexione e estenda para contar reps.';
       });
     } catch (e) {
       if (!mounted) return;
@@ -173,50 +178,58 @@ class _CameraCoachSheetState extends State<_CameraCoachSheet> {
       initialChildSize: 0.72,
       minChildSize: 0.45,
       maxChildSize: 0.92,
-      builder: (_, scroll) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-        ),
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-        child: ListView(
-          controller: scroll,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.black12,
-                  borderRadius: BorderRadius.circular(99),
+      builder:
+          (_, scroll) => Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            child: ListView(
+              controller: scroll,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.black12,
+                      borderRadius: BorderRadius.circular(99),
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 14),
+                Text(
+                  'MediaPipe · ${widget.exerciseName}',
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _status,
+                  style: const TextStyle(color: Colors.black54, height: 1.35),
+                ),
+                const SizedBox(height: 14),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: SizedBox(
+                    height: 280,
+                    child:
+                        _ready && _controller != null
+                            ? CameraPreview(_controller!)
+                            : Center(child: Text(_status)),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                FilledButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Fechar coach'),
+                ),
+              ],
             ),
-            const SizedBox(height: 14),
-            Text(
-              'MediaPipe · ${widget.exerciseName}',
-              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
-            ),
-            const SizedBox(height: 8),
-            Text(_status, style: const TextStyle(color: Colors.black54, height: 1.35)),
-            const SizedBox(height: 14),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: SizedBox(
-                height: 280,
-                child: _ready && _controller != null
-                    ? CameraPreview(_controller!)
-                    : Center(child: Text(_status)),
-              ),
-            ),
-            const SizedBox(height: 12),
-            FilledButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Fechar coach'),
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 }

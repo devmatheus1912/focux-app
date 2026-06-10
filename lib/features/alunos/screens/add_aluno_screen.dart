@@ -14,9 +14,9 @@ import '../providers/alunos_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import '../../../core/theme/tokens_strip.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 part 'add_aluno_screen_widgets.part.dart';
-
 
 const _generos = ['Masculino', 'Feminino', 'Outro'];
 const _tiposConsultoria = ['ONLINE', 'PRESENCIAL', 'HIBRIDO'];
@@ -212,7 +212,10 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                   width: 42,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
+                    color:
+                        isDark
+                            ? EagleTokens.darkLine
+                            : TokensStrip.borderDefault,
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
@@ -237,7 +240,8 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.6,
-                    color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+                    color:
+                        isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -245,7 +249,9 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                   'Compartilhe o convite para o aluno acessar o app.',
                   style: TextStyle(
                     color:
-                        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+                        isDark
+                            ? EagleTokens.darkInkMute
+                            : TokensStrip.textSecondary,
                     fontSize: 13.4,
                     height: 1.35,
                   ),
@@ -281,7 +287,8 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                           fontSize: 31,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 5.5,
-                          color: isDark ? Colors.white : TokensStrip.textPrimary,
+                          color:
+                              isDark ? Colors.white : TokensStrip.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 9),
@@ -374,18 +381,26 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                       icon: Icon(
                         Icons.copy_rounded,
                         size: 18,
-                        color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+                        color:
+                            isDark
+                                ? EagleTokens.darkInk
+                                : TokensStrip.textPrimary,
                       ),
                       label: Text(
                         'Copiar convite',
                         style: TextStyle(
-                          color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+                          color:
+                              isDark
+                                  ? EagleTokens.darkInk
+                                  : TokensStrip.textPrimary,
                         ),
                       ),
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(
                           color:
-                              isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
+                              isDark
+                                  ? EagleTokens.darkLine
+                                  : TokensStrip.borderDefault,
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -439,212 +454,224 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Novo aluno',
-        subtitle: 'Cadastro rápido',
-        onBack: () => safePopOrGo(context, '/alunos'),
-      ),
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            Expanded(
-              child: FadeTransition(
-                opacity: _entryFade,
-                child: SlideTransition(
-                  position: _entrySlide,
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 8, 20, 132),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _AccessProgressStrip(
-                            name: _firstName,
-                            hasName: _nomeCtrl.text.trim().isNotEmpty,
-                            hasEmail: RegExp(
-                              _emailPattern,
-                            ).hasMatch(_emailCtrl.text.trim()),
-                            isDark: isDark,
-                          ),
-                          const SizedBox(height: TokensStrip.s4),
-                          _SectionCard(
-                            icon: Icons.person_outline_rounded,
-                            title: 'Identidade',
-                            subtitle: 'Acesso e contato.',
-                            isDark: isDark,
-                            children: [
-                              _FxFormField(
-                                controller: _nomeCtrl,
-                                label: 'Nome completo',
-                                hint: 'Ex.: Beatriz Andrade',
-                                icon: Icons.person_outline_rounded,
-                                isDark: isDark,
-                                validator:
-                                    (v) =>
-                                        v == null || v.trim().isEmpty
-                                            ? 'Informe o nome completo.'
-                                            : null,
-                                textCapitalization: TextCapitalization.words,
-                              ),
-                              const SizedBox(height: 14),
-                              _FxFormField(
-                                controller: _emailCtrl,
-                                label: 'E-mail',
-                                hint: 'aluno@email.com',
-                                icon: Icons.alternate_email_rounded,
-                                isDark: isDark,
-                                keyboardType: TextInputType.emailAddress,
-                                validator: (v) {
-                                  final value = v?.trim() ?? '';
-                                  if (value.isEmpty) return 'Informe o e-mail.';
-                                  if (!RegExp(_emailPattern).hasMatch(value)) {
-                                    return 'Informe um e-mail válido.';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 14),
-                              _FxFormField(
-                                controller: _whatsappCtrl,
-                                label: 'WhatsApp',
-                                helper:
-                                    'Opcional. Se preencher, abrimos o WhatsApp com a mensagem pronta.',
-                                hint: '(11) 99999-9999',
-                                icon: Icons.phone_outlined,
-                                isDark: isDark,
-                                keyboardType: TextInputType.phone,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 14),
-                          _SectionCard(
-                            icon: Icons.tune_rounded,
-                            title: 'Perfil inicial',
-                            subtitle: 'Filtros e atendimento.',
-                            isDark: isDark,
-                            children: [
-                              _FxFormField(
-                                controller: _objetivoCtrl,
-                                label: 'Objetivo',
-                                hint: 'Ex.: Hipertrofia',
-                                icon: Icons.flag_outlined,
-                                isDark: isDark,
-                                textCapitalization: TextCapitalization.words,
-                              ),
-                              const SizedBox(height: 10),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children:
-                                    _objetivosRapidos.map((objetivo) {
-                                      final selected =
-                                          _objetivoCtrl.text.trim() == objetivo;
+    return fxScreenA11yScope(
+      label: 'Novo aluno',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Novo aluno',
+          subtitle: 'Cadastro rápido',
+          onBack: () => safePopOrGo(context, '/alunos'),
+        ),
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              Expanded(
+                child: FadeTransition(
+                  opacity: _entryFade,
+                  child: SlideTransition(
+                    position: _entrySlide,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(
+                        TokensStrip.s5,
+                        8,
+                        20,
+                        132,
+                      ),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _AccessProgressStrip(
+                              name: _firstName,
+                              hasName: _nomeCtrl.text.trim().isNotEmpty,
+                              hasEmail: RegExp(
+                                _emailPattern,
+                              ).hasMatch(_emailCtrl.text.trim()),
+                              isDark: isDark,
+                            ),
+                            const SizedBox(height: TokensStrip.s4),
+                            _SectionCard(
+                              icon: Icons.person_outline_rounded,
+                              title: 'Identidade',
+                              subtitle: 'Acesso e contato.',
+                              isDark: isDark,
+                              children: [
+                                _FxFormField(
+                                  controller: _nomeCtrl,
+                                  label: 'Nome completo',
+                                  hint: 'Ex.: Beatriz Andrade',
+                                  icon: Icons.person_outline_rounded,
+                                  isDark: isDark,
+                                  validator:
+                                      (v) =>
+                                          v == null || v.trim().isEmpty
+                                              ? 'Informe o nome completo.'
+                                              : null,
+                                  textCapitalization: TextCapitalization.words,
+                                ),
+                                const SizedBox(height: 14),
+                                _FxFormField(
+                                  controller: _emailCtrl,
+                                  label: 'E-mail',
+                                  hint: 'aluno@email.com',
+                                  icon: Icons.alternate_email_rounded,
+                                  isDark: isDark,
+                                  keyboardType: TextInputType.emailAddress,
+                                  validator: (v) {
+                                    final value = v?.trim() ?? '';
+                                    if (value.isEmpty)
+                                      return 'Informe o e-mail.';
+                                    if (!RegExp(
+                                      _emailPattern,
+                                    ).hasMatch(value)) {
+                                      return 'Informe um e-mail válido.';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 14),
+                                _FxFormField(
+                                  controller: _whatsappCtrl,
+                                  label: 'WhatsApp',
+                                  helper:
+                                      'Opcional. Se preencher, abrimos o WhatsApp com a mensagem pronta.',
+                                  hint: '(11) 99999-9999',
+                                  icon: Icons.phone_outlined,
+                                  isDark: isDark,
+                                  keyboardType: TextInputType.phone,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 14),
+                            _SectionCard(
+                              icon: Icons.tune_rounded,
+                              title: 'Perfil inicial',
+                              subtitle: 'Filtros e atendimento.',
+                              isDark: isDark,
+                              children: [
+                                _FxFormField(
+                                  controller: _objetivoCtrl,
+                                  label: 'Objetivo',
+                                  hint: 'Ex.: Hipertrofia',
+                                  icon: Icons.flag_outlined,
+                                  isDark: isDark,
+                                  textCapitalization: TextCapitalization.words,
+                                ),
+                                const SizedBox(height: 10),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children:
+                                      _objetivosRapidos.map((objetivo) {
+                                        final selected =
+                                            _objetivoCtrl.text.trim() ==
+                                            objetivo;
+                                        return _OptionChip(
+                                          label: objetivo,
+                                          selected: selected,
+                                          isDark: isDark,
+                                          onTap: () {
+                                            HapticFeedback.selectionClick();
+                                            setState(() {
+                                              _objetivoCtrl.text =
+                                                  selected ? '' : objetivo;
+                                            });
+                                          },
+                                        );
+                                      }).toList(),
+                                ),
+                                const SizedBox(height: 18),
+                                _LabelRow(label: 'Gênero', isDark: isDark),
+                                const SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children:
+                                      _generos.map((g) {
+                                        return _OptionChip(
+                                          label: g,
+                                          selected: _genero == g,
+                                          isDark: isDark,
+                                          onTap:
+                                              () => setState(
+                                                () =>
+                                                    _genero =
+                                                        _genero == g ? null : g,
+                                              ),
+                                        );
+                                      }).toList(),
+                                ),
+                                const SizedBox(height: 18),
+                                _LabelRow(label: 'Consultoria', isDark: isDark),
+                                const SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: List.generate(
+                                    _tiposConsultoria.length,
+                                    (i) {
+                                      final value = _tiposConsultoria[i];
                                       return _OptionChip(
-                                        label: objetivo,
-                                        selected: selected,
-                                        isDark: isDark,
-                                        onTap: () {
-                                          HapticFeedback.selectionClick();
-                                          setState(() {
-                                            _objetivoCtrl.text =
-                                                selected ? '' : objetivo;
-                                          });
-                                        },
-                                      );
-                                    }).toList(),
-                              ),
-                              const SizedBox(height: 18),
-                              _LabelRow(label: 'Gênero', isDark: isDark),
-                              const SizedBox(height: 8),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children:
-                                    _generos.map((g) {
-                                      return _OptionChip(
-                                        label: g,
-                                        selected: _genero == g,
+                                        label: _tiposConsultoriaLabel[i],
+                                        selected: _tipoConsultoria == value,
                                         isDark: isDark,
                                         onTap:
                                             () => setState(
                                               () =>
-                                                  _genero =
-                                                      _genero == g ? null : g,
+                                                  _tipoConsultoria =
+                                                      _tipoConsultoria == value
+                                                          ? null
+                                                          : value,
                                             ),
                                       );
-                                    }).toList(),
-                              ),
-                              const SizedBox(height: 18),
-                              _LabelRow(label: 'Consultoria', isDark: isDark),
-                              const SizedBox(height: 8),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: List.generate(
-                                  _tiposConsultoria.length,
-                                  (i) {
-                                    final value = _tiposConsultoria[i];
-                                    return _OptionChip(
-                                      label: _tiposConsultoriaLabel[i],
-                                      selected: _tipoConsultoria == value,
-                                      isDark: isDark,
-                                      onTap:
-                                          () => setState(
-                                            () =>
-                                                _tipoConsultoria =
-                                                    _tipoConsultoria == value
-                                                        ? null
-                                                        : value,
-                                          ),
-                                    );
-                                  },
+                                    },
+                                  ),
                                 ),
+                              ],
+                            ),
+                            if (_canSubmit) ...[
+                              const SizedBox(height: 14),
+                              _InvitePreviewCard(
+                                isDark: isDark,
+                                name: _firstName,
+                                hasWhatsapp:
+                                    _whatsappCtrl.text.trim().isNotEmpty,
+                                consultoriaLabel:
+                                    _tipoConsultoria == null
+                                        ? null
+                                        : _tiposConsultoriaLabel[_tiposConsultoria
+                                            .indexOf(_tipoConsultoria!)],
                               ),
                             ],
-                          ),
-                          if (_canSubmit) ...[
-                            const SizedBox(height: 14),
-                            _InvitePreviewCard(
-                              isDark: isDark,
-                              name: _firstName,
-                              hasWhatsapp: _whatsappCtrl.text.trim().isNotEmpty,
-                              consultoriaLabel:
-                                  _tipoConsultoria == null
-                                      ? null
-                                      : _tiposConsultoriaLabel[_tiposConsultoria
-                                          .indexOf(_tipoConsultoria!)],
-                            ),
+                            if (_error != null) ...[
+                              const SizedBox(height: 14),
+                              _ErrorCard(message: _error!, isDark: isDark),
+                            ],
                           ],
-                          if (_error != null) ...[
-                            const SizedBox(height: 14),
-                            _ErrorCard(message: _error!, isDark: isDark),
-                          ],
-                        ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-            _BottomSubmitBar(
-              isDark: isDark,
-              primary: primary,
-              canSubmit: _canSubmit,
-              loading: _loading,
-              helper:
-                  _canSubmit
-                      ? 'O convite de $_firstName será preparado após o cadastro.'
-                      : 'Complete nome e e-mail para cadastrar',
-              onSubmit: _submit,
-            ),
-          ],
+              _BottomSubmitBar(
+                isDark: isDark,
+                primary: primary,
+                canSubmit: _canSubmit,
+                loading: _loading,
+                helper:
+                    _canSubmit
+                        ? 'O convite de $_firstName será preparado após o cadastro.'
+                        : 'Complete nome e e-mail para cadastrar',
+                onSubmit: _submit,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
-

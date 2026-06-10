@@ -13,7 +13,8 @@ import '../utils/aluno360_operacao_logic.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
 
 class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
-  const Aluno360OperacaoStickyCtaBar({super.key, 
+  const Aluno360OperacaoStickyCtaBar({
+    super.key,
     required this.aluno,
     required this.alunoId,
     required this.proximaAcao360,
@@ -91,6 +92,7 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
           openEditAluno();
       }
     }
+
     final showSecondaryCommandCenter = shouldShowStickySecondaryCommandCenter(
       sticky: sticky,
       hasOpenTask: hasOpenTask,
@@ -106,40 +108,40 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
 
     return SafeArea(
       top: false,
-        child: Semantics(
+      child: Semantics(
         container: true,
         label: 'Ações rápidas da aba operação',
         child: Container(
-        key: const ValueKey('aluno360_operacao_sticky_cta'),
-        decoration: BoxDecoration(
-          color: ShellChrome.of(context).sheetFill,
-          border: Border(top: BorderSide(color: line)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
-              blurRadius: 16,
-              offset: const Offset(0, -4),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              flex: hasSecondary ? 5 : 1,
-              child: Semantics(
-                button: true,
-                label: stickyDisplayLabel,
-                child: FxLiquidPrimaryButton(
-                  icon: sticky.icon,
+          key: const ValueKey('aluno360_operacao_sticky_cta'),
+          decoration: BoxDecoration(
+            color: ShellChrome.of(context).sheetFill,
+            border: Border(top: BorderSide(color: line)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+                blurRadius: 16,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                flex: hasSecondary ? 5 : 1,
+                child: Semantics(
+                  button: true,
                   label: stickyDisplayLabel,
-                  loading: creating,
-                  loadingLabel: 'Criando…',
-                  onPressed: creating ? null : onPrimary,
+                  child: FxLiquidPrimaryButton(
+                    icon: sticky.icon,
+                    label: stickyDisplayLabel,
+                    loading: creating,
+                    loadingLabel: 'Criando…',
+                    onPressed: creating ? null : onPrimary,
+                  ),
                 ),
               ),
-            ),
               if (showSecondaryCommandCenter) ...[
                 const SizedBox(width: 10),
                 Expanded(
@@ -162,21 +164,21 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
                     icon: Icons.chat_bubble_outline_rounded,
                     primary: primary,
                     semanticsLabel: 'Abrir chat com aluno',
-                    onPressed:
-                        () => openChat(acao: effectiveProxima?.acao),
+                    onPressed: () => openChat(acao: effectiveProxima?.acao),
                   ),
                 ),
               ],
             ],
           ),
-      ),
+        ),
       ),
     );
   }
 }
 
 class Aluno360OperacaoStickySecondaryButton extends StatelessWidget {
-  const Aluno360OperacaoStickySecondaryButton({super.key, 
+  const Aluno360OperacaoStickySecondaryButton({
+    super.key,
     required this.label,
     required this.icon,
     required this.primary,
@@ -197,7 +199,10 @@ class Aluno360OperacaoStickySecondaryButton extends StatelessWidget {
       label: semanticsLabel,
       child: OutlinedButton(
         onPressed: onPressed,
-        style: Aluno360Layout.operacaoOutlinedButtonStyle(context, primary).copyWith(
+        style: Aluno360Layout.operacaoOutlinedButtonStyle(
+          context,
+          primary,
+        ).copyWith(
           padding: WidgetStateProperty.all(
             const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           ),
@@ -221,4 +226,3 @@ class Aluno360OperacaoStickySecondaryButton extends StatelessWidget {
     );
   }
 }
-

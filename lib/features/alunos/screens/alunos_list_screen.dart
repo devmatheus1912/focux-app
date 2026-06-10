@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -36,10 +36,7 @@ part 'alunos_list_screen_actions.part.dart';
 
 /// Fade na borda direita para indicar scroll horizontal nos filtros.
 class _HorizontalScrollPeek extends StatelessWidget {
-  const _HorizontalScrollPeek({
-    required this.child,
-    required this.showPeek,
-  });
+  const _HorizontalScrollPeek({required this.child, required this.showPeek});
 
   final Widget child;
   final bool showPeek;

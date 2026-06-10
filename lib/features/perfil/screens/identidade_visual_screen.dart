@@ -22,9 +22,9 @@ import '../../subscription/utils/landing_editor_access.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 part 'identidade_visual_screen_widgets.part.dart';
-
 
 class IdentidadeVisualScreen extends ConsumerStatefulWidget {
   const IdentidadeVisualScreen({super.key, this.isSetup = false});
@@ -36,7 +36,8 @@ class IdentidadeVisualScreen extends ConsumerStatefulWidget {
       _IdentidadeVisualScreenState();
 }
 
-class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen> {
+class _IdentidadeVisualScreenState
+    extends ConsumerState<IdentidadeVisualScreen> {
   final _descCtrl = TextEditingController();
   final _espCtrl = TextEditingController();
   final _instaCtrl = TextEditingController();
@@ -123,10 +124,7 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
   Future<void> _restoreDefaultBrandColors(String plano) async {
     if (plano.toUpperCase() != 'ENTERPRISE') return;
     setState(() => _palette = CuratedBrandPalette.focuxDefault);
-    await _salvar(
-      plano,
-      successMessage: 'Cores padrão do Focux restauradas!',
-    );
+    await _salvar(plano, successMessage: 'Cores padrão do Focux restauradas!');
   }
 
   Future<void> _salvar(
@@ -182,250 +180,263 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
     final planUpper = plano.toUpperCase();
     final isEnterprise =
         planUpper == 'ENTERPRISE' || planUpper == 'ENTERPRISE_PRO';
-    final isPremiumOrAbove =
-        ['PREMIUM', 'ENTERPRISE', 'ENTERPRISE_PRO'].contains(planUpper);
+    final isPremiumOrAbove = [
+      'PREMIUM',
+      'ENTERPRISE',
+      'ENTERPRISE_PRO',
+    ].contains(planUpper);
     final nomePersonal = perfil?.nome ?? '';
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: widget.isSetup ? 'Configurar meu app' : 'Identidade Visual',
-        subtitle: isEnterprise ? 'Sua marca no app' : 'Marca no app',
-        onBack:
-            widget.isSetup
-                ? null
-                : () => safePopOrGo(context, '/dashboard/personal'),
-        leading:
-            widget.isSetup
-                ? const SizedBox(width: 8)
-                : null,
-      ),
-      bottomNavigationBar:
-          isPremiumOrAbove
-              ? _SaveBar(
-                salvando: _salvando,
-                label:
-                    widget.isSetup ? 'Finalizar configuração' : 'Salvar marca',
-                onPressed: () => _salvar(plano),
-              )
-              : null,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(
-          parent: AlwaysScrollableScrollPhysics(),
+    return fxScreenA11yScope(
+      label: 'Identidade Visual',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: widget.isSetup ? 'Configurar meu app' : 'Identidade Visual',
+          subtitle: isEnterprise ? 'Sua marca no app' : 'Marca no app',
+          onBack:
+              widget.isSetup
+                  ? null
+                  : () => safePopOrGo(context, '/dashboard/personal'),
+          leading: widget.isSetup ? const SizedBox(width: 8) : null,
         ),
-        slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(18, 4, 18, 120),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                if (!isPremiumOrAbove) ...[
-                  _PaywallCard(
-                    onTap: () => context.go('/assinatura'),
-                    chrome: chrome,
-                  ),
-                  const SizedBox(height: 18),
-                ],
-                AbsorbPointer(
-                  absorbing: !isPremiumOrAbove,
-                  child: Opacity(
-                    opacity: isPremiumOrAbove ? 1 : 0.38,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _LiveBrandHero(
-                          primary: _corPrimaria,
-                          secondary: _corSecundaria,
-                          name: nomePersonal,
-                          slogan: _sloganCtrl.text.trim(),
-                          logoUrl: _logoUrl,
-                          paletteName: _palette.name,
-                        ),
-                        const SizedBox(height: 12),
-                        if (isEnterprise)
-                          OutlinedButton.icon(
-                            onPressed: () => openLandingEditorOrUpgrade(context, ref),
-                            icon: const Icon(Icons.language_outlined),
-                            label: const Text('Editor da landing (Enterprise Pro)'),
+        bottomNavigationBar:
+            isPremiumOrAbove
+                ? _SaveBar(
+                  salvando: _salvando,
+                  label:
+                      widget.isSetup
+                          ? 'Finalizar configuração'
+                          : 'Salvar marca',
+                  onPressed: () => _salvar(plano),
+                )
+                : null,
+        body: CustomScrollView(
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(18, 4, 18, 120),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  if (!isPremiumOrAbove) ...[
+                    _PaywallCard(
+                      onTap: () => context.go('/assinatura'),
+                      chrome: chrome,
+                    ),
+                    const SizedBox(height: 18),
+                  ],
+                  AbsorbPointer(
+                    absorbing: !isPremiumOrAbove,
+                    child: Opacity(
+                      opacity: isPremiumOrAbove ? 1 : 0.38,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _LiveBrandHero(
+                            primary: _corPrimaria,
+                            secondary: _corSecundaria,
+                            name: nomePersonal,
+                            slogan: _sloganCtrl.text.trim(),
+                            logoUrl: _logoUrl,
+                            paletteName: _palette.name,
                           ),
-                        const SizedBox(height: TokensStrip.s4),
-                        ShellSurface(
-                          accent: _corPrimaria,
-                          padding: const EdgeInsets.all(18),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _PanelTitle(
-                                icon: Icons.auto_awesome_outlined,
-                                title: 'Logo e slogan',
-                                subtitle:
-                                    'Aparece no app, login e áreas do aluno.',
-                                accent: _corPrimaria,
-                                mute: chrome.mute,
+                          const SizedBox(height: 12),
+                          if (isEnterprise)
+                            OutlinedButton.icon(
+                              onPressed:
+                                  () =>
+                                      openLandingEditorOrUpgrade(context, ref),
+                              icon: const Icon(Icons.language_outlined),
+                              label: const Text(
+                                'Editor da landing (Enterprise Pro)',
                               ),
-                              const SizedBox(height: 18),
-                              Center(
-                                child: _LogoUploadRing(
-                                  nome: nomePersonal,
-                                  logoUrl: _logoUrl,
-                                  primary: _corPrimaria,
-                                  secondary: _corSecundaria,
-                                  uploading: _uploadingLogo,
-                                  onTap: isEnterprise ? _pickLogo : null,
+                            ),
+                          const SizedBox(height: TokensStrip.s4),
+                          ShellSurface(
+                            accent: _corPrimaria,
+                            padding: const EdgeInsets.all(18),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _PanelTitle(
+                                  icon: Icons.auto_awesome_outlined,
+                                  title: 'Logo e slogan',
+                                  subtitle:
+                                      'Aparece no app, login e áreas do aluno.',
+                                  accent: _corPrimaria,
+                                  mute: chrome.mute,
                                 ),
-                              ),
-                              const SizedBox(height: 18),
-                              _BrandField(
-                                label: 'Slogan',
-                                controller: _sloganCtrl,
-                                enabled: isEnterprise,
-                                accent: _corPrimaria,
-                                icon: Icons.format_quote_outlined,
-                                hint: 'Transformando vidas através do movimento',
-                                maxLength: 200,
-                                maxLines: 2,
-                              ),
-                            ],
+                                const SizedBox(height: 18),
+                                Center(
+                                  child: _LogoUploadRing(
+                                    nome: nomePersonal,
+                                    logoUrl: _logoUrl,
+                                    primary: _corPrimaria,
+                                    secondary: _corSecundaria,
+                                    uploading: _uploadingLogo,
+                                    onTap: isEnterprise ? _pickLogo : null,
+                                  ),
+                                ),
+                                const SizedBox(height: 18),
+                                _BrandField(
+                                  label: 'Slogan',
+                                  controller: _sloganCtrl,
+                                  enabled: isEnterprise,
+                                  accent: _corPrimaria,
+                                  icon: Icons.format_quote_outlined,
+                                  hint:
+                                      'Transformando vidas através do movimento',
+                                  maxLength: 200,
+                                  maxLines: 2,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 14),
-                        ShellSurface(
-                          accent: _corPrimaria,
-                          padding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _PanelTitle(
-                                icon: Icons.palette_outlined,
-                                title: 'Paleta premium',
-                                subtitle:
-                                    'Pares curados com contraste seguro — nunca quebra o app.',
-                                accent: _corPrimaria,
-                                mute: chrome.mute,
-                              ),
-                              const SizedBox(height: 14),
-                              _CuratedPaletteGrid(
-                                selected: _palette,
-                                onSelect:
-                                    isEnterprise
-                                        ? (p) {
-                                          HapticFeedback.selectionClick();
-                                          setState(() => _palette = p);
-                                        }
-                                        : null,
-                              ),
-                              if (isEnterprise) ...[
-                                const SizedBox(height: 10),
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      onTap:
-                                          () =>
-                                              _restoreDefaultBrandColors(plano),
-                                      borderRadius: BorderRadius.circular(999),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 8,
+                          const SizedBox(height: 14),
+                          ShellSurface(
+                            accent: _corPrimaria,
+                            padding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _PanelTitle(
+                                  icon: Icons.palette_outlined,
+                                  title: 'Paleta premium',
+                                  subtitle:
+                                      'Pares curados com contraste seguro — nunca quebra o app.',
+                                  accent: _corPrimaria,
+                                  mute: chrome.mute,
+                                ),
+                                const SizedBox(height: 14),
+                                _CuratedPaletteGrid(
+                                  selected: _palette,
+                                  onSelect:
+                                      isEnterprise
+                                          ? (p) {
+                                            HapticFeedback.selectionClick();
+                                            setState(() => _palette = p);
+                                          }
+                                          : null,
+                                ),
+                                if (isEnterprise) ...[
+                                  const SizedBox(height: 10),
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        onTap:
+                                            () => _restoreDefaultBrandColors(
+                                              plano,
+                                            ),
+                                        borderRadius: BorderRadius.circular(
+                                          999,
                                         ),
-                                        decoration: BoxDecoration(
-                                          color: _corPrimaria.withValues(
-                                            alpha: 0.08,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 8,
                                           ),
-                                          borderRadius: BorderRadius.circular(
-                                            999,
-                                          ),
-                                          border: Border.all(
+                                          decoration: BoxDecoration(
                                             color: _corPrimaria.withValues(
-                                              alpha: 0.18,
+                                              alpha: 0.08,
                                             ),
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              Icons.restore_rounded,
-                                              size: 16,
-                                              color: _corPrimaria,
+                                            borderRadius: BorderRadius.circular(
+                                              999,
                                             ),
-                                            const SizedBox(width: 6),
-                                            Text(
-                                              'Restaurar cores padrão',
-                                              style: AppTypography.inter(
-                                                color: _corPrimaria,
-                                                fontWeight: FontWeight.w700,
-                                                fontSize: 12,
+                                            border: Border.all(
+                                              color: _corPrimaria.withValues(
+                                                alpha: 0.18,
                                               ),
                                             ),
-                                          ],
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.restore_rounded,
+                                                size: 16,
+                                                color: _corPrimaria,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                'Restaurar cores padrão',
+                                                style: AppTypography.inter(
+                                                  color: _corPrimaria,
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          ShellSurface(
+                            accent: _corPrimaria,
+                            padding: const EdgeInsets.all(18),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _PanelTitle(
+                                  icon: Icons.badge_outlined,
+                                  title: 'Perfil profissional',
+                                  subtitle:
+                                      'Bio e canais usados no app e convites.',
+                                  accent: _corPrimaria,
+                                  mute: chrome.mute,
+                                ),
+                                const SizedBox(height: 18),
+                                _BrandField(
+                                  label: 'Descrição profissional',
+                                  controller: _descCtrl,
+                                  enabled: isPremiumOrAbove,
+                                  accent: _corPrimaria,
+                                  hint:
+                                      'Trajetória, metodologia, diferencial...',
+                                  maxLines: 4,
+                                  maxLength: 500,
+                                ),
+                                const SizedBox(height: 14),
+                                _BrandField(
+                                  label: 'Especialidades',
+                                  controller: _espCtrl,
+                                  enabled: isPremiumOrAbove,
+                                  accent: _corPrimaria,
+                                  icon: Icons.fitness_center_outlined,
+                                  hint:
+                                      'Musculação, Funcional, Emagrecimento...',
+                                ),
+                                const SizedBox(height: 14),
+                                _BrandField(
+                                  label: 'Instagram',
+                                  controller: _instaCtrl,
+                                  enabled: isPremiumOrAbove,
+                                  accent: _corPrimaria,
+                                  icon: Icons.alternate_email,
+                                  hint: '@seuperfil',
                                 ),
                               ],
-                            ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 14),
-                        ShellSurface(
-                          accent: _corPrimaria,
-                          padding: const EdgeInsets.all(18),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _PanelTitle(
-                                icon: Icons.badge_outlined,
-                                title: 'Perfil profissional',
-                                subtitle:
-                                    'Bio e canais usados no app e convites.',
-                                accent: _corPrimaria,
-                                mute: chrome.mute,
-                              ),
-                              const SizedBox(height: 18),
-                              _BrandField(
-                                label: 'Descrição profissional',
-                                controller: _descCtrl,
-                                enabled: isPremiumOrAbove,
-                                accent: _corPrimaria,
-                                hint:
-                                    'Trajetória, metodologia, diferencial...',
-                                maxLines: 4,
-                                maxLength: 500,
-                              ),
-                              const SizedBox(height: 14),
-                              _BrandField(
-                                label: 'Especialidades',
-                                controller: _espCtrl,
-                                enabled: isPremiumOrAbove,
-                                accent: _corPrimaria,
-                                icon: Icons.fitness_center_outlined,
-                                hint: 'Musculação, Funcional, Emagrecimento...',
-                              ),
-                              const SizedBox(height: 14),
-                              _BrandField(
-                                label: 'Instagram',
-                                controller: _instaCtrl,
-                                enabled: isPremiumOrAbove,
-                                accent: _corPrimaria,
-                                icon: Icons.alternate_email,
-                                hint: '@seuperfil',
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ]),
+                ]),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
-

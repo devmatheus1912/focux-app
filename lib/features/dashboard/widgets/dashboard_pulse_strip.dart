@@ -9,6 +9,7 @@ import '../../../core/widgets/operational_metric_tile.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_screen_helpers.dart';
+
 /// Tappable pulse chips reuse [operationalMetricDecoration] from `OperationalMetricTile`
 /// so dashboard KPIs match Aluno 360 visual language (display tiles stay read-only).
 class DashboardDayPulseStrip extends StatelessWidget {
@@ -68,173 +69,171 @@ class DashboardDayPulseStrip extends StatelessWidget {
             'Pulso operacional',
             style: dashboardSectionKickerStyle(context, isDark: isDark),
           ),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                Expanded(
-                  child: DashboardPulseChip(
-                    icon: 'users',
-                    value: alunosAtivos.toString(),
-                    label: 'Ativos',
-                    accent: neutralAccent,
-                    isDark: isDark,
-                    compact: tight,
-                    onTap: onAtivos,
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Expanded(
+                child: DashboardPulseChip(
+                  icon: 'users',
+                  value: alunosAtivos.toString(),
+                  label: 'Ativos',
+                  accent: neutralAccent,
+                  isDark: isDark,
+                  compact: tight,
+                  onTap: onAtivos,
+                ),
+              ),
+              SizedBox(width: gap),
+              Expanded(
+                child: DashboardPulseChip(
+                  icon: 'circle-check',
+                  value: checkinsHoje.toString(),
+                  label: tight ? 'Checks' : 'Check-ins',
+                  accent: pulseCheckinsAccent(
+                    checkinsHoje: checkinsHoje,
+                    neutralAccent: neutralAccent,
                   ),
+                  isDark: isDark,
+                  compact: tight,
+                  onTap: onCheckins,
                 ),
-                SizedBox(width: gap),
-                Expanded(
-                  child: DashboardPulseChip(
-                    icon: 'circle-check',
-                    value: checkinsHoje.toString(),
-                    label: tight ? 'Checks' : 'Check-ins',
-                    accent: pulseCheckinsAccent(
-                      checkinsHoje: checkinsHoje,
-                      neutralAccent: neutralAccent,
-                    ),
-                    isDark: isDark,
-                    compact: tight,
-                    onTap: onCheckins,
-                  ),
-                ),
-                SizedBox(width: gap),
-                Expanded(
-                  child:
-                      hideRiscoChip
-                          ? DashboardPulseChip(
-                            icon: 'calendar',
-                            value: agendaHoje.toString(),
-                            label: tight ? 'Agenda' : 'Agenda hoje',
-                            accent: neutralAccent,
-                            isDark: isDark,
-                            compact: tight,
-                            onTap: onAgenda,
-                          )
-                          : DashboardPulseChip(
-                            icon:
-                                riscoAlto > 0
-                                    ? 'alert-triangle'
-                                    : 'circle-check',
-                            value: riscoAlto.toString(),
-                            label: 'Risco',
-                            accent: riscoAccent,
-                            isDark: isDark,
-                            compact: tight,
-                            onTap: onRisco,
-                          ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Builder(
-              builder: (context) {
-                final mute = dashboardReadableMuted(context, isDark: isDark);
-                final hasTrend = checkinsTrend.any((v) => v > 0);
-                return Semantics(
-                  label:
-                      hasTrend
-                          ? 'Tendência de check-ins nos últimos 7 dias'
-                          : 'Sem check-ins nos últimos 7 dias',
-                  child: InkWell(
-                    onTap: onCheckins,
-                    borderRadius: BorderRadius.circular(TokensStrip.rInput),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
+              ),
+              SizedBox(width: gap),
+              Expanded(
+                child:
+                    hideRiscoChip
+                        ? DashboardPulseChip(
+                          icon: 'calendar',
+                          value: agendaHoje.toString(),
+                          label: tight ? 'Agenda' : 'Agenda hoje',
+                          accent: neutralAccent,
+                          isDark: isDark,
+                          compact: tight,
+                          onTap: onAgenda,
+                        )
+                        : DashboardPulseChip(
+                          icon:
+                              riscoAlto > 0 ? 'alert-triangle' : 'circle-check',
+                          value: riscoAlto.toString(),
+                          label: 'Risco',
+                          accent: riscoAccent,
+                          isDark: isDark,
+                          compact: tight,
+                          onTap: onRisco,
+                        ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Builder(
+            builder: (context) {
+              final mute = dashboardReadableMuted(context, isDark: isDark);
+              final hasTrend = checkinsTrend.any((v) => v > 0);
+              return Semantics(
+                label:
+                    hasTrend
+                        ? 'Tendência de check-ins nos últimos 7 dias'
+                        : 'Sem check-ins nos últimos 7 dias',
+                child: InkWell(
+                  onTap: onCheckins,
+                  borderRadius: BorderRadius.circular(TokensStrip.rInput),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Tendência 7 dias',
+                                style: dashboardSectionKickerStyle(
+                                  context,
+                                  isDark: isDark,
+                                ),
+                              ),
+                              if (!hasTrend) ...[
+                                const SizedBox(height: 2),
                                 Text(
-                                  'Tendência 7 dias',
-                                  style: dashboardSectionKickerStyle(
-                                    context,
-                                    isDark: isDark,
+                                  'Sem check-ins nos últimos 7 dias',
+                                  style: AppTypography.inter(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: mute,
+                                    height: 1.25,
                                   ),
                                 ),
-                                if (!hasTrend) ...[
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Sem check-ins nos últimos 7 dias',
-                                    style: AppTypography.inter(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                      color: mute,
-                                      height: 1.25,
-                                    ),
-                                  ),
-                                ],
                               ],
+                            ],
+                          ),
+                        ),
+                        if (hasTrend)
+                          FxSparkline(
+                            data: checkinsTrend,
+                            color: pulseCheckinsAccent(
+                              checkinsHoje: checkinsHoje,
+                              neutralAccent: neutralAccent,
+                            ),
+                            width: 88,
+                            height: 24,
+                          )
+                        else
+                          Container(
+                            width: 88,
+                            height: 24,
+                            alignment: Alignment.centerRight,
+                            child: Icon(
+                              Icons.timeline_rounded,
+                              size: 20,
+                              color: mute,
                             ),
                           ),
-                          if (hasTrend)
-                            FxSparkline(
-                              data: checkinsTrend,
-                              color: pulseCheckinsAccent(
-                                checkinsHoje: checkinsHoje,
-                                neutralAccent: neutralAccent,
-                              ),
-                              width: 88,
-                              height: 24,
-                            )
-                          else
-                            Container(
-                              width: 88,
-                              height: 24,
-                              alignment: Alignment.centerRight,
-                              child: Icon(
-                                Icons.timeline_rounded,
-                                size: 20,
-                                color: mute,
-                              ),
-                            ),
-                        ],
-                      ),
+                      ],
                     ),
                   ),
-                );
-              },
-            ),
-            if (showEmptyTrendCta &&
-                emptyTrendCtaLabel != null &&
-                onEmptyTrendCta != null) ...[
-              const SizedBox(height: 6),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Semantics(
-                  button: true,
-                  label: emptyTrendCtaLabel,
-                  child: TextButton.icon(
-                    onPressed: onEmptyTrendCta,
-                    style: TextButton.styleFrom(
-                      minimumSize: const Size(48, 36),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      foregroundColor: primary,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              );
+            },
+          ),
+          if (showEmptyTrendCta &&
+              emptyTrendCtaLabel != null &&
+              onEmptyTrendCta != null) ...[
+            const SizedBox(height: 6),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Semantics(
+                button: true,
+                label: emptyTrendCtaLabel,
+                child: TextButton.icon(
+                  onPressed: onEmptyTrendCta,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(48, 36),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
                     ),
-                    icon: Icon(
-                      emptyTrendCtaLabel!.contains('treino')
-                          ? Icons.fitness_center_rounded
-                          : Icons.calendar_today_rounded,
-                      size: 16,
-                    ),
-                    label: Text(
-                      emptyTrendCtaLabel!,
-                      style: AppTypography.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    foregroundColor: primary,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  icon: Icon(
+                    emptyTrendCtaLabel!.contains('treino')
+                        ? Icons.fitness_center_rounded
+                        : Icons.calendar_today_rounded,
+                    size: 16,
+                  ),
+                  label: Text(
+                    emptyTrendCtaLabel!,
+                    style: AppTypography.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
               ),
-            ],
+            ),
           ],
-        ),
+        ],
+      ),
     );
   }
 }
@@ -295,11 +294,10 @@ class DashboardPulseChip extends StatelessWidget {
                         width: iconSize,
                         height: iconSize,
                         decoration: BoxDecoration(
-                          color: accent.withValues(
-                            alpha: isDark ? 0.18 : 0.10,
+                          color: accent.withValues(alpha: isDark ? 0.18 : 0.10),
+                          borderRadius: BorderRadius.circular(
+                            TokensStrip.rInput,
                           ),
-                          borderRadius:
-                              BorderRadius.circular(TokensStrip.rInput),
                         ),
                         child: Center(
                           child: FxIcon(
@@ -327,7 +325,9 @@ class DashboardPulseChip extends StatelessWidget {
                   ),
                   SizedBox(height: compact ? 2 : 3),
                   Padding(
-                    padding: EdgeInsets.only(left: iconSize + (compact ? 5 : 6)),
+                    padding: EdgeInsets.only(
+                      left: iconSize + (compact ? 5 : 6),
+                    ),
                     child: Text(
                       label,
                       maxLines: 1,

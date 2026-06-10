@@ -25,7 +25,9 @@ class AssinaturaRepository {
     return list.map((e) => Plano.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  Future<PaywallVitrineSnapshot> fetchVitrine({bool forceRefresh = false}) async {
+  Future<PaywallVitrineSnapshot> fetchVitrine({
+    bool forceRefresh = false,
+  }) async {
     if (!forceRefresh) {
       final cached = await _loadVitrineCache();
       if (cached != null) return cached;
@@ -66,10 +68,7 @@ class AssinaturaRepository {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
       _vitrineCacheKey,
-      jsonEncode({
-        'savedAt': DateTime.now().toIso8601String(),
-        'data': raw,
-      }),
+      jsonEncode({'savedAt': DateTime.now().toIso8601String(), 'data': raw}),
     );
   }
 

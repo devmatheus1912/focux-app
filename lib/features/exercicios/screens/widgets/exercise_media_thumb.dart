@@ -23,6 +23,7 @@ class ExerciseMediaThumb extends StatefulWidget {
   final double radius;
   final double iconSize;
   final bool showPlayBadge;
+
   /// Quando true e sem URL, mostra estado "sem demonstração" em vez de haltere genérico.
   final bool expectMedia;
   final bool celebrateSuccess;
@@ -120,8 +121,8 @@ class _ExerciseMediaThumbState extends State<ExerciseMediaThumb>
           gaplessPlayback: true,
           cacheWidth: (widget.size * 2).round(),
           cacheHeight: (widget.size * 2).round(),
-          errorBuilder: (_, __, ___) =>
-              _fallback(primary, missing: widget.expectMedia),
+          errorBuilder:
+              (_, __, ___) => _fallback(primary, missing: widget.expectMedia),
           loadingBuilder: (context, child, progress) {
             if (progress == null) return child;
             return SkeletonLoader(
@@ -252,8 +253,7 @@ class _ExerciseMediaThumbState extends State<ExerciseMediaThumb>
 bool isCloudinaryTemplateUrl(String? url) {
   final value = url?.trim();
   if (value == null || value.isEmpty) return false;
-  return value.contains('/curated/gifs/') ||
-      value.contains('/curated/thumbs/');
+  return value.contains('/curated/gifs/') || value.contains('/curated/thumbs/');
 }
 
 /// Cloudinary com versão publicada (evita templates 404 do seed).
@@ -266,7 +266,8 @@ bool isCloudinaryPublishedUrl(String? url) {
 }
 
 bool exercicioHasPublishedLibraryMedia(Exercicio exercicio) {
-  if (exercicio.isPersonalUpload && exercicio.videoUrl?.trim().isNotEmpty == true) {
+  if (exercicio.isPersonalUpload &&
+      exercicio.videoUrl?.trim().isNotEmpty == true) {
     return true;
   }
   return isCloudinaryPublishedUrl(exercicio.thumbnailUrl) ||

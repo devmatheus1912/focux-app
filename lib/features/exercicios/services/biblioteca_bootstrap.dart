@@ -18,7 +18,9 @@ class BibliotecaBootstrap {
     return ensureReadyWithContainer(ProviderScope.containerOf(context));
   }
 
-  static Future<void> ensureReadyWithContainer(ProviderContainer container) async {
+  static Future<void> ensureReadyWithContainer(
+    ProviderContainer container,
+  ) async {
     if (_running) return;
     _running = true;
     BibliotecaSyncStatus.instance.start('Preparando biblioteca...');
@@ -34,13 +36,12 @@ class BibliotecaBootstrap {
         exercicios = await container.read(exerciciosProvider.future);
       }
 
-      final needsEnrich =
-          exercicios.any(
-            (exercicio) =>
-                exercicio.curado &&
-                (exercicio.gifUrl?.trim().isEmpty ?? true) &&
-                (exercicio.substitutos?.trim().isEmpty ?? true),
-          );
+      final needsEnrich = exercicios.any(
+        (exercicio) =>
+            exercicio.curado &&
+            (exercicio.gifUrl?.trim().isEmpty ?? true) &&
+            (exercicio.substitutos?.trim().isEmpty ?? true),
+      );
 
       if (needsEnrich || !(prefs.getBool(_bootstrapKey) ?? false)) {
         BibliotecaSyncStatus.instance.start('Organizando biblioteca...');

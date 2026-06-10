@@ -24,10 +24,7 @@ class _SectionCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 18),
-      decoration: fxListCardDecoration(
-        context,
-        accent: primary,
-      ),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

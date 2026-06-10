@@ -12,6 +12,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/winback_repository.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 final winbackRepositoryProvider = Provider(
   (ref) => WinbackRepository(ref.read(apiClientProvider)),
@@ -64,110 +65,115 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final mute = fxScreenMute(context);
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Win-back automático',
-        subtitle: 'Push de reengajamento',
-        onBack: () => safePopOrGo(context, '/dashboard/personal'),
-      ),
-      body:
-          _loading
-              ? Center(child: FxLoading(color: primary))
-              : RefreshIndicator(
-                color: primary,
-                onRefresh: _carregar,
-                child: ListView(
-                  padding: const EdgeInsets.all(TokensStrip.s4),
-                  children: [
-                    FxSatellitePanel(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.notifications_active_outlined,
-                            color: primary,
-                            size: 40,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Automação FCM ativa',
-                            style: AppTypography.inter(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 18,
-                              color: fxScreenInk(context),
+    return fxScreenA11yScope(
+      label: 'Win-back automático',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Win-back automático',
+          subtitle: 'Push de reengajamento',
+          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+        ),
+        body:
+            _loading
+                ? Center(child: FxLoading(color: primary))
+                : RefreshIndicator(
+                  color: primary,
+                  onRefresh: _carregar,
+                  child: ListView(
+                    padding: const EdgeInsets.all(TokensStrip.s4),
+                    children: [
+                      FxSatellitePanel(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.notifications_active_outlined,
+                              color: primary,
+                              size: 40,
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Push de reengajamento para alunos inativos e lembretes de trial.',
-                            style: TextStyle(height: 1.45, color: mute),
-                          ),
-                          const SizedBox(height: 16),
-                          FilledButton.icon(
-                            onPressed: () => context.push('/retencao'),
-                            icon: const Icon(Icons.health_and_safety_outlined),
-                            label: const Text('Ver saúde da base'),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Histórico de envios (${_entries.length})',
-                      style: AppTypography.inter(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                        color: fxScreenInk(context),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    if (_entries.isEmpty)
-                      const FxEmptyState(
-                        icon: 'send',
-                        title: 'Nenhum envio ainda',
-                        subtitle:
-                            'Quando a automação disparar, os registros aparecem aqui.',
-                      )
-                    else
-                      ..._entries.map(
-                        (entry) => FxSatelliteListTile(
-                          isThreeLine: true,
-                          leading: CircleAvatar(
-                            backgroundColor: primary.withValues(alpha: 0.12),
-                            foregroundColor: primary,
-                            child: const Icon(Icons.send_outlined, size: 20),
-                          ),
-                          title: entry.alunoNome,
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 4),
-                              Text(_formatTipo(entry.tipo)),
-                              if (entry.mensagem.isNotEmpty) ...[
-                                const SizedBox(height: 4),
-                                Text(
-                                  entry.mensagem,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                              const SizedBox(height: 4),
-                              Text(
-                                entry.enviadoEm,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: mute.withValues(alpha: 0.85),
-                                ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Automação FCM ativa',
+                              style: AppTypography.inter(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 18,
+                                color: fxScreenInk(context),
                               ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Push de reengajamento para alunos inativos e lembretes de trial.',
+                              style: TextStyle(height: 1.45, color: mute),
+                            ),
+                            const SizedBox(height: 16),
+                            FilledButton.icon(
+                              onPressed: () => context.push('/retencao'),
+                              icon: const Icon(
+                                Icons.health_and_safety_outlined,
+                              ),
+                              label: const Text('Ver saúde da base'),
+                            ),
+                          ],
                         ),
                       ),
-                  ],
+                      const SizedBox(height: 16),
+                      Text(
+                        'Histórico de envios (${_entries.length})',
+                        style: AppTypography.inter(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: fxScreenInk(context),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      if (_entries.isEmpty)
+                        const FxEmptyState(
+                          icon: 'send',
+                          title: 'Nenhum envio ainda',
+                          subtitle:
+                              'Quando a automação disparar, os registros aparecem aqui.',
+                        )
+                      else
+                        ..._entries.map(
+                          (entry) => FxSatelliteListTile(
+                            isThreeLine: true,
+                            leading: CircleAvatar(
+                              backgroundColor: primary.withValues(alpha: 0.12),
+                              foregroundColor: primary,
+                              child: const Icon(Icons.send_outlined, size: 20),
+                            ),
+                            title: entry.alunoNome,
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 4),
+                                Text(_formatTipo(entry.tipo)),
+                                if (entry.mensagem.isNotEmpty) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    entry.mensagem,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                                const SizedBox(height: 4),
+                                Text(
+                                  entry.enviadoEm,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: mute.withValues(alpha: 0.85),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
+      ),
     );
   }
 }

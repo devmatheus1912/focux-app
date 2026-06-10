@@ -1,4 +1,4 @@
-﻿part of 'paywall_components.dart';
+part of 'paywall_components.dart';
 
 // ─── Usage meters (Plan Studio) ─────────────────────────────────────────────
 
@@ -20,7 +20,11 @@ class PaywallUsageMeters extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = PaywallCatalog.accentForPlan(usage.plano);
-    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    final secondary = PaywallCatalog.readableSecondary(
+      ink,
+      mute,
+      isDark: isDark,
+    );
     final showAlunosMeter =
         usage.limiteAlunos != null && usage.limiteAlunos! > 0;
     final showAlunosUnlimited =
@@ -36,62 +40,63 @@ class PaywallUsageMeters extends StatelessWidget {
       container: true,
       label: 'Uso do seu plano',
       child: PaywallInsetPanel(
-      accent: accent,
-      isDark: isDark,
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Uso do seu plano',
-            style: AppTypography.inter(
-              fontWeight: FontWeight.w800,
-              fontSize: 13,
-              color: ink,
+        accent: accent,
+        isDark: isDark,
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Uso do seu plano',
+              style: AppTypography.inter(
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
+                color: ink,
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          if (showAlunosUnlimited)
-            _PaywallUsageUnlimitedRow(
-              label: 'Alunos ativos',
-              detail: usage.alunosAtivos > 0
-                  ? '${usage.alunosAtivos} cadastrados agora'
-                  : 'Sem teto de cadastro',
-              accent: accent,
-              ink: ink,
-              secondary: secondary,
-              isDark: isDark,
-            ),
-          if (showAlunosMeter)
-            _PaywallUsageMeterRow(
-              label: 'Alunos ativos',
-              used: usage.alunosAtivos,
-              limit: usage.limiteAlunos!,
-              accent: accent,
-              ink: ink,
-              secondary: secondary,
-              isDark: isDark,
-              atLimit: usage.alunosAtLimit,
-              nearLimit: usage.alunosNearLimit,
-            ),
-          if ((showAlunosMeter || showAlunosUnlimited) && showIa)
             const SizedBox(height: 10),
-          if (showIa)
-            _PaywallUsageMeterRow(
-              label: 'IA Copiloto (mês)',
-              used: usage.iaUsadaMes,
-              limit: usage.limiteIaMensal,
-              remaining: usage.iaRestantesEfetivos,
-              accent: accent,
-              ink: ink,
-              secondary: secondary,
-              isDark: isDark,
-              atLimit: usage.iaAtLimit,
-              nearLimit: usage.iaNearLimit,
-            ),
-        ],
+            if (showAlunosUnlimited)
+              _PaywallUsageUnlimitedRow(
+                label: 'Alunos ativos',
+                detail:
+                    usage.alunosAtivos > 0
+                        ? '${usage.alunosAtivos} cadastrados agora'
+                        : 'Sem teto de cadastro',
+                accent: accent,
+                ink: ink,
+                secondary: secondary,
+                isDark: isDark,
+              ),
+            if (showAlunosMeter)
+              _PaywallUsageMeterRow(
+                label: 'Alunos ativos',
+                used: usage.alunosAtivos,
+                limit: usage.limiteAlunos!,
+                accent: accent,
+                ink: ink,
+                secondary: secondary,
+                isDark: isDark,
+                atLimit: usage.alunosAtLimit,
+                nearLimit: usage.alunosNearLimit,
+              ),
+            if ((showAlunosMeter || showAlunosUnlimited) && showIa)
+              const SizedBox(height: 10),
+            if (showIa)
+              _PaywallUsageMeterRow(
+                label: 'IA Copiloto (mês)',
+                used: usage.iaUsadaMes,
+                limit: usage.limiteIaMensal,
+                remaining: usage.iaRestantesEfetivos,
+                accent: accent,
+                ink: ink,
+                secondary: secondary,
+                isDark: isDark,
+                atLimit: usage.iaAtLimit,
+                nearLimit: usage.iaNearLimit,
+              ),
+          ],
+        ),
       ),
-    ),
     );
   }
 }
@@ -151,8 +156,10 @@ class _PaywallUsageMeterRowState extends State<_PaywallUsageMeterRow>
   void didUpdateWidget(covariant _PaywallUsageMeterRow oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.used != widget.used) {
-      _usedTween = Tween<double>(begin: _displayUsed, end: widget.used.toDouble())
-          .animate(CurvedAnimation(parent: _pulse, curve: Curves.easeOutCubic));
+      _usedTween = Tween<double>(
+        begin: _displayUsed,
+        end: widget.used.toDouble(),
+      ).animate(CurvedAnimation(parent: _pulse, curve: Curves.easeOutCubic));
       _pulse.forward(from: 0);
     }
   }
@@ -169,22 +176,25 @@ class _PaywallUsageMeterRowState extends State<_PaywallUsageMeterRow>
       animation: _pulse,
       builder: (context, _) {
         final animatedUsed = _usedTween.value.round();
-        final ratio = widget.limit <= 0
-            ? 0.0
-            : (animatedUsed / widget.limit).clamp(0.0, 1.0);
-        final barColor = widget.atLimit
-            ? const Color(0xFFE85D5D)
-            : widget.nearLimit
-            ? PaywallCatalog.warning
-            : widget.accent;
+        final ratio =
+            widget.limit <= 0
+                ? 0.0
+                : (animatedUsed / widget.limit).clamp(0.0, 1.0);
+        final barColor =
+            widget.atLimit
+                ? const Color(0xFFE85D5D)
+                : widget.nearLimit
+                ? PaywallCatalog.warning
+                : widget.accent;
         final rest =
             widget.remaining ??
             (widget.limit - animatedUsed).clamp(0, widget.limit);
-        final statusHint = widget.atLimit
-            ? ', limite atingido'
-            : widget.nearLimit
-            ? ', perto do limite'
-            : '';
+        final statusHint =
+            widget.atLimit
+                ? ', limite atingido'
+                : widget.nearLimit
+                ? ', perto do limite'
+                : '';
         return Semantics(
           label:
               '${widget.label}: $animatedUsed de ${widget.limit}, $rest restantes$statusHint',
@@ -196,10 +206,9 @@ class _PaywallUsageMeterRowState extends State<_PaywallUsageMeterRow>
                   Expanded(
                     child: Text(
                       widget.label,
-                      style: TokensStrip.body(color: widget.secondary).copyWith(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: TokensStrip.body(
+                        color: widget.secondary,
+                      ).copyWith(fontSize: 12, fontWeight: FontWeight.w600),
                     ),
                   ),
                   Column(
@@ -275,17 +284,16 @@ class _PaywallUsageUnlimitedRow extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TokensStrip.body(color: secondary).copyWith(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TokensStrip.body(
+                    color: secondary,
+                  ).copyWith(fontSize: 12, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   detail,
-                  style: TokensStrip.bodyMuted(color: secondary).copyWith(
-                    fontSize: 11.5,
-                  ),
+                  style: TokensStrip.bodyMuted(
+                    color: secondary,
+                  ).copyWith(fontSize: 11.5),
                 ),
               ],
             ),
@@ -303,7 +311,10 @@ class _PaywallUsageUnlimitedRow extends StatelessWidget {
                 fontSize: 11,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 0.5,
-                color: PaywallCatalog.readableTierAccent(accent, isDark: isDark),
+                color: PaywallCatalog.readableTierAccent(
+                  accent,
+                  isDark: isDark,
+                ),
               ),
             ),
           ),
@@ -338,11 +349,16 @@ class PaywallPlanSyncBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = PaywallCatalog.warning;
-    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
-    final body = message?.trim().isNotEmpty == true
-        ? message!.trim()
-        : 'Seu plano $billingLabel está ativo na loja. '
-            'Estamos sincronizando os dados — toque em Atualizar.';
+    final secondary = PaywallCatalog.readableSecondary(
+      ink,
+      mute,
+      isDark: isDark,
+    );
+    final body =
+        message?.trim().isNotEmpty == true
+            ? message!.trim()
+            : 'Seu plano $billingLabel está ativo na loja. '
+                'Estamos sincronizando os dados — toque em Atualizar.';
 
     return Semantics(
       container: true,
@@ -359,10 +375,9 @@ class PaywallPlanSyncBanner extends StatelessWidget {
             Expanded(
               child: Text(
                 body,
-                style: TokensStrip.body(color: secondary).copyWith(
-                  fontSize: 12.5,
-                  height: 1.4,
-                ),
+                style: TokensStrip.body(
+                  color: secondary,
+                ).copyWith(fontSize: 12.5, height: 1.4),
               ),
             ),
             if (onRefresh != null) ...[
@@ -381,7 +396,10 @@ class PaywallPlanSyncBanner extends StatelessWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 12,
-                    color: PaywallCatalog.readableTierAccent(accent, isDark: isDark),
+                    color: PaywallCatalog.readableTierAccent(
+                      accent,
+                      isDark: isDark,
+                    ),
                   ),
                 ),
               ),
@@ -466,9 +484,7 @@ class PaywallContextBanner extends StatelessWidget {
         children: [
           Icon(Icons.bolt_rounded, color: accent, size: 22),
           const SizedBox(width: 10),
-          Expanded(
-            child: Text(msg, style: TokensStrip.body(color: ink)),
-          ),
+          Expanded(child: Text(msg, style: TokensStrip.body(color: ink))),
           if (onCta != null)
             TextButton(
               onPressed: onCta,
@@ -514,7 +530,10 @@ class PaywallSocialProofStrip extends StatelessWidget {
             if (i > 0) VerticalDivider(width: 1, color: line),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 6),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 6,
+                ),
                 child: Column(
                   children: [
                     Text(
@@ -530,7 +549,9 @@ class PaywallSocialProofStrip extends StatelessWidget {
                     Text(
                       socialProof[i].label,
                       textAlign: TextAlign.center,
-                      style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 11),
+                      style: TokensStrip.bodyMuted(
+                        color: mute,
+                      ).copyWith(fontSize: 11),
                     ),
                   ],
                 ),
@@ -581,13 +602,14 @@ class PaywallRoiStrip extends StatelessWidget {
                       for (var col = 0; col < cols; col++) ...[
                         if (col > 0) VerticalDivider(width: 1, color: line),
                         Expanded(
-                          child: row * cols + col < items.length
-                              ? _RoiCell(
-                                  item: items[row * cols + col],
-                                  line: line,
-                                  mute: mute,
-                                )
-                              : const SizedBox.shrink(),
+                          child:
+                              row * cols + col < items.length
+                                  ? _RoiCell(
+                                    item: items[row * cols + col],
+                                    line: line,
+                                    mute: mute,
+                                  )
+                                  : const SizedBox.shrink(),
                         ),
                       ],
                     ],
@@ -607,11 +629,7 @@ class _RoiCell extends StatelessWidget {
   final Color line;
   final Color mute;
 
-  const _RoiCell({
-    required this.item,
-    required this.line,
-    required this.mute,
-  });
+  const _RoiCell({required this.item, required this.line, required this.mute});
 
   @override
   Widget build(BuildContext context) {
@@ -639,4 +657,3 @@ class _RoiCell extends StatelessWidget {
     );
   }
 }
-

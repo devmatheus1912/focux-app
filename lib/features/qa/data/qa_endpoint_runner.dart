@@ -5,11 +5,7 @@ import '../../../core/storage/secure_storage.dart';
 import 'qa_smoke_catalog.dart';
 
 class QaEndpointResult {
-  const QaEndpointResult({
-    required this.ok,
-    this.statusCode,
-    this.error,
-  });
+  const QaEndpointResult({required this.ok, this.statusCode, this.error});
 
   final bool ok;
   final int? statusCode;
@@ -25,10 +21,7 @@ Future<QaEndpointResult> runQaSmokeEndpoint(QaSmokeEndpoint endpoint) async {
     final response = await dio.request<dynamic>(
       endpoint.path,
       queryParameters: endpoint.queryParameters,
-      options: Options(
-        method: endpoint.method,
-        validateStatus: (_) => true,
-      ),
+      options: Options(method: endpoint.method, validateStatus: (_) => true),
     );
 
     final status = response.statusCode ?? 0;
@@ -51,10 +44,7 @@ Future<QaEndpointResult> runQaSmokeEndpoint(QaSmokeEndpoint endpoint) async {
   }
 }
 
-List<int> _expectedStatus(
-  QaSmokeEndpoint endpoint, {
-  required bool isAuthed,
-}) {
+List<int> _expectedStatus(QaSmokeEndpoint endpoint, {required bool isAuthed}) {
   if (!isAuthed) {
     return [endpoint.expectedAnonymousStatus];
   }

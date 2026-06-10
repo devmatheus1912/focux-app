@@ -61,7 +61,11 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
       onEntrancePlayed: onEntrancePlayed,
       measurementsSection: medidasAsync.when(
         loading:
-            () => FxLoading.sectionShimmer(context, height: 88, showHeader: false),
+            () => FxLoading.sectionShimmer(
+              context,
+              height: 88,
+              showHeader: false,
+            ),
         error:
             (_, __) => Container(
               width: double.infinity,
@@ -75,10 +79,9 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
               ),
               child: Text(
                 'Medidas indisponíveis agora. Puxe para atualizar ou tente em instantes.',
-                style: Aluno360Layout.captionStyle(context).copyWith(
-                  color: fxScreenMute(context),
-                  height: 1.35,
-                ),
+                style: Aluno360Layout.captionStyle(
+                  context,
+                ).copyWith(color: fxScreenMute(context), height: 1.35),
               ),
             ),
         data:
@@ -125,7 +128,8 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
                     emptyHint: bf == null ? 'Registrar' : null,
                     onTap:
                         bf == null
-                            ? () => context.push(evolucaoRoute, extra: aluno.nome)
+                            ? () =>
+                                context.push(evolucaoRoute, extra: aluno.nome)
                             : null,
                   ),
                   Aluno360MeasurementCard(
@@ -140,7 +144,8 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
                     emptyHint: massaMagra == null ? 'Registrar' : null,
                     onTap:
                         massaMagra == null
-                            ? () => context.push(evolucaoRoute, extra: aluno.nome)
+                            ? () =>
+                                context.push(evolucaoRoute, extra: aluno.nome)
                             : null,
                   ),
                 ],

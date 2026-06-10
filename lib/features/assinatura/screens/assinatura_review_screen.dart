@@ -65,10 +65,13 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final accent = PaywallCatalog.accentForPlan(widget.plan);
     final freq =
-        widget.billingPeriod == SubscriptionBillingPeriod.yearly ? 'Anual' : 'Mensal';
+        widget.billingPeriod == SubscriptionBillingPeriod.yearly
+            ? 'Anual'
+            : 'Mensal';
     final nextBill = DateTime.now().add(
       Duration(
-        days: widget.billingPeriod == SubscriptionBillingPeriod.yearly ? 365 : 30,
+        days:
+            widget.billingPeriod == SubscriptionBillingPeriod.yearly ? 365 : 30,
       ),
     );
     final nextLabel =
@@ -104,11 +107,20 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(widget.priceDisplay, style: TokensStrip.h1(color: ink).copyWith(fontSize: 28)),
+                Text(
+                  widget.priceDisplay,
+                  style: TokensStrip.h1(color: ink).copyWith(fontSize: 28),
+                ),
                 const SizedBox(height: 6),
-                Text('Cobrança $freq · renovação automática', style: TokensStrip.bodyMuted(color: mute)),
+                Text(
+                  'Cobrança $freq · renovação automática',
+                  style: TokensStrip.bodyMuted(color: mute),
+                ),
                 const SizedBox(height: 4),
-                Text('Próxima cobrança estimada: $nextLabel', style: TokensStrip.bodyMuted(color: mute)),
+                Text(
+                  'Próxima cobrança estimada: $nextLabel',
+                  style: TokensStrip.bodyMuted(color: mute),
+                ),
                 if (widget.trialNote != null) ...[
                   const SizedBox(height: 10),
                   Text(widget.trialNote!, style: TokensStrip.body(color: ink)),
@@ -117,7 +129,10 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          Text('Incluído no plano', style: TokensStrip.h2(color: ink).copyWith(fontSize: 17)),
+          Text(
+            'Incluído no plano',
+            style: TokensStrip.h2(color: ink).copyWith(fontSize: 17),
+          ),
           const SizedBox(height: 10),
           ..._topFeatures(widget.plan).map(
             (f) => Padding(
@@ -134,14 +149,22 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
           const SizedBox(height: 20),
           Text(
             _legalBody(widget.priceDisplay, freq),
-            style: TokensStrip.bodyMuted(color: mute).copyWith(fontSize: 12, height: 1.5),
+            style: TokensStrip.bodyMuted(
+              color: mute,
+            ).copyWith(fontSize: 12, height: 1.5),
           ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 12,
             children: [
-              TextButton(onPressed: () => FocuxLegal.openPrivacy(), child: const Text('Privacidade')),
-              TextButton(onPressed: () => FocuxLegal.openTerms(), child: const Text('Termos')),
+              TextButton(
+                onPressed: () => FocuxLegal.openPrivacy(),
+                child: const Text('Privacidade'),
+              ),
+              TextButton(
+                onPressed: () => FocuxLegal.openTerms(),
+                child: const Text('Termos'),
+              ),
             ],
           ),
           const SizedBox(height: 24),
@@ -157,15 +180,23 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
                 backgroundColor: accent,
                 foregroundColor: const Color(0xFF081012),
                 minimumSize: const Size.fromHeight(52),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
-              child: const Text('Confirmar e assinar', style: TextStyle(fontWeight: FontWeight.w900)),
+              child: const Text(
+                'Confirmar e assinar',
+                style: TextStyle(fontWeight: FontWeight.w900),
+              ),
             ),
           ),
           const SizedBox(height: 10),
           TextButton(
             onPressed: () => context.pop(false),
-            child: Text('Voltar', style: TextStyle(color: mute, fontWeight: FontWeight.w600)),
+            child: Text(
+              'Voltar',
+              style: TextStyle(color: mute, fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       ),

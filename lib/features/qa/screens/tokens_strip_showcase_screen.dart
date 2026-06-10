@@ -9,6 +9,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../widgets/fx_strip_components.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 /// QA board — visual reference for TOKENS STRIP v1.0.0 (debug only).
 class TokensStripShowcaseScreen extends StatefulWidget {
@@ -31,69 +32,169 @@ class _TokensStripShowcaseScreenState extends State<TokensStripShowcaseScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'TOKENS STRIP',
-        subtitle: 'Design system reference · v${TokensStrip.version}',
-        onBack: () => safePopOrGo(context, '/dashboard/personal'),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 40),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _HeaderBadge(version: TokensStrip.version),
-            const SizedBox(height: TokensStrip.s5),
-            LayoutBuilder(
-              builder: (context, c) {
-                final wide = c.maxWidth >= 720;
-                return Wrap(
-                  spacing: TokensStrip.s4,
-                  runSpacing: TokensStrip.s4,
-                  children: [
-                    _panel(wide, 1, 'Typography', _TypographyPanel(isDark: isDark)),
-                    _panel(wide, 1, 'Icon set', _IconGrid(primary: primary)),
-                    _panel(wide, 1, 'Spacing scale', const _SpacingTable()),
-                    _panel(wide, 1, 'Border & radius', _BorderRadiusSpec(primary: primary)),
-                    _panel(wide, 1, 'Shadow depth', const _ShadowDepth()),
-                    _panel(
-                      wide,
-                      2,
-                      'Surface elevation',
-                      _ElevationStrip(isDark: isDark, primary: primary),
-                    ),
-                    _panel(wide, 1, 'Buttons', const _ButtonsPanel()),
-                    _panel(wide, 1, 'Inputs', _InputsPanel(obscure: _obscure, onToggleObscure: () => setState(() => _obscure = !_obscure))),
-                    _panel(wide, 1, 'Toggle', _TogglePanel(value: _toggleOn, onChanged: (v) => setState(() => _toggleOn = v))),
-                    _panel(wide, 1, 'Tabs', _TabsPanel(index: _tabIndex, onChanged: (i) => setState(() => _tabIndex = i))),
-                    _panel(wide, 1, 'Chips', const _ChipsPanel()),
-                    _panel(wide, 1, 'Date picker mini', _MiniCalendar(primary: primary)),
-                    _panel(wide, 1, 'Dropdown', _DropdownPanel(
-                      open: _dropdownOpen,
-                      onToggle: () => setState(() => _dropdownOpen = !_dropdownOpen),
-                    )),
-                    _panel(wide, 2, 'Stepper / Steps', const FxStripStepper(currentStep: 0, labels: ['Label progress', 'Label progress', 'Label progress'])),
-                    _panel(wide, 2, 'Component anatomy: button', const _ButtonAnatomy()),
-                    _panel(wide, 2, 'Notifications', const FxStripToast()),
-                    _panel(wide, 1, 'Tooltip', const FxStripTooltip()),
-                    _panel(wide, 1, 'Badge', const _BadgeRow()),
-                    _panel(wide, 2, 'Pagination', FxStripPagination(page: _page, totalPages: 5, onPage: (p) => setState(() => _page = p))),
-                    _panel(wide, 2, 'Breadcrumbs', const FxStripBreadcrumbs(segments: ['Navigation', 'Sub-page', 'Trail'])),
-                    _panel(wide, 1, 'Card', _SpecCard(primary: primary, isDark: isDark)),
-                    _panel(wide, 2, 'Table row', _TablePreview(primary: primary, isDark: isDark)),
-                    _panel(wide, 2, 'Empty state', FxStripEmptyState(
-                      icon: Icons.terrain_outlined,
-                      title: 'Illustration and message',
-                      message: 'This state is a message alone to use it in order to focus user activity.',
-                      actionLabel: 'Learn more',
-                      onAction: () {},
-                    )),
-                  ],
-                );
-              },
-            ),
-          ],
+    return fxScreenA11yScope(
+      label: 'TOKENS STRIP',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'TOKENS STRIP',
+          subtitle: 'Design system reference · v${TokensStrip.version}',
+          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 40),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _HeaderBadge(version: TokensStrip.version),
+              const SizedBox(height: TokensStrip.s5),
+              LayoutBuilder(
+                builder: (context, c) {
+                  final wide = c.maxWidth >= 720;
+                  return Wrap(
+                    spacing: TokensStrip.s4,
+                    runSpacing: TokensStrip.s4,
+                    children: [
+                      _panel(
+                        wide,
+                        1,
+                        'Typography',
+                        _TypographyPanel(isDark: isDark),
+                      ),
+                      _panel(wide, 1, 'Icon set', _IconGrid(primary: primary)),
+                      _panel(wide, 1, 'Spacing scale', const _SpacingTable()),
+                      _panel(
+                        wide,
+                        1,
+                        'Border & radius',
+                        _BorderRadiusSpec(primary: primary),
+                      ),
+                      _panel(wide, 1, 'Shadow depth', const _ShadowDepth()),
+                      _panel(
+                        wide,
+                        2,
+                        'Surface elevation',
+                        _ElevationStrip(isDark: isDark, primary: primary),
+                      ),
+                      _panel(wide, 1, 'Buttons', const _ButtonsPanel()),
+                      _panel(
+                        wide,
+                        1,
+                        'Inputs',
+                        _InputsPanel(
+                          obscure: _obscure,
+                          onToggleObscure:
+                              () => setState(() => _obscure = !_obscure),
+                        ),
+                      ),
+                      _panel(
+                        wide,
+                        1,
+                        'Toggle',
+                        _TogglePanel(
+                          value: _toggleOn,
+                          onChanged: (v) => setState(() => _toggleOn = v),
+                        ),
+                      ),
+                      _panel(
+                        wide,
+                        1,
+                        'Tabs',
+                        _TabsPanel(
+                          index: _tabIndex,
+                          onChanged: (i) => setState(() => _tabIndex = i),
+                        ),
+                      ),
+                      _panel(wide, 1, 'Chips', const _ChipsPanel()),
+                      _panel(
+                        wide,
+                        1,
+                        'Date picker mini',
+                        _MiniCalendar(primary: primary),
+                      ),
+                      _panel(
+                        wide,
+                        1,
+                        'Dropdown',
+                        _DropdownPanel(
+                          open: _dropdownOpen,
+                          onToggle:
+                              () => setState(
+                                () => _dropdownOpen = !_dropdownOpen,
+                              ),
+                        ),
+                      ),
+                      _panel(
+                        wide,
+                        2,
+                        'Stepper / Steps',
+                        const FxStripStepper(
+                          currentStep: 0,
+                          labels: [
+                            'Label progress',
+                            'Label progress',
+                            'Label progress',
+                          ],
+                        ),
+                      ),
+                      _panel(
+                        wide,
+                        2,
+                        'Component anatomy: button',
+                        const _ButtonAnatomy(),
+                      ),
+                      _panel(wide, 2, 'Notifications', const FxStripToast()),
+                      _panel(wide, 1, 'Tooltip', const FxStripTooltip()),
+                      _panel(wide, 1, 'Badge', const _BadgeRow()),
+                      _panel(
+                        wide,
+                        2,
+                        'Pagination',
+                        FxStripPagination(
+                          page: _page,
+                          totalPages: 5,
+                          onPage: (p) => setState(() => _page = p),
+                        ),
+                      ),
+                      _panel(
+                        wide,
+                        2,
+                        'Breadcrumbs',
+                        const FxStripBreadcrumbs(
+                          segments: ['Navigation', 'Sub-page', 'Trail'],
+                        ),
+                      ),
+                      _panel(
+                        wide,
+                        1,
+                        'Card',
+                        _SpecCard(primary: primary, isDark: isDark),
+                      ),
+                      _panel(
+                        wide,
+                        2,
+                        'Table row',
+                        _TablePreview(primary: primary, isDark: isDark),
+                      ),
+                      _panel(
+                        wide,
+                        2,
+                        'Empty state',
+                        FxStripEmptyState(
+                          icon: Icons.terrain_outlined,
+                          title: 'Illustration and message',
+                          message:
+                              'This state is a message alone to use it in order to focus user activity.',
+                          actionLabel: 'Learn more',
+                          onAction: () {},
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -131,7 +232,9 @@ class _HeaderBadge extends StatelessWidget {
           decoration: BoxDecoration(
             color: TokensStrip.primary.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(TokensStrip.rButton),
-            border: Border.all(color: TokensStrip.primary.withValues(alpha: 0.35)),
+            border: Border.all(
+              color: TokensStrip.primary.withValues(alpha: 0.35),
+            ),
           ),
           child: Text(
             'v$version',
@@ -290,30 +393,36 @@ class _SpacingTable extends StatelessWidget {
   Widget build(BuildContext context) {
     return Table(
       columnWidths: const {0: FlexColumnWidth(1), 1: FlexColumnWidth(2)},
-      children: _rows.map((r) {
-        return TableRow(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 3),
-              child: Text('${r.$1}', style: _cell()),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 3),
-              child: Row(
-                children: [
-                  Container(width: r.$2, height: 8, color: TokensStrip.primary.withValues(alpha: 0.5)),
-                  const SizedBox(width: 6),
-                  Text('${r.$2.toInt()}px', style: _cell()),
-                ],
-              ),
-            ),
-          ],
-        );
-      }).toList(),
+      children:
+          _rows.map((r) {
+            return TableRow(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 3),
+                  child: Text('${r.$1}', style: _cell()),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 3),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: r.$2,
+                        height: 8,
+                        color: TokensStrip.primary.withValues(alpha: 0.5),
+                      ),
+                      const SizedBox(width: 6),
+                      Text('${r.$2.toInt()}px', style: _cell()),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          }).toList(),
     );
   }
 
-  TextStyle _cell() => GoogleFonts.jetBrainsMono(fontSize: 11, color: TokensStrip.textSecondary);
+  TextStyle _cell() =>
+      GoogleFonts.jetBrainsMono(fontSize: 11, color: TokensStrip.textSecondary);
 }
 
 class _BorderRadiusSpec extends StatelessWidget {
@@ -412,7 +521,10 @@ class _ShadowDepth extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            border: Border.all(color: color.withValues(alpha: 0.55), width: 1.2),
+            border: Border.all(
+              color: color.withValues(alpha: 0.55),
+              width: 1.2,
+            ),
             boxShadow: TokensStrip.coloredDepthGlow(color),
           ),
         ),
@@ -442,31 +554,42 @@ class _ElevationStrip extends StatelessWidget {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: _levels.map((dp) {
-          final selected = dp == 3;
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: Column(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: TokensStrip.cardBg,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: selected ? primary : TokensStrip.borderDefault,
-                      width: selected ? 2 : 1,
+        children:
+            _levels.map((dp) {
+              final selected = dp == 3;
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: TokensStrip.cardBg,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: selected ? primary : TokensStrip.borderDefault,
+                          width: selected ? 2 : 1,
+                        ),
+                        boxShadow: TokensStrip.elevation(
+                          dp.clamp(0, 48),
+                          dark: isDark,
+                          accent: primary,
+                        ),
+                      ),
                     ),
-                    boxShadow: TokensStrip.elevation(dp.clamp(0, 48), dark: isDark, accent: primary),
-                  ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$dp',
+                      style: GoogleFonts.jetBrainsMono(
+                        fontSize: 9,
+                        color: TokensStrip.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Text('$dp', style: GoogleFonts.jetBrainsMono(fontSize: 9, color: TokensStrip.textSecondary)),
-              ],
-            ),
-          );
-        }).toList(),
+              );
+            }).toList(),
       ),
     );
   }
@@ -498,20 +621,40 @@ class _InputsPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        TextField(decoration: FxInputDeco.build(context, 'text or profile', hint: 'text or profile')),
+        TextField(
+          decoration: FxInputDeco.build(
+            context,
+            'text or profile',
+            hint: 'text or profile',
+          ),
+        ),
         const SizedBox(height: 10),
         TextField(
           obscureText: obscure,
-          decoration: FxInputDeco.build(context, 'Password', hint: 'Password').copyWith(
+          decoration: FxInputDeco.build(
+            context,
+            'Password',
+            hint: 'Password',
+          ).copyWith(
             suffixIcon: IconButton(
               onPressed: onToggleObscure,
-              icon: Icon(obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined, size: 20),
+              icon: Icon(
+                obscure
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                size: 20,
+              ),
             ),
           ),
         ),
         const SizedBox(height: 10),
         TextField(
-          decoration: FxInputDeco.build(context, 'Search', hint: 'Search', icon: Icons.search_rounded),
+          decoration: FxInputDeco.build(
+            context,
+            'Search',
+            hint: 'Search',
+            icon: Icons.search_rounded,
+          ),
         ),
       ],
     );
@@ -528,9 +671,24 @@ class _TogglePanel extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        Column(children: [Switch(value: true, onChanged: (_) {}), const Text('On', style: TextStyle(fontSize: 11))]),
-        Column(children: [Switch(value: false, onChanged: (_) {}), const Text('Off', style: TextStyle(fontSize: 11))]),
-        Column(children: [Switch(value: value, onChanged: onChanged), const Text('Live', style: TextStyle(fontSize: 11))]),
+        Column(
+          children: [
+            Switch(value: true, onChanged: (_) {}),
+            const Text('On', style: TextStyle(fontSize: 11)),
+          ],
+        ),
+        Column(
+          children: [
+            Switch(value: false, onChanged: (_) {}),
+            const Text('Off', style: TextStyle(fontSize: 11)),
+          ],
+        ),
+        Column(
+          children: [
+            Switch(value: value, onChanged: onChanged),
+            const Text('Live', style: TextStyle(fontSize: 11)),
+          ],
+        ),
       ],
     );
   }
@@ -581,14 +739,16 @@ class _TabsPanel extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 10),
               decoration: BoxDecoration(
-                gradient: selected && filled
-                    ? TokensStrip.primaryButtonGradient(primary)
-                    : null,
+                gradient:
+                    selected && filled
+                        ? TokensStrip.primaryButtonGradient(primary)
+                        : null,
                 color: selected && filled ? null : Colors.transparent,
                 borderRadius: BorderRadius.circular(TokensStrip.rButton),
-                boxShadow: selected && filled
-                    ? TokensStrip.coloredDepthGlow(primary, strength: 0.45)
-                    : null,
+                boxShadow:
+                    selected && filled
+                        ? TokensStrip.coloredDepthGlow(primary, strength: 0.45)
+                        : null,
               ),
               alignment: Alignment.center,
               child: Text(
@@ -596,9 +756,12 @@ class _TabsPanel extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: disabled
-                      ? TokensStrip.disabled
-                      : (selected && filled ? Colors.white : TokensStrip.textSecondary),
+                  color:
+                      disabled
+                          ? TokensStrip.disabled
+                          : (selected && filled
+                              ? Colors.white
+                              : TokensStrip.textSecondary),
                 ),
               ),
             ),
@@ -684,23 +847,42 @@ class _MiniCalendar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Icon(Icons.chevron_left, size: 18, color: primary),
-            Text('June 2022', style: AppTypography.inter(fontWeight: FontWeight.w700, fontSize: 13)),
+            Text(
+              'June 2022',
+              style: AppTypography.inter(
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+              ),
+            ),
             Icon(Icons.chevron_right, size: 18, color: primary),
           ],
         ),
         const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: days.map((d) => Text(d, style: TextStyle(fontSize: 10, color: TokensStrip.textSecondary))).toList(),
+          children:
+              days
+                  .map(
+                    (d) => Text(
+                      d,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: TokensStrip.textSecondary,
+                      ),
+                    ),
+                  )
+                  .toList(),
         ),
         const SizedBox(height: 4),
-        ...grid.map((row) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: row.map(dayCell).toList(),
+        ...grid.map(
+          (row) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: row.map(dayCell).toList(),
+            ),
           ),
-        )),
+        ),
       ],
     );
   }
@@ -761,7 +943,10 @@ class _DropdownPanel extends StatelessWidget {
               child: Row(
                 children: [
                   const Expanded(
-                    child: Text('Select options', style: TextStyle(fontSize: 13)),
+                    child: Text(
+                      'Select options',
+                      style: TextStyle(fontSize: 13),
+                    ),
                   ),
                   Icon(
                     open ? Icons.expand_less : Icons.expand_more,
@@ -832,10 +1017,7 @@ class _ButtonAnatomy extends StatelessWidget {
           'DISABLED STATE',
           '',
           '',
-          _specButton(
-            label: 'Engage',
-            disabled: true,
-          ),
+          _specButton(label: 'Engage', disabled: true),
         ),
         _anatomyRow(
           'LOADING STATE',
@@ -869,40 +1051,53 @@ class _ButtonAnatomy extends StatelessWidget {
     return Container(
       height: 44,
       decoration: BoxDecoration(
-        gradient: filled && primary != null
-            ? TokensStrip.primaryButtonGradient(primary)
-            : null,
-        color: disabled
-            ? const Color(0xFFE8EAED)
-            : (filled ? null : fill ?? TokensStrip.specIdleFill),
+        gradient:
+            filled && primary != null
+                ? TokensStrip.primaryButtonGradient(primary)
+                : null,
+        color:
+            disabled
+                ? const Color(0xFFE8EAED)
+                : (filled ? null : fill ?? TokensStrip.specIdleFill),
         borderRadius: BorderRadius.circular(TokensStrip.rButton),
-        border: disabled ? null : Border.all(color: border ?? TokensStrip.specIdleBorder),
+        border:
+            disabled
+                ? null
+                : Border.all(color: border ?? TokensStrip.specIdleBorder),
         boxShadow: disabled ? null : shadow,
       ),
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: loading
-          ? FxLoading(color: primary ?? TokensStrip.primary, strokeWidth: 2)
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (icon != null) ...[
-                  Icon(icon, size: 16, color: filled ? Colors.white : TokensStrip.textPrimary),
-                  const SizedBox(width: 6),
-                ],
-                if (label != null)
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                      color: disabled
-                          ? const Color(0xFF9CA3AF)
-                          : (filled ? Colors.white : TokensStrip.textPrimary),
+      child:
+          loading
+              ? FxLoading(color: primary ?? TokensStrip.primary, strokeWidth: 2)
+              : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (icon != null) ...[
+                    Icon(
+                      icon,
+                      size: 16,
+                      color: filled ? Colors.white : TokensStrip.textPrimary,
                     ),
-                  ),
-              ],
-            ),
+                    const SizedBox(width: 6),
+                  ],
+                  if (label != null)
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color:
+                            disabled
+                                ? const Color(0xFF9CA3AF)
+                                : (filled
+                                    ? Colors.white
+                                    : TokensStrip.textPrimary),
+                      ),
+                    ),
+                ],
+              ),
     );
   }
 
@@ -1008,12 +1203,20 @@ class _SpecCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             'Content block title',
-            style: AppTypography.inter(fontSize: 15, fontWeight: FontWeight.w700, color: ink),
+            style: AppTypography.inter(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: ink,
+            ),
           ),
           const SizedBox(height: 6),
           Text(
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-            style: AppTypography.inter(fontSize: 12.5, color: TokensStrip.textSecondary, height: 1.45),
+            style: AppTypography.inter(
+              fontSize: 12.5,
+              color: TokensStrip.textSecondary,
+              height: 1.45,
+            ),
           ),
         ],
       ),
@@ -1029,21 +1232,44 @@ class _TablePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    TextStyle head() => AppTypography.inter(fontSize: 12, fontWeight: FontWeight.w700, color: primary);
+    TextStyle head() => AppTypography.inter(
+      fontSize: 12,
+      fontWeight: FontWeight.w700,
+      color: primary,
+    );
     TextStyle cell() => AppTypography.inter(fontSize: 12, color: ink);
 
     Widget row(List<String> cells, {bool header = false}) {
       return Container(
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: TokensStrip.borderDefault.withValues(alpha: 0.7))),
+          border: Border(
+            bottom: BorderSide(
+              color: TokensStrip.borderDefault.withValues(alpha: 0.7),
+            ),
+          ),
         ),
         child: Row(
           children: [
-            Expanded(flex: 2, child: Text(cells[0], style: header ? head() : cell())),
+            Expanded(
+              flex: 2,
+              child: Text(cells[0], style: header ? head() : cell()),
+            ),
             Expanded(child: Text(cells[1], style: header ? head() : cell())),
             Expanded(child: Text(cells[2], style: header ? head() : cell())),
-            Expanded(child: Text(cells[3], style: header ? head().copyWith(color: primary) : TextStyle(color: primary, fontWeight: FontWeight.w600, fontSize: 12))),
+            Expanded(
+              child: Text(
+                cells[3],
+                style:
+                    header
+                        ? head().copyWith(color: primary)
+                        : TextStyle(
+                          color: primary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+              ),
+            ),
           ],
         ),
       );

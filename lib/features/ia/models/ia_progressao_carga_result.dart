@@ -35,9 +35,10 @@ class IaProgressaoCargaResult {
             final atual = row['cargaAtual']?.toString() ?? '';
             final sugerida = row['cargaSugerida']?.toString() ?? '';
             final deltaRaw = row['deltaKg'];
-            final deltaLabel = deltaRaw != null
-                ? _deltaFromApi(deltaRaw)
-                : computeProgressaoDeltaLabel(atual, sugerida);
+            final deltaLabel =
+                deltaRaw != null
+                    ? _deltaFromApi(deltaRaw)
+                    : computeProgressaoDeltaLabel(atual, sugerida);
             return IaProgressaoExerciseRow(
               exercicio: row['exercicio']?.toString() ?? '',
               cargaAtual: atual,

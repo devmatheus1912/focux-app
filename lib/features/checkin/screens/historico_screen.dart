@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,6 +13,7 @@ import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 class HistoricoCheckinScreen extends ConsumerWidget {
   const HistoricoCheckinScreen({super.key});
@@ -22,49 +23,58 @@ class HistoricoCheckinScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final historicoAsync = ref.watch(historicoCheckinProvider);
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Histórico de Treinos',
-        onBack: () => safePopOrGo(context, '/checkin/treinos'),
-      ),
-      body: historicoAsync.when(
-        loading: () => const FxLoading(),
-        error:
-            (e, _) => FxEmptyState(
-              icon: 'alert-triangle',
-              title: 'Erro ao carregar',
-              subtitle: friendlyError(e),
-              action: FxEmptyAction(
-                label: 'Tentar novamente',
-                onTap: () => ref.invalidate(historicoCheckinProvider),
+    return fxScreenA11yScope(
+      label: 'Histórico de Treinos',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Histórico de Treinos',
+          onBack: () => safePopOrGo(context, '/checkin/treinos'),
+        ),
+        body: historicoAsync.when(
+          loading: () => const FxLoading(),
+          error:
+              (e, _) => FxEmptyState(
+                icon: 'alert-triangle',
+                title: 'Erro ao carregar',
+                subtitle: friendlyError(e),
+                action: FxEmptyAction(
+                  label: 'Tentar novamente',
+                  onTap: () => ref.invalidate(historicoCheckinProvider),
+                ),
               ),
-            ),
-        data:
-            (historico) =>
-                historico.isEmpty
-                    ? FxEmptyState(
-                      icon: 'dumbbell',
-                      title: 'Nenhum treino ainda',
-                      subtitle: 'Seus treinos concluídos aparecerão aqui.',
-                      action: FxEmptyAction(
-                        label: 'Ver treinos disponíveis',
-                        onTap: () => context.push('/checkin/treinos'),
+          data:
+              (historico) =>
+                  historico.isEmpty
+                      ? FxEmptyState(
+                        icon: 'dumbbell',
+                        title: 'Nenhum treino ainda',
+                        subtitle: 'Seus treinos concluídos aparecerão aqui.',
+                        action: FxEmptyAction(
+                          label: 'Ver treinos disponíveis',
+                          onTap: () => context.push('/checkin/treinos'),
+                        ),
+                      )
+                      : RefreshIndicator(
+                        onRefresh:
+                            () async =>
+                                ref.invalidate(historicoCheckinProvider),
+                        child: ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(
+                            TokensStrip.s4,
+                            8,
+                            16,
+                            100,
+                          ),
+                          itemCount: historico.length,
+                          itemBuilder:
+                              (context, i) => _HistoricoCard(
+                                entry: historico[i],
+                                isDark: isDark,
+                              ),
+                        ),
                       ),
-                    )
-                    : RefreshIndicator(
-                      onRefresh:
-                          () async => ref.invalidate(historicoCheckinProvider),
-                      child: ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 8, 16, 100),
-                        itemCount: historico.length,
-                        itemBuilder:
-                            (context, i) => _HistoricoCard(
-                              entry: historico[i],
-                              isDark: isDark,
-                            ),
-                      ),
-                    ),
+        ),
       ),
     );
   }

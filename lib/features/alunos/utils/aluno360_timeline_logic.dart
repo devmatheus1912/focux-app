@@ -13,8 +13,14 @@ String sanitizeTimeline360Copy(String? raw) {
   text = text.replaceFirst(RegExp(r'^!\s*'), '');
 
   text = text.replaceAll(RegExp(r'\bacao\b', caseSensitive: false), 'ação');
-  text = text.replaceAll(RegExp(r'\bevolucao\b', caseSensitive: false), 'evolução');
-  text = text.replaceAll(RegExp(r'\bproximo\b', caseSensitive: false), 'próximo');
+  text = text.replaceAll(
+    RegExp(r'\bevolucao\b', caseSensitive: false),
+    'evolução',
+  );
+  text = text.replaceAll(
+    RegExp(r'\bproximo\b', caseSensitive: false),
+    'próximo',
+  );
   text = text.replaceAll(RegExp(r'\besta\b', caseSensitive: false), 'está');
 
   text = text.replaceAll(
@@ -124,10 +130,9 @@ bool timeline360IsAutonomiaActionCode(String? raw) {
 }
 
 String timeline360AutonomiaTaskFingerprint(String title) {
-  return sanitizeTimeline360Copy(title)
-      .toLowerCase()
-      .replaceAll(RegExp(r'\s+'), ' ')
-      .trim();
+  return sanitizeTimeline360Copy(
+    title,
+  ).toLowerCase().replaceAll(RegExp(r'\s+'), ' ').trim();
 }
 
 String timeline360RewriteCopilotExtractedAction(String action) {
@@ -139,7 +144,8 @@ String timeline360RewriteCopilotExtractedAction(String action) {
   if (lower.contains('sumiu do radar')) {
     return trimmed;
   }
-  if (lower.contains('reforçar check-in') || lower.contains('reforcar check-in')) {
+  if (lower.contains('reforçar check-in') ||
+      lower.contains('reforcar check-in')) {
     return 'Vale reforçar o check-in com o aluno esta semana.';
   }
 
@@ -200,8 +206,14 @@ String timeline360StripInactivitySuffixFragments(String text) {
 
 String timeline360FinalizeCopy(String text) {
   var out = timeline360StripInactivitySuffixFragments(text.trim());
-  out = out.replaceAll(RegExp(r'\s+para retomar\.?$', caseSensitive: false), '');
-  out = out.replaceAll(RegExp(r'\.\s+para retomar\.?$', caseSensitive: false), '.');
+  out = out.replaceAll(
+    RegExp(r'\s+para retomar\.?$', caseSensitive: false),
+    '',
+  );
+  out = out.replaceAll(
+    RegExp(r'\.\s+para retomar\.?$', caseSensitive: false),
+    '.',
+  );
   out = out.replaceAllMapped(
     RegExp(
       r'(ajusto o plano)\.?\s+para entender o motivo da inatividad[ée][^.]*\.?$',
@@ -215,10 +227,10 @@ String timeline360FinalizeCopy(String text) {
 
 /// Fingerprint para deduplicar previews de chat no FE (defensivo).
 String timeline360ChatBodyFingerprint(String body) {
-  final text = sanitizeTimeline360Copy(body).toLowerCase().replaceAll(
-    RegExp(r'\s+'),
-    ' ',
-  ).trim();
+  final text =
+      sanitizeTimeline360Copy(
+        body,
+      ).toLowerCase().replaceAll(RegExp(r'\s+'), ' ').trim();
   if (text.isEmpty) return '';
   if (text.startsWith('próximo passo do plano:') && text.contains('contate')) {
     return 'chat:recovery';
@@ -247,7 +259,8 @@ bool isSmokeTimelineContent(String? raw) {
     return true;
   }
   if (text.startsWith('próximo passo do plano:') &&
-      (text.contains('reforçar check-in') || text.contains('reforcar check-in'))) {
+      (text.contains('reforçar check-in') ||
+          text.contains('reforcar check-in'))) {
     return true;
   }
   return false;
@@ -280,8 +293,9 @@ List<T> sortTimeline360Items<T>(
     } else if (atB != null) {
       return 1;
     }
-    return timeline360PriorityRank(priorityOf(a))
-        .compareTo(timeline360PriorityRank(priorityOf(b)));
+    return timeline360PriorityRank(
+      priorityOf(a),
+    ).compareTo(timeline360PriorityRank(priorityOf(b)));
   });
   return sorted;
 }
@@ -338,13 +352,11 @@ List<T> dedupeAutonomiaTimelineByTask<T>(
 }
 
 /// Preview body for chat rows — drops redundant "Oi, {nome}." after kind header.
-String timeline360ChatPreviewBody(
-  String body, {
-  String? alunoFirstName,
-}) {
+String timeline360ChatPreviewBody(String body, {String? alunoFirstName}) {
   var text = body.trim();
   if (text.isEmpty) return text;
-  if (text.length <= 4 && RegExp(r'^oi[!?.]*$', caseSensitive: false).hasMatch(text)) {
+  if (text.length <= 4 &&
+      RegExp(r'^oi[!?.]*$', caseSensitive: false).hasMatch(text)) {
     return 'Saudação no chat';
   }
 
@@ -455,10 +467,7 @@ bool timeline360ShouldShowPriorityBadge({required String kind}) {
   return kind != 'Chat';
 }
 
-String? timeline360SenderLabel({
-  required String meta,
-  required String title,
-}) {
+String? timeline360SenderLabel({required String meta, required String title}) {
   final upper = meta.trim().toUpperCase();
   if (upper == 'PERSONAL') return 'Personal';
   if (upper == 'ALUNO') return 'Aluno';
@@ -478,10 +487,7 @@ Color timeline360PriorityColor(String? priority, {required Color primary}) {
 }
 
 /// Ink on priority pill backgrounds — darkens brand teal for WCAG AA on white.
-Color timeline360PriorityInk(
-  Color accent, {
-  required bool isDark,
-}) {
+Color timeline360PriorityInk(Color accent, {required bool isDark}) {
   if (isDark) return accent;
   final hsl = HSLColor.fromColor(accent);
   if (hsl.hue >= 95 && hsl.hue <= 165) {

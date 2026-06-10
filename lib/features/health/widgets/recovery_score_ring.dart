@@ -46,16 +46,18 @@ class _RecoveryRingPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2 - 3;
-    final background = Paint()
-      ..color = color.withValues(alpha: 0.14)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4
-      ..strokeCap = StrokeCap.round;
-    final foreground = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4
-      ..strokeCap = StrokeCap.round;
+    final background =
+        Paint()
+          ..color = color.withValues(alpha: 0.14)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 4
+          ..strokeCap = StrokeCap.round;
+    final foreground =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 4
+          ..strokeCap = StrokeCap.round;
 
     canvas.drawCircle(center, radius, background);
     final sweep = (score.clamp(0, 100) / 100) * math.pi * 2;

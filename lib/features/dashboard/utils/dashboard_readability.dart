@@ -37,17 +37,22 @@ Color dashboardHeroMutedOnTeal() => Colors.white.withValues(alpha: 0.90);
       foreground: Colors.white.withValues(alpha: 0.96),
     );
   }
-  return (
-    background: accent.withValues(alpha: 0.14),
-    foreground: accent,
-  );
+  return (background: accent.withValues(alpha: 0.14), foreground: accent);
 }
 
 /// Chip “Ver prioridades” no header quando [isDark].
-Color dashboardPrioritiesChipBackground(Color primary, {required bool isDark}) =>
-    BrandPalette.soft(primary, dark: isDark).withValues(alpha: isDark ? 0.55 : 1);
+Color dashboardPrioritiesChipBackground(
+  Color primary, {
+  required bool isDark,
+}) => BrandPalette.soft(
+  primary,
+  dark: isDark,
+).withValues(alpha: isDark ? 0.55 : 1);
 
-Color dashboardPrioritiesChipForeground(Color primary, {required bool isDark}) =>
+Color dashboardPrioritiesChipForeground(
+  Color primary, {
+  required bool isDark,
+}) =>
     isDark
         ? Colors.white.withValues(alpha: 0.96)
         : BrandPalette.sectionAction(primary, dark: false);

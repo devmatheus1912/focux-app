@@ -76,7 +76,11 @@ class PadraoExerciciosBottomSheet extends ConsumerWidget {
                       padding: EdgeInsets.symmetric(vertical: 6),
                       child: Row(
                         children: [
-                          SkeletonLoader(width: 44, height: 44, borderRadius: 14),
+                          SkeletonLoader(
+                            width: 44,
+                            height: 44,
+                            borderRadius: 14,
+                          ),
                           SizedBox(width: 12),
                           Expanded(
                             child: Column(
@@ -115,14 +119,14 @@ class PadraoExerciciosBottomSheet extends ConsumerWidget {
               final filtered = applyExercisePickerFilter(all, pickerFilter);
               final items = sortExerciciosForPicker(
                 filtered.where((ex) {
-                      if (padrao != null) {
-                        return ex.padraoMovimento == padrao;
-                      }
-                      if (grupo != null) {
-                        return ex.grupoMuscularPrimario == grupo;
-                      }
-                      return false;
-                    }),
+                  if (padrao != null) {
+                    return ex.padraoMovimento == padrao;
+                  }
+                  if (grupo != null) {
+                    return ex.grupoMuscularPrimario == grupo;
+                  }
+                  return false;
+                }),
                 alreadyInTreinoIds: alreadyInTreinoIds,
               );
 
@@ -166,10 +170,8 @@ class PadraoExerciciosBottomSheet extends ConsumerWidget {
                     alreadyInTreino: alreadyInTreinoIds.contains(ex.id),
                     onPreview:
                         ex.hasPlayableMedia
-                            ? () => showExerciseMediaPreview(
-                              context,
-                              exercicio: ex,
-                            )
+                            ? () =>
+                                showExerciseMediaPreview(context, exercicio: ex)
                             : null,
                     onTap: () {
                       HapticFeedback.selectionClick();

@@ -104,10 +104,13 @@ IaProgressaoParsedResult parseIaProgressaoMarkdown(String raw) {
 
   return IaProgressaoParsedResult(
     rawMarkdown: raw,
-    intro: preTable.isEmpty ? null : _cleanMarkdownParagraph(preTable.join('\n')),
+    intro:
+        preTable.isEmpty ? null : _cleanMarkdownParagraph(preTable.join('\n')),
     exercises: exercises,
     footer:
-        postTable.isEmpty ? null : _cleanMarkdownParagraph(postTable.join('\n')),
+        postTable.isEmpty
+            ? null
+            : _cleanMarkdownParagraph(postTable.join('\n')),
   );
 }
 
@@ -184,10 +187,8 @@ String _cleanMarkdownParagraph(String value) {
   return value
       .split('\n')
       .map(
-        (line) => line
-            .replaceAll(RegExp(r'^#+\s*'), '')
-            .replaceAll('**', '')
-            .trim(),
+        (line) =>
+            line.replaceAll(RegExp(r'^#+\s*'), '').replaceAll('**', '').trim(),
       )
       .where((line) => line.isNotEmpty)
       .join('\n')

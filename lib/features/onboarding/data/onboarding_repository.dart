@@ -54,9 +54,10 @@ class OnboardingWizard {
   });
 
   factory OnboardingWizard.fromJson(Map<String, dynamic> j) => OnboardingWizard(
-    steps: (j['steps'] as List<dynamic>? ?? [])
-        .map((e) => OnboardingStep.fromJson(e as Map<String, dynamic>))
-        .toList(),
+    steps:
+        (j['steps'] as List<dynamic>? ?? [])
+            .map((e) => OnboardingStep.fromJson(e as Map<String, dynamic>))
+            .toList(),
     completedCount: (j['completedCount'] as num?)?.toInt() ?? 0,
     totalCount: (j['totalCount'] as num?)?.toInt() ?? 0,
     progressPercent: (j['progressPercent'] as num?)?.toInt() ?? 0,

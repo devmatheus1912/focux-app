@@ -72,7 +72,10 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
 
   Future<void> _salvar() async {
     if (!_canSave) {
-      FeedbackHelper.showError(context, 'Selecione aluno, início e fim para agendar.');
+      FeedbackHelper.showError(
+        context,
+        'Selecione aluno, início e fim para agendar.',
+      );
       return;
     }
     final alunoId = _alunoId;
@@ -306,10 +309,7 @@ class _AgendaAlunoButton extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: chrome.mute,
-              ),
+              Icon(Icons.keyboard_arrow_down_rounded, color: chrome.mute),
             ],
           ),
         ),
@@ -512,7 +512,12 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                   const SizedBox(height: 10),
                   _agendaSheetHandle(context),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 18, 20, 12),
+                    padding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s5,
+                      18,
+                      20,
+                      12,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -546,16 +551,24 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                             onChanged: (_) => setState(() {}),
                             decoration: InputDecoration(
                               hintText: 'Buscar por nome, e-mail ou objetivo',
-                              prefixIcon: Icon(Icons.search, size: 19, color: chrome.mute),
+                              prefixIcon: Icon(
+                                Icons.search,
+                                size: 19,
+                                color: chrome.mute,
+                              ),
                               filled: true,
                               fillColor: chrome.cardFill,
                               border: FxInputDeco.outlineBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: chrome.lineStrong),
+                                borderSide: BorderSide(
+                                  color: chrome.lineStrong,
+                                ),
                               ),
                               enabledBorder: FxInputDeco.outlineBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: chrome.lineStrong),
+                                borderSide: BorderSide(
+                                  color: chrome.lineStrong,
+                                ),
                               ),
                               focusedBorder: FxInputDeco.outlineBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -567,88 +580,96 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                       ],
                     ),
                   ),
-                Expanded(
-                  child: ListView.separated(
-                    controller: controller,
-                    padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 0, 20, 28),
-                    itemCount: alunos.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (_, index) {
-                      final aluno = alunos[index];
-                      final selected = aluno.id == widget.selectedId;
-                      return Semantics(
-                        button: true,
-                        selected: selected,
-                        label: 'Aluno ${aluno.nome}${selected ? ', selecionado' : ''}',
-                        child: InkWell(
-                          onTap: () => Navigator.pop(context, aluno),
-                          borderRadius: BorderRadius.circular(18),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color:
-                                  selected
-                                      ? primary.withValues(
-                                        alpha: chrome.isDark ? 0.18 : 0.10,
-                                      )
-                                      : chrome.cardFill,
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(
-                                color: selected ? primary : chrome.lineStrong,
+                  Expanded(
+                    child: ListView.separated(
+                      controller: controller,
+                      padding: const EdgeInsets.fromLTRB(
+                        TokensStrip.s5,
+                        0,
+                        20,
+                        28,
+                      ),
+                      itemCount: alunos.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemBuilder: (_, index) {
+                        final aluno = alunos[index];
+                        final selected = aluno.id == widget.selectedId;
+                        return Semantics(
+                          button: true,
+                          selected: selected,
+                          label:
+                              'Aluno ${aluno.nome}${selected ? ', selecionado' : ''}',
+                          child: InkWell(
+                            onTap: () => Navigator.pop(context, aluno),
+                            borderRadius: BorderRadius.circular(18),
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color:
+                                    selected
+                                        ? primary.withValues(
+                                          alpha: chrome.isDark ? 0.18 : 0.10,
+                                        )
+                                        : chrome.cardFill,
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(
+                                  color: selected ? primary : chrome.lineStrong,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  _AgendaAlunoAvatar(aluno: aluno),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          aluno.nome,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: AppTypography.inter(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w800,
+                                            color: chrome.ink,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 3),
+                                        Text(
+                                          [
+                                            if ((aluno.objetivo ?? '')
+                                                .isNotEmpty)
+                                              aluno.objetivo!,
+                                            aluno.email,
+                                          ].join(' · '),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: AppTypography.inter(
+                                            fontSize: 11,
+                                            color: chrome.mute,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(
+                                    selected
+                                        ? Icons.check_circle
+                                        : Icons.chevron_right_rounded,
+                                    color: selected ? primary : chrome.mute,
+                                  ),
+                                ],
                               ),
                             ),
-                            child: Row(
-                              children: [
-                                _AgendaAlunoAvatar(aluno: aluno),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        aluno.nome,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: AppTypography.inter(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w800,
-                                          color: chrome.ink,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 3),
-                                      Text(
-                                        [
-                                          if ((aluno.objetivo ?? '').isNotEmpty)
-                                            aluno.objetivo!,
-                                          aluno.email,
-                                        ].join(' · '),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: AppTypography.inter(
-                                          fontSize: 11,
-                                          color: chrome.mute,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Icon(
-                                  selected
-                                      ? Icons.check_circle
-                                      : Icons.chevron_right_rounded,
-                                  color: selected ? primary : chrome.mute,
-                                ),
-                              ],
-                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
       ),
     );
   }
@@ -745,30 +766,32 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
                             color: selected ? primary : chrome.lineStrong,
                           ),
                         ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            _weekLabel(day.weekday),
-                            style: AppTypography.inter(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              color:
-                                  selected ? Colors.white : TokensStrip.textSecondary,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              _weekLabel(day.weekday),
+                              style: AppTypography.inter(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color:
+                                    selected
+                                        ? Colors.white
+                                        : TokensStrip.textSecondary,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${day.day}',
-                            style: AppTypography.inter(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: selected ? Colors.white : chrome.ink,
+                            const SizedBox(height: 4),
+                            Text(
+                              '${day.day}',
+                              style: AppTypography.inter(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                color: selected ? Colors.white : chrome.ink,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
                     ),
                   );
                 },

@@ -14,7 +14,11 @@ class PaywallOtherPlansIntro extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    final secondary = PaywallCatalog.readableSecondary(
+      ink,
+      mute,
+      isDark: isDark,
+    );
     return Padding(
       padding: const EdgeInsets.only(bottom: TokensStrip.s3),
       child: Text(
@@ -41,7 +45,11 @@ class _StudioActiveStatusBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    final secondary = PaywallCatalog.readableSecondary(
+      ink,
+      mute,
+      isDark: isDark,
+    );
     return PaywallInsetPanel(
       accent: accent,
       isDark: isDark,
@@ -68,7 +76,9 @@ class _StudioActiveStatusBanner extends StatelessWidget {
                 Text(
                   'Cobrança e renovação na ${subscriptionChannelLabel()}. '
                   'Valores exatos aparecem nas configurações da loja.',
-                  style: TokensStrip.bodyMuted(color: secondary).copyWith(fontSize: 13),
+                  style: TokensStrip.bodyMuted(
+                    color: secondary,
+                  ).copyWith(fontSize: 13),
                 ),
               ],
             ),
@@ -105,7 +115,11 @@ class _StoreBillingHint extends StatelessWidget {
               'Preços e upgrade disponíveis na ${subscriptionChannelLabel()} '
               'deste dispositivo. Abra a loja para concluir.',
               style: TokensStrip.bodyMuted(
-                color: PaywallCatalog.readableSecondary(ink, mute, isDark: isDark),
+                color: PaywallCatalog.readableSecondary(
+                  ink,
+                  mute,
+                  isDark: isDark,
+                ),
               ).copyWith(fontSize: 13),
             ),
           ),
@@ -129,7 +143,11 @@ class _RoiMoneyTag extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       child: Row(
         children: [
-          const Icon(Icons.savings_outlined, size: 16, color: PaywallCatalog.green),
+          const Icon(
+            Icons.savings_outlined,
+            size: 16,
+            color: PaywallCatalog.green,
+          ),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
@@ -171,9 +189,16 @@ class PaywallSectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    final secondary = PaywallCatalog.readableSecondary(
+      ink,
+      mute,
+      isDark: isDark,
+    );
     return Padding(
-      padding: const EdgeInsets.only(top: TokensStrip.s1, bottom: TokensStrip.s3),
+      padding: const EdgeInsets.only(
+        top: TokensStrip.s1,
+        bottom: TokensStrip.s3,
+      ),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final stackNote = constraints.maxWidth < 400 && note != null;
@@ -194,10 +219,9 @@ class PaywallSectionHeader extends StatelessWidget {
                 const SizedBox(height: TokensStrip.s2),
                 Text(
                   note!,
-                  style: TokensStrip.bodyMuted(color: secondary).copyWith(
-                    fontSize: TokensStrip.fontBodySm,
-                    height: 1.4,
-                  ),
+                  style: TokensStrip.bodyMuted(
+                    color: secondary,
+                  ).copyWith(fontSize: TokensStrip.fontBodySm, height: 1.4),
                 ),
               ] else
                 Row(
@@ -221,7 +245,9 @@ class PaywallSectionHeader extends StatelessWidget {
                         child: Text(
                           note!,
                           textAlign: TextAlign.end,
-                          style: TokensStrip.bodyMuted(color: secondary).copyWith(
+                          style: TokensStrip.bodyMuted(
+                            color: secondary,
+                          ).copyWith(
                             fontSize: TokensStrip.fontBodySm,
                             height: 1.4,
                           ),

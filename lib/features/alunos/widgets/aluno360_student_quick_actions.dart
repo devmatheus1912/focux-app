@@ -64,10 +64,9 @@ class Aluno360StudentQuickActions extends StatelessWidget {
                         'Acesso e evolução de ${aluno.nome.split(' ').first}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: Aluno360Layout.captionStyle(context).copyWith(
-                          color: mute,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: Aluno360Layout.captionStyle(
+                          context,
+                        ).copyWith(color: mute, fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
@@ -129,11 +128,12 @@ class Aluno360QuickActionPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final pillInk = Color.lerp(
-      primary,
-      isDark ? Colors.white : Colors.black,
-      isDark ? 0.08 : 0.55,
-    )!;
+    final pillInk =
+        Color.lerp(
+          primary,
+          isDark ? Colors.white : Colors.black,
+          isDark ? 0.08 : 0.55,
+        )!;
     return Semantics(
       button: true,
       label: label,
@@ -143,33 +143,33 @@ class Aluno360QuickActionPill extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(14),
           child: Container(
-          height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
-            color: primary.withValues(alpha: isDark ? 0.14 : 0.10),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: primary.withValues(alpha: isDark ? 0.42 : 0.50),
+            height: 48,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: primary.withValues(alpha: isDark ? 0.14 : 0.10),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: primary.withValues(alpha: isDark ? 0.42 : 0.50),
+              ),
             ),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, size: 16, color: pillInk),
-              const SizedBox(width: 5),
-              Expanded(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.inter(
-                    color: pillInk,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+            child: Row(
+              children: [
+                Icon(icon, size: 16, color: pillInk),
+                const SizedBox(width: 5),
+                Expanded(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.inter(
+                      color: pillInk,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
           ),
         ),
       ),

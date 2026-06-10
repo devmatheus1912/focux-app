@@ -125,10 +125,7 @@ class ExercicioCard extends ConsumerWidget {
                                   : hasDemo
                                   ? 'Biblioteca'
                                   : 'Sem demo',
-                          color:
-                              hasDemo
-                                  ? EagleTokens.good
-                                  : EagleTokens.warn,
+                          color: hasDemo ? EagleTokens.good : EagleTokens.warn,
                         ),
                         const SizedBox(width: 6),
                         if (_modalidadeLabel(exercicio)?.isNotEmpty == true)

@@ -40,8 +40,7 @@ class DashboardDayFocus {
     if (riscoAlto > 0) {
       return DashboardDayFocus(
         headline: 'Acompanhar alunos em risco',
-        detail:
-            '$riscoAlto no radar · revise antes que a aderência caia.',
+        detail: '$riscoAlto no radar · revise antes que a aderência caia.',
         semanticLabel:
             'Foco do dia: $riscoAlto alunos em risco precisam de acompanhamento.',
       );
@@ -69,8 +68,7 @@ class DashboardDayFocus {
         headline: 'Agenda cheia hoje',
         detail:
             '$agendaHoje compromisso${agendaHoje == 1 ? '' : 's'} · confira a Central de Comando.',
-        semanticLabel:
-            'Foco do dia: $agendaHoje compromissos na agenda.',
+        semanticLabel: 'Foco do dia: $agendaHoje compromissos na agenda.',
       );
     }
     return const DashboardDayFocus(

@@ -37,9 +37,10 @@ class SetupOnboardingWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final statusAsync = ref.watch(onboardingStatusProvider);
     final primary = Theme.of(context).colorScheme.primary;
-    final mute = Theme.of(context).brightness == Brightness.dark
-        ? TokensStrip.textSecondary
-        : TokensStrip.textSecondary;
+    final mute =
+        Theme.of(context).brightness == Brightness.dark
+            ? TokensStrip.textSecondary
+            : TokensStrip.textSecondary;
 
     return statusAsync.when(
       loading: () => const SetupWizardSkeleton(compact: true),
@@ -98,10 +99,9 @@ class SetupOnboardingWidget extends ConsumerWidget {
                 const SizedBox(height: TokensStrip.s2),
                 Text(
                   '$completedCount passos concluídos · foco nos próximos',
-                  style: TokensStrip.bodyMuted(color: mute).copyWith(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TokensStrip.bodyMuted(
+                    color: mute,
+                  ).copyWith(fontSize: 12, fontWeight: FontWeight.w500),
                 ),
               ],
               const SizedBox(height: TokensStrip.s3),
@@ -121,7 +121,8 @@ class SetupOnboardingWidget extends ConsumerWidget {
                 const SizedBox(height: TokensStrip.s2),
                 Semantics(
                   button: true,
-                  label: 'Mais $hiddenPending passos pendentes, abrir setup completo',
+                  label:
+                      'Mais $hiddenPending passos pendentes, abrir setup completo',
                   child: InkWell(
                     onTap: () => context.push('/onboarding/wizard'),
                     borderRadius: BorderRadius.circular(TokensStrip.rInput),

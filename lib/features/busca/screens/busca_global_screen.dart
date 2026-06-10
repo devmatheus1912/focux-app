@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -410,7 +410,12 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
                   return ListView(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 12, 16, 4),
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          12,
+                          16,
+                          4,
+                        ),
                         child: Text(
                           '${items.length} resultado${items.length > 1 ? 's' : ''} em ${filter.label}',
                           style: TextStyle(
@@ -432,7 +437,12 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
                 return ListView(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 8, 16, 0),
+                      padding: const EdgeInsets.fromLTRB(
+                        TokensStrip.s4,
+                        8,
+                        16,
+                        0,
+                      ),
                       child: Text(
                         '${result.totalCount} resultado${result.totalCount > 1 ? 's' : ''}',
                         style: TextStyle(

@@ -7,7 +7,7 @@ import '../models/progressao_sugestao.dart';
 /// Pending load-progression suggestions; [alunoId] null lists all personal alunos.
 final progressaoSugestoesProvider = FutureProvider.autoDispose
     .family<List<ProgressaoSugestao>, int?>((ref, alunoId) async {
-      return IaRepository(ref.read(apiClientProvider)).sugestoesProgressao(
-        alunoId: alunoId,
-      );
+      return IaRepository(
+        ref.read(apiClientProvider),
+      ).sugestoesProgressao(alunoId: alunoId);
     });

@@ -20,6 +20,7 @@ import '../widgets/checkin_header_widgets.dart';
 import '../widgets/checkin_exercise_widgets.dart';
 import '../widgets/checkin_serie_detail_widgets.dart';
 import '../widgets/checkin_timer_widgets.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class CheckinScreen extends ConsumerStatefulWidget {
   final int treinoId;
@@ -438,9 +439,12 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     final line = chrome.line;
 
     if (_loading) {
-      return Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Center(child: FxLoading(color: brand)),
+      return fxScreenA11yScope(
+        label: 'Checkin',
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Center(child: FxLoading(color: brand)),
+        ),
       );
     }
 
@@ -550,17 +554,28 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
                     brandDeep: brandDeep,
                     dark: dark,
                     onApply: () {
-                      FeedbackHelper.showSuccess(context, 'Sugestao registrada para a proxima serie.',);
+                      FeedbackHelper.showSuccess(
+                        context,
+                        'Sugestao registrada para a proxima serie.',
+                      );
                     },
                     onSkip: () {
-                      FeedbackHelper.showSuccess(context, 'Sugestao ignorada neste exercicio.');
+                      FeedbackHelper.showSuccess(
+                        context,
+                        'Sugestao ignorada neste exercicio.',
+                      );
                     },
                   ),
                 ),
               ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, 16, 130),
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s4,
+                    0,
+                    16,
+                    130,
+                  ),
                   child: FxLiquidPrimaryButton(
                     label: 'Finalizar treino',
                     icon: Icons.flag_rounded,
@@ -599,4 +614,3 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
     );
   }
 }
-

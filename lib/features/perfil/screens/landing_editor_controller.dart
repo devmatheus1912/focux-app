@@ -69,13 +69,13 @@ class LandingEditorController {
   bool applyingTemplate = false;
 
   Iterable<TextEditingController> get _textControllers => [
-        heroTitle,
-        heroSubtitle,
-        primaryCta,
-        offerCta,
-        finalCta,
-        contactCta,
-      ];
+    heroTitle,
+    heroSubtitle,
+    primaryCta,
+    offerCta,
+    finalCta,
+    contactCta,
+  ];
 
   void attachTextListeners() {
     for (final c in _textControllers) {
@@ -108,7 +108,9 @@ class LandingEditorController {
   void notifyChanged() => onStateChanged();
 
   List<({String pergunta, String resposta})> faqPayload() {
-    return faq.map((e) => (pergunta: e.pergunta, resposta: e.resposta)).toList();
+    return faq
+        .map((e) => (pergunta: e.pergunta, resposta: e.resposta))
+        .toList();
   }
 
   List<LandingContentIssue> contentIssuesForReview() {
@@ -161,15 +163,23 @@ class LandingEditorController {
     heroImageUrl = p.heroImageUrl;
     bioImageUrl = p.bioImageUrl;
     coverExpanded = heroImageUrl != null && heroImageUrl!.isNotEmpty;
-    servicos = p.servicos
-        .map((e) => LandingServiceItem(titulo: e.titulo, descricao: e.descricao))
-        .toList();
-    faq = p.faq
-        .map((e) => LandingFaqItem(pergunta: e.pergunta, resposta: e.resposta))
-        .toList();
-    sectionOrder = p.sectionOrder.isNotEmpty
-        ? normalizeLandingSectionOrder(p.sectionOrder)
-        : List<String>.from(landingEditorCanonicalSections);
+    servicos =
+        p.servicos
+            .map(
+              (e) =>
+                  LandingServiceItem(titulo: e.titulo, descricao: e.descricao),
+            )
+            .toList();
+    faq =
+        p.faq
+            .map(
+              (e) => LandingFaqItem(pergunta: e.pergunta, resposta: e.resposta),
+            )
+            .toList();
+    sectionOrder =
+        p.sectionOrder.isNotEmpty
+            ? normalizeLandingSectionOrder(p.sectionOrder)
+            : List<String>.from(landingEditorCanonicalSections);
     loaded = true;
     dirty = false;
     lastReviewCount = contentReviewCount();
@@ -262,8 +272,11 @@ class LandingEditorController {
 
   List<LandingFaqItem> faqForSave() {
     return faq
-        .where((item) =>
-            item.pergunta.trim().length >= 3 && item.resposta.trim().length >= 3)
+        .where(
+          (item) =>
+              item.pergunta.trim().length >= 3 &&
+              item.resposta.trim().length >= 3,
+        )
         .map(
           (item) => LandingFaqItem(
             pergunta: landingPolishShortText(item.pergunta),
@@ -275,8 +288,9 @@ class LandingEditorController {
 
   List<LandingServiceItem> servicosForSave() {
     return servicos
-        .where((s) =>
-            s.titulo.trim().isNotEmpty || s.descricao.trim().isNotEmpty)
+        .where(
+          (s) => s.titulo.trim().isNotEmpty || s.descricao.trim().isNotEmpty,
+        )
         .map(
           (s) => LandingServiceItem(
             titulo: landingPolishShortText(s.titulo),
@@ -308,7 +322,11 @@ class LandingEditorController {
     return null;
   }
 
-  void reorderSection(int oldIndex, int newIndex, {required VoidCallback onHighlightEnd}) {
+  void reorderSection(
+    int oldIndex,
+    int newIndex, {
+    required VoidCallback onHighlightEnd,
+  }) {
     final item = sectionOrder.removeAt(oldIndex);
     sectionOrder.insert(newIndex, item);
     dirty = true;
@@ -318,7 +336,11 @@ class LandingEditorController {
     highlightTimer = Timer(const Duration(milliseconds: 750), onHighlightEnd);
   }
 
-  void moveSection(int index, int delta, {required VoidCallback onHighlightEnd}) {
+  void moveSection(
+    int index,
+    int delta, {
+    required VoidCallback onHighlightEnd,
+  }) {
     if (delta < 0) {
       if (index <= 0) return;
       reorderSection(index, index - 1, onHighlightEnd: onHighlightEnd);
@@ -329,7 +351,10 @@ class LandingEditorController {
   }
 
   void addServico() {
-    servicos = [...servicos, const LandingServiceItem(titulo: '', descricao: '')];
+    servicos = [
+      ...servicos,
+      const LandingServiceItem(titulo: '', descricao: ''),
+    ];
     dirty = true;
     onStateChanged();
   }
@@ -376,7 +401,10 @@ class LandingEditorController {
     highlightedFaqIndex = index;
     onStateChanged();
     faqHighlightTimer?.cancel();
-    faqHighlightTimer = Timer(const Duration(milliseconds: 900), onHighlightEnd);
+    faqHighlightTimer = Timer(
+      const Duration(milliseconds: 900),
+      onHighlightEnd,
+    );
   }
 
   void clearSectionHighlight() {

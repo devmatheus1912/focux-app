@@ -40,10 +40,7 @@ class _Aluno360OperacaoEntranceState extends State<Aluno360OperacaoEntrance> {
     }
     if (!widget.enabled || reduceMotionOf(context)) return widget.child;
     return ClipRect(
-      child: FxPremiumEntrance(
-        delay: widget.delay,
-        child: widget.child,
-      ),
+      child: FxPremiumEntrance(delay: widget.delay, child: widget.child),
     );
   }
 }
@@ -126,41 +123,39 @@ class Aluno360OperacaoTab extends ConsumerWidget {
       label: 'Conteúdo da aba operação',
       child: Aluno360Layout.operacaoContentWidthLimiter(
         child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (showFinanceRisk && financeRiskBanner != null) ...[
-          section(0, financeRiskBanner!),
-          const SizedBox(height: Aluno360Layout.sectionGap),
-        ],
-        section(1, followUpCard),
-        const SizedBox(height: Aluno360Layout.sectionGap),
-        AnimatedSize(
-          duration: Duration(milliseconds: motionMs),
-          curve: Curves.easeOutCubic,
-          alignment: Alignment.topCenter,
-          child:
-              focusMode
-                  ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      section(3, copilotCard),
-                    ],
-                  )
-                  : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      section(2, diagnosticBody()),
-                      if (recoveryCard != null) ...[
-                        const SizedBox(height: Aluno360Layout.sectionGap),
-                        section(4, recoveryCard!),
-                      ],
-                      const SizedBox(height: Aluno360Layout.sectionGap),
-                      section(5, quickActions),
-                    ],
-                  ),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (showFinanceRisk && financeRiskBanner != null) ...[
+              section(0, financeRiskBanner!),
+              const SizedBox(height: Aluno360Layout.sectionGap),
+            ],
+            section(1, followUpCard),
+            const SizedBox(height: Aluno360Layout.sectionGap),
+            AnimatedSize(
+              duration: Duration(milliseconds: motionMs),
+              curve: Curves.easeOutCubic,
+              alignment: Alignment.topCenter,
+              child:
+                  focusMode
+                      ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [section(3, copilotCard)],
+                      )
+                      : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          section(2, diagnosticBody()),
+                          if (recoveryCard != null) ...[
+                            const SizedBox(height: Aluno360Layout.sectionGap),
+                            section(4, recoveryCard!),
+                          ],
+                          const SizedBox(height: Aluno360Layout.sectionGap),
+                          section(5, quickActions),
+                        ],
+                      ),
+            ),
+          ],
         ),
-      ],
-    ),
       ),
     );
   }

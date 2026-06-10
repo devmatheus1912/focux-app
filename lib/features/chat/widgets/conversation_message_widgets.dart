@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -17,7 +16,8 @@ class ConversationEmptyState extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  const ConversationEmptyState({super.key, 
+  const ConversationEmptyState({
+    super.key,
     required this.isDark,
     required this.accentColor,
     required this.title,
@@ -58,7 +58,10 @@ class ConversationEmptyState extends StatelessWidget {
               subtitle,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+                color:
+                    isDark
+                        ? EagleTokens.darkInkMute
+                        : TokensStrip.textSecondary,
               ),
             ),
           ],
@@ -73,7 +76,8 @@ class ConversationErrorState extends StatelessWidget {
   final Color accentColor;
   final VoidCallback onRetry;
 
-  const ConversationErrorState({super.key, 
+  const ConversationErrorState({
+    super.key,
     required this.isDark,
     required this.accentColor,
     required this.onRetry,
@@ -159,7 +163,8 @@ class ConversationDateDivider extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: isDark ? const Color(0xFF94A3B8) : TokensStrip.textSecondary,
+              color:
+                  isDark ? const Color(0xFF94A3B8) : TokensStrip.textSecondary,
               fontSize: 11,
               fontWeight: FontWeight.w600,
             ),
@@ -174,7 +179,11 @@ class ConversationOlderMessagesLoader extends StatelessWidget {
   final bool loading;
   final VoidCallback onTap;
 
-  const ConversationOlderMessagesLoader({super.key, required this.loading, required this.onTap});
+  const ConversationOlderMessagesLoader({
+    super.key,
+    required this.loading,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -221,7 +230,11 @@ class ConversationDeliveryStatus extends StatelessWidget {
   final ChatMsg msg;
   final Color color;
 
-  const ConversationDeliveryStatus({super.key, required this.msg, required this.color});
+  const ConversationDeliveryStatus({
+    super.key,
+    required this.msg,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -251,13 +264,19 @@ class ConversationTypingIndicator extends StatefulWidget {
   final bool isDark;
   final Color accentColor;
 
-  const ConversationTypingIndicator({super.key, required this.isDark, required this.accentColor});
+  const ConversationTypingIndicator({
+    super.key,
+    required this.isDark,
+    required this.accentColor,
+  });
 
   @override
-  State<ConversationTypingIndicator> createState() => _ConversationTypingIndicatorState();
+  State<ConversationTypingIndicator> createState() =>
+      _ConversationTypingIndicatorState();
 }
 
-class _ConversationTypingIndicatorState extends State<ConversationTypingIndicator>
+class _ConversationTypingIndicatorState
+    extends State<ConversationTypingIndicator>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
 
@@ -279,7 +298,8 @@ class _ConversationTypingIndicatorState extends State<ConversationTypingIndicato
   @override
   Widget build(BuildContext context) {
     final bg = widget.isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg;
-    final border = widget.isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final border =
+        widget.isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
       decoration: BoxDecoration(
@@ -325,7 +345,8 @@ class ConversationSwipeReplyWrapper extends StatefulWidget {
   final Color accentColor;
   final VoidCallback onReply;
 
-  const ConversationSwipeReplyWrapper({super.key, 
+  const ConversationSwipeReplyWrapper({
+    super.key,
     required this.child,
     required this.alignRight,
     required this.accentColor,
@@ -333,10 +354,12 @@ class ConversationSwipeReplyWrapper extends StatefulWidget {
   });
 
   @override
-  State<ConversationSwipeReplyWrapper> createState() => _ConversationSwipeReplyWrapperState();
+  State<ConversationSwipeReplyWrapper> createState() =>
+      _ConversationSwipeReplyWrapperState();
 }
 
-class _ConversationSwipeReplyWrapperState extends State<ConversationSwipeReplyWrapper> {
+class _ConversationSwipeReplyWrapperState
+    extends State<ConversationSwipeReplyWrapper> {
   double _offset = 0;
   bool _triggered = false;
 
@@ -402,7 +425,11 @@ class ConversationChatBackdrop extends StatelessWidget {
   final bool isDark;
   final Color accentColor;
 
-  const ConversationChatBackdrop({super.key, required this.isDark, required this.accentColor});
+  const ConversationChatBackdrop({
+    super.key,
+    required this.isDark,
+    required this.accentColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -426,7 +453,10 @@ class ConversationChatBackdrop extends StatelessWidget {
         ),
       ),
       child: CustomPaint(
-        painter: ConversationChatBackdropPainter(isDark: isDark, accentColor: accentColor),
+        painter: ConversationChatBackdropPainter(
+          isDark: isDark,
+          accentColor: accentColor,
+        ),
         child: const SizedBox.expand(),
       ),
     );
@@ -437,7 +467,10 @@ class ConversationChatBackdropPainter extends CustomPainter {
   final bool isDark;
   final Color accentColor;
 
-  const ConversationChatBackdropPainter({required this.isDark, required this.accentColor});
+  const ConversationChatBackdropPainter({
+    required this.isDark,
+    required this.accentColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -491,7 +524,8 @@ class ConversationBubble extends StatelessWidget {
   final VoidCallback? onReplyTap;
   final VoidCallback onOpenMedia;
 
-  const ConversationBubble({super.key, 
+  const ConversationBubble({
+    super.key,
     required this.msg,
     required this.mine,
     required this.isDark,
@@ -506,7 +540,9 @@ class ConversationBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textColor =
-        mine ? Colors.white : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
+        mine
+            ? Colors.white
+            : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
     final metaColor =
         mine
             ? Colors.white.withValues(alpha: 0.75)
@@ -552,7 +588,9 @@ class ConversationBubble extends StatelessWidget {
                       ? accentColor
                       : mine
                       ? Colors.transparent
-                      : (isDark ? EagleTokens.darkLine : TokensStrip.borderDefault),
+                      : (isDark
+                          ? EagleTokens.darkLine
+                          : TokensStrip.borderDefault),
               width: highlighted ? 1.6 : 1,
             ),
             boxShadow:
@@ -701,7 +739,8 @@ class ConversationReplySnippet extends StatelessWidget {
   final String preview;
   final VoidCallback? onTap;
 
-  const ConversationReplySnippet({super.key, 
+  const ConversationReplySnippet({
+    super.key,
     required this.mine,
     required this.isDark,
     required this.accentColor,
@@ -713,7 +752,9 @@ class ConversationReplySnippet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textColor =
-        mine ? Colors.white : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
+        mine
+            ? Colors.white
+            : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
@@ -755,4 +796,3 @@ class ConversationReplySnippet extends StatelessWidget {
     );
   }
 }
-

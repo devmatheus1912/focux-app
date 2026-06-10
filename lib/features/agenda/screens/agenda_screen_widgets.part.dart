@@ -29,7 +29,9 @@ class _AgendaEmptyState extends StatelessWidget {
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: primary.withValues(alpha: chrome.isDark ? 0.22 : 0.12),
+                    color: primary.withValues(
+                      alpha: chrome.isDark ? 0.22 : 0.12,
+                    ),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(
@@ -124,7 +126,9 @@ class _AgendaEventSheet extends StatelessWidget {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: primary.withValues(alpha: chrome.isDark ? 0.22 : 0.12),
+                    color: primary.withValues(
+                      alpha: chrome.isDark ? 0.22 : 0.12,
+                    ),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   alignment: Alignment.center,
@@ -259,4 +263,3 @@ class _AgendaInfoTile extends StatelessWidget {
     );
   }
 }
-

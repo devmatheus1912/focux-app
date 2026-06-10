@@ -39,7 +39,10 @@ class PaywallPlanFeatureItem {
 class PaywallPlanSections {
   PaywallPlanSections._();
 
-  static List<PaywallPlanFeatureSection> forPlan(Plano plano, SubscriptionPlan plan) {
+  static List<PaywallPlanFeatureSection> forPlan(
+    Plano plano,
+    SubscriptionPlan plan,
+  ) {
     final raw = switch (plan) {
       SubscriptionPlan.FREE => _free(plano),
       SubscriptionPlan.PREMIUM => _premium(plano),
@@ -61,7 +64,9 @@ class PaywallPlanSections {
       title: 'Alunos & Treinos',
       items: [
         PaywallPlanFeatureItem(label: _alunosLabel(plano), highlight: true),
-        const PaywallPlanFeatureItem(label: 'Treinos + check-in + biblioteca 190+'),
+        const PaywallPlanFeatureItem(
+          label: 'Treinos + check-in + biblioteca 190+',
+        ),
         const PaywallPlanFeatureItem(label: 'Agenda básica'),
         const PaywallPlanFeatureItem(label: 'Focux Score™ (visualização)'),
       ],
@@ -70,11 +75,23 @@ class PaywallPlanSections {
       title: 'Bloqueado no FREE',
       collapsible: true,
       items: [
-        PaywallPlanFeatureItem(label: 'PIX com QR Code + cobrança no chat', included: false),
-        PaywallPlanFeatureItem(label: 'CRM de leads + landing page', included: false),
+        PaywallPlanFeatureItem(
+          label: 'PIX com QR Code + cobrança no chat',
+          included: false,
+        ),
+        PaywallPlanFeatureItem(
+          label: 'CRM de leads + landing page',
+          included: false,
+        ),
         PaywallPlanFeatureItem(label: 'IA Copiloto', included: false),
-        PaywallPlanFeatureItem(label: 'Alertas de risco & churn', included: false),
-        PaywallPlanFeatureItem(label: 'Recovery Score + relógio', included: false),
+        PaywallPlanFeatureItem(
+          label: 'Alertas de risco & churn',
+          included: false,
+        ),
+        PaywallPlanFeatureItem(
+          label: 'Recovery Score + relógio',
+          included: false,
+        ),
       ],
     ),
   ];
@@ -84,8 +101,12 @@ class PaywallPlanSections {
       title: 'Alunos & Treinos',
       items: [
         PaywallPlanFeatureItem(label: _alunosLabel(plano), highlight: true),
-        const PaywallPlanFeatureItem(label: 'Treinos + check-in + biblioteca 190+'),
-        const PaywallPlanFeatureItem(label: 'Agenda completa + lembretes automáticos'),
+        const PaywallPlanFeatureItem(
+          label: 'Treinos + check-in + biblioteca 190+',
+        ),
+        const PaywallPlanFeatureItem(
+          label: 'Agenda completa + lembretes automáticos',
+        ),
         const PaywallPlanFeatureItem(
           label: 'Focux Score™ + alertas de risco',
           highlight: true,
@@ -112,12 +133,8 @@ class PaywallPlanSections {
         ),
         const PaywallPlanFeatureItem(label: 'CRM de leads'),
         const PaywallPlanFeatureItem(label: 'Chat, feed e broadcasts'),
-        const PaywallPlanFeatureItem(
-          label: 'Habit coaching diário ✦',
-        ),
-        const PaywallPlanFeatureItem(
-          label: 'Comunidade privada de alunos ✦',
-        ),
+        const PaywallPlanFeatureItem(label: 'Habit coaching diário ✦'),
+        const PaywallPlanFeatureItem(label: 'Comunidade privada de alunos ✦'),
       ],
     ),
     PaywallPlanFeatureSection(
@@ -169,9 +186,16 @@ class PaywallPlanSections {
     PaywallPlanFeatureSection(
       title: 'Alunos & Treinos',
       items: [
-        const PaywallPlanFeatureItem(label: 'Alunos ILIMITADOS', highlight: true),
-        const PaywallPlanFeatureItem(label: 'Treinos + check-in + biblioteca 190+'),
-        const PaywallPlanFeatureItem(label: 'Agenda completa + lembretes automáticos'),
+        const PaywallPlanFeatureItem(
+          label: 'Alunos ILIMITADOS',
+          highlight: true,
+        ),
+        const PaywallPlanFeatureItem(
+          label: 'Treinos + check-in + biblioteca 190+',
+        ),
+        const PaywallPlanFeatureItem(
+          label: 'Agenda completa + lembretes automáticos',
+        ),
         const PaywallPlanFeatureItem(
           label: 'Focux Score™ + motor de retenção IA',
           highlight: true,
@@ -204,9 +228,7 @@ class PaywallPlanSections {
         ),
         const PaywallPlanFeatureItem(label: 'Domínio customizado'),
         const PaywallPlanFeatureItem(label: 'NFS-e automática (para PJ)'),
-        const PaywallPlanFeatureItem(
-          label: 'Automações sequenciais ✦',
-        ),
+        const PaywallPlanFeatureItem(label: 'Automações sequenciais ✦'),
       ],
     ),
     const PaywallPlanFeatureSection(
@@ -275,15 +297,9 @@ class PaywallPlanSections {
           highlight: true,
         ),
         const PaywallPlanFeatureItem(label: 'Gamificação, ranking e badges'),
-        const PaywallPlanFeatureItem(
-          label: 'Habit coaching diário ✦',
-        ),
-        const PaywallPlanFeatureItem(
-          label: 'Equipe / RBAC (assistente) ✦',
-        ),
-        const PaywallPlanFeatureItem(
-          label: 'Comunidade + grupos ✦',
-        ),
+        const PaywallPlanFeatureItem(label: 'Habit coaching diário ✦'),
+        const PaywallPlanFeatureItem(label: 'Equipe / RBAC (assistente) ✦'),
+        const PaywallPlanFeatureItem(label: 'Comunidade + grupos ✦'),
         const PaywallPlanFeatureItem(
           label: 'Pose Coach — análise ML ✦',
           included: false,
@@ -306,12 +322,8 @@ class PaywallPlanSections {
           label: 'IA Copiloto — 400+/mês contexto avançado',
           highlight: true,
         ),
-        PaywallPlanFeatureItem(
-          label: 'Automações sequenciais avançadas ✦',
-        ),
-        PaywallPlanFeatureItem(
-          label: 'Equipe / RBAC ilimitado ✦',
-        ),
+        PaywallPlanFeatureItem(label: 'Automações sequenciais avançadas ✦'),
+        PaywallPlanFeatureItem(label: 'Equipe / RBAC ilimitado ✦'),
         PaywallPlanFeatureItem(
           label: 'Pose Coach — análise de postura ML ✦',
           capability: 'poseCoach',
@@ -405,7 +417,8 @@ class _PaywallPlanInclusion {
     required Map<String, bool> caps,
     required Plano vitrinePlano,
   }) {
-    final capability = item.capability ?? _inferCapability(sectionTitle, item.label);
+    final capability =
+        item.capability ?? _inferCapability(sectionTitle, item.label);
     final included = _resolveIncluded(
       item: item,
       sectionTitle: sectionTitle,
@@ -413,12 +426,13 @@ class _PaywallPlanInclusion {
       vitrinePlano: vitrinePlano,
       capability: capability,
     );
-    final upgradePlan = !included
-        ? (item.upgradePlan ??
-            (capability != null
-                ? PlanEntitlements.targetPlan(capability: capability)
-                : _defaultUpgradeForSection(sectionTitle)))
-        : null;
+    final upgradePlan =
+        !included
+            ? (item.upgradePlan ??
+                (capability != null
+                    ? PlanEntitlements.targetPlan(capability: capability)
+                    : _defaultUpgradeForSection(sectionTitle)))
+            : null;
 
     return PaywallPlanFeatureItem(
       label: item.label,
@@ -492,7 +506,9 @@ class _PaywallPlanInclusion {
 
   static SubscriptionPlan _defaultUpgradeForSection(String sectionTitle) {
     final s = sectionTitle.toLowerCase();
-    if (s.contains('enterprise pro') || s.contains('loja') || s.contains('landing')) {
+    if (s.contains('enterprise pro') ||
+        s.contains('loja') ||
+        s.contains('landing')) {
       return SubscriptionPlan.ENTERPRISE_PRO;
     }
     return SubscriptionPlan.PREMIUM;

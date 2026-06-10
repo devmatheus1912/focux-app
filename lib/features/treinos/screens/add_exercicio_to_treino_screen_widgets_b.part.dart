@@ -40,8 +40,7 @@ class _ExercisePickerCard extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final selected = exercicio != null;
-    final hasMediaIssue =
-        selected && exercicio!.showMediaBadgeInWorkoutList;
+    final hasMediaIssue = selected && exercicio!.showMediaBadgeInWorkoutList;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -169,34 +168,34 @@ class _ExercisePickerCard extends StatelessWidget {
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeOutCubic,
             child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: fxListCardDecoration(context, accent: primary),
-            child: Row(
-              children: [
-                Icon(
-                  selected
-                      ? Icons.edit_note_rounded
-                      : Icons.auto_awesome_motion_rounded,
-                  color: primary,
-                  size: 17,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: fxListCardDecoration(context, accent: primary),
+              child: Row(
+                children: [
+                  Icon(
                     selected
-                        ? 'Revise a prescrição abaixo antes de adicionar.'
-                        : 'Busque acima ou explore por movimento/grupo.',
-                    style: AppTypography.inter(
-                      color: mute,
-                      fontSize: 12,
-                      height: 1.25,
-                      fontWeight: FontWeight.w700,
+                        ? Icons.edit_note_rounded
+                        : Icons.auto_awesome_motion_rounded,
+                    color: primary,
+                    size: 17,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      selected
+                          ? 'Revise a prescrição abaixo antes de adicionar.'
+                          : 'Busque acima ou explore por movimento/grupo.',
+                      style: AppTypography.inter(
+                        color: mute,
+                        fontSize: 12,
+                        height: 1.25,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
           ),
         ],
         if (selected && !compactMode) ...[
@@ -670,4 +669,3 @@ String _cloudinaryH264VideoUrl(String rawUrl) {
 
   return url.replaceFirst(marker, '${marker}f_mp4,vc_h264/');
 }
-

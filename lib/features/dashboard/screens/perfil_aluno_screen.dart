@@ -18,6 +18,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 final minhasMedidasProvider = FutureProvider<List<MedidaCorporal>>((ref) async {
   final repo = EvolucaoRepository(ref.read(apiClientProvider));
@@ -582,576 +583,590 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Meu perfil',
-        onBack: () => safePopOrGo(context, '/dashboard/aluno'),
-        actions: [
-          TextButton(
-            onPressed: _saving ? null : _save,
-            child:
-                _saving
-                    ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: FxLoading(strokeWidth: 2),
-                    )
-                    : const Text('Salvar'),
-          ),
-        ],
-      ),
-      body: async.when(
-        loading: () => const FxLoading(),
-        error:
-            (e, _) => Center(
-              child: Padding(
-                padding: const EdgeInsets.all(TokensStrip.s5),
-                child: Text(friendlyError(e), textAlign: TextAlign.center),
-              ),
+    return fxScreenA11yScope(
+      label: 'Meu perfil',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Meu perfil',
+          onBack: () => safePopOrGo(context, '/dashboard/aluno'),
+          actions: [
+            TextButton(
+              onPressed: _saving ? null : _save,
+              child:
+                  _saving
+                      ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: FxLoading(strokeWidth: 2),
+                      )
+                      : const Text('Salvar'),
             ),
-        data: (aluno) {
-          _loadIfNeeded(aluno);
-          final completion = _completionScore();
-          return Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 28),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors:
-                            isDark
-                                ? const [Color(0xFF132344), Color(0xFF0C1731)]
-                                : const [Color(0xFFF2F6FF), Color(0xFFFFFFFF)],
+          ],
+        ),
+        body: async.when(
+          loading: () => const FxLoading(),
+          error:
+              (e, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(TokensStrip.s5),
+                  child: Text(friendlyError(e), textAlign: TextAlign.center),
+                ),
+              ),
+          data: (aluno) {
+            _loadIfNeeded(aluno);
+            final completion = _completionScore();
+            return Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 28),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors:
+                              isDark
+                                  ? const [Color(0xFF132344), Color(0xFF0C1731)]
+                                  : const [
+                                    Color(0xFFF2F6FF),
+                                    Color(0xFFFFFFFF),
+                                  ],
+                        ),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: line),
                       ),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: line),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Stack(
-                              children: [
-                                CircleAvatar(
-                                  radius: 38,
-                                  backgroundImage:
-                                      _fotoUrl != null && _fotoUrl!.isNotEmpty
-                                          ? NetworkImage(_fotoUrl!)
-                                          : null,
-                                  backgroundColor: BrandPalette.soft(primary),
-                                  child:
-                                      _fotoUrl == null || _fotoUrl!.isEmpty
-                                          ? Text(
-                                            aluno.nome.isNotEmpty
-                                                ? aluno.nome[0].toUpperCase()
-                                                : 'A',
-                                            style: const TextStyle(
-                                              fontSize: 24,
-                                              fontWeight: FontWeight.w800,
-                                            ),
-                                          )
-                                          : null,
-                                ),
-                                Positioned(
-                                  right: -4,
-                                  bottom: -4,
-                                  child: IconButton.filled(
-                                    onPressed: _uploading ? null : _pickFoto,
-                                    icon:
-                                        _uploading
-                                            ? const SizedBox(
-                                              width: 15,
-                                              height: 15,
-                                              child: FxLoading(strokeWidth: 2),
-                                            )
-                                            : const Icon(
-                                              Icons.camera_alt,
-                                              size: 16,
-                                            ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Stack(
                                 children: [
-                                  Text(
-                                    aluno.nome,
-                                    style: TextStyle(
-                                      color: ink,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w800,
-                                    ),
+                                  CircleAvatar(
+                                    radius: 38,
+                                    backgroundImage:
+                                        _fotoUrl != null && _fotoUrl!.isNotEmpty
+                                            ? NetworkImage(_fotoUrl!)
+                                            : null,
+                                    backgroundColor: BrandPalette.soft(primary),
+                                    child:
+                                        _fotoUrl == null || _fotoUrl!.isEmpty
+                                            ? Text(
+                                              aluno.nome.isNotEmpty
+                                                  ? aluno.nome[0].toUpperCase()
+                                                  : 'A',
+                                              style: const TextStyle(
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.w800,
+                                              ),
+                                            )
+                                            : null,
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Quanto mais completo seu perfil, melhor o ajuste do treino.',
-                                    style: TextStyle(
-                                      color: mute,
-                                      fontSize: 13,
-                                      height: 1.4,
+                                  Positioned(
+                                    right: -4,
+                                    bottom: -4,
+                                    child: IconButton.filled(
+                                      onPressed: _uploading ? null : _pickFoto,
+                                      icon:
+                                          _uploading
+                                              ? const SizedBox(
+                                                width: 15,
+                                                height: 15,
+                                                child: FxLoading(
+                                                  strokeWidth: 2,
+                                                ),
+                                              )
+                                              : const Icon(
+                                                Icons.camera_alt,
+                                                size: 16,
+                                              ),
                                     ),
                                   ),
                                 ],
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      aluno.nome,
+                                      style: TextStyle(
+                                        color: ink,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Quanto mais completo seu perfil, melhor o ajuste do treino.',
+                                      style: TextStyle(
+                                        color: mute,
+                                        fontSize: 13,
+                                        height: 1.4,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 18),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: _summaryChips(aluno, isDark),
+                          ),
+                          const SizedBox(height: 18),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Perfil preenchido',
+                                      style: TextStyle(
+                                        color: mute,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(999),
+                                      child: LinearProgressIndicator(
+                                        value: completion / 100,
+                                        minHeight: 9,
+                                        backgroundColor: BrandPalette.soft(
+                                          primary,
+                                        ),
+                                        valueColor: AlwaysStoppedAnimation(
+                                          primary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Container(
+                                width: 56,
+                                height: 56,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: BrandPalette.soft(
+                                    primary,
+                                    dark: isDark,
+                                  ),
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                                child: Text(
+                                  '$completion%',
+                                  style: TextStyle(
+                                    color: primary,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: TokensStrip.s4),
+                    _SectionCard(
+                      title: 'Identidade e contato',
+                      subtitle: 'Dados basicos para contato e rotina do aluno.',
+                      isDark: isDark,
+                      children: [
+                        _Field(
+                          controller: _nome,
+                          label: 'Nome',
+                          icon: Icons.person_outline,
+                          requiredField: true,
+                        ),
+                        _Field(
+                          controller: _email,
+                          label: 'Email',
+                          icon: Icons.email_outlined,
+                          requiredField: true,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _Field(
+                                controller: _telefone,
+                                label: 'Telefone',
+                                icon: Icons.phone_outlined,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _Field(
+                                controller: _whatsapp,
+                                label: 'WhatsApp',
+                                icon: Icons.chat_outlined,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 18),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: _summaryChips(aluno, isDark),
-                        ),
-                        const SizedBox(height: 18),
                         Row(
                           children: [
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Perfil preenchido',
-                                    style: TextStyle(
-                                      color: mute,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(999),
-                                    child: LinearProgressIndicator(
-                                      value: completion / 100,
-                                      minHeight: 9,
-                                      backgroundColor: BrandPalette.soft(
-                                        primary,
-                                      ),
-                                      valueColor: AlwaysStoppedAnimation(
-                                        primary,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                              child: _Field(
+                                controller: _genero,
+                                label: 'Genero',
+                                icon: Icons.badge_outlined,
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            Container(
-                              width: 56,
-                              height: 56,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: BrandPalette.soft(primary, dark: isDark),
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                              child: Text(
-                                '$completion%',
-                                style: TextStyle(
-                                  color: primary,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 16,
-                                ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _Field(
+                                controller: _dataNascimento,
+                                label: 'Nascimento AAAA-MM-DD',
+                                icon: Icons.cake_outlined,
                               ),
                             ),
                           ],
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: TokensStrip.s4),
-                  _SectionCard(
-                    title: 'Identidade e contato',
-                    subtitle: 'Dados basicos para contato e rotina do aluno.',
-                    isDark: isDark,
-                    children: [
-                      _Field(
-                        controller: _nome,
-                        label: 'Nome',
-                        icon: Icons.person_outline,
-                        requiredField: true,
-                      ),
-                      _Field(
-                        controller: _email,
-                        label: 'Email',
-                        icon: Icons.email_outlined,
-                        requiredField: true,
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _Field(
-                              controller: _telefone,
-                              label: 'Telefone',
-                              icon: Icons.phone_outlined,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: _Field(
-                              controller: _whatsapp,
-                              label: 'WhatsApp',
-                              icon: Icons.chat_outlined,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _Field(
-                              controller: _genero,
-                              label: 'Genero',
-                              icon: Icons.badge_outlined,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: _Field(
-                              controller: _dataNascimento,
-                              label: 'Nascimento AAAA-MM-DD',
-                              icon: Icons.cake_outlined,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  _SectionCard(
-                    title: 'Corpo e metas',
-                    subtitle:
-                        'O que o aluno quer construir e de onde esta partindo.',
-                    isDark: isDark,
-                    children: [
-                      _Field(
-                        controller: _objetivo,
-                        label: 'Objetivo principal',
-                        icon: Icons.flag_outlined,
-                        maxLines: 2,
-                      ),
-                      _Field(
-                        controller: _objetivoDetalhado,
-                        label: 'Objetivo detalhado',
-                        icon: Icons.track_changes_outlined,
-                        maxLines: 3,
-                      ),
-                      _Field(
-                        controller: _tipoConsultoria,
-                        label: 'Tipo de consultoria',
-                        icon: Icons.fitness_center,
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _Field(
-                              controller: _peso,
-                              label: 'Peso kg',
-                              icon: Icons.monitor_weight_outlined,
-                              keyboardType: TextInputType.number,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: _Field(
-                              controller: _altura,
-                              label: 'Altura m',
-                              icon: Icons.height,
-                              keyboardType: TextInputType.number,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  _SectionCard(
-                    title: 'Progresso corporal',
-                    subtitle:
-                        'Medidas, foto de evolução e histórico rápido para acompanhar resultado real.',
-                    isDark: isDark,
-                    trailing: FilledButton.tonalIcon(
-                      onPressed: _registrarMedida,
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size(0, 44),
-                      ),
-                      icon: const Icon(Icons.add_chart),
-                      label: const Text('Registrar'),
-                    ),
-                    children: [
-                      medidasAsync.when(
-                        loading:
-                            () => const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 12),
-                              child: FxLoading(),
-                            ),
-                        error:
-                            (e, _) => Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: Text(
-                                'Não foi possível carregar sua evolução: $e',
-                                style: TextStyle(color: mute, height: 1.4),
+                    const SizedBox(height: 14),
+                    _SectionCard(
+                      title: 'Corpo e metas',
+                      subtitle:
+                          'O que o aluno quer construir e de onde esta partindo.',
+                      isDark: isDark,
+                      children: [
+                        _Field(
+                          controller: _objetivo,
+                          label: 'Objetivo principal',
+                          icon: Icons.flag_outlined,
+                          maxLines: 2,
+                        ),
+                        _Field(
+                          controller: _objetivoDetalhado,
+                          label: 'Objetivo detalhado',
+                          icon: Icons.track_changes_outlined,
+                          maxLines: 3,
+                        ),
+                        _Field(
+                          controller: _tipoConsultoria,
+                          label: 'Tipo de consultoria',
+                          icon: Icons.fitness_center,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _Field(
+                                controller: _peso,
+                                label: 'Peso kg',
+                                icon: Icons.monitor_weight_outlined,
+                                keyboardType: TextInputType.number,
                               ),
                             ),
-                        data: (medidas) {
-                          final ultima =
-                              medidas.isNotEmpty ? medidas.first : null;
-                          final cards = <Widget>[
-                            _MetricHighlightCard(
-                              label: 'Último peso',
-                              value:
-                                  ultima?.peso != null
-                                      ? '${ultima!.peso!.toStringAsFixed(1)} kg'
-                                      : 'Sem registro',
-                              helper:
-                                  ultima != null
-                                      ? 'Atualizado em ${_formatarDataCurta(ultima.data)}'
-                                      : 'Registre a primeira medida',
-                              icon: Icons.monitor_weight_outlined,
-                              isDark: isDark,
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _Field(
+                                controller: _altura,
+                                label: 'Altura m',
+                                icon: Icons.height,
+                                keyboardType: TextInputType.number,
+                              ),
                             ),
-                            _MetricHighlightCard(
-                              label: 'Variação',
-                              value:
-                                  medidas
-                                              .where(
-                                                (item) => item.peso != null,
-                                              )
-                                              .length >=
-                                          2
-                                      ? _variacaoPeso(
-                                        medidas,
-                                      ).split(' desde').first
-                                      : '--',
-                              helper: _variacaoPeso(medidas),
-                              icon: Icons.show_chart,
-                              isDark: isDark,
-                            ),
-                            _MetricHighlightCard(
-                              label: 'Entradas',
-                              value: '${medidas.length}',
-                              helper:
-                                  medidas.isEmpty
-                                      ? 'Nenhuma atualização ainda'
-                                      : 'Histórico pronto para comparar',
-                              icon: Icons.timeline,
-                              isDark: isDark,
-                            ),
-                          ];
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              for (var i = 0; i < cards.length; i++) ...[
-                                cards[i],
-                                if (i != cards.length - 1)
-                                  const SizedBox(height: 10),
-                              ],
-                              const SizedBox(height: 12),
-                              if (medidas.isEmpty)
-                                Container(
-                                  padding: const EdgeInsets.all(TokensStrip.s4),
-                                  decoration: BoxDecoration(
-                                    color:
-                                        isDark
-                                            ? Colors.white.withValues(
-                                              alpha: 0.04,
-                                            )
-                                            : BrandPalette.softer(primary),
-                                    borderRadius: BorderRadius.circular(18),
-                                  ),
-                                  child: Text(
-                                    'Seu histórico corporal ainda está vazio. Registrar a primeira medida melhora acompanhamento, ajuste de carga e conversa com o personal.',
-                                    style: TextStyle(
-                                      color: mute,
-                                      fontSize: 13,
-                                      height: 1.5,
-                                    ),
-                                  ),
-                                )
-                              else ...[
-                                Text(
-                                  'Últimas atualizações',
-                                  style: TextStyle(
-                                    color: ink,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    _SectionCard(
+                      title: 'Progresso corporal',
+                      subtitle:
+                          'Medidas, foto de evolução e histórico rápido para acompanhar resultado real.',
+                      isDark: isDark,
+                      trailing: FilledButton.tonalIcon(
+                        onPressed: _registrarMedida,
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(0, 44),
+                        ),
+                        icon: const Icon(Icons.add_chart),
+                        label: const Text('Registrar'),
+                      ),
+                      children: [
+                        medidasAsync.when(
+                          loading:
+                              () => const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 12),
+                                child: FxLoading(),
+                              ),
+                          error:
+                              (e, _) => Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: Text(
+                                  'Não foi possível carregar sua evolução: $e',
+                                  style: TextStyle(color: mute, height: 1.4),
                                 ),
-                                const SizedBox(height: 10),
-                                ...medidas
-                                    .take(3)
-                                    .map(
-                                      (medida) => _ProgressEntryCard(
-                                        medida: medida,
-                                        isDark: isDark,
-                                        formatarData: _formatarDataCurta,
+                              ),
+                          data: (medidas) {
+                            final ultima =
+                                medidas.isNotEmpty ? medidas.first : null;
+                            final cards = <Widget>[
+                              _MetricHighlightCard(
+                                label: 'Último peso',
+                                value:
+                                    ultima?.peso != null
+                                        ? '${ultima!.peso!.toStringAsFixed(1)} kg'
+                                        : 'Sem registro',
+                                helper:
+                                    ultima != null
+                                        ? 'Atualizado em ${_formatarDataCurta(ultima.data)}'
+                                        : 'Registre a primeira medida',
+                                icon: Icons.monitor_weight_outlined,
+                                isDark: isDark,
+                              ),
+                              _MetricHighlightCard(
+                                label: 'Variação',
+                                value:
+                                    medidas
+                                                .where(
+                                                  (item) => item.peso != null,
+                                                )
+                                                .length >=
+                                            2
+                                        ? _variacaoPeso(
+                                          medidas,
+                                        ).split(' desde').first
+                                        : '--',
+                                helper: _variacaoPeso(medidas),
+                                icon: Icons.show_chart,
+                                isDark: isDark,
+                              ),
+                              _MetricHighlightCard(
+                                label: 'Entradas',
+                                value: '${medidas.length}',
+                                helper:
+                                    medidas.isEmpty
+                                        ? 'Nenhuma atualização ainda'
+                                        : 'Histórico pronto para comparar',
+                                icon: Icons.timeline,
+                                isDark: isDark,
+                              ),
+                            ];
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                for (var i = 0; i < cards.length; i++) ...[
+                                  cards[i],
+                                  if (i != cards.length - 1)
+                                    const SizedBox(height: 10),
+                                ],
+                                const SizedBox(height: 12),
+                                if (medidas.isEmpty)
+                                  Container(
+                                    padding: const EdgeInsets.all(
+                                      TokensStrip.s4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          isDark
+                                              ? Colors.white.withValues(
+                                                alpha: 0.04,
+                                              )
+                                              : BrandPalette.softer(primary),
+                                      borderRadius: BorderRadius.circular(18),
+                                    ),
+                                    child: Text(
+                                      'Seu histórico corporal ainda está vazio. Registrar a primeira medida melhora acompanhamento, ajuste de carga e conversa com o personal.',
+                                      style: TextStyle(
+                                        color: mute,
+                                        fontSize: 13,
+                                        height: 1.5,
                                       ),
                                     ),
-                              ],
-                            ],
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  _SectionCard(
-                    title: 'Saúde e restrições',
-                    subtitle:
-                        'Informações que deixam treino e dieta mais seguros.',
-                    isDark: isDark,
-                    children: [
-                      DropdownButtonFormField<String>(
-                        initialValue: _nivelAtividade,
-                        decoration: const InputDecoration(
-                          labelText: 'Nível de atividade',
-                          prefixIcon: Icon(Icons.insights_outlined),
-                        ),
-                        items:
-                            _niveisAtividade
-                                .map(
-                                  (item) => DropdownMenuItem<String>(
-                                    value: item.$1,
-                                    child: Text(item.$2),
+                                  )
+                                else ...[
+                                  Text(
+                                    'Últimas atualizações',
+                                    style: TextStyle(
+                                      color: ink,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
-                                )
-                                .toList(),
-                        onChanged:
-                            (value) => setState(() => _nivelAtividade = value),
-                      ),
-                      const SizedBox(height: 12),
-                      _Field(
-                        controller: _lesoes,
-                        label: 'Lesões ou limitações',
-                        icon: Icons.healing_outlined,
-                        maxLines: 3,
-                      ),
-                      _Field(
-                        controller: _medicamentos,
-                        label: 'Medicamentos em uso',
-                        icon: Icons.medication_outlined,
-                        maxLines: 2,
-                      ),
-                      _Field(
-                        controller: _historicoMedico,
-                        label: 'Histórico médico',
-                        icon: Icons.local_hospital_outlined,
-                        maxLines: 3,
-                      ),
-                      _Field(
-                        controller: _cirurgias,
-                        label: 'Cirurgias realizadas',
-                        icon: Icons.personal_injury_outlined,
-                        maxLines: 2,
-                      ),
-                      _Field(
-                        controller: _doresCronicas,
-                        label: 'Dores crônicas',
-                        icon: Icons.accessibility_new_outlined,
-                        maxLines: 2,
-                      ),
-                      _Field(
-                        controller: _restricoesAlimentares,
-                        label: 'Restrições alimentares',
-                        icon: Icons.no_food_outlined,
-                        maxLines: 2,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  _SectionCard(
-                    title: 'Rotina de treino',
-                    subtitle:
-                        'Preferências e disponibilidade para o plano fazer sentido.',
-                    isDark: isDark,
-                    children: [
-                      Text(
-                        'Disponibilidade semanal',
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
+                                  const SizedBox(height: 10),
+                                  ...medidas
+                                      .take(3)
+                                      .map(
+                                        (medida) => _ProgressEntryCard(
+                                          medida: medida,
+                                          isDark: isDark,
+                                          formatarData: _formatarDataCurta,
+                                        ),
+                                      ),
+                                ],
+                              ],
+                            );
+                          },
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      SegmentedButton<int>(
-                        showSelectedIcon: false,
-                        multiSelectionEnabled: false,
-                        selected: {_disponibilidadeSemanal},
-                        segments: const [
-                          ButtonSegment(value: 1, label: Text('1')),
-                          ButtonSegment(value: 2, label: Text('2')),
-                          ButtonSegment(value: 3, label: Text('3')),
-                          ButtonSegment(value: 4, label: Text('4')),
-                          ButtonSegment(value: 5, label: Text('5')),
-                          ButtonSegment(value: 6, label: Text('6')),
-                          ButtonSegment(value: 7, label: Text('7')),
-                        ],
-                        onSelectionChanged:
-                            (values) => setState(
-                              () => _disponibilidadeSemanal = values.first,
-                            ),
-                      ),
-                      const SizedBox(height: 12),
-                      _Field(
-                        controller: _preferenciasTreino,
-                        label: 'Preferências de treino',
-                        icon: Icons.sports_gymnastics_outlined,
-                        maxLines: 3,
-                      ),
-                      _Field(
-                        controller: _observacoes,
-                        label: 'Observações para o personal',
-                        icon: Icons.sticky_note_2_outlined,
-                        maxLines: 3,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: TokensStrip.s4),
-                  FxLiquidPrimaryButton(
-                    loading: _saving,
-                    icon: Icons.check,
-                    label: 'Salvar meu perfil',
-                    onPressed: _saving ? null : _save,
-                  ),
-                  const SizedBox(height: 10),
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: EagleTokens.bad,
-                      side: const BorderSide(color: EagleTokens.bad),
+                      ],
                     ),
-                    onPressed: _deleting ? null : _confirmDeleteAccount,
-                    icon:
-                        _deleting
-                            ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: FxLoading(strokeWidth: 2),
-                            )
-                            : const Icon(Icons.delete_forever_outlined),
-                    label: const Text('Excluir minha conta'),
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    'Esses dados ajudam o personal a ajustar treino, contato, segurança e aderência sem depender de conversa toda hora.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: mute, fontSize: 12, height: 1.45),
-                  ),
-                ],
+                    const SizedBox(height: 14),
+                    _SectionCard(
+                      title: 'Saúde e restrições',
+                      subtitle:
+                          'Informações que deixam treino e dieta mais seguros.',
+                      isDark: isDark,
+                      children: [
+                        DropdownButtonFormField<String>(
+                          initialValue: _nivelAtividade,
+                          decoration: const InputDecoration(
+                            labelText: 'Nível de atividade',
+                            prefixIcon: Icon(Icons.insights_outlined),
+                          ),
+                          items:
+                              _niveisAtividade
+                                  .map(
+                                    (item) => DropdownMenuItem<String>(
+                                      value: item.$1,
+                                      child: Text(item.$2),
+                                    ),
+                                  )
+                                  .toList(),
+                          onChanged:
+                              (value) =>
+                                  setState(() => _nivelAtividade = value),
+                        ),
+                        const SizedBox(height: 12),
+                        _Field(
+                          controller: _lesoes,
+                          label: 'Lesões ou limitações',
+                          icon: Icons.healing_outlined,
+                          maxLines: 3,
+                        ),
+                        _Field(
+                          controller: _medicamentos,
+                          label: 'Medicamentos em uso',
+                          icon: Icons.medication_outlined,
+                          maxLines: 2,
+                        ),
+                        _Field(
+                          controller: _historicoMedico,
+                          label: 'Histórico médico',
+                          icon: Icons.local_hospital_outlined,
+                          maxLines: 3,
+                        ),
+                        _Field(
+                          controller: _cirurgias,
+                          label: 'Cirurgias realizadas',
+                          icon: Icons.personal_injury_outlined,
+                          maxLines: 2,
+                        ),
+                        _Field(
+                          controller: _doresCronicas,
+                          label: 'Dores crônicas',
+                          icon: Icons.accessibility_new_outlined,
+                          maxLines: 2,
+                        ),
+                        _Field(
+                          controller: _restricoesAlimentares,
+                          label: 'Restrições alimentares',
+                          icon: Icons.no_food_outlined,
+                          maxLines: 2,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    _SectionCard(
+                      title: 'Rotina de treino',
+                      subtitle:
+                          'Preferências e disponibilidade para o plano fazer sentido.',
+                      isDark: isDark,
+                      children: [
+                        Text(
+                          'Disponibilidade semanal',
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        SegmentedButton<int>(
+                          showSelectedIcon: false,
+                          multiSelectionEnabled: false,
+                          selected: {_disponibilidadeSemanal},
+                          segments: const [
+                            ButtonSegment(value: 1, label: Text('1')),
+                            ButtonSegment(value: 2, label: Text('2')),
+                            ButtonSegment(value: 3, label: Text('3')),
+                            ButtonSegment(value: 4, label: Text('4')),
+                            ButtonSegment(value: 5, label: Text('5')),
+                            ButtonSegment(value: 6, label: Text('6')),
+                            ButtonSegment(value: 7, label: Text('7')),
+                          ],
+                          onSelectionChanged:
+                              (values) => setState(
+                                () => _disponibilidadeSemanal = values.first,
+                              ),
+                        ),
+                        const SizedBox(height: 12),
+                        _Field(
+                          controller: _preferenciasTreino,
+                          label: 'Preferências de treino',
+                          icon: Icons.sports_gymnastics_outlined,
+                          maxLines: 3,
+                        ),
+                        _Field(
+                          controller: _observacoes,
+                          label: 'Observações para o personal',
+                          icon: Icons.sticky_note_2_outlined,
+                          maxLines: 3,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: TokensStrip.s4),
+                    FxLiquidPrimaryButton(
+                      loading: _saving,
+                      icon: Icons.check,
+                      label: 'Salvar meu perfil',
+                      onPressed: _saving ? null : _save,
+                    ),
+                    const SizedBox(height: 10),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: EagleTokens.bad,
+                        side: const BorderSide(color: EagleTokens.bad),
+                      ),
+                      onPressed: _deleting ? null : _confirmDeleteAccount,
+                      icon:
+                          _deleting
+                              ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: FxLoading(strokeWidth: 2),
+                              )
+                              : const Icon(Icons.delete_forever_outlined),
+                      label: const Text('Excluir minha conta'),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      'Esses dados ajudam o personal a ajustar treino, contato, segurança e aderência sem depender de conversa toda hora.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: mute, fontSize: 12, height: 1.45),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -1188,7 +1203,8 @@ class _SectionCard extends StatelessWidget {
                 child: Text(
                   title,
                   style: TextStyle(
-                    color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+                    color:
+                        isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                   ),
@@ -1201,7 +1217,8 @@ class _SectionCard extends StatelessWidget {
           Text(
             subtitle,
             style: TextStyle(
-              color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+              color:
+                  isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
               fontSize: 12.5,
               height: 1.4,
             ),
@@ -1307,7 +1324,9 @@ class _MetricHighlightCard extends StatelessWidget {
                   label,
                   style: TextStyle(
                     color:
-                        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+                        isDark
+                            ? EagleTokens.darkInkMute
+                            : TokensStrip.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -1316,7 +1335,8 @@ class _MetricHighlightCard extends StatelessWidget {
                 Text(
                   value,
                   style: TextStyle(
-                    color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+                    color:
+                        isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
                   ),
@@ -1328,7 +1348,9 @@ class _MetricHighlightCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color:
-                        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+                        isDark
+                            ? EagleTokens.darkInkMute
+                            : TokensStrip.textSecondary,
                     fontSize: 11.5,
                     height: 1.35,
                   ),

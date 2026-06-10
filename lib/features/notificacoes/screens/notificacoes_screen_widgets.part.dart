@@ -243,126 +243,126 @@ class _RadarNotificationGroup extends StatelessWidget {
       label:
           '${items.length} $label Radar Focux. Alunos com próxima ação pendente.',
       child: AnimatedOpacity(
-      duration: const Duration(milliseconds: 180),
-      opacity: unread ? 1 : 0.78,
-      child: Container(
-        padding: const EdgeInsets.all(13),
-        decoration: fxListCardDecoration(
-          context,
-          accent: unread ? primary : null,
-          radius: 22,
-        ),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: primary.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Center(
-                    child: FxIcon(name: 'spark', color: primary, size: 18),
-                  ),
-                ),
-                const SizedBox(width: 11),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${items.length} $label Radar Focux',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        'Alunos com próxima ação pendente',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: mute,
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (time.isNotEmpty)
-                  _TinyBadge(label: time, color: primary, isDark: isDark),
-              ],
-            ),
-            const SizedBox(height: 10),
-            for (var i = 0; i < items.length; i++) ...[
-              _RadarRow(
-                item: items[i],
-                isDark: isDark,
-                primary: primary,
-                actionInk: actionInk,
-                onOpen: onOpen,
-              ),
-              if (i != items.length - 1)
-                Divider(height: 14, thickness: 1, color: line),
-            ],
-            if (items.length > 1) ...[
-              const SizedBox(height: 10),
-              Semantics(
-                button: true,
-                label: 'Abrir sinais do Radar Focux',
-                child: InkWell(
-                  onTap:
-                      () => onOpen(
-                        items.firstWhere(
-                          (item) => !item.lida,
-                          orElse: () => items.first,
-                        ),
-                      ),
-                  borderRadius: BorderRadius.circular(14),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
+        duration: const Duration(milliseconds: 180),
+        opacity: unread ? 1 : 0.78,
+        child: Container(
+          padding: const EdgeInsets.all(13),
+          decoration: fxListCardDecoration(
+            context,
+            accent: unread ? primary : null,
+            radius: 22,
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
                     decoration: BoxDecoration(
-                      color: primary.withValues(alpha: isDark ? 0.14 : 0.07),
-                      borderRadius: BorderRadius.circular(14),
+                      color: primary.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    child: Center(
+                      child: FxIcon(name: 'spark', color: primary, size: 18),
+                    ),
+                  ),
+                  const SizedBox(width: 11),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Abrir sinais',
+                          '${items.length} $label Radar Focux',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: actionInk,
-                            fontSize: 12,
+                            color: ink,
+                            fontSize: 14,
                             fontWeight: FontWeight.w900,
                           ),
                         ),
-                        const SizedBox(width: 6),
-                        Icon(
-                          Icons.arrow_forward_rounded,
-                          color: actionInk,
-                          size: 15,
+                        const SizedBox(height: 3),
+                        Text(
+                          'Alunos com próxima ação pendente',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ],
                     ),
                   ),
-                ),
+                  if (time.isNotEmpty)
+                    _TinyBadge(label: time, color: primary, isDark: isDark),
+                ],
               ),
+              const SizedBox(height: 10),
+              for (var i = 0; i < items.length; i++) ...[
+                _RadarRow(
+                  item: items[i],
+                  isDark: isDark,
+                  primary: primary,
+                  actionInk: actionInk,
+                  onOpen: onOpen,
+                ),
+                if (i != items.length - 1)
+                  Divider(height: 14, thickness: 1, color: line),
+              ],
+              if (items.length > 1) ...[
+                const SizedBox(height: 10),
+                Semantics(
+                  button: true,
+                  label: 'Abrir sinais do Radar Focux',
+                  child: InkWell(
+                    onTap:
+                        () => onOpen(
+                          items.firstWhere(
+                            (item) => !item.lida,
+                            orElse: () => items.first,
+                          ),
+                        ),
+                    borderRadius: BorderRadius.circular(14),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: primary.withValues(alpha: isDark ? 0.14 : 0.07),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Abrir sinais',
+                            style: TextStyle(
+                              color: actionInk,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Icon(
+                            Icons.arrow_forward_rounded,
+                            color: actionInk,
+                            size: 15,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
-    ),
     );
   }
 }
@@ -394,46 +394,47 @@ class _RadarRow extends StatelessWidget {
       button: true,
       label: '$displayName. $summary',
       child: InkWell(
-      onTap: () => onOpen(item),
-      borderRadius: BorderRadius.circular(14),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 5),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name.isEmpty ? 'Aluno' : name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: ink,
-                      fontSize: 13.2,
-                      fontWeight: item.lida ? FontWeight.w700 : FontWeight.w900,
+        onTap: () => onOpen(item),
+        borderRadius: BorderRadius.circular(14),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 5),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name.isEmpty ? 'Aluno' : name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 13.2,
+                        fontWeight:
+                            item.lida ? FontWeight.w700 : FontWeight.w900,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    summary,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: mute,
-                      fontSize: 11.7,
-                      fontWeight: FontWeight.w500,
+                    const SizedBox(height: 3),
+                    Text(
+                      summary,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: mute,
+                        fontSize: 11.7,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Icon(Icons.chevron_right_rounded, color: actionInk, size: 20),
-          ],
+              const SizedBox(width: 8),
+              Icon(Icons.chevron_right_rounded, color: actionInk, size: 20),
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 }
@@ -459,53 +460,53 @@ class _QuietFooter extends StatelessWidget {
       label:
           'Inbox sob controle. Fora destes sinais, nada crítico pendente agora.',
       child: Container(
-      margin: const EdgeInsets.only(top: 4),
-      padding: const EdgeInsets.all(14),
-      decoration: fxListCardDecoration(context, radius: 20),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: EagleTokens.good.withValues(alpha: isDark ? 0.16 : 0.10),
-              borderRadius: BorderRadius.circular(14),
+        margin: const EdgeInsets.only(top: 4),
+        padding: const EdgeInsets.all(14),
+        decoration: fxListCardDecoration(context, radius: 20),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: EagleTokens.good.withValues(alpha: isDark ? 0.16 : 0.10),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(
+                Icons.check_circle_outline_rounded,
+                color: EagleTokens.good,
+                size: 18,
+              ),
             ),
-            child: Icon(
-              Icons.check_circle_outline_rounded,
-              color: EagleTokens.good,
-              size: 18,
-            ),
-          ),
-          const SizedBox(width: 11),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Inbox sob controle',
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 13.4,
-                    fontWeight: FontWeight.w900,
+            const SizedBox(width: 11),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Inbox sob controle',
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 13.4,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  'Fora destes sinais, nada crítico pendente agora.',
-                  style: TextStyle(
-                    color: mute,
-                    fontSize: 11.8,
-                    fontWeight: FontWeight.w600,
+                  const SizedBox(height: 3),
+                  Text(
+                    'Fora destes sinais, nada crítico pendente agora.',
+                    style: TextStyle(
+                      color: mute,
+                      fontSize: 11.8,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          _TinyBadge(label: 'ok', color: actionInk, isDark: isDark),
-        ],
+            _TinyBadge(label: 'ok', color: actionInk, isDark: isDark),
+          ],
+        ),
       ),
-    ),
     );
   }
 }
@@ -543,127 +544,127 @@ class _NotificationTile extends StatelessWidget {
       button: true,
       label: a11yLabel,
       child: AnimatedOpacity(
-      duration: const Duration(milliseconds: 180),
-      opacity: item.lida ? 0.76 : 1,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: const EdgeInsets.all(13),
-          decoration: fxListCardDecoration(
-            context,
-            accent: unread ? tipoColor : null,
-            radius: 20,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: tipoColor.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Icon(
-                      _iconFor(item.tipo, item.titulo),
-                      color: tipoColor,
-                      size: 18,
-                    ),
-                  ),
-                  if (unread)
-                    Positioned(
-                      right: -1,
-                      top: -1,
-                      child: Container(
-                        width: 7,
-                        height: 7,
-                        decoration: BoxDecoration(
-                          color: tipoColor,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: ShellChrome.of(context).cardFill,
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(width: 11),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        duration: const Duration(milliseconds: 180),
+        opacity: item.lida ? 0.76 : 1,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            padding: const EdgeInsets.all(13),
+            decoration: fxListCardDecoration(
+              context,
+              accent: unread ? tipoColor : null,
+              radius: 20,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Stack(
+                  clipBehavior: Clip.none,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: ink,
-                              fontSize: 14,
-                              fontWeight:
-                                  unread ? FontWeight.w900 : FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        if (time.isNotEmpty) ...[
-                          const SizedBox(width: 8),
-                          Text(
-                            time,
-                            style: TextStyle(
-                              color: mute,
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      item.mensagem,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: mute,
-                        fontSize: 12.1,
-                        height: 1.3,
-                        fontWeight: FontWeight.w500,
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: tipoColor.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Icon(
+                        _iconFor(item.tipo, item.titulo),
+                        color: tipoColor,
+                        size: 18,
                       ),
                     ),
-                    const SizedBox(height: 9),
-                    Row(
-                      children: [
-                        _TinyBadge(
-                          label: _badgeLabel(item),
-                          color: tipoColor,
-                          isDark: isDark,
-                        ),
-                        const Spacer(),
-                        if (hasRoute)
-                          Icon(
-                            Icons.chevron_right_rounded,
-                            color: actionInk,
-                            size: 20,
+                    if (unread)
+                      Positioned(
+                        right: -1,
+                        top: -1,
+                        child: Container(
+                          width: 7,
+                          height: 7,
+                          decoration: BoxDecoration(
+                            color: tipoColor,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: ShellChrome.of(context).cardFill,
+                              width: 1.5,
+                            ),
                           ),
-                      ],
-                    ),
+                        ),
+                      ),
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(width: 11),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: ink,
+                                fontSize: 14,
+                                fontWeight:
+                                    unread ? FontWeight.w900 : FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          if (time.isNotEmpty) ...[
+                            const SizedBox(width: 8),
+                            Text(
+                              time,
+                              style: TextStyle(
+                                color: mute,
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        item.mensagem,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: mute,
+                          fontSize: 12.1,
+                          height: 1.3,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 9),
+                      Row(
+                        children: [
+                          _TinyBadge(
+                            label: _badgeLabel(item),
+                            color: tipoColor,
+                            isDark: isDark,
+                          ),
+                          const Spacer(),
+                          if (hasRoute)
+                            Icon(
+                              Icons.chevron_right_rounded,
+                              color: actionInk,
+                              size: 20,
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    ),
     );
   }
 
@@ -745,44 +746,47 @@ class _NotificationsStateCard extends StatelessWidget {
           container: true,
           label: '$title. $subtitle',
           child: Container(
-          padding: const EdgeInsets.all(18),
-          decoration: fxListCardDecoration(
-            context,
-            accent: actionInk,
-            radius: 22,
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: BrandPalette.soft(primary, dark: isDark),
-                  borderRadius: BorderRadius.circular(16),
+            padding: const EdgeInsets.all(18),
+            decoration: fxListCardDecoration(
+              context,
+              accent: actionInk,
+              radius: 22,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: BrandPalette.soft(primary, dark: isDark),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Center(child: FxIcon(name: icon, color: primary)),
                 ),
-                child: Center(child: FxIcon(name: icon, color: primary)),
-              ),
-              const SizedBox(width: 13),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
+                const SizedBox(width: 13),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          color: ink,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(subtitle, style: TextStyle(color: mute, height: 1.35)),
-                  ],
+                      const SizedBox(height: 5),
+                      Text(
+                        subtitle,
+                        style: TextStyle(color: mute, height: 1.35),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
         ),
       ],
     );

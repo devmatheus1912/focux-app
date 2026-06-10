@@ -22,7 +22,8 @@ class WhiteLabelSettingsScreen extends ConsumerStatefulWidget {
       _WhiteLabelSettingsScreenState();
 }
 
-class _WhiteLabelSettingsScreenState extends ConsumerState<WhiteLabelSettingsScreen> {
+class _WhiteLabelSettingsScreenState
+    extends ConsumerState<WhiteLabelSettingsScreen> {
   final _appNameCtrl = TextEditingController();
   final _domainCtrl = TextEditingController();
   bool _ocultarFocux = false;
@@ -50,12 +51,14 @@ class _WhiteLabelSettingsScreenState extends ConsumerState<WhiteLabelSettingsScr
   Future<void> _salvar() async {
     setState(() => _salvando = true);
     try {
-      await ref.read(whiteLabelRepositoryProvider).save(
-        appDisplayName: _appNameCtrl.text.trim(),
-        ocultarMarcaFocux: _ocultarFocux,
-        dominioCustomizado: _domainCtrl.text.trim(),
-        landingModo: _landingModo,
-      );
+      await ref
+          .read(whiteLabelRepositoryProvider)
+          .save(
+            appDisplayName: _appNameCtrl.text.trim(),
+            ocultarMarcaFocux: _ocultarFocux,
+            dominioCustomizado: _domainCtrl.text.trim(),
+            landingModo: _landingModo,
+          );
       ref.invalidate(whiteLabelConfigProvider);
       if (mounted) FeedbackHelper.showSuccess(context, 'Configurações salvas');
     } catch (e) {
@@ -70,9 +73,11 @@ class _WhiteLabelSettingsScreenState extends ConsumerState<WhiteLabelSettingsScr
     try {
       await ref.read(whiteLabelRepositoryProvider).verifyDomain();
       ref.invalidate(whiteLabelConfigProvider);
-      if (mounted) FeedbackHelper.showSuccess(context, 'Domínio marcado como verificado');
+      if (mounted)
+        FeedbackHelper.showSuccess(context, 'Domínio marcado como verificado');
     } catch (e) {
-      if (mounted) FeedbackHelper.showError(context, 'Verifique o DNS antes de confirmar');
+      if (mounted)
+        FeedbackHelper.showError(context, 'Verifique o DNS antes de confirmar');
     } finally {
       if (mounted) setState(() => _verificando = false);
     }
@@ -96,177 +101,195 @@ class _WhiteLabelSettingsScreenState extends ConsumerState<WhiteLabelSettingsScr
         ),
         body: FxContentWidthLimiter(
           child: configAsync.when(
-          loading: () => const Center(child: FxLoading()),
-          error: (_, __) => Center(
-            child: Text(
-              'Recurso disponível no plano Enterprise',
-              style: TextStyle(color: EagleTokens.inkMute),
-            ),
-          ),
-          data: (config) {
-            _apply(config);
-            final chrome = ShellChrome.of(context);
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-              children: [
-                _sectionTitle('App do aluno'),
-                Semantics(
-                  toggled: _ocultarFocux,
-                  label: 'Ocultar marca Focux',
-                  child: SwitchListTile(
-                    value: _ocultarFocux,
-                    onChanged: (v) => setState(() => _ocultarFocux = v),
-                    title: const Text('Ocultar marca Focux'),
-                    subtitle: const Text(
-                      'Login, splash e cards sociais usam só a sua marca.',
+            loading: () => const Center(child: FxLoading()),
+            error:
+                (_, __) => Center(
+                  child: Text(
+                    'Recurso disponível no plano Enterprise',
+                    style: TextStyle(color: EagleTokens.inkMute),
+                  ),
+                ),
+            data: (config) {
+              _apply(config);
+              final chrome = ShellChrome.of(context);
+              return ListView(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                children: [
+                  _sectionTitle('App do aluno'),
+                  Semantics(
+                    toggled: _ocultarFocux,
+                    label: 'Ocultar marca Focux',
+                    child: SwitchListTile(
+                      value: _ocultarFocux,
+                      onChanged: (v) => setState(() => _ocultarFocux = v),
+                      title: const Text('Ocultar marca Focux'),
+                      subtitle: const Text(
+                        'Login, splash e cards sociais usam só a sua marca.',
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _appNameCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Nome do app (aluno)',
-                    hintText: 'Ex: Studio João Silva',
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _appNameCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Nome do app (aluno)',
+                      hintText: 'Ex: Studio João Silva',
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                _sectionTitle('Domínio customizado'),
-                TextField(
-                  controller: _domainCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Domínio',
-                    hintText: 'treino.seudominio.com.br',
+                  const SizedBox(height: 24),
+                  _sectionTitle('Domínio customizado'),
+                  TextField(
+                    controller: _domainCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Domínio',
+                      hintText: 'treino.seudominio.com.br',
+                    ),
+                    autocorrect: false,
+                    keyboardType: TextInputType.url,
                   ),
-                  autocorrect: false,
-                  keyboardType: TextInputType.url,
-                ),
-                if (config.dominioVerificado)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Row(
-                      children: [
-                        Icon(Icons.verified_rounded, color: EagleTokens.success, size: 18),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Domínio verificado',
-                          style: TextStyle(color: EagleTokens.success, fontSize: 13),
+                  if (config.dominioVerificado)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.verified_rounded,
+                            color: EagleTokens.success,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Domínio verificado',
+                            style: TextStyle(
+                              color: EagleTokens.success,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: chrome.cardFill,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: chrome.line),
+                    ),
+                    child: Text(
+                      config.dnsInstrucoes,
+                      style: TextStyle(
+                        color: chrome.mute,
+                        fontSize: 12,
+                        height: 1.45,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: _verificando ? null : _verificarDominio,
+                    icon:
+                        _verificando
+                            ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: FxLoading(strokeWidth: 2),
+                            )
+                            : const Icon(Icons.dns_outlined),
+                    label: const Text('Verificar domínio'),
+                  ),
+                  const SizedBox(height: 24),
+                  _sectionTitle('Como você vende'),
+                  Semantics(
+                    label: 'Modo de venda da landing',
+                    child: SegmentedButton<String>(
+                      showSelectedIcon: false,
+                      segments: const [
+                        ButtonSegment(
+                          value: 'CAPTURA',
+                          label: Text('Formulário rápido'),
+                        ),
+                        ButtonSegment(
+                          value: 'SITE',
+                          label: Text('Página completa'),
                         ),
                       ],
+                      selected: {_landingModo},
+                      onSelectionChanged:
+                          (s) => setState(() => _landingModo = s.first),
                     ),
                   ),
-                const SizedBox(height: 12),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: chrome.cardFill,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: chrome.line),
+                  const SizedBox(height: 8),
+                  Text(
+                    _landingModo == 'CAPTURA'
+                        ? 'Destaque o link curto de captura no dashboard e anúncios.'
+                        : 'Destaque a página completa com foto, planos e depoimentos.',
+                    style: TextStyle(color: chrome.mute, fontSize: 13),
                   ),
-                  child: Text(
-                    config.dnsInstrucoes,
-                    style: TextStyle(
-                      color: chrome.mute,
-                      fontSize: 12,
-                      height: 1.45,
+                  const SizedBox(height: 16),
+                  if (config.slug != null && config.slug!.isNotEmpty) ...[
+                    _linkTile(
+                      title: 'Página completa',
+                      hint: 'Ideal para Instagram, WhatsApp e bio.',
+                      displayLabel: Env.landingPageDisplayLabel(config.slug!),
+                      copyUrl:
+                          config.publicLandingUrl.isNotEmpty
+                              ? config.publicLandingUrl
+                              : Env.landingPageUrl(config.slug!),
+                    ),
+                    _linkTile(
+                      title: 'Formulário rápido',
+                      hint: 'Só nome e WhatsApp — use em anúncios.',
+                      displayLabel: Env.capturaPageDisplayLabel(config.slug!),
+                      copyUrl:
+                          config.publicCapturaUrl.isNotEmpty
+                              ? config.publicCapturaUrl
+                              : Env.capturaPageUrl(config.slug!),
+                    ),
+                  ] else ...[
+                    _linkTile(
+                      title: 'Página completa',
+                      hint: 'Configure seu link público no perfil primeiro.',
+                      displayLabel: 'focux.app/p/seu-nome',
+                      copyUrl: config.publicLandingUrl,
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  _sectionTitle(
+                    'Checklist máquina de vendas (${config.checklistScore}/${config.checklist.length})',
+                  ),
+                  ...config.checklist.map(
+                    (item) => CheckboxListTile(
+                      value: item.done,
+                      onChanged: null,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      title: Text(
+                        item.label,
+                        style: const TextStyle(fontSize: 14),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: _verificando ? null : _verificarDominio,
-                  icon: _verificando
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: FxLoading(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.dns_outlined),
-                  label: const Text('Verificar domínio'),
-                ),
-                const SizedBox(height: 24),
-                _sectionTitle('Como você vende'),
-                Semantics(
-                  label: 'Modo de venda da landing',
-                  child: SegmentedButton<String>(
-                    showSelectedIcon: false,
-                    segments: const [
-                      ButtonSegment(
-                        value: 'CAPTURA',
-                        label: Text('Formulário rápido'),
-                      ),
-                      ButtonSegment(
-                        value: 'SITE',
-                        label: Text('Página completa'),
-                      ),
-                    ],
-                    selected: {_landingModo},
-                    onSelectionChanged: (s) => setState(() => _landingModo = s.first),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  _landingModo == 'CAPTURA'
-                      ? 'Destaque o link curto de captura no dashboard e anúncios.'
-                      : 'Destaque a página completa com foto, planos e depoimentos.',
-                  style: TextStyle(color: chrome.mute, fontSize: 13),
-                ),
-                const SizedBox(height: 16),
-                if (config.slug != null && config.slug!.isNotEmpty) ...[
-                  _linkTile(
-                    title: 'Página completa',
-                    hint: 'Ideal para Instagram, WhatsApp e bio.',
-                    displayLabel: Env.landingPageDisplayLabel(config.slug!),
-                    copyUrl: config.publicLandingUrl.isNotEmpty
-                        ? config.publicLandingUrl
-                        : Env.landingPageUrl(config.slug!),
-                  ),
-                  _linkTile(
-                    title: 'Formulário rápido',
-                    hint: 'Só nome e WhatsApp — use em anúncios.',
-                    displayLabel: Env.capturaPageDisplayLabel(config.slug!),
-                    copyUrl: config.publicCapturaUrl.isNotEmpty
-                        ? config.publicCapturaUrl
-                        : Env.capturaPageUrl(config.slug!),
-                  ),
-                ] else ...[
-                  _linkTile(
-                    title: 'Página completa',
-                    hint: 'Configure seu link público no perfil primeiro.',
-                    displayLabel: 'focux.app/p/seu-nome',
-                    copyUrl: config.publicLandingUrl,
+                  const SizedBox(height: 24),
+                  Semantics(
+                    button: true,
+                    enabled: !_salvando,
+                    label: 'Salvar configurações de marca própria',
+                    child: FilledButton(
+                      onPressed: _salvando ? null : _salvar,
+                      child:
+                          _salvando
+                              ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: FxLoading(strokeWidth: 2),
+                              )
+                              : const Text('Salvar configurações'),
+                    ),
                   ),
                 ],
-                const SizedBox(height: 24),
-                _sectionTitle('Checklist máquina de vendas (${config.checklistScore}/${config.checklist.length})'),
-                ...config.checklist.map(
-                  (item) => CheckboxListTile(
-                    value: item.done,
-                    onChanged: null,
-                    controlAffinity: ListTileControlAffinity.leading,
-                    title: Text(item.label, style: const TextStyle(fontSize: 14)),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Semantics(
-                  button: true,
-                  enabled: !_salvando,
-                  label: 'Salvar configurações de marca própria',
-                  child: FilledButton(
-                    onPressed: _salvando ? null : _salvar,
-                    child: _salvando
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: FxLoading(strokeWidth: 2),
-                          )
-                        : const Text('Salvar configurações'),
-                  ),
-                ),
-              ],
-            );
-          },
+              );
+            },
           ),
         ),
       ),
@@ -299,9 +322,15 @@ class _WhiteLabelSettingsScreenState extends ConsumerState<WhiteLabelSettingsScr
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+            ),
             const SizedBox(height: 2),
-            Text(hint, style: TextStyle(color: chrome.mute, fontSize: 12, height: 1.35)),
+            Text(
+              hint,
+              style: TextStyle(color: chrome.mute, fontSize: 12, height: 1.35),
+            ),
             const SizedBox(height: 8),
             Container(
               width: double.infinity,
@@ -312,19 +341,23 @@ class _WhiteLabelSettingsScreenState extends ConsumerState<WhiteLabelSettingsScr
               ),
               child: Text(
                 displayLabel,
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
               ),
             ),
             const SizedBox(height: 8),
             Align(
               alignment: Alignment.centerRight,
               child: TextButton.icon(
-                onPressed: urlToCopy.isEmpty
-                    ? null
-                    : () {
-                        Clipboard.setData(ClipboardData(text: urlToCopy));
-                        FeedbackHelper.showSuccess(context, 'Link copiado');
-                      },
+                onPressed:
+                    urlToCopy.isEmpty
+                        ? null
+                        : () {
+                          Clipboard.setData(ClipboardData(text: urlToCopy));
+                          FeedbackHelper.showSuccess(context, 'Link copiado');
+                        },
                 icon: const Icon(Icons.copy_rounded, size: 18),
                 label: const Text('Copiar link'),
               ),

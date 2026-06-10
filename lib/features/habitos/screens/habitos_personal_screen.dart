@@ -74,66 +74,82 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
     final descricaoCtrl = TextEditingController();
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('Novo hábito'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (templates.isNotEmpty) ...[
-                  DropdownButtonFormField<HabitoTemplate>(
-                    decoration: const InputDecoration(labelText: 'Template'),
-                    items: templates
-                        .map((t) => DropdownMenuItem(
-                              value: t,
-                              child: Text('${t.icone ?? ''} ${t.titulo}'),
-                            ))
-                        .toList(),
-                    onChanged: (t) {
-                      setDialogState(() {
-                        selected = t;
-                        if (t != null) {
-                          tituloCtrl.text = t.titulo;
-                          descricaoCtrl.text = t.descricao ?? '';
-                        }
-                      });
-                    },
+      builder:
+          (ctx) => StatefulBuilder(
+            builder:
+                (ctx, setDialogState) => AlertDialog(
+                  title: const Text('Novo hábito'),
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (templates.isNotEmpty) ...[
+                          DropdownButtonFormField<HabitoTemplate>(
+                            decoration: const InputDecoration(
+                              labelText: 'Template',
+                            ),
+                            items:
+                                templates
+                                    .map(
+                                      (t) => DropdownMenuItem(
+                                        value: t,
+                                        child: Text(
+                                          '${t.icone ?? ''} ${t.titulo}',
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                            onChanged: (t) {
+                              setDialogState(() {
+                                selected = t;
+                                if (t != null) {
+                                  tituloCtrl.text = t.titulo;
+                                  descricaoCtrl.text = t.descricao ?? '';
+                                }
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                        TextField(
+                          controller: tituloCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Título',
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: descricaoCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Descrição (opcional)',
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                ],
-                TextField(
-                  controller: tituloCtrl,
-                  decoration: const InputDecoration(labelText: 'Título'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(false),
+                      child: const Text('Cancelar'),
+                    ),
+                    FilledButton(
+                      onPressed: () => Navigator.of(ctx).pop(true),
+                      child: const Text('Criar'),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: descricaoCtrl,
-                  decoration: const InputDecoration(labelText: 'Descrição (opcional)'),
-                ),
-              ],
-            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('Cancelar'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text('Criar'),
-            ),
-          ],
-        ),
-      ),
     );
     if (ok == true && tituloCtrl.text.trim().isNotEmpty) {
       try {
-        await ref.read(_repoProvider).criar(
+        await ref
+            .read(_repoProvider)
+            .criar(
               titulo: tituloCtrl.text.trim(),
-              descricao: descricaoCtrl.text.trim().isEmpty
-                  ? null
-                  : descricaoCtrl.text.trim(),
+              descricao:
+                  descricaoCtrl.text.trim().isEmpty
+                      ? null
+                      : descricaoCtrl.text.trim(),
               tipo: selected?.tipo ?? 'CUSTOM',
               metaDiaria: selected?.metaDiaria,
               metaSemanal: selected?.metaSemanal,
@@ -154,80 +170,84 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
       requiredPlan: SubscriptionPlan.PREMIUM,
       capability: 'habitCoaching',
       child: FxShellScaffold(
-      appBar: const FxShellAppBar(
-        title: 'Hábitos & Compliance',
-        subtitle: 'Coaching diário e aderência',
-      ),
-      floatingActionButton: Semantics(
-        label: 'Novo hábito',
-        button: true,
-        child: FloatingActionButton.extended(
-          onPressed: _novoHabito,
-          icon: const Icon(Icons.add),
-          label: const Text('Novo hábito'),
+        appBar: const FxShellAppBar(
+          title: 'Hábitos & Compliance',
+          subtitle: 'Coaching diário e aderência',
         ),
-      ),
-      body: _loading
-          ? const Center(child: FxLoading())
-          : _error != null
-              ? FxEmptyState(
+        floatingActionButton: Semantics(
+          label: 'Novo hábito',
+          button: true,
+          child: FloatingActionButton.extended(
+            onPressed: _novoHabito,
+            icon: const Icon(Icons.add),
+            label: const Text('Novo hábito'),
+          ),
+        ),
+        body:
+            _loading
+                ? const Center(child: FxLoading())
+                : _error != null
+                ? FxEmptyState(
                   icon: 'alert-triangle',
                   title: 'Erro ao carregar',
                   subtitle: _error,
-                  action: FxEmptyAction(label: 'Tentar novamente', onTap: _carregar),
+                  action: FxEmptyAction(
+                    label: 'Tentar novamente',
+                    onTap: _carregar,
+                  ),
                 )
-              : RefreshIndicator(
-              onRefresh: _carregar,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  _SectionHeader(
-                    titulo: 'Hábitos cadastrados',
-                    subtitulo: 'Aplica para todos os seus alunos',
-                  ),
-                  if (_habitos.isEmpty)
-                    const _EmptyHabitos()
-                  else
-                    ..._habitos.map(
-                      (h) => FxSatelliteListTile(
-                        title: h.titulo,
-                        titleCase: false,
-                        leading: Icon(
-                          Icons.fitness_center_rounded,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        subtitle: Text(
-                          h.descricao ?? 'Meta semanal: ${h.metaSemanal}x',
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete_outline_rounded),
-                          onPressed: () async {
-                            await ref.read(_repoProvider).desativar(h.id);
-                            await _carregar();
-                          },
-                        ),
+                : RefreshIndicator(
+                  onRefresh: _carregar,
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      _SectionHeader(
+                        titulo: 'Hábitos cadastrados',
+                        subtitulo: 'Aplica para todos os seus alunos',
                       ),
-                    ),
-                  const SizedBox(height: 24),
-                  _SectionHeader(
-                    titulo: 'Compliance da semana',
-                    subtitulo: 'Aderência dos seus alunos aos hábitos',
-                  ),
-                  if (_compliance.isEmpty)
-                    FxSatelliteListTile(
-                      title: 'Sem dados ainda',
-                      titleCase: false,
-                      leading: Icon(Icons.info_outline_rounded),
-                      subtitle: Text(
-                        'Cadastre hábitos e os alunos vão começar a marcar.',
+                      if (_habitos.isEmpty)
+                        const _EmptyHabitos()
+                      else
+                        ..._habitos.map(
+                          (h) => FxSatelliteListTile(
+                            title: h.titulo,
+                            titleCase: false,
+                            leading: Icon(
+                              Icons.fitness_center_rounded,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            subtitle: Text(
+                              h.descricao ?? 'Meta semanal: ${h.metaSemanal}x',
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete_outline_rounded),
+                              onPressed: () async {
+                                await ref.read(_repoProvider).desativar(h.id);
+                                await _carregar();
+                              },
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: 24),
+                      _SectionHeader(
+                        titulo: 'Compliance da semana',
+                        subtitulo: 'Aderência dos seus alunos aos hábitos',
                       ),
-                    )
-                  else
-                    ..._compliance.map((c) => _ComplianceTile(item: c)),
-                  const SizedBox(height: 80),
-                ],
-              ),
-            ),
+                      if (_compliance.isEmpty)
+                        FxSatelliteListTile(
+                          title: 'Sem dados ainda',
+                          titleCase: false,
+                          leading: Icon(Icons.info_outline_rounded),
+                          subtitle: Text(
+                            'Cadastre hábitos e os alunos vão começar a marcar.',
+                          ),
+                        )
+                      else
+                        ..._compliance.map((c) => _ComplianceTile(item: c)),
+                      const SizedBox(height: 80),
+                    ],
+                  ),
+                ),
       ),
     );
   }
@@ -245,12 +265,18 @@ class _SectionHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(titulo,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800)),
-          Text(subtitulo,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.outline)),
+          Text(
+            titulo,
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          Text(
+            subtitulo,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.outline,
+            ),
+          ),
         ],
       ),
     );
@@ -267,15 +293,17 @@ class _EmptyHabitos extends StatelessWidget {
       child: Column(
         children: [
           const Icon(Icons.checklist_outlined, size: 40),
-            const SizedBox(height: 8),
-            Text('Nenhum hábito cadastrado',
-                style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 4),
-            Text(
-              'Hábitos diários (água, sono, refeições) aumentam aderência em 25-40% e reduzem churn (HAVIT, Everfit benchmark 2026).',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+          const SizedBox(height: 8),
+          Text(
+            'Nenhum hábito cadastrado',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Hábitos diários (água, sono, refeições) aumentam aderência em 25-40% e reduzem churn (HAVIT, Everfit benchmark 2026).',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         ],
       ),
     );

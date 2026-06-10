@@ -19,14 +19,15 @@ class WinbackLogEntry {
     required this.enviadoEm,
   });
 
-  factory WinbackLogEntry.fromJson(Map<String, dynamic> json) => WinbackLogEntry(
-    id: (json['id'] as num).toInt(),
-    alunoId: (json['alunoId'] as num?)?.toInt(),
-    alunoNome: json['alunoNome'] as String? ?? 'Aluno',
-    tipo: json['tipo'] as String? ?? '',
-    mensagem: json['mensagem'] as String? ?? '',
-    enviadoEm: json['enviadoEm'] as String? ?? '',
-  );
+  factory WinbackLogEntry.fromJson(Map<String, dynamic> json) =>
+      WinbackLogEntry(
+        id: (json['id'] as num).toInt(),
+        alunoId: (json['alunoId'] as num?)?.toInt(),
+        alunoNome: json['alunoNome'] as String? ?? 'Aluno',
+        tipo: json['tipo'] as String? ?? '',
+        mensagem: json['mensagem'] as String? ?? '',
+        enviadoEm: json['enviadoEm'] as String? ?? '',
+      );
 }
 
 class WinbackRepository {

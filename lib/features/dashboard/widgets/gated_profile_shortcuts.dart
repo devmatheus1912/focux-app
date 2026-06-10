@@ -33,36 +33,11 @@ class GatedProfileShortcuts extends ConsumerWidget {
   tileBuilder;
 
   static const _entries = [
-    (
-      Icons.smart_toy_outlined,
-      'Automações',
-      'Fluxos',
-      'Automações',
-    ),
-    (
-      Icons.emoji_events_outlined,
-      'Desafios',
-      'Comunidade',
-      'Desafios',
-    ),
-    (
-      Icons.storefront_outlined,
-      'Loja digital',
-      'Vitrine PIX',
-      'Loja',
-    ),
-    (
-      Icons.groups_outlined,
-      'Equipe',
-      'Assistentes e RBAC',
-      'Equipe',
-    ),
-    (
-      Icons.track_changes_outlined,
-      'Hábitos',
-      'Coaching diário',
-      'Hábitos',
-    ),
+    (Icons.smart_toy_outlined, 'Automações', 'Fluxos', 'Automações'),
+    (Icons.emoji_events_outlined, 'Desafios', 'Comunidade', 'Desafios'),
+    (Icons.storefront_outlined, 'Loja digital', 'Vitrine PIX', 'Loja'),
+    (Icons.groups_outlined, 'Equipe', 'Assistentes e RBAC', 'Equipe'),
+    (Icons.track_changes_outlined, 'Hábitos', 'Coaching diário', 'Hábitos'),
   ];
 
   DashboardToolShortcut? _shortcutFor(String label) {
@@ -82,11 +57,9 @@ class GatedProfileShortcuts extends ConsumerWidget {
           Builder(
             builder: (context) {
               final shortcut = _shortcutFor(entry.$4);
-              final locked =
-                  shortcut != null && !shortcut.isUnlocked(features);
+              final locked = shortcut != null && !shortcut.isUnlocked(features);
               final tier = locked ? shortcut.tierBadgeLabel() : null;
-              final value =
-                  locked ? 'Plano $tier' : entry.$3;
+              final value = locked ? 'Plano $tier' : entry.$3;
 
               return tileBuilder(
                 icon: entry.$1,

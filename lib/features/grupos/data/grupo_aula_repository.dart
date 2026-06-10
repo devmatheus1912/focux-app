@@ -65,14 +65,17 @@ class GrupoAulaRepository {
     int? capacidadeMax,
     String? localAula,
   }) async {
-    final r = await _dio.post('/api/grupo-aulas', data: {
-      'titulo': titulo,
-      'descricao': descricao,
-      'inicio': inicio.toIso8601String(),
-      'fim': fim.toIso8601String(),
-      'capacidadeMax': capacidadeMax,
-      'localAula': localAula,
-    });
+    final r = await _dio.post(
+      '/api/grupo-aulas',
+      data: {
+        'titulo': titulo,
+        'descricao': descricao,
+        'inicio': inicio.toIso8601String(),
+        'fim': fim.toIso8601String(),
+        'capacidadeMax': capacidadeMax,
+        'localAula': localAula,
+      },
+    );
     return GrupoAula.fromJson(r.data as Map<String, dynamic>);
   }
 

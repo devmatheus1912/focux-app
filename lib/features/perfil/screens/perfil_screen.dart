@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -33,12 +33,12 @@ import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 part 'perfil_screen_widgets_a.part.dart';
 part 'perfil_screen_widgets_b.part.dart';
 part 'perfil_screen_panels_a.part.dart';
 part 'perfil_screen_panels_b.part.dart';
-
 
 class PerfilScreen extends ConsumerStatefulWidget {
   const PerfilScreen({super.key});
@@ -79,10 +79,10 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
       FeedbackHelper.showSuccess(context, 'Foto atualizada com sucesso.');
     } catch (error) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(
-              error,
-              fallback: 'Não foi possível enviar a foto agora.',
-            ),);
+      FeedbackHelper.showError(
+        context,
+        friendlyError(error, fallback: 'Não foi possível enviar a foto agora.'),
+      );
     } finally {
       if (mounted) {
         setState(() => _uploadingPhoto = false);
@@ -129,76 +129,81 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
     final perfilAsync = ref.watch(perfilProvider);
     final dashboardAsync = ref.watch(dashboardProvider);
 
-    return perfilAsync.when(
-      loading: () => const _PerfilLoadingScaffold(),
-      error:
-          (error, _) => _PerfilErrorScaffold(
-            error: error,
-            onRetry: () => ref.invalidate(perfilProvider),
-          ),
-      data:
-          (perfil) => dashboardAsync.when(
-            loading:
-                () => _PerfilBody(
-                  perfil: perfil,
-                  dashboard: DashboardData(
-                    totalAlunos: 0,
-                    alunosAtivos: 0,
-                    planoAtual: perfil.plano,
-                    limiteAlunos: 0,
-                    nomePersonal: perfil.nome,
-                    logoUrl: perfil.logoUrl,
-                    corPrimaria: perfil.corPrimaria,
-                    corSecundaria: perfil.corSecundaria,
-                    descricaoProfissional: perfil.descricaoProfissional,
-                    instagram: perfil.instagram,
+    return fxScreenA11yScope(
+      label: 'Perfil',
+      child: perfilAsync.when(
+        loading: () => const _PerfilLoadingScaffold(),
+        error:
+            (error, _) => _PerfilErrorScaffold(
+              error: error,
+              onRetry: () => ref.invalidate(perfilProvider),
+            ),
+        data:
+            (perfil) => dashboardAsync.when(
+              loading:
+                  () => _PerfilBody(
+                    perfil: perfil,
+                    dashboard: DashboardData(
+                      totalAlunos: 0,
+                      alunosAtivos: 0,
+                      planoAtual: perfil.plano,
+                      limiteAlunos: 0,
+                      nomePersonal: perfil.nome,
+                      logoUrl: perfil.logoUrl,
+                      corPrimaria: perfil.corPrimaria,
+                      corSecundaria: perfil.corSecundaria,
+                      descricaoProfissional: perfil.descricaoProfissional,
+                      instagram: perfil.instagram,
+                    ),
+                    uploadingPhoto: _uploadingPhoto,
+                    loadingMetrics: true,
+                    onPickPhoto: _pickAndUploadPhoto,
+                    onEditPerfil: () => _openEditPerfil(perfil),
+                    onLogout: _logout,
+                    onOpenLandingEditor:
+                        () => openLandingEditorOrUpgrade(context, ref),
+                    onChecklistAction:
+                        (action) => _handleChecklistAction(action, perfil),
                   ),
-                  uploadingPhoto: _uploadingPhoto,
-                  loadingMetrics: true,
-                  onPickPhoto: _pickAndUploadPhoto,
-                  onEditPerfil: () => _openEditPerfil(perfil),
-                  onLogout: _logout,
-                  onOpenLandingEditor: () => openLandingEditorOrUpgrade(context, ref),
-                  onChecklistAction:
-                      (action) => _handleChecklistAction(action, perfil),
-                ),
-            error:
-                (_, __) => _PerfilBody(
-                  perfil: perfil,
-                  dashboard: DashboardData(
-                    totalAlunos: 0,
-                    alunosAtivos: 0,
-                    planoAtual: perfil.plano,
-                    limiteAlunos: 0,
-                    nomePersonal: perfil.nome,
-                    logoUrl: perfil.logoUrl,
-                    corPrimaria: perfil.corPrimaria,
-                    corSecundaria: perfil.corSecundaria,
-                    descricaoProfissional: perfil.descricaoProfissional,
-                    instagram: perfil.instagram,
+              error:
+                  (_, __) => _PerfilBody(
+                    perfil: perfil,
+                    dashboard: DashboardData(
+                      totalAlunos: 0,
+                      alunosAtivos: 0,
+                      planoAtual: perfil.plano,
+                      limiteAlunos: 0,
+                      nomePersonal: perfil.nome,
+                      logoUrl: perfil.logoUrl,
+                      corPrimaria: perfil.corPrimaria,
+                      corSecundaria: perfil.corSecundaria,
+                      descricaoProfissional: perfil.descricaoProfissional,
+                      instagram: perfil.instagram,
+                    ),
+                    uploadingPhoto: _uploadingPhoto,
+                    onPickPhoto: _pickAndUploadPhoto,
+                    onEditPerfil: () => _openEditPerfil(perfil),
+                    onLogout: _logout,
+                    onOpenLandingEditor:
+                        () => openLandingEditorOrUpgrade(context, ref),
+                    onChecklistAction:
+                        (action) => _handleChecklistAction(action, perfil),
                   ),
-                  uploadingPhoto: _uploadingPhoto,
-                  onPickPhoto: _pickAndUploadPhoto,
-                  onEditPerfil: () => _openEditPerfil(perfil),
-                  onLogout: _logout,
-                  onOpenLandingEditor: () => openLandingEditorOrUpgrade(context, ref),
-                  onChecklistAction:
-                      (action) => _handleChecklistAction(action, perfil),
-                ),
-            data:
-                (dashboard) => _PerfilBody(
-                  perfil: perfil,
-                  dashboard: dashboard,
-                  uploadingPhoto: _uploadingPhoto,
-                  onPickPhoto: _pickAndUploadPhoto,
-                  onEditPerfil: () => _openEditPerfil(perfil),
-                  onLogout: _logout,
-                  onOpenLandingEditor: () => openLandingEditorOrUpgrade(context, ref),
-                  onChecklistAction:
-                      (action) => _handleChecklistAction(action, perfil),
-                ),
-          ),
+              data:
+                  (dashboard) => _PerfilBody(
+                    perfil: perfil,
+                    dashboard: dashboard,
+                    uploadingPhoto: _uploadingPhoto,
+                    onPickPhoto: _pickAndUploadPhoto,
+                    onEditPerfil: () => _openEditPerfil(perfil),
+                    onLogout: _logout,
+                    onOpenLandingEditor:
+                        () => openLandingEditorOrUpgrade(context, ref),
+                    onChecklistAction:
+                        (action) => _handleChecklistAction(action, perfil),
+                  ),
+            ),
+      ),
     );
   }
 }
-

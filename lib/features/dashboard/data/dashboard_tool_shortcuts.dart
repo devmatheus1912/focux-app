@@ -43,7 +43,11 @@ class DashboardToolShortcut {
   }
 
   static const List<DashboardToolShortcut> moreTools = [
-    DashboardToolShortcut(icon: 'dumbbell', label: 'Exercícios', route: '/exercicios'),
+    DashboardToolShortcut(
+      icon: 'dumbbell',
+      label: 'Exercícios',
+      route: '/exercicios',
+    ),
     DashboardToolShortcut(icon: 'article', label: 'Feed', route: '/feed'),
     DashboardToolShortcut(
       icon: 'trend',
@@ -53,7 +57,11 @@ class DashboardToolShortcut {
       featureName: 'CRM e Leads',
     ),
     DashboardToolShortcut(icon: 'home', label: 'Indique', route: '/referral'),
-    DashboardToolShortcut(icon: 'spark', label: 'Ofertas', route: '/ofertas-upsell'),
+    DashboardToolShortcut(
+      icon: 'spark',
+      label: 'Ofertas',
+      route: '/ofertas-upsell',
+    ),
     DashboardToolShortcut(
       icon: 'flame',
       label: 'Hábitos',
@@ -143,8 +151,16 @@ class DashboardToolShortcut {
       label: 'Configuração inicial',
       route: '/onboarding/wizard',
     ),
-    DashboardToolShortcut(icon: 'circle-check', label: 'Qualidade', route: '/dashboard/qualidade'),
-    DashboardToolShortcut(icon: 'bell', label: 'Broadcasts', route: '/broadcasts'),
+    DashboardToolShortcut(
+      icon: 'circle-check',
+      label: 'Qualidade',
+      route: '/dashboard/qualidade',
+    ),
+    DashboardToolShortcut(
+      icon: 'bell',
+      label: 'Broadcasts',
+      route: '/broadcasts',
+    ),
   ];
 
   static const List<DashboardToolShortcut> roiQuickLinks = [

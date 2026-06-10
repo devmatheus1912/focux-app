@@ -65,22 +65,22 @@ class _HeroAction extends StatelessWidget {
       button: true,
       label: semanticsLabel,
       child: Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(38),
-        child: Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.14),
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(38),
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.14),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+            ),
+            child: Icon(icon, color: Colors.white, size: 18),
           ),
-          child: Icon(icon, color: Colors.white, size: 18),
         ),
       ),
-    ),
     );
   }
 }
@@ -109,68 +109,68 @@ class _Avatar extends StatelessWidget {
       label: semanticsLabel,
       enabled: !loading,
       child: Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          width: 82,
-          height: 82,
-          padding: const EdgeInsets.all(3),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white.withValues(alpha: 0.92),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x33000000),
-                blurRadius: 20,
-                offset: Offset(0, 10),
-              ),
-            ],
-          ),
-          child: CircleAvatar(
-            backgroundColor: Colors.white,
-            backgroundImage:
-                logoUrl != null && logoUrl!.isNotEmpty
-                    ? NetworkImage(logoUrl!)
-                    : null,
-            child:
-                logoUrl == null || logoUrl!.isEmpty
-                    ? Text(
-                      _initials(nome),
-                      style: TextStyle(
-                        fontSize: 27,
-                        fontWeight: FontWeight.w900,
-                        color: primaryColor,
-                      ),
-                    )
-                    : null,
-          ),
-        ),
-        Positioned(
-          right: 1,
-          bottom: 1,
-          child: InkWell(
-            onTap: loading ? null : onTap,
-            borderRadius: BorderRadius.circular(26),
-            child: Container(
-              width: 30,
-              height: 30,
-              decoration: BoxDecoration(
-                color: primaryColor,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2.5),
-              ),
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: 82,
+            height: 82,
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.92),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x33000000),
+                  blurRadius: 20,
+                  offset: Offset(0, 10),
+                ),
+              ],
+            ),
+            child: CircleAvatar(
+              backgroundColor: Colors.white,
+              backgroundImage:
+                  logoUrl != null && logoUrl!.isNotEmpty
+                      ? NetworkImage(logoUrl!)
+                      : null,
               child:
-                  loading
-                      ? Padding(
-                        padding: const EdgeInsets.all(6),
-                        child: FxLoading(strokeWidth: 2, color: Colors.white),
+                  logoUrl == null || logoUrl!.isEmpty
+                      ? Text(
+                        _initials(nome),
+                        style: TextStyle(
+                          fontSize: 27,
+                          fontWeight: FontWeight.w900,
+                          color: primaryColor,
+                        ),
                       )
-                      : const Icon(Icons.edit, size: 14, color: Colors.white),
+                      : null,
             ),
           ),
-        ),
-      ],
-    ),
+          Positioned(
+            right: 1,
+            bottom: 1,
+            child: InkWell(
+              onTap: loading ? null : onTap,
+              borderRadius: BorderRadius.circular(26),
+              child: Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: primaryColor,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2.5),
+                ),
+                child:
+                    loading
+                        ? Padding(
+                          padding: const EdgeInsets.all(6),
+                          child: FxLoading(strokeWidth: 2, color: Colors.white),
+                        )
+                        : const Icon(Icons.edit, size: 14, color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -207,85 +207,97 @@ class _CardSection extends StatelessWidget {
       container: true,
       label: a11yTitle,
       child: Container(
-      decoration: chrome.panel(radius: 20),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: ink,
-                          letterSpacing: -0.2,
-                        ),
-                      ),
-                      if (subtitle != null) ...[
-                        const SizedBox(height: 4),
+        decoration: chrome.panel(radius: 20),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          subtitle!,
-                          style: TextStyle(color: mute, fontSize: 12, height: 1.35),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                if (trailingLabel != null && onTrailingTap != null)
-                  Semantics(
-                    button: true,
-                    label: '$trailingLabel $title',
-                    child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: onTrailingTap,
-                      borderRadius: BorderRadius.circular(999),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: accent.withValues(alpha: isDark ? 0.16 : 0.10),
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(
-                            color: accent.withValues(alpha: 0.22),
+                          title,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: ink,
+                            letterSpacing: -0.2,
                           ),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              trailingLabel!,
-                              style: TextStyle(
-                                color: actionInk,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
+                        if (subtitle != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            subtitle!,
+                            style: TextStyle(
+                              color: mute,
+                              fontSize: 12,
+                              height: 1.35,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (trailingLabel != null && onTrailingTap != null)
+                    Semantics(
+                      button: true,
+                      label: '$trailingLabel $title',
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: onTrailingTap,
+                          borderRadius: BorderRadius.circular(999),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: accent.withValues(
+                                alpha: isDark ? 0.16 : 0.10,
+                              ),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: accent.withValues(alpha: 0.22),
                               ),
                             ),
-                            const SizedBox(width: 2),
-                            Icon(Icons.north_east, size: 13, color: actionInk),
-                          ],
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  trailingLabel!,
+                                  style: TextStyle(
+                                    color: actionInk,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(width: 2),
+                                Icon(
+                                  Icons.north_east,
+                                  size: 13,
+                                  color: actionInk,
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            child,
-          ],
+                ],
+              ),
+              const SizedBox(height: 14),
+              child,
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 }
@@ -358,4 +370,3 @@ class _PaletteDot extends StatelessWidget {
     );
   }
 }
-

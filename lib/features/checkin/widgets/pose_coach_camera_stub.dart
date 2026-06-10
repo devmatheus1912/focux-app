@@ -8,5 +8,8 @@ Future<void> openPoseCameraCoach(
   required Color brand,
   required VoidCallback onRep,
 }) async {
-  FeedbackHelper.showWarn(context, 'Coach com camera disponivel apenas no celular.');
+  FeedbackHelper.showWarn(
+    context,
+    'Coach com camera disponivel apenas no celular.',
+  );
 }

@@ -1,10 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/relatorio_repository.dart';
@@ -13,6 +14,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../subscription/models/subscription_plan.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 class RelatorioGlobalScreen extends ConsumerStatefulWidget {
   const RelatorioGlobalScreen({super.key});
@@ -57,31 +59,34 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FeatureGate(
-      featureName: 'Relatório global',
-      requiredPlan: SubscriptionPlan.PREMIUM,
-      capability: 'relatorios',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Relatorio global',
-          onBack: () => safePopOrGo(context, '/dashboard/personal'),
-          actions: [
-            IconButton(
-              tooltip: 'Atualizar',
-              icon: const Icon(Icons.refresh_rounded),
-              onPressed: _load,
-            ),
-          ],
+    return fxScreenA11yScope(
+      label: 'Relatorio global',
+      child: FeatureGate(
+        featureName: 'Relatório global',
+        requiredPlan: SubscriptionPlan.PREMIUM,
+        capability: 'relatorios',
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Relatorio global',
+            onBack: () => safePopOrGo(context, '/dashboard/personal'),
+            actions: [
+              IconButton(
+                tooltip: 'Atualizar',
+                icon: const Icon(Icons.refresh_rounded),
+                onPressed: _load,
+              ),
+            ],
+          ),
+          body:
+              _loading
+                  ? const FxLoading()
+                  : _erro != null
+                  ? _ErrorState(message: _erro!, onRetry: _load)
+                  : _dados == null
+                  ? const SizedBox.shrink()
+                  : _ReportContent(dados: _dados!, onRefresh: _load),
         ),
-        body:
-            _loading
-                ? const FxLoading()
-                : _erro != null
-                ? _ErrorState(message: _erro!, onRetry: _load)
-                : _dados == null
-                ? const SizedBox.shrink()
-                : _ReportContent(dados: _dados!, onRefresh: _load),
       ),
     );
   }
@@ -114,87 +119,88 @@ class _ReportContent extends StatelessWidget {
     final alunosComTreino =
         alunosUnicos.where((aluno) => aluno.totalTreinos > 0).length;
 
-    return RefreshIndicator(
-      onRefresh: onRefresh,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 12, 16, 32),
-        children: [
-          _HeroCard(dados: dados),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _MetricTile(
-                  icon: Icons.assignment_turned_in_rounded,
-                  label: 'Check-ins',
-                  value: '$totalConcluidos',
-                  tone: EagleTokens.good,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _MetricTile(
-                  icon: Icons.fitness_center_rounded,
-                  label: 'Prescritos',
-                  value: '$totalPrescritos',
-                  tone: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          _MetricTile(
-            icon: Icons.group_rounded,
-            label: 'Alunos com treino ativo',
-            value: '$alunosComTreino de ${dados.totalAlunos}',
-            tone: EagleTokens.warn,
-          ),
-          const SizedBox(height: TokensStrip.s5),
-          const _SectionHeader(
-            icon: Icons.workspace_premium_rounded,
-            title: 'Mais comprometidos',
-            subtitle: 'Alunos com melhor aderencia registrada.',
-            color: EagleTokens.good,
-          ),
-          const SizedBox(height: 10),
-          if (dados.maisComprometidos.isEmpty)
-            _EmptyList(
-              text: 'Ainda nao ha treinos concluidos no periodo.',
-            )
-          else
-            ...dados.maisComprometidos
-                .take(5)
-                .toList()
-                .asMap()
-                .entries
-                .map(
-                  (entry) => _AlunoRankCard(
-                    aluno: entry.value,
-                    posicao: entry.key + 1,
-                    tipo: _TipoRank.top,
+    return FxContentWidthLimiter(
+      maxWidth: 800,
+      child: RefreshIndicator(
+        onRefresh: onRefresh,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 12, 16, 32),
+          children: [
+            _HeroCard(dados: dados),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _MetricTile(
+                    icon: Icons.assignment_turned_in_rounded,
+                    label: 'Check-ins',
+                    value: '$totalConcluidos',
+                    tone: EagleTokens.good,
                   ),
                 ),
-          const SizedBox(height: TokensStrip.s5),
-          const _SectionHeader(
-            icon: Icons.report_problem_rounded,
-            title: 'Precisam de atencao',
-            subtitle: 'Priorize contato e ajuste de prescricao.',
-            color: EagleTokens.bad,
-          ),
-          const SizedBox(height: 10),
-          if (dados.menosComprometidos.isEmpty)
-            _EmptyList(text: 'Nenhum aluno em risco neste recorte.')
-          else
-            ...dados.menosComprometidos
-                .take(5)
-                .map(
-                  (aluno) => _AlunoRankCard(
-                    aluno: aluno,
-                    posicao: -1,
-                    tipo: _TipoRank.atencao,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _MetricTile(
+                    icon: Icons.fitness_center_rounded,
+                    label: 'Prescritos',
+                    value: '$totalPrescritos',
+                    tone: Theme.of(context).colorScheme.primary,
                   ),
                 ),
-        ],
+              ],
+            ),
+            const SizedBox(height: 10),
+            _MetricTile(
+              icon: Icons.group_rounded,
+              label: 'Alunos com treino ativo',
+              value: '$alunosComTreino de ${dados.totalAlunos}',
+              tone: EagleTokens.warn,
+            ),
+            const SizedBox(height: TokensStrip.s5),
+            const _SectionHeader(
+              icon: Icons.workspace_premium_rounded,
+              title: 'Mais comprometidos',
+              subtitle: 'Alunos com melhor aderencia registrada.',
+              color: EagleTokens.good,
+            ),
+            const SizedBox(height: 10),
+            if (dados.maisComprometidos.isEmpty)
+              _EmptyList(text: 'Ainda nao ha treinos concluidos no periodo.')
+            else
+              ...dados.maisComprometidos
+                  .take(5)
+                  .toList()
+                  .asMap()
+                  .entries
+                  .map(
+                    (entry) => _AlunoRankCard(
+                      aluno: entry.value,
+                      posicao: entry.key + 1,
+                      tipo: _TipoRank.top,
+                    ),
+                  ),
+            const SizedBox(height: TokensStrip.s5),
+            const _SectionHeader(
+              icon: Icons.report_problem_rounded,
+              title: 'Precisam de atencao',
+              subtitle: 'Priorize contato e ajuste de prescricao.',
+              color: EagleTokens.bad,
+            ),
+            const SizedBox(height: 10),
+            if (dados.menosComprometidos.isEmpty)
+              _EmptyList(text: 'Nenhum aluno em risco neste recorte.')
+            else
+              ...dados.menosComprometidos
+                  .take(5)
+                  .map(
+                    (aluno) => _AlunoRankCard(
+                      aluno: aluno,
+                      posicao: -1,
+                      tipo: _TipoRank.atencao,
+                    ),
+                  ),
+          ],
+        ),
       ),
     );
   }
@@ -276,10 +282,7 @@ class _HeroCard extends StatelessWidget {
             '${aderencia.toStringAsFixed(1)}%',
             style: dashboardHeroMutedOnTealStyle(
               fontWeight: FontWeight.w900,
-            ).copyWith(
-              fontSize: 52,
-              height: 0.95,
-            ),
+            ).copyWith(fontSize: 52, height: 0.95),
           ),
           const SizedBox(height: 18),
           ClipRRect(
@@ -287,7 +290,9 @@ class _HeroCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: aderencia / 100,
               minHeight: 8,
-              backgroundColor: dashboardHeroCaptionOnTeal().withValues(alpha: 0.18),
+              backgroundColor: dashboardHeroCaptionOnTeal().withValues(
+                alpha: 0.18,
+              ),
               valueColor: AlwaysStoppedAnimation(dashboardHeroCaptionOnTeal()),
             ),
           ),
@@ -381,7 +386,9 @@ class _MetricTile extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color:
-                        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+                        isDark
+                            ? EagleTokens.darkInkMute
+                            : TokensStrip.textSecondary,
                     fontSize: 11.5,
                     fontWeight: FontWeight.w700,
                   ),
@@ -392,7 +399,8 @@ class _MetricTile extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+                    color:
+                        isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
                   ),
@@ -451,7 +459,10 @@ class _SectionHeader extends StatelessWidget {
               Text(
                 subtitle,
                 style: TextStyle(
-                  color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+                  color:
+                      isDark
+                          ? EagleTokens.darkInkMute
+                          : TokensStrip.textSecondary,
                   fontSize: 12.5,
                 ),
               ),
@@ -510,7 +521,10 @@ class _AlunoRankCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+                          color:
+                              isDark
+                                  ? EagleTokens.darkInk
+                                  : TokensStrip.textPrimary,
                           fontWeight: FontWeight.w900,
                           fontSize: 15.5,
                         ),
@@ -524,7 +538,9 @@ class _AlunoRankCard extends StatelessWidget {
                   '${aluno.treinosConcluidos} de ${aluno.totalTreinos} treinos concluidos',
                   style: TextStyle(
                     color:
-                        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+                        isDark
+                            ? EagleTokens.darkInkMute
+                            : TokensStrip.textSecondary,
                     fontSize: 12.5,
                     fontWeight: FontWeight.w600,
                   ),
@@ -536,7 +552,9 @@ class _AlunoRankCard extends StatelessWidget {
                     value: aderencia / 100,
                     minHeight: 6,
                     backgroundColor:
-                        isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
+                        isDark
+                            ? EagleTokens.darkLine
+                            : TokensStrip.borderDefault,
                     valueColor: AlwaysStoppedAnimation(tone),
                   ),
                 ),
@@ -697,7 +715,10 @@ class _ErrorState extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+                color:
+                    isDark
+                        ? EagleTokens.darkInkMute
+                        : TokensStrip.textSecondary,
                 fontSize: 12.5,
               ),
             ),

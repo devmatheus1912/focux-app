@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
@@ -12,6 +12,7 @@ import '../../../core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 String _fmtData(String? iso) {
   if (iso == null || iso.isEmpty) return '—';
@@ -71,10 +72,7 @@ class _EvolucaoComparativoScreenState
       final eh404 = msg.contains('404') || msg.contains('Not Found');
       if (!mounted) return;
       setState(() {
-        _erro =
-            eh404
-                ? 'Nenhuma avaliação encontrada para comparativo.'
-                : msg;
+        _erro = eh404 ? 'Nenhuma avaliação encontrada para comparativo.' : msg;
         _loading = false;
       });
     }
@@ -82,45 +80,50 @@ class _EvolucaoComparativoScreenState
 
   @override
   Widget build(BuildContext context) {
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Evolução de ${widget.alunoNome}',
-        subtitle: 'Comparativo de avaliações físicas',
-        onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-      ),
-      body:
-          _loading
-              ? const Center(child: FxLoading())
-              : _erro != null
-              ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(TokensStrip.s5),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.info_outline,
-                        size: 48,
-                        color: TokensStrip.textSecondary,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        _erro!,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: TokensStrip.textSecondary),
-                      ),
-                      const SizedBox(height: TokensStrip.s4),
-                      OutlinedButton.icon(
-                        onPressed: _load,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Tentar novamente'),
-                      ),
-                    ],
+    return fxScreenA11yScope(
+      label: 'Evolução de ${widget.alunoNome}',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Evolução de ${widget.alunoNome}',
+          subtitle: 'Comparativo de avaliações físicas',
+          onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+        ),
+        body:
+            _loading
+                ? const Center(child: FxLoading())
+                : _erro != null
+                ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(TokensStrip.s5),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.info_outline,
+                          size: 48,
+                          color: TokensStrip.textSecondary,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          _erro!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: TokensStrip.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: TokensStrip.s4),
+                        OutlinedButton.icon(
+                          onPressed: _load,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Tentar novamente'),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              )
-              : _buildConteudo(_comparativo!),
+                )
+                : _buildConteudo(_comparativo!),
+      ),
     );
   }
 
@@ -159,7 +162,10 @@ class _EvolucaoComparativoScreenState
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Icon(Icons.arrow_forward, color: TokensStrip.textSecondary),
+                  const Icon(
+                    Icons.arrow_forward,
+                    color: TokensStrip.textSecondary,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(
@@ -259,21 +265,30 @@ class _EvolucaoComparativoScreenState
               SizedBox(width: 4),
               Text(
                 'Melhora',
-                style: TextStyle(fontSize: 12, color: TokensStrip.textSecondary),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: TokensStrip.textSecondary,
+                ),
               ),
               SizedBox(width: 12),
               Icon(Icons.circle, size: 10, color: EagleTokens.bad),
               SizedBox(width: 4),
               Text(
                 'Piora',
-                style: TextStyle(fontSize: 12, color: TokensStrip.textSecondary),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: TokensStrip.textSecondary,
+                ),
               ),
               SizedBox(width: 12),
               Icon(Icons.circle, size: 10, color: TokensStrip.textSecondary),
               SizedBox(width: 4),
               Text(
                 'Sem alteração',
-                style: TextStyle(fontSize: 12, color: TokensStrip.textSecondary),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: TokensStrip.textSecondary,
+                ),
               ),
             ],
           ),

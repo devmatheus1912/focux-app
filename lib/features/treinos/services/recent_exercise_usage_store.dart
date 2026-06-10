@@ -25,11 +25,10 @@ class RecentExerciseUsageStore {
           if (byCount != 0) return byCount;
           return a.key.compareTo(b.key);
         });
-    final next =
-        sorted
-            .take(_maxItems)
-            .map((e) => '${e.key}:${e.value}')
-            .toList(growable: false);
+    final next = sorted
+        .take(_maxItems)
+        .map((e) => '${e.key}:${e.value}')
+        .toList(growable: false);
     await prefs.setStringList(_key, next);
   }
 

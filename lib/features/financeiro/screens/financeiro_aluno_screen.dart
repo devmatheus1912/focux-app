@@ -9,6 +9,7 @@ import '../data/financeiro_repository.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import '../../../core/theme/tokens_strip.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class FinanceiroAlunoScreen extends ConsumerStatefulWidget {
   const FinanceiroAlunoScreen({super.key});
@@ -103,44 +104,52 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = Theme.of(context).colorScheme.primary;
 
-    return FxShellScaffold(
-      appBar: FxShellAppBar(
-        title: 'Minhas Mensalidades',
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded, size: 22),
-            onPressed: _carregar,
-            tooltip: 'Recarregar',
-          ),
-        ],
+    return fxScreenA11yScope(
+      label: 'Minhas Mensalidades',
+      child: FxShellScaffold(
+        appBar: FxShellAppBar(
+          title: 'Minhas Mensalidades',
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh_rounded, size: 22),
+              onPressed: _carregar,
+              tooltip: 'Recarregar',
+            ),
+          ],
+        ),
+        body:
+            _loading
+                ? const Center(
+                  child: SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: FxLoading(strokeWidth: 2.5),
+                  ),
+                )
+                : _erro != null
+                ? _buildError(isDark, ink, mute, primary)
+                : _mensalidades.isEmpty
+                ? _buildEmpty(isDark, ink, mute, primary)
+                : RefreshIndicator(
+                  onRefresh: _carregar,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s4,
+                      8,
+                      16,
+                      32,
+                    ),
+                    itemCount: _mensalidades.length,
+                    itemBuilder:
+                        (_, i) => _MensalidadeCard(
+                          m: _mensalidades[i],
+                          isDark: isDark,
+                          formatarMes: _formatarMes,
+                          statusColor: _statusColor,
+                        ),
+                  ),
+                ),
       ),
-      body:
-          _loading
-              ? const Center(
-                child: SizedBox(
-                  width: 28,
-                  height: 28,
-                  child: FxLoading(strokeWidth: 2.5),
-                ),
-              )
-              : _erro != null
-              ? _buildError(isDark, ink, mute, primary)
-              : _mensalidades.isEmpty
-              ? _buildEmpty(isDark, ink, mute, primary)
-              : RefreshIndicator(
-                onRefresh: _carregar,
-                child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 8, 16, 32),
-                  itemCount: _mensalidades.length,
-                  itemBuilder:
-                      (_, i) => _MensalidadeCard(
-                        m: _mensalidades[i],
-                        isDark: isDark,
-                        formatarMes: _formatarMes,
-                        statusColor: _statusColor,
-                      ),
-                ),
-              ),
     );
   }
 

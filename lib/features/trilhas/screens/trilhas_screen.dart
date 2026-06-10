@@ -431,7 +431,9 @@ class _MarcoTile extends StatelessWidget {
           icon: Icon(
             marco.concluido ? Icons.check_circle : Icons.radio_button_unchecked,
             color:
-                marco.concluido ? EagleTokens.good : ShellChrome.of(context).mute,
+                marco.concluido
+                    ? EagleTokens.good
+                    : ShellChrome.of(context).mute,
           ),
           onPressed:
               marco.concluido

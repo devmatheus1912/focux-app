@@ -7,7 +7,8 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 
 class IaCopilotResultActionBar extends StatelessWidget {
-  const IaCopilotResultActionBar({super.key, 
+  const IaCopilotResultActionBar({
+    super.key,
     required this.brand,
     required this.ink,
     required this.onCreateTask,
@@ -68,7 +69,8 @@ class IaCopilotResultActionBar extends StatelessWidget {
 }
 
 class IaCopilotHeaderStatus extends StatelessWidget {
-  const IaCopilotHeaderStatus({super.key, 
+  const IaCopilotHeaderStatus({
+    super.key,
     required this.dark,
     required this.brand,
     required this.line,
@@ -109,7 +111,8 @@ class IaCopilotHeaderStatus extends StatelessWidget {
 }
 
 class IaCopilotStudentSelector extends StatelessWidget {
-  const IaCopilotStudentSelector({super.key, 
+  const IaCopilotStudentSelector({
+    super.key,
     required this.alunoNome,
     required this.brand,
     required this.ink,
@@ -147,51 +150,56 @@ class IaCopilotStudentSelector extends StatelessWidget {
                   color: brand.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.person_search_outlined, color: brand, size: 18),
+                child: Icon(
+                  Icons.person_search_outlined,
+                  color: brand,
+                  size: 18,
+                ),
               ),
-            const SizedBox(width: 11),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    selected ? alunoNome! : 'Selecionar aluno',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: ink,
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w800,
-                      height: 1.1,
+              const SizedBox(width: 11),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      selected ? alunoNome! : 'Selecionar aluno',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w800,
+                        height: 1.1,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    selected
-                        ? 'Aluno ativo para esta análise'
-                        : 'Escolha o aluno para ver recomendações',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: mute,
-                      fontSize: 11.2,
-                      fontWeight: FontWeight.w600,
+                    const SizedBox(height: 4),
+                    Text(
+                      selected
+                          ? 'Aluno ativo para esta análise'
+                          : 'Escolha o aluno para ver recomendações',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: mute,
+                        fontSize: 11.2,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Icon(Icons.keyboard_arrow_down_rounded, color: mute, size: 22),
-          ],
+              Icon(Icons.keyboard_arrow_down_rounded, color: mute, size: 22),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
 }
 
 class IaCopilotModeSelector extends StatelessWidget {
-  const IaCopilotModeSelector({super.key, 
+  const IaCopilotModeSelector({
+    super.key,
     required this.modes,
     required this.selectedIndex,
     required this.brand,
@@ -235,29 +243,29 @@ class IaCopilotModeSelector extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: selected ? brand : Colors.transparent,
                         borderRadius: BorderRadius.circular(12),
-                      boxShadow:
-                          selected
-                              ? [
-                                BoxShadow(
-                                  color: brand.withValues(alpha: 0.20),
-                                  blurRadius: 14,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ]
-                              : null,
-                    ),
-                    child: Center(
-                      child: Text(
-                        _label(e.value),
-                        style: TextStyle(
-                          color: selected ? Colors.white : mute,
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w800,
+                        boxShadow:
+                            selected
+                                ? [
+                                  BoxShadow(
+                                    color: brand.withValues(alpha: 0.20),
+                                    blurRadius: 14,
+                                    offset: const Offset(0, 5),
+                                  ),
+                                ]
+                                : null,
+                      ),
+                      child: Center(
+                        child: Text(
+                          _label(e.value),
+                          style: TextStyle(
+                            color: selected ? Colors.white : mute,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
                 ),
               );
             }).toList(),
@@ -267,7 +275,8 @@ class IaCopilotModeSelector extends StatelessWidget {
 }
 
 class IaCopilotSafetyNote extends StatelessWidget {
-  const IaCopilotSafetyNote({super.key, 
+  const IaCopilotSafetyNote({
+    super.key,
     required this.ink,
     required this.mute,
     required this.brand,
@@ -313,7 +322,8 @@ class IaCopilotSafetyNote extends StatelessWidget {
 }
 
 class IaCopilotMetaChip extends StatelessWidget {
-  const IaCopilotMetaChip({super.key, 
+  const IaCopilotMetaChip({
+    super.key,
     required this.label,
     required this.icon,
     required this.brand,
@@ -356,7 +366,8 @@ class IaCopilotMetaChip extends StatelessWidget {
 }
 
 class IaCopilotMenuAction extends StatelessWidget {
-  const IaCopilotMenuAction({super.key, 
+  const IaCopilotMenuAction({
+    super.key,
     required this.icon,
     required this.title,
     required this.subtitle,
@@ -384,7 +395,11 @@ class IaCopilotMenuAction extends StatelessWidget {
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.all(12),
-          decoration: fxListCardDecoration(context, accent: primary, radius: 18),
+          decoration: fxListCardDecoration(
+            context,
+            accent: primary,
+            radius: 18,
+          ),
           child: Row(
             children: [
               Container(
@@ -431,7 +446,8 @@ class IaCopilotMenuAction extends StatelessWidget {
 }
 
 class IaCopilotPrimaryAction extends StatelessWidget {
-  const IaCopilotPrimaryAction({super.key, 
+  const IaCopilotPrimaryAction({
+    super.key,
     required this.label,
     required this.icon,
     required this.brand,
@@ -458,37 +474,38 @@ class IaCopilotPrimaryAction extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: LinearGradient(colors: [brand, primaryDeep]),
             borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: brand.withValues(alpha: 0.28),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: Colors.white, size: 17),
-            const SizedBox(width: 9),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
+            boxShadow: [
+              BoxShadow(
+                color: brand.withValues(alpha: 0.28),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
               ),
-            ),
-          ],
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: Colors.white, size: 17),
+              const SizedBox(width: 9),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
 }
 
 class IaCopilotGenerationStatus extends StatelessWidget {
-  const IaCopilotGenerationStatus({super.key, 
+  const IaCopilotGenerationStatus({
+    super.key,
     required this.gerando,
     required this.gerado,
     required this.elapsedMs,
@@ -607,7 +624,8 @@ class IaCopilotGenerationStatus extends StatelessWidget {
 }
 
 class IaCopilotPreviewCard extends StatelessWidget {
-  const IaCopilotPreviewCard({super.key, 
+  const IaCopilotPreviewCard({
+    super.key,
     required this.howItWorks,
     required this.brand,
     required this.ink,
@@ -637,45 +655,45 @@ class IaCopilotPreviewCard extends StatelessWidget {
             Row(
               children: [
                 Icon(Icons.info_outline_rounded, color: brand, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                'Como funciona',
-                style: TextStyle(
-                  color: ink,
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w800,
+                const SizedBox(width: 8),
+                Text(
+                  'Como funciona',
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            howItWorks,
-            style: TextStyle(color: mute, fontSize: 12.2, height: 1.45),
-          ),
-          const SizedBox(height: 12),
-          for (final check in checks)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 7),
-              child: Row(
-                children: [
-                  Icon(Icons.check, color: brand, size: 15),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      check,
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              howItWorks,
+              style: TextStyle(color: mute, fontSize: 12.2, height: 1.45),
+            ),
+            const SizedBox(height: 12),
+            for (final check in checks)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 7),
+                child: Row(
+                  children: [
+                    Icon(Icons.check, color: brand, size: 15),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        check,
+                        style: TextStyle(
+                          color: ink,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }

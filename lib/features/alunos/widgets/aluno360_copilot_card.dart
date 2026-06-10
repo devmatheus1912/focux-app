@@ -31,7 +31,8 @@ class Aluno360CopilotCard extends ConsumerWidget {
   final bool showFocusToggle;
   final bool focusMode;
 
-  const Aluno360CopilotCard({super.key, 
+  const Aluno360CopilotCard({
+    super.key,
     required this.aluno,
     required this.alunoId,
     required this.resumoAsync,
@@ -109,7 +110,9 @@ class Aluno360CopilotCard extends ConsumerWidget {
     final iaAsync =
         forceIa ? ref.watch(alunoCopilotoActionProvider(aluno.id)) : null;
     final openActionsAsync = ref.watch(alunoOpenIaActionsProvider(aluno.id));
-    final openTask = findOpenCopilotTask(openActionsAsync.valueOrNull ?? const []);
+    final openTask = findOpenCopilotTask(
+      openActionsAsync.valueOrNull ?? const [],
+    );
     final hasOpenTask = openTask != null || hasOpenCopilotTask360;
     final bundleAsync = ref.watch(aluno360Provider(aluno.id));
     final bundle = bundleAsync.valueOrNull;
@@ -132,9 +135,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
     );
     final fallback = copilotFallbackAction(aluno, resumo);
     final seed360 =
-        proximaAcao360 != null
-            ? copilotActionFrom360(proximaAcao360!)
-            : null;
+        proximaAcao360 != null ? copilotActionFrom360(proximaAcao360!) : null;
     final stickyAction = operacao.stickyAction;
     final effectiveProxima = operacao.effectiveProxima;
     final hideCopilotChat = operacao.hideCopilotChatRow;
@@ -170,192 +171,195 @@ class Aluno360CopilotCard extends ConsumerWidget {
       container: true,
       label: 'Prioridade do dia, copiloto operacional',
       child: Container(
-      padding: EdgeInsets.all(cardPadding),
-      decoration: Aluno360Layout.operacaoInsetSectionDecoration(
-        context,
-        primary: primary,
-        isDark: isDark,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Aluno360SectionHeader(
-                  icon: Icons.hub_outlined,
-                  title: copilotCardTitle(
-                    contactPriority: operacao.contactPriority,
-                  ),
-                  subtitle: copilotCardSubtitle(
-                    forceIa: forceIa,
-                    iaAsync: iaAsync,
-                    resumoLoading:
-                        resumoAsync.isLoading && !resumoAsync.hasValue,
-                    compact: compactSubtitle,
-                    iaRefreshing: iaRefreshing,
-                    bundleLoading: bundleLoading,
-                    bundleRefreshing: bundleRefreshing,
-                  ),
-                  subtitleTrailing:
-                      shouldShowCopilotContactBadge(
-                        contactPriority: operacao.contactPriority,
-                        sticky: stickyAction,
-                      )
-                      ? Aluno360ContactPriorityBadge(primary: primary)
-                      : null,
-                  isDark: isDark,
-                ),
-              ),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.topRight,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (showFocusToggle)
-                      Aluno360OperacaoFocusModeToggle(
-                        alunoId: alunoId,
-                        primary: primary,
-                        iconOnly: true,
-                      ),
-                    Aluno360CopilotIaRefreshButton(
-                      alunoId: aluno.id,
-                      primary: primary,
+        padding: EdgeInsets.all(cardPadding),
+        decoration: Aluno360Layout.operacaoInsetSectionDecoration(
+          context,
+          primary: primary,
+          isDark: isDark,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Aluno360SectionHeader(
+                    icon: Icons.hub_outlined,
+                    title: copilotCardTitle(
+                      contactPriority: operacao.contactPriority,
                     ),
-                  ],
+                    subtitle: copilotCardSubtitle(
+                      forceIa: forceIa,
+                      iaAsync: iaAsync,
+                      resumoLoading:
+                          resumoAsync.isLoading && !resumoAsync.hasValue,
+                      compact: compactSubtitle,
+                      iaRefreshing: iaRefreshing,
+                      bundleLoading: bundleLoading,
+                      bundleRefreshing: bundleRefreshing,
+                    ),
+                    subtitleTrailing:
+                        shouldShowCopilotContactBadge(
+                              contactPriority: operacao.contactPriority,
+                              sticky: stickyAction,
+                            )
+                            ? Aluno360ContactPriorityBadge(primary: primary)
+                            : null,
+                    isDark: isDark,
+                  ),
+                ),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.topRight,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (showFocusToggle)
+                        Aluno360OperacaoFocusModeToggle(
+                          alunoId: alunoId,
+                          primary: primary,
+                          iconOnly: true,
+                        ),
+                      Aluno360CopilotIaRefreshButton(
+                        alunoId: aluno.id,
+                        primary: primary,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (iaLoading) ...[
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: LinearProgressIndicator(
+                  minHeight: iaRefreshing ? 4 : 3,
+                  backgroundColor: primary.withValues(alpha: 0.12),
+                  color: primary,
                 ),
               ),
             ],
-          ),
-          if (iaLoading) ...[
-            const SizedBox(height: 8),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: LinearProgressIndicator(
-                minHeight: iaRefreshing ? 4 : 3,
-                backgroundColor: primary.withValues(alpha: 0.12),
-                color: primary,
+            if (!hasOpenTask) ...[
+              const SizedBox(height: 10),
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                childAspectRatio: 1.38,
+                children:
+                    signals
+                        .map(
+                          (signal) => Aluno360CopilotSignalTile(signal: signal),
+                        )
+                        .toList(),
               ),
-            ),
-          ],
-          if (!hasOpenTask) ...[
-            const SizedBox(height: 10),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              childAspectRatio: 1.38,
-              children:
-                  signals
-                      .map((signal) => Aluno360CopilotSignalTile(signal: signal))
-                      .toList(),
-            ),
-          ],
-          if (!hasOpenTask) const SizedBox(height: 10),
-          if (shouldShowCopilotProfileGapsButton(
-            aluno,
-            profileCompletion,
-            sticky: stickyAction,
-          )) ...[
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => _completeProfile(context, aluno),
-                icon: const Icon(Icons.person_add_alt_1_rounded, size: 16),
-                label: Text(
-                  copilotProfileGapsButtonLabel(aluno),
-                ),
-                style: Aluno360Layout.operacaoOutlinedButtonStyle(context, primary),
-              ),
-            ),
-            const SizedBox(height: 10),
-          ],
-          if (showCopilotPrescription) ...[
-            Aluno360CopilotPrescriptionBody(
-              aluno: aluno,
-              primary: primary,
-              fallback: fallback,
-              seed360: seed360,
-              forceIa: forceIa,
-              iaAsync: iaAsync,
-              iaRefreshing: iaRefreshing,
-              resumoLoading:
-                  resumoAsync.isLoading && !resumoAsync.hasValue,
-              bundleLoading: bundleLoading,
-              bundleRefreshing: bundleRefreshing,
-              preferContactPriority: operacao.contactPriority,
-              wearableRelevant: wearableRelevant,
-              contactPriority: operacao.contactPriority,
-              statusMetricsVisible: !focusMode,
-              hideMetricFooter: focusMode,
-              onPrepareMessage:
-                  showPrepareInPrescription
-                      ? () => _prepararMensagem(
-                        context,
-                        resolvedAcao,
-                        backendMessage: effectiveProxima?.mensagemSugerida,
-                        outreachMessage: operacao.outreachMessage,
-                      )
-                      : null,
-            ),
-            const SizedBox(height: 10),
-          ],
-          if (!hasOpenTask)
-            openActionsAsync.maybeWhen(
-              loading:
-                  () => const Aluno360CopilotTaskStatus(
-                    icon: Icons.sync_rounded,
-                    title: 'Sincronizando tarefas',
-                    subtitle: 'Checando Command Center antes de criar.',
+            ],
+            if (!hasOpenTask) const SizedBox(height: 10),
+            if (shouldShowCopilotProfileGapsButton(
+              aluno,
+              profileCompletion,
+              sticky: stickyAction,
+            )) ...[
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => _completeProfile(context, aluno),
+                  icon: const Icon(Icons.person_add_alt_1_rounded, size: 16),
+                  label: Text(copilotProfileGapsButtonLabel(aluno)),
+                  style: Aluno360Layout.operacaoOutlinedButtonStyle(
+                    context,
+                    primary,
                   ),
-              orElse: () => const SizedBox.shrink(),
-            ),
-          if (!hasOpenTask && openActionsAsync.isLoading)
-            const SizedBox(height: 10),
-          if (!hasOpenTask &&
-              shouldShowCopilotExecutarAcao(
-                tipoAcao: effectiveProxima?.tipoAcao,
-                aluno: aluno,
-                proxima: effectiveProxima,
-                outreachMessage: operacao.outreachMessage,
-              )) ...[
-            Aluno360CopilotExecutarAcaoButton(
-              alunoId: aluno.id,
-              spec: resolveCopilotExecutarAcao(
-                tipoAcao: effectiveProxima?.tipoAcao,
-                aluno: aluno,
-                proxima: effectiveProxima,
-                outreachMessage: operacao.outreachMessage,
-              )!,
-              primary: primary,
-            ),
-            const SizedBox(height: 10),
-          ],
-          if (!hasOpenTask)
-            Aluno360CopilotActionRow(
-            aluno: aluno,
-            primary: primary,
-            existingTask: openTask,
-            openTaskHint: hasOpenCopilotTask360 && openTask == null,
-            hidePrimaryCta: hasOpenTask || hideCopilotPrimary,
-            hideChatCta: hideCopilotChat,
-            acao: resolvedAcao,
-            onAssign:
-                (acao) => criarTarefaCopilotoFromAluno360(
-                  context: context,
-                  ref: ref,
-                  aluno: aluno,
-                  acao: acao,
                 ),
-            onPrepareMessage: (acao) => _prepararMensagem(context, acao),
-          ),
-        ],
+              ),
+              const SizedBox(height: 10),
+            ],
+            if (showCopilotPrescription) ...[
+              Aluno360CopilotPrescriptionBody(
+                aluno: aluno,
+                primary: primary,
+                fallback: fallback,
+                seed360: seed360,
+                forceIa: forceIa,
+                iaAsync: iaAsync,
+                iaRefreshing: iaRefreshing,
+                resumoLoading: resumoAsync.isLoading && !resumoAsync.hasValue,
+                bundleLoading: bundleLoading,
+                bundleRefreshing: bundleRefreshing,
+                preferContactPriority: operacao.contactPriority,
+                wearableRelevant: wearableRelevant,
+                contactPriority: operacao.contactPriority,
+                statusMetricsVisible: !focusMode,
+                hideMetricFooter: focusMode,
+                onPrepareMessage:
+                    showPrepareInPrescription
+                        ? () => _prepararMensagem(
+                          context,
+                          resolvedAcao,
+                          backendMessage: effectiveProxima?.mensagemSugerida,
+                          outreachMessage: operacao.outreachMessage,
+                        )
+                        : null,
+              ),
+              const SizedBox(height: 10),
+            ],
+            if (!hasOpenTask)
+              openActionsAsync.maybeWhen(
+                loading:
+                    () => const Aluno360CopilotTaskStatus(
+                      icon: Icons.sync_rounded,
+                      title: 'Sincronizando tarefas',
+                      subtitle: 'Checando Command Center antes de criar.',
+                    ),
+                orElse: () => const SizedBox.shrink(),
+              ),
+            if (!hasOpenTask && openActionsAsync.isLoading)
+              const SizedBox(height: 10),
+            if (!hasOpenTask &&
+                shouldShowCopilotExecutarAcao(
+                  tipoAcao: effectiveProxima?.tipoAcao,
+                  aluno: aluno,
+                  proxima: effectiveProxima,
+                  outreachMessage: operacao.outreachMessage,
+                )) ...[
+              Aluno360CopilotExecutarAcaoButton(
+                alunoId: aluno.id,
+                spec:
+                    resolveCopilotExecutarAcao(
+                      tipoAcao: effectiveProxima?.tipoAcao,
+                      aluno: aluno,
+                      proxima: effectiveProxima,
+                      outreachMessage: operacao.outreachMessage,
+                    )!,
+                primary: primary,
+              ),
+              const SizedBox(height: 10),
+            ],
+            if (!hasOpenTask)
+              Aluno360CopilotActionRow(
+                aluno: aluno,
+                primary: primary,
+                existingTask: openTask,
+                openTaskHint: hasOpenCopilotTask360 && openTask == null,
+                hidePrimaryCta: hasOpenTask || hideCopilotPrimary,
+                hideChatCta: hideCopilotChat,
+                acao: resolvedAcao,
+                onAssign:
+                    (acao) => criarTarefaCopilotoFromAluno360(
+                      context: context,
+                      ref: ref,
+                      aluno: aluno,
+                      acao: acao,
+                    ),
+                onPrepareMessage: (acao) => _prepararMensagem(context, acao),
+              ),
+          ],
+        ),
       ),
-    ),
     );
   }
 }
@@ -370,20 +374,20 @@ class Aluno360ContactPriorityBadge extends StatelessWidget {
     return Semantics(
       label: 'Prioridade de contato',
       child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: EagleTokens.bad.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: EagleTokens.bad.withValues(alpha: 0.22)),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: EagleTokens.bad.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: EagleTokens.bad.withValues(alpha: 0.22)),
+        ),
+        child: Text(
+          'Contato',
+          style: Aluno360Layout.chipLabelStyle(
+            context,
+            color: EagleTokens.bad,
+          ).copyWith(letterSpacing: 0.2),
+        ),
       ),
-      child: Text(
-        'Contato',
-        style: Aluno360Layout.chipLabelStyle(
-          context,
-          color: EagleTokens.bad,
-        ).copyWith(letterSpacing: 0.2),
-      ),
-    ),
     );
   }
 }

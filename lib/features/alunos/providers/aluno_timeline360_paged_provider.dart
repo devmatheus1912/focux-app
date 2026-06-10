@@ -45,8 +45,7 @@ class Timeline360PagedNotifier
   final int alunoId;
   static const int _pageSize = 40;
 
-  AlunoRepository get _repo =>
-      AlunoRepository(_ref.read(apiClientProvider));
+  AlunoRepository get _repo => AlunoRepository(_ref.read(apiClientProvider));
 
   Future<void> refresh() async {
     state = const AsyncValue.loading();
@@ -61,9 +60,8 @@ class Timeline360PagedNotifier
           events: page.events,
           hasMore: page.hasMore,
           nextOffset: page.nextOffset,
-          totalCount: page.totalCount > 0
-              ? page.totalCount
-              : page.events.length,
+          totalCount:
+              page.totalCount > 0 ? page.totalCount : page.events.length,
         ),
       );
     } catch (error, stack) {
@@ -87,9 +85,10 @@ class Timeline360PagedNotifier
           events: [...current.events, ...page.events],
           hasMore: page.hasMore,
           nextOffset: page.nextOffset,
-          totalCount: page.totalCount > 0
-              ? page.totalCount
-              : current.events.length + page.events.length,
+          totalCount:
+              page.totalCount > 0
+                  ? page.totalCount
+                  : current.events.length + page.events.length,
         ),
       );
     } catch (_) {
@@ -99,13 +98,14 @@ class Timeline360PagedNotifier
 }
 
 final alunoTimeline360PagedProvider = StateNotifierProvider.autoDispose
-    .family<Timeline360PagedNotifier, AsyncValue<Timeline360PagedState>, int>(
-      (ref, alunoId) {
-        final notifier = Timeline360PagedNotifier(ref, alunoId);
-        notifier.refresh();
-        return notifier;
-      },
-    );
+    .family<Timeline360PagedNotifier, AsyncValue<Timeline360PagedState>, int>((
+      ref,
+      alunoId,
+    ) {
+      final notifier = Timeline360PagedNotifier(ref, alunoId);
+      notifier.refresh();
+      return notifier;
+    });
 
 /// Backwards-compatible event list for Evolução tab.
 final alunoTimeline360ApiProvider =

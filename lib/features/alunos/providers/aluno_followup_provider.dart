@@ -21,7 +21,10 @@ class AlunoFollowUpActions {
 
   AlunoRepository get _repo => _ref.read(alunoRepositoryProvider);
 
-  Future<void> snooze(int alunoId, {Duration duration = const Duration(hours: 24)}) async {
+  Future<void> snooze(
+    int alunoId, {
+    Duration duration = const Duration(hours: 24),
+  }) async {
     final until = DateTime.now().add(duration);
     await _repo.atualizarFollowUp(
       alunoId,
@@ -36,7 +39,11 @@ class AlunoFollowUpActions {
         '${normalized.year.toString().padLeft(4, '0')}-'
         '${normalized.month.toString().padLeft(2, '0')}-'
         '${normalized.day.toString().padLeft(2, '0')}';
-    await _repo.atualizarFollowUp(alunoId, proximoContato: iso, clearSnooze: true);
+    await _repo.atualizarFollowUp(
+      alunoId,
+      proximoContato: iso,
+      clearSnooze: true,
+    );
     _invalidate(alunoId);
   }
 

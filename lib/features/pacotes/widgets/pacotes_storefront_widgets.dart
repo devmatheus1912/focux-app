@@ -17,7 +17,6 @@ import '../data/pacote_repository.dart';
 
 part 'pacotes_storefront_widgets_private.part.dart';
 
-
 /// Skeleton de carregamento — alinhado ao Setup D0.
 class PacotesStorefrontSkeleton extends StatelessWidget {
   const PacotesStorefrontSkeleton({super.key});
@@ -72,7 +71,8 @@ class PacotesOverviewStrip extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = fxScreenInk(context);
     final count = pacotes.length;
-    final ticketMedio = pacotes.map((p) => p.valor).reduce((a, b) => a + b) / count;
+    final ticketMedio =
+        pacotes.map((p) => p.valor).reduce((a, b) => a + b) / count;
     final ticketLabel = ticketMedio.toStringAsFixed(2).replaceAll('.', ',');
 
     return Semantics(
@@ -149,10 +149,9 @@ class PacotesComoFuncionaCard extends StatelessWidget {
                   'Você monta planos com preço (ex.: musculação, 3 meses, R\$ 500). '
                   'Eles ficam numa página sua na internet. Envie o link no WhatsApp ou '
                   'Instagram — a pessoa vê seus planos e pode te contratar.',
-                  style: TokensStrip.bodyMuted(color: mute).copyWith(
-                    fontSize: 12.5,
-                    height: 1.45,
-                  ),
+                  style: TokensStrip.bodyMuted(
+                    color: mute,
+                  ).copyWith(fontSize: 12.5, height: 1.45),
                 ),
               ],
             ),
@@ -222,10 +221,9 @@ class StorefrontLinkCard extends StatelessWidget {
                       Text(
                         'Como um cartão de visitas online: o cliente abre o link, '
                         'vê seus planos e valores e pode te chamar.',
-                        style: TokensStrip.bodyMuted(color: mute).copyWith(
-                          fontSize: 12.5,
-                          height: 1.35,
-                        ),
+                        style: TokensStrip.bodyMuted(
+                          color: mute,
+                        ).copyWith(fontSize: 12.5, height: 1.35),
                       ),
                     ],
                   ),
@@ -235,24 +233,25 @@ class StorefrontLinkCard extends StatelessWidget {
             const SizedBox(height: 14),
             Text(
               'Link para enviar no WhatsApp ou Instagram',
-              style: TokensStrip.bodyMuted(color: mute).copyWith(
-                fontSize: 11.5,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TokensStrip.bodyMuted(
+                color: mute,
+              ).copyWith(fontSize: 11.5, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 6),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.06)
-                    : TokensStrip.pageBg,
+                color:
+                    isDark
+                        ? Colors.white.withValues(alpha: 0.06)
+                        : TokensStrip.pageBg,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.12)
-                      : TokensStrip.borderDefault,
+                  color:
+                      isDark
+                          ? Colors.white.withValues(alpha: 0.12)
+                          : TokensStrip.borderDefault,
                 ),
               ),
               child: Text(
@@ -394,7 +393,10 @@ class PacoteStorefrontCard extends StatelessWidget {
             children: [
               if (pacote.destaque) ...[
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: primary,
                     borderRadius: BorderRadius.circular(6),
@@ -427,7 +429,10 @@ class PacoteStorefrontCard extends StatelessWidget {
                 label: 'Desativar pacote ${pacote.titulo}',
                 child: IconButton(
                   tooltip: 'Desativar pacote',
-                  constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                  constraints: const BoxConstraints(
+                    minWidth: 48,
+                    minHeight: 48,
+                  ),
                   onPressed: () {
                     HapticFeedback.lightImpact();
                     onDelete();
@@ -478,4 +483,3 @@ class PacoteStorefrontCard extends StatelessWidget {
         .slideY(begin: 0.03, curve: Curves.easeOutCubic, duration: 280.ms);
   }
 }
-

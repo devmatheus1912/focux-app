@@ -9,21 +9,24 @@ Color alunoListSecondaryInk(bool isDark) =>
     isDark ? const Color(0xFF9AA8B4) : const Color(0xFF4B5563);
 
 /// Badge «Risco alto» — cores calibradas para leitura em 10px.
-(Color, Color) alunoRiscoAltoBadgeColors(bool isDark) => isDark
-    ? (const Color(0xFFFFB088), const Color(0xFF3D2A18))
-    : (const Color(0xFF8A4F00), const Color(0xFFFFE8CC));
+(Color, Color) alunoRiscoAltoBadgeColors(bool isDark) =>
+    isDark
+        ? (const Color(0xFFFFB088), const Color(0xFF3D2A18))
+        : (const Color(0xFF8A4F00), const Color(0xFFFFE8CC));
 
 /// Hero metric chip — mesma família cromática da lista, por nível.
 (Color, Color) alunoHeroRiscoMetricBadgeColors(bool isDark, String nivel) {
   final upper = nivel.trim().toUpperCase();
   return switch (upper) {
     'ALTO' => alunoRiscoAltoBadgeColors(isDark),
-    'MÉDIO' || 'MEDIO' => isDark
-        ? (const Color(0xFFE2C48A), const Color(0xFF2E2618))
-        : (const Color(0xFF7A5A00), EagleTokens.warnSoft),
-    'BAIXO' => isDark
-        ? (const Color(0xFF9CF0C0), const Color(0xFF1A2E24))
-        : (EagleTokens.good, EagleTokens.goodSoft),
+    'MÉDIO' || 'MEDIO' =>
+      isDark
+          ? (const Color(0xFFE2C48A), const Color(0xFF2E2618))
+          : (const Color(0xFF7A5A00), EagleTokens.warnSoft),
+    'BAIXO' =>
+      isDark
+          ? (const Color(0xFF9CF0C0), const Color(0xFF1A2E24))
+          : (EagleTokens.good, EagleTokens.goodSoft),
     _ => alunoRiscoAltoBadgeColors(isDark),
   };
 }

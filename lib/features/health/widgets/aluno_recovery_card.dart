@@ -52,76 +52,86 @@ class AlunoRecoveryCard extends ConsumerWidget {
       error: (_, __) => const SizedBox.shrink(),
       data: (snapshot) {
         if (snapshot == null) {
-          return _ConnectCard(isDark: isDark, onTap: () => context.push('/saude'));
+          return _ConnectCard(
+            isDark: isDark,
+            onTap: () => context.push('/saude'),
+          );
         }
         return _shell(
-          context,
-          primary,
-          isDark,
-          child: InkWell(
-            onTap: () {
-              HapticFeedback.selectionClick();
-              context.push('/saude');
-            },
-            borderRadius: BorderRadius.circular(20),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Stack(
-                    alignment: Alignment.center,
+              context,
+              primary,
+              isDark,
+              child: InkWell(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  context.push('/saude');
+                },
+                borderRadius: BorderRadius.circular(20),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
                     children: [
-                      RecoveryScoreRing(
-                        score: snapshot.recoveryScore,
-                        color: primary,
-                        size: 54,
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          RecoveryScoreRing(
+                            score: snapshot.recoveryScore,
+                            color: primary,
+                            size: 54,
+                          ),
+                          Positioned(
+                            right: -2,
+                            bottom: -2,
+                            child: FxRiveHeartPulse(size: 22),
+                          ),
+                        ],
                       ),
-                      Positioned(
-                        right: -2,
-                        bottom: -2,
-                        child: FxRiveHeartPulse(size: 22),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Prontidao do dia',
+                              style: TextStyle(
+                                color: mute,
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              snapshot.recoveryLabel,
+                              style: TextStyle(
+                                color: ink,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              snapshot.recoveryHint,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: mute,
+                                fontSize: 12,
+                                height: 1.3,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                      Icon(Icons.chevron_right, color: mute),
                     ],
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Prontidao do dia',
-                          style: TextStyle(
-                            color: mute,
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          snapshot.recoveryLabel,
-                          style: TextStyle(
-                            color: ink,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.2,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          snapshot.recoveryHint,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: mute, fontSize: 12, height: 1.3),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(Icons.chevron_right, color: mute),
-                ],
+                ),
               ),
-            ),
-          ),
-        ).animate().fadeIn(duration: 280.ms).slideY(begin: 0.04, curve: Curves.easeOutCubic);
+            )
+            .animate()
+            .fadeIn(duration: 280.ms)
+            .slideY(begin: 0.04, curve: Curves.easeOutCubic);
       },
     );
   }

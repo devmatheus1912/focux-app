@@ -17,9 +17,9 @@ import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 part 'feed_screen_widgets.part.dart';
-
 
 class FeedScreen extends ConsumerStatefulWidget {
   const FeedScreen({super.key});
@@ -307,7 +307,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                   decoration: BoxDecoration(
                                     color: Theme.of(ctx).colorScheme.primary
                                         .withValues(alpha: 0.08),
-                                    borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                                    borderRadius: BorderRadius.circular(
+                                      TokensStrip.rCard,
+                                    ),
                                   ),
                                   child: Row(
                                     children: [
@@ -392,7 +394,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                             setModalState(
                                               () => salvando = false,
                                             );
-                                            FeedbackHelper.showError(ctx, friendlyError(e));
+                                            FeedbackHelper.showError(
+                                              ctx,
+                                              friendlyError(e),
+                                            );
                                           }
                                         }
                                       },
@@ -445,259 +450,286 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final primaryDeep = BrandPalette.deep(primary);
-    return FxShellScaffold(
-      useMesh: true,
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: [primary, primaryDeep]),
-          borderRadius: BorderRadius.circular(44),
-          boxShadow: [
-            BoxShadow(
-              color: primary.withValues(alpha: 0.4),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
+    return fxScreenA11yScope(
+      label: 'Feed',
+      child: FxShellScaffold(
+        useMesh: true,
+        floatingActionButton: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: [primary, primaryDeep]),
+            borderRadius: BorderRadius.circular(44),
+            boxShadow: [
+              BoxShadow(
+                color: primary.withValues(alpha: 0.4),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: FloatingActionButton(
+            onPressed: _abrirFormulario,
+            tooltip: 'Nova Publicação',
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            child: const Icon(Icons.add, color: EagleTokens.darkInk),
+          ),
         ),
-        child: FloatingActionButton(
-          onPressed: _abrirFormulario,
-          tooltip: 'Nova Publicação',
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: const Icon(Icons.add, color: EagleTokens.darkInk),
-        ),
-      ),
-      body: SafeArea(
-        child:
-            _loading
-                ? Center(child: FxLoading(color: primary))
-                : _posts.isEmpty
-                ? FxEmptyState(
-                  icon: 'rss',
-                  title: 'Nenhuma publicacao ainda',
-                  subtitle: 'Compartilhe novidades, videos e conquistas com seus alunos.',
-                  action: FxEmptyAction(
-                    label: 'Criar publicacao',
-                    onTap: _abrirFormulario,
-                  ),
-                )
-                : RefreshIndicator(
-                  color: primary,
-                  onRefresh: _load,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 110),
-                    itemCount: _posts.length + 1,
-                    itemBuilder: (_, i) {
-                      if (i == 0) {
-                        return Padding(
-                          padding: const EdgeInsets.fromLTRB(4, 0, 4, 18),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  'Feed',
-                                  style: TextStyle(
-                                    color:
-                                        isDark
-                                            ? EagleTokens.darkInk
-                                            : TokensStrip.textPrimary,
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: -0.5,
+        body: SafeArea(
+          child:
+              _loading
+                  ? Center(child: FxLoading(color: primary))
+                  : _posts.isEmpty
+                  ? FxEmptyState(
+                    icon: 'rss',
+                    title: 'Nenhuma publicacao ainda',
+                    subtitle:
+                        'Compartilhe novidades, videos e conquistas com seus alunos.',
+                    action: FxEmptyAction(
+                      label: 'Criar publicacao',
+                      onTap: _abrirFormulario,
+                    ),
+                  )
+                  : RefreshIndicator(
+                    color: primary,
+                    onRefresh: _load,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(
+                        TokensStrip.s4,
+                        10,
+                        16,
+                        110,
+                      ),
+                      itemCount: _posts.length + 1,
+                      itemBuilder: (_, i) {
+                        if (i == 0) {
+                          return Padding(
+                            padding: const EdgeInsets.fromLTRB(4, 0, 4, 18),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    'Feed',
+                                    style: TextStyle(
+                                      color:
+                                          isDark
+                                              ? EagleTokens.darkInk
+                                              : TokensStrip.textPrimary,
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: -0.5,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              InkWell(
-                                onTap: _abrirFormulario,
-                                borderRadius: BorderRadius.circular(44),
-                                child: Container(
-                                  width: 44,
-                                  height: 44,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [primary, primaryDeep],
+                                InkWell(
+                                  onTap: _abrirFormulario,
+                                  borderRadius: BorderRadius.circular(44),
+                                  child: Container(
+                                    width: 44,
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [primary, primaryDeep],
+                                      ),
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: primary.withValues(
+                                            alpha: 0.38,
+                                          ),
+                                          blurRadius: 16,
+                                          offset: const Offset(0, 6),
+                                        ),
+                                      ],
                                     ),
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: primary.withValues(alpha: 0.38),
-                                        blurRadius: 16,
-                                        offset: const Offset(0, 6),
+                                    child: const Icon(
+                                      Icons.add_rounded,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        final p = _posts[i - 1];
+                        final mUrl = p.midiaUrl ?? p.imagemUrl;
+                        final badgeColor = _feedBadgeColor(p.tipoPost, primary);
+                        final curtidas =
+                            _curtidasLocais[p.id] ?? p.totalCurtidas;
+                        final comentarios =
+                            _comentariosLocais[p.id] ?? p.totalComentarios;
+
+                        return FxStaggerItem(
+                          index: i,
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            decoration: fxListCardDecoration(
+                              context,
+                              accent: p.fixado ? primary : null,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                TokensStrip.s4,
+                                14,
+                                16,
+                                12,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _PostAuthorHeader(post: p, primary: primary),
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    children: [
+                                      if (p.fixado) ...[
+                                        Icon(
+                                          Icons.push_pin,
+                                          color: primary,
+                                          size: 18,
+                                        ),
+                                        const SizedBox(width: 8),
+                                      ],
+                                      Icon(
+                                        _getIconForTipo(p.tipoPost),
+                                        size: 20,
+                                        color: badgeColor,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          p.titulo,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                      PopupMenuButton<String>(
+                                        tooltip: 'Ações',
+                                        onSelected: (val) {
+                                          if (val == 'fixar')
+                                            _toggleFixar(p.id);
+                                          if (val == 'excluir') {
+                                            _confirmarExclusao(p.id);
+                                          }
+                                        },
+                                        itemBuilder:
+                                            (ctx) => [
+                                              PopupMenuItem(
+                                                value: 'fixar',
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                      p.fixado
+                                                          ? Icons
+                                                              .push_pin_outlined
+                                                          : Icons.push_pin,
+                                                      size: 20,
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    Text(
+                                                      p.fixado
+                                                          ? 'Desafixar'
+                                                          : 'Fixar no topo',
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              const PopupMenuItem(
+                                                value: 'excluir',
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.delete_outline,
+                                                      color: EagleTokens.bad,
+                                                      size: 20,
+                                                    ),
+                                                    SizedBox(width: 8),
+                                                    Text(
+                                                      'Excluir',
+                                                      style: TextStyle(
+                                                        color: EagleTokens.bad,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
                                       ),
                                     ],
                                   ),
-                                  child: const Icon(
-                                    Icons.add_rounded,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                      final p = _posts[i - 1];
-                      final mUrl = p.midiaUrl ?? p.imagemUrl;
-                      final badgeColor = _feedBadgeColor(p.tipoPost, primary);
-                      final curtidas = _curtidasLocais[p.id] ?? p.totalCurtidas;
-                      final comentarios =
-                          _comentariosLocais[p.id] ?? p.totalComentarios;
-
-                      return FxStaggerItem(
-                        index: i,
-                        child: Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: fxListCardDecoration(
-                          context,
-                          accent: p.fixado ? primary : null,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 14, 16, 12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _PostAuthorHeader(post: p, primary: primary),
-                              const SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  if (p.fixado) ...[
-                                    Icon(
-                                      Icons.push_pin,
-                                      color: primary,
-                                      size: 18,
-                                    ),
-                                    const SizedBox(width: 8),
-                                  ],
-                                  Icon(
-                                    _getIconForTipo(p.tipoPost),
-                                    size: 20,
+                                  const SizedBox(height: 6),
+                                  _TypeBadge(
+                                    tipo: p.tipoPost,
                                     color: badgeColor,
                                   ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      p.titulo,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    p.conteudo,
+                                    style: const TextStyle(fontSize: 14),
                                   ),
-                                  PopupMenuButton<String>(
-                                    tooltip: 'Ações',
-                                    onSelected: (val) {
-                                      if (val == 'fixar') _toggleFixar(p.id);
-                                      if (val == 'excluir') {
-                                        _confirmarExclusao(p.id);
-                                      }
-                                    },
-                                    itemBuilder:
-                                        (ctx) => [
-                                          PopupMenuItem(
-                                            value: 'fixar',
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  p.fixado
-                                                      ? Icons.push_pin_outlined
-                                                      : Icons.push_pin,
-                                                  size: 20,
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Text(
-                                                  p.fixado
-                                                      ? 'Desafixar'
-                                                      : 'Fixar no topo',
-                                                ),
-                                              ],
-                                            ),
+                                  if (mUrl != null && mUrl.isNotEmpty) ...[
+                                    const SizedBox(height: 12),
+                                    p.tipoPost == 'VIDEO'
+                                        ? _VideoAttachmentTile(primary: primary)
+                                        : ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
                                           ),
-                                          const PopupMenuItem(
-                                            value: 'excluir',
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.delete_outline,
-                                                  color: EagleTokens.bad,
-                                                  size: 20,
-                                                ),
-                                                SizedBox(width: 8),
-                                                Text(
-                                                  'Excluir',
-                                                  style: TextStyle(
-                                                    color: EagleTokens.bad,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
+                                          child: Image.network(
+                                            mUrl,
+                                            fit: BoxFit.cover,
+                                            height: 130,
+                                            width: double.infinity,
+                                            errorBuilder:
+                                                (_, __, ___) =>
+                                                    _ImagePlaceholder(
+                                                      primary: primary,
+                                                    ),
                                           ),
-                                        ],
+                                        ),
+                                  ] else if (p.tipoPost == 'IMAGEM') ...[
+                                    const SizedBox(height: 12),
+                                    _ImagePlaceholder(primary: primary),
+                                  ],
+                                  const SizedBox(height: 12),
+                                  const Divider(height: 1),
+                                  const SizedBox(height: 8),
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 4,
+                                    crossAxisAlignment:
+                                        WrapCrossAlignment.center,
+                                    children: [
+                                      TextButton.icon(
+                                        onPressed: () => _curtir(p.id),
+                                        icon: const Icon(
+                                          Icons.thumb_up_alt_outlined,
+                                          size: 18,
+                                        ),
+                                        label: Text('$curtidas Curtir'),
+                                      ),
+                                      TextButton.icon(
+                                        onPressed:
+                                            () => _abrirComentarios(p.id),
+                                        icon: const Icon(
+                                          Icons.comment_outlined,
+                                          size: 18,
+                                        ),
+                                        label: Text('$comentarios Comentar'),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 6),
-                              _TypeBadge(tipo: p.tipoPost, color: badgeColor),
-                              const SizedBox(height: 8),
-                              Text(
-                                p.conteudo,
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                              if (mUrl != null && mUrl.isNotEmpty) ...[
-                                const SizedBox(height: 12),
-                                p.tipoPost == 'VIDEO'
-                                    ? _VideoAttachmentTile(primary: primary)
-                                    : ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.network(
-                                        mUrl,
-                                        fit: BoxFit.cover,
-                                        height: 130,
-                                        width: double.infinity,
-                                        errorBuilder:
-                                            (_, __, ___) => _ImagePlaceholder(
-                                              primary: primary,
-                                            ),
-                                      ),
-                                    ),
-                              ] else if (p.tipoPost == 'IMAGEM') ...[
-                                const SizedBox(height: 12),
-                                _ImagePlaceholder(primary: primary),
-                              ],
-                              const SizedBox(height: 12),
-                              const Divider(height: 1),
-                              const SizedBox(height: 8),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 4,
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                children: [
-                                  TextButton.icon(
-                                    onPressed: () => _curtir(p.id),
-                                    icon: const Icon(
-                                      Icons.thumb_up_alt_outlined,
-                                      size: 18,
-                                    ),
-                                    label: Text('$curtidas Curtir'),
-                                  ),
-                                  TextButton.icon(
-                                    onPressed: () => _abrirComentarios(p.id),
-                                    icon: const Icon(
-                                      Icons.comment_outlined,
-                                      size: 18,
-                                    ),
-                                    label: Text('$comentarios Comentar'),
-                                  ),
-                                ],
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
-                ),
+        ),
       ),
     );
   }
@@ -729,4 +761,3 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     );
   }
 }
-

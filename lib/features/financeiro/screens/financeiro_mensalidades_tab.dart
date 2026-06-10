@@ -27,10 +27,12 @@ class FinanceiroMensalidadesTab extends ConsumerStatefulWidget {
   final int? initialAlunoId;
 
   @override
-  ConsumerState<FinanceiroMensalidadesTab> createState() => _FinanceiroMensalidadesTabState();
+  ConsumerState<FinanceiroMensalidadesTab> createState() =>
+      _FinanceiroMensalidadesTabState();
 }
 
-class _FinanceiroMensalidadesTabState extends ConsumerState<FinanceiroMensalidadesTab> {
+class _FinanceiroMensalidadesTabState
+    extends ConsumerState<FinanceiroMensalidadesTab> {
   List<Mensalidade> _mensalidades = [];
   List<Mensalidade> _filtered = [];
   bool _loading = true;
@@ -193,164 +195,166 @@ class _FinanceiroMensalidadesTabState extends ConsumerState<FinanceiroMensalidad
               radius: 28,
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
               child: StatefulBuilder(
-            builder:
-                (ctx, setModalState) => Form(
-                    key: formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Editar Mensalidade',
-                                style: AppTypography.inter(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -0.3,
+                builder:
+                    (ctx, setModalState) => Form(
+                      key: formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Editar Mensalidade',
+                                  style: AppTypography.inter(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -0.3,
+                                  ),
                                 ),
                               ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: () => Navigator.of(ctx).pop(),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: TokensStrip.s4),
-                        TextFormField(
-                          controller: valorCtrl,
-                          decoration: _fxDeco(
-                            'Valor (R\$)',
-                            icon: Icons.attach_money,
-                          ),
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d+\.?\d{0,2}'),
-                            ),
-                          ],
-                          validator: (v) {
-                            if (v == null || v.trim().isEmpty) {
-                              return 'Informe o valor';
-                            }
-                            final parsed = double.tryParse(
-                              v.trim().replaceAll(',', '.'),
-                            );
-                            if (parsed == null || parsed <= 0) {
-                              return 'Valor inválido';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: mesReferenciaCtrl,
-                          decoration: _fxDeco(
-                            'Mês Referência',
-                            icon: Icons.calendar_month,
-                            hint: '2026-04-01',
-                          ),
-                          readOnly: true,
-                          onTap: () async {
-                            final now = DateTime.now();
-                            final picked = await showDatePicker(
-                              context: ctx,
-                              initialDate:
-                                  DateTime.tryParse(mesReferenciaCtrl.text) ??
-                                  DateTime(now.year, now.month, 1),
-                              firstDate: DateTime(2020),
-                              lastDate: DateTime(now.year + 5),
-                              selectableDayPredicate: (day) => day.day == 1,
-                            );
-                            if (picked != null) {
-                              final mes = picked.month.toString().padLeft(
-                                2,
-                                '0',
-                              );
-                              mesReferenciaCtrl.text = '${picked.year}-$mes-01';
-                            }
-                          },
-                          validator: (v) {
-                            if (v == null || v.trim().isEmpty) {
-                              return 'Selecione o mês de referência';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        DropdownButtonFormField<String>(
-                          initialValue: selectedStatus,
-                          decoration: _fxDeco('Status', icon: Icons.flag),
-                          items:
-                              statuses
-                                  .map(
-                                    (s) => DropdownMenuItem(
-                                      value: s,
-                                      child: Text(s),
-                                    ),
-                                  )
-                                  .toList(),
-                          onChanged:
-                              (v) => setModalState(
-                                () => selectedStatus = v ?? selectedStatus,
+                              IconButton(
+                                icon: const Icon(Icons.close),
+                                onPressed: () => Navigator.of(ctx).pop(),
                               ),
-                        ),
-                        const SizedBox(height: TokensStrip.s5),
-                        FxLiquidPrimaryButton(
-                          label: salvando ? 'Salvando...' : 'Salvar',
-                          icon: Icons.save,
-                          loading: salvando,
-                          onPressed:
-                              salvando
-                                  ? null
-                                  : () async {
-                                    if (!formKey.currentState!.validate()) {
-                                      return;
-                                    }
-                                    setModalState(() => salvando = true);
-                                    try {
-                                      final valor = double.parse(
-                                        valorCtrl.text.trim().replaceAll(
-                                          ',',
-                                          '.',
-                                        ),
-                                      );
-                                      await FinanceiroRepository(
-                                        ref.read(apiClientProvider),
-                                      ).editarMensalidade(
-                                        m.id,
-                                        valor: valor,
-                                        mesReferencia:
-                                            mesReferenciaCtrl.text.trim(),
-                                        status: selectedStatus,
-                                      );
-                                      if (ctx.mounted) Navigator.of(ctx).pop();
-                                      _load();
-                                      if (mounted) {
-                                        FeedbackHelper.showSuccess(
-                                          context,
-                                          'Mensalidade atualizada!',
-                                        );
+                            ],
+                          ),
+                          const SizedBox(height: TokensStrip.s4),
+                          TextFormField(
+                            controller: valorCtrl,
+                            decoration: _fxDeco(
+                              'Valor (R\$)',
+                              icon: Icons.attach_money,
+                            ),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                RegExp(r'^\d+\.?\d{0,2}'),
+                              ),
+                            ],
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Informe o valor';
+                              }
+                              final parsed = double.tryParse(
+                                v.trim().replaceAll(',', '.'),
+                              );
+                              if (parsed == null || parsed <= 0) {
+                                return 'Valor inválido';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: mesReferenciaCtrl,
+                            decoration: _fxDeco(
+                              'Mês Referência',
+                              icon: Icons.calendar_month,
+                              hint: '2026-04-01',
+                            ),
+                            readOnly: true,
+                            onTap: () async {
+                              final now = DateTime.now();
+                              final picked = await showDatePicker(
+                                context: ctx,
+                                initialDate:
+                                    DateTime.tryParse(mesReferenciaCtrl.text) ??
+                                    DateTime(now.year, now.month, 1),
+                                firstDate: DateTime(2020),
+                                lastDate: DateTime(now.year + 5),
+                                selectableDayPredicate: (day) => day.day == 1,
+                              );
+                              if (picked != null) {
+                                final mes = picked.month.toString().padLeft(
+                                  2,
+                                  '0',
+                                );
+                                mesReferenciaCtrl.text =
+                                    '${picked.year}-$mes-01';
+                              }
+                            },
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Selecione o mês de referência';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          DropdownButtonFormField<String>(
+                            initialValue: selectedStatus,
+                            decoration: _fxDeco('Status', icon: Icons.flag),
+                            items:
+                                statuses
+                                    .map(
+                                      (s) => DropdownMenuItem(
+                                        value: s,
+                                        child: Text(s),
+                                      ),
+                                    )
+                                    .toList(),
+                            onChanged:
+                                (v) => setModalState(
+                                  () => selectedStatus = v ?? selectedStatus,
+                                ),
+                          ),
+                          const SizedBox(height: TokensStrip.s5),
+                          FxLiquidPrimaryButton(
+                            label: salvando ? 'Salvando...' : 'Salvar',
+                            icon: Icons.save,
+                            loading: salvando,
+                            onPressed:
+                                salvando
+                                    ? null
+                                    : () async {
+                                      if (!formKey.currentState!.validate()) {
+                                        return;
                                       }
-                                    } catch (e) {
-                                      setModalState(() => salvando = false);
-                                      if (ctx.mounted) {
-                                        FeedbackHelper.showError(
-                                          ctx,
-                                          friendlyError(e),
+                                      setModalState(() => salvando = true);
+                                      try {
+                                        final valor = double.parse(
+                                          valorCtrl.text.trim().replaceAll(
+                                            ',',
+                                            '.',
+                                          ),
                                         );
+                                        await FinanceiroRepository(
+                                          ref.read(apiClientProvider),
+                                        ).editarMensalidade(
+                                          m.id,
+                                          valor: valor,
+                                          mesReferencia:
+                                              mesReferenciaCtrl.text.trim(),
+                                          status: selectedStatus,
+                                        );
+                                        if (ctx.mounted)
+                                          Navigator.of(ctx).pop();
+                                        _load();
+                                        if (mounted) {
+                                          FeedbackHelper.showSuccess(
+                                            context,
+                                            'Mensalidade atualizada!',
+                                          );
+                                        }
+                                      } catch (e) {
+                                        setModalState(() => salvando = false);
+                                        if (ctx.mounted) {
+                                          FeedbackHelper.showError(
+                                            ctx,
+                                            friendlyError(e),
+                                          );
+                                        }
                                       }
-                                    }
-                                  },
-                        ),
-                      ],
+                                    },
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-            ),
+              ),
             ),
           ),
     );
@@ -556,192 +560,192 @@ class _FinanceiroMensalidadesTabState extends ConsumerState<FinanceiroMensalidad
               radius: 28,
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
               child: StatefulBuilder(
-            builder:
-                (ctx, setModalState) => Form(
-                    key: formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Nova Mensalidade',
-                                style: AppTypography.inter(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -0.3,
+                builder:
+                    (ctx, setModalState) => Form(
+                      key: formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Nova Mensalidade',
+                                  style: AppTypography.inter(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -0.3,
+                                  ),
                                 ),
                               ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: () => Navigator.of(ctx).pop(),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: TokensStrip.s4),
-                        ref
-                            .watch(alunosProvider)
-                            .when(
-                              loading: () => const LinearProgressIndicator(),
-                              error:
-                                  (e, _) => Text(
-                                    'Nao foi possivel carregar alunos.',
-                                    style: TextStyle(
-                                      color: Theme.of(ctx).colorScheme.error,
+                              IconButton(
+                                icon: const Icon(Icons.close),
+                                onPressed: () => Navigator.of(ctx).pop(),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: TokensStrip.s4),
+                          ref
+                              .watch(alunosProvider)
+                              .when(
+                                loading: () => const LinearProgressIndicator(),
+                                error:
+                                    (e, _) => Text(
+                                      'Nao foi possivel carregar alunos.',
+                                      style: TextStyle(
+                                        color: Theme.of(ctx).colorScheme.error,
+                                      ),
                                     ),
-                                  ),
-                              data:
-                                  (alunos) => DropdownButtonFormField<int>(
-                                    initialValue: alunoSelecionadoId,
-                                    decoration: _fxDeco(
-                                      'Aluno',
-                                      icon: Icons.person,
+                                data:
+                                    (alunos) => DropdownButtonFormField<int>(
+                                      initialValue: alunoSelecionadoId,
+                                      decoration: _fxDeco(
+                                        'Aluno',
+                                        icon: Icons.person,
+                                      ),
+                                      items:
+                                          alunos
+                                              .map(
+                                                (a) => DropdownMenuItem<int>(
+                                                  value: a.id,
+                                                  child: Text(a.nome),
+                                                ),
+                                              )
+                                              .toList(),
+                                      onChanged:
+                                          (value) => setModalState(
+                                            () => alunoSelecionadoId = value,
+                                          ),
+                                      validator:
+                                          (value) =>
+                                              value == null
+                                                  ? 'Selecione um aluno'
+                                                  : null,
                                     ),
-                                    items:
-                                        alunos
-                                            .map(
-                                              (a) => DropdownMenuItem<int>(
-                                                value: a.id,
-                                                child: Text(a.nome),
-                                              ),
-                                            )
-                                            .toList(),
-                                    onChanged:
-                                        (value) => setModalState(
-                                          () => alunoSelecionadoId = value,
-                                        ),
-                                    validator:
-                                        (value) =>
-                                            value == null
-                                                ? 'Selecione um aluno'
-                                                : null,
-                                  ),
+                              ),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: valorCtrl,
+                            decoration: _fxDeco(
+                              'Valor (R\$)',
+                              icon: Icons.attach_money,
                             ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: valorCtrl,
-                          decoration: _fxDeco(
-                            'Valor (R\$)',
-                            icon: Icons.attach_money,
-                          ),
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d+\.?\d{0,2}'),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
                             ),
-                          ],
-                          validator: (v) {
-                            if (v == null || v.trim().isEmpty) {
-                              return 'Informe o valor';
-                            }
-                            final parsed = double.tryParse(
-                              v.trim().replaceAll(',', '.'),
-                            );
-                            if (parsed == null || parsed <= 0) {
-                              return 'Valor invalido';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: mesReferenciaCtrl,
-                          decoration: _fxDeco(
-                            'Mês Referência',
-                            icon: Icons.calendar_month,
-                            hint: '2026-04-01',
-                          ),
-                          readOnly: true,
-                          onTap: () async {
-                            final now = DateTime.now();
-                            final picked = await showDatePicker(
-                              context: ctx,
-                              initialDate: DateTime(now.year, now.month, 1),
-                              firstDate: DateTime(2020),
-                              lastDate: DateTime(now.year + 5),
-                              helpText: 'Selecione o mes de referencia',
-                              fieldLabelText: 'Mes/Ano',
-                              initialEntryMode:
-                                  DatePickerEntryMode.calendarOnly,
-                              selectableDayPredicate: (day) => day.day == 1,
-                            );
-                            if (picked != null) {
-                              final mes = picked.month.toString().padLeft(
-                                2,
-                                '0',
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                RegExp(r'^\d+\.?\d{0,2}'),
+                              ),
+                            ],
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Informe o valor';
+                              }
+                              final parsed = double.tryParse(
+                                v.trim().replaceAll(',', '.'),
                               );
-                              mesReferenciaCtrl.text = '${picked.year}-$mes-01';
-                            }
-                          },
-                          validator: (v) {
-                            if (v == null || v.trim().isEmpty) {
-                              return 'Selecione o mes de referencia';
-                            }
-                            if (!RegExp(
-                              r'^\d{4}-\d{2}-01$',
-                            ).hasMatch(v.trim())) {
-                              return 'Formato invalido';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: TokensStrip.s5),
-                        FxLiquidPrimaryButton(
-                          label:
-                              salvando
-                                  ? 'Salvando...'
-                                  : 'Lancar Mensalidade',
-                          icon: Icons.check,
-                          loading: salvando,
-                          onPressed:
-                              salvando
-                                  ? null
-                                  : () async {
-                                    if (!formKey.currentState!.validate()) {
-                                      return;
-                                    }
-                                    setModalState(() => salvando = true);
-                                    try {
-                                      final alunoId = alunoSelecionadoId!;
-                                      final valor = double.parse(
-                                        valorCtrl.text.trim().replaceAll(
-                                          ',',
-                                          '.',
-                                        ),
-                                      );
-                                      final mesReferencia =
-                                          mesReferenciaCtrl.text.trim();
-                                      await FinanceiroRepository(
-                                        ref.read(apiClientProvider),
-                                      ).criar(alunoId, valor, mesReferencia);
-                                      if (ctx.mounted) Navigator.of(ctx).pop();
-                                      _load();
-                                      if (mounted) {
-                                        FeedbackHelper.showSuccess(
-                                          context,
-                                          'Mensalidade lançada com sucesso!',
-                                        );
+                              if (parsed == null || parsed <= 0) {
+                                return 'Valor invalido';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: mesReferenciaCtrl,
+                            decoration: _fxDeco(
+                              'Mês Referência',
+                              icon: Icons.calendar_month,
+                              hint: '2026-04-01',
+                            ),
+                            readOnly: true,
+                            onTap: () async {
+                              final now = DateTime.now();
+                              final picked = await showDatePicker(
+                                context: ctx,
+                                initialDate: DateTime(now.year, now.month, 1),
+                                firstDate: DateTime(2020),
+                                lastDate: DateTime(now.year + 5),
+                                helpText: 'Selecione o mes de referencia',
+                                fieldLabelText: 'Mes/Ano',
+                                initialEntryMode:
+                                    DatePickerEntryMode.calendarOnly,
+                                selectableDayPredicate: (day) => day.day == 1,
+                              );
+                              if (picked != null) {
+                                final mes = picked.month.toString().padLeft(
+                                  2,
+                                  '0',
+                                );
+                                mesReferenciaCtrl.text =
+                                    '${picked.year}-$mes-01';
+                              }
+                            },
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Selecione o mes de referencia';
+                              }
+                              if (!RegExp(
+                                r'^\d{4}-\d{2}-01$',
+                              ).hasMatch(v.trim())) {
+                                return 'Formato invalido';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: TokensStrip.s5),
+                          FxLiquidPrimaryButton(
+                            label:
+                                salvando ? 'Salvando...' : 'Lancar Mensalidade',
+                            icon: Icons.check,
+                            loading: salvando,
+                            onPressed:
+                                salvando
+                                    ? null
+                                    : () async {
+                                      if (!formKey.currentState!.validate()) {
+                                        return;
                                       }
-                                    } catch (e) {
-                                      setModalState(() => salvando = false);
-                                      if (ctx.mounted) {
-                                        FeedbackHelper.showError(
-                                          ctx,
-                                          friendlyError(e),
+                                      setModalState(() => salvando = true);
+                                      try {
+                                        final alunoId = alunoSelecionadoId!;
+                                        final valor = double.parse(
+                                          valorCtrl.text.trim().replaceAll(
+                                            ',',
+                                            '.',
+                                          ),
                                         );
+                                        final mesReferencia =
+                                            mesReferenciaCtrl.text.trim();
+                                        await FinanceiroRepository(
+                                          ref.read(apiClientProvider),
+                                        ).criar(alunoId, valor, mesReferencia);
+                                        if (ctx.mounted)
+                                          Navigator.of(ctx).pop();
+                                        _load();
+                                        if (mounted) {
+                                          FeedbackHelper.showSuccess(
+                                            context,
+                                            'Mensalidade lançada com sucesso!',
+                                          );
+                                        }
+                                      } catch (e) {
+                                        setModalState(() => salvando = false);
+                                        if (ctx.mounted) {
+                                          FeedbackHelper.showError(
+                                            ctx,
+                                            friendlyError(e),
+                                          );
+                                        }
                                       }
-                                    }
-                                  },
-                        ),
-                      ],
+                                    },
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-            ),
+              ),
             ),
           ),
     );
@@ -756,230 +760,230 @@ class _FinanceiroMensalidadesTabState extends ConsumerState<FinanceiroMensalidad
       extendBody: true,
       backgroundColor: Colors.transparent,
       floatingActionButton: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        FloatingActionButton.small(
-          heroTag: 'atualizar',
-          onPressed: _atualizarAtrasos,
-          tooltip: 'Atualizar atrasos',
-          backgroundColor: Theme.of(
-            context,
-          ).colorScheme.primary.withValues(alpha: 0.12),
-          foregroundColor: Theme.of(context).colorScheme.primary,
-          elevation: 0,
-          child: const Icon(Icons.sync_rounded, size: 20),
-        ),
-        const SizedBox(height: 8),
-        FloatingActionButton(
-          heroTag: 'nova',
-          onPressed: _abrirFormularioNovaMensalidade,
-          tooltip: 'Nova Mensalidade',
-          elevation: 0,
-          child: const Icon(Icons.add_rounded),
-        ),
-      ],
-    ),
-    body: Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 12, 16, 4),
-          child: TextField(
-            controller: _searchCtrl,
-            decoration: InputDecoration(
-              hintText: 'Buscar por nome do aluno...',
-              hintStyle: TextStyle(
-                color: mute,
-                fontSize: 13.5,
-                fontWeight: FontWeight.w600,
-              ),
-              prefixIcon: Icon(
-                Icons.search_rounded,
-                color: mute,
-                size: 20,
-              ),
-              suffixIcon:
-                  _searchCtrl.text.isNotEmpty
-                      ? IconButton(
-                        icon: const Icon(Icons.clear_rounded, size: 18),
-                        onPressed: () {
-                          _searchCtrl.clear();
-                          setState(() => _filtered = _mensalidades);
-                        },
-                      )
-                      : null,
-              filled: true,
-              fillColor: chrome.cardFill,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-              border: FxInputDeco.outlineBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: chrome.line),
-              ),
-              enabledBorder: FxInputDeco.outlineBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: chrome.line),
-              ),
-              focusedBorder: FxInputDeco.outlineBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color: primary,
-                  width: 1.6,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton.small(
+            heroTag: 'atualizar',
+            onPressed: _atualizarAtrasos,
+            tooltip: 'Atualizar atrasos',
+            backgroundColor: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.12),
+            foregroundColor: Theme.of(context).colorScheme.primary,
+            elevation: 0,
+            child: const Icon(Icons.sync_rounded, size: 20),
+          ),
+          const SizedBox(height: 8),
+          FloatingActionButton(
+            heroTag: 'nova',
+            onPressed: _abrirFormularioNovaMensalidade,
+            tooltip: 'Nova Mensalidade',
+            elevation: 0,
+            child: const Icon(Icons.add_rounded),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 12, 16, 4),
+            child: TextField(
+              controller: _searchCtrl,
+              decoration: InputDecoration(
+                hintText: 'Buscar por nome do aluno...',
+                hintStyle: TextStyle(
+                  color: mute,
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w600,
                 ),
+                prefixIcon: Icon(Icons.search_rounded, color: mute, size: 20),
+                suffixIcon:
+                    _searchCtrl.text.isNotEmpty
+                        ? IconButton(
+                          icon: const Icon(Icons.clear_rounded, size: 18),
+                          onPressed: () {
+                            _searchCtrl.clear();
+                            setState(() => _filtered = _mensalidades);
+                          },
+                        )
+                        : null,
+                filled: true,
+                fillColor: chrome.cardFill,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                border: FxInputDeco.outlineBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: chrome.line),
+                ),
+                enabledBorder: FxInputDeco.outlineBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: chrome.line),
+                ),
+                focusedBorder: FxInputDeco.outlineBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: primary, width: 1.6),
+                ),
+                isDense: true,
               ),
-              isDense: true,
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Text(
-            'HISTÓRICO DE TRANSAÇÕES',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.4,
-              color: mute,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Text(
+              'HISTÓRICO DE TRANSAÇÕES',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.4,
+                color: mute,
+              ),
             ),
           ),
-        ),
-        Expanded(
-          child:
-              _loading
-                  ? _buildMensalidadesLoading(context)
-                  : _erro != null
-                  ? DashboardErrorState(
-                    chromeOnDark: chrome.isDark,
-                    primary: primary,
-                    message: _erro!,
-                    onRetry: _load,
-                  )
-                  : _filtered.isEmpty
-                  ? _buildMensalidadesEmpty(context)
-                  : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 4, 16, 80),
-                    itemCount: _filtered.length,
-                    itemBuilder: (_, i) {
-                      final m = _filtered[i];
-                      final ink = chrome.ink;
-                      final mute = chrome.mute;
-                      final statusColor = _statusColor(m.status);
-                      final isPending =
-                          m.status == 'PENDENTE' || m.status == 'ATRASADO';
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 10),
-                        padding: const EdgeInsets.all(14),
-                        decoration: fxListCardDecoration(context, radius: 20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        m.alunoNome,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w800,
-                                          color: ink,
-                                          letterSpacing: -0.15,
+          Expanded(
+            child:
+                _loading
+                    ? _buildMensalidadesLoading(context)
+                    : _erro != null
+                    ? DashboardErrorState(
+                      chromeOnDark: chrome.isDark,
+                      primary: primary,
+                      message: _erro!,
+                      onRetry: _load,
+                    )
+                    : _filtered.isEmpty
+                    ? _buildMensalidadesEmpty(context)
+                    : ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(
+                        TokensStrip.s4,
+                        4,
+                        16,
+                        80,
+                      ),
+                      itemCount: _filtered.length,
+                      itemBuilder: (_, i) {
+                        final m = _filtered[i];
+                        final ink = chrome.ink;
+                        final mute = chrome.mute;
+                        final statusColor = _statusColor(m.status);
+                        final isPending =
+                            m.status == 'PENDENTE' || m.status == 'ATRASADO';
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.all(14),
+                          decoration: fxListCardDecoration(context, radius: 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          m.alunoNome,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w800,
+                                            color: ink,
+                                            letterSpacing: -0.15,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      const SizedBox(height: 3),
-                                      Text(
-                                        m.mesReferencia.substring(0, 7),
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: mute,
-                                          fontWeight: FontWeight.w600,
+                                        const SizedBox(height: 3),
+                                        Text(
+                                          m.mesReferencia.substring(0, 7),
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: mute,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'R\$ ${m.valor.toStringAsFixed(0)}',
-                                  style: GoogleFonts.jetBrainsMono(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w700,
-                                    color: ink,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 5,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: statusColor.withValues(
-                                      alpha: chrome.isDark ? 0.18 : 0.10,
-                                    ),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Text(
-                                    financeiroMensalidadeStatusLabel(m.status),
-                                    style: TextStyle(
-                                      color: financeiroMensalidadeStatusInk(
-                                        statusColor,
-                                        status: m.status,
-                                        isDark: chrome.isDark,
-                                      ),
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 0.3,
+                                      ],
                                     ),
                                   ),
-                                ),
-                                const Spacer(),
-                                _MiniAction(
-                                  icon: Icons.edit_rounded,
-                                  color: mute,
-                                  onTap: () => _editarMensalidade(m),
-                                ),
-                                if (isPending) ...[
-                                  const SizedBox(width: 6),
-                                  _MiniAction(
-                                    icon: Icons.phone_in_talk_rounded,
-                                    color: mute,
-                                    onTap: () => _registrarContato(m),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  _MiniAction(
-                                    icon: Icons.pix_rounded,
-                                    color: primary,
-                                    onTap: () => _mostrarPix(m.id),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  _MiniAction(
-                                    icon: Icons.check_circle_outline_rounded,
-                                    color: EagleTokens.good,
-                                    onTap: () => _pagar(m.id),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'R\$ ${m.valor.toStringAsFixed(0)}',
+                                    style: GoogleFonts.jetBrainsMono(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                      color: ink,
+                                    ),
                                   ),
                                 ],
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-        ),
-      ],
-    ),
-  );
+                              ),
+                              const SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 5,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: statusColor.withValues(
+                                        alpha: chrome.isDark ? 0.18 : 0.10,
+                                      ),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      financeiroMensalidadeStatusLabel(
+                                        m.status,
+                                      ),
+                                      style: TextStyle(
+                                        color: financeiroMensalidadeStatusInk(
+                                          statusColor,
+                                          status: m.status,
+                                          isDark: chrome.isDark,
+                                        ),
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  _MiniAction(
+                                    icon: Icons.edit_rounded,
+                                    color: mute,
+                                    onTap: () => _editarMensalidade(m),
+                                  ),
+                                  if (isPending) ...[
+                                    const SizedBox(width: 6),
+                                    _MiniAction(
+                                      icon: Icons.phone_in_talk_rounded,
+                                      color: mute,
+                                      onTap: () => _registrarContato(m),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    _MiniAction(
+                                      icon: Icons.pix_rounded,
+                                      color: primary,
+                                      onTap: () => _mostrarPix(m.id),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    _MiniAction(
+                                      icon: Icons.check_circle_outline_rounded,
+                                      color: EagleTokens.good,
+                                      onTap: () => _pagar(m.id),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildMensalidadesLoading(BuildContext context) {

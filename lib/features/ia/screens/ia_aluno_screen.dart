@@ -84,7 +84,10 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen>
               indicatorColor: primary,
               dividerColor: Colors.transparent,
               tabs: const [
-                Tab(icon: Icon(Icons.chat_bubble_outline_rounded), text: 'Chat'),
+                Tab(
+                  icon: Icon(Icons.chat_bubble_outline_rounded),
+                  text: 'Chat',
+                ),
                 Tab(icon: Icon(Icons.trending_up_rounded), text: 'Progressão'),
               ],
             ),
@@ -280,7 +283,10 @@ class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
   Future<void> _gerarProgressao() async {
     final id = widget.alunoId;
     if (id == null || id <= 0) {
-      FeedbackHelper.showError(context, 'Não foi possível identificar seu perfil de aluno.');
+      FeedbackHelper.showError(
+        context,
+        'Não foi possível identificar seu perfil de aluno.',
+      );
       return;
     }
     setState(() {

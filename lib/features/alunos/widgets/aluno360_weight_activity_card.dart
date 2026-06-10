@@ -80,21 +80,18 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                 children: [
                   Text(
                     aluno.peso?.toStringAsFixed(1) ?? '--',
-                    style: Aluno360Layout.inlineMetricStyle(context, ink)
-                        .copyWith(
-                          fontSize: 32,
-                          letterSpacing: -0.5,
-                          height: 1,
-                        ),
+                    style: Aluno360Layout.inlineMetricStyle(
+                      context,
+                      ink,
+                    ).copyWith(fontSize: 32, letterSpacing: -0.5, height: 1),
                   ),
                   if (aluno.peso != null) ...[
                     const SizedBox(width: 3),
                     Text(
                       'kg',
-                      style: Aluno360Layout.captionStyle(context).copyWith(
-                        color: mute,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: Aluno360Layout.captionStyle(
+                        context,
+                      ).copyWith(color: mute, fontWeight: FontWeight.w500),
                     ),
                   ],
                   const Spacer(),
@@ -125,9 +122,7 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                                 primary,
                                 isDark: isDark,
                               ),
-                            ).copyWith(
-                              decoration: TextDecoration.underline,
-                            ),
+                            ).copyWith(decoration: TextDecoration.underline),
                           ),
                         ),
                       ),
@@ -195,10 +190,9 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                         Text(
                           'O radar também pede mapa corporal (P0) — '
                           'registre peso e medidas na evolução corporal.',
-                          style: Aluno360Layout.captionStyle(context).copyWith(
-                            color: mute,
-                            height: 1.35,
-                          ),
+                          style: Aluno360Layout.captionStyle(
+                            context,
+                          ).copyWith(color: mute, height: 1.35),
                         ),
                       ],
                     ],
@@ -289,18 +283,16 @@ class Aluno360WeightTrendSparkline extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Últimas medições',
-                    style: Aluno360Layout.captionStyle(context).copyWith(
-                      color: mute,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: Aluno360Layout.captionStyle(
+                      context,
+                    ).copyWith(color: mute, fontWeight: FontWeight.w600),
                   ),
                 ),
                 Text(
                   deltaLabel,
-                  style: Aluno360Layout.captionStyle(context).copyWith(
-                    color: deltaColor,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: Aluno360Layout.captionStyle(
+                    context,
+                  ).copyWith(color: deltaColor, fontWeight: FontWeight.w700),
                 ),
               ],
             ),
@@ -309,7 +301,10 @@ class Aluno360WeightTrendSparkline extends StatelessWidget {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   return FxSparkline(
-                    data: values.length >= 2 ? values : [values.first, values.first],
+                    data:
+                        values.length >= 2
+                            ? values
+                            : [values.first, values.first],
                     color: color,
                     width: constraints.maxWidth,
                     height: constraints.maxHeight,

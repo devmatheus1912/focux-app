@@ -9,7 +9,8 @@ import '../../health/data/health_repository.dart';
 import '../copilot_insight_text.dart';
 
 class IaCopilotInsightItem extends StatefulWidget {
-  const IaCopilotInsightItem({super.key, 
+  const IaCopilotInsightItem({
+    super.key,
     required this.index,
     required this.insight,
     required this.isLast,
@@ -55,142 +56,144 @@ class _IaCopilotInsightItemState extends State<IaCopilotInsightItem> {
                 ? () => setState(() => _expanded = !_expanded)
                 : null,
         child: Container(
-        margin:
-            widget.highlighted
-                ? const EdgeInsets.fromLTRB(10, 10, 10, 8)
-                : EdgeInsets.zero,
-        padding:
-            widget.highlighted
-                ? const EdgeInsets.all(14)
-                : const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-        decoration: BoxDecoration(
-          color:
+          margin:
               widget.highlighted
-                  ? widget.primarySoft.withValues(alpha: 0.38)
-                  : Colors.transparent,
-          borderRadius: BorderRadius.circular(widget.highlighted ? 16 : 0),
-          border:
+                  ? const EdgeInsets.fromLTRB(10, 10, 10, 8)
+                  : EdgeInsets.zero,
+          padding:
               widget.highlighted
-                  ? Border.all(color: widget.brand.withValues(alpha: 0.18))
-                  : Border(
-                    bottom:
-                        widget.isLast
-                            ? BorderSide.none
-                            : BorderSide(color: widget.line, width: 0.5),
-                  ),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: widget.highlighted ? 38 : 30,
-              height: widget.highlighted ? 38 : 30,
-              decoration: BoxDecoration(
-                color:
-                    widget.highlighted
-                        ? widget.brand.withValues(alpha: 0.12)
-                        : widget.primarySoft,
-                borderRadius: BorderRadius.circular(
-                  widget.highlighted ? 12 : 9,
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  '${widget.index + 1}',
-                  style: TextStyle(
-                    color: widget.brand,
-                    fontSize: widget.highlighted ? 13 : 12,
-                    fontWeight: FontWeight.w800,
+                  ? const EdgeInsets.all(14)
+                  : const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+          decoration: BoxDecoration(
+            color:
+                widget.highlighted
+                    ? widget.primarySoft.withValues(alpha: 0.38)
+                    : Colors.transparent,
+            borderRadius: BorderRadius.circular(widget.highlighted ? 16 : 0),
+            border:
+                widget.highlighted
+                    ? Border.all(color: widget.brand.withValues(alpha: 0.18))
+                    : Border(
+                      bottom:
+                          widget.isLast
+                              ? BorderSide.none
+                              : BorderSide(color: widget.line, width: 0.5),
+                    ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: widget.highlighted ? 38 : 30,
+                height: widget.highlighted ? 38 : 30,
+                decoration: BoxDecoration(
+                  color:
+                      widget.highlighted
+                          ? widget.brand.withValues(alpha: 0.12)
+                          : widget.primarySoft,
+                  borderRadius: BorderRadius.circular(
+                    widget.highlighted ? 12 : 9,
                   ),
                 ),
+                child: Center(
+                  child: Text(
+                    '${widget.index + 1}',
+                    style: TextStyle(
+                      color: widget.brand,
+                      fontSize: widget.highlighted ? 13 : 12,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (widget.highlighted) ...[
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (widget.highlighted) ...[
+                                Text(
+                                  'Mais importante',
+                                  style: TextStyle(
+                                    color: widget.brand,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.7,
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+                              ],
                               Text(
-                                'Mais importante',
+                                titulo,
                                 style: TextStyle(
-                                  color: widget.brand,
-                                  fontSize: 10,
+                                  color: widget.ink,
+                                  fontSize: widget.highlighted ? 14 : 13,
                                   fontWeight: FontWeight.w900,
-                                  letterSpacing: 0.7,
+                                  height: 1.2,
                                 ),
                               ),
-                              const SizedBox(height: 3),
                             ],
-                            Text(
-                              titulo,
-                              style: TextStyle(
-                                color: widget.ink,
-                                fontSize: widget.highlighted ? 14 : 13,
-                                fontWeight: FontWeight.w900,
-                                height: 1.2,
-                              ),
-                            ),
-                          ],
+                          ),
+                        ),
+                        if (tipo.isNotEmpty) ...[
+                          const SizedBox(width: 8),
+                          IaCopilotTinyTypeChip(
+                            label: tipo,
+                            color: widget.mute,
+                            background: widget.chipBg,
+                          ),
+                        ],
+                      ],
+                    ),
+                    if (detalhe.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        detalhe,
+                        maxLines:
+                            _expanded ? null : (widget.highlighted ? 4 : 2),
+                        overflow:
+                            _expanded
+                                ? TextOverflow.visible
+                                : TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: widget.mute,
+                          fontSize: widget.highlighted ? 12.7 : 12.2,
+                          height: widget.highlighted ? 1.42 : 1.34,
                         ),
                       ),
-                      if (tipo.isNotEmpty) ...[
-                        const SizedBox(width: 8),
-                        IaCopilotTinyTypeChip(
-                          label: tipo,
-                          color: widget.mute,
-                          background: widget.chipBg,
+                      if (detalhe.length > 150) ...[
+                        const SizedBox(height: 7),
+                        Text(
+                          _expanded ? 'Ver menos' : 'Ver detalhe',
+                          style: TextStyle(
+                            color: widget.brand,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
                       ],
                     ],
-                  ),
-                  if (detalhe.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      detalhe,
-                      maxLines: _expanded ? null : (widget.highlighted ? 4 : 2),
-                      overflow:
-                          _expanded
-                              ? TextOverflow.visible
-                              : TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: widget.mute,
-                        fontSize: widget.highlighted ? 12.7 : 12.2,
-                        height: widget.highlighted ? 1.42 : 1.34,
-                      ),
-                    ),
-                    if (detalhe.length > 150) ...[
-                      const SizedBox(height: 7),
-                      Text(
-                        _expanded ? 'Ver menos' : 'Ver detalhe',
-                        style: TextStyle(
-                          color: widget.brand,
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
 }
 
 class IaCopilotTinyTypeChip extends StatelessWidget {
-  const IaCopilotTinyTypeChip({super.key, 
+  const IaCopilotTinyTypeChip({
+    super.key,
     required this.label,
     required this.color,
     required this.background,
@@ -221,7 +224,8 @@ class IaCopilotTinyTypeChip extends StatelessWidget {
 }
 
 class IaCopilotReadinessCard extends StatelessWidget {
-  const IaCopilotReadinessCard({super.key, 
+  const IaCopilotReadinessCard({
+    super.key,
     required this.headline,
     required this.modeDisplay,
     required this.icon,
@@ -337,15 +341,16 @@ class IaCopilotReadinessCard extends StatelessWidget {
                 ),
               if (recoveryAsync != null)
                 recoveryAsync!.when(
-                  loading: () => IaCopilotPill(
-                    icon: Icons.watch_outlined,
-                    label: 'Sync wearable...',
-                    ink: ink,
-                    mute: mute,
-                    line: line,
-                    soft: soft,
-                    brand: primary,
-                  ),
+                  loading:
+                      () => IaCopilotPill(
+                        icon: Icons.watch_outlined,
+                        label: 'Sync wearable...',
+                        ink: ink,
+                        mute: mute,
+                        line: line,
+                        soft: soft,
+                        brand: primary,
+                      ),
                   error: (_, __) => const SizedBox.shrink(),
                   data: (snapshot) {
                     if (snapshot == null) {
@@ -388,7 +393,8 @@ class IaCopilotReadinessCard extends StatelessWidget {
 }
 
 class IaCopilotInsightsLoading extends StatelessWidget {
-  const IaCopilotInsightsLoading({super.key, 
+  const IaCopilotInsightsLoading({
+    super.key,
     required this.ink,
     required this.mute,
     required this.brand,
@@ -470,7 +476,8 @@ class IaCopilotInsightsLoading extends StatelessWidget {
 }
 
 class IaCopilotPill extends StatelessWidget {
-  const IaCopilotPill({super.key, 
+  const IaCopilotPill({
+    super.key,
     required this.icon,
     required this.label,
     required this.ink,
@@ -515,4 +522,3 @@ class IaCopilotPill extends StatelessWidget {
     );
   }
 }
-

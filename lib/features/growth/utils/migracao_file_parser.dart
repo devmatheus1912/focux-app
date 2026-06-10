@@ -63,12 +63,11 @@ class MigracaoFileParser {
 
   static MigracaoFileParseResult _parseCsvText(String text, String filename) {
     final delimiter = text.contains(';') && !text.contains(',') ? ';' : ',';
-    final rows =
-        CsvToListConverter(
-          fieldDelimiter: delimiter,
-          eol: '\n',
-          shouldParseNumbers: false,
-        ).convert(text);
+    final rows = CsvToListConverter(
+      fieldDelimiter: delimiter,
+      eol: '\n',
+      shouldParseNumbers: false,
+    ).convert(text);
 
     final parsed = _rowsToAlunos(rows);
     if (parsed != null && parsed.isNotEmpty) {
@@ -88,10 +87,7 @@ class MigracaoFileParser {
     try {
       final book = Excel.decodeBytes(bytes);
       if (book.tables.isEmpty) {
-        return MigracaoFileParseResult(
-          textForIa: '',
-          sourceLabel: filename,
-        );
+        return MigracaoFileParseResult(textForIa: '', sourceLabel: filename);
       }
       final sheet = book.tables.values.first;
       final rows = <List<dynamic>>[];
@@ -108,11 +104,10 @@ class MigracaoFileParser {
 
       final buffer = StringBuffer();
       for (final row in rows) {
-        final line =
-            row
-                .map((v) => v.toString().trim())
-                .where((v) => v.isNotEmpty)
-                .join(' — ');
+        final line = row
+            .map((v) => v.toString().trim())
+            .where((v) => v.isNotEmpty)
+            .join(' — ');
         if (line.isNotEmpty) buffer.writeln(line);
       }
       return MigracaoFileParseResult(
@@ -180,7 +175,10 @@ class MigracaoFileParser {
         objetivo = _cell(row, objIdx);
       } else {
         final parts =
-            row.map((c) => c.toString().trim()).where((p) => p.isNotEmpty).toList();
+            row
+                .map((c) => c.toString().trim())
+                .where((p) => p.isNotEmpty)
+                .toList();
         if (parts.isEmpty) continue;
         nome = parts.first;
         for (final part in parts.skip(1)) {

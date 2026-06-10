@@ -48,12 +48,17 @@ class _CoachProativoCardState extends ConsumerState<CoachProativoCard> {
                 children: [
                   Icon(Icons.psychology_outlined, color: primary, size: 20),
                   const SizedBox(width: 8),
-                  Text('Coach proativo',
-                      style: TextStyle(fontWeight: FontWeight.w600, color: ink)),
+                  Text(
+                    'Coach proativo',
+                    style: TextStyle(fontWeight: FontWeight.w600, color: ink),
+                  ),
                   const Spacer(),
                   if (msgs.length > 1)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: primary,
                         borderRadius: BorderRadius.circular(10),
@@ -80,16 +85,18 @@ class _CoachProativoCardState extends ConsumerState<CoachProativoCard> {
                       children: [
                         IconButton(
                           icon: const Icon(Icons.chevron_left, size: 20),
-                          onPressed: clamped == 0
-                              ? null
-                              : () => setState(() => _index = clamped - 1),
+                          onPressed:
+                              clamped == 0
+                                  ? null
+                                  : () => setState(() => _index = clamped - 1),
                           tooltip: 'Anterior',
                         ),
                         IconButton(
                           icon: const Icon(Icons.chevron_right, size: 20),
-                          onPressed: clamped >= msgs.length - 1
-                              ? null
-                              : () => setState(() => _index = clamped + 1),
+                          onPressed:
+                              clamped >= msgs.length - 1
+                                  ? null
+                                  : () => setState(() => _index = clamped + 1),
                           tooltip: 'Próxima',
                         ),
                       ],
@@ -98,8 +105,9 @@ class _CoachProativoCardState extends ConsumerState<CoachProativoCard> {
                     const SizedBox.shrink(),
                   TextButton(
                     onPressed: () async {
-                      await CoachProativoRepository(ref.read(apiClientProvider))
-                          .marcarLido(msg.id);
+                      await CoachProativoRepository(
+                        ref.read(apiClientProvider),
+                      ).marcarLido(msg.id);
                       if (clamped >= msgs.length - 1 && clamped > 0) {
                         setState(() => _index = clamped - 1);
                       }

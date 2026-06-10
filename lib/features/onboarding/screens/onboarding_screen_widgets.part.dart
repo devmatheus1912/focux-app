@@ -39,8 +39,7 @@ class _SlideDot extends StatelessWidget {
       height: 7,
       margin: const EdgeInsets.symmetric(horizontal: 3),
       decoration: BoxDecoration(
-        color:
-            active ? primary : Colors.white.withValues(alpha: 0.22),
+        color: active ? primary : Colors.white.withValues(alpha: 0.22),
         borderRadius: BorderRadius.circular(7),
       ),
     );
@@ -323,7 +322,9 @@ class _OnboardingHook extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hook =
-        aluno ? FocuxBrandCopy.onboardingHookAluno : FocuxBrandCopy.onboardingHook;
+        aluno
+            ? FocuxBrandCopy.onboardingHookAluno
+            : FocuxBrandCopy.onboardingHook;
     final highlight =
         aluno
             ? FocuxBrandCopy.onboardingHookAlunoHighlight
@@ -434,4 +435,3 @@ class _AuthGridPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter old) => false;
 }
-

@@ -8,7 +8,9 @@ import 'package:path_provider/path_provider.dart';
 class MigracaoOcrService {
   MigracaoOcrService._();
 
-  static final _recognizer = TextRecognizer(script: TextRecognitionScript.latin);
+  static final _recognizer = TextRecognizer(
+    script: TextRecognitionScript.latin,
+  );
 
   static bool get disponivel => !kIsWeb;
 

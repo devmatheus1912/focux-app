@@ -59,7 +59,11 @@ class PaywallPlanStudio extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final secondary = PaywallCatalog.readableSecondary(ink, mute, isDark: isDark);
+    final secondary = PaywallCatalog.readableSecondary(
+      ink,
+      mute,
+      isDark: isDark,
+    );
     final showPicker = studioPlanos.length > 1 && !isMaxTier;
 
     Plano? currentPlano;
@@ -69,12 +73,10 @@ class PaywallPlanStudio extends StatelessWidget {
         break;
       }
     }
-    final statusLabel = currentPlano == null
-        ? PaywallCatalog.displayPlanName(currentPlan)
-        : PaywallCatalog.displayNameFor(
-            currentPlano,
-            currentPlan,
-          );
+    final statusLabel =
+        currentPlano == null
+            ? PaywallCatalog.displayPlanName(currentPlan)
+            : PaywallCatalog.displayNameFor(currentPlano, currentPlan);
 
     final onCurrentEnterprise =
         selectedPlan == currentPlan &&
@@ -96,144 +98,152 @@ class PaywallPlanStudio extends StatelessWidget {
             emphasis: PaywallTierEmphasis.low,
           ),
           Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _PaywallPlanStudioHero(
-            currentPlan: currentPlan,
-            statusLabel: statusLabel,
-            kicker: isMaxTier
-                ? 'PLANO MÁXIMO'
-                : selectedPlan == currentPlan
-                ? 'SEU PLANO · ATIVO'
-                : 'VISUALIZANDO',
-            subtitle: isMaxTier
-                ? 'Plano máximo ativo — gerencie na loja do dispositivo.'
-                : onCurrentEnterprise
-                ? 'Recursos ativos · faixa acima leva ao Pro'
-                : !showPicker
-                ? 'Gerencie na loja do dispositivo'
-                : selectedPlan == currentPlan
-                ? 'Recursos e cobrança do seu plano'
-                : 'O que inclui neste plano',
-            accent: PaywallCatalog.accentForPlan(currentPlan),
-            ink: ink,
-            secondary: secondary,
-            isDark: isDark,
-            showUsageAnchor:
-                usageSnapshot != null &&
-                selectedPlan == currentPlan &&
-                onScrollToUsage != null,
-            showCompareAnchor: showCompareAnchor && onExplorePro != null,
-            onScrollToUsage: onScrollToUsage,
-            onScrollToCompare: onExplorePro,
-          ),
-          if (planMismatch || (syncWarning != null && syncWarning!.isNotEmpty)) ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-              child: PaywallPlanSyncBanner(
-                ink: ink,
-                mute: mute,
-                isDark: isDark,
-                billingLabel: PaywallCatalog.displayPlanName(currentPlan),
-                serverLabel: usageSnapshot?.serverPlano != null
-                    ? PaywallCatalog.displayPlanName(usageSnapshot!.serverPlano!)
-                    : null,
-                message: syncWarning,
-                onRefresh: onRefreshPlan,
-              ),
-            ),
-          ],
-          if (showPicker) ...[
-            const SizedBox(height: TokensStrip.s3),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _PaywallStudioPlanPicker(
-                planos: studioPlanos,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _PaywallPlanStudioHero(
                 currentPlan: currentPlan,
-                selectedPlan: selectedPlan,
-                isDark: isDark,
+                statusLabel: statusLabel,
+                kicker:
+                    isMaxTier
+                        ? 'PLANO MÁXIMO'
+                        : selectedPlan == currentPlan
+                        ? 'SEU PLANO · ATIVO'
+                        : 'VISUALIZANDO',
+                subtitle:
+                    isMaxTier
+                        ? 'Plano máximo ativo — gerencie na loja do dispositivo.'
+                        : onCurrentEnterprise
+                        ? 'Recursos ativos · faixa acima leva ao Pro'
+                        : !showPicker
+                        ? 'Gerencie na loja do dispositivo'
+                        : selectedPlan == currentPlan
+                        ? 'Recursos e cobrança do seu plano'
+                        : 'O que inclui neste plano',
+                accent: PaywallCatalog.accentForPlan(currentPlan),
                 ink: ink,
-                mute: mute,
-                onSelected: onPlanSelected,
-              ),
-            ),
-          ],
-          if (usageSnapshot != null && selectedPlan == currentPlan) ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: PaywallUsageMeters(
-                usage: usageSnapshot!,
-                ink: ink,
-                mute: mute,
+                secondary: secondary,
                 isDark: isDark,
+                showUsageAnchor:
+                    usageSnapshot != null &&
+                    selectedPlan == currentPlan &&
+                    onScrollToUsage != null,
+                showCompareAnchor: showCompareAnchor && onExplorePro != null,
+                onScrollToUsage: onScrollToUsage,
+                onScrollToCompare: onExplorePro,
               ),
-            ),
-          ],
-          if (showProExploreStrip &&
-              showPicker &&
-              currentPlan == SubscriptionPlan.ENTERPRISE &&
-              selectedPlan == SubscriptionPlan.ENTERPRISE) ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-              child: PaywallProExploreStrip(
-                ink: ink,
-                mute: mute,
-                isDark: isDark,
-                roiTag: roiTag,
-                onExplorePro:
-                    onExplorePro ??
-                    () => onPlanSelected(SubscriptionPlan.ENTERPRISE_PRO),
-              ),
-            ),
-          ],
-          const SizedBox(height: TokensStrip.s2),
-          AnimatedSwitcher(
-            duration: TokensStrip.prefersReducedMotion(context)
-                ? Duration.zero
-                : const Duration(milliseconds: 220),
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            transitionBuilder: (child, animation) {
-              final curved = CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOutCubic,
-                reverseCurve: Curves.easeInCubic,
-              );
-              return FadeTransition(
-                opacity: curved,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0.025),
-                    end: Offset.zero,
-                  ).animate(curved),
-                  child: child,
+              if (planMismatch ||
+                  (syncWarning != null && syncWarning!.isNotEmpty)) ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                  child: PaywallPlanSyncBanner(
+                    ink: ink,
+                    mute: mute,
+                    isDark: isDark,
+                    billingLabel: PaywallCatalog.displayPlanName(currentPlan),
+                    serverLabel:
+                        usageSnapshot?.serverPlano != null
+                            ? PaywallCatalog.displayPlanName(
+                              usageSnapshot!.serverPlano!,
+                            )
+                            : null,
+                    message: syncWarning,
+                    onRefresh: onRefreshPlan,
+                  ),
                 ),
-              );
-            },
-            layoutBuilder: (current, previous) => current ?? const SizedBox.shrink(),
-            child: KeyedSubtree(
-              key: ValueKey<SubscriptionPlan>(selectedPlan),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  planContent,
-                  if (belowPlanSection != null) ...[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                      child: belowPlanSection!,
+              ],
+              if (showPicker) ...[
+                const SizedBox(height: TokensStrip.s3),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _PaywallStudioPlanPicker(
+                    planos: studioPlanos,
+                    currentPlan: currentPlan,
+                    selectedPlan: selectedPlan,
+                    isDark: isDark,
+                    ink: ink,
+                    mute: mute,
+                    onSelected: onPlanSelected,
+                  ),
+                ),
+              ],
+              if (usageSnapshot != null && selectedPlan == currentPlan) ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child: PaywallUsageMeters(
+                    usage: usageSnapshot!,
+                    ink: ink,
+                    mute: mute,
+                    isDark: isDark,
+                  ),
+                ),
+              ],
+              if (showProExploreStrip &&
+                  showPicker &&
+                  currentPlan == SubscriptionPlan.ENTERPRISE &&
+                  selectedPlan == SubscriptionPlan.ENTERPRISE) ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                  child: PaywallProExploreStrip(
+                    ink: ink,
+                    mute: mute,
+                    isDark: isDark,
+                    roiTag: roiTag,
+                    onExplorePro:
+                        onExplorePro ??
+                        () => onPlanSelected(SubscriptionPlan.ENTERPRISE_PRO),
+                  ),
+                ),
+              ],
+              const SizedBox(height: TokensStrip.s2),
+              AnimatedSwitcher(
+                duration:
+                    TokensStrip.prefersReducedMotion(context)
+                        ? Duration.zero
+                        : const Duration(milliseconds: 220),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (child, animation) {
+                  final curved = CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeOutCubic,
+                    reverseCurve: Curves.easeInCubic,
+                  );
+                  return FadeTransition(
+                    opacity: curved,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0, 0.025),
+                        end: Offset.zero,
+                      ).animate(curved),
+                      child: child,
                     ),
-                  ],
-                  if (compareSection != null) ...[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
-                      child: compareSection!,
-                    ),
-                  ],
-                ],
+                  );
+                },
+                layoutBuilder:
+                    (current, previous) => current ?? const SizedBox.shrink(),
+                child: KeyedSubtree(
+                  key: ValueKey<SubscriptionPlan>(selectedPlan),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      planContent,
+                      if (belowPlanSection != null) ...[
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                          child: belowPlanSection!,
+                        ),
+                      ],
+                      if (compareSection != null) ...[
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+                          child: compareSection!,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-        ],
+            ],
           ),
         ],
       ),
@@ -273,7 +283,10 @@ class _PaywallPlanStudioHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kickerColor = PaywallCatalog.readableTierAccent(accent, isDark: isDark);
+    final kickerColor = PaywallCatalog.readableTierAccent(
+      accent,
+      isDark: isDark,
+    );
     final anchorStyle = TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w700,
@@ -316,10 +329,9 @@ class _PaywallPlanStudioHero extends StatelessWidget {
                   const SizedBox(height: TokensStrip.s3),
                   Text(
                     subtitle,
-                    style: TokensStrip.bodyMuted(color: secondary).copyWith(
-                      fontSize: TokensStrip.fontBodySm,
-                      height: 1.5,
-                    ),
+                    style: TokensStrip.bodyMuted(
+                      color: secondary,
+                    ).copyWith(fontSize: TokensStrip.fontBodySm, height: 1.5),
                   ),
                   const SizedBox(height: TokensStrip.s4),
                   Container(
@@ -339,7 +351,10 @@ class _PaywallPlanStudioHero extends StatelessWidget {
                         if (showUsageAnchor)
                           TextButton(
                             style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               minimumSize: const Size(44, 36),
                               tapTargetSize: MaterialTapTargetSize.padded,
                             ),
@@ -352,7 +367,10 @@ class _PaywallPlanStudioHero extends StatelessWidget {
                         if (showCompareAnchor)
                           TextButton(
                             style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               minimumSize: const Size(44, 36),
                               tapTargetSize: MaterialTapTargetSize.padded,
                             ),
@@ -403,21 +421,21 @@ class _PaywallStudioPlanPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sorted = [...planos]
-      ..sort(
-        (a, b) => subscriptionPlanFromApi(a.nome).level.compareTo(
-          subscriptionPlanFromApi(b.nome).level,
-        ),
-      );
+    final sorted = [...planos]..sort(
+      (a, b) => subscriptionPlanFromApi(
+        a.nome,
+      ).level.compareTo(subscriptionPlanFromApi(b.nome).level),
+    );
 
     return Semantics(
       label: 'Selecionar plano para visualizar',
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(TokensStrip.rPill),
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.06)
-              : TokensStrip.pageBg.withValues(alpha: 0.85),
+          color:
+              isDark
+                  ? Colors.white.withValues(alpha: 0.06)
+                  : TokensStrip.pageBg.withValues(alpha: 0.85),
           border: Border.all(
             color: mute.withValues(alpha: isDark ? 0.25 : 0.35),
           ),
@@ -432,7 +450,8 @@ class _PaywallStudioPlanPicker extends StatelessWidget {
                   child: _PaywallStudioSegment(
                     plano: sorted[i],
                     plan: subscriptionPlanFromApi(sorted[i].nome),
-                    isCurrent: subscriptionPlanFromApi(sorted[i].nome) == currentPlan,
+                    isCurrent:
+                        subscriptionPlanFromApi(sorted[i].nome) == currentPlan,
                     isSelected:
                         subscriptionPlanFromApi(sorted[i].nome) == selectedPlan,
                     ink: ink,
@@ -481,84 +500,101 @@ class _PaywallStudioSegment extends StatelessWidget {
   Widget build(BuildContext context) {
     final accent = PaywallCatalog.accentForPlan(plan);
     final label = PaywallCatalog.displayNameFor(plano, plan);
-    final short = label.length > 14
-        ? switch (plan) {
-            SubscriptionPlan.ENTERPRISE_PRO => 'ENT. PRO',
-            SubscriptionPlan.ENTERPRISE => 'ENTERPRISE',
-            SubscriptionPlan.PREMIUM => 'PREMIUM',
-            _ => label,
-          }
-        : label;
+    final short =
+        label.length > 14
+            ? switch (plan) {
+              SubscriptionPlan.ENTERPRISE_PRO => 'ENT. PRO',
+              SubscriptionPlan.ENTERPRISE => 'ENTERPRISE',
+              SubscriptionPlan.PREMIUM => 'PREMIUM',
+              _ => label,
+            }
+            : label;
 
     return Semantics(
       button: true,
       selected: isSelected,
-      label: isCurrent
-          ? '$label, seu plano atual'
-          : isSelected
-          ? '$label, selecionado'
-          : label,
+      label:
+          isCurrent
+              ? '$label, seu plano atual'
+              : isSelected
+              ? '$label, selecionado'
+              : label,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(TokensStrip.rPill),
-            child: AnimatedScale(
+          child: AnimatedScale(
             scale: isSelected ? 1.0 : 0.98,
-            duration: TokensStrip.prefersReducedMotion(context)
-                ? Duration.zero
-                : const Duration(milliseconds: 180),
+            duration:
+                TokensStrip.prefersReducedMotion(context)
+                    ? Duration.zero
+                    : const Duration(milliseconds: 180),
             curve: Curves.easeOutCubic,
             child: AnimatedContainer(
-            duration: TokensStrip.prefersReducedMotion(context)
-                ? Duration.zero
-                : const Duration(milliseconds: 200),
-            curve: Curves.easeOutCubic,
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(TokensStrip.rPill),
-              color: isSelected
-                  ? accent.withValues(alpha: isDark ? 0.22 : 0.14)
-                  : Colors.transparent,
-              border: isSelected
-                  ? Border.all(color: accent.withValues(alpha: 0.55), width: 1.5)
-                  : null,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  short,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.inter(
-                    fontSize: 11,
-                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                    color: isSelected
-                        ? PaywallCatalog.readableTierAccent(accent, isDark: isDark)
-                        : mute,
-                    height: 1.1,
-                  ),
-                ),
-                if (isCurrent) ...[
-                  const SizedBox(height: 2),
+              duration:
+                  TokensStrip.prefersReducedMotion(context)
+                      ? Duration.zero
+                      : const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(TokensStrip.rPill),
+                color:
+                    isSelected
+                        ? accent.withValues(alpha: isDark ? 0.22 : 0.14)
+                        : Colors.transparent,
+                border:
+                    isSelected
+                        ? Border.all(
+                          color: accent.withValues(alpha: 0.55),
+                          width: 1.5,
+                        )
+                        : null,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   Text(
-                    'Ativo',
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.4,
-                      color: PaywallCatalog.readableTierAccent(accent, isDark: isDark),
+                    short,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.inter(
+                      fontSize: 11,
+                      fontWeight:
+                          isSelected ? FontWeight.w800 : FontWeight.w600,
+                      color:
+                          isSelected
+                              ? PaywallCatalog.readableTierAccent(
+                                accent,
+                                isDark: isDark,
+                              )
+                              : mute,
+                      height: 1.1,
                     ),
                   ),
+                  if (isCurrent) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      'Ativo',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.4,
+                        color: PaywallCatalog.readableTierAccent(
+                          accent,
+                          isDark: isDark,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),
       ),
-    ),
     );
   }
 }

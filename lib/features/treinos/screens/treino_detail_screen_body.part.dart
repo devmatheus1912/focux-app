@@ -142,12 +142,14 @@ class _TreinoDetailBody extends StatelessWidget {
                           _MenuActionTile(
                             icon: Icons.copy_outlined,
                             label: 'Duplicar treino',
-                            onTap: () => Navigator.pop(sheetContext, 'duplicate'),
+                            onTap:
+                                () => Navigator.pop(sheetContext, 'duplicate'),
                           ),
                           _MenuActionTile(
                             icon: Icons.bookmark_border,
                             label: 'Salvar como template',
-                            onTap: () => Navigator.pop(sheetContext, 'template'),
+                            onTap:
+                                () => Navigator.pop(sheetContext, 'template'),
                           ),
                           _MenuActionTile(
                             icon: Icons.delete_outline,
@@ -615,13 +617,11 @@ class _TreinoDetailBody extends StatelessWidget {
                       '/treinos/$treinoId/exercicios/add',
                       extra: alunoId == null ? null : {'alunoId': alunoId},
                     )
-                    .then((
-                  added,
-                ) {
-                  if (added == true) {
-                    ref.invalidate(treinoProvider(treinoId));
-                  }
-                });
+                    .then((added) {
+                      if (added == true) {
+                        ref.invalidate(treinoProvider(treinoId));
+                      }
+                    });
               },
             ),
           )
@@ -642,4 +642,3 @@ class _TreinoDetailBody extends StatelessWidget {
     );
   }
 }
-

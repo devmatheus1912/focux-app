@@ -78,10 +78,9 @@ class Aluno360MeasurementCard extends StatelessWidget {
               const SizedBox(width: 2),
               Text(
                 unit,
-                style: Aluno360Layout.captionStyle(context).copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: mute,
-                ),
+                style: Aluno360Layout.captionStyle(
+                  context,
+                ).copyWith(fontWeight: FontWeight.w500, color: mute),
               ),
             ],
           ),
@@ -184,6 +183,7 @@ class Aluno360ModuleTile extends StatelessWidget {
   final bool isDark;
   final bool highlight;
   final VoidCallback onTap;
+
   /// Compact viz pinned top-right (e.g. aderência sparkline).
   final Widget? topTrailing;
 
@@ -197,9 +197,7 @@ class Aluno360ModuleTile extends StatelessWidget {
     final isPending = badge == 'Pend.';
     final bg =
         isPending
-            ? (isDark
-                ? const Color(0xFF3D2A18)
-                : EagleTokens.warnSoft)
+            ? (isDark ? const Color(0xFF3D2A18) : EagleTokens.warnSoft)
             : primary.withValues(alpha: isDark ? 0.16 : 0.12);
     final ink =
         isPending
@@ -212,15 +210,18 @@ class Aluno360ModuleTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: bg,
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: ink.withValues(alpha: isDark ? 0.45 : 0.35)),
+          border: Border.all(
+            color: ink.withValues(alpha: isDark ? 0.45 : 0.35),
+          ),
         ),
         child: Text(
           badge!,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: Aluno360Layout.badgeMicroStyle(context, ink).copyWith(
-            fontWeight: FontWeight.w700,
-          ),
+          style: Aluno360Layout.badgeMicroStyle(
+            context,
+            ink,
+          ).copyWith(fontWeight: FontWeight.w700),
         ),
       ),
     );
@@ -237,84 +238,80 @@ class Aluno360ModuleTile extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: aluno360ModuleTileSemantics(
-        label: label,
-        sub: sub,
-        badge: badge,
-      ),
+      label: aluno360ModuleTileSemantics(label: label, sub: sub, badge: badge),
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(16),
           child: Container(
-          width: double.infinity,
-          padding: Aluno360Layout.moduleTilePadding,
-          decoration:
-              highlight
-                  ? fxListCardDecoration(
-                    context,
-                    accent: primary,
-                    selected: true,
-                  )
-                  : fxListCardDecoration(context),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              ExcludeSemantics(
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: primary.withValues(alpha: highlight ? 0.18 : 0.1),
-                    borderRadius: BorderRadius.circular(10),
+            width: double.infinity,
+            padding: Aluno360Layout.moduleTilePadding,
+            decoration:
+                highlight
+                    ? fxListCardDecoration(
+                      context,
+                      accent: primary,
+                      selected: true,
+                    )
+                    : fxListCardDecoration(context),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                ExcludeSemantics(
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: primary.withValues(alpha: highlight ? 0.18 : 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(icon, size: 16, color: primary),
                   ),
-                  child: Icon(icon, size: 16, color: primary),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      label,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Aluno360Layout.moduleTileTitleStyle(
-                        context,
-                        titleColor,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        label,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Aluno360Layout.moduleTileTitleStyle(
+                          context,
+                          titleColor,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      sub,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Aluno360Layout.moduleTileSubtitleStyle(
-                        context,
-                        subColor,
+                      const SizedBox(height: 2),
+                      Text(
+                        sub,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Aluno360Layout.moduleTileSubtitleStyle(
+                          context,
+                          subColor,
+                        ),
                       ),
-                    ),
-                    if (badge != null || topTrailing != null) ...[
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          if (badge != null)
-                            Flexible(
-                              child: _badgeChip(context, primary, badgeInk),
-                            ),
-                          const Spacer(),
-                          if (topTrailing != null) topTrailing!,
-                        ],
-                      ),
+                      if (badge != null || topTrailing != null) ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            if (badge != null)
+                              Flexible(
+                                child: _badgeChip(context, primary, badgeInk),
+                              ),
+                            const Spacer(),
+                            if (topTrailing != null) topTrailing!,
+                          ],
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
           ),
         ),
       ),

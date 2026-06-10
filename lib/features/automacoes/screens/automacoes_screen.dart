@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-
-
 import '../../../core/theme/design_tokens.dart';
 
 import '../../../core/theme/tokens_strip.dart';
@@ -28,28 +26,18 @@ import '../../subscription/models/subscription_plan.dart';
 
 import '../data/automacao_repository.dart';
 
-
-
-final _repo = Provider((ref) => AutomacaoRepository(ref.read(apiClientProvider)));
-
-
+final _repo = Provider(
+  (ref) => AutomacaoRepository(ref.read(apiClientProvider)),
+);
 
 class AutomacoesScreen extends ConsumerStatefulWidget {
-
   const AutomacoesScreen({super.key});
 
-
-
   @override
-
   ConsumerState<AutomacoesScreen> createState() => _AutomacoesScreenState();
-
 }
 
-
-
 class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
-
   List<AutomacaoFluxo> _fluxos = [];
 
   List<AutomacaoTemplate> _templates = [];
@@ -58,32 +46,21 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
 
   String? _error;
 
-
-
   @override
-
   void initState() {
-
     super.initState();
 
     _load();
-
   }
 
-
-
   Future<void> _load() async {
-
     setState(() {
-
       _loading = true;
 
       _error = null;
-
     });
 
     try {
-
       final repo = ref.read(_repo);
 
       final r = await Future.wait([repo.listar(), repo.templates()]);
@@ -91,37 +68,25 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
       if (!mounted) return;
 
       setState(() {
-
         _fluxos = r[0] as List<AutomacaoFluxo>;
 
         _templates = r[1] as List<AutomacaoTemplate>;
 
         _loading = false;
-
       });
-
     } catch (e) {
-
       if (!mounted) return;
 
       setState(() {
-
         _loading = false;
 
         _error = friendlyError(e);
-
       });
-
     }
-
   }
 
-
-
   Future<void> _ativar(AutomacaoTemplate t) async {
-
     try {
-
       await ref.read(_repo).ativarTemplate(t.id);
 
       await _load();
@@ -129,29 +94,18 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
       if (!mounted) return;
 
       FeedbackHelper.showSuccess(context, 'Template "${t.nome}" ativado');
-
     } catch (e) {
-
       if (!mounted) return;
 
       FeedbackHelper.showError(context, friendlyError(e));
-
     }
-
   }
 
-
-
   @override
-
   Widget build(BuildContext context) {
-
     final scheme = Theme.of(context).colorScheme;
 
-
-
     return FeatureGate(
-
       featureName: 'Automações',
 
       requiredPlan: SubscriptionPlan.ENTERPRISE,
@@ -159,200 +113,145 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
       capability: 'automacoes',
 
       child: FxShellScaffold(
-
         appBar: const FxShellAppBar(
-
           title: 'Automações',
 
           subtitle: 'Templates e fluxos ativos',
-
         ),
 
-        body: _loading
-
-            ? const Center(child: FxLoading())
-
-            : _error != null
-
+        body:
+            _loading
+                ? const Center(child: FxLoading())
+                : _error != null
                 ? FxEmptyState(
+                  icon: 'alert-triangle',
 
-                    icon: 'alert-triangle',
+                  title: 'Erro ao carregar',
 
-                    title: 'Erro ao carregar',
+                  subtitle: _error,
 
-                    subtitle: _error,
-
-                    action: FxEmptyAction(label: 'Tentar novamente', onTap: _load),
-
-                  )
-
+                  action: FxEmptyAction(
+                    label: 'Tentar novamente',
+                    onTap: _load,
+                  ),
+                )
                 : RefreshIndicator(
+                  onRefresh: _load,
 
-                    onRefresh: _load,
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s4,
 
-                    child: ListView(
+                      TokensStrip.s2,
 
-                      padding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s4,
 
-                        TokensStrip.s4,
+                      96,
+                    ),
 
-                        TokensStrip.s2,
+                    physics: const AlwaysScrollableScrollPhysics(),
 
-                        TokensStrip.s4,
+                    children: [
+                      Text(
+                        'Templates',
 
-                        96,
+                        style: AppTypography.inter(
+                          fontSize: 14,
 
+                          fontWeight: FontWeight.w700,
+
+                          color: scheme.onSurface,
+                        ),
                       ),
 
-                      physics: const AlwaysScrollableScrollPhysics(),
+                      const SizedBox(height: TokensStrip.s2),
 
-                      children: [
+                      ..._templates.asMap().entries.map(
+                        (e) => FxStaggerItem(
+                          index: e.key,
 
-                        Text(
+                          child: Semantics(
+                            label: 'Ativar template ${e.value.nome}',
 
-                          'Templates',
+                            button: true,
 
-                          style: AppTypography.inter(
+                            child: FxSatelliteListTile(
+                              title: e.value.nome,
 
-                            fontSize: 14,
+                              titleCase: false,
 
-                            fontWeight: FontWeight.w700,
+                              leading: Icon(
+                                Icons.bolt_outlined,
 
-                            color: scheme.onSurface,
+                                color: scheme.primary,
+                              ),
 
+                              subtitle: Text(e.value.descricao),
+
+                              trailing: FilledButton(
+                                onPressed: () => _ativar(e.value),
+
+                                child: const Text('Ativar'),
+                              ),
+                            ),
                           ),
-
                         ),
+                      ),
 
-                        const SizedBox(height: TokensStrip.s2),
+                      const SizedBox(height: TokensStrip.s4),
 
-                        ..._templates.asMap().entries.map(
+                      Text(
+                        'Fluxos ativos',
 
+                        style: AppTypography.inter(
+                          fontSize: 14,
+
+                          fontWeight: FontWeight.w700,
+
+                          color: scheme.onSurface,
+                        ),
+                      ),
+
+                      if (_fluxos.isEmpty)
+                        const FxEmptyState(
+                          icon: 'zap',
+
+                          title: 'Nenhum fluxo ativo',
+
+                          subtitle:
+                              'Ative um template acima para começar automações.',
+                        )
+                      else
+                        ..._fluxos.asMap().entries.map(
                           (e) => FxStaggerItem(
-
-                            index: e.key,
+                            index: e.key + _templates.length,
 
                             child: Semantics(
-
-                              label: 'Ativar template ${e.value.nome}',
-
-                              button: true,
+                              label:
+                                  'Fluxo ${e.value.nome}, ${e.value.triggerTipo}',
 
                               child: FxSatelliteListTile(
-
                                 title: e.value.nome,
 
                                 titleCase: false,
 
                                 leading: Icon(
-
-                                  Icons.bolt_outlined,
+                                  e.value.ativo
+                                      ? Icons.play_circle_rounded
+                                      : Icons.pause_circle_rounded,
 
                                   color: scheme.primary,
-
                                 ),
 
-                                subtitle: Text(e.value.descricao),
-
-                                trailing: FilledButton(
-
-                                  onPressed: () => _ativar(e.value),
-
-                                  child: const Text('Ativar'),
-
-                                ),
-
+                                subtitle: Text(e.value.triggerTipo),
                               ),
-
                             ),
-
                           ),
-
                         ),
-
-                        const SizedBox(height: TokensStrip.s4),
-
-                        Text(
-
-                          'Fluxos ativos',
-
-                          style: AppTypography.inter(
-
-                            fontSize: 14,
-
-                            fontWeight: FontWeight.w700,
-
-                            color: scheme.onSurface,
-
-                          ),
-
-                        ),
-
-                        if (_fluxos.isEmpty)
-
-                          const FxEmptyState(
-
-                            icon: 'zap',
-
-                            title: 'Nenhum fluxo ativo',
-
-                            subtitle:
-
-                                'Ative um template acima para começar automações.',
-
-                          )
-
-                        else
-
-                          ..._fluxos.asMap().entries.map(
-
-                            (e) => FxStaggerItem(
-
-                              index: e.key + _templates.length,
-
-                              child: Semantics(
-
-                                label: 'Fluxo ${e.value.nome}, ${e.value.triggerTipo}',
-
-                                child: FxSatelliteListTile(
-
-                                  title: e.value.nome,
-
-                                  titleCase: false,
-
-                                  leading: Icon(
-
-                                    e.value.ativo
-
-                                        ? Icons.play_circle_rounded
-
-                                        : Icons.pause_circle_rounded,
-
-                                    color: scheme.primary,
-
-                                  ),
-
-                                  subtitle: Text(e.value.triggerTipo),
-
-                                ),
-
-                              ),
-
-                            ),
-
-                          ),
-
-                      ],
-
-                    ),
-
+                    ],
                   ),
-
+                ),
       ),
-
     );
-
   }
-
 }
-

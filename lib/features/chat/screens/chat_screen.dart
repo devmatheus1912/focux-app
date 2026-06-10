@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import 'conversation_screen.dart';
 
 class ChatScreen extends StatelessWidget {
@@ -15,10 +16,13 @@ class ChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ConversationScreen.personal(
-      alunoId: alunoId,
-      alunoNome: alunoNome,
-      initialDraft: initialDraft,
+    return fxScreenA11yScope(
+      label: 'Chat',
+      child: ConversationScreen.personal(
+        alunoId: alunoId,
+        alunoNome: alunoNome,
+        initialDraft: initialDraft,
+      ),
     );
   }
 }

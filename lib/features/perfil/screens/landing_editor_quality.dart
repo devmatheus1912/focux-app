@@ -51,7 +51,8 @@ List<int> landingBadFaqIndices({
     final p = faq[i].pergunta.trim();
     final r = faq[i].resposta.trim();
     if (p.isEmpty && r.isEmpty) continue;
-    if (landingTextLooksLikePlaceholder(p) || landingTextLooksLikePlaceholder(r)) {
+    if (landingTextLooksLikePlaceholder(p) ||
+        landingTextLooksLikePlaceholder(r)) {
       badFaq.add(i);
     }
   }
@@ -108,7 +109,8 @@ List<LandingContentIssue> landingContentIssues({
       LandingContentIssue(
         id: 'faq',
         faqIndices: badFaq,
-        message: '${badFaq.length} perguntas frequentes parecem texto de teste.',
+        message:
+            '${badFaq.length} perguntas frequentes parecem texto de teste.',
       ),
     );
   }

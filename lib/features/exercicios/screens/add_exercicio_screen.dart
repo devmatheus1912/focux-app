@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -134,7 +134,12 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(TokensStrip.s5, 0, 20, 118 + bottom),
+                padding: EdgeInsets.fromLTRB(
+                  TokensStrip.s5,
+                  0,
+                  20,
+                  118 + bottom,
+                ),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -500,30 +505,35 @@ class _QuickSetupStrip extends StatelessWidget {
                 selected: selectedLabel == setup.label,
                 label: 'Perfil rápido ${setup.label}',
                 child: FilterChip(
-                avatar: Icon(
-                  setup.icon,
-                  color: selectedLabel == setup.label ? Colors.white : primary,
-                  size: 16,
+                  avatar: Icon(
+                    setup.icon,
+                    color:
+                        selectedLabel == setup.label ? Colors.white : primary,
+                    size: 16,
+                  ),
+                  label: Text(setup.label),
+                  selected: selectedLabel == setup.label,
+                  onSelected: (_) => onSelected(setup),
+                  showCheckmark: false,
+                  visualDensity: VisualDensity.compact,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 9,
+                    vertical: 7,
+                  ),
+                  labelStyle: TextStyle(
+                    color:
+                        selectedLabel == setup.label ? Colors.white : primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                  ),
+                  side: BorderSide(color: primary.withValues(alpha: 0.16)),
+                  selectedColor: primary,
+                  backgroundColor:
+                      isDark
+                          ? Colors.white.withValues(alpha: 0.04)
+                          : primary.withValues(alpha: 0.06),
                 ),
-                label: Text(setup.label),
-                selected: selectedLabel == setup.label,
-                onSelected: (_) => onSelected(setup),
-                showCheckmark: false,
-                visualDensity: VisualDensity.compact,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
-                labelStyle: TextStyle(
-                  color: selectedLabel == setup.label ? Colors.white : primary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
-                ),
-                side: BorderSide(color: primary.withValues(alpha: 0.16)),
-                selectedColor: primary,
-                backgroundColor:
-                    isDark
-                        ? Colors.white.withValues(alpha: 0.04)
-                        : primary.withValues(alpha: 0.06),
-              ),
               ),
           ],
         ),
@@ -582,7 +592,10 @@ class _SectionCard extends StatelessWidget {
               Text(
                 subtitle,
                 style: TextStyle(
-                  color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+                  color:
+                      isDark
+                          ? EagleTokens.darkInkMute
+                          : TokensStrip.textSecondary,
                   fontSize: 12,
                   height: 1.25,
                   fontWeight: FontWeight.w600,
@@ -599,7 +612,8 @@ class _SectionCard extends StatelessWidget {
             curve: Curves.easeOutCubic,
             child: Icon(
               Icons.keyboard_arrow_down_rounded,
-              color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+              color:
+                  isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
             ),
           ),
         ],
@@ -621,9 +635,7 @@ class _SectionCard extends StatelessWidget {
               button: true,
               expanded: expanded,
               label:
-                  expanded
-                      ? 'Recolher $title'
-                      : 'Expandir $title. $subtitle',
+                  expanded ? 'Recolher $title' : 'Expandir $title. $subtitle',
               child: InkWell(
                 onTap: onToggle,
                 borderRadius: BorderRadius.circular(14),
@@ -648,7 +660,9 @@ class _SectionCard extends StatelessWidget {
                           color:
                               isDark
                                   ? EagleTokens.darkLine
-                                  : TokensStrip.borderDefault.withValues(alpha: 0.58),
+                                  : TokensStrip.borderDefault.withValues(
+                                    alpha: 0.58,
+                                  ),
                         ),
                         const SizedBox(height: 14),
                         child,
@@ -736,7 +750,8 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final fillColor = isDark ? EagleTokens.darkCard : Colors.white;
-    final borderColor = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final borderColor =
+        isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     return FormField<T>(
       initialValue: value,
       validator: validator,
@@ -753,112 +768,115 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
                   ? '$label, não selecionado'
                   : '$label, ${labels[effectiveValue] ?? effectiveValue.backendName}',
           child: InkWell(
-          onTap: () async {
-            final useCompactPicker = values.length <= 4;
-            final isDark = Theme.of(context).brightness == Brightness.dark;
-            final pageBg = isDark ? EagleTokens.darkBg : TokensStrip.pageBg;
-            final picked = await showGeneralDialog<T>(
-              context: context,
-              barrierDismissible: true,
-              barrierLabel: 'Fechar seletor de $label',
-              barrierColor: Colors.black.withValues(alpha: 0.68),
-              transitionDuration: const Duration(milliseconds: 180),
-              pageBuilder:
-                  (context, _, __) => Material(
-                    color: useCompactPicker ? Colors.transparent : pageBg,
-                    child:
-                        useCompactPicker
-                            ? _EnumPickerCompact<T>(
-                              title: label,
-                              values: values,
-                              labels: labels,
-                              selected: effectiveValue,
-                            )
-                            : _EnumPickerFullScreen<T>(
-                              title: label,
-                              values: values,
-                              labels: labels,
-                              selected: effectiveValue,
-                              maxHeight: menuMaxHeight ?? 720,
-                            ),
-                  ),
-              transitionBuilder:
-                  (context, animation, secondaryAnimation, child) =>
-                      FadeTransition(
-                        opacity: CurvedAnimation(
-                          parent: animation,
-                          curve: Curves.easeOutCubic,
-                        ),
-                        child: SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(0, 0.04),
-                            end: Offset.zero,
-                          ).animate(
-                            CurvedAnimation(
-                              parent: animation,
-                              curve: Curves.easeOutCubic,
-                            ),
+            onTap: () async {
+              final useCompactPicker = values.length <= 4;
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              final pageBg = isDark ? EagleTokens.darkBg : TokensStrip.pageBg;
+              final picked = await showGeneralDialog<T>(
+                context: context,
+                barrierDismissible: true,
+                barrierLabel: 'Fechar seletor de $label',
+                barrierColor: Colors.black.withValues(alpha: 0.68),
+                transitionDuration: const Duration(milliseconds: 180),
+                pageBuilder:
+                    (context, _, __) => Material(
+                      color: useCompactPicker ? Colors.transparent : pageBg,
+                      child:
+                          useCompactPicker
+                              ? _EnumPickerCompact<T>(
+                                title: label,
+                                values: values,
+                                labels: labels,
+                                selected: effectiveValue,
+                              )
+                              : _EnumPickerFullScreen<T>(
+                                title: label,
+                                values: values,
+                                labels: labels,
+                                selected: effectiveValue,
+                                maxHeight: menuMaxHeight ?? 720,
+                              ),
+                    ),
+                transitionBuilder:
+                    (context, animation, secondaryAnimation, child) =>
+                        FadeTransition(
+                          opacity: CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeOutCubic,
                           ),
-                          child: child,
+                          child: SlideTransition(
+                            position: Tween<Offset>(
+                              begin: const Offset(0, 0.04),
+                              end: Offset.zero,
+                            ).animate(
+                              CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.easeOutCubic,
+                              ),
+                            ),
+                            child: child,
+                          ),
                         ),
+              );
+              if (picked != null) {
+                state.didChange(picked);
+                onChanged(picked);
+              }
+            },
+            borderRadius: BorderRadius.circular(15),
+            child: InputDecorator(
+              isEmpty: effectiveValue == null,
+              decoration: InputDecoration(
+                labelText: effectiveValue == null ? null : label,
+                hintText: effectiveValue == null ? label : null,
+                errorText: state.errorText,
+                filled: true,
+                fillColor: fillColor,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 14,
+                ),
+                border: FxInputDeco.outlineBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                enabledBorder: FxInputDeco.outlineBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: BorderSide(color: borderColor),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      selectedLabel,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color:
+                            effectiveValue == null
+                                ? (isDark
+                                    ? EagleTokens.darkInkMute
+                                    : TokensStrip.textSecondary)
+                                : (isDark
+                                    ? EagleTokens.darkInk
+                                    : TokensStrip.textPrimary),
+                        fontWeight:
+                            effectiveValue == null
+                                ? FontWeight.w500
+                                : FontWeight.w800,
                       ),
-            );
-            if (picked != null) {
-              state.didChange(picked);
-              onChanged(picked);
-            }
-          },
-          borderRadius: BorderRadius.circular(15),
-          child: InputDecorator(
-            isEmpty: effectiveValue == null,
-            decoration: InputDecoration(
-              labelText: effectiveValue == null ? null : label,
-              hintText: effectiveValue == null ? label : null,
-              errorText: state.errorText,
-              filled: true,
-              fillColor: fillColor,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 14,
-              ),
-              border: FxInputDeco.outlineBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              enabledBorder: FxInputDeco.outlineBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: borderColor),
-              ),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    selectedLabel,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color:
-                          effectiveValue == null
-                              ? (isDark
-                                  ? EagleTokens.darkInkMute
-                                  : TokensStrip.textSecondary)
-                              : (isDark
-                                  ? EagleTokens.darkInk
-                                  : TokensStrip.textPrimary),
-                      fontWeight:
-                          effectiveValue == null
-                              ? FontWeight.w500
-                              : FontWeight.w800,
                     ),
                   ),
-                ),
-                Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
-                ),
-              ],
+                  Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color:
+                        isDark
+                            ? EagleTokens.darkInkMute
+                            : TokensStrip.textSecondary,
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
         );
       },
     );
@@ -962,47 +980,47 @@ class _EnumPickerCompact<T extends Enum> extends StatelessWidget {
                       selected: isSelected,
                       label: itemLabel,
                       child: Material(
-                      color:
-                          isSelected
-                              ? primary.withValues(alpha: 0.08)
-                              : Colors.transparent,
-                      borderRadius: BorderRadius.circular(16),
-                      child: InkWell(
+                        color:
+                            isSelected
+                                ? primary.withValues(alpha: 0.08)
+                                : Colors.transparent,
                         borderRadius: BorderRadius.circular(16),
-                        onTap: () => Navigator.of(context).pop(item),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 12,
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                isSelected
-                                    ? Icons.check_circle_rounded
-                                    : Icons.circle_outlined,
-                                color: isSelected ? primary : mute,
-                                size: 21,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  itemLabel,
-                                  style: TextStyle(
-                                    color: ink,
-                                    fontSize: 14,
-                                    fontWeight:
-                                        isSelected
-                                            ? FontWeight.w900
-                                            : FontWeight.w700,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () => Navigator.of(context).pop(item),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 12,
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  isSelected
+                                      ? Icons.check_circle_rounded
+                                      : Icons.circle_outlined,
+                                  color: isSelected ? primary : mute,
+                                  size: 21,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    itemLabel,
+                                    style: TextStyle(
+                                      color: ink,
+                                      fontSize: 14,
+                                      fontWeight:
+                                          isSelected
+                                              ? FontWeight.w900
+                                              : FontWeight.w700,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
                     );
                   }),
                 ],
@@ -1157,31 +1175,37 @@ class _EnumPickerFullScreenState<T extends Enum>
                   textField: true,
                   label: 'Buscar ${widget.title.toLowerCase()}',
                   child: TextField(
-                  onChanged: (value) => setState(() => _query = value),
-                  decoration: InputDecoration(
-                    hintText: 'Buscar opção',
-                    prefixIcon: Icon(Icons.search_rounded, color: mute),
-                    filled: true,
-                    fillColor:
-                        isDark ? EagleTokens.darkCard : TokensStrip.pageBg,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
-                    ),
-                    border: FxInputDeco.outlineBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(
-                        color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
+                    onChanged: (value) => setState(() => _query = value),
+                    decoration: InputDecoration(
+                      hintText: 'Buscar opção',
+                      prefixIcon: Icon(Icons.search_rounded, color: mute),
+                      filled: true,
+                      fillColor:
+                          isDark ? EagleTokens.darkCard : TokensStrip.pageBg,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 12,
                       ),
-                    ),
-                    enabledBorder: FxInputDeco.outlineBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(
-                        color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
+                      border: FxInputDeco.outlineBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(
+                          color:
+                              isDark
+                                  ? EagleTokens.darkLine
+                                  : TokensStrip.borderDefault,
+                        ),
+                      ),
+                      enabledBorder: FxInputDeco.outlineBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(
+                          color:
+                              isDark
+                                  ? EagleTokens.darkLine
+                                  : TokensStrip.borderDefault,
+                        ),
                       ),
                     ),
                   ),
-                ),
                 ),
               ],
               const SizedBox(height: 12),
@@ -1196,7 +1220,9 @@ class _EnumPickerFullScreenState<T extends Enum>
                         color:
                             isDark
                                 ? EagleTokens.darkLine
-                                : TokensStrip.borderDefault.withValues(alpha: 0.72),
+                                : TokensStrip.borderDefault.withValues(
+                                  alpha: 0.72,
+                                ),
                       ),
                   itemBuilder: (context, index) {
                     final item = filtered[index];
@@ -1275,7 +1301,9 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
           margin: EdgeInsets.zero,
           padding: EdgeInsets.fromLTRB(TokensStrip.s4, 10, 16, 12 + bottom),
           decoration: fxListCardDecoration(context, accent: primary).copyWith(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(TokensStrip.rXl)),
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(TokensStrip.rXl),
+            ),
           ),
           child: Column(
             children: [
@@ -1330,13 +1358,19 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
                     border: FxInputDeco.outlineBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide(
-                        color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
+                        color:
+                            isDark
+                                ? EagleTokens.darkLine
+                                : TokensStrip.borderDefault,
                       ),
                     ),
                     enabledBorder: FxInputDeco.outlineBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide(
-                        color: isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
+                        color:
+                            isDark
+                                ? EagleTokens.darkLine
+                                : TokensStrip.borderDefault,
                       ),
                     ),
                   ),
@@ -1353,7 +1387,9 @@ class _EnumPickerSheetState<T extends Enum> extends State<_EnumPickerSheet<T>> {
                         color:
                             isDark
                                 ? EagleTokens.darkLine
-                                : TokensStrip.borderDefault.withValues(alpha: 0.72),
+                                : TokensStrip.borderDefault.withValues(
+                                  alpha: 0.72,
+                                ),
                       ),
                   itemBuilder: (context, index) {
                     final item = filtered[index];
@@ -1432,37 +1468,39 @@ class _ChoiceGroup<T extends Enum> extends StatelessWidget {
         selected: isSelected,
         label: label,
         child: ChoiceChip(
-        label: Text(label),
-        selected: isSelected,
-        onSelected: (_) => onToggle(value),
-        showCheckmark: isSelected,
-        checkmarkColor: Colors.white,
-        visualDensity: VisualDensity.compact,
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        padding: EdgeInsets.symmetric(
-          horizontal: isSelected ? 10 : 9,
-          vertical: isSelected ? 7 : 6,
+          label: Text(label),
+          selected: isSelected,
+          onSelected: (_) => onToggle(value),
+          showCheckmark: isSelected,
+          checkmarkColor: Colors.white,
+          visualDensity: VisualDensity.compact,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          padding: EdgeInsets.symmetric(
+            horizontal: isSelected ? 10 : 9,
+            vertical: isSelected ? 7 : 6,
+          ),
+          labelStyle: TextStyle(
+            color:
+                isSelected
+                    ? Colors.white
+                    : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary),
+            fontSize: isSelected ? 12 : 11.5,
+            fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+          ),
+          selectedColor: primary,
+          backgroundColor:
+              isDark
+                  ? Colors.white.withValues(alpha: 0.035)
+                  : TokensStrip.pageBg,
+          side: BorderSide(
+            color:
+                isSelected
+                    ? primary
+                    : (isDark
+                        ? EagleTokens.darkLine
+                        : TokensStrip.borderDefault.withValues(alpha: 0.72)),
+          ),
         ),
-        labelStyle: TextStyle(
-          color:
-              isSelected
-                  ? Colors.white
-                  : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary),
-          fontSize: isSelected ? 12 : 11.5,
-          fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
-        ),
-        selectedColor: primary,
-        backgroundColor:
-            isDark ? Colors.white.withValues(alpha: 0.035) : TokensStrip.pageBg,
-        side: BorderSide(
-          color:
-              isSelected
-                  ? primary
-                  : (isDark
-                      ? EagleTokens.darkLine
-                      : TokensStrip.borderDefault.withValues(alpha: 0.72)),
-        ),
-      ),
       );
     }
 

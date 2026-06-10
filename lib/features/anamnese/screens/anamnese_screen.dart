@@ -409,19 +409,18 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
     String label, {
     int maxLines = 1,
     String? hint,
-  }) =>
-      Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: TextFormField(
-          controller: c,
-          decoration: InputDecoration(
-            labelText: label,
-            hintText: hint,
-            hintStyle: TextStyle(
-              color: TokensStrip.textSecondary.withValues(alpha: 0.72),
-            ),
-          ),
-          maxLines: maxLines,
+  }) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: TextFormField(
+      controller: c,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        hintStyle: TextStyle(
+          color: TokensStrip.textSecondary.withValues(alpha: 0.72),
         ),
-      );
+      ),
+      maxLines: maxLines,
+    ),
+  );
 }

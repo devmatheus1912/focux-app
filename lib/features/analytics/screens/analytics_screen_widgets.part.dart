@@ -187,37 +187,37 @@ class _KpiCard extends StatelessWidget {
     return Semantics(
       label: '$label: $value',
       child: Container(
-      padding: const EdgeInsets.all(14),
-      decoration: fxListCardDecoration(
-        context,
-        accent: primary,
-        radius: 18,
-      ).copyWith(border: Border.all(color: line)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label.toUpperCase(),
-            style: TextStyle(
-              color: mute,
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.8,
+        padding: const EdgeInsets.all(14),
+        decoration: fxListCardDecoration(
+          context,
+          accent: primary,
+          radius: 18,
+        ).copyWith(border: Border.all(color: line)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label.toUpperCase(),
+              style: TextStyle(
+                color: mute,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.8,
+              ),
             ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: AppTypography.inter(
-              color: ink,
-              fontSize: 26,
-              fontWeight: FontWeight.w700,
-              height: 1,
+            const SizedBox(height: 6),
+            Text(
+              value,
+              style: AppTypography.inter(
+                color: ink,
+                fontSize: 26,
+                fontWeight: FontWeight.w700,
+                height: 1,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
     );
   }
 }
@@ -776,7 +776,8 @@ class _InadimplenciaCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: (churn / 10).clamp(0.0, 1.0),
               minHeight: 6,
-              backgroundColor: dark ? EagleTokens.darkLine : TokensStrip.borderDefault,
+              backgroundColor:
+                  dark ? EagleTokens.darkLine : TokensStrip.borderDefault,
               color: isGood ? EagleTokens.good : EagleTokens.bad,
             ),
           ),

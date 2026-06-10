@@ -25,8 +25,7 @@ class Aluno360CopilotSignalTile extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final semanticsLabel =
-        '${signal.label}: ${signal.value}. ${signal.detail}';
+    final semanticsLabel = '${signal.label}: ${signal.value}. ${signal.detail}';
     return Semantics(
       label: semanticsLabel,
       button: signal.detail.isNotEmpty,
@@ -76,10 +75,9 @@ class Aluno360CopilotSignalTile extends StatelessWidget {
                         signal.detail,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: Aluno360Layout.metaStyle(context).copyWith(
-                          color: mute,
-                          height: 1.2,
-                        ),
+                        style: Aluno360Layout.metaStyle(
+                          context,
+                        ).copyWith(color: mute, height: 1.2),
                       ),
                     ],
                   ],
@@ -136,9 +134,9 @@ class Aluno360CopilotTaskStatus extends StatelessWidget {
                   subtitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: Aluno360Layout.captionStyle(context).copyWith(
-                    color: mute,
-                  ),
+                  style: Aluno360Layout.captionStyle(
+                    context,
+                  ).copyWith(color: mute),
                 ),
               ],
             ),
@@ -247,10 +245,11 @@ class _Aluno360CopilotActionRowState
                               child: OutlinedButton(
                                 onPressed:
                                     _completing ? null : _completeOpenTask,
-                                style: Aluno360Layout.operacaoOutlinedButtonStyle(
-                                  context,
-                                  widget.primary,
-                                ),
+                                style:
+                                    Aluno360Layout.operacaoOutlinedButtonStyle(
+                                      context,
+                                      widget.primary,
+                                    ),
                                 child:
                                     _completing
                                         ? const FxLoading(

@@ -9,6 +9,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class FinanceiroResumoScreen extends ConsumerStatefulWidget {
   const FinanceiroResumoScreen({super.key});
@@ -107,52 +108,55 @@ class _FinanceiroResumoScreenState
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = Theme.of(context).colorScheme.primary;
 
-    return FxShellScaffold(
-      useMesh: true,
-      extendBody: true,
-      body: Column(
-        children: [
-          // Month/year picker
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _NavArrow(
-                  icon: Icons.chevron_left_rounded,
-                  onTap: _mesAnterior,
-                  isDark: isDark,
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  '${_meses[_mes]} $_ano',
-                  style: AppTypography.inter(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: ink,
-                    letterSpacing: -0.3,
+    return fxScreenA11yScope(
+      label: 'Financeiro Resumo',
+      child: FxShellScaffold(
+        useMesh: true,
+        extendBody: true,
+        body: Column(
+          children: [
+            // Month/year picker
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _NavArrow(
+                    icon: Icons.chevron_left_rounded,
+                    onTap: _mesAnterior,
+                    isDark: isDark,
                   ),
-                ),
-                const SizedBox(width: 16),
-                _NavArrow(
-                  icon: Icons.chevron_right_rounded,
-                  onTap: _mesProximo,
-                  isDark: isDark,
-                ),
-              ],
+                  const SizedBox(width: 16),
+                  Text(
+                    '${_meses[_mes]} $_ano',
+                    style: AppTypography.inter(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: ink,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  _NavArrow(
+                    icon: Icons.chevron_right_rounded,
+                    onTap: _mesProximo,
+                    isDark: isDark,
+                  ),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child:
-                _loading
-                    ? _buildLoading(isDark)
-                    : _erro != null
-                    ? _buildError(isDark, ink, mute, primary)
-                    : _resumo == null
-                    ? _buildEmpty(isDark, ink, mute, primary)
-                    : _buildContent(isDark, ink, mute, primary),
-          ),
-        ],
+            Expanded(
+              child:
+                  _loading
+                      ? _buildLoading(isDark)
+                      : _erro != null
+                      ? _buildError(isDark, ink, mute, primary)
+                      : _resumo == null
+                      ? _buildEmpty(isDark, ink, mute, primary)
+                      : _buildContent(isDark, ink, mute, primary),
+            ),
+          ],
+        ),
       ),
     );
   }

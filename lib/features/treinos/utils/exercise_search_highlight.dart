@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 /// Destaca o termo buscado no nome do exercício.
 Widget highlightedExerciseName({
   required String name,
@@ -10,13 +9,23 @@ Widget highlightedExerciseName({
 }) {
   final normalized = query.trim().toLowerCase();
   if (normalized.isEmpty) {
-    return Text(name, maxLines: 2, overflow: TextOverflow.ellipsis, style: baseStyle);
+    return Text(
+      name,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: baseStyle,
+    );
   }
 
   final lower = name.toLowerCase();
   final index = lower.indexOf(normalized);
   if (index < 0) {
-    return Text(name, maxLines: 2, overflow: TextOverflow.ellipsis, style: baseStyle);
+    return Text(
+      name,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: baseStyle,
+    );
   }
 
   final before = name.substring(0, index);

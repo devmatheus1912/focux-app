@@ -17,7 +17,8 @@ class ConversationMediaPreview extends StatelessWidget {
   final bool isDark;
   final VoidCallback onOpen;
 
-  const ConversationMediaPreview({super.key, 
+  const ConversationMediaPreview({
+    super.key,
     required this.msg,
     required this.mine,
     required this.isDark,
@@ -102,7 +103,9 @@ class ConversationMediaPreview extends StatelessWidget {
     }
 
     final textColor =
-        mine ? Colors.white : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
+        mine
+            ? Colors.white
+            : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
 
     if (tipo == 'AUDIO') {
       return Padding(
@@ -174,7 +177,8 @@ class ConversationMediaFilterChip extends StatelessWidget {
   final Color primary;
   final bool isDark;
 
-  const ConversationMediaFilterChip({super.key, 
+  const ConversationMediaFilterChip({
+    super.key,
     required this.label,
     required this.selected,
     required this.onTap,
@@ -205,7 +209,9 @@ class ConversationMediaFilterChip extends StatelessWidget {
               color:
                   selected
                       ? primary
-                      : (isDark ? EagleTokens.darkLine : TokensStrip.borderDefault),
+                      : (isDark
+                          ? EagleTokens.darkLine
+                          : TokensStrip.borderDefault),
             ),
           ),
           child: Text(
@@ -227,7 +233,8 @@ class ConversationMediaGalleryTile extends StatelessWidget {
   final bool isDark;
   final VoidCallback onTap;
 
-  const ConversationMediaGalleryTile({super.key, 
+  const ConversationMediaGalleryTile({
+    super.key,
     required this.msg,
     required this.isDark,
     required this.onTap,
@@ -339,7 +346,8 @@ class ConversationAudioInlinePlayer extends StatefulWidget {
   final bool isDark;
   final VoidCallback onFallbackOpen;
 
-  const ConversationAudioInlinePlayer({super.key, 
+  const ConversationAudioInlinePlayer({
+    super.key,
     required this.url,
     required this.label,
     required this.mine,
@@ -348,10 +356,12 @@ class ConversationAudioInlinePlayer extends StatefulWidget {
   });
 
   @override
-  State<ConversationAudioInlinePlayer> createState() => _ConversationAudioInlinePlayerState();
+  State<ConversationAudioInlinePlayer> createState() =>
+      _ConversationAudioInlinePlayerState();
 }
 
-class _ConversationAudioInlinePlayerState extends State<ConversationAudioInlinePlayer> {
+class _ConversationAudioInlinePlayerState
+    extends State<ConversationAudioInlinePlayer> {
   final AudioPlayer _player = AudioPlayer();
   bool _loaded = false;
   bool _busy = false;

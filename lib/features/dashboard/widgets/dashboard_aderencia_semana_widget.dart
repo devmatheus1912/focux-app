@@ -13,6 +13,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import '../providers/aderencia_provider.dart';
 import '../utils/dashboard_readability.dart';
+
 class DashboardAderenciaSemanaWidget extends StatelessWidget {
   final bool isDark;
   final bool retentionFocus;
@@ -38,7 +39,10 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
               () => Container(
                 height: 184,
                 padding: const EdgeInsets.all(14),
-              decoration: fxStripCardDecoration(context, radius: TokensStrip.rCard),
+                decoration: fxStripCardDecoration(
+                  context,
+                  radius: TokensStrip.rCard,
+                ),
                 child: Column(
                   children: List.generate(3, (index) {
                     return Expanded(
@@ -84,7 +88,10 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
           error:
               (e, _) => Container(
                 padding: const EdgeInsets.all(TokensStrip.s4),
-              decoration: fxStripCardDecoration(context, radius: TokensStrip.rCard),
+                decoration: fxStripCardDecoration(
+                  context,
+                  radius: TokensStrip.rCard,
+                ),
                 child: Row(
                   children: [
                     Container(
@@ -159,8 +166,7 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
                 title: 'Treinos parados na semana',
                 body:
                     'Acione alunos sem treino esta semana — o foco do dia já está no topo.',
-                primaryAction:
-                    retentionFocus ? 'Revisar base' : 'Ver agenda',
+                primaryAction: retentionFocus ? 'Revisar base' : 'Ver agenda',
                 secondaryAction: 'Plano retomada',
                 onPrimary:
                     retentionFocus
@@ -340,7 +346,11 @@ class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       body,
-                      style: TextStyle(color: mute, height: 1.35, fontSize: 12.5),
+                      style: TextStyle(
+                        color: mute,
+                        height: 1.35,
+                        fontSize: 12.5,
+                      ),
                     ),
                   ],
                 ),

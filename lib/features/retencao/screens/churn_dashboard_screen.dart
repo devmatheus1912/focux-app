@@ -38,9 +38,9 @@ int _riscoSortOrder(String risco) => switch (risco.trim().toUpperCase()) {
 List<RetencaoAlunoScore> _sortedScores(List<RetencaoAlunoScore> scores) {
   final copy = List<RetencaoAlunoScore>.from(scores);
   copy.sort((a, b) {
-    final risk = _riscoSortOrder(a.riscoChurn).compareTo(
-      _riscoSortOrder(b.riscoChurn),
-    );
+    final risk = _riscoSortOrder(
+      a.riscoChurn,
+    ).compareTo(_riscoSortOrder(b.riscoChurn));
     if (risk != 0) return risk;
     return b.scoreAtual.compareTo(a.scoreAtual);
   });
@@ -95,10 +95,11 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
     final sorted = _sortedScores(_scores);
     final alto =
         _scores.where((s) => s.riscoChurn.toUpperCase() == 'ALTO').length;
-    final medio = _scores.where((s) {
-      final r = s.riscoChurn.toUpperCase();
-      return r == 'MEDIO' || r == 'MÉDIO';
-    }).length;
+    final medio =
+        _scores.where((s) {
+          final r = s.riscoChurn.toUpperCase();
+          return r == 'MEDIO' || r == 'MÉDIO';
+        }).length;
     final saudavel =
         _scores.where((s) => s.riscoChurn.toUpperCase() == 'BAIXO').length;
 
@@ -173,7 +174,9 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                                       primary: primary,
                                       onTap: () {
                                         HapticFeedback.selectionClick();
-                                        context.push('/alunos/${score.alunoId}');
+                                        context.push(
+                                          '/alunos/${score.alunoId}',
+                                        );
                                       },
                                     ),
                                   );

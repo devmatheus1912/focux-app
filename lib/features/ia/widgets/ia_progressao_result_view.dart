@@ -67,31 +67,34 @@ class IaProgressaoResultView extends StatelessWidget {
       duration: fxMotionDuration(context),
       switchInCurve: Curves.easeOutCubic,
       switchOutCurve: Curves.easeInCubic,
-      child: parsed.hasStructuredRows
-          ? _StructuredResult(
-              key: ValueKey(parsed.toPlainText()),
-              parsed: parsed,
-              primary: primary,
-              alunoNome: alunoNome,
-              showSectionTitle: showSectionTitle,
-              showApplyTreino: showApplyTreino,
-              onCopy: onCopy ?? () => _copyPlain(context, parsed),
-              onExportPdf: onExportPdf,
-              onApplyTreino: onApplyTreino,
-              onReviewSuggestions: onReviewSuggestions,
-              pendingSuggestions: result.sugestoesRegistradas,
-            )
-          : _FallbackPlainText(
-              key: ValueKey(result.resposta),
-              text: parsed.toPlainText(),
-              onCopy: onCopy ?? () => _copyPlain(context, parsed),
-              onExportPdf: onExportPdf,
-            ),
+      child:
+          parsed.hasStructuredRows
+              ? _StructuredResult(
+                key: ValueKey(parsed.toPlainText()),
+                parsed: parsed,
+                primary: primary,
+                alunoNome: alunoNome,
+                showSectionTitle: showSectionTitle,
+                showApplyTreino: showApplyTreino,
+                onCopy: onCopy ?? () => _copyPlain(context, parsed),
+                onExportPdf: onExportPdf,
+                onApplyTreino: onApplyTreino,
+                onReviewSuggestions: onReviewSuggestions,
+                pendingSuggestions: result.sugestoesRegistradas,
+              )
+              : _FallbackPlainText(
+                key: ValueKey(result.resposta),
+                text: parsed.toPlainText(),
+                onCopy: onCopy ?? () => _copyPlain(context, parsed),
+                onExportPdf: onExportPdf,
+              ),
     );
   }
 
   /// Prefer API rows; re-parse markdown when empty (e.g. justificativa com "sugerida").
-  static IaProgressaoParsedResult _resolveParsed(IaProgressaoCargaResult result) {
+  static IaProgressaoParsedResult _resolveParsed(
+    IaProgressaoCargaResult result,
+  ) {
     final direct = result.toParsed();
     if (direct.hasStructuredRows) return direct;
     final reparsed = parseIaProgressaoMarkdown(result.resposta);
@@ -110,7 +113,10 @@ class IaProgressaoResultView extends StatelessWidget {
   ) async {
     await Clipboard.setData(ClipboardData(text: parsed.toPlainText()));
     if (!context.mounted) return;
-    FeedbackHelper.showSuccess(context, 'Sugestão copiada para a área de transferência.');
+    FeedbackHelper.showSuccess(
+      context,
+      'Sugestão copiada para a área de transferência.',
+    );
   }
 }
 
@@ -159,9 +165,9 @@ class _StructuredResult extends StatelessWidget {
               alunoNome == null
                   ? 'Sugestões por exercício'
                   : 'Sugestões para $alunoNome',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
             ),
           ),
           const SizedBox(height: TokensStrip.s2),

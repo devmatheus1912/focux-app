@@ -4,6 +4,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../alunos/data/aluno_repository.dart';
+
 String dashboardGreeting(String? nome) {
   final hour = DateTime.now().hour;
   final prefix =
@@ -82,5 +83,4 @@ String financePercentLabel(double progressRaw, {required bool exceeded}) {
 Color pulseCheckinsAccent({
   required int checkinsHoje,
   required Color neutralAccent,
-}) =>
-    checkinsHoje > 0 ? EagleTokens.good : neutralAccent;
+}) => checkinsHoje > 0 ? EagleTokens.good : neutralAccent;

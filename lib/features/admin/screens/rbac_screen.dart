@@ -10,6 +10,7 @@ import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 
@@ -60,83 +61,93 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
     final permissoesAsync = ref.watch(permissoesProvider);
     final primary = Theme.of(context).colorScheme.primary;
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Controle de Acessos',
-        subtitle: 'Permissões da equipe (RBAC)',
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add_rounded),
-            tooltip: 'Conceder novo acesso',
-            onPressed: () => _showConcederAcesso(context, ref),
-          ),
-        ],
-      ),
-      body: permissoesAsync.when(
-        loading: () => const Center(child: FxLoading()),
-        error:
-            (e, _) => Center(
-              child: Padding(
-                padding: const EdgeInsets.all(TokensStrip.s5),
-                child: Text(friendlyError(e), textAlign: TextAlign.center),
-              ),
+    return fxScreenA11yScope(
+      label: 'Controle de Acessos',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Controle de Acessos',
+          subtitle: 'Permissões da equipe (RBAC)',
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.add_rounded),
+              tooltip: 'Conceder novo acesso',
+              onPressed: () => _showConcederAcesso(context, ref),
             ),
-        data: (permissoes) {
-          if (permissoes.isEmpty) {
-            return FxEmptyState(
-              icon: 'shield',
-              title: 'Nenhuma permissão especial concedida',
-              subtitle:
-                  'Conceda acessos pontuais para assistentes da sua equipe.',
-              action: FxEmptyAction(
-                label: 'Conceder acesso',
-                onTap: () => _showConcederAcesso(context, ref),
+          ],
+        ),
+        body: permissoesAsync.when(
+          loading: () => const Center(child: FxLoading()),
+          error:
+              (e, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(TokensStrip.s5),
+                  child: Text(friendlyError(e), textAlign: TextAlign.center),
+                ),
               ),
-            );
-          }
-          return ListView.builder(
-            itemCount: permissoes.length,
-            padding: const EdgeInsets.all(TokensStrip.s4),
-            itemBuilder: (ctx, i) {
-              final p = permissoes[i];
-              return fxListTileCardShell(
-                context: ctx,
-                margin: const EdgeInsets.only(bottom: 12),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor:
-                        p.nivelAcesso == 'ADMIN'
-                            ? EagleTokens.bad.withValues(alpha: 0.1)
-                            : primary.withValues(alpha: 0.1),
-                    child: Icon(
-                      p.nivelAcesso == 'ADMIN' ? Icons.security : Icons.vpn_key,
-                      color:
-                          p.nivelAcesso == 'ADMIN' ? EagleTokens.bad : primary,
-                    ),
-                  ),
-                  title: Text(
-                    'Recurso: ${p.recurso}',
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                  subtitle: Text(
-                    'ID Assistente: ${p.usuarioConvidadoId} • Nível: ${p.nivelAcesso}',
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete_outline, color: EagleTokens.bad),
-                    tooltip: 'Revogar acesso',
-                    onPressed:
-                        () => _revogarAcesso(
-                          ref,
-                          p.usuarioConvidadoId,
-                          p.recurso,
-                        ),
-                  ),
+          data: (permissoes) {
+            if (permissoes.isEmpty) {
+              return FxEmptyState(
+                icon: 'shield',
+                title: 'Nenhuma permissão especial concedida',
+                subtitle:
+                    'Conceda acessos pontuais para assistentes da sua equipe.',
+                action: FxEmptyAction(
+                  label: 'Conceder acesso',
+                  onTap: () => _showConcederAcesso(context, ref),
                 ),
               );
-            },
-          );
-        },
+            }
+            return ListView.builder(
+              itemCount: permissoes.length,
+              padding: const EdgeInsets.all(TokensStrip.s4),
+              itemBuilder: (ctx, i) {
+                final p = permissoes[i];
+                return fxListTileCardShell(
+                  context: ctx,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor:
+                          p.nivelAcesso == 'ADMIN'
+                              ? EagleTokens.bad.withValues(alpha: 0.1)
+                              : primary.withValues(alpha: 0.1),
+                      child: Icon(
+                        p.nivelAcesso == 'ADMIN'
+                            ? Icons.security
+                            : Icons.vpn_key,
+                        color:
+                            p.nivelAcesso == 'ADMIN'
+                                ? EagleTokens.bad
+                                : primary,
+                      ),
+                    ),
+                    title: Text(
+                      'Recurso: ${p.recurso}',
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    subtitle: Text(
+                      'ID Assistente: ${p.usuarioConvidadoId} • Nível: ${p.nivelAcesso}',
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(
+                        Icons.delete_outline,
+                        color: EagleTokens.bad,
+                      ),
+                      tooltip: 'Revogar acesso',
+                      onPressed:
+                          () => _revogarAcesso(
+                            ref,
+                            p.usuarioConvidadoId,
+                            p.recurso,
+                          ),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

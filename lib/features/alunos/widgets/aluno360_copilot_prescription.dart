@@ -144,10 +144,9 @@ class _Aluno360CopilotPrescriptionState
                       segments[i],
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: Aluno360Layout.captionStyle(context).copyWith(
-                        color: caption,
-                        height: 1.32,
-                      ),
+                      style: Aluno360Layout.captionStyle(
+                        context,
+                      ).copyWith(color: caption, height: 1.32),
                     ),
                   ),
                 ],
@@ -160,10 +159,9 @@ class _Aluno360CopilotPrescriptionState
         reason,
         maxLines: _expandedReason ? null : _collapsedLines,
         overflow: _expandedReason ? null : TextOverflow.ellipsis,
-        style: Aluno360Layout.captionStyle(context).copyWith(
-          color: caption,
-          height: 1.32,
-        ),
+        style: Aluno360Layout.captionStyle(
+          context,
+        ).copyWith(color: caption, height: 1.32),
       );
     }
 
@@ -251,7 +249,11 @@ class _Aluno360CopilotPrescriptionState
               if (widget.showTitle) ...[
                 Row(
                   children: [
-                    Icon(Icons.auto_awesome_rounded, color: widget.color, size: 17),
+                    Icon(
+                      Icons.auto_awesome_rounded,
+                      color: widget.color,
+                      size: 17,
+                    ),
                     const SizedBox(width: 7),
                     Expanded(
                       child: Text(
@@ -293,49 +295,47 @@ class _Aluno360CopilotPrescriptionState
                   active: true,
                 ),
               if (widget.onPrepareMessage != null) ...[
-            SizedBox(height: showExpandAction ? 16 : 12),
-            Semantics(
-              button: true,
-              label: 'Preparar mensagem para o aluno',
-              child: SizedBox(
-                width: double.infinity,
-                height: 44,
-                child: OutlinedButton.icon(
-                  onPressed: widget.onPrepareMessage,
-                  icon: Icon(
-                    Icons.chat_bubble_outline_rounded,
-                    size: 17,
-                  ),
-                  label: const Text('Preparar mensagem'),
-                  style: Aluno360Layout.operacaoOutlinedButtonStyle(
-                    context,
-                    widget.color,
-                  ).copyWith(
-                    textStyle: WidgetStateProperty.all(
-                      Aluno360Layout.chipLabelStyle(context).copyWith(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: Aluno360Layout.operacaoOutlinedForeground(
-                          widget.color,
-                          isDark:
-                              Theme.of(context).brightness == Brightness.dark,
+                SizedBox(height: showExpandAction ? 16 : 12),
+                Semantics(
+                  button: true,
+                  label: 'Preparar mensagem para o aluno',
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 44,
+                    child: OutlinedButton.icon(
+                      onPressed: widget.onPrepareMessage,
+                      icon: Icon(Icons.chat_bubble_outline_rounded, size: 17),
+                      label: const Text('Preparar mensagem'),
+                      style: Aluno360Layout.operacaoOutlinedButtonStyle(
+                        context,
+                        widget.color,
+                      ).copyWith(
+                        textStyle: WidgetStateProperty.all(
+                          Aluno360Layout.chipLabelStyle(context).copyWith(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: Aluno360Layout.operacaoOutlinedForeground(
+                              widget.color,
+                              isDark:
+                                  Theme.of(context).brightness ==
+                                  Brightness.dark,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ),
-          ],
-          if (reason.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            _buildReasonFooter(
-              reason: reason,
-              caption: caption,
-              maxWidth: constraints.maxWidth,
-              showExpandReason: showExpandReason,
-            ),
-          ],
+              ],
+              if (reason.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                _buildReasonFooter(
+                  reason: reason,
+                  caption: caption,
+                  maxWidth: constraints.maxWidth,
+                  showExpandReason: showExpandReason,
+                ),
+              ],
             ],
           ),
         );

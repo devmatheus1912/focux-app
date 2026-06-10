@@ -333,7 +333,8 @@ class _AlunoProfileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final textColor = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final muteColor = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final muteColor =
+        isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     final hasFoto = aluno.fotoUrl != null && aluno.fotoUrl!.isNotEmpty;
     final genderLabel = _genderLabel(aluno.genero);

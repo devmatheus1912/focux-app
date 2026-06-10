@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 
 class EngajamentoScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -84,38 +85,43 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Engajamento — ${widget.alunoNome}',
-        onBack: () => safePopOrGo(context, '/evolucao'),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: DropdownButton<int>(
-              value: _dias,
-              underline: const SizedBox(),
-              items:
-                  [30, 60, 90]
-                      .map(
-                        (d) =>
-                            DropdownMenuItem(value: d, child: Text('$d dias')),
-                      )
-                      .toList(),
-              onChanged: (v) {
-                if (v != null) {
-                  setState(() => _dias = v);
-                  _load();
-                }
-              },
+    return fxScreenA11yScope(
+      label: 'Engajamento — ${widget.alunoNome}',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Engajamento — ${widget.alunoNome}',
+          onBack: () => safePopOrGo(context, '/evolucao'),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: DropdownButton<int>(
+                value: _dias,
+                underline: const SizedBox(),
+                items:
+                    [30, 60, 90]
+                        .map(
+                          (d) => DropdownMenuItem(
+                            value: d,
+                            child: Text('$d dias'),
+                          ),
+                        )
+                        .toList(),
+                onChanged: (v) {
+                  if (v != null) {
+                    setState(() => _dias = v);
+                    _load();
+                  }
+                },
+              ),
             ),
-          ),
-        ],
-      ),
-      body: _loading
-          ? const Center(child: FxLoading())
-          : _erro != null
-              ? ListView(
+          ],
+        ),
+        body:
+            _loading
+                ? const Center(child: FxLoading())
+                : _erro != null
+                ? ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   children: [
                     FxEmptyState(
@@ -129,48 +135,49 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                     ),
                   ],
                 )
-              : _eventos.isEmpty
-                  ? ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: const [
-                        FxEmptyState(
-                          icon: 'chart',
-                          title: 'Nenhum evento registrado',
-                          subtitle:
-                              'Check-ins e treinos do aluno aparecerão aqui nos últimos dias.',
-                        ),
-                      ],
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(TokensStrip.s4),
-                      itemCount: _eventos.length,
-                      itemBuilder: (_, i) {
-                        final e = _eventos[i];
-                        final primary = Theme.of(context).colorScheme.primary;
-                        return FxSatelliteListTile(
-                          accent: primary,
-                          title: e.descricao,
-                          titleCase: false,
-                          subtitle: Text(e.tipo),
-                          trailing: Text(
-                            _formatarDataHora(e.dataHora),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: TokensStrip.textSecondary,
-                            ),
-                          ),
-                          leading: CircleAvatar(
-                            backgroundColor:
-                                Theme.of(context).colorScheme.primaryContainer,
-                            child: Icon(
-                              _iconForTipo(e.tipo),
-                              color: primary,
-                              size: 20,
-                            ),
-                          ),
-                        );
-                      },
+                : _eventos.isEmpty
+                ? ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: const [
+                    FxEmptyState(
+                      icon: 'chart',
+                      title: 'Nenhum evento registrado',
+                      subtitle:
+                          'Check-ins e treinos do aluno aparecerão aqui nos últimos dias.',
                     ),
+                  ],
+                )
+                : ListView.builder(
+                  padding: const EdgeInsets.all(TokensStrip.s4),
+                  itemCount: _eventos.length,
+                  itemBuilder: (_, i) {
+                    final e = _eventos[i];
+                    final primary = Theme.of(context).colorScheme.primary;
+                    return FxSatelliteListTile(
+                      accent: primary,
+                      title: e.descricao,
+                      titleCase: false,
+                      subtitle: Text(e.tipo),
+                      trailing: Text(
+                        _formatarDataHora(e.dataHora),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: TokensStrip.textSecondary,
+                        ),
+                      ),
+                      leading: CircleAvatar(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.primaryContainer,
+                        child: Icon(
+                          _iconForTipo(e.tipo),
+                          color: primary,
+                          size: 20,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+      ),
     );
   }
 }

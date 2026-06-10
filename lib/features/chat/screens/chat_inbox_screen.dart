@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,6 +18,7 @@ import '../data/chat_repository.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 final chatInboxProvider = FutureProvider<List<ChatInboxItem>>((ref) async {
   return ChatRepository(ref.read(apiClientProvider)).inbox();
@@ -154,7 +155,10 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
       ref.invalidate(chatInboxUnreadProvider);
       ref.invalidate(chatInboxArchivedProvider);
       if (!mounted) return;
-      FeedbackHelper.showInfo(context, ids.length == 1 ? 'Mensagens excluidas' : 'Conversas excluidas',);
+      FeedbackHelper.showInfo(
+        context,
+        ids.length == 1 ? 'Mensagens excluidas' : 'Conversas excluidas',
+      );
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(context, friendlyError(e));
@@ -197,167 +201,175 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
     final ink = chrome.ink;
     final mute = chrome.mute;
 
-    return FxShellScaffold(
-      useMesh: true,
-      floatingActionButton:
-          _isSearching || _selectionActive
-              ? null
-              : FloatingActionButton(
-                tooltip: 'Nova mensagem',
-                onPressed: _showAlunoPicker,
-                child: const Icon(Icons.edit_outlined),
-              ),
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(
-          _isSearching || _selectionActive ? 56 : 104,
-        ),
-        child:
-            _selectionActive || _isSearching
-                ? AppBar(
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  scrolledUnderElevation: 0,
-                  foregroundColor: ink,
-                  automaticallyImplyLeading: !_selectionActive,
-                  leading:
-                      _selectionActive
-                          ? IconButton(
-                            icon: Icon(Icons.close_rounded, color: ink),
-                            onPressed: _clearSelection,
-                          )
-                          : IconButton(
-                            onPressed: () => safePopOrGo(context, '/dashboard/personal'),
-                            icon: Container(
-                              width: 38,
-                              height: 38,
-                              decoration: chrome.headerAction(radius: 12),
-                              child: Icon(
-                                Icons.arrow_back_ios_new,
-                                size: 16,
-                                color: ink,
+    return fxScreenA11yScope(
+      label: 'Mensagens',
+      child: FxShellScaffold(
+        useMesh: true,
+        floatingActionButton:
+            _isSearching || _selectionActive
+                ? null
+                : FloatingActionButton(
+                  tooltip: 'Nova mensagem',
+                  onPressed: _showAlunoPicker,
+                  child: const Icon(Icons.edit_outlined),
+                ),
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(
+            _isSearching || _selectionActive ? 56 : 104,
+          ),
+          child:
+              _selectionActive || _isSearching
+                  ? AppBar(
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                    scrolledUnderElevation: 0,
+                    foregroundColor: ink,
+                    automaticallyImplyLeading: !_selectionActive,
+                    leading:
+                        _selectionActive
+                            ? IconButton(
+                              icon: Icon(Icons.close_rounded, color: ink),
+                              onPressed: _clearSelection,
+                            )
+                            : IconButton(
+                              onPressed:
+                                  () => safePopOrGo(
+                                    context,
+                                    '/dashboard/personal',
+                                  ),
+                              icon: Container(
+                                width: 38,
+                                height: 38,
+                                decoration: chrome.headerAction(radius: 12),
+                                child: Icon(
+                                  Icons.arrow_back_ios_new,
+                                  size: 16,
+                                  color: ink,
+                                ),
                               ),
                             ),
-                          ),
-                  title:
-                      _selectionActive
-                          ? Text(
-                            _selectedAlunoIds.isEmpty
-                                ? 'Selecione mensagens'
-                                : '${_selectedAlunoIds.length} selecionada(s)',
-                            style: TextStyle(
-                              color: ink,
-                              fontWeight: FontWeight.w700,
+                    title:
+                        _selectionActive
+                            ? Text(
+                              _selectedAlunoIds.isEmpty
+                                  ? 'Selecione mensagens'
+                                  : '${_selectedAlunoIds.length} selecionada(s)',
+                              style: TextStyle(
+                                color: ink,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            )
+                            : TextField(
+                              controller: _searchCtrl,
+                              autofocus: true,
+                              style: TextStyle(color: ink, fontSize: 16),
+                              decoration: InputDecoration(
+                                hintText: 'Buscar em todas as conversas...',
+                                hintStyle: TextStyle(color: mute),
+                                border: InputBorder.none,
+                              ),
+                              onChanged: _performSearch,
                             ),
-                          )
-                          : TextField(
-                            controller: _searchCtrl,
-                            autofocus: true,
-                            style: TextStyle(color: ink, fontSize: 16),
-                            decoration: InputDecoration(
-                              hintText: 'Buscar em todas as conversas...',
-                              hintStyle: TextStyle(color: mute),
-                              border: InputBorder.none,
-                            ),
-                            onChanged: _performSearch,
-                          ),
-                  actions: [
-                    if (_selectionActive)
-                      IconButton(
-                        tooltip: 'Excluir mensagens',
-                        icon: const Icon(Icons.delete_outline_rounded),
-                        color:
-                            _selectedAlunoIds.isEmpty
-                                ? mute.withValues(alpha: 0.45)
-                                : EagleTokens.bad,
-                        onPressed:
-                            _selectedAlunoIds.isEmpty
-                                ? null
-                                : _deleteSelectedConversations,
-                      )
-                    else
-                      IconButton(
-                        icon: Icon(Icons.close, color: ink),
-                        onPressed: _toggleSearch,
-                      ),
-                  ],
-                )
-                : Column(
-                  children: [
-                    FxShellAppBar(
-                      title: 'Mensagens',
-                      onBack: () => safePopOrGo(context, '/dashboard/personal'),
-                      actions: [
+                    actions: [
+                      if (_selectionActive)
                         IconButton(
-                          icon: Icon(Icons.search_rounded, color: ink),
+                          tooltip: 'Excluir mensagens',
+                          icon: const Icon(Icons.delete_outline_rounded),
+                          color:
+                              _selectedAlunoIds.isEmpty
+                                  ? mute.withValues(alpha: 0.45)
+                                  : EagleTokens.bad,
+                          onPressed:
+                              _selectedAlunoIds.isEmpty
+                                  ? null
+                                  : _deleteSelectedConversations,
+                        )
+                      else
+                        IconButton(
+                          icon: Icon(Icons.close, color: ink),
                           onPressed: _toggleSearch,
                         ),
-                      ],
+                    ],
+                  )
+                  : Column(
+                    children: [
+                      FxShellAppBar(
+                        title: 'Mensagens',
+                        onBack:
+                            () => safePopOrGo(context, '/dashboard/personal'),
+                        actions: [
+                          IconButton(
+                            icon: Icon(Icons.search_rounded, color: ink),
+                            onPressed: _toggleSearch,
+                          ),
+                        ],
+                      ),
+                      TabBar(
+                        controller: _tabCtrl,
+                        labelColor: primary,
+                        unselectedLabelColor: mute,
+                        indicatorColor: primary,
+                        indicatorSize: TabBarIndicatorSize.label,
+                        dividerColor: Colors.transparent,
+                        tabs: const [
+                          Tab(text: 'Todas'),
+                          Tab(text: 'Não lidas'),
+                          Tab(text: 'Arquivadas'),
+                        ],
+                      ),
+                    ],
+                  ),
+        ),
+        body:
+            _isSearching && _searchResults != null
+                ? _buildSearchResults(isDark, primary, ink, mute)
+                : _isSearching
+                ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.search, size: 48, color: mute),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Digite para buscar...',
+                        style: TextStyle(color: mute),
+                      ),
+                    ],
+                  ),
+                )
+                : TabBarView(
+                  controller: _tabCtrl,
+                  children: [
+                    _buildInboxTab(
+                      ref.watch(chatInboxProvider),
+                      chatInboxProvider,
+                      isDark,
+                      primary,
+                      ink,
+                      mute,
                     ),
-                    TabBar(
-                      controller: _tabCtrl,
-                      labelColor: primary,
-                      unselectedLabelColor: mute,
-                      indicatorColor: primary,
-                      indicatorSize: TabBarIndicatorSize.label,
-                      dividerColor: Colors.transparent,
-                      tabs: const [
-                        Tab(text: 'Todas'),
-                        Tab(text: 'Não lidas'),
-                        Tab(text: 'Arquivadas'),
-                      ],
+                    _buildInboxTab(
+                      ref.watch(chatInboxUnreadProvider),
+                      chatInboxUnreadProvider,
+                      isDark,
+                      primary,
+                      ink,
+                      mute,
+                      emptyMsg: 'Nenhuma mensagem não lida',
+                    ),
+                    _buildInboxTab(
+                      ref.watch(chatInboxArchivedProvider),
+                      chatInboxArchivedProvider,
+                      isDark,
+                      primary,
+                      ink,
+                      mute,
+                      emptyMsg: 'Nenhuma conversa arquivada',
+                      isArchived: true,
                     ),
                   ],
                 ),
       ),
-      body:
-          _isSearching && _searchResults != null
-              ? _buildSearchResults(isDark, primary, ink, mute)
-              : _isSearching
-              ? Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.search, size: 48, color: mute),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Digite para buscar...',
-                      style: TextStyle(color: mute),
-                    ),
-                  ],
-                ),
-              )
-              : TabBarView(
-                controller: _tabCtrl,
-                children: [
-                  _buildInboxTab(
-                    ref.watch(chatInboxProvider),
-                    chatInboxProvider,
-                    isDark,
-                    primary,
-                    ink,
-                    mute,
-                  ),
-                  _buildInboxTab(
-                    ref.watch(chatInboxUnreadProvider),
-                    chatInboxUnreadProvider,
-                    isDark,
-                    primary,
-                    ink,
-                    mute,
-                    emptyMsg: 'Nenhuma mensagem não lida',
-                  ),
-                  _buildInboxTab(
-                    ref.watch(chatInboxArchivedProvider),
-                    chatInboxArchivedProvider,
-                    isDark,
-                    primary,
-                    ink,
-                    mute,
-                    emptyMsg: 'Nenhuma conversa arquivada',
-                    isArchived: true,
-                  ),
-                ],
-              ),
     );
   }
 
@@ -471,64 +483,64 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
               return FxStaggerItem(
                 index: index,
                 child: Dismissible(
-                key: Key('inbox-${item.alunoId}'),
-                direction:
-                    _selectionActive
-                        ? DismissDirection.none
-                        : DismissDirection.horizontal,
-                confirmDismiss: (direction) async {
-                  if (direction == DismissDirection.endToStart) {
-                    // Swipe left → archive/unarchive
-                    await _conversationAction(
-                      item.alunoId,
-                      isArchived ? 'unarchive' : 'archive',
-                    );
-                    return false;
-                  } else {
-                    // Swipe right → pin/unpin
-                    await _conversationAction(item.alunoId, 'pin');
-                    return false;
-                  }
-                },
-                background: Container(
-                  alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.only(left: 24),
-                  decoration: BoxDecoration(
-                    color: primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Icon(Icons.push_pin, color: primary),
-                ),
-                secondaryBackground: Container(
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.only(right: 24),
-                  decoration: BoxDecoration(
-                    color: EagleTokens.warn.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Icon(
-                    isArchived ? Icons.unarchive : Icons.archive,
-                    color: EagleTokens.warn,
-                  ),
-                ),
-                child: _InboxTile(
-                  item: item,
-                  isDark: isDark,
-                  selected: selected,
-                  selecting: _selectionActive,
-                  onTap: () {
-                    if (_selectionActive) {
-                      _toggleSelection(item.alunoId);
-                      return;
+                  key: Key('inbox-${item.alunoId}'),
+                  direction:
+                      _selectionActive
+                          ? DismissDirection.none
+                          : DismissDirection.horizontal,
+                  confirmDismiss: (direction) async {
+                    if (direction == DismissDirection.endToStart) {
+                      // Swipe left → archive/unarchive
+                      await _conversationAction(
+                        item.alunoId,
+                        isArchived ? 'unarchive' : 'archive',
+                      );
+                      return false;
+                    } else {
+                      // Swipe right → pin/unpin
+                      await _conversationAction(item.alunoId, 'pin');
+                      return false;
                     }
-                    context.push(
-                      '/alunos/${item.alunoId}/chat',
-                      extra: item.alunoNome,
-                    );
                   },
-                  onLongPress: () => _toggleSelection(item.alunoId),
+                  background: Container(
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.only(left: 24),
+                    decoration: BoxDecoration(
+                      color: primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Icon(Icons.push_pin, color: primary),
+                  ),
+                  secondaryBackground: Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 24),
+                    decoration: BoxDecoration(
+                      color: EagleTokens.warn.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Icon(
+                      isArchived ? Icons.unarchive : Icons.archive,
+                      color: EagleTokens.warn,
+                    ),
+                  ),
+                  child: _InboxTile(
+                    item: item,
+                    isDark: isDark,
+                    selected: selected,
+                    selecting: _selectionActive,
+                    onTap: () {
+                      if (_selectionActive) {
+                        _toggleSelection(item.alunoId);
+                        return;
+                      }
+                      context.push(
+                        '/alunos/${item.alunoId}/chat',
+                        extra: item.alunoNome,
+                      );
+                    },
+                    onLongPress: () => _toggleSelection(item.alunoId),
+                  ),
                 ),
-              ),
               );
             },
           ),
@@ -702,7 +714,10 @@ class _AlunoContactTile extends StatelessWidget {
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final soft = BrandPalette.soft(primary, dark: Theme.of(context).brightness == Brightness.dark);
+    final soft = BrandPalette.soft(
+      primary,
+      dark: Theme.of(context).brightness == Brightness.dark,
+    );
 
     return InkWell(
       onTap: onTap,
@@ -900,7 +915,10 @@ class _InboxTile extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
-    final brandSoft = BrandPalette.soft(primary, dark: Theme.of(context).brightness == Brightness.dark);
+    final brandSoft = BrandPalette.soft(
+      primary,
+      dark: Theme.of(context).brightness == Brightness.dark,
+    );
 
     return InkWell(
       onTap: onTap,
@@ -910,11 +928,7 @@ class _InboxTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
         decoration:
             selected
-                ? fxListCardDecoration(
-                  context,
-                  accent: primary,
-                  selected: true,
-                )
+                ? fxListCardDecoration(context, accent: primary, selected: true)
                 : fxListCardDecoration(context),
         child: Row(
           children: [
