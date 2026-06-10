@@ -56,8 +56,10 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
         _loading = false;
       });
     } catch (e) {
-      debugPrint('[Focux] Error: $e');
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _loading = false);
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
     }
   }
 

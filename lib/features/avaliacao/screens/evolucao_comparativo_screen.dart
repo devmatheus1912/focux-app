@@ -17,8 +17,7 @@ String _fmtData(String? iso) {
   if (iso == null || iso.isEmpty) return '—';
   try {
     return fxDateShort(DateTime.parse(iso));
-  } catch (e) {
-    debugPrint('[Focux] Error: $e');
+  } catch (_) {
     return iso;
   }
 }

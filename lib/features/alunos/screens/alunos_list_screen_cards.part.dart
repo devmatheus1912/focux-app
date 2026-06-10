@@ -326,9 +326,7 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
       final repo = AlunoRepository(ref.read(apiClientProvider));
       final res = await repo.aderenciaSemanal(widget.aluno.id);
       if (mounted) setState(() => _dados = res);
-    } catch (e) {
-      debugPrint('[Focux] Error: $e');
-    }
+    } catch (_) {}
   }
 
   @override

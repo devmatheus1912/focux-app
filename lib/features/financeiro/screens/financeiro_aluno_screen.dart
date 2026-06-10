@@ -91,8 +91,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
       final mes = int.parse(parts[1]);
       if (mes < 1 || mes > 12) return mesReferencia;
       return '${_mesesNomes[mes]} $ano';
-    } catch (e) {
-      debugPrint('[Focux] Error: $e');
+    } catch (_) {
       return mesReferencia;
     }
   }

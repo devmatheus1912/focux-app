@@ -77,8 +77,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
       final hh = dt.hour.toString().padLeft(2, '0');
       final min = dt.minute.toString().padLeft(2, '0');
       return '$dd/$mm $hh:$min';
-    } catch (e) {
-      debugPrint('[Focux] Error: $e');
+    } catch (_) {
       return dataHora.length >= 16 ? dataHora.substring(0, 16) : dataHora;
     }
   }

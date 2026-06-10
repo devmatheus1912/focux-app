@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/agenda_repository.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
@@ -54,8 +55,10 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
         _loading = false;
       });
     } catch (e) {
-      debugPrint('[Focux] Error: $e');
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _loading = false);
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
     }
   }
 

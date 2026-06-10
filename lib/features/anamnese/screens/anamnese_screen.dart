@@ -99,9 +99,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
       _dispSemanal = a.disponibilidadeSemanal ?? 3;
       _prefTreinoCtrl.text = a.preferenciasTreino ?? '';
       _restricoesCtrl.text = a.restricoesAlimentares ?? '';
-    } catch (e) {
-      debugPrint('[Focux] Error: $e');
-    }
+    } catch (_) {}
     if (mounted) setState(() => _loading = false);
   }
 

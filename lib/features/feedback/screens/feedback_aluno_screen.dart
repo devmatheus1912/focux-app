@@ -5,6 +5,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -100,10 +101,17 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
           : RefreshIndicator(
               onRefresh: _load,
               child: _items.isEmpty
-                  ? ListView(children: const [
-                      SizedBox(height: 120),
-                      Center(child: Text('Nenhum vídeo enviado ainda. Toque em "Enviar vídeo".')),
-                    ])
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: const [
+                        FxEmptyState(
+                          icon: 'spark',
+                          title: 'Nenhum vídeo enviado ainda',
+                          subtitle:
+                              'Toque em Enviar vídeo para receber análise IA da sua execução.',
+                        ),
+                      ],
+                    )
                   : ListView.separated(
                       padding: const EdgeInsets.all(TokensStrip.s4),
                       itemCount: _items.length,

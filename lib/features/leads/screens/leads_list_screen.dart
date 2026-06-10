@@ -13,6 +13,8 @@ import '../../subscription/models/subscription_plan.dart';
 import 'lead_detail_screen.dart';
 import 'add_lead_screen.dart';
 import 'leads_kanban_screen.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 
 class LeadsListScreen extends ConsumerStatefulWidget {
@@ -45,8 +47,10 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
         });
       }
     } catch (e) {
-      debugPrint('[Focux] Error: $e');
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _loading = false);
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
     }
   }
 

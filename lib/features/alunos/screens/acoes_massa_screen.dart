@@ -6,6 +6,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/aluno_contact_utils.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -108,21 +109,23 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
       try {
         await repo.excluirAluno(id);
         sucesso++;
-      } catch (e) {
-        debugPrint('[Focux] Error: $e');
+      } catch (_) {
         falha++;
       }
     }
     if (mounted) {
       ref.invalidate(alunosProvider);
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(
-          content: Text(
-            '$sucesso excluído(s)${falha > 0 ? ', $falha erro(s)' : ''}',
-          ),
-        ),
-      );
+      if (falha > 0) {
+        FeedbackHelper.showError(
+          context,
+          '$sucesso excluído(s), $falha não puderam ser removidos.',
+        );
+      } else {
+        FeedbackHelper.showSuccess(
+          context,
+          '$sucesso aluno(s) excluído(s).',
+        );
+      }
       setState(() => _selecionados.clear());
     }
     if (mounted) setState(() => _processando = false);
@@ -169,21 +172,23 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
       try {
         await repo.atualizarAluno(id, {'status': novoStatus});
         sucesso++;
-      } catch (e) {
-        debugPrint('[Focux] Error: $e');
+      } catch (_) {
         falha++;
       }
     }
     if (mounted) {
       ref.invalidate(alunosProvider);
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(
-          content: Text(
-            '$sucesso atualizado(s)${falha > 0 ? ', $falha erro(s)' : ''}',
-          ),
-        ),
-      );
+      if (falha > 0) {
+        FeedbackHelper.showError(
+          context,
+          '$sucesso atualizado(s), $falha não puderam ser alterados.',
+        );
+      } else {
+        FeedbackHelper.showSuccess(
+          context,
+          '$sucesso aluno(s) atualizado(s).',
+        );
+      }
       setState(() => _selecionados.clear());
     }
     if (mounted) setState(() => _processando = false);
@@ -226,7 +231,12 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
         data:
             (alunos) =>
                 alunos.isEmpty
-                    ? const Center(child: Text('Nenhum aluno cadastrado.'))
+                    ? const FxEmptyState(
+                      icon: 'users',
+                      title: 'Nenhum aluno cadastrado',
+                      subtitle:
+                          'Cadastre alunos na lista principal para usar ações em massa.',
+                    )
                     : Stack(
                       children: [
                         ListView.builder(

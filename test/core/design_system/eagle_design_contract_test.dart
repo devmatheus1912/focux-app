@@ -40,6 +40,11 @@ void main() {
               'lib/core/theme/theme_provider.dart',
             },
           ),
+          _EagleGateRule(
+            label: "debugPrint('[Focux] Error",
+            pattern: RegExp(r"debugPrint\s*\(\s*'\[Focux\] Error"),
+            allowedFiles: const {},
+          ),
         ];
 
         final failures = <String>[];

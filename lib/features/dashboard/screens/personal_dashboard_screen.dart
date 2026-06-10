@@ -197,16 +197,12 @@ class _PersonalDashboardScreenState
       final home = await ref.read(dashboardHomeProvider.future);
       if (!mounted) return;
       _applyFinanceData(home.financeiro);
-    } catch (e, st) {
-      debugPrint('[Focux] Error loading financeiro dashboard: $e\n$st');
+    } catch (e) {
       if (mounted) {
         setState(() {
           _loadingFin = false;
         });
-        FeedbackHelper.showWarn(
-          context,
-          'Financeiro indisponível agora. Puxe para atualizar.',
-        );
+        FeedbackHelper.showWarn(context, friendlyError(e));
       }
     }
   }

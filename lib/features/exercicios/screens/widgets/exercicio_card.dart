@@ -9,6 +9,7 @@ import '../../data/exercicio_repository.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
 import '../../providers/exercicios_provider.dart';
 import 'exercise_media_thumb.dart';
+import '../../../../core/utils/friendly_error.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 class ExercicioCard extends ConsumerWidget {
@@ -41,12 +42,8 @@ class ExercicioCard extends ConsumerWidget {
       }
       onFavoritoToggle();
     } catch (e) {
-      debugPrint('[Focux] Error: $e');
       if (context.mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(content: Text('Erro ao atualizar favorito.')),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }

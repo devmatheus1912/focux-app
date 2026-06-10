@@ -42,8 +42,10 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
         });
       }
     } catch (e) {
-      debugPrint('[Focux] Error: $e');
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _loading = false);
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
     }
   }
 

@@ -71,8 +71,10 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
         });
       }
     } catch (e) {
-      debugPrint('[Focux] Error: $e');
-      if (mounted) setState(() => _loadingInteracoes = false);
+      if (mounted) {
+        setState(() => _loadingInteracoes = false);
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
     }
   }
 
@@ -187,9 +189,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
     if (_lead.proximoContato != null) {
       try {
         inicial = DateTime.parse(_lead.proximoContato!);
-      } catch (e) {
-        debugPrint('[Focux] Error: $e');
-      }
+      } catch (_) {}
     }
     final picked = await showDatePicker(
       context: context,

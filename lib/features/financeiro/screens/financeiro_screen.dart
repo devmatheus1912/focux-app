@@ -16,6 +16,7 @@ import '../../../features/alunos/utils/satellite_screen_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../data/financeiro_repository.dart';
+import '../../dashboard/widgets/dashboard_error_state.dart';
 import 'financeiro_dashboard_screen.dart';
 import 'financeiro_resumo_screen.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -233,6 +234,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
   List<Mensalidade> _mensalidades = [];
   List<Mensalidade> _filtered = [];
   bool _loading = true;
+  String? _erro;
   final TextEditingController _searchCtrl = TextEditingController();
   Timer? _debounce;
 
@@ -264,8 +266,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
         ).listarPorNome(query);
         if (mounted) setState(() => _filtered = results);
       } catch (e) {
-        debugPrint('[Focux] Error: $e');
-        // fallback: filter locally
+        // fallback: filter locally quando a busca remota falha
         if (mounted) {
           setState(
             () =>
@@ -284,7 +285,10 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final r =
           await FinanceiroRepository(ref.read(apiClientProvider)).listar();
@@ -293,14 +297,18 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
           alunoFilter == null
               ? r
               : r.where((m) => m.alunoId == alunoFilter).toList();
+      if (!mounted) return;
       setState(() {
         _mensalidades = r;
         _filtered = filtered;
         _loading = false;
       });
     } catch (e) {
-      debugPrint('[Focux] Error: $e');
-      setState(() => _loading = false);
+      if (!mounted) return;
+      setState(() {
+        _erro = friendlyError(e);
+        _loading = false;
+      });
     }
   }
 
@@ -1040,6 +1048,13 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
           child:
               _loading
                   ? _buildMensalidadesLoading(context)
+                  : _erro != null
+                  ? DashboardErrorState(
+                    chromeOnDark: chrome.isDark,
+                    primary: primary,
+                    message: _erro!,
+                    onRetry: _load,
+                  )
                   : _filtered.isEmpty
                   ? _buildMensalidadesEmpty(context)
                   : ListView.builder(

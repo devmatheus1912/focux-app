@@ -38,12 +38,8 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
       }
       ref.invalidate(exercicioProvider(widget.exercicioId));
     } catch (e) {
-      debugPrint('[Focux] Error: $e');
       if (context.mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          const SnackBar(content: Text('Erro ao atualizar favorito.')),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -67,12 +63,8 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
         const SnackBar(content: Text('Video proprio adicionado ao exercicio.')),
       );
     } catch (e) {
-      debugPrint('[Focux] Error: $e');
       if (context.mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     } finally {
       if (mounted) setState(() => _uploadingVideo = false);
@@ -138,12 +130,8 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
         ),
       );
     } catch (e) {
-      debugPrint('[Focux] Error: $e');
       if (context.mounted) {
-        FeedbackHelper.showSnackBar(
-          context,
-          SnackBar(content: Text(friendlyError(e))),
-        );
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }

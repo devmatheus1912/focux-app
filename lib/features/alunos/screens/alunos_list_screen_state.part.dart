@@ -108,9 +108,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
       try {
         await repo.excluirAluno(id);
         sucesso++;
-      } catch (e) {
-        debugPrint('[Focux] Error excluir aluno $id: $e');
-      }
+      } catch (_) {}
     }
     if (mounted) {
       ref.invalidate(alunosProvider);

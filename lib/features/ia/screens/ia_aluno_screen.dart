@@ -58,9 +58,7 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen>
           await ChatRepository(ref.read(apiClientProvider)).historicoAluno();
       final id = msgs.isNotEmpty ? msgs.first.alunoId : null;
       if (id != null && mounted) setState(() => _alunoId = id);
-    } catch (e) {
-      debugPrint('[Focux] Error: $e');
-    }
+    } catch (_) {}
   }
 
   @override
