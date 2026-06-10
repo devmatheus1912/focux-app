@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -293,7 +294,7 @@ class _NovoPlanoScreenState extends ConsumerState<_NovoPlanoScreen> {
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Erro: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
     if (mounted) {

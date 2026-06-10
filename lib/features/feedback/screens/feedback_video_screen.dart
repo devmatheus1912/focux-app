@@ -292,7 +292,7 @@ class _NovoFeedbackDialogState extends ConsumerState<_NovoFeedbackDialog> {
       widget.onSalvo();
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Erro: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
     if (mounted) setState(() => _salvando = false);

@@ -2,6 +2,7 @@
 import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/brand_palette.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -232,7 +233,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                     }
                   } catch (e) {
                     if (context.mounted) {
-                      FeedbackHelper.showSuccess(context, 'Erro: $e');
+                      FeedbackHelper.showError(context, friendlyError(e));
                     }
                   }
                 },
@@ -322,7 +323,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                     }
                   } catch (e) {
                     if (context.mounted) {
-                      FeedbackHelper.showSuccess(context, 'Erro: $e');
+                      FeedbackHelper.showError(context, friendlyError(e));
                     }
                   }
                 },
@@ -385,7 +386,13 @@ class _TabMedidas extends StatelessWidget {
   Widget build(BuildContext context) {
     return medidasAsync.when(
       loading: () => const FxLoading(),
-      error: (e, _) => Center(child: Text('Erro: $e')),
+      error:
+          (e, _) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(TokensStrip.s5),
+              child: Text(friendlyError(e), textAlign: TextAlign.center),
+            ),
+          ),
       data: (lista) {
         if (lista.isEmpty) {
           final first = satelliteFirstName(alunoNome);
@@ -530,7 +537,13 @@ class _TabRecordes extends StatelessWidget {
   Widget build(BuildContext context) {
     return recordesAsync.when(
       loading: () => const FxLoading(),
-      error: (e, _) => Center(child: Text('Erro: $e')),
+      error:
+          (e, _) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(TokensStrip.s5),
+              child: Text(friendlyError(e), textAlign: TextAlign.center),
+            ),
+          ),
       data: (lista) {
         if (lista.isEmpty) {
           final first = satelliteFirstName(alunoNome);

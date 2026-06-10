@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/theme_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/providers/personal_brand_provider.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -71,8 +70,8 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
     final historicoAsync = ref.watch(historicoCheckinProvider);
     final chatAsync = ref.watch(chatAlunoDashboardProvider);
 
-    return Scaffold(
-      backgroundColor: shellScaffoldColor,
+    return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Meu Treino',
         leading: const SizedBox(width: 8),

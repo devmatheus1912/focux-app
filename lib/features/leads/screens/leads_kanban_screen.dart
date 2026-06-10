@@ -160,7 +160,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                     if (ctx.mounted) {
                       FeedbackHelper.showSnackBar(
                         ctx,
-                        SnackBar(content: Text('Erro: $e')),
+                        SnackBar(content: Text(friendlyError(e))),
                       );
                     }
                   }

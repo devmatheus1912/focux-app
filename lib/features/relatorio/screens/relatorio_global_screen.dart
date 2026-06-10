@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -47,7 +48,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _erro = e.toString();
+        _erro = friendlyError(e);
         _loading = false;
       });
     }

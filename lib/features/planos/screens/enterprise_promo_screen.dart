@@ -5,7 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -76,10 +78,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
       context.go('/dashboard/personal');
     } catch (error) {
       if (!mounted) return;
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(content: Text('Erro ao ativar trial: $error')),
-      );
+      FeedbackHelper.showError(context, friendlyError(error));
     } finally {
       if (mounted) setState(() => _starting = false);
     }
@@ -93,7 +92,8 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
     final dateStr =
         '${trialEndDate.day.toString().padLeft(2, '0')}/${trialEndDate.month.toString().padLeft(2, '0')}/${trialEndDate.year}';
 
-    return Scaffold(
+    return FxShellScaffold(
+      useMesh: true,
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(

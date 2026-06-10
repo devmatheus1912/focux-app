@@ -187,7 +187,13 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
         bottom: false,
         child: exercicioAsync.when(
           loading: () => Center(child: FxLoading(color: primary)),
-          error: (e, _) => Center(child: Text('Erro: $e')),
+          error:
+              (e, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(TokensStrip.s5),
+                  child: Text(friendlyError(e), textAlign: TextAlign.center),
+                ),
+              ),
           data:
               (ex) => SingleChildScrollView(
                 padding: const EdgeInsets.all(TokensStrip.s4),

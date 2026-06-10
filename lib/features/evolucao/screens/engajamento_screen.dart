@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -49,7 +50,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _erro = e.toString();
+          _erro = friendlyError(e);
           _loading = false;
         });
       }

@@ -6,6 +6,7 @@ import '../data/depoimento_repository.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 
 class DepoimentoAlunoScreen extends ConsumerStatefulWidget {
@@ -36,7 +37,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
       ).submeter(texto: _textoCtrl.text.trim(), nota: _nota);
       if (mounted) setState(() => _enviado = true);
     } catch (e) {
-      if (mounted) FeedbackHelper.showSuccess(context, 'Erro: $e');
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     } finally {
       if (mounted) setState(() => _enviando = false);
     }

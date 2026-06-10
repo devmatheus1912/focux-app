@@ -8,6 +8,7 @@ import '../utils/satellite_screen_utils.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 
 class AlunoEquipamentosScreen extends ConsumerStatefulWidget {
@@ -75,7 +76,13 @@ class _AlunoEquipamentosScreenState
       ),
       body: alunoAsync.when(
         loading: () => const FxLoading(),
-        error: (e, _) => Center(child: Text('Erro: $e')),
+        error:
+            (e, _) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(TokensStrip.s5),
+                child: Text(friendlyError(e), textAlign: TextAlign.center),
+              ),
+            ),
         data: (aluno) {
           _selected ??= {...aluno.equipamentosDisponiveis};
           return ListView(

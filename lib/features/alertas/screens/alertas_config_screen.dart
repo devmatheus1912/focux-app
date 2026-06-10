@@ -51,7 +51,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _erro = e.toString();
+          _erro = friendlyError(e);
           _loading = false;
         });
       }

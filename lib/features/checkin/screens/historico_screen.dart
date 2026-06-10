@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -33,7 +34,7 @@ class HistoricoCheckinScreen extends ConsumerWidget {
             (e, _) => FxEmptyState(
               icon: 'alert-triangle',
               title: 'Erro ao carregar',
-              subtitle: e.toString(),
+              subtitle: friendlyError(e),
               action: FxEmptyAction(
                 label: 'Tentar novamente',
                 onTap: () => ref.invalidate(historicoCheckinProvider),

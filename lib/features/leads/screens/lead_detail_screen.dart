@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
@@ -110,7 +111,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Erro: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -144,7 +145,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Erro: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -175,7 +176,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       if (mounted) safePopOrGo(context, '/leads');
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Erro: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -213,7 +214,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Erro: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -321,7 +322,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                               if (mounted) {
                                 FeedbackHelper.showSnackBar(
                                   context,
-                                  SnackBar(content: Text('Erro: $e')),
+                                  SnackBar(content: Text(friendlyError(e))),
                                 );
                               }
                             }

@@ -627,7 +627,13 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
       ),
       body: async.when(
         loading: () => const FxLoading(),
-        error: (e, _) => Center(child: Text('Erro: $e')),
+        error:
+            (e, _) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(TokensStrip.s5),
+                child: Text(friendlyError(e), textAlign: TextAlign.center),
+              ),
+            ),
         data: (aluno) {
           _loadIfNeeded(aluno);
           final completion = _completionScore();

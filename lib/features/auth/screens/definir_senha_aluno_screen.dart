@@ -121,8 +121,8 @@ class _DefinirSenhaAlunoScreenState
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final strength = _passwordStrength();
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(

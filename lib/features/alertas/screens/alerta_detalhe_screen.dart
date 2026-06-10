@@ -6,6 +6,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alertas_repository.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -53,7 +54,7 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _erro = e.toString();
+          _erro = friendlyError(e);
           _loading = false;
         });
       }

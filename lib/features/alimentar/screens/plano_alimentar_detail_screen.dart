@@ -522,7 +522,7 @@ class _NovaRefeicaoSheetState extends ConsumerState<_NovaRefeicaoSheet> {
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Erro: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
     if (mounted) setState(() => _saving = false);

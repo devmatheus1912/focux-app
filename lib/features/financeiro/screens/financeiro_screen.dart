@@ -673,7 +673,7 @@ class _MensalidadesTabState extends ConsumerState<_MensalidadesTab> {
                     })
                     .catchError((e) {
                       setDialogState(() {
-                        erro = e.toString();
+                        erro = friendlyError(e);
                         carregando = false;
                       });
                     });

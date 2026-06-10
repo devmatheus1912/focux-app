@@ -9,6 +9,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
 
@@ -99,7 +100,7 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _loading = false);
-        FeedbackHelper.showSuccess(context, 'Erro: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }

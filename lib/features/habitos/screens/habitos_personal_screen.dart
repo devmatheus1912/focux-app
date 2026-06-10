@@ -143,7 +143,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
         if (!mounted) return;
         FeedbackHelper.showSnackBar(
           context,
-          SnackBar(content: Text('Erro: $e')),
+          SnackBar(content: Text(friendlyError(e))),
         );
       }
     }

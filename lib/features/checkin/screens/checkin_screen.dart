@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -77,7 +78,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       setState(() {
         _loading = false;
       });
-      FeedbackHelper.showSuccess(context, 'Erro: $e');
+      FeedbackHelper.showError(context, friendlyError(e));
       safePopOrGo(context, '/checkin/treinos');
     }
   }
@@ -116,7 +117,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       });
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Erro: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -182,7 +183,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Erro: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -224,7 +225,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       });
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Erro: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -306,7 +307,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
       safePopOrGo(context, '/checkin/treinos');
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Erro: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     } finally {
       if (mounted) {

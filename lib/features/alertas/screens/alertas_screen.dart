@@ -2,6 +2,7 @@
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -111,7 +112,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
       _load();
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Erro: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -127,7 +128,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Erro: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }
@@ -178,7 +179,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Erro: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     }
   }

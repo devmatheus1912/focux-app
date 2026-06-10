@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -91,7 +92,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _erro = e.toString();
+          _erro = friendlyError(e);
           _carregando = false;
         });
       }

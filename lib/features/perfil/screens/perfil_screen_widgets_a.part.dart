@@ -10,22 +10,23 @@ class _PerfilLoadingScaffold extends StatelessWidget {
     final surface = isDark ? EagleTokens.darkCard : TokensStrip.cardBg;
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(TokensStrip.s4),
-          child: Column(
-            children: [
-              Container(
-                height: 286,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(26),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF1AABA4), Color(0xFF0A1F24)],
-                  ),
+    final primary = theme.colorScheme.primary;
+
+    return FxShellScaffold(
+      useMesh: true,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(TokensStrip.s4),
+        child: Column(
+          children: [
+            Container(
+              height: 286,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(26),
+                gradient: LinearGradient(
+                  colors: [primary, BrandPalette.deep(primary)],
                 ),
               ),
+            ),
               const SizedBox(height: 14),
               for (final height in [132.0, 178.0, 228.0])
                 Padding(
@@ -39,8 +40,7 @@ class _PerfilLoadingScaffold extends StatelessWidget {
                     ),
                   ),
                 ),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -60,15 +60,14 @@ class _PerfilErrorScaffold extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(TokensStrip.s5),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+    return FxShellScaffold(
+      useMesh: true,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(TokensStrip.s5),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
                 Container(
                   width: 58,
                   height: 58,
@@ -105,8 +104,7 @@ class _PerfilErrorScaffold extends StatelessWidget {
                   label: 'Tentar novamente',
                   onPressed: onRetry,
                 ),
-              ],
-            ),
+            ],
           ),
         ),
       ),

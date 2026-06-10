@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -67,9 +68,13 @@ class QualidadeOperacionalScreen extends ConsumerWidget {
         loading: () => const FxLoading(),
         error:
             (e, _) => Center(
-              child: Text(
-                'Erro: $e',
-                style: const TextStyle(color: EagleTokens.bad),
+              child: Padding(
+                padding: const EdgeInsets.all(TokensStrip.s5),
+                child: Text(
+                  friendlyError(e),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: EagleTokens.bad),
+                ),
               ),
             ),
         data: (data) => _QualidadeBody(data: data, isDark: isDark),

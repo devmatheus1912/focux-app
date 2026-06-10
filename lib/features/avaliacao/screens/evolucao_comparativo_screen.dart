@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/router/safe_navigation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -67,14 +68,14 @@ class _EvolucaoComparativoScreenState
         _loading = false;
       });
     } catch (e) {
-      final msg = e.toString();
+      final msg = friendlyError(e);
       final eh404 = msg.contains('404') || msg.contains('Not Found');
       if (!mounted) return;
       setState(() {
         _erro =
             eh404
                 ? 'Nenhuma avaliação encontrada para comparativo.'
-                : 'Erro ao carregar comparativo: $msg';
+                : msg;
         _loading = false;
       });
     }
@@ -295,7 +296,7 @@ class _EvolucaoComparativoScreenState
                     );
                   }
                 } catch (e) {
-                  messenger.showSnackBar(SnackBar(content: Text('Erro: $e')));
+                  FeedbackHelper.showError(context, friendlyError(e));
                 }
               },
             ),

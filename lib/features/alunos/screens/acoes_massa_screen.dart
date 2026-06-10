@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/aluno_contact_utils.dart';
 import '../data/aluno_repository.dart';
@@ -151,7 +152,7 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
       if (mounted) {
         FeedbackHelper.showSnackBar(
           context,
-          SnackBar(content: Text('Erro: $e')),
+          SnackBar(content: Text(friendlyError(e))),
         );
       }
     }
@@ -214,7 +215,13 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
       ),
       body: alunosAsync.when(
         loading: () => const FxLoading(),
-        error: (e, _) => Center(child: Text('Erro: $e')),
+        error:
+            (e, _) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(TokensStrip.s5),
+                child: Text(friendlyError(e), textAlign: TextAlign.center),
+              ),
+            ),
         data:
             (alunos) =>
                 alunos.isEmpty

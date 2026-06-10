@@ -10,6 +10,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/curated_brand_palettes.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -112,7 +113,7 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
       if (mounted) setState(() => _logoUrl = url);
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Erro upload: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     } finally {
       if (mounted) setState(() => _uploadingLogo = false);
@@ -164,7 +165,7 @@ class _IdentidadeVisualScreenState extends ConsumerState<IdentidadeVisualScreen>
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Erro: $e');
+        FeedbackHelper.showError(context, friendlyError(e));
       }
     } finally {
       if (mounted) setState(() => _salvando = false);
