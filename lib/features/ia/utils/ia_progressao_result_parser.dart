@@ -97,7 +97,7 @@ IaProgressaoParsedResult parseIaProgressaoMarkdown(String raw) {
   for (final line in tableLines) {
     if (_isTableSeparator(line)) continue;
     final cells = _parseTableCells(line);
-    if (cells.isEmpty || _looksLikeHeader(cells)) continue;
+    if (cells.isEmpty || _looksLikeHeaderRow(cells)) continue;
     final row = _mapCellsToExercise(cells);
     if (row != null) exercises.add(row);
   }
@@ -128,17 +128,22 @@ List<String> _parseTableCells(String line) {
   return s.split('|').map((c) => c.trim()).toList();
 }
 
-bool _looksLikeHeader(List<String> cells) {
-  final joined = cells.map((c) => c.toLowerCase()).join(' ');
-  return joined.contains('exerc') ||
-      joined.contains('carga atual') ||
-      joined.contains('sugerid') ||
-      joined.contains('justific');
+/// Header row is identified by the first column title only — never by
+/// justificativa text (which often repeats words like "sugerida").
+bool _looksLikeHeaderRow(List<String> cells) {
+  if (cells.isEmpty) return false;
+  final first = _stripInlineMarkdown(cells.first).toLowerCase();
+  return first == 'exercício' ||
+      first == 'exercicio' ||
+      first == 'exercícios' ||
+      first == 'exercicios' ||
+      first == 'exercise' ||
+      first == 'exercises';
 }
 
 IaProgressaoExerciseRow? _mapCellsToExercise(List<String> cells) {
   final nonEmpty = cells.where((c) => c.trim().isNotEmpty).toList();
-  if (nonEmpty.length < 2 || _looksLikeHeader(nonEmpty)) return null;
+  if (nonEmpty.length < 2) return null;
 
   if (nonEmpty.length >= 4) {
     final atual = _stripInlineMarkdown(nonEmpty[1]);

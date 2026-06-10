@@ -40,6 +40,20 @@ Lembre-se de aquecer e registrar RPE após cada série.
     expect(plain, isNot(contains('|')));
   });
 
+  test('parses row when justificativa mentions carga sugerida', () {
+    const md = '''
+| Exercício | Carga Atual | Carga Sugerida | Justificativa |
+| --- | --- | --- | --- |
+| Agachamento | Desconhecida 4x15 | 60kg 4x12 | A carga sugerida permite boa forma na hipertrofia. |
+''';
+
+    final parsed = parseIaProgressaoMarkdown(md);
+
+    expect(parsed.hasStructuredRows, isTrue);
+    expect(parsed.exercises.single.exercicio, 'Agachamento');
+    expect(parsed.exercises.single.cargaSugerida, '60kg 4x12');
+  });
+
   test('falls back to raw markdown when no table is present', () {
     const raw = 'Resposta sem tabela, apenas texto corrido.';
     final parsed = parseIaProgressaoMarkdown(raw);

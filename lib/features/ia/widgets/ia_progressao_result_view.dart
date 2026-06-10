@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/motion_preferences.dart';
@@ -61,7 +60,7 @@ class IaProgressaoResultView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final parsed = result.toParsed();
+    final parsed = _resolveParsed(result);
     final primary = Theme.of(context).colorScheme.primary;
 
     return AnimatedSwitcher(
@@ -82,12 +81,26 @@ class IaProgressaoResultView extends StatelessWidget {
               onReviewSuggestions: onReviewSuggestions,
               pendingSuggestions: result.sugestoesRegistradas,
             )
-          : _FallbackMarkdown(
+          : _FallbackPlainText(
               key: ValueKey(result.resposta),
-              markdown: result.resposta,
+              text: parsed.toPlainText(),
               onCopy: onCopy ?? () => _copyPlain(context, parsed),
               onExportPdf: onExportPdf,
             ),
+    );
+  }
+
+  /// Prefer API rows; re-parse markdown when empty (e.g. justificativa com "sugerida").
+  static IaProgressaoParsedResult _resolveParsed(IaProgressaoCargaResult result) {
+    final direct = result.toParsed();
+    if (direct.hasStructuredRows) return direct;
+    final reparsed = parseIaProgressaoMarkdown(result.resposta);
+    if (!reparsed.hasStructuredRows) return direct;
+    return IaProgressaoParsedResult(
+      rawMarkdown: result.resposta,
+      intro: result.intro ?? reparsed.intro,
+      exercises: reparsed.exercises,
+      footer: result.footer ?? reparsed.footer,
     );
   }
 
@@ -290,15 +303,15 @@ class _ExerciseCard extends StatelessWidget {
   }
 }
 
-class _FallbackMarkdown extends StatelessWidget {
-  const _FallbackMarkdown({
+class _FallbackPlainText extends StatelessWidget {
+  const _FallbackPlainText({
     super.key,
-    required this.markdown,
+    required this.text,
     required this.onCopy,
     this.onExportPdf,
   });
 
-  final String markdown;
+  final String text;
   final VoidCallback onCopy;
   final VoidCallback? onExportPdf;
 
@@ -307,14 +320,9 @@ class _FallbackMarkdown extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        MarkdownBody(
-          data: markdown,
-          selectable: true,
-          shrinkWrap: true,
-          styleSheet: MarkdownStyleSheet(
-            p: const TextStyle(fontSize: 14, height: 1.45),
-            tableBody: const TextStyle(fontSize: 12),
-          ),
+        SelectableText(
+          text,
+          style: const TextStyle(fontSize: 14, height: 1.45),
         ),
         const SizedBox(height: TokensStrip.s2),
         IaProgressaoResultActionBar(
