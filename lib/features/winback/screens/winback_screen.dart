@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -43,10 +46,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
-      FeedbackHelper.showSnackBar(
-        context,
-        SnackBar(content: Text(friendlyError(e))),
-      );
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -62,20 +62,25 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final mute = fxScreenMute(context);
+
     return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Win-back automático',
-        onBack: () => context.pop(),
+        subtitle: 'Push de reengajamento',
+        onBack: () => safePopOrGo(context, '/dashboard/personal'),
       ),
-      body: _loading
-          ? const Center(child: FxLoading())
-          : RefreshIndicator(
-              onRefresh: _carregar,
-              child: ListView(
-                padding: const EdgeInsets.all(TokensStrip.s4),
-                children: [
-                  Card(
-                    child: Padding(
+      body:
+          _loading
+              ? Center(child: FxLoading(color: primary))
+              : RefreshIndicator(
+                color: primary,
+                onRefresh: _carregar,
+                child: ListView(
+                  padding: const EdgeInsets.all(TokensStrip.s4),
+                  children: [
+                    FxSatellitePanel(
                       padding: const EdgeInsets.all(20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,23 +91,18 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                             size: 40,
                           ),
                           const SizedBox(height: 12),
-                          const Text(
+                          Text(
                             'Automação FCM ativa',
-                            style: TextStyle(
+                            style: AppTypography.inter(
                               fontWeight: FontWeight.w800,
                               fontSize: 18,
+                              color: fxScreenInk(context),
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             'Push de reengajamento para alunos inativos e lembretes de trial.',
-                            style: TextStyle(
-                              height: 1.45,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withValues(alpha: 0.75),
-                            ),
+                            style: TextStyle(height: 1.45, color: mute),
                           ),
                           const SizedBox(height: 16),
                           FilledButton.icon(
@@ -113,40 +113,33 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                         ],
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Histórico de envios (${_entries.length})',
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 8),
-                  if (_entries.isEmpty)
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Text(
-                          'Nenhum envio registrado ainda.',
-                          style: TextStyle(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.65),
-                          ),
-                        ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Histórico de envios (${_entries.length})',
+                      style: AppTypography.inter(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: fxScreenInk(context),
                       ),
-                    )
-                  else
-                    ..._entries.map(
-                      (entry) => Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: ListTile(
+                    ),
+                    const SizedBox(height: 10),
+                    if (_entries.isEmpty)
+                      const FxEmptyState(
+                        icon: 'send',
+                        title: 'Nenhum envio ainda',
+                        subtitle:
+                            'Quando a automação disparar, os registros aparecem aqui.',
+                      )
+                    else
+                      ..._entries.map(
+                        (entry) => FxSatelliteListTile(
                           isThreeLine: true,
                           leading: CircleAvatar(
                             backgroundColor: primary.withValues(alpha: 0.12),
                             foregroundColor: primary,
                             child: const Icon(Icons.send_outlined, size: 20),
                           ),
-                          title: Text(entry.alunoNome),
+                          title: entry.alunoNome,
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -164,21 +157,17 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                               Text(
                                 entry.enviadoEm,
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurface
-                                      .withValues(alpha: 0.55),
+                                  fontSize: 11,
+                                  color: mute.withValues(alpha: 0.85),
                                 ),
                               ),
                             ],
                           ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
     );
   }
 }

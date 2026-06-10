@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/feature_gate.dart';
@@ -191,18 +192,22 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                     const _EmptyHabitos()
                   else
                     ..._habitos.map(
-                      (h) => Card(
-                        child: ListTile(
-                          leading: const Icon(Icons.fitness_center),
-                          title: Text(h.titulo),
-                          subtitle: Text(h.descricao ?? 'Meta semanal: ${h.metaSemanal}x'),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete_outline),
-                            onPressed: () async {
-                              await ref.read(_repoProvider).desativar(h.id);
-                              await _carregar();
-                            },
-                          ),
+                      (h) => FxSatelliteListTile(
+                        title: h.titulo,
+                        titleCase: false,
+                        leading: Icon(
+                          Icons.fitness_center_rounded,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        subtitle: Text(
+                          h.descricao ?? 'Meta semanal: ${h.metaSemanal}x',
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete_outline_rounded),
+                          onPressed: () async {
+                            await ref.read(_repoProvider).desativar(h.id);
+                            await _carregar();
+                          },
                         ),
                       ),
                     ),
@@ -212,11 +217,12 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                     subtitulo: 'Aderência dos seus alunos aos hábitos',
                   ),
                   if (_compliance.isEmpty)
-                    Card(
-                      child: const ListTile(
-                        leading: Icon(Icons.info_outline),
-                        title: Text('Sem dados ainda'),
-                        subtitle: Text('Cadastre hábitos e os alunos vão começar a marcar.'),
+                    FxSatelliteListTile(
+                      title: 'Sem dados ainda',
+                      titleCase: false,
+                      leading: Icon(Icons.info_outline_rounded),
+                      subtitle: Text(
+                        'Cadastre hábitos e os alunos vão começar a marcar.',
                       ),
                     )
                   else
@@ -259,12 +265,11 @@ class _EmptyHabitos extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            const Icon(Icons.checklist_outlined, size: 40),
+    return FxSatellitePanel(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          const Icon(Icons.checklist_outlined, size: 40),
             const SizedBox(height: 8),
             Text('Nenhum hábito cadastrado',
                 style: Theme.of(context).textTheme.titleMedium),
@@ -274,8 +279,7 @@ class _EmptyHabitos extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodySmall,
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -287,27 +291,32 @@ class _ComplianceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = item.compliancePct >= 70
-        ? Colors.green
-        : item.compliancePct >= 40
-            ? Colors.orange
-            : Colors.red;
-    return Card(
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: color.withValues(alpha: .15),
-          child: Text('${item.compliancePct}%',
-              style: TextStyle(
-                  color: color, fontSize: 12, fontWeight: FontWeight.w800)),
+    final color =
+        item.compliancePct >= 70
+            ? EagleTokens.good
+            : item.compliancePct >= 40
+            ? EagleTokens.warn
+            : EagleTokens.bad;
+    return FxSatelliteListTile(
+      title: item.alunoNome,
+      accent: color,
+      leading: CircleAvatar(
+        backgroundColor: color.withValues(alpha: 0.15),
+        child: Text(
+          '${item.compliancePct}%',
+          style: TextStyle(
+            color: color,
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+          ),
         ),
-        title: Text(item.alunoNome),
-        subtitle: Text('${item.checksSemana} checks na semana'),
-        trailing: Icon(
-          item.compliancePct >= 70
-              ? Icons.trending_up
-              : Icons.trending_down,
-          color: color,
-        ),
+      ),
+      subtitle: Text('${item.checksSemana} checks na semana'),
+      trailing: Icon(
+        item.compliancePct >= 70
+            ? Icons.trending_up_rounded
+            : Icons.trending_down_rounded,
+        color: color,
       ),
     );
   }

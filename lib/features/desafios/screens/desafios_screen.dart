@@ -4,8 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 
 
-import '../../../core/theme/design_tokens.dart';
-
 import '../../../core/theme/tokens_strip.dart';
 
 import '../../../core/utils/friendly_error.dart';
@@ -338,35 +336,23 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
 
                                 button: true,
 
-                                child: Card(
+                                child: FxSatelliteListTile(
 
-                                  child: ListTile(
+                                  title: d.titulo,
 
-                                    leading: Icon(
+                                  titleCase: false,
 
-                                      Icons.emoji_events_outlined,
+                                  onTap: () => _abrirLeaderboard(d),
 
-                                      color: scheme.primary,
+                                  leading: Icon(
 
-                                    ),
+                                    Icons.emoji_events_outlined,
 
-                                    title: Text(
-
-                                      d.titulo,
-
-                                      style: AppTypography.inter(
-
-                                        fontWeight: FontWeight.w700,
-
-                                      ),
-
-                                    ),
-
-                                    subtitle: Text('${d.tipo} · meta ${d.metaPontos} pts'),
-
-                                    onTap: () => _abrirLeaderboard(d),
+                                    color: scheme.primary,
 
                                   ),
+
+                                  subtitle: Text('${d.tipo} · meta ${d.metaPontos} pts'),
 
                                 ),
 

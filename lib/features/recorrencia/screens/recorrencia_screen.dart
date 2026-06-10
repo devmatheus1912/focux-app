@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -110,7 +112,12 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     return FxShellScaffold(
-      appBar: FxShellAppBar(title: 'Recorrência MP', onBack: () => context.pop()),
+      useMesh: true,
+      appBar: FxShellAppBar(
+        title: 'Recorrência MP',
+        subtitle: 'Assinaturas Mercado Pago',
+        onBack: () => context.pop(),
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _criar,
         icon: const Icon(Icons.add),
@@ -121,33 +128,46 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
           : RefreshIndicator(
               onRefresh: _load,
               child: _items.isEmpty
-                  ? ListView(children: const [
-                      SizedBox(height: 120),
-                      Center(child: Text('Nenhuma assinatura recorrente ainda.')),
-                    ])
+                  ? ListView(
+                    children: const [
+                      SizedBox(height: 48),
+                      FxEmptyState(
+                        icon: 'credit-card',
+                        title: 'Nenhuma assinatura ainda',
+                        subtitle:
+                            'Crie a primeira recorrência para cobrar seus alunos via Mercado Pago.',
+                      ),
+                    ],
+                  )
                   : ListView.separated(
                       padding: const EdgeInsets.all(TokensStrip.s4),
                       itemCount: _items.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      separatorBuilder: (_, __) => const SizedBox(height: 2),
                       itemBuilder: (_, i) {
                         final item = _items[i];
-                        return Card(
-                          child: ListTile(
-                            title: Text(item.alunoNome ?? 'Aluno #${item.alunoId}'),
-                            subtitle: Text(
-                              'R\$ ${item.valor.toStringAsFixed(0)} · ${item.status}'
-                              '${item.proximaCobranca != null ? ' · Próx: ${item.proximaCobranca}' : ''}',
-                            ),
-                            trailing: item.initPoint != null && item.status == 'PENDENTE'
-                                ? IconButton(
-                                    icon: Icon(Icons.link, color: primary),
+                        final pendente = item.status == 'PENDENTE';
+                        return FxSatelliteListTile(
+                          title: item.alunoNome ?? 'Aluno #${item.alunoId}',
+                          accent: pendente ? EagleTokens.warn : null,
+                          subtitle: Text(
+                            'R\$ ${item.valor.toStringAsFixed(0)} · ${item.status}'
+                            '${item.proximaCobranca != null ? ' · Próx: ${item.proximaCobranca}' : ''}',
+                          ),
+                          trailing:
+                              item.initPoint != null && pendente
+                                  ? IconButton(
+                                    icon: Icon(Icons.link_rounded, color: primary),
                                     onPressed: () async {
                                       final uri = Uri.parse(item.initPoint!);
-                                      if (await canLaunchUrl(uri)) launchUrl(uri, mode: LaunchMode.externalApplication);
+                                      if (await canLaunchUrl(uri)) {
+                                        await launchUrl(
+                                          uri,
+                                          mode: LaunchMode.externalApplication,
+                                        );
+                                      }
                                     },
                                   )
-                                : null,
-                          ),
+                                  : null,
                         );
                       },
                     ),

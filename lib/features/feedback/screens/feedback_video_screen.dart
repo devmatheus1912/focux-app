@@ -174,56 +174,56 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                 itemCount: _feedbacks.length,
                 itemBuilder: (_, i) {
                   final f = _feedbacks[i];
-                  return Card(
+                  return FxSatelliteListTile(
                     margin: const EdgeInsets.only(bottom: 12),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.video_library,
-                        size: 36,
-                        color: primary,
-                      ),
-                      title: Text('Exercício #${f.exercicioId}'),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 4),
-                          Text('Comentário: ${f.comentario}'),
-                          if (f.aiScore != null) ...[
-                            const SizedBox(height: 4),
-                            Text('Score IA: ${f.aiScore}/100 · ${f.statusAnalise ?? ''}'),
-                          ],
-                          if (f.aiAnalise != null && f.aiAnalise!.isNotEmpty) ...[
-                            const SizedBox(height: 4),
-                            Text(f.aiAnalise!, maxLines: 2, overflow: TextOverflow.ellipsis),
-                          ],
+                    accent: primary,
+                    titleCase: false,
+                    title: 'Exercício #${f.exercicioId}',
+                    leading: Icon(
+                      Icons.video_library_rounded,
+                      size: 32,
+                      color: primary,
+                    ),
+                    isThreeLine: true,
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 4),
+                        Text('Comentário: ${f.comentario}'),
+                        if (f.aiScore != null) ...[
                           const SizedBox(height: 4),
                           Text(
-                            'Data: ${fxDateShort(f.criadoEm)}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: TokensStrip.textSecondary,
-                            ),
+                            'Score IA: ${f.aiScore}/100 · ${f.statusAnalise ?? ''}',
                           ),
                         ],
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.open_in_new),
-                            tooltip: 'Assistir vídeo',
-                            onPressed: () => _abrirVideo(f.videoUrl),
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.delete,
-                              color: EagleTokens.bad,
-                            ),
-                            onPressed: () => _deletar(f.id),
+                        if (f.aiAnalise != null && f.aiAnalise!.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            f.aiAnalise!,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
-                      ),
-                      isThreeLine: true,
+                        const SizedBox(height: 4),
+                        Text('Data: ${fxDateShort(f.criadoEm)}'),
+                      ],
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.open_in_new_rounded),
+                          tooltip: 'Assistir vídeo',
+                          onPressed: () => _abrirVideo(f.videoUrl),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.delete_outline_rounded,
+                            color: EagleTokens.bad,
+                          ),
+                          onPressed: () => _deletar(f.id),
+                        ),
+                      ],
                     ),
                   );
                 },

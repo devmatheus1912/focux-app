@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -72,19 +73,24 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
                       separatorBuilder: (_, __) => const SizedBox(height: 8),
                       itemBuilder: (_, i) {
                         final a = _aulas[i];
-                        return Card(
-                          child: ListTile(
-                            title: Text(a.titulo),
-                            subtitle: Text('${_fmt(a.inicio)} · ${a.inscritos}/${a.capacidadeMax}'
-                                '${a.localAula != null ? ' · ${a.localAula}' : ''}'),
-                            trailing: a.lotada
-                                ? const Text('Lotada')
-                                : FilledButton(
+                        return FxSatelliteListTile(
+                          title: a.titulo,
+                          titleCase: false,
+                          accent: a.lotada ? EagleTokens.warn : primary,
+                          subtitle: Text(
+                            '${_fmt(a.inicio)} · ${a.inscritos}/${a.capacidadeMax}'
+                            '${a.localAula != null ? ' · ${a.localAula}' : ''}',
+                          ),
+                          trailing:
+                              a.lotada
+                                  ? const Text('Lotada')
+                                  : FilledButton(
                                     onPressed: () => _inscrever(a),
-                                    style: FilledButton.styleFrom(backgroundColor: primary),
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: primary,
+                                    ),
                                     child: const Text('Inscrever'),
                                   ),
-                          ),
                         );
                       },
                     ),

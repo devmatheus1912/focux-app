@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -75,9 +77,13 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
   @override
   Widget build(BuildContext context) {
     final snap = _snapshot;
+    final primary = Theme.of(context).colorScheme.primary;
+
     return FxShellScaffold(
+      useMesh: true,
       appBar: FxShellAppBar(
         title: 'Recuperação de pagamentos',
+        subtitle: 'Falhas e taxa de recuperação',
         onBack: () => context.pop(),
       ),
       body: _loading
@@ -88,31 +94,24 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
                 padding: const EdgeInsets.all(TokensStrip.s4),
                 children: [
                   if (snap != null)
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Taxa de recuperação: ${snap.recoveryRate.toStringAsFixed(1)}%',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 16,
-                              ),
+                    FxSatellitePanel(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Taxa de recuperação: ${snap.recoveryRate.toStringAsFixed(1)}%',
+                            style: AppTypography.inter(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                              color: fxScreenInk(context),
                             ),
-                            const SizedBox(height: 6),
-                            Text(
-                              '${snap.abertas} falhas em aberto · ${snap.recuperadas} recuperadas de ${snap.total}',
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withValues(alpha: 0.7),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '${snap.abertas} falhas em aberto · ${snap.recuperadas} recuperadas de ${snap.total}',
+                            style: TextStyle(color: fxScreenMute(context)),
+                          ),
+                        ],
                       ),
                     ),
                   const SizedBox(height: 12),
@@ -122,39 +121,39 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
                   ),
                   const SizedBox(height: 8),
                   if (_falhas.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 32),
-                      child: Center(
-                        child: Text('Nenhuma falha de pagamento em aberto.'),
-                      ),
+                    const FxEmptyState(
+                      icon: 'check-circle',
+                      title: 'Tudo em dia',
+                      subtitle: 'Nenhuma falha de pagamento em aberto.',
                     )
                   else
                     ..._falhas.map((f) {
                       final recuperando = _marcandoId == f.id;
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: ListTile(
-                          title: Text(f.contexto),
-                          subtitle: Text(
-                            [
-                              if (f.motivo != null && f.motivo!.isNotEmpty)
-                                f.motivo!,
-                              if (f.valor != null)
-                                'R\$ ${f.valor!.toStringAsFixed(2)}',
-                              if (f.alunoId != null) 'Aluno #${f.alunoId}',
-                              'Tentativa ${f.tentativa}',
-                            ].join(' · '),
-                          ),
-                          trailing: FilledButton.tonal(
-                            onPressed:
-                                recuperando
-                                    ? null
-                                    : () => _marcarRecuperado(f),
-                            child:
-                                recuperando
-                                    ? const FxLoading(size: 18, strokeWidth: 2)
-                                    : const Text('Recuperado'),
-                          ),
+                      return FxSatelliteListTile(
+                        accent: EagleTokens.bad,
+                        title: f.contexto,
+                        titleCase: false,
+                        subtitle: Text(
+                          [
+                            if (f.motivo != null && f.motivo!.isNotEmpty)
+                              f.motivo!,
+                            if (f.valor != null)
+                              'R\$ ${f.valor!.toStringAsFixed(2)}',
+                            if (f.alunoId != null) 'Aluno #${f.alunoId}',
+                            'Tentativa ${f.tentativa}',
+                          ].join(' · '),
+                        ),
+                        trailing: FilledButton.tonal(
+                          onPressed:
+                              recuperando ? null : () => _marcarRecuperado(f),
+                          child:
+                              recuperando
+                                  ? FxLoading(
+                                    size: 18,
+                                    strokeWidth: 2,
+                                    color: primary,
+                                  )
+                                  : const Text('Recuperado'),
                         ),
                       );
                     }),

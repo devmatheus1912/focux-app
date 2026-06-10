@@ -238,29 +238,27 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
 
                               button: true,
 
-                              child: Card(
+                              child: FxSatelliteListTile(
 
-                                child: ListTile(
+                                title: e.value.nome,
 
-                                  leading: Icon(
+                                titleCase: false,
 
-                                    Icons.bolt_outlined,
+                                leading: Icon(
 
-                                    color: scheme.primary,
+                                  Icons.bolt_outlined,
 
-                                  ),
+                                  color: scheme.primary,
 
-                                  title: Text(e.value.nome),
+                                ),
 
-                                  subtitle: Text(e.value.descricao),
+                                subtitle: Text(e.value.descricao),
 
-                                  trailing: FilledButton(
+                                trailing: FilledButton(
 
-                                    onPressed: () => _ativar(e.value),
+                                  onPressed: () => _ativar(e.value),
 
-                                    child: const Text('Ativar'),
-
-                                  ),
+                                  child: const Text('Ativar'),
 
                                 ),
 
@@ -316,21 +314,23 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
 
                                 label: 'Fluxo ${e.value.nome}, ${e.value.triggerTipo}',
 
-                                child: ListTile(
+                                child: FxSatelliteListTile(
+
+                                  title: e.value.nome,
+
+                                  titleCase: false,
 
                                   leading: Icon(
 
                                     e.value.ativo
 
-                                        ? Icons.play_circle
+                                        ? Icons.play_circle_rounded
 
-                                        : Icons.pause_circle,
+                                        : Icons.pause_circle_rounded,
 
                                     color: scheme.primary,
 
                                   ),
-
-                                  title: Text(e.value.nome),
 
                                   subtitle: Text(e.value.triggerTipo),
 

@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/fx_utils.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/captura_repository.dart';
 
@@ -38,8 +44,10 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
         _leads = lista;
         _loading = false;
       });
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -63,51 +71,60 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
           : RefreshIndicator(
               onRefresh: _carregar,
               child: _leads.isEmpty
-                  ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(32),
-                        child: Text(
-                          'Nenhum lead chegou ainda.\nCompartilhe o link do seu storefront para começar a captar.',
-                          textAlign: TextAlign.center,
-                        ),
+                  ? ListView(
+                    children: const [
+                      SizedBox(height: 48),
+                      FxEmptyState(
+                        icon: 'users',
+                        title: 'Nenhum lead ainda',
+                        subtitle:
+                            'Compartilhe o link do seu storefront para começar a captar contatos.',
                       ),
-                    )
+                    ],
+                  )
                   : ListView.builder(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(TokensStrip.s4),
                       itemCount: _leads.length,
                       itemBuilder: (_, i) {
                         final l = _leads[i];
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: l.convertido
-                                  ? Colors.green
-                                  : Theme.of(context).colorScheme.primary,
-                              child: Text(
-                                l.nome.isEmpty
-                                    ? '?'
-                                    : l.nome[0].toUpperCase(),
-                                style: const TextStyle(color: Colors.white),
+                        final primary = Theme.of(context).colorScheme.primary;
+                        final nome = fxTitleCaseName(l.nome);
+                        return FxSatelliteListTile(
+                          title: nome,
+                          accent: l.convertido ? EagleTokens.good : primary,
+                          leading: CircleAvatar(
+                            backgroundColor:
+                                l.convertido
+                                    ? EagleTokens.goodSoft
+                                    : primary.withValues(alpha: 0.14),
+                            foregroundColor:
+                                l.convertido ? EagleTokens.good : primary,
+                            child: Text(
+                              l.nome.isEmpty ? '?' : fxInitials(nome),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 12,
                               ),
                             ),
-                            title: Text(l.nome),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (l.telefone != null && l.telefone!.isNotEmpty)
-                                  Text('Tel: ${l.telefone}'),
-                                if (l.email != null && l.email!.isNotEmpty)
-                                  Text('E-mail: ${l.email}'),
-                                if (l.objetivo != null &&
-                                    l.objetivo!.isNotEmpty)
-                                  Text('Objetivo: ${l.objetivo}'),
-                              ],
-                            ),
-                            trailing: l.convertido
-                                ? const Icon(Icons.check_circle,
-                                    color: Colors.green)
-                                : Row(
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (l.telefone != null && l.telefone!.isNotEmpty)
+                                Text('Tel: ${l.telefone}'),
+                              if (l.email != null && l.email!.isNotEmpty)
+                                Text('E-mail: ${l.email}'),
+                              if (l.objetivo != null && l.objetivo!.isNotEmpty)
+                                Text('Objetivo: ${l.objetivo}'),
+                            ],
+                          ),
+                          trailing:
+                              l.convertido
+                                  ? const Icon(
+                                    Icons.check_circle_rounded,
+                                    color: EagleTokens.good,
+                                  )
+                                  : Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       if (l.email != null &&
@@ -146,7 +163,6 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
                                       ),
                                     ],
                                   ),
-                          ),
                         );
                       },
                     ),

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../theme/design_tokens.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
+import '../utils/fx_utils.dart';
 import 'cinematic_mesh_background.dart';
 import 'fx_glass_surface.dart';
 import 'fx_icon.dart';
@@ -234,6 +236,105 @@ Widget fxListTileCardShell({
       child: child,
     ),
   );
+}
+
+/// Premium panel for satellite screens (replaces raw [Card]).
+class FxSatellitePanel extends StatelessWidget {
+  const FxSatellitePanel({
+    super.key,
+    required this.child,
+    this.accent,
+    this.padding = const EdgeInsets.all(16),
+    this.margin,
+    this.radius = 20,
+  });
+
+  final Widget child;
+  final Color? accent;
+  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? margin;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: margin,
+      padding: padding,
+      decoration: fxListCardDecoration(
+        context,
+        accent: accent ?? Theme.of(context).colorScheme.primary,
+        radius: radius,
+      ),
+      child: child,
+    );
+  }
+}
+
+/// Premium list row for satellite screens (replaces [Card] + [ListTile]).
+class FxSatelliteListTile extends StatelessWidget {
+  const FxSatelliteListTile({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.leading,
+    this.trailing,
+    this.onTap,
+    this.accent,
+    this.margin = const EdgeInsets.only(bottom: 10),
+    this.isThreeLine = false,
+    this.titleCase = true,
+  });
+
+  final String title;
+  final Widget? subtitle;
+  final Widget? leading;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+  final Color? accent;
+  final EdgeInsetsGeometry margin;
+  final bool isThreeLine;
+  final bool titleCase;
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
+    final displayTitle = titleCase ? fxTitleCaseName(title) : title;
+
+    return fxListTileCardShell(
+      context: context,
+      margin: margin,
+      accent: accent,
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+        isThreeLine: isThreeLine,
+        onTap: onTap,
+        leading: leading,
+        trailing: trailing,
+        title: Text(
+          displayTitle,
+          style: AppTypography.inter(
+            fontWeight: FontWeight.w700,
+            fontSize: 15,
+            color: ink,
+            letterSpacing: -0.15,
+          ),
+        ),
+        subtitle:
+            subtitle == null
+                ? null
+                : DefaultTextStyle(
+                  style: TextStyle(
+                    fontSize: 12,
+                    height: 1.35,
+                    color: mute,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  child: subtitle!,
+                ),
+      ),
+    );
+  }
 }
 
 Color fxScreenInk(BuildContext context) => ShellChrome.of(context).ink;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -108,15 +109,22 @@ class _GrupoAulasPersonalScreenState extends ConsumerState<GrupoAulasPersonalScr
                       itemBuilder: (_, i) {
                         final a = _aulas[i];
                         final lotada = a.inscritos >= a.capacidadeMax;
-                        return Card(
-                          child: ListTile(
-                            title: Text(a.titulo),
-                            subtitle: Text('${_fmt(a.inicio)} · ${a.inscritos}/${a.capacidadeMax}'
-                                '${a.localAula != null ? ' · ${a.localAula}' : ''}'),
-                            trailing: lotada
-                                ? const Chip(label: Text('Lotada'))
-                                : Chip(label: Text('${a.capacidadeMax - a.inscritos} vagas')),
+                        return FxSatelliteListTile(
+                          title: a.titulo,
+                          titleCase: false,
+                          accent: lotada ? EagleTokens.warn : null,
+                          subtitle: Text(
+                            '${_fmt(a.inicio)} · ${a.inscritos}/${a.capacidadeMax}'
+                            '${a.localAula != null ? ' · ${a.localAula}' : ''}',
                           ),
+                          trailing:
+                              lotada
+                                  ? const Chip(label: Text('Lotada'))
+                                  : Chip(
+                                    label: Text(
+                                      '${a.capacidadeMax - a.inscritos} vagas',
+                                    ),
+                                  ),
                         );
                       },
                     ),
