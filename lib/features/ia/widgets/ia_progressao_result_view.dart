@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/motion_preferences.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../models/ia_progressao_carga_result.dart';
 import '../utils/ia_progressao_result_parser.dart';
 import 'ia_expandable_copy.dart';
@@ -110,8 +110,11 @@ class IaProgressaoResultView extends StatelessWidget {
   ) async {
     await Clipboard.setData(ClipboardData(text: parsed.toPlainText()));
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Sugestão copiada para a área de transferência.')),
+    FeedbackHelper.showSnackBar(
+      context,
+      const SnackBar(
+        content: Text('Sugestão copiada para a área de transferência.'),
+      ),
     );
   }
 }

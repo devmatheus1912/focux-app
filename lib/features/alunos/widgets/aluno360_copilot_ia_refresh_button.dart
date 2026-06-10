@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../ia/data/ia_repository.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_copilot_ia_cache_store.dart';
@@ -114,13 +115,10 @@ class Aluno360CopilotIaRefreshButtonState
           ),
           icon:
               _refreshing
-                  ? SizedBox(
-                    width: iconSize,
-                    height: iconSize,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: widget.primary,
-                    ),
+                  ? FxLoading(
+                    size: iconSize,
+                    strokeWidth: 2,
+                    color: widget.primary,
                   )
                   : Icon(Icons.refresh_rounded, size: iconSize),
           label: Text(
@@ -144,13 +142,10 @@ class Aluno360CopilotIaRefreshButtonState
         constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
         icon:
             _refreshing
-                ? SizedBox(
-                  width: iconSize,
-                  height: iconSize,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: widget.primary,
-                  ),
+                ? FxLoading(
+                  size: iconSize,
+                  strokeWidth: 2,
+                  color: widget.primary,
                 )
                 : Icon(Icons.refresh_rounded, size: iconSize),
         tooltip: _refreshing ? 'Atualizando…' : 'Regenerar sugestão com IA',

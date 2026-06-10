@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/aluno_repository.dart';
 
@@ -151,11 +152,11 @@ class _AlunoDeleteConfirmSheetState extends State<AlunoDeleteConfirmSheet> {
                 isDense: true,
                 filled: true,
                 fillColor: EagleTokens.bad.withValues(alpha: isDark ? 0.08 : 0.05),
-                enabledBorder: OutlineInputBorder(
+                enabledBorder: FxInputDeco.outlineBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: line),
                 ),
-                focusedBorder: OutlineInputBorder(
+                focusedBorder: FxInputDeco.outlineBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
                     color: EagleTokens.bad.withValues(alpha: 0.45),

@@ -30,10 +30,10 @@ void main() {
   test('command center low severity follows active primary color', () {
     final commandCenter =
         File(
-          'lib/features/dashboard/screens/personal_dashboard_screen.dart',
+          'lib/features/dashboard/widgets/dashboard_command_center_section.dart',
         ).readAsStringSync();
 
-    expect(commandCenter, contains('_CommandActionTone.primary => primary'));
+    expect(commandCenter, contains('CommandActionTone.primary => primary'));
     expect(commandCenter, isNot(contains('return const Color(0xFF2563EB);')));
   });
 

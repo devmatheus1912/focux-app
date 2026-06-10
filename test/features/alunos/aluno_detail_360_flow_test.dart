@@ -5,7 +5,6 @@ import 'package:focux_app/features/alertas/data/alertas_repository.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
 import 'package:focux_app/features/alunos/providers/aluno_followup_provider.dart';
-import 'package:focux_app/features/alunos/providers/aluno_timeline360_paged_provider.dart';
 import 'package:focux_app/features/alunos/providers/alunos_provider.dart';
 import 'package:focux_app/features/alunos/screens/aluno_detail_screen.dart';
 import 'package:go_router/go_router.dart';

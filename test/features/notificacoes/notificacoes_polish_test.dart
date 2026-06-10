@@ -1,12 +1,12 @@
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
+
+import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('notificacoes usa polish 10/10: inbox, a11y e feedback', () {
-    final screen = File(
+    final screen = readScreenSourceBundle(
       'lib/features/notificacoes/screens/notificacoes_screen.dart',
-    ).readAsStringSync();
+    );
 
     expect(screen, contains("subtitle: 'INBOX'"));
     expect(screen, contains('formatDisplayName'));

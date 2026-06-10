@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../ia/data/ia_repository.dart';
 import '../../treinos/providers/treinos_provider.dart';
@@ -123,14 +124,7 @@ class _Aluno360CopilotExecutarAcaoButtonState
           onPressed: _executing ? null : _executar,
           icon:
               _executing
-                  ? SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: widget.primary,
-                    ),
-                  )
+                  ? FxLoading(size: 16, strokeWidth: 2, color: widget.primary)
                   : Icon(spec.icon, size: 16),
           label: Text(
             _executing ? spec.executingLabel : spec.label,

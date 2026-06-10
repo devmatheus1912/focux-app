@@ -176,7 +176,7 @@ class _TierGlowWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!enabled || TokensStrip.prefersReducedMotion(context)) return child;
-    final isBrand = color == TokensStrip.primary || color == EagleTokens.brand;
+    final isBrand = color == TokensStrip.primary;
     final s = (isBrand ? 0.28 : 0.14) * strength.clamp(0.0, 1.0);
     return DecoratedBox(
       decoration: BoxDecoration(

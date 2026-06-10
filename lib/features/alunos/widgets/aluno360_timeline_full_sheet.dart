@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
@@ -70,7 +71,7 @@ class Aluno360TimelineFullSheet extends ConsumerWidget {
                 24 + MediaQuery.of(ctx).padding.bottom,
               ),
               child: pagedAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: FxLoading()),
                 error:
                     (_, __) => Center(
                       child: Text(
@@ -152,13 +153,7 @@ class Aluno360TimelineFullSheet extends ConsumerWidget {
                           return const Padding(
                             padding: EdgeInsets.symmetric(vertical: 12),
                             child: Center(
-                              child: SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              ),
+                              child: FxLoading(size: 22, strokeWidth: 2),
                             ),
                           );
                         }

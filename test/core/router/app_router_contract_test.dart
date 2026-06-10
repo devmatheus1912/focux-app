@@ -195,10 +195,9 @@ void main() {
   test('residual back controls keep safe fallbacks', () {
     final featureGate =
         File('lib/core/widgets/feature_gate.dart').readAsStringSync();
-    final alunosList =
-        File(
-          'lib/features/alunos/screens/alunos_list_screen.dart',
-        ).readAsStringSync();
+    final alunosList = readScreenSourceBundle(
+      'lib/features/alunos/screens/alunos_list_screen.dart',
+    );
     final acoesMassa =
         File(
           'lib/features/alunos/screens/acoes_massa_screen.dart',

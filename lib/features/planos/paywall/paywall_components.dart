@@ -13,6 +13,7 @@ import '../../subscription/store_subscription_policy.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../../subscription/subscription_products.dart';
 import '../../../core/widgets/fx_glass_surface.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
 import 'paywall_catalog.dart';
 import 'paywall_glass.dart';

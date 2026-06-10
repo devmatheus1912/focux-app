@@ -1,5 +1,4 @@
 import '../data/aluno_repository.dart';
-import 'aluno_display_utils.dart';
 
 String cleanCopilotText(String value) {
   return value

@@ -101,7 +101,9 @@ class _PaywallRoiCalculatorState extends State<PaywallRoiCalculator> {
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       labelText: 'Mensalidade média (R\$)',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: FxInputDeco.outlineBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     controller: _feeController,
                     onChanged: (v) {

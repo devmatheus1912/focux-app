@@ -396,7 +396,6 @@ void main() {
         'Completar perfil base',
         'Oi',
       ];
-      final bodies = ['Visualizado', 'Visualizado', 'Oi'];
       final deduped = dedupeAutonomiaTimelineByTask(
         List.generate(3, (i) => i),
         kindOf: (i) => kinds[i],

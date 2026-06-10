@@ -1,4 +1,6 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -183,11 +185,7 @@ class _ProgressaoAceitarScreenState extends ConsumerState<ProgressaoAceitarScree
                                     ? null
                                     : () => _confirmarRejeicao(args, sugestao),
                                 icon: busy
-                                    ? const SizedBox(
-                                        width: 18,
-                                        height: 18,
-                                        child: CircularProgressIndicator(strokeWidth: 2),
-                                      )
+                                    ? const FxLoading(size: 18, strokeWidth: 2)
                                     : const Icon(Icons.close_rounded, size: 18),
                                 label: const Text('Rejeitar'),
                                 style: OutlinedButton.styleFrom(
@@ -207,13 +205,10 @@ class _ProgressaoAceitarScreenState extends ConsumerState<ProgressaoAceitarScree
                                     ? null
                                     : () => _acao(args, sugestao, aceitar: true),
                                 icon: busy
-                                    ? const SizedBox(
-                                        width: 18,
-                                        height: 18,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
+                                    ? const FxLoading(
+                                        size: 18,
+                                        strokeWidth: 2,
+                                        color: Colors.white,
                                       )
                                     : const Icon(Icons.check_rounded, size: 18),
                                 label: const Text('Aceitar'),
@@ -276,7 +271,7 @@ class _ProgressaoAceitarScreenState extends ConsumerState<ProgressaoAceitarScree
         final response = await repo.aceitarSugestao(sugestao.id);
         ref.invalidate(progressaoSugestoesProvider(args.alunoId));
         if (!mounted) return;
-        await HapticFeedback.mediumImpact();
+        unawaited(HapticFeedback.mediumImpact());
         setState(() => _successBanner = response.mensagem);
         FeedbackHelper.showSnackBar(
           context,

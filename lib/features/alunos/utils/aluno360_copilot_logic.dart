@@ -8,7 +8,6 @@ import '../utils/aluno_display_utils.dart';
 export 'aluno360_copilot_executar_logic.dart';
 export 'aluno360_copilot_outreach_logic.dart';
 export 'aluno360_copilot_text_logic.dart';
-import 'aluno360_copilot_executar_logic.dart';
 import 'aluno360_copilot_outreach_logic.dart';
 import 'aluno360_copilot_text_logic.dart';
 
