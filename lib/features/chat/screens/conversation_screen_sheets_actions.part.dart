@@ -20,12 +20,10 @@ void _showMessageActions(ChatMsg msg) {
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(TokensStrip.rXl),
-              child: DecoratedBox(
-                decoration: fxListCardDecoration(
-                  context,
-                  accent: primary,
-                  radius: TokensStrip.rXl,
-                ),
+              child: fxListTileCardShell(
+                context: context,
+                accent: primary,
+                radius: TokensStrip.rXl,
                 child: SafeArea(
                   child: ConstrainedBox(
                     constraints: BoxConstraints(

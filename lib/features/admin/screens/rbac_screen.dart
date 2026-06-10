@@ -100,9 +100,9 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
             padding: const EdgeInsets.all(TokensStrip.s4),
             itemBuilder: (ctx, i) {
               final p = permissoes[i];
-              return Container(
+              return fxListTileCardShell(
+                context: ctx,
                 margin: const EdgeInsets.only(bottom: 12),
-                decoration: fxListCardDecoration(ctx),
                 child: ListTile(
                   leading: CircleAvatar(
                     backgroundColor:

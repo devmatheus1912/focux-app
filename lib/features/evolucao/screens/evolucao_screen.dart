@@ -586,12 +586,11 @@ class _CardRecorde extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        decoration: fxListCardDecoration(context, accent: primary),
-        child: ListTile(
+    return fxListTileCardShell(
+      context: context,
+      margin: const EdgeInsets.only(bottom: 10),
+      accent: primary,
+      child: ListTile(
           leading: Container(
             width: 44,
             height: 44,
@@ -631,7 +630,6 @@ class _CardRecorde extends StatelessWidget {
             ),
           ),
         ),
-      ),
     );
   }
 }

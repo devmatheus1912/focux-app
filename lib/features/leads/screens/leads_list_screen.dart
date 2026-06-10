@@ -357,9 +357,10 @@ class _KanbanCard extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
-    return Container(
+    return fxListTileCardShell(
+      context: context,
       margin: const EdgeInsets.only(bottom: 8),
-      decoration: fxListCardDecoration(context, accent: color),
+      accent: color,
       child: ListTile(
         onTap: onTap,
         contentPadding: const EdgeInsets.fromLTRB(12, 4, 8, 4),

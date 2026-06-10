@@ -129,8 +129,8 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8),
-                  child: DecoratedBox(
-                    decoration: fxListCardDecoration(context),
+                  child: fxListTileCardShell(
+                    context: context,
                     child: ListTile(
                       leading: _statusIcon(result),
                       title: Text(

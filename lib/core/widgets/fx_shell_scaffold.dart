@@ -210,6 +210,32 @@ BoxDecoration fxListCardDecoration(
   return chrome.panel(radius: radius, accent: accent);
 }
 
+/// Card shell for [ListTile] — Material inside decoration so ink splashes render.
+Widget fxListTileCardShell({
+  required BuildContext context,
+  required Widget child,
+  Color? accent,
+  double radius = TokensStrip.rCard,
+  bool selected = false,
+  EdgeInsetsGeometry? margin,
+  Clip clipBehavior = Clip.antiAlias,
+}) {
+  return Container(
+    margin: margin,
+    decoration: fxListCardDecoration(
+      context,
+      accent: accent,
+      radius: radius,
+      selected: selected,
+    ),
+    clipBehavior: clipBehavior,
+    child: Material(
+      color: Colors.transparent,
+      child: child,
+    ),
+  );
+}
+
 Color fxScreenInk(BuildContext context) => ShellChrome.of(context).ink;
 
 Color fxScreenMute(BuildContext context) => ShellChrome.of(context).mute;
