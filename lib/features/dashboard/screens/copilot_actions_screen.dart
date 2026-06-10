@@ -12,6 +12,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 final iaActionsProvider = FutureProvider.family<List<FilaAcaoResumo>, String>((
@@ -98,21 +99,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
             Expanded(
               child: actionsAsync.when(
                 loading:
-                    () => ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(
-                        TokensStrip.s4,
-                        10,
-                        TokensStrip.s4,
-                        120,
-                      ),
-                      itemCount: 5,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
-                      itemBuilder:
-                          (_, __) => Container(
-                            height: 94,
-                            decoration: fxListCardDecoration(context),
-                          ),
-                    ),
+                    () => const Center(child: FxLoading()),
                 error:
                     (_, __) => _IaActionsEmpty(
                       title: 'Não foi possível carregar',

@@ -53,7 +53,7 @@ class _LiveBrandHero extends StatelessWidget {
               height: 120,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.08),
+                color: heroTealSurface(0.08),
               ),
             ),
           ),
@@ -80,10 +80,10 @@ class _LiveBrandHero extends StatelessWidget {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.14),
+                    color: heroTealSurface(0.14),
                     borderRadius: BorderRadius.circular(999),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.22),
+                      color: heroTealSurface(0.22),
                     ),
                   ),
                   child: Row(
@@ -101,7 +101,7 @@ class _LiveBrandHero extends StatelessWidget {
                       Text(
                         'Preview ao vivo · $paletteName',
                         style: AppTypography.inter(
-                          color: Colors.white.withValues(alpha: 0.92),
+                          color: heroTealSurface(0.92),
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.3,
@@ -115,7 +115,7 @@ class _LiveBrandHero extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 28,
-                      backgroundColor: Colors.white.withValues(alpha: 0.16),
+                      backgroundColor: heroTealSurface(0.16),
                       backgroundImage:
                           logoUrl != null && logoUrl!.isNotEmpty
                               ? NetworkImage(logoUrl!)
@@ -125,7 +125,7 @@ class _LiveBrandHero extends StatelessWidget {
                               ? Text(
                                 name.isNotEmpty ? name[0].toUpperCase() : 'P',
                                 style: AppTypography.inter(
-                                  color: Colors.white,
+                                  color: heroTealInk(),
                                   fontWeight: FontWeight.w800,
                                   fontSize: 22,
                                 ),
@@ -142,7 +142,7 @@ class _LiveBrandHero extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppTypography.inter(
-                              color: Colors.white,
+                              color: heroTealInk(),
                               fontWeight: FontWeight.w800,
                               fontSize: 20,
                               letterSpacing: -0.5,
@@ -157,7 +157,7 @@ class _LiveBrandHero extends StatelessWidget {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: AppTypography.inter(
-                              color: Colors.white.withValues(alpha: 0.82),
+                              color: heroTealSurface(0.82),
                               fontSize: 12.5,
                               height: 1.3,
                               fontWeight: FontWeight.w500,
@@ -224,7 +224,7 @@ class _LogoUploadRing extends StatelessWidget {
               shape: BoxShape.circle,
               color: ShellChrome.of(context).cardFill,
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.65),
+                color: heroTealSurface(0.65),
                 width: 2,
               ),
             ),
@@ -252,7 +252,7 @@ class _LogoUploadRing extends StatelessWidget {
               decoration: BoxDecoration(
                 color: primary,
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
+                border: Border.all(color: heroTealInk(), width: 2),
                 boxShadow: [
                   BoxShadow(
                     color: primary.withValues(alpha: 0.4),
@@ -262,14 +262,14 @@ class _LogoUploadRing extends StatelessWidget {
               ),
               child:
                   uploading
-                      ? const Padding(
-                        padding: EdgeInsets.all(7),
-                        child: FxLoading(strokeWidth: 2, color: Colors.white),
+                      ? Padding(
+                        padding: const EdgeInsets.all(7),
+                        child: FxLoading(strokeWidth: 2, color: heroTealInk()),
                       )
-                      : const Icon(
+                      : Icon(
                         Icons.photo_camera_outlined,
                         size: 16,
-                        color: Colors.white,
+                        color: heroTealInk(),
                       ),
             ),
           ),
@@ -304,7 +304,7 @@ class _CuratedPaletteGrid extends StatelessWidget {
         final isSelected = palette.id == selected.id;
 
         return Material(
-          color: Colors.transparent,
+          color: fxTransparent,
           child: InkWell(
             onTap: onSelect == null ? null : () => onSelect!(palette),
             borderRadius: BorderRadius.circular(18),
@@ -363,9 +363,9 @@ class _CuratedPaletteGrid extends StatelessWidget {
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
                                   colors: [
-                                    Colors.white.withValues(alpha: 0.14),
-                                    Colors.transparent,
-                                    Colors.black.withValues(alpha: 0.08),
+                                    heroTealSurface(0.14),
+                                    fxTransparent,
+                                    heroScrim(0.08),
                                   ],
                                 ),
                               ),
@@ -378,13 +378,11 @@ class _CuratedPaletteGrid extends StatelessWidget {
                                 margin: const EdgeInsets.all(6),
                                 padding: const EdgeInsets.all(3),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: heroTealInk(),
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.15,
-                                      ),
+                                      color: heroScrim(0.15),
                                       blurRadius: 6,
                                     ),
                                   ],

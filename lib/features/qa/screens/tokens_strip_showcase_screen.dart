@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../dashboard/utils/dashboard_readability.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -732,7 +733,7 @@ class _TabsPanel extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2),
         child: Material(
-          color: Colors.transparent,
+          color: fxTransparent,
           child: InkWell(
             onTap: disabled ? null : () => onChanged(i),
             borderRadius: BorderRadius.circular(TokensStrip.rButton),
@@ -743,7 +744,7 @@ class _TabsPanel extends StatelessWidget {
                     selected && filled
                         ? TokensStrip.primaryButtonGradient(primary)
                         : null,
-                color: selected && filled ? null : Colors.transparent,
+                color: selected && filled ? null : fxTransparent,
                 borderRadius: BorderRadius.circular(TokensStrip.rButton),
                 boxShadow:
                     selected && filled
@@ -826,7 +827,7 @@ class _MiniCalendar extends StatelessWidget {
         height: 28,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: is10 ? primary : (is13 ? Colors.transparent : null),
+          color: is10 ? primary : (is13 ? fxTransparent : null),
           shape: BoxShape.circle,
           border: is13 ? Border.all(color: primary, width: 2) : null,
         ),
@@ -928,7 +929,7 @@ class _DropdownPanel extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: heroTealInk(),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: borderColor),
       ),
@@ -1181,7 +1182,7 @@ class _SpecCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: heroTealInk(),
         borderRadius: BorderRadius.circular(TokensStrip.rCard),
         boxShadow: [
           ...TokensStrip.cardShadow(),

@@ -12,7 +12,7 @@ class _RemoveExerciseSheet extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final border =
         isDark
-            ? Colors.white.withValues(alpha: 0.08)
+            ? heroTealSurface(0.08)
             : TokensStrip.borderDefault.withValues(alpha: 0.9);
     final dangerFill = EagleTokens.badSoft;
 
@@ -112,7 +112,7 @@ class _RemoveExerciseSheet extends StatelessWidget {
                       style: FilledButton.styleFrom(
                         minimumSize: const Size.fromHeight(48),
                         backgroundColor: dangerFill,
-                        foregroundColor: Colors.white,
+                        foregroundColor: heroTealInk(),
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -122,7 +122,7 @@ class _RemoveExerciseSheet extends StatelessWidget {
                         'Remover',
                         style: AppTypography.inter(
                           fontWeight: FontWeight.w800,
-                          color: Colors.white,
+                          color: heroTealInk(),
                         ),
                       ),
                     ),
@@ -150,7 +150,7 @@ class _DeleteTrainingSheet extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final border =
         isDark
-            ? Colors.white.withValues(alpha: 0.08)
+            ? heroTealSurface(0.08)
             : TokensStrip.borderDefault.withValues(alpha: 0.9);
     final softBad = EagleTokens.bad.withValues(alpha: isDark ? 0.18 : 0.1);
 
@@ -228,7 +228,7 @@ class _DeleteTrainingSheet extends StatelessWidget {
                 decoration: BoxDecoration(
                   color:
                       isDark
-                          ? Colors.white.withValues(alpha: 0.05)
+                          ? heroTealSurface(0.05)
                           : EagleTokens.brandSoft.withValues(alpha: 0.42),
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(color: border),
@@ -283,7 +283,7 @@ class _DeleteTrainingSheet extends StatelessWidget {
                       style: FilledButton.styleFrom(
                         minimumSize: const Size.fromHeight(48),
                         backgroundColor: EagleTokens.bad,
-                        foregroundColor: Colors.white,
+                        foregroundColor: heroTealInk(),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
@@ -312,7 +312,7 @@ class _GridTexturePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
-          ..color = Colors.white.withValues(alpha: 0.06)
+          ..color = heroTealSurface(0.06)
           ..strokeWidth = 0.5
           ..style = PaintingStyle.stroke;
 

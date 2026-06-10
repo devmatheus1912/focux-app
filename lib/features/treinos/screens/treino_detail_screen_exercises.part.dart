@@ -75,8 +75,8 @@ class _TreinoExerciseReorderListState
   Future<void> _removeExercise(TreinoExercicioItem te) async {
     final confirm = await showModalBottomSheet<bool>(
       context: context,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.34),
+      backgroundColor: fxTransparent,
+      barrierColor: heroScrim(0.34),
       builder:
           (ctx) => _RemoveExerciseSheet(
             title: te.exercicio.nomeDisplay,
@@ -106,8 +106,8 @@ class _TreinoExerciseReorderListState
             final t = Curves.easeOut.transform(animation.value);
             return Material(
               elevation: 6 * t,
-              color: Colors.transparent,
-              shadowColor: Colors.black.withValues(alpha: 0.18),
+              color: fxTransparent,
+              shadowColor: heroScrim(0.18),
               borderRadius: BorderRadius.circular(TokensStrip.rCard),
               child: child,
             );
@@ -275,12 +275,12 @@ class _MenuActionTile extends StatelessWidget {
         color ?? (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
     final border =
         isDark
-            ? Colors.white.withValues(alpha: 0.06)
+            ? heroTealSurface(0.06)
             : TokensStrip.borderDefault.withValues(alpha: 0.95);
     final iconFill =
         color == null
             ? (isDark
-                ? Colors.white.withValues(alpha: 0.05)
+                ? heroTealSurface(0.05)
                 : EagleTokens.brandSofter)
             : EagleTokens.bad.withValues(alpha: isDark ? 0.16 : 0.10);
 
@@ -294,7 +294,7 @@ class _MenuActionTile extends StatelessWidget {
           decoration: BoxDecoration(
             color:
                 isDark
-                    ? Colors.white.withValues(alpha: 0.035)
+                    ? heroTealSurface(0.035)
                     : TokensStrip.cardBg,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: border),
@@ -303,7 +303,7 @@ class _MenuActionTile extends StatelessWidget {
                     ? null
                     : [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.018),
+                        color: heroScrim(0.018),
                         blurRadius: 18,
                         offset: const Offset(0, 10),
                       ),
@@ -368,7 +368,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
         widget.isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final border =
         widget.isDark
-            ? Colors.white.withValues(alpha: 0.08)
+            ? heroTealSurface(0.08)
             : TokensStrip.borderDefault.withValues(alpha: 0.95);
 
     return SafeArea(
@@ -388,7 +388,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                 decoration: BoxDecoration(
                   color:
                       widget.isDark
-                          ? Colors.white.withValues(alpha: 0.16)
+                          ? heroTealSurface(0.16)
                           : TokensStrip.borderDefault,
                   borderRadius: BorderRadius.circular(99),
                 ),
@@ -445,7 +445,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                   decoration: BoxDecoration(
                     color:
                         widget.isDark
-                            ? Colors.white.withValues(alpha: 0.04)
+                            ? heroTealSurface(0.04)
                             : TokensStrip.cardBg,
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(color: border),
@@ -495,8 +495,8 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                                   selected
                                       ? EagleTokens.brandSofter
                                       : widget.isDark
-                                      ? Colors.white.withValues(alpha: 0.03)
-                                      : Colors.white,
+                                      ? heroTealSurface(0.03)
+                                      : heroTealInk(),
                               borderRadius: BorderRadius.circular(18),
                               border: Border.all(
                                 color:
@@ -521,7 +521,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                                   child: Text(
                                     initials,
                                     style: AppTypography.inter(
-                                      color: selected ? Colors.white : primary,
+                                      color: selected ? heroTealInk() : primary,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w800,
                                     ),
@@ -652,7 +652,7 @@ class _TreinoHeroActions extends StatelessWidget {
       children: [
         Expanded(
           child: Material(
-            color: Colors.transparent,
+            color: fxTransparent,
             child: InkWell(
               onTap: onAdd,
               borderRadius: BorderRadius.circular(18),
@@ -694,7 +694,7 @@ class _TreinoHeroActions extends StatelessWidget {
         ),
         const SizedBox(width: 10),
         Material(
-          color: Colors.transparent,
+          color: fxTransparent,
           child: InkWell(
             onTap: onMenu,
             borderRadius: BorderRadius.circular(18),
@@ -704,7 +704,7 @@ class _TreinoHeroActions extends StatelessWidget {
               decoration: BoxDecoration(
                 color:
                     isDark
-                        ? Colors.white.withValues(alpha: 0.08)
+                        ? heroTealSurface(0.08)
                         : TokensStrip.cardBg,
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
@@ -713,7 +713,7 @@ class _TreinoHeroActions extends StatelessWidget {
               ),
               child: Icon(
                 Icons.more_horiz_rounded,
-                color: isDark ? Colors.white : primary,
+                color: isDark ? heroTealInk() : primary,
                 size: 20,
               ),
             ),
@@ -736,9 +736,9 @@ class _HeroMetricChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.10),
+          color: heroTealSurface(0.10),
           borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+          border: Border.all(color: heroTealSurface(0.12)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -748,7 +748,7 @@ class _HeroMetricChip extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: AppTypography.inter(
-                color: Colors.white.withValues(alpha: 0.62),
+                color: heroTealSurface(0.62),
                 fontSize: 9.5,
                 fontWeight: FontWeight.w700,
               ),
@@ -759,7 +759,7 @@ class _HeroMetricChip extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: AppTypography.mono(
-                color: Colors.white,
+                color: heroTealInk(),
                 fontSize: 12.5,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0,

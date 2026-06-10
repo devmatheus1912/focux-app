@@ -6,6 +6,7 @@ import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
 import '../utils/fx_utils.dart';
 import 'cinematic_mesh_background.dart';
+import 'fx_content_width_limiter.dart';
 import 'fx_glass_surface.dart';
 import 'fx_icon.dart';
 import 'mesh_scope.dart';
@@ -22,6 +23,7 @@ class FxShellScaffold extends StatelessWidget {
     this.extendBody = false,
     this.useMesh = false,
     this.safeArea = true,
+    this.constrainWidth = true,
   });
 
   final PreferredSizeWidget? appBar;
@@ -32,17 +34,25 @@ class FxShellScaffold extends StatelessWidget {
   final bool useMesh;
   final bool safeArea;
 
+  /// Tier S+: limita largura do body em telas satélite (hubs full-bleed usam false).
+  final bool constrainWidth;
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final meshActive = MeshScope.of(context);
     final needsMesh = useMesh && !meshActive;
 
-    Widget content = FxPremiumEntrance(child: body);
+    Widget inner = body;
+    if (constrainWidth) {
+      inner = FxContentWidthLimiter(child: inner);
+    }
+
+    Widget content = FxPremiumEntrance(child: inner);
     if (safeArea) {
       content = SafeArea(
         bottom: bottomNavigationBar == null,
-        child: FxPremiumEntrance(child: body),
+        child: FxPremiumEntrance(child: inner),
       );
     }
 

@@ -6,6 +6,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/referral_repository.dart';
@@ -25,6 +26,7 @@ class ReferralScreen extends ConsumerStatefulWidget {
 class _ReferralScreenState extends ConsumerState<ReferralScreen> {
   ReferralInfo? _info;
   bool _loading = true;
+  String? _erro;
 
   @override
   void initState() {
@@ -40,8 +42,13 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
           _info = info;
           _loading = false;
         });
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _erro = friendlyError(e);
+        });
+      }
     }
   }
 
@@ -73,6 +80,8 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
         body:
             _loading
                 ? const Center(child: FxLoading())
+                : _erro != null
+                ? Center(child: Text(_erro!, textAlign: TextAlign.center))
                 : Padding(
                   padding: const EdgeInsets.all(TokensStrip.s5),
                   child: Column(

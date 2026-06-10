@@ -72,6 +72,7 @@ class GamificacaoScreen extends ConsumerWidget {
     return fxScreenA11yScope(
       label: 'Minha evolução',
       child: FxShellScaffold(
+        constrainWidth: false,
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Minha evolução',

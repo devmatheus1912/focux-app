@@ -30,6 +30,7 @@ class AnalyticsScreen extends ConsumerWidget {
     return fxScreenA11yScope(
       label: 'Analytics',
       child: FxShellScaffold(
+        constrainWidth: false,
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Analytics',

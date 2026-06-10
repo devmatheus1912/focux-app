@@ -4,47 +4,19 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-
-class RankingItem {
-  final int personalId;
-  final String nome;
-  final String? logoUrl;
-  final int totalAlunosAtivos;
-  final int posicao;
-  final int? descontoPercentual;
-
-  RankingItem({
-    required this.personalId,
-    required this.nome,
-    this.logoUrl,
-    required this.totalAlunosAtivos,
-    required this.posicao,
-    this.descontoPercentual,
-  });
-
-  factory RankingItem.fromJson(Map<String, dynamic> j) => RankingItem(
-    personalId: j['personalId'] as int,
-    nome: j['nome'] as String,
-    logoUrl: j['logoUrl'] as String?,
-    totalAlunosAtivos: j['totalAlunosAtivos'] as int,
-    posicao: j['posicao'] as int,
-    descontoPercentual: j['descontoPercentual'] as int?,
-  );
-}
+import '../../dashboard/widgets/dashboard_error_state.dart';
+import '../data/ranking_repository.dart';
 
 final rankingProvider = FutureProvider.autoDispose<List<RankingItem>>((
   ref,
 ) async {
-  final dio = ref.read(apiClientProvider).dio;
-  final r = await dio.get('/api/ranking');
-  return (r.data as List)
-      .map((e) => RankingItem.fromJson(e as Map<String, dynamic>))
-      .toList();
+  return RankingRepository(ref.read(apiClientProvider)).listarTop();
 });
 
 class RankingScreen extends ConsumerWidget {
@@ -67,11 +39,11 @@ class RankingScreen extends ConsumerWidget {
         body: rankingAsync.when(
           loading: () => const SkeletonList(count: 5),
           error:
-              (e, _) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(TokensStrip.s5),
-                  child: Text(friendlyError(e), textAlign: TextAlign.center),
-                ),
+              (e, _) => DashboardErrorState(
+                chromeOnDark: ShellChrome.of(context).isDark,
+                primary: Theme.of(context).colorScheme.primary,
+                message: friendlyError(e),
+                onRetry: () => ref.invalidate(rankingProvider),
               ),
           data: (ranking) {
             final top3 = ranking.where((r) => r.posicao <= 3).toList();

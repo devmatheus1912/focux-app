@@ -405,10 +405,10 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
                   ),
                   child:
                       _saving
-                          ? const FxLoading(
+                          ? FxLoading(
                             size: 22,
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: heroTealInk(),
                           )
                           : const Text('Salvar prescrição'),
                 ),

@@ -4,6 +4,7 @@ import '../../../core/api/api_client.dart';
 import '../../../core/health/health_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -26,6 +27,7 @@ class HealthDashboardScreen extends StatefulWidget {
 class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
   bool _authorized = false;
   bool _loading = true;
+  String? _erro;
   HealthSummary? _summary;
   RecoverySnapshot? _recovery;
 
@@ -43,8 +45,13 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
       } else {
         if (mounted) setState(() => _loading = false);
       }
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _erro = friendlyError(e);
+        });
+      }
     }
   }
 

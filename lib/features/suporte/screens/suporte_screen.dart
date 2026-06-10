@@ -171,6 +171,7 @@ class _SuporteScreenState extends ConsumerState<SuporteScreen> {
     return fxScreenA11yScope(
       label: 'Suporte',
       child: FxShellScaffold(
+        constrainWidth: false,
         useMesh: true,
         extendBody: true,
         safeArea: false,

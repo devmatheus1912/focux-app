@@ -73,7 +73,7 @@ class _ExercicioRow extends StatelessWidget {
           const SizedBox(width: 13),
           Expanded(
             child: Material(
-              color: Colors.transparent,
+              color: fxTransparent,
               child: InkWell(
                 onTap: onEditPrescription,
                 borderRadius: BorderRadius.circular(12),
@@ -192,8 +192,8 @@ class _ExercicioRow extends StatelessWidget {
               final action = await showModalBottomSheet<String>(
                 context: context,
                 isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                barrierColor: Colors.black.withValues(alpha: 0.34),
+                backgroundColor: fxTransparent,
+                barrierColor: heroScrim(0.34),
                 builder:
                     (_) => _ExerciseActionsSheet(
                       title: te.exercicio.nomeDisplay,
@@ -213,13 +213,13 @@ class _ExercicioRow extends StatelessWidget {
               decoration: BoxDecoration(
                 color:
                     isDark
-                        ? Colors.white.withValues(alpha: 0.05)
+                        ? heroTealSurface(0.05)
                         : TokensStrip.cardBg,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color:
                       isDark
-                          ? Colors.white.withValues(alpha: 0.04)
+                          ? heroTealSurface(0.04)
                           : TokensStrip.borderDefault,
                 ),
               ),
@@ -299,7 +299,7 @@ class _ExerciseActionsSheet extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final border =
         isDark
-            ? Colors.white.withValues(alpha: 0.08)
+            ? heroTealSurface(0.08)
             : TokensStrip.borderDefault.withValues(alpha: 0.9);
     final maxHeight = MediaQuery.sizeOf(context).height * 0.82;
 
@@ -334,7 +334,7 @@ class _ExerciseActionsSheet extends StatelessWidget {
                     decoration: BoxDecoration(
                       color:
                           isDark
-                              ? Colors.white.withValues(alpha: 0.06)
+                              ? heroTealSurface(0.06)
                               : EagleTokens.brandSofter,
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -434,12 +434,12 @@ class _ExerciseActionTile extends StatelessWidget {
         color ?? (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
     final border =
         isDark
-            ? Colors.white.withValues(alpha: 0.06)
+            ? heroTealSurface(0.06)
             : TokensStrip.borderDefault.withValues(alpha: 0.95);
     final iconFill =
         color == null
             ? (isDark
-                ? Colors.white.withValues(alpha: 0.05)
+                ? heroTealSurface(0.05)
                 : EagleTokens.brandSofter)
             : EagleTokens.bad.withValues(alpha: isDark ? 0.16 : 0.10);
 
@@ -453,7 +453,7 @@ class _ExerciseActionTile extends StatelessWidget {
           decoration: BoxDecoration(
             color:
                 isDark
-                    ? Colors.white.withValues(alpha: 0.035)
+                    ? heroTealSurface(0.035)
                     : TokensStrip.cardBg,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: border),

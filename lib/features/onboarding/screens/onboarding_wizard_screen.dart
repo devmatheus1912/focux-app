@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/onboarding_repository.dart';
@@ -22,6 +23,7 @@ class _OnboardingWizardScreenState
     extends ConsumerState<OnboardingWizardScreen> {
   OnboardingWizard? _wizard;
   bool _loading = true;
+  String? _erro;
   int _previousCompleted = 0;
   bool _celebratedAllDone = false;
 
@@ -50,8 +52,13 @@ class _OnboardingWizardScreenState
         _loading = false;
         _previousCompleted = completed;
       });
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _erro = friendlyError(e);
+        });
+      }
     }
   }
 
@@ -88,8 +95,8 @@ class _OnboardingWizardScreenState
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text(
-                          'Não foi possível carregar o setup.',
+                        Text(
+                          _erro ?? 'Não foi possível carregar o setup.',
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: TokensStrip.s4),

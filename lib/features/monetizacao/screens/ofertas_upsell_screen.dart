@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -28,6 +29,7 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
   List<OfertaUpsell> _ofertas = [];
   bool _loading = true;
   bool _saving = false;
+  String? _erro;
   String _tipoGatilho = 'MANUAL';
 
   @override
@@ -52,8 +54,13 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
           _ofertas = list;
           _loading = false;
         });
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _erro = friendlyError(e);
+        });
+      }
     }
   }
 
@@ -98,6 +105,8 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
         body:
             _loading
                 ? const Center(child: FxLoading())
+                : _erro != null
+                ? Center(child: Text(_erro!, textAlign: TextAlign.center))
                 : ListView(
                   padding: const EdgeInsets.all(TokensStrip.s4),
                   children: [
@@ -162,8 +171,8 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
                     ),
                     const SizedBox(height: 8),
                     ..._ofertas.map(
-                      (o) => ListTile(
-                        title: Text(o.titulo),
+                      (o) => FxSatelliteListTile(
+                        title: o.titulo,
                         subtitle: Text(
                           'R\$ ${o.valor.toStringAsFixed(2)} · ${o.tipoGatilho}',
                         ),

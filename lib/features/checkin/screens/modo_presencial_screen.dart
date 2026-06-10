@@ -6,8 +6,10 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
+import '../../../core/utils/friendly_error.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../dashboard/utils/dashboard_readability.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 /// Landscape-optimized training screen for in-person coaching sessions.
@@ -29,6 +31,7 @@ class ModoPresencialScreen extends ConsumerStatefulWidget {
 class _State extends ConsumerState<ModoPresencialScreen> {
   ExecucaoTreino? _exec;
   bool _loading = true;
+  String? _erro;
   int _currentIdx = 0;
   Timer? _timer;
   Duration _elapsed = Duration.zero;
@@ -70,7 +73,12 @@ class _State extends ConsumerState<ModoPresencialScreen> {
         if (mounted) setState(() => _elapsed += const Duration(seconds: 1));
       });
     } catch (e) {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _erro = friendlyError(e);
+        });
+      }
     }
   }
 
@@ -148,8 +156,9 @@ class _State extends ConsumerState<ModoPresencialScreen> {
               ),
               const SizedBox(height: TokensStrip.s4),
               Text(
-                'Treino não encontrado',
+                _erro ?? 'Treino não encontrado',
                 style: TextStyle(color: EagleTokens.darkInkMute, fontSize: 18),
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: TokensStrip.s5),
               FxLiquidPrimaryButton(
@@ -184,10 +193,10 @@ class _State extends ConsumerState<ModoPresencialScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text(
+          Text(
             'DESCANSO',
             style: TextStyle(
-              color: Colors.white54,
+              color: heroTealMuted(0.54),
               fontSize: 20,
               fontWeight: FontWeight.w700,
               letterSpacing: 4,
@@ -196,8 +205,8 @@ class _State extends ConsumerState<ModoPresencialScreen> {
           const SizedBox(height: TokensStrip.s4),
           Text(
             '$_restSecs',
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: heroTealInk(),
               fontSize: 120,
               fontWeight: FontWeight.w900,
             ),
@@ -222,10 +231,10 @@ class _State extends ConsumerState<ModoPresencialScreen> {
               backgroundColor: Colors.white12,
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
             ),
-            child: const Text(
+            child: Text(
               'PULAR',
               style: TextStyle(
-                color: Colors.white,
+                color: heroTealInk(),
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -247,20 +256,20 @@ class _State extends ConsumerState<ModoPresencialScreen> {
         // ── Left: Navigation + Timer ───────────────────────────────
         Container(
           width: 100,
-          color: Colors.white.withValues(alpha: 0.05),
+          color: heroTealSurface(0.05),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: const Icon(Icons.close, color: Colors.white54, size: 32),
+                icon: Icon(Icons.close, color: heroTealMuted(0.54), size: 32),
                 onPressed: () => Navigator.pop(context),
               ),
               Column(
                 children: [
                   Text(
                     _fmt(_elapsed),
-                    style: const TextStyle(
-                      color: Colors.white70,
+                    style: TextStyle(
+                      color: heroTealMuted(0.70),
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
@@ -314,8 +323,8 @@ class _State extends ConsumerState<ModoPresencialScreen> {
               children: [
                 Text(
                   'EXERCÍCIO ${_currentIdx + 1} DE $total',
-                  style: const TextStyle(
-                    color: Colors.white38,
+                  style: TextStyle(
+                    color: heroTealMuted(0.38),
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 2,
@@ -324,8 +333,8 @@ class _State extends ConsumerState<ModoPresencialScreen> {
                 const SizedBox(height: 8),
                 Text(
                   ex.exercicioNome,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: heroTealInk(),
                     fontSize: 36,
                     fontWeight: FontWeight.w900,
                   ),
@@ -370,15 +379,15 @@ class _State extends ConsumerState<ModoPresencialScreen> {
                         child: Center(
                           child:
                               isDone
-                                  ? const Icon(
+                                  ? Icon(
                                     Icons.check,
-                                    color: Colors.white,
+                                    color: heroTealInk(),
                                     size: 28,
                                   )
                                   : Text(
                                     '${i + 1}',
-                                    style: const TextStyle(
-                                      color: Colors.white54,
+                                    style: TextStyle(
+                                      color: heroTealMuted(0.54),
                                       fontSize: 20,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -417,20 +426,20 @@ class _State extends ConsumerState<ModoPresencialScreen> {
                   child: OutlinedButton(
                     onPressed: () => _startRest(ex.descansoSegundos ?? 60),
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.white24),
+                      side: BorderSide(color: heroTealMuted(0.24)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.timer, color: Colors.white70, size: 22),
+                        Icon(Icons.timer, color: heroTealMuted(0.70), size: 22),
                         SizedBox(width: 8),
                         Text(
                           'DESCANSO',
                           style: TextStyle(
-                            color: Colors.white70,
+                            color: heroTealMuted(0.70),
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                           ),
@@ -473,17 +482,17 @@ class _State extends ConsumerState<ModoPresencialScreen> {
                   height: 48,
                   child: TextButton(
                     onPressed: _next,
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
                           'PRÓXIMO',
-                          style: TextStyle(color: Colors.white54, fontSize: 13),
+                          style: TextStyle(color: heroTealMuted(0.54), fontSize: 13),
                         ),
                         SizedBox(width: 4),
                         Icon(
                           Icons.arrow_forward,
-                          color: Colors.white54,
+                          color: heroTealMuted(0.54),
                           size: 18,
                         ),
                       ],
@@ -507,18 +516,18 @@ class _InfoChip extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     decoration: BoxDecoration(
-      color: Colors.white12,
+      color: heroTealMuted(0.12),
       borderRadius: BorderRadius.circular(10),
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, color: Colors.white54, size: 16),
+        Icon(icon, color: heroTealMuted(0.54), size: 16),
         const SizedBox(width: 6),
         Text(
           label,
-          style: const TextStyle(
-            color: Colors.white70,
+          style: TextStyle(
+            color: heroTealMuted(0.70),
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),

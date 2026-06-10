@@ -39,7 +39,7 @@ class _SlideDot extends StatelessWidget {
       height: 7,
       margin: const EdgeInsets.symmetric(horizontal: 3),
       decoration: BoxDecoration(
-        color: active ? primary : Colors.white.withValues(alpha: 0.22),
+        color: active ? primary : heroTealSurface(0.22),
         borderRadius: BorderRadius.circular(7),
       ),
     );
@@ -136,7 +136,7 @@ class _OBPageWidget extends StatelessWidget {
                       textAlign: TextAlign.center,
                       text: TextSpan(
                         style: AppTypography.inter(
-                          color: Colors.white,
+                          color: heroTealInk(),
                           fontSize: titleSize,
                           fontWeight: FontWeight.w700,
                           letterSpacing: -0.7,
@@ -166,7 +166,7 @@ class _OBPageWidget extends StatelessWidget {
                         data.subtitle,
                         textAlign: TextAlign.center,
                         style: AppTypography.inter(
-                          color: Colors.white.withValues(alpha: 0.86),
+                          color: heroTealSurface(0.86),
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
                           height: 1.48,
@@ -211,10 +211,10 @@ class _OBPageWidget extends StatelessWidget {
                         vertical: pageIndex == 0 ? 10 : 12,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.04),
+                        color: heroTealSurface(0.04),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.10),
+                          color: heroTealSurface(0.10),
                         ),
                       ),
                       child: Column(
@@ -246,7 +246,7 @@ class _OBPageWidget extends StatelessWidget {
                                       child: Text(
                                         e.value,
                                         style: AppTypography.inter(
-                                          color: Colors.white.withValues(
+                                          color: heroTealInk().withValues(
                                             alpha: 0.82,
                                           ),
                                           fontSize: 13,
@@ -283,9 +283,9 @@ class _OnboardingSocialProof extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.04),
+          color: heroTealSurface(0.04),
           borderRadius: BorderRadius.circular(99),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+          border: Border.all(color: heroTealSurface(0.10)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -298,7 +298,7 @@ class _OnboardingSocialProof extends StatelessWidget {
                 FocuxBrandCopy.onboardingSocialProof,
                 textAlign: TextAlign.center,
                 style: AppTypography.inter(
-                  color: Colors.white.withValues(alpha: 0.78),
+                  color: heroTealSurface(0.78),
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.12,
@@ -339,7 +339,7 @@ class _OnboardingHook extends StatelessWidget {
           textAlign: TextAlign.center,
           text: TextSpan(
             style: AppTypography.inter(
-              color: Colors.white.withValues(alpha: 0.88),
+              color: heroTealSurface(0.88),
               fontSize: 13,
               fontWeight: FontWeight.w500,
               height: 1.45,
@@ -377,9 +377,9 @@ class _MetricChipWidget extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 3),
       padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
+        color: heroTealSurface(0.04),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: heroTealSurface(0.08)),
       ),
       child: Column(
         children: [
@@ -388,7 +388,7 @@ class _MetricChipWidget extends StatelessWidget {
           Text(
             metric.value,
             style: AppTypography.inter(
-              color: Colors.white,
+              color: heroTealInk(),
               fontSize: 15,
               fontWeight: FontWeight.w700,
               height: 1,
@@ -400,7 +400,7 @@ class _MetricChipWidget extends StatelessWidget {
             textAlign: TextAlign.center,
             maxLines: 2,
             style: AppTypography.inter(
-              color: Colors.white.withValues(alpha: 0.78),
+              color: heroTealSurface(0.78),
               fontSize: 10.5,
               fontWeight: FontWeight.w500,
               height: 1.2,

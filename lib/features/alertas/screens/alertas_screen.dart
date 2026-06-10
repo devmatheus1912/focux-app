@@ -13,6 +13,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../dashboard/utils/dashboard_readability.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class AlertasScreen extends ConsumerStatefulWidget {
@@ -291,7 +292,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                       decoration: BoxDecoration(
                         color:
                             isDark
-                                ? Colors.white.withValues(alpha: 0.04)
+                                ? heroTealSurface(0.04)
                                 : brand.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
@@ -548,8 +549,8 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                             alignment: Alignment.center,
                                             child: Text(
                                               fxInitials(a.alunoNome),
-                                              style: const TextStyle(
-                                                color: Colors.white,
+                                              style: TextStyle(
+                                                color: heroTealInk(),
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w700,
                                               ),

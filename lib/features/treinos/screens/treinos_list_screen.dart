@@ -8,6 +8,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../dashboard/utils/dashboard_readability.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/fx_icon.dart';
@@ -660,7 +661,7 @@ class _DeleteWorkoutSheet extends StatelessWidget {
                       onPressed: () => Navigator.of(context).pop(true),
                       style: FilledButton.styleFrom(
                         backgroundColor: dangerFill,
-                        foregroundColor: Colors.white,
+                        foregroundColor: heroTealInk(),
                         elevation: 0,
                         minimumSize: const Size(0, 50),
                         shape: RoundedRectangleBorder(
@@ -853,8 +854,8 @@ class _TreinoActionTile extends StatelessWidget {
           decoration: BoxDecoration(
             color:
                 isDark
-                    ? Colors.white.withValues(alpha: 0.035)
-                    : Colors.white.withValues(alpha: 0.88),
+                    ? heroTealSurface(0.035)
+                    : heroTealSurface(0.88),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(color: chrome.line),
           ),
@@ -985,7 +986,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                   decoration: BoxDecoration(
                     color:
                         isDark
-                            ? Colors.white.withValues(alpha: 0.04)
+                            ? heroTealSurface(0.04)
                             : TokensStrip.cardBg,
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(color: chrome.line),
@@ -1035,8 +1036,8 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                                   selected
                                       ? BrandPalette.soft(primary, dark: isDark)
                                       : isDark
-                                      ? Colors.white.withValues(alpha: 0.03)
-                                      : Colors.white,
+                                      ? heroTealSurface(0.03)
+                                      : heroTealInk(),
                               borderRadius: BorderRadius.circular(18),
                               border: Border.all(
                                 color:
@@ -1059,7 +1060,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                                     initials,
                                     style: AppTypography.inter(
                                       color:
-                                          selected ? Colors.white : chrome.ink,
+                                          selected ? heroTealInk() : chrome.ink,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w800,
                                     ),
@@ -1145,7 +1146,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                               : () => Navigator.pop(context, selectedAlunoId),
                       style: FilledButton.styleFrom(
                         backgroundColor: primary,
-                        foregroundColor: Colors.white,
+                        foregroundColor: heroTealInk(),
                         minimumSize: const Size(0, 46),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -1334,12 +1335,12 @@ class _TreinosCommandCard extends StatelessWidget {
                   width: 46,
                   height: 46,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.14),
+                    color: heroTealSurface(0.14),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.auto_awesome_motion_rounded,
-                    color: Colors.white,
+                    color: heroTealInk(),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -1351,7 +1352,7 @@ class _TreinosCommandCard extends StatelessWidget {
                     Text(
                       'Biblioteca sob controle',
                       style: AppTypography.inter(
-                        color: Colors.white,
+                        color: heroTealInk(),
                         fontSize: ultraCompact ? 15 : 17,
                         fontWeight: FontWeight.w800,
                       ),
@@ -1364,7 +1365,7 @@ class _TreinosCommandCard extends StatelessWidget {
                               : 'Todos os planos têm exercícios.'
                           : '$assembling plano${assembling == 1 ? '' : 's'} ainda em montagem.',
                       style: AppTypography.inter(
-                        color: Colors.white.withValues(alpha: 0.74),
+                        color: heroTealSurface(0.74),
                         fontSize: ultraCompact ? 11.2 : 12.2,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1376,8 +1377,8 @@ class _TreinosCommandCard extends StatelessWidget {
               TextButton.icon(
                 onPressed: onCreate,
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.white.withValues(alpha: 0.14),
+                  foregroundColor: heroTealInk(),
+                  backgroundColor: heroTealSurface(0.14),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
                     vertical: 9,
@@ -1458,16 +1459,16 @@ class _CommandInlineMetrics extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.11),
+        color: heroTealSurface(0.11),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+        border: Border.all(color: heroTealSurface(0.10)),
       ),
       child: Text(
         '${_readyCountLabel(ready)} · $totalExercises exercícios · ${_templateCountLabel(templates)}',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: AppTypography.inter(
-          color: Colors.white.withValues(alpha: 0.86),
+          color: heroTealSurface(0.86),
           fontSize: 12,
           fontWeight: FontWeight.w700,
         ),
@@ -1494,9 +1495,9 @@ class _CommandMetric extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.14),
+        color: heroTealSurface(0.14),
         borderRadius: BorderRadius.circular(17),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        border: Border.all(color: heroTealSurface(0.12)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1506,7 +1507,7 @@ class _CommandMetric extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: AppTypography.inter(
-              color: Colors.white,
+              color: heroTealInk(),
               fontSize: 19,
               fontWeight: FontWeight.w800,
               height: 1,
@@ -1518,7 +1519,7 @@ class _CommandMetric extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: AppTypography.inter(
-              color: Colors.white.withValues(alpha: 0.68),
+              color: heroTealSurface(0.68),
               fontSize: 10.5,
               fontWeight: FontWeight.w700,
             ),
@@ -1610,7 +1611,7 @@ class _LibraryControls extends StatelessWidget {
         color:
             isDark
                 ? EagleTokens.darkCard
-                : Colors.white.withValues(alpha: 0.86),
+                : heroTealSurface(0.86),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color:
@@ -1674,7 +1675,7 @@ class _LibraryControls extends StatelessWidget {
                             backgroundColor:
                                 isDark
                                     ? EagleTokens.darkBg
-                                    : Colors.white.withValues(alpha: 0.72),
+                                    : heroTealSurface(0.72),
                           ),
                           icon: Icon(
                             Icons.close_rounded,
@@ -1692,7 +1693,7 @@ class _LibraryControls extends StatelessWidget {
                           label: const Text('Excluir'),
                           style: FilledButton.styleFrom(
                             backgroundColor: EagleTokens.bad,
-                            foregroundColor: Colors.white,
+                            foregroundColor: heroTealInk(),
                             minimumSize: const Size(0, 40),
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             shape: RoundedRectangleBorder(
@@ -1759,7 +1760,7 @@ class _LibraryControls extends StatelessWidget {
                             backgroundColor:
                                 isDark
                                     ? primary.withValues(alpha: 0.16)
-                                    : Colors.white.withValues(alpha: 0.86),
+                                    : heroTealSurface(0.86),
                             minimumSize: const Size(0, 40),
                             padding: const EdgeInsets.symmetric(horizontal: 11),
                             shape: RoundedRectangleBorder(
@@ -1810,7 +1811,7 @@ class _LibraryControls extends StatelessWidget {
                 fillColor:
                     isDark
                         ? EagleTokens.darkBg
-                        : Colors.white.withValues(alpha: 0.92),
+                        : heroTealSurface(0.92),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 12,
@@ -1818,7 +1819,7 @@ class _LibraryControls extends StatelessWidget {
                 enabledBorder: FxInputDeco.outlineBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(
-                    color: isDark ? EagleTokens.darkLine : Colors.white,
+                    color: isDark ? EagleTokens.darkLine : heroTealInk(),
                   ),
                 ),
                 focusedBorder: FxInputDeco.outlineBorder(

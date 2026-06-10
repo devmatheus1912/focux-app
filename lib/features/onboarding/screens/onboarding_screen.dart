@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../dashboard/utils/dashboard_readability.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/focux_official_logo.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -244,7 +245,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       data: MediaQuery.of(context).copyWith(textScaler: textScaler),
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
+          statusBarColor: fxTransparent,
           statusBarIconBrightness: Brightness.light,
           statusBarBrightness: Brightness.dark,
         ),
@@ -289,7 +290,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                             button: true,
                             label: FocuxBrandCopy.onboardingSkip,
                             child: Material(
-                              color: Colors.transparent,
+                              color: fxTransparent,
                               child: InkWell(
                                 onTap: _skip,
                                 borderRadius: BorderRadius.circular(99),
@@ -299,10 +300,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                     vertical: 10,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.04),
+                                    color: heroTealSurface(0.04),
                                     borderRadius: BorderRadius.circular(99),
                                     border: Border.all(
-                                      color: Colors.white.withValues(
+                                      color: heroTealInk().withValues(
                                         alpha: 0.12,
                                       ),
                                     ),
@@ -313,7 +314,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                       Text(
                                         FocuxBrandCopy.onboardingSkip,
                                         style: AppTypography.inter(
-                                          color: Colors.white.withValues(
+                                          color: heroTealInk().withValues(
                                             alpha: 0.70,
                                           ),
                                           fontSize: 13,
@@ -323,7 +324,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                       Icon(
                                         Icons.chevron_right_rounded,
                                         size: 16,
-                                        color: Colors.white.withValues(
+                                        color: heroTealInk().withValues(
                                           alpha: 0.55,
                                         ),
                                       ),
@@ -433,7 +434,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                               FocuxBrandCopy.onboardingCtaFinishHint,
                               textAlign: TextAlign.center,
                               style: AppTypography.inter(
-                                color: Colors.white.withValues(alpha: 0.78),
+                                color: heroTealSurface(0.78),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                               ),

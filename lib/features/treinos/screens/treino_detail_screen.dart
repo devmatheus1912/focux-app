@@ -24,6 +24,7 @@ import '../providers/treinos_provider.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../dashboard/utils/dashboard_readability.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 
@@ -127,7 +128,7 @@ class TreinoDetailScreen extends ConsumerWidget {
           _popTreinoDetail(context, alunoId: alunoId);
         },
         child: Scaffold(
-          backgroundColor: Colors.transparent,
+          backgroundColor: fxTransparent,
           body: treinoAsync.when(
             loading:
                 () => SafeArea(

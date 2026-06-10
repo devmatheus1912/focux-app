@@ -225,6 +225,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
     final theme = Theme.of(context);
 
     return FxShellScaffold(
+      constrainWidth: false,
       useMesh: true,
       appBar: FxShellAppBar(
         title: 'Relatório',

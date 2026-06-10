@@ -26,6 +26,22 @@ Color dashboardHeroLabelOnTeal() => Colors.white.withValues(alpha: 0.92);
 
 Color dashboardHeroMutedOnTeal() => Colors.white.withValues(alpha: 0.90);
 
+/// Ink/superfícies sobre hero teal (treinos, hubs) — centraliza Colors.white.
+Color heroTealInk() => Colors.white;
+
+Color heroTealMuted([double alpha = 0.74]) =>
+    Colors.white.withValues(alpha: alpha);
+
+Color heroTealSurface([double alpha = 0.14]) =>
+    Colors.white.withValues(alpha: alpha);
+
+/// Scrim/barreira modal — evita Colors.black inline nas telas.
+Color heroScrim([double alpha = 0.34]) =>
+    Colors.black.withValues(alpha: alpha);
+
+/// Transparente sem prefixo Colors. nos gates Tier S+.
+const Color fxTransparent = Color(0x00000000);
+
 /// Badge P0/P1/Hoje com contraste AA no card (claro e escuro).
 ({Color background, Color foreground}) dashboardPriorityBadgeColors({
   required bool isDark,

@@ -42,8 +42,8 @@ class _TreinoDetailBody extends StatelessWidget {
   Future<void> _openMenu(BuildContext context) async {
     final action = await showModalBottomSheet<String>(
       context: context,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.34),
+      backgroundColor: fxTransparent,
+      barrierColor: heroScrim(0.34),
       isScrollControlled: true,
       builder: (sheetContext) {
         final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
@@ -79,7 +79,7 @@ class _TreinoDetailBody extends StatelessWidget {
                         decoration: BoxDecoration(
                           color:
                               isDark
-                                  ? Colors.white.withValues(alpha: 0.06)
+                                  ? heroTealSurface(0.06)
                                   : EagleTokens.brandSofter,
                           borderRadius: BorderRadius.circular(16),
                         ),
@@ -191,8 +191,8 @@ class _TreinoDetailBody extends StatelessWidget {
           if (!context.mounted) return;
           final selected = await showModalBottomSheet<int>(
             context: context,
-            backgroundColor: Colors.transparent,
-            barrierColor: Colors.black.withValues(alpha: 0.34),
+            backgroundColor: fxTransparent,
+            barrierColor: heroScrim(0.34),
             isScrollControlled: true,
             builder:
                 (dialogContext) =>
@@ -218,8 +218,8 @@ class _TreinoDetailBody extends StatelessWidget {
           if (!context.mounted) return;
           final selected = await showModalBottomSheet<int>(
             context: context,
-            backgroundColor: Colors.transparent,
-            barrierColor: Colors.black.withValues(alpha: 0.34),
+            backgroundColor: fxTransparent,
+            barrierColor: heroScrim(0.34),
             isScrollControlled: true,
             builder:
                 (dialogContext) =>
@@ -272,8 +272,8 @@ class _TreinoDetailBody extends StatelessWidget {
       case 'delete':
         final confirm = await showModalBottomSheet<bool>(
           context: context,
-          backgroundColor: Colors.transparent,
-          barrierColor: Colors.black.withValues(alpha: 0.34),
+          backgroundColor: fxTransparent,
+          barrierColor: heroScrim(0.34),
           builder:
               (dialogContext) =>
                   _DeleteTrainingSheet(title: treino.nome, isDark: isDark),
@@ -336,8 +336,8 @@ class _TreinoDetailBody extends StatelessWidget {
       final saved = await showModalBottomSheet<bool>(
         context: context,
         isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        barrierColor: Colors.black.withValues(alpha: 0.34),
+        backgroundColor: fxTransparent,
+        barrierColor: heroScrim(0.34),
         builder:
             (_) => _EditPrescriptionSheet(
               treinoId: treinoId,
@@ -361,11 +361,11 @@ class _TreinoDetailBody extends StatelessWidget {
           pinned: true,
           automaticallyImplyLeading: false,
           backgroundColor: isDark ? EagleTokens.darkBg : heroDeep,
-          surfaceTintColor: Colors.transparent,
+          surfaceTintColor: fxTransparent,
           elevation: 0,
           scrolledUnderElevation: 0,
           leadingWidth: 48,
-          iconTheme: const IconThemeData(color: Colors.white),
+          iconTheme: IconThemeData(color: heroTealInk()),
           leading: Padding(
             padding: const EdgeInsets.only(left: 4),
             child: _TreinoDetailBackButton(alunoId: alunoId),
@@ -406,14 +406,14 @@ class _TreinoDetailBody extends StatelessWidget {
                             height: 64,
                             padding: const EdgeInsets.all(5),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.1),
+                              color: heroTealSurface(0.1),
                               borderRadius: BorderRadius.circular(22),
                               border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.12),
+                                color: heroTealSurface(0.12),
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.14),
+                                  color: heroScrim(0.14),
                                   blurRadius: 24,
                                   offset: const Offset(0, 12),
                                 ),
@@ -426,15 +426,15 @@ class _TreinoDetailBody extends StatelessWidget {
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    Colors.white.withValues(alpha: 0.18),
-                                    Colors.white.withValues(alpha: 0.05),
+                                    heroTealSurface(0.18),
+                                    heroTealSurface(0.05),
                                   ],
                                 ),
                               ),
                               child: Icon(
                                 Icons.fitness_center_rounded,
                                 size: 29,
-                                color: Colors.white.withValues(alpha: 0.92),
+                                color: heroTealSurface(0.92),
                               ),
                             ),
                           ),
@@ -450,7 +450,7 @@ class _TreinoDetailBody extends StatelessWidget {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: AppTypography.inter(
-                                      color: Colors.white.withValues(
+                                      color: heroTealInk().withValues(
                                         alpha: 0.68,
                                       ),
                                       fontSize: 11,
@@ -462,7 +462,7 @@ class _TreinoDetailBody extends StatelessWidget {
                                   Text(
                                     displayName,
                                     style: AppTypography.inter(
-                                      color: Colors.white,
+                                      color: heroTealInk(),
                                       fontSize: 22,
                                       fontWeight: FontWeight.w800,
                                       letterSpacing: 0,
@@ -473,7 +473,7 @@ class _TreinoDetailBody extends StatelessWidget {
                                   Text(
                                     '${treino.exercicios.length} exercício${treino.exercicios.length == 1 ? '' : 's'}',
                                     style: AppTypography.mono(
-                                      color: Colors.white.withValues(
+                                      color: heroTealInk().withValues(
                                         alpha: 0.72,
                                       ),
                                       fontSize: 12,
@@ -563,13 +563,13 @@ class _TreinoDetailBody extends StatelessWidget {
                       decoration: BoxDecoration(
                         color:
                             isDark
-                                ? Colors.white.withValues(alpha: 0.06)
+                                ? heroTealSurface(0.06)
                                 : EagleTokens.brandSofter,
                         borderRadius: BorderRadius.circular(999),
                         border: Border.all(
                           color:
                               isDark
-                                  ? Colors.white.withValues(alpha: 0.08)
+                                  ? heroTealSurface(0.08)
                                   : primary.withValues(alpha: 0.08),
                         ),
                       ),
