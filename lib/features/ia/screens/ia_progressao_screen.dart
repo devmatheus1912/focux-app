@@ -19,6 +19,7 @@ import '../models/ia_progressao_carga_result.dart';
 import '../widgets/ia_progressao_loading_skeleton.dart';
 import '../widgets/ia_progressao_result_view.dart';
 import '../utils/ia_progressao_input_normalizer.dart';
+import '../utils/progressao_copy.dart';
 import '../utils/progressao_aceitar_route_args.dart';
 import '../widgets/ia_quota_upgrade.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
@@ -176,11 +177,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
         FeedbackHelper.showSnackBar(
           context,
           SnackBar(
-            content: Text(
-              r.sugestoesRegistradas == 1
-                  ? '1 sugestão salva para revisão.'
-                  : '${r.sugestoesRegistradas} sugestões salvas para revisão.',
-            ),
+            content: Text(progressaoSavedForReviewSnack(r.sugestoesRegistradas)),
           ),
         );
       }
@@ -318,10 +315,21 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                         result: _resultado!,
                         alunoNome: widget.alunoNome,
                         onExportPdf: () => _exportarPdf(_resultado!),
-                        onApplyTreino: () => context.push(
-                          '/alunos/${widget.alunoId}/treinos-list',
-                          extra: widget.alunoNome,
-                        ),
+                        onApplyTreino: () {
+                          FeedbackHelper.showSnackBar(
+                            context,
+                            const SnackBar(
+                              content: Text(
+                                'Abra o treino ativo para conferir ou ajustar as cargas.',
+                              ),
+                              duration: Duration(seconds: 3),
+                            ),
+                          );
+                          context.push(
+                            '/alunos/${widget.alunoId}/treinos-list',
+                            extra: widget.alunoNome,
+                          );
+                        },
                         onReviewSuggestions:
                             () => context.push(
                               '/ia/progressao/aceitar',

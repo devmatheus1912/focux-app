@@ -6,9 +6,9 @@ import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../models/ia_progressao_carga_result.dart';
 import '../utils/ia_progressao_result_parser.dart';
-import 'ia_carga_chip.dart';
 import 'ia_expandable_copy.dart';
 import 'ia_progressao_card_entrance.dart';
+import 'ia_progressao_exercise_card.dart';
 import 'ia_progressao_result_action_bar.dart';
 
 /// Mobile-first rendering for IA progressão de carga responses.
@@ -173,7 +173,13 @@ class _StructuredResult extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: TokensStrip.s3),
             child: IaProgressaoCardEntrance(
               index: entry.key,
-              child: _ExerciseCard(row: entry.value, primary: primary),
+              child: IaProgressaoExerciseCard(
+                exercicio: entry.value.exercicio,
+                cargaAtual: entry.value.cargaAtual,
+                cargaSugerida: entry.value.cargaSugerida,
+                justificativa: entry.value.justificativa,
+                deltaLabel: entry.value.deltaLabel,
+              ),
             ),
           ),
         ),
@@ -206,99 +212,6 @@ class _StructuredResult extends StatelessWidget {
           pendingSuggestions: pendingSuggestions,
         ),
       ],
-    );
-  }
-}
-
-class _ExerciseCard extends StatelessWidget {
-  const _ExerciseCard({required this.row, required this.primary});
-
-  final IaProgressaoExerciseRow row;
-  final Color primary;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label:
-          '${row.exercicio}. Carga atual ${row.cargaAtual}. '
-          'Carga sugerida ${row.cargaSugerida}.'
-          '${row.deltaLabel != null ? ' Variação ${row.deltaLabel}.' : ''}'
-          '${row.justificativa.isNotEmpty ? ' ${row.justificativa}' : ''}',
-      child: Container(
-        decoration: fxListCardDecoration(context, accent: primary),
-        clipBehavior: Clip.antiAlias,
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                row.exercicio,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: IaCargaChip(
-                      label: 'Atual',
-                      valor: row.cargaAtual,
-                      color: TokensStrip.textSecondary,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Icon(Icons.arrow_forward_rounded, color: primary, size: 20),
-                  ),
-                  Expanded(
-                    child: IaCargaChip(
-                      label: 'Sugerido',
-                      valor: row.cargaSugerida,
-                      color: primary,
-                      deltaLabel: row.deltaLabel,
-                    ),
-                  ),
-                ],
-              ),
-              if (row.justificativa.isNotEmpty) ...[
-                const SizedBox(height: 10),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: TokensStrip.textSecondary.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.info_outline,
-                        size: 14,
-                        color: TokensStrip.textSecondary,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: IaExpandableCopy(
-                          text: row.justificativa,
-                          expandLabel: 'Ler justificativa completa',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            height: 1.4,
-                            color: TokensStrip.textSecondary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

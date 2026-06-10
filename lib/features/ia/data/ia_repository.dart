@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../models/ia_progressao_carga_result.dart';
+import '../models/progressao_sugestao.dart';
 
 class IaOperationalException implements Exception {
   final String message;
@@ -291,16 +292,32 @@ class IaRepository {
 
   // ── Progressão sugestões ──────────────────────────────────────────────────
 
-  Future<List<Map<String, dynamic>>> sugestoesProgressao({int? alunoId}) async {
+  Future<List<ProgressaoSugestao>> sugestoesProgressao({
+    int? alunoId,
+    int limit = 50,
+  }) async {
     final r = await _dio.get(
       '/api/ia/progressao/sugestoes',
-      queryParameters: {if (alunoId != null) 'alunoId': alunoId},
+      queryParameters: {
+        if (alunoId != null) 'alunoId': alunoId,
+        'limit': limit,
+      },
     );
-    return (r.data as List).cast<Map<String, dynamic>>();
+    return (r.data as List)
+        .map((row) => ProgressaoSugestao.fromApi(Map<String, dynamic>.from(row as Map)))
+        .toList(growable: false);
   }
 
-  Future<void> aceitarSugestao(int id) async {
-    await _dio.post('/api/ia/progressao/sugestoes/$id/aceitar');
+  Future<ProgressaoAceitarResponse> aceitarSugestao(int id) async {
+    final r = await _dio.post('/api/ia/progressao/sugestoes/$id/aceitar');
+    final data = r.data;
+    if (data is Map) {
+      return ProgressaoAceitarResponse.fromApi(Map<String, dynamic>.from(data));
+    }
+    return const ProgressaoAceitarResponse(
+      cargaAplicada: true,
+      mensagem: 'Sugestão aceita.',
+    );
   }
 
   Future<void> rejeitarSugestao(int id) async {

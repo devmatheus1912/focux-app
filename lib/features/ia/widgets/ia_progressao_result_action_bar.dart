@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/tokens_strip.dart';
+import '../utils/progressao_copy.dart';
 
 class IaProgressaoResultActionBar extends StatelessWidget {
   const IaProgressaoResultActionBar({
@@ -30,11 +31,11 @@ class IaProgressaoResultActionBar extends StatelessWidget {
         if (showApplyTreino && onApplyTreino != null) ...[
           Semantics(
             button: true,
-            label: 'Aplicar progressão no treino do aluno',
-            child: FilledButton.icon(
+              label: 'Ver treinos do aluno para conferir cargas',
+              child: FilledButton.icon(
               onPressed: onApplyTreino,
               icon: const Icon(Icons.fitness_center_rounded, size: 18),
-              label: const Text('Aplicar no treino'),
+              label: const Text('Ver treinos do aluno'),
               style: FilledButton.styleFrom(
                 backgroundColor: primary,
                 padding: const EdgeInsets.symmetric(vertical: 14),
@@ -76,17 +77,11 @@ class IaProgressaoResultActionBar extends StatelessWidget {
           const SizedBox(height: TokensStrip.s2),
           Semantics(
             button: true,
-            label: pendingSuggestions > 0
-                ? 'Revisar $pendingSuggestions sugestões pendentes de progressão'
-                : 'Revisar sugestões pendentes de progressão',
+            label: progressaoAceitarSemanticsLabel(pendingSuggestions),
             child: TextButton.icon(
               onPressed: onReviewSuggestions,
               icon: const Icon(Icons.fact_check_outlined, size: 18),
-              label: Text(
-                pendingSuggestions > 0
-                    ? 'Revisar $pendingSuggestions sugestões pendentes'
-                    : 'Revisar sugestões pendentes',
-              ),
+              label: Text(progressaoPendingReviewLabel(pendingSuggestions)),
             ),
           ),
         ],

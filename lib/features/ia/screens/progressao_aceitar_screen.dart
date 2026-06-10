@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -6,26 +7,34 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../features/alunos/constants/aluno_360_layout.dart';
 import '../../../features/alunos/utils/satellite_screen_utils.dart';
 import '../../../features/alunos/widgets/aluno360_action_empty_panel.dart';
+import '../../../features/alunos/widgets/aluno_avatar.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/ia_repository.dart';
+import '../models/progressao_sugestao.dart';
 import '../providers/progressao_sugestoes_provider.dart';
-import '../utils/ia_progressao_carga_delta.dart';
 import '../utils/progressao_aceitar_route_args.dart';
-import '../widgets/ia_carga_chip.dart';
-import '../widgets/ia_expandable_copy.dart';
 import '../widgets/ia_progressao_card_entrance.dart';
+import '../widgets/ia_progressao_exercise_card.dart';
 
-class ProgressaoAceitarScreen extends ConsumerWidget {
+class ProgressaoAceitarScreen extends ConsumerStatefulWidget {
   const ProgressaoAceitarScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProgressaoAceitarScreen> createState() =>
+      _ProgressaoAceitarScreenState();
+}
+
+class _ProgressaoAceitarScreenState extends ConsumerState<ProgressaoAceitarScreen> {
+  int? _actingOnId;
+  String? _successBanner;
+
+  @override
+  Widget build(BuildContext context) {
     final args = ProgressaoAceitarRouteArgs.resolve(context);
     final sugestoesAsync = ref.watch(progressaoSugestoesProvider(args.alunoId));
     final firstName = satelliteFirstName(args.alunoNome, fallback: 'aluno');
@@ -42,7 +51,9 @@ class ProgressaoAceitarScreen extends ConsumerWidget {
             label: 'Atualizar sugestões pendentes',
             child: IconButton(
               icon: const Icon(Icons.refresh),
-              onPressed: () => ref.invalidate(progressaoSugestoesProvider(args.alunoId)),
+              onPressed: _actingOnId == null
+                  ? () => ref.invalidate(progressaoSugestoesProvider(args.alunoId))
+                  : null,
             ),
           ),
         ],
@@ -77,35 +88,48 @@ class ProgressaoAceitarScreen extends ConsumerWidget {
         data: (lista) {
           if (lista.isEmpty) {
             return satelliteEmptyBody(
-              child: Aluno360ActionEmptyPanel(
-                icon: Icons.check_circle_outline,
-                title: 'Nenhuma sugestão pendente',
-                subtitle:
-                    args.alunoId == null
-                        ? 'Quando a IA sugerir progressão de carga, ela aparecerá aqui para você revisar e aplicar.'
-                        : 'Gere uma progressão com IA para $firstName e volte aqui para revisar antes de aplicar no treino.',
-                primaryLabel:
-                    args.alunoId == null ? null : 'Gerar progressão com IA',
-                primaryIcon: args.alunoId == null ? null : Icons.auto_awesome,
-                onPrimary:
-                    args.alunoId == null
-                        ? null
-                        : () => context.push(
-                          '/alunos/${args.alunoId}/ia/progressao',
-                          extra: args.alunoNome ?? 'Aluno',
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (_successBanner != null) ...[
+                    _SuccessBanner(message: _successBanner!),
+                    const SizedBox(height: TokensStrip.s4),
+                  ],
+                  Aluno360ActionEmptyPanel(
+                    icon: Icons.check_circle_outline,
+                    title: _successBanner != null
+                        ? 'Tudo em dia'
+                        : 'Nenhuma sugestão pendente',
+                    subtitle:
+                        args.alunoId == null
+                            ? 'Quando a IA sugerir progressão de carga, ela aparecerá aqui para você revisar e aplicar.'
+                            : _successBanner != null
+                            ? 'A carga foi registrada. Gere uma nova progressão quando quiser atualizar o plano.'
+                            : 'Gere uma progressão com IA para $firstName e volte aqui para revisar antes de aplicar no treino.',
+                    primaryLabel:
+                        args.alunoId == null ? null : 'Gerar progressão com IA',
+                    primaryIcon: args.alunoId == null ? null : Icons.auto_awesome,
+                    onPrimary:
+                        args.alunoId == null
+                            ? null
+                            : () => context.push(
+                              '/alunos/${args.alunoId}/ia/progressao',
+                              extra: args.alunoNome ?? 'Aluno',
+                            ),
+                    showPrimary: args.alunoId != null,
+                    secondaryActions: [
+                      if (args.alunoId != null)
+                        Aluno360SecondaryAction(
+                          label: 'Voltar ao Aluno 360',
+                          icon: Icons.arrow_back_rounded,
+                          onTap:
+                              () => safePopOrGo(
+                                context,
+                                args.returnTo ?? '/alunos/${args.alunoId}',
+                              ),
                         ),
-                showPrimary: args.alunoId != null,
-                secondaryActions: [
-                  if (args.alunoId != null)
-                    Aluno360SecondaryAction(
-                      label: 'Voltar ao Aluno 360',
-                      icon: Icons.arrow_back_rounded,
-                      onTap:
-                          () => safePopOrGo(
-                            context,
-                            args.returnTo ?? '/alunos/${args.alunoId}',
-                          ),
-                    ),
+                    ],
+                  ),
                 ],
               ),
             );
@@ -115,29 +139,96 @@ class ProgressaoAceitarScreen extends ConsumerWidget {
             child: ListView.builder(
               padding: const EdgeInsets.all(TokensStrip.s4),
               itemCount: lista.length,
-              itemBuilder:
-                  (_, i) => IaProgressaoCardEntrance(
-                    index: i,
-                    child: _CardSugestao(
-                      sugestao: lista[i],
-                      onAceitar:
-                          () => _acao(
-                            context,
-                            ref,
-                            args,
-                            lista[i],
-                            aceitar: true,
+              itemBuilder: (_, i) {
+                final sugestao = lista[i];
+                final busy = _actingOnId == sugestao.id;
+                return IaProgressaoCardEntrance(
+                  index: i,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: IaProgressaoExerciseCard(
+                      exercicio: sugestao.exercicio,
+                      cargaAtual: sugestao.cargaAtual,
+                      cargaSugerida: sugestao.cargaSugerida,
+                      justificativa: sugestao.justificativa,
+                      deltaLabel: sugestao.deltaLabel,
+                      padding: const EdgeInsets.all(TokensStrip.s4),
+                      header: Row(
+                        children: [
+                          AlunoAvatar(
+                            name: sugestao.alunoNome ?? args.alunoNome ?? 'Aluno',
+                            photoUrl: args.alunoFotoUrl,
+                            variant: AlunoAvatarVariant.strip,
                           ),
-                      onRejeitar:
-                          () => _acao(
-                            context,
-                            ref,
-                            args,
-                            lista[i],
-                            aceitar: false,
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              sugestao.alunoNome ?? args.alunoNome ?? 'Aluno',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15,
+                              ),
+                            ),
                           ),
+                        ],
+                      ),
+                      footerActions: Row(
+                        children: [
+                          Expanded(
+                            child: Semantics(
+                              button: true,
+                              label: 'Rejeitar sugestão de ${sugestao.exercicio}',
+                              child: OutlinedButton.icon(
+                                onPressed: busy
+                                    ? null
+                                    : () => _confirmarRejeicao(args, sugestao),
+                                icon: busy
+                                    ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      )
+                                    : const Icon(Icons.close_rounded, size: 18),
+                                label: const Text('Rejeitar'),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: EagleTokens.bad,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Semantics(
+                              button: true,
+                              label:
+                                  'Aceitar sugestão de ${sugestao.exercicio} e aplicar no treino',
+                              child: FilledButton.icon(
+                                onPressed: busy
+                                    ? null
+                                    : () => _acao(args, sugestao, aceitar: true),
+                                icon: busy
+                                    ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Icon(Icons.check_rounded, size: 18),
+                                label: const Text('Aceitar'),
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: EagleTokens.good,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
+                );
+              },
             ),
           );
         },
@@ -145,235 +236,113 @@ class ProgressaoAceitarScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _acao(
-    BuildContext context,
-    WidgetRef ref,
+  Future<void> _confirmarRejeicao(
     ProgressaoAceitarRouteArgs args,
-    Map<String, dynamic> sugestao, {
+    ProgressaoSugestao sugestao,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Descartar sugestão?'),
+        content: Text(
+          'A sugestão de ${sugestao.exercicio} (${sugestao.cargaSugerida}) será removida.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Descartar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      await _acao(args, sugestao, aceitar: false);
+    }
+  }
+
+  Future<void> _acao(
+    ProgressaoAceitarRouteArgs args,
+    ProgressaoSugestao sugestao, {
     required bool aceitar,
   }) async {
-    final id = sugestao['id'] as int?;
-    if (id == null) return;
+    setState(() => _actingOnId = sugestao.id);
     try {
       final repo = IaRepository(ref.read(apiClientProvider));
       if (aceitar) {
-        await repo.aceitarSugestao(id);
-      } else {
-        await repo.rejeitarSugestao(id);
-      }
-      ref.invalidate(progressaoSugestoesProvider(args.alunoId));
-      if (context.mounted) {
+        final response = await repo.aceitarSugestao(sugestao.id);
+        ref.invalidate(progressaoSugestoesProvider(args.alunoId));
+        if (!mounted) return;
+        await HapticFeedback.mediumImpact();
+        setState(() => _successBanner = response.mensagem);
         FeedbackHelper.showSnackBar(
           context,
           SnackBar(
-            content: Text(
-              aceitar
-                  ? 'Sugestão aceita e carga aplicada no treino.'
-                  : 'Sugestão descartada.',
-            ),
-            backgroundColor: aceitar ? EagleTokens.good : EagleTokens.warn,
+            content: Text(response.mensagem),
+            backgroundColor:
+                response.cargaAplicada ? EagleTokens.good : EagleTokens.warn,
           ),
         );
+      } else {
+        await repo.rejeitarSugestao(sugestao.id);
+        ref.invalidate(progressaoSugestoesProvider(args.alunoId));
+        if (mounted) {
+          FeedbackHelper.showSnackBar(
+            context,
+            const SnackBar(content: Text('Sugestão descartada.')),
+          );
+        }
       }
     } catch (e) {
-      if (context.mounted) {
+      if (mounted) {
         FeedbackHelper.showSnackBar(
           context,
           SnackBar(content: Text('Não foi possível concluir: $e')),
         );
       }
+    } finally {
+      if (mounted) setState(() => _actingOnId = null);
     }
   }
 }
 
-class _CardSugestao extends StatelessWidget {
-  const _CardSugestao({
-    required this.sugestao,
-    required this.onAceitar,
-    required this.onRejeitar,
-  });
+class _SuccessBanner extends StatelessWidget {
+  const _SuccessBanner({required this.message});
 
-  final Map<String, dynamic> sugestao;
-  final VoidCallback onAceitar;
-  final VoidCallback onRejeitar;
+  final String message;
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final alunoNome = sugestao['alunoNome'] as String? ?? 'Aluno';
-    final exercicio = sugestao['exercicio'] as String? ?? '—';
-    final cargaAtual =
-        sugestao['cargaAtual']?.toString() ??
-        _formatKg(sugestao['cargaAnteriorKg']);
-    final cargaSugerida =
-        sugestao['cargaSugerida']?.toString() ??
-        _formatKg(sugestao['cargaSugeridaKg']);
-    final motivo =
-        sugestao['justificativa'] as String? ??
-        sugestao['motivo'] as String? ??
-        '';
-    final deltaLabel = _deltaLabelFromApi(sugestao) ??
-        computeProgressaoDeltaLabel(cargaAtual, cargaSugerida);
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Semantics(
-        label:
-            'Sugestão de $exercicio para $alunoNome. Atual $cargaAtual. Sugerido $cargaSugerida.',
-        child: DecoratedBox(
-          decoration: fxListCardDecoration(context, accent: primary),
-          child: Padding(
-            padding: const EdgeInsets.all(TokensStrip.s4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 16,
-                      backgroundColor: primary,
-                      child: const Icon(
-                        Icons.person,
-                        size: 16,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        alunoNome,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ),
-                  ],
+    return Semantics(
+      liveRegion: true,
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(horizontal: TokensStrip.s4),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: EagleTokens.good.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(TokensStrip.rCard),
+          border: Border.all(color: EagleTokens.good.withValues(alpha: 0.4)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.check_circle, color: EagleTokens.good, size: 22),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  height: 1.35,
                 ),
-                const SizedBox(height: 10),
-                const Divider(height: 1),
-                const SizedBox(height: 10),
-                Text(
-                  exercicio,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: IaCargaChip(
-                        label: 'Atual',
-                        valor: cargaAtual.isEmpty ? '—' : cargaAtual,
-                        color: TokensStrip.textSecondary,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Icon(Icons.arrow_forward_rounded, color: primary),
-                    ),
-                    Expanded(
-                      child: IaCargaChip(
-                        label: 'Sugerido',
-                        valor: cargaSugerida.isEmpty ? '—' : cargaSugerida,
-                        color: primary,
-                        deltaLabel: deltaLabel,
-                      ),
-                    ),
-                  ],
-                ),
-                if (motivo.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: TokensStrip.textSecondary.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(
-                          Icons.info_outline,
-                          size: 14,
-                          color: TokensStrip.textSecondary,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: IaExpandableCopy(
-                            text: motivo,
-                            expandLabel: 'Ler justificativa completa',
-                            collapseLabel: 'Ver menos',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Semantics(
-                        button: true,
-                        label: 'Rejeitar sugestão de $exercicio',
-                        child: OutlinedButton.icon(
-                          onPressed: onRejeitar,
-                          icon: const Icon(Icons.close_rounded, size: 18),
-                          label: const Text('Rejeitar'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: EagleTokens.bad,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Semantics(
-                        button: true,
-                        label: 'Aceitar sugestão de $exercicio e aplicar no treino',
-                        child: FilledButton.icon(
-                          onPressed: onAceitar,
-                          icon: const Icon(Icons.check_rounded, size: 18),
-                          label: const Text('Aceitar'),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: EagleTokens.good,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
-  }
-
-  static String _formatKg(Object? raw) {
-    if (raw == null) return '';
-    final text = raw.toString().trim();
-    if (text.isEmpty) return '';
-    return text.endsWith('kg') ? text : '${text}kg';
-  }
-
-  static String? _deltaLabelFromApi(Map<String, dynamic> sugestao) {
-    final raw = sugestao['deltaKg'];
-    final value = switch (raw) {
-      final num n => n.toDouble(),
-      final String s => double.tryParse(s.replaceAll(',', '.')),
-      _ => null,
-    };
-    if (value == null || value.abs() < 0.01) return null;
-    final sign = value > 0 ? '+' : '';
-    final abs = value.abs();
-    final formatted =
-        abs == abs.roundToDouble()
-            ? abs.toStringAsFixed(0)
-            : abs.toStringAsFixed(1).replaceAll('.', ',');
-    return '$sign$formatted kg';
   }
 }

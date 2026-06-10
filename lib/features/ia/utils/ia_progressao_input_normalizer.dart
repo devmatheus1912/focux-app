@@ -31,7 +31,7 @@ String _normalizeExerciseLine(String line) {
   );
 
   text = text.replaceAllMapped(
-    RegExp(r'(\d+(?:[,.]\d+)?)\s*kg', caseSensitive: false),
+    RegExp(r'(\d+(?:[,.]\d+)?)\s*[-–]?\s*kg', caseSensitive: false),
     (m) => '${m[1]!.replaceAll(',', '.')}kg',
   );
 

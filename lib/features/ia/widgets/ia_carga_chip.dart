@@ -50,6 +50,14 @@ class IaCargaChip extends StatelessWidget {
           child: Column(
             children: [
               Text(
+                label,
+                style: textTheme.labelSmall?.copyWith(
+                  fontSize: 10,
+                  color: TokensStrip.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
                 valor.isEmpty ? '—' : valor,
                 textAlign: TextAlign.center,
                 style: valueStyle,
@@ -72,14 +80,6 @@ class IaCargaChip extends StatelessWidget {
                   ),
                 ),
               ],
-              const SizedBox(height: 2),
-              Text(
-                label,
-                style: textTheme.labelSmall?.copyWith(
-                  fontSize: 10,
-                  color: TokensStrip.textSecondary,
-                ),
-              ),
             ],
           ),
         ),

@@ -9,6 +9,13 @@ void main() {
     );
   });
 
+  test('computeProgressaoDeltaLabel usa volume quando não há kg', () {
+    expect(
+      computeProgressaoDeltaLabel('Desconhecida 4x15', '60kg 4x12'),
+      '4x15 → 4x12',
+    );
+  });
+
   test('computeProgressaoDeltaLabel returns null when equal', () {
     expect(
       computeProgressaoDeltaLabel('80kg', '80kg'),

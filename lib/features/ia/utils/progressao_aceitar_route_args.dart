@@ -6,11 +6,13 @@ class ProgressaoAceitarRouteArgs {
     this.returnTo,
     this.alunoId,
     this.alunoNome,
+    this.alunoFotoUrl,
   });
 
   final String? returnTo;
   final int? alunoId;
   final String? alunoNome;
+  final String? alunoFotoUrl;
 
   /// Resolves navigation context from [GoRouter] extra (hot-reload safe).
   static ProgressaoAceitarRouteArgs resolve(BuildContext context) =>
@@ -28,6 +30,7 @@ class ProgressaoAceitarRouteArgs {
       returnTo: extra['returnTo']?.toString(),
       alunoId: alunoId,
       alunoNome: extra['alunoNome']?.toString(),
+      alunoFotoUrl: extra['alunoFotoUrl']?.toString(),
     );
   }
 
@@ -35,5 +38,6 @@ class ProgressaoAceitarRouteArgs {
     if (returnTo != null) 'returnTo': returnTo,
     if (alunoId != null) 'alunoId': alunoId,
     if (alunoNome != null) 'alunoNome': alunoNome,
+    if (alunoFotoUrl != null) 'alunoFotoUrl': alunoFotoUrl,
   };
 }

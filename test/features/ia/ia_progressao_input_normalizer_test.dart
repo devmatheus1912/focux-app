@@ -13,6 +13,13 @@ void main() {
     expect(normalizeIaProgressaoObjetivo('hipertrofia'), 'Hipertrofia');
   });
 
+  test('normalizeHistorico fixes 80-kg hyphen typo', () {
+    expect(
+      normalizeIaProgressaoHistorico('supino 80-kg 4x20'),
+      'supino 80kg 4x20',
+    );
+  });
+
   test('detects when historico was normalized', () {
     expect(
       iaProgressaoHistoricoWasNormalized(
