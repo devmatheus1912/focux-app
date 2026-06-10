@@ -14,21 +14,12 @@ import '../../../features/alunos/utils/satellite_screen_utils.dart';
 import '../../../features/alunos/widgets/aluno360_action_empty_panel.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/ia_repository.dart';
+import '../providers/progressao_sugestoes_provider.dart';
 import '../utils/ia_progressao_carga_delta.dart';
 import '../utils/progressao_aceitar_route_args.dart';
 import '../widgets/ia_carga_chip.dart';
 import '../widgets/ia_expandable_copy.dart';
 import '../widgets/ia_progressao_card_entrance.dart';
-
-final sugestoesProgressaoProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, int?>((
-      ref,
-      alunoId,
-    ) async {
-      return IaRepository(ref.read(apiClientProvider)).sugestoesProgressao(
-        alunoId: alunoId,
-      );
-    });
 
 class ProgressaoAceitarScreen extends ConsumerWidget {
   const ProgressaoAceitarScreen({super.key, this.args = const ProgressaoAceitarRouteArgs()});
@@ -37,7 +28,7 @@ class ProgressaoAceitarScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sugestoesAsync = ref.watch(sugestoesProgressaoProvider(args.alunoId));
+    final sugestoesAsync = ref.watch(progressaoSugestoesProvider(args.alunoId));
     final firstName = satelliteFirstName(args.alunoNome, fallback: 'aluno');
 
     return FxShellScaffold(
@@ -52,7 +43,7 @@ class ProgressaoAceitarScreen extends ConsumerWidget {
             label: 'Atualizar sugestões pendentes',
             child: IconButton(
               icon: const Icon(Icons.refresh),
-              onPressed: () => ref.invalidate(sugestoesProgressaoProvider(args.alunoId)),
+              onPressed: () => ref.invalidate(progressaoSugestoesProvider(args.alunoId)),
             ),
           ),
         ],
@@ -69,7 +60,7 @@ class ProgressaoAceitarScreen extends ConsumerWidget {
                 primaryLabel: 'Tentar novamente',
                 primaryIcon: Icons.refresh,
                 onPrimary:
-                    () => ref.invalidate(sugestoesProgressaoProvider(args.alunoId)),
+                    () => ref.invalidate(progressaoSugestoesProvider(args.alunoId)),
                 secondaryActions: [
                   if (args.alunoId != null)
                     Aluno360SecondaryAction(
@@ -157,7 +148,7 @@ class ProgressaoAceitarScreen extends ConsumerWidget {
       } else {
         await repo.rejeitarSugestao(id);
       }
-      ref.invalidate(sugestoesProgressaoProvider(args.alunoId));
+      ref.invalidate(progressaoSugestoesProvider(args.alunoId));
       if (context.mounted) {
         FeedbackHelper.showSnackBar(
           context,
