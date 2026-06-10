@@ -25,6 +25,7 @@ Lembre-se de aquecer e registrar RPE após cada série.
     expect(supino.cargaAtual, '80kg 3x8');
     expect(supino.cargaSugerida, '82,5kg 3x8 ou 80kg 3x10');
     expect(supino.justificativa, contains('2,5kg'));
+    expect(supino.deltaLabel, '+2,5 kg');
 
     expect(parsed.footer, contains('aquecer'));
   });

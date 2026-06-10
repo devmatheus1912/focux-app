@@ -1,3 +1,5 @@
+import 'ia_progressao_carga_delta.dart';
+
 /// Parses IA markdown progressão responses into mobile-friendly exercise rows.
 class IaProgressaoExerciseRow {
   const IaProgressaoExerciseRow({
@@ -5,12 +7,14 @@ class IaProgressaoExerciseRow {
     required this.cargaAtual,
     required this.cargaSugerida,
     required this.justificativa,
+    this.deltaLabel,
   });
 
   final String exercicio;
   final String cargaAtual;
   final String cargaSugerida;
   final String justificativa;
+  final String? deltaLabel;
 }
 
 class IaProgressaoParsedResult {
@@ -137,26 +141,34 @@ IaProgressaoExerciseRow? _mapCellsToExercise(List<String> cells) {
   if (nonEmpty.length < 2 || _looksLikeHeader(nonEmpty)) return null;
 
   if (nonEmpty.length >= 4) {
+    final atual = _stripInlineMarkdown(nonEmpty[1]);
+    final sugerida = _stripInlineMarkdown(nonEmpty[2]);
     return IaProgressaoExerciseRow(
       exercicio: _stripInlineMarkdown(nonEmpty[0]),
-      cargaAtual: _stripInlineMarkdown(nonEmpty[1]),
-      cargaSugerida: _stripInlineMarkdown(nonEmpty[2]),
+      cargaAtual: atual,
+      cargaSugerida: sugerida,
       justificativa: _stripInlineMarkdown(nonEmpty.sublist(3).join(' ')),
+      deltaLabel: computeProgressaoDeltaLabel(atual, sugerida),
     );
   }
   if (nonEmpty.length == 3) {
+    final atual = _stripInlineMarkdown(nonEmpty[1]);
+    final sugerida = _stripInlineMarkdown(nonEmpty[2]);
     return IaProgressaoExerciseRow(
       exercicio: _stripInlineMarkdown(nonEmpty[0]),
-      cargaAtual: _stripInlineMarkdown(nonEmpty[1]),
-      cargaSugerida: _stripInlineMarkdown(nonEmpty[2]),
+      cargaAtual: atual,
+      cargaSugerida: sugerida,
       justificativa: '',
+      deltaLabel: computeProgressaoDeltaLabel(atual, sugerida),
     );
   }
+  final atual = _stripInlineMarkdown(nonEmpty[1]);
   return IaProgressaoExerciseRow(
     exercicio: _stripInlineMarkdown(nonEmpty[0]),
-    cargaAtual: _stripInlineMarkdown(nonEmpty[1]),
+    cargaAtual: atual,
     cargaSugerida: '',
     justificativa: '',
+    deltaLabel: null,
   );
 }
 

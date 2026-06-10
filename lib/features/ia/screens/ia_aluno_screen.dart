@@ -6,6 +6,8 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
 import '../../../features/chat/data/chat_repository.dart';
 import '../data/ia_repository.dart';
+import '../models/ia_progressao_carga_result.dart';
+import '../widgets/ia_progressao_loading_skeleton.dart';
 import '../widgets/ia_progressao_result_view.dart';
 import '../widgets/ia_quota_upgrade.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -255,7 +257,7 @@ class _ProgressaoTab extends ConsumerStatefulWidget {
 
 class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
   bool _loading = false;
-  String? _resultado;
+  IaProgressaoCargaResult? _resultado;
 
   Future<void> _gerarProgressao() async {
     final id = widget.alunoId;
@@ -312,13 +314,15 @@ class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
           loading: _loading,
           onPressed: _loading ? null : _gerarProgressao,
         ),
+        if (_loading) const IaProgressaoLoadingSkeleton(),
         if (_resultado != null) ...[
           const SizedBox(height: 20),
           const Divider(),
           const SizedBox(height: 8),
           IaProgressaoResultView(
-            markdown: _resultado!,
+            result: _resultado!,
             showSectionTitle: false,
+            showApplyTreino: false,
           ),
         ],
       ],

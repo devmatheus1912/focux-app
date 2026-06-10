@@ -9,6 +9,8 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../utils/ia_progressao_carga_delta.dart';
+import '../widgets/ia_carga_chip.dart';
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
@@ -215,19 +217,30 @@ class _CardSugestao extends StatelessWidget {
             // Carga atual → sugerida
             Row(
               children: [
-                _CargaBox(
-                  label: 'Carga Atual',
-                  valor: cargaAtual != null ? '${cargaAtual}kg' : '—',
-                  cor: TokensStrip.textSecondary,
+                Expanded(
+                  child: IaCargaChip(
+                    label: 'Atual',
+                    valor: cargaAtual != null ? '${cargaAtual}kg' : '—',
+                    color: TokensStrip.textSecondary,
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Icon(Icons.arrow_forward, color: primary),
                 ),
-                _CargaBox(
-                  label: 'Sugerido',
-                  valor: cargaSugerida != null ? '${cargaSugerida}kg' : '—',
-                  cor: primary,
+                Expanded(
+                  child: IaCargaChip(
+                    label: 'Sugerido',
+                    valor: cargaSugerida != null ? '${cargaSugerida}kg' : '—',
+                    color: primary,
+                    deltaLabel:
+                        cargaAtual != null && cargaSugerida != null
+                            ? computeProgressaoDeltaLabel(
+                              '${cargaAtual}kg',
+                              '${cargaSugerida}kg',
+                            )
+                            : null,
+                  ),
                 ),
               ],
             ),
@@ -295,44 +308,6 @@ class _CardSugestao extends StatelessWidget {
           ],
         ),
         ),
-      ),
-    );
-  }
-}
-
-class _CargaBox extends StatelessWidget {
-  final String label, valor;
-  final Color cor;
-  const _CargaBox({
-    required this.label,
-    required this.valor,
-    required this.cor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: cor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: cor.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        children: [
-          Text(
-            valor,
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 16,
-              color: cor,
-            ),
-          ),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 10, color: TokensStrip.textSecondary),
-          ),
-        ],
       ),
     );
   }

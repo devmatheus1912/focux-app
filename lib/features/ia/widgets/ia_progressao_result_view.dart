@@ -5,28 +5,63 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../models/ia_progressao_carga_result.dart';
 import '../utils/ia_progressao_result_parser.dart';
+import 'ia_carga_chip.dart';
+import 'ia_expandable_copy.dart';
+import 'ia_progressao_card_entrance.dart';
+import 'ia_progressao_result_action_bar.dart';
 
 /// Mobile-first rendering for IA progressão de carga responses.
 class IaProgressaoResultView extends StatelessWidget {
   const IaProgressaoResultView({
     super.key,
-    required this.markdown,
+    required this.result,
     this.alunoNome,
     this.onCopy,
-    this.showCopyButton = true,
+    this.onExportPdf,
+    this.onApplyTreino,
+    this.onReviewSuggestions,
     this.showSectionTitle = true,
+    this.showApplyTreino = true,
   });
 
-  final String markdown;
+  final IaProgressaoCargaResult result;
   final String? alunoNome;
   final VoidCallback? onCopy;
-  final bool showCopyButton;
+  final VoidCallback? onExportPdf;
+  final VoidCallback? onApplyTreino;
+  final VoidCallback? onReviewSuggestions;
   final bool showSectionTitle;
+  final bool showApplyTreino;
+
+  factory IaProgressaoResultView.fromMarkdown(
+    String markdown, {
+    Key? key,
+    String? alunoNome,
+    VoidCallback? onCopy,
+    VoidCallback? onExportPdf,
+    VoidCallback? onApplyTreino,
+    VoidCallback? onReviewSuggestions,
+    bool showSectionTitle = true,
+    bool showApplyTreino = true,
+  }) {
+    return IaProgressaoResultView(
+      key: key,
+      result: IaProgressaoCargaResult.fromApi({'resposta': markdown}),
+      alunoNome: alunoNome,
+      onCopy: onCopy,
+      onExportPdf: onExportPdf,
+      onApplyTreino: onApplyTreino,
+      onReviewSuggestions: onReviewSuggestions,
+      showSectionTitle: showSectionTitle,
+      showApplyTreino: showApplyTreino,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final parsed = parseIaProgressaoMarkdown(markdown);
+    final parsed = result.toParsed();
     final primary = Theme.of(context).colorScheme.primary;
 
     return AnimatedSwitcher(
@@ -39,15 +74,18 @@ class IaProgressaoResultView extends StatelessWidget {
               parsed: parsed,
               primary: primary,
               alunoNome: alunoNome,
-              showCopyButton: showCopyButton,
               showSectionTitle: showSectionTitle,
+              showApplyTreino: showApplyTreino,
               onCopy: onCopy ?? () => _copyPlain(context, parsed),
+              onExportPdf: onExportPdf,
+              onApplyTreino: onApplyTreino,
+              onReviewSuggestions: onReviewSuggestions,
             )
           : _FallbackMarkdown(
-              key: ValueKey(markdown),
-              markdown: markdown,
-              showCopyButton: showCopyButton,
+              key: ValueKey(result.resposta),
+              markdown: result.resposta,
               onCopy: onCopy ?? () => _copyPlain(context, parsed),
+              onExportPdf: onExportPdf,
             ),
     );
   }
@@ -70,17 +108,23 @@ class _StructuredResult extends StatelessWidget {
     required this.parsed,
     required this.primary,
     this.alunoNome,
-    required this.showCopyButton,
     required this.showSectionTitle,
+    required this.showApplyTreino,
     required this.onCopy,
+    this.onExportPdf,
+    this.onApplyTreino,
+    this.onReviewSuggestions,
   });
 
   final IaProgressaoParsedResult parsed;
   final Color primary;
   final String? alunoNome;
-  final bool showCopyButton;
   final bool showSectionTitle;
+  final bool showApplyTreino;
   final VoidCallback onCopy;
+  final VoidCallback? onExportPdf;
+  final VoidCallback? onApplyTreino;
+  final VoidCallback? onReviewSuggestions;
 
   @override
   Widget build(BuildContext context) {
@@ -88,14 +132,7 @@ class _StructuredResult extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (parsed.intro != null && parsed.intro!.isNotEmpty) ...[
-          Text(
-            parsed.intro!,
-            style: const TextStyle(
-              fontSize: 14,
-              height: 1.45,
-              color: TokensStrip.textSecondary,
-            ),
-          ),
+          IaExpandableCopy(text: parsed.intro!),
           const SizedBox(height: TokensStrip.s3),
         ],
         if (showSectionTitle) ...[
@@ -105,15 +142,20 @@ class _StructuredResult extends StatelessWidget {
               alunoNome == null
                   ? 'Sugestões por exercício'
                   : 'Sugestões para $alunoNome',
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
           const SizedBox(height: TokensStrip.s2),
         ],
-        ...parsed.exercises.map(
-          (row) => Padding(
+        ...parsed.exercises.asMap().entries.map(
+          (entry) => Padding(
             padding: const EdgeInsets.only(bottom: TokensStrip.s3),
-            child: _ExerciseCard(row: row, primary: primary),
+            child: IaProgressaoCardEntrance(
+              index: entry.key,
+              child: _ExerciseCard(row: entry.value, primary: primary),
+            ),
           ),
         ),
         if (parsed.footer != null && parsed.footer!.isNotEmpty) ...[
@@ -123,8 +165,9 @@ class _StructuredResult extends StatelessWidget {
               color: TokensStrip.textSecondary.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(TokensStrip.rCard),
             ),
-            child: Text(
-              parsed.footer!,
+            child: IaExpandableCopy(
+              text: parsed.footer!,
+              expandLabel: 'Ler lembrete completo',
               style: const TextStyle(
                 fontSize: 12,
                 height: 1.4,
@@ -134,12 +177,13 @@ class _StructuredResult extends StatelessWidget {
           ),
           const SizedBox(height: TokensStrip.s2),
         ],
-        if (showCopyButton)
-          OutlinedButton.icon(
-            onPressed: onCopy,
-            icon: const Icon(Icons.copy_rounded, size: 18),
-            label: const Text('Copiar sugestão'),
-          ),
+        IaProgressaoResultActionBar(
+          onCopy: onCopy,
+          onExportPdf: onExportPdf,
+          onApplyTreino: onApplyTreino,
+          onReviewSuggestions: onReviewSuggestions,
+          showApplyTreino: showApplyTreino,
+        ),
       ],
     );
   }
@@ -157,6 +201,7 @@ class _ExerciseCard extends StatelessWidget {
       label:
           '${row.exercicio}. Carga atual ${row.cargaAtual}. '
           'Carga sugerida ${row.cargaSugerida}.'
+          '${row.deltaLabel != null ? ' Variação ${row.deltaLabel}.' : ''}'
           '${row.justificativa.isNotEmpty ? ' ${row.justificativa}' : ''}',
       child: Container(
         decoration: fxListCardDecoration(context, accent: primary),
@@ -168,13 +213,15 @@ class _ExerciseCard extends StatelessWidget {
             children: [
               Text(
                 row.exercicio,
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 10),
               Row(
                 children: [
                   Expanded(
-                    child: _CargaChip(
+                    child: IaCargaChip(
                       label: 'Atual',
                       valor: row.cargaAtual,
                       color: TokensStrip.textSecondary,
@@ -185,10 +232,11 @@ class _ExerciseCard extends StatelessWidget {
                     child: Icon(Icons.arrow_forward_rounded, color: primary, size: 20),
                   ),
                   Expanded(
-                    child: _CargaChip(
+                    child: IaCargaChip(
                       label: 'Sugerido',
                       valor: row.cargaSugerida,
                       color: primary,
+                      deltaLabel: row.deltaLabel,
                     ),
                   ),
                 ],
@@ -212,8 +260,9 @@ class _ExerciseCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Expanded(
-                        child: Text(
-                          row.justificativa,
+                        child: IaExpandableCopy(
+                          text: row.justificativa,
+                          expandLabel: 'Ler justificativa completa',
                           style: const TextStyle(
                             fontSize: 13,
                             height: 1.4,
@@ -233,60 +282,17 @@ class _ExerciseCard extends StatelessWidget {
   }
 }
 
-class _CargaChip extends StatelessWidget {
-  const _CargaChip({
-    required this.label,
-    required this.valor,
-    required this.color,
-  });
-
-  final String label;
-  final String valor;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withValues(alpha: 0.28)),
-      ),
-      child: Column(
-        children: [
-          Text(
-            valor.isEmpty ? '—' : valor,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 14,
-              height: 1.25,
-              color: color,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 10, color: TokensStrip.textSecondary),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _FallbackMarkdown extends StatelessWidget {
   const _FallbackMarkdown({
     super.key,
     required this.markdown,
-    required this.showCopyButton,
     required this.onCopy,
+    this.onExportPdf,
   });
 
   final String markdown;
-  final bool showCopyButton;
   final VoidCallback onCopy;
+  final VoidCallback? onExportPdf;
 
   @override
   Widget build(BuildContext context) {
@@ -302,14 +308,12 @@ class _FallbackMarkdown extends StatelessWidget {
             tableBody: const TextStyle(fontSize: 12),
           ),
         ),
-        if (showCopyButton) ...[
-          const SizedBox(height: TokensStrip.s2),
-          OutlinedButton.icon(
-            onPressed: onCopy,
-            icon: const Icon(Icons.copy_rounded, size: 18),
-            label: const Text('Copiar sugestão'),
-          ),
-        ],
+        const SizedBox(height: TokensStrip.s2),
+        IaProgressaoResultActionBar(
+          onCopy: onCopy,
+          onExportPdf: onExportPdf,
+          showApplyTreino: false,
+        ),
       ],
     );
   }

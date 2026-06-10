@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../subscription/models/subscription_plan.dart';
+import '../models/ia_progressao_carga_result.dart';
 
 class IaOperationalException implements Exception {
   final String message;
@@ -167,7 +168,7 @@ class IaRepository {
     });
   }
 
-  Future<String> progressaoCarga(
+  Future<IaProgressaoCargaResult> progressaoCarga(
     int alunoId, {
     String? objetivo,
     String? historicoTreinos,
@@ -183,7 +184,9 @@ class IaRepository {
             'historicoTreinos': historicoTreinos,
         },
       );
-      return r.data['resposta'] as String;
+      return IaProgressaoCargaResult.fromApi(
+        Map<String, dynamic>.from(r.data as Map),
+      );
     });
   }
 
