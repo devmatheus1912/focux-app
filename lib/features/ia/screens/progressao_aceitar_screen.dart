@@ -22,12 +22,11 @@ import '../widgets/ia_expandable_copy.dart';
 import '../widgets/ia_progressao_card_entrance.dart';
 
 class ProgressaoAceitarScreen extends ConsumerWidget {
-  const ProgressaoAceitarScreen({super.key, this.args = const ProgressaoAceitarRouteArgs()});
-
-  final ProgressaoAceitarRouteArgs args;
+  const ProgressaoAceitarScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final args = ProgressaoAceitarRouteArgs.resolve(context);
     final sugestoesAsync = ref.watch(progressaoSugestoesProvider(args.alunoId));
     final firstName = satelliteFirstName(args.alunoNome, fallback: 'aluno');
 
@@ -121,9 +120,22 @@ class ProgressaoAceitarScreen extends ConsumerWidget {
                     index: i,
                     child: _CardSugestao(
                       sugestao: lista[i],
-                      onAceitar: () => _acao(context, ref, lista[i], aceitar: true),
+                      onAceitar:
+                          () => _acao(
+                            context,
+                            ref,
+                            args,
+                            lista[i],
+                            aceitar: true,
+                          ),
                       onRejeitar:
-                          () => _acao(context, ref, lista[i], aceitar: false),
+                          () => _acao(
+                            context,
+                            ref,
+                            args,
+                            lista[i],
+                            aceitar: false,
+                          ),
                     ),
                   ),
             ),
@@ -136,6 +148,7 @@ class ProgressaoAceitarScreen extends ConsumerWidget {
   Future<void> _acao(
     BuildContext context,
     WidgetRef ref,
+    ProgressaoAceitarRouteArgs args,
     Map<String, dynamic> sugestao, {
     required bool aceitar,
   }) async {

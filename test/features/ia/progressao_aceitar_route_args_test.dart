@@ -14,4 +14,10 @@ void main() {
     expect(args.alunoNome, 'Nathalia');
     expect(args.toExtra(), containsPair('alunoId', 12));
   });
+
+  test('fromExtra returns empty args for null extra', () {
+    final args = ProgressaoAceitarRouteArgs.fromExtra(null);
+    expect(args.alunoId, isNull);
+    expect(args.returnTo, isNull);
+  });
 }

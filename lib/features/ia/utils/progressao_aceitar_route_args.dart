@@ -1,3 +1,6 @@
+import 'package:flutter/widgets.dart';
+import 'package:go_router/go_router.dart';
+
 class ProgressaoAceitarRouteArgs {
   const ProgressaoAceitarRouteArgs({
     this.returnTo,
@@ -8,6 +11,10 @@ class ProgressaoAceitarRouteArgs {
   final String? returnTo;
   final int? alunoId;
   final String? alunoNome;
+
+  /// Resolves navigation context from [GoRouter] extra (hot-reload safe).
+  static ProgressaoAceitarRouteArgs resolve(BuildContext context) =>
+      fromExtra(GoRouterState.of(context).extra);
 
   static ProgressaoAceitarRouteArgs fromExtra(Object? extra) {
     if (extra is! Map) return const ProgressaoAceitarRouteArgs();
