@@ -99,6 +99,7 @@ bool isPersonalOnlyLocation(String path) {
     '/growth/migracao',
     '/promo-enterprise',
     '/ranking',
+    '/coach',
     '/galeria',
     '/feedback-videos',
     '/busca',

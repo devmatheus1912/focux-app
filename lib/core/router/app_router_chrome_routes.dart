@@ -43,6 +43,7 @@ import '../../features/checkin/screens/modo_presencial_screen.dart';
 import '../../features/ia/screens/progressao_aceitar_screen.dart';
 import '../../features/alunos/screens/editar_aluno_screen.dart';
 import '../../features/ranking/screens/ranking_screen.dart';
+import '../../features/coach/screens/coach_screen.dart';
 import '../../features/perfil/screens/identidade_visual_screen.dart';
 import '../../features/perfil/screens/white_label_settings_screen.dart';
 import '../../features/perfil/screens/landing_editor_screen.dart';
@@ -784,6 +785,10 @@ RouteBase buildChromeShellRoute() {
           GoRoute(
             path: '/ranking',
             builder: (context, state) => const RankingScreen(),
+          ),
+          GoRoute(
+            path: '/coach',
+            builder: (context, state) => const CoachScreen(),
           ),
           GoRoute(
             path: '/suporte',
