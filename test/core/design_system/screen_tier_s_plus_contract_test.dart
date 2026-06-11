@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/screen_source_bundle.dart';
+
 /// Tier S+ gate — every production feature screen meets hub-quality baseline.
 void main() {
   const allowedWithoutLimiter = {
@@ -41,7 +43,8 @@ void main() {
       final norm = path.substring(path.indexOf('lib/'));
       if (excluded.contains(norm)) continue;
 
-      final source = file.readAsStringSync();
+      final mainSource = file.readAsStringSync();
+      final source = readScreenSourceBundle(norm);
 
       if (!source.contains('fxScreenA11yScope') && !source.contains('Semantics(')) {
         failures.add('$norm: sem root a11y');
@@ -92,7 +95,7 @@ void main() {
         }
       }
 
-      final colorHits = 'Colors.'.allMatches(source).length;
+      final colorHits = 'Colors.'.allMatches(mainSource).length;
       if (colorHits > 16) {
         failures.add('$norm: $colorHits usos de Colors. (max 16)');
       }

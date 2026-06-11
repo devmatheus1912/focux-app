@@ -4,9 +4,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import '../../../core/theme/design_tokens.dart';
+import '../utils/financeiro_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -887,11 +886,8 @@ class _FinanceiroMensalidadesTabState
                                       children: [
                                         Text(
                                           m.alunoNome,
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w800,
-                                            color: ink,
-                                            letterSpacing: -0.15,
+                                          style: FinanceiroTypography.alunoNome(
+                                            context,
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -899,10 +895,8 @@ class _FinanceiroMensalidadesTabState
                                         const SizedBox(height: 3),
                                         Text(
                                           m.mesReferencia.substring(0, 7),
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: mute,
-                                            fontWeight: FontWeight.w600,
+                                          style: FinanceiroTypography.meta(
+                                            context,
                                           ),
                                         ),
                                       ],
@@ -911,9 +905,8 @@ class _FinanceiroMensalidadesTabState
                                   const SizedBox(width: 8),
                                   Text(
                                     'R\$ ${m.valor.toStringAsFixed(0)}',
-                                    style: GoogleFonts.jetBrainsMono(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
+                                    style: FinanceiroTypography.valorMonetario(
+                                      context,
                                       color: ink,
                                     ),
                                   ),

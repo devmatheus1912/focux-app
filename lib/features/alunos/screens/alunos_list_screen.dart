@@ -26,6 +26,8 @@ import '../constants/alunos_list_filters.dart';
 import '../utils/aluno_display_utils.dart';
 import '../utils/alunos_list_utils.dart';
 import '../widgets/aluno_avatar.dart';
+import '../../../core/widgets/fx_horizontal_scroll_peek.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
 
 export '../constants/alunos_list_filters.dart';
@@ -33,51 +35,6 @@ export '../constants/alunos_list_filters.dart';
 part 'alunos_list_screen_state.part.dart';
 part 'alunos_list_screen_cards.part.dart';
 part 'alunos_list_screen_actions.part.dart';
-
-/// Fade na borda direita para indicar scroll horizontal nos filtros.
-class _HorizontalScrollPeek extends StatelessWidget {
-  const _HorizontalScrollPeek({required this.child, required this.showPeek});
-
-  final Widget child;
-  final bool showPeek;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!showPeek) return child;
-
-    final base = Theme.of(context).scaffoldBackgroundColor;
-
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Semantics(
-          label: 'Deslize horizontalmente para ver mais filtros',
-          child: child,
-        ),
-        Positioned(
-          right: 0,
-          top: 0,
-          bottom: 0,
-          child: IgnorePointer(
-            child: Container(
-              width: 32,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    base.withValues(alpha: 0),
-                    base.withValues(alpha: 0.92),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 class AlunosListScreen extends ConsumerStatefulWidget {
   final AlunoFiltro initialFiltro;

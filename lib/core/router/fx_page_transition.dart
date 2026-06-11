@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../utils/motion_preferences.dart';
+
 Page<T> fxTransitionPage<T>({
   required GoRouterState state,
   required Widget child,
@@ -12,6 +14,9 @@ Page<T> fxTransitionPage<T>({
     transitionDuration: const Duration(milliseconds: 320),
     reverseTransitionDuration: const Duration(milliseconds: 260),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      if (reduceMotionOf(context)) {
+        return child;
+      }
       final curved = CurvedAnimation(
         parent: animation,
         curve: Curves.easeOutCubic,

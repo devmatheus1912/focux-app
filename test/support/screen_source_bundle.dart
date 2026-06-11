@@ -49,4 +49,3 @@ String readRouterSourceBundle() {
   final extra = siblings.map((f) => f.readAsStringSync()).join('\n');
   return '$main\n$extra';
 }
-

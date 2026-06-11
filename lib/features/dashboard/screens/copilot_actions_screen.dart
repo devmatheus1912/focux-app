@@ -50,7 +50,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Tarefas IA',
-          subtitle: 'Command Center',
+          subtitle: 'Centro de Comando',
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
         ),
         bottomNavigationBar: Padding(

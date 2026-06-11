@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/physics.dart';
 
 import '../theme/tokens_strip.dart';
+import '../utils/motion_preferences.dart';
 import 'fx_loading.dart';
 
 /// 3D interactive neon glow — TOKENS STRIP premium CTA halo.
@@ -432,9 +433,16 @@ class _FxStaggerItemState extends State<FxStaggerItem>
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic));
 
-    final delay = widget.staggerDelay * widget.index;
-    Future.delayed(delay, () {
-      if (mounted) _ctrl.forward();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (reduceMotionOf(context)) {
+        _ctrl.value = 1.0;
+        return;
+      }
+      final delay = widget.staggerDelay * widget.index;
+      Future.delayed(delay, () {
+        if (mounted) _ctrl.forward();
+      });
     });
   }
 

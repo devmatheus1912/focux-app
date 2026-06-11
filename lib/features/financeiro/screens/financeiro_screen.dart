@@ -12,6 +12,7 @@ import '../../subscription/models/subscription_plan.dart';
 import 'financeiro_dashboard_screen.dart';
 import 'financeiro_mensalidades_tab.dart';
 import 'financeiro_resumo_screen.dart';
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 
 class FinanceiroScreen extends ConsumerStatefulWidget {
@@ -29,10 +30,10 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
   String _periodFilter = 'agora';
 
   static const Map<String, String> _periodLabels = {
-    'agora': 'agora',
-    'mes_atual': 'este mes',
-    'mes_anterior': 'mes anterior',
-    'ano': 'ano',
+    'agora': FocuxMicrocopy.periodoAgora,
+    'mes_atual': FocuxMicrocopy.periodoEsteMes,
+    'mes_anterior': FocuxMicrocopy.periodoMesAnterior,
+    'ano': FocuxMicrocopy.periodoAno,
   };
 
   @override
@@ -81,7 +82,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
               children: [
                 FxShellAppBar(
                   title: 'Financeiro',
-                  subtitle: 'ESTE MÊS',
+                  subtitle: FocuxMicrocopy.financeiroEsteMes,
                   onBack: () => safePopOrGo(context, '/dashboard/personal'),
                   actions: [
                     PopupMenuButton<String>(

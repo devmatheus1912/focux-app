@@ -20,7 +20,10 @@ import '../../notificacoes/data/notificacoes_repository.dart';
 import '../../onboarding/screens/setup_onboarding_widget.dart';
 import '../../onboarding/data/onboarding_repository.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../subscription/widgets/plan_usage_banner.dart';
 import '../../subscription/widgets/trial_countdown_banner.dart';
@@ -241,11 +244,14 @@ class _PersonalDashboardScreenState
     final historicoCheckinsAsync = ref.watch(historicoCheckinProvider);
     final chromeOnDark = themeDark;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: SafeArea(
-        bottom: false,
-        child: homeAsync.when(
+    return fxScreenA11yScope(
+      label: FocuxMicrocopy.painelPersonal,
+      child: FxContentWidthLimiter(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
+            bottom: false,
+            child: homeAsync.when(
           loading: () => DashboardShimmerLoading(themeDark: themeDark),
           error:
               (e, _) => DashboardErrorState(
@@ -868,6 +874,8 @@ class _PersonalDashboardScreenState
               ],
             );
           },
+            ),
+          ),
         ),
       ),
     );

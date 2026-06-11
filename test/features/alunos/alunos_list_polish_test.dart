@@ -20,8 +20,8 @@ void main() {
 
     expect(screen, contains('alunosSelectionTitle'));
     expect(screen, contains('mensalidadesPagasMessage'));
-    expect(screen, contains('_HorizontalScrollPeek'));
-    expect(screen, contains('Deslize horizontalmente para ver mais filtros'));
+    expect(screen, contains('FxHorizontalScrollPeek'));
+    expect(screen, contains('fx_horizontal_scroll_peek.dart'));
     expect(screen, contains("statusText = 'Risco alto'"));
     expect(screen, contains("statusText = 'Inadimplente'"));
     expect(screen, contains("label: 'Ativo'"));

@@ -8,6 +8,7 @@ void main() {
       'lib/features/dashboard/screens/personal_dashboard_screen.dart',
       'lib/features/dashboard/utils/dashboard_screen_helpers.dart',
       'lib/features/dashboard/widgets/dashboard_horizontal_scroll_peek.dart',
+      'lib/core/widgets/fx_horizontal_scroll_peek.dart',
       'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
       'lib/features/dashboard/widgets/dashboard_command_center_section.dart',
       'lib/features/dashboard/widgets/dashboard_command_center_section_actions.part.dart',

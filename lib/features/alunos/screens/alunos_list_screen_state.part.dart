@@ -654,13 +654,15 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
         configAsync.valueOrNull?.diasSemTreino ??
         AlunoFollowUpStore.diasSemTreinoLimite;
 
-    return PopScope(
-      canPop: !_hasActiveFilter,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-        if (_hasActiveFilter) _handleHeaderBack();
-      },
-      child: Scaffold(
+    return fxScreenA11yScope(
+      label: 'Lista de alunos',
+      child: PopScope(
+        canPop: !_hasActiveFilter,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          if (_hasActiveFilter) _handleHeaderBack();
+        },
+        child: Scaffold(
         backgroundColor: Colors.transparent,
         body: alunosAsync.when(
           loading:
@@ -1047,7 +1049,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                             16,
                             10,
                           ),
-                          child: _HorizontalScrollPeek(
+                          child: FxHorizontalScrollPeek(
                             showPeek: true,
                             child: SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
@@ -1326,6 +1328,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
               ),
             );
           },
+        ),
         ),
       ),
     );

@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/screen_source_bundle.dart';
+
 void main() {
   test('every feature screen exposes root a11y scope', () {
     const allowedWithoutA11y = {'lib/features/qa/screens/qa_smoke_screen.dart'};
@@ -18,7 +20,7 @@ void main() {
       final normalized = path.substring(path.indexOf('lib/'));
       if (allowedWithoutA11y.contains(normalized)) continue;
 
-      final source = file.readAsStringSync();
+      final source = readScreenSourceBundle(normalized);
       final hasA11y =
           source.contains('Semantics(') ||
           source.contains('fxScreenA11yScope(');

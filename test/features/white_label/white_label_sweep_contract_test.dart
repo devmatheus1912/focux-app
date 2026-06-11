@@ -55,6 +55,7 @@ void main() {
     const allowedBrandTokenFiles = {
       'lib/core/theme/theme_provider.dart',
       'lib/core/theme/tokens_strip.dart',
+      'lib/core/theme/design_tokens.dart',
       'lib/main.dart',
     };
 

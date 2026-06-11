@@ -8,10 +8,10 @@ import 'design_tokens.dart';
 ///
 /// Tested with cyan (default Focux), warm reds, greens, purples.
 class BrandPalette {
-  static const Color defaultPrimary = Color(0xFF18B5B5);
+  static const Color defaultPrimary = Color(0xFF13C2C2);
   static const Color defaultSecondary = Color(0xFF007D8A);
-  static const Color defaultInk = Color(0xFF128989);
-  static const String defaultPrimaryHex = '#18B5B5';
+  static const Color defaultInk = Color(0xFF0E9E9E);
+  static const String defaultPrimaryHex = '#13C2C2';
   static const String defaultSecondaryHex = '#007D8A';
 
   /// Previous default cyan kept for reset detection on saved profiles.

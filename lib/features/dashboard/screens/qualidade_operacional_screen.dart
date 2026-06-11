@@ -166,7 +166,7 @@ class _QualidadeBody extends StatelessWidget {
                           ),
                           const SizedBox(width: 5),
                           Text(
-                            'Focux Score™',
+                            'Índice Focux',
                             style: AppTypography.inter(
                               color: Colors.white.withValues(alpha: 0.8),
                               fontSize: 12,
