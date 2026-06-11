@@ -7,9 +7,13 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | Gate | Status |
 |------|--------|
 | `dart analyze --fatal-infos` | ✅ |
-| `flutter test` (693) | ✅ |
+| `flutter test` (694+) | ✅ |
 | Tier S+ + a11y (part-aware) | ✅ |
 | Contratos API repositórios | ✅ |
+| `productivity_gates_contract_test` (polish + CI + design gates) | ✅ |
+| `routes_pillar_contract_test` (shell + deep links + README) | ✅ |
+| `dart run tools/find_orphan_dart.dart` | ✅ |
+| `tool/verify.ps1` | ✅ |
 
 ## Design & UX — 10/10
 
