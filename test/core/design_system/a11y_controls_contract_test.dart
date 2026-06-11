@@ -4,37 +4,50 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
 
+/// Tier S+ a11y — todas as telas de produção expõem escopo e labels.
 void main() {
-  const hubs = [
-    'lib/features/dashboard/screens/personal_dashboard_screen.dart',
-    'lib/features/alunos/screens/alunos_list_screen.dart',
-    'lib/features/treinos/screens/treinos_list_screen.dart',
-    'lib/features/financeiro/screens/financeiro_screen.dart',
-    'lib/features/chat/screens/chat_inbox_screen.dart',
-    'lib/features/perfil/screens/perfil_screen.dart',
-    'lib/features/agenda/screens/agenda_screen.dart',
-    'lib/features/notificacoes/screens/notificacoes_screen.dart',
-  ];
+  const excluded = {
+    'lib/features/qa/screens/qa_smoke_screen.dart',
+    'lib/features/qa/screens/tokens_strip_showcase_screen.dart',
+  };
 
-  test('hub screens expõem a11y scope e labels em controles', () {
-    for (final path in hubs) {
-      final source = readScreenSourceBundle(path);
-      expect(
-        source,
-        anyOf(contains('fxScreenA11yScope'), contains('Semantics(')),
-        reason: '$path sem escopo a11y',
-      );
-      expect(
-        source,
-        anyOf(
-          contains('Semantics(label:'),
-          contains('Semantics( label:'),
-          contains('label:'),
-          contains('tooltip:'),
-          contains('semanticsLabel:'),
-        ),
-        reason: '$path sem labels em controles',
-      );
+  test('todas as feature screens expõem a11y scope e labels em controles', () {
+    final screens = Directory('lib/features')
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((f) => f.path.endsWith('_screen.dart'))
+        .toList();
+
+    final failures = <String>[];
+
+    for (final file in screens) {
+      final path = file.path.replaceAll(r'\', '/');
+      final norm = path.substring(path.indexOf('lib/'));
+      if (excluded.contains(norm)) continue;
+
+      final source = readScreenSourceBundle(norm);
+
+      if (!source.contains('fxScreenA11yScope') &&
+          !source.contains('Semantics(')) {
+        failures.add('$norm: sem escopo a11y');
+        continue;
+      }
+
+      final hasLabels = source.contains('Semantics(label:') ||
+          source.contains('Semantics( label:') ||
+          source.contains('label:') ||
+          source.contains('tooltip:') ||
+          source.contains('semanticsLabel:');
+
+      if (!hasLabels) {
+        failures.add('$norm: sem labels em controles');
+      }
     }
+
+    expect(
+      failures,
+      isEmpty,
+      reason: 'Telas sem a11y (${failures.length}):\n${failures.join('\n')}',
+    );
   });
 }
