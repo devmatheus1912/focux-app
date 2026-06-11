@@ -37,11 +37,12 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
   Future<void> _load() async {
     try {
       final info = await ref.read(referralRepositoryProvider).getInfo();
-      if (mounted)
+      if (mounted) {
         setState(() {
           _info = info;
           _loading = false;
         });
+      }
     } catch (e) {
       if (mounted) {
         setState(() {

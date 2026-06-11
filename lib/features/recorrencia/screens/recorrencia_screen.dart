@@ -37,11 +37,12 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
     try {
       final items =
           await RecorrenciaRepository(ref.read(apiClientProvider)).listar();
-      if (mounted)
+      if (mounted) {
         setState(() {
           _items = items;
           _loading = false;
         });
+      }
     } catch (e) {
       if (mounted) setState(() => _loading = false);
     }

@@ -315,8 +315,9 @@ class _DefinirSenhaAlunoScreenState
                                 if (v == null || v.isEmpty) {
                                   return 'Informe a nova senha';
                                 }
-                                if (v.length < 6)
+                                if (v.length < 6) {
                                   return 'Mínimo de 6 caracteres';
+                                }
                                 return null;
                               },
                             ),

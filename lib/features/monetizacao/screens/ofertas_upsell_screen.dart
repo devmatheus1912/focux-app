@@ -49,11 +49,12 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
   Future<void> _load() async {
     try {
       final list = await ref.read(upsellRepositoryProvider).listarOfertas();
-      if (mounted)
+      if (mounted) {
         setState(() {
           _ofertas = list;
           _loading = false;
         });
+      }
     } catch (e) {
       if (mounted) {
         setState(() {

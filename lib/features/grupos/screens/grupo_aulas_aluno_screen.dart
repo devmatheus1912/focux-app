@@ -38,11 +38,12 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
     try {
       final aulas =
           await GrupoAulaRepository(ref.read(apiClientProvider)).disponiveis();
-      if (mounted)
+      if (mounted) {
         setState(() {
           _aulas = aulas;
           _loading = false;
         });
+      }
     } catch (e) {
       if (mounted) setState(() => _loading = false);
     }

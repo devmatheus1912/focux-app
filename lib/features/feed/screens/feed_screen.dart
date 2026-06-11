@@ -608,8 +608,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                       PopupMenuButton<String>(
                                         tooltip: 'Ações',
                                         onSelected: (val) {
-                                          if (val == 'fixar')
+                                          if (val == 'fixar') {
                                             _toggleFixar(p.id);
+                                          }
                                           if (val == 'excluir') {
                                             _confirmarExclusao(p.id);
                                           }

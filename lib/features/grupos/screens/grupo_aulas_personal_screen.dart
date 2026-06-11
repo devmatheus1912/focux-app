@@ -41,11 +41,12 @@ class _GrupoAulasPersonalScreenState
           await GrupoAulaRepository(
             ref.read(apiClientProvider),
           ).listarPersonal();
-      if (mounted)
+      if (mounted) {
         setState(() {
           _aulas = aulas;
           _loading = false;
         });
+      }
     } catch (e) {
       if (mounted) setState(() => _loading = false);
     }

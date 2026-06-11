@@ -51,9 +51,15 @@ JaCoCo é **indicador anti-regressão**, não objetivo final.
 | FE | `e2e.yml` | `test:smoke` + `gradlew check` |
 | Ambos | `dependabot.yml` | Atualizações semanais |
 
+## Segurança
+
+- [x] `dart analyze --fatal-infos` verde
+- [x] Semgrep SAST no CI
+- [x] gitleaks + dependabot
+
 ## Segurança (manual trimestral)
 
-- [ ] Matriz RBAC role × recurso revisada
+- [ ] Revisão trimestral TalkBack nos hubs
 - [ ] Teste manual TalkBack nos 8 hubs
 - [ ] Restore de backup (`BackupService`) em staging
 - [ ] Revisão de secrets (gitleaks + rotação)

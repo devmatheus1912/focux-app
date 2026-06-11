@@ -176,8 +176,9 @@ class _ResumoMensalCardState extends ConsumerState<_ResumoMensalCard> {
   @override
   Widget build(BuildContext context) {
     if (_loading) return const _ResumoMensalSkeleton();
-    if (_error != null)
+    if (_error != null) {
       return _ResumoMensalError(message: _error!, onRetry: _load);
+    }
     if (_resumo == null) return const SizedBox.shrink();
 
     final primary = Theme.of(context).colorScheme.primary;

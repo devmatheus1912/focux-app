@@ -430,11 +430,12 @@ class _ExerciseVideoPreviewSheetState extends State<ExerciseVideoPreviewSheet> {
       Uri.parse(_cloudinaryH264VideoUrl(widget.url)),
     );
     _controller = controller;
-    if (mounted)
+    if (mounted) {
       setState(() {
         _ready = false;
         _failed = false;
       });
+    }
 
     try {
       await controller.initialize();

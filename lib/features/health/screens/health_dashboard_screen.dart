@@ -130,9 +130,37 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
         body:
             _loading
                 ? const Center(child: FxLoading())
+                : _erro != null
+                ? _buildErrorPrompt(primary, _erro!)
                 : !_authorized
                 ? _buildAuthPrompt(primary)
                 : _buildDashboard(isDark, primary),
+      ),
+    );
+  }
+
+  Widget _buildErrorPrompt(Color primary, String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 48, color: primary),
+            const SizedBox(height: 16),
+            Text(message, textAlign: TextAlign.center),
+            const SizedBox(height: 24),
+            FxLiquidPrimaryButton(
+              label: 'Tentar novamente',
+              icon: Icons.refresh_rounded,
+              onPressed: () {
+                setState(() => _erro = null);
+                _checkAuth();
+              },
+              expand: false,
+            ),
+          ],
+        ),
       ),
     );
   }

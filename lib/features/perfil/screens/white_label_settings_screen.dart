@@ -73,11 +73,13 @@ class _WhiteLabelSettingsScreenState
     try {
       await ref.read(whiteLabelRepositoryProvider).verifyDomain();
       ref.invalidate(whiteLabelConfigProvider);
-      if (mounted)
+      if (mounted) {
         FeedbackHelper.showSuccess(context, 'Domínio marcado como verificado');
+      }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         FeedbackHelper.showError(context, 'Verifique o DNS antes de confirmar');
+      }
     } finally {
       if (mounted) setState(() => _verificando = false);
     }

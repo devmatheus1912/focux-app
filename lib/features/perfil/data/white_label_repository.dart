@@ -90,10 +90,12 @@ class WhiteLabelRepository {
   }) async {
     final body = <String, dynamic>{};
     if (appDisplayName != null) body['appDisplayName'] = appDisplayName;
-    if (ocultarMarcaFocux != null)
+    if (ocultarMarcaFocux != null) {
       body['ocultarMarcaFocux'] = ocultarMarcaFocux;
-    if (dominioCustomizado != null)
+    }
+    if (dominioCustomizado != null) {
       body['dominioCustomizado'] = dominioCustomizado;
+    }
     if (landingModo != null) body['landingModo'] = landingModo;
     final r = await _dio.put('/api/personal/white-label', data: body);
     return WhiteLabelConfig.fromJson(r.data as Map<String, dynamic>);

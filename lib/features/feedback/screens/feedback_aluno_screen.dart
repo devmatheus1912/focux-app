@@ -40,12 +40,13 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
       try {
         exs = await repo.exerciciosDisponiveis();
       } catch (_) {}
-      if (mounted)
+      if (mounted) {
         setState(() {
           _items = items;
           _exercicios = exs;
           _loading = false;
         });
+      }
     } catch (e) {
       if (mounted) setState(() => _loading = false);
     }

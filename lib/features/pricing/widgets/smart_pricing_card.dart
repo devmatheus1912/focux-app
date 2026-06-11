@@ -29,11 +29,12 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
           await SmartPricingRepository(
             ref.read(apiClientProvider),
           ).recomendacao();
-      if (mounted)
+      if (mounted) {
         setState(() {
           _data = d;
           _loading = false;
         });
+      }
     } catch (e) {
       if (mounted) setState(() => _loading = false);
     }

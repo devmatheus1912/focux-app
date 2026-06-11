@@ -331,8 +331,9 @@ class _FinanceiroMensalidadesTabState
                                               mesReferenciaCtrl.text.trim(),
                                           status: selectedStatus,
                                         );
-                                        if (ctx.mounted)
+                                        if (ctx.mounted) {
                                           Navigator.of(ctx).pop();
+                                        }
                                         _load();
                                         if (mounted) {
                                           FeedbackHelper.showSuccess(
@@ -722,8 +723,9 @@ class _FinanceiroMensalidadesTabState
                                         await FinanceiroRepository(
                                           ref.read(apiClientProvider),
                                         ).criar(alunoId, valor, mesReferencia);
-                                        if (ctx.mounted)
+                                        if (ctx.mounted) {
                                           Navigator.of(ctx).pop();
+                                        }
                                         _load();
                                         if (mounted) {
                                           FeedbackHelper.showSuccess(

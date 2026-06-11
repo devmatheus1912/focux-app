@@ -522,8 +522,9 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                                   keyboardType: TextInputType.emailAddress,
                                   validator: (v) {
                                     final value = v?.trim() ?? '';
-                                    if (value.isEmpty)
+                                    if (value.isEmpty) {
                                       return 'Informe o e-mail.';
+                                    }
                                     if (!RegExp(
                                       _emailPattern,
                                     ).hasMatch(value)) {

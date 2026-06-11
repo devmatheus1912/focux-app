@@ -39,17 +39,19 @@ class _RecorrenciaAlunoScreenState
     try {
       final a =
           await RecorrenciaRepository(ref.read(apiClientProvider)).minha();
-      if (mounted)
+      if (mounted) {
         setState(() {
           _assinatura = a;
           _loading = false;
         });
+      }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _loading = false;
           _erro = friendlyError(e);
         });
+      }
     }
   }
 
