@@ -74,7 +74,12 @@ Demo Account for Review:
 
 In-App Purchases:
 - Subscriptions use Flutter `in_app_purchase` (StoreKit / Google Play Billing).
-- Product IDs (auto-renewing): `focux_premium_monthly`, `focux_premium_yearly`, `focux_enterprise_monthly`, `focux_enterprise_yearly`. Annual is the default offer in-app (−20% vs 12× monthly).
+- Product IDs (auto-renewing, criar todos no App Store Connect):
+  - `focux_premium_monthly`, `focux_premium_yearly`
+  - `focux_enterprise_monthly`, `focux_enterprise_yearly`
+  - `focux_enterprise_pro_monthly`, `focux_enterprise_pro_yearly`
+- Annual is the default offer in-app (−20% vs 12× monthly).
+- Local StoreKit config for Xcode: `ios/Products.storekit`
 - Server validates receipts via `POST /api/iap/verify`.
 - Free tier includes up to 5 students.
 - Premium and Enterprise unlock more students, AI, finance, white-label, etc.

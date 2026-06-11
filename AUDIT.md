@@ -59,10 +59,21 @@ JaCoCo é **indicador anti-regressão**, não objetivo final.
 
 ## Segurança (manual trimestral)
 
-- [ ] Revisão trimestral TalkBack nos hubs
-- [ ] Teste manual TalkBack nos 8 hubs
-- [ ] Restore de backup (`BackupService`) em staging
+- [ ] Teste manual VoiceOver nos 8 hubs (Passo 3 de `TESTFLIGHT.md`)
+- [x] Drill backup export no backend (`BackupQuarterlyDrillTest`)
+- [x] k6 smoke pré-release (issue #1 Q2_2026)
 - [ ] Revisão de secrets (gitleaks + rotação)
+
+## App Store / TestFlight — pronto para upload
+
+Ver **`TESTFLIGHT.md`** (único guia após conta Apple aprovada).
+
+- [x] Metadados `APP_STORE_METADATA.md` (6 IAPs)
+- [x] `ios/ExportOptions.plist` + `tools/release/build-ios.sh`
+- [x] `ios/Products.storekit` para sandbox local
+- [x] `PrivacyInfo.xcprivacy` no target Runner
+- [x] Ícones iOS (`flutter_launcher_icons`)
+- [ ] Team ID + upload TestFlight (você, no Mac)
 
 ## LGPD
 

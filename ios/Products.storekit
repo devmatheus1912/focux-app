@@ -1,0 +1,135 @@
+{
+  "identifier" : "FocuxSubscriptions",
+  "nonRenewingSubscriptions" : [],
+  "products" : [],
+  "settings" : {
+    "_applicationInternalID" : "0",
+    "_developerTeamID" : "YOUR_APPLE_TEAM_ID",
+    "_failTransactionsEnabled" : false,
+    "_storeKitErrors" : []
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "focux_plans",
+      "localizations" : [],
+      "name" : "Focux Plans",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "49.90",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "premium_monthly",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Plano Premium mensal",
+              "displayName" : "Focux Premium Mensal",
+              "locale" : "pt_BR"
+            }
+          ],
+          "productID" : "focux_premium_monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Premium Monthly",
+          "subscriptionGroupID" : "focux_plans",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "displayPrice" : "479.00",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "premium_yearly",
+          "localizations" : [
+            {
+              "description" : "Plano Premium anual",
+              "displayName" : "Focux Premium Anual",
+              "locale" : "pt_BR"
+            }
+          ],
+          "productID" : "focux_premium_yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Premium Yearly",
+          "subscriptionGroupID" : "focux_plans",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "displayPrice" : "99.90",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "enterprise_monthly",
+          "localizations" : [
+            {
+              "description" : "Plano Enterprise mensal",
+              "displayName" : "Focux Enterprise Mensal",
+              "locale" : "pt_BR"
+            }
+          ],
+          "productID" : "focux_enterprise_monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Enterprise Monthly",
+          "subscriptionGroupID" : "focux_plans",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "displayPrice" : "959.00",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "enterprise_yearly",
+          "localizations" : [
+            {
+              "description" : "Plano Enterprise anual",
+              "displayName" : "Focux Enterprise Anual",
+              "locale" : "pt_BR"
+            }
+          ],
+          "productID" : "focux_enterprise_yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Enterprise Yearly",
+          "subscriptionGroupID" : "focux_plans",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "displayPrice" : "149.90",
+          "familyShareable" : false,
+          "groupNumber" : 3,
+          "internalID" : "enterprise_pro_monthly",
+          "localizations" : [
+            {
+              "description" : "Plano Enterprise Pro mensal",
+              "displayName" : "Focux Enterprise Pro Mensal",
+              "locale" : "pt_BR"
+            }
+          ],
+          "productID" : "focux_enterprise_pro_monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Enterprise Pro Monthly",
+          "subscriptionGroupID" : "focux_plans",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "displayPrice" : "1439.00",
+          "familyShareable" : false,
+          "groupNumber" : 3,
+          "internalID" : "enterprise_pro_yearly",
+          "localizations" : [
+            {
+              "description" : "Plano Enterprise Pro anual",
+              "displayName" : "Focux Enterprise Pro Anual",
+              "locale" : "pt_BR"
+            }
+          ],
+          "productID" : "focux_enterprise_pro_yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Enterprise Pro Yearly",
+          "subscriptionGroupID" : "focux_plans",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

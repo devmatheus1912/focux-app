@@ -697,13 +697,15 @@ Saida:
 build/web/
 ```
 
-### iOS
+### iOS / TestFlight
+
+Guia completo (único passo manual após conta Apple): **`TESTFLIGHT.md`**.
 
 ```bash
-flutter build ios --release
+./tools/release/build-ios.sh
 ```
 
-Requer Xcode e configuracao de signing.
+Requer Mac, Xcode e Team ID em `ios/ExportOptions.plist`.
 
 ## Testes e qualidade
 
