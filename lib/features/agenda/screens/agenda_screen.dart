@@ -63,9 +63,9 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
 
   Color _statusColor(String s, bool isDark, Color primary) {
     if (s == 'PRESENTE' || s == 'CONCLUIDO') {
-      return isDark ? const Color(0xFF6FE296) : EagleTokens.good;
+      return EagleTokens.semanticGood(isDark: isDark);
     }
-    if (s == 'FALTA') return isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad;
+    if (s == 'FALTA') return EagleTokens.semanticBad(isDark: isDark);
     if (s == 'CANCELADO') {
       return isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     }

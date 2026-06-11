@@ -31,7 +31,7 @@ class PlanUsageBanner extends ConsumerWidget {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final warn = isDark ? const Color(0xFFFFD28A) : EagleTokens.warn;
+    final warn = isDark ? EagleTokens.planUsageWarn : EagleTokens.warn;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(TokensStrip.s5, 0, TokensStrip.s5, 12),

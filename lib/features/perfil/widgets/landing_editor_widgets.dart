@@ -390,10 +390,10 @@ class LandingContentWarningBanner extends StatelessWidget {
   final bool configComplete;
   final VoidCallback? onReview;
 
-  static const _bg = Color(0xFFFFF4D6);
-  static const _title = Color(0xFF7A5200);
-  static const _body = Color(0xFF9A6700);
-  static const _icon = Color(0xFFE6A800);
+  static const _bg = EagleTokens.landingWarnBg;
+  static const _title = EagleTokens.landingWarnTitle;
+  static const _body = EagleTokens.landingWarnBody;
+  static const _icon = EagleTokens.landingWarnIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -523,10 +523,10 @@ Future<void> showLandingContentReviewSheet(
                       title: issue.message,
                       titleCase: false,
                       margin: EdgeInsets.zero,
-                      accent: const Color(0xFFE6A800),
-                      leading: const Icon(
+                      accent: EagleTokens.landingWarnIcon,
+                      leading: Icon(
                         Icons.warning_amber_rounded,
-                        color: Color(0xFFE6A800),
+                        color: EagleTokens.landingWarnIcon,
                       ),
                       trailing: Icon(
                         Icons.chevron_right_rounded,
@@ -574,7 +574,7 @@ class LandingHighlightCard extends StatelessWidget {
             highlighted
                 ? [
                   BoxShadow(
-                    color: const Color(0xFFE6A800).withValues(alpha: 0.28),
+                    color: EagleTokens.landingWarnIcon.withValues(alpha: 0.28),
                     blurRadius: 12,
                     spreadRadius: 1,
                   ),
@@ -584,17 +584,17 @@ class LandingHighlightCard extends StatelessWidget {
       child: Container(
         decoration: fxListCardDecoration(
           context,
-          accent: highlighted ? const Color(0xFFE6A800) : null,
+          accent: highlighted ? EagleTokens.landingWarnIcon : null,
           radius: TokensStrip.rMd,
         ).copyWith(
           color:
               highlighted
-                  ? const Color(0xFFFFF4D6).withValues(alpha: 0.55)
+                  ? EagleTokens.landingWarnBg.withValues(alpha: 0.55)
                   : scheme.surface,
           border: Border.all(
             color:
                 highlighted
-                    ? const Color(0xFFE6A800).withValues(alpha: 0.75)
+                    ? EagleTokens.landingWarnIcon.withValues(alpha: 0.75)
                     : scheme.outlineVariant.withValues(alpha: 0.55),
             width: highlighted ? 1.5 : 1,
           ),
@@ -610,7 +610,7 @@ class LandingHighlightCard extends StatelessWidget {
                     const Icon(
                       Icons.warning_amber_rounded,
                       size: 16,
-                      color: Color(0xFF9A6700),
+                      color: EagleTokens.landingWarnBody,
                     ),
                     const SizedBox(width: 6),
                     Expanded(
@@ -619,7 +619,7 @@ class LandingHighlightCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF7A5200),
+                          color: EagleTokens.landingWarnTitle,
                         ),
                       ),
                     ),

@@ -31,7 +31,7 @@ class CheckinLiveCoachingCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors:
-              dark ? [brandDeep, const Color(0xFF0F1A3C)] : [brand, brandDeep],
+              dark ? [brandDeep, EagleTokens.checkinTimerDark] : [brand, brandDeep],
         ),
         borderRadius: BorderRadius.circular(24),
       ),
@@ -55,10 +55,10 @@ class CheckinLiveCoachingCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'IA FOCUX | SUGESTAO AO VIVO',
                 style: TextStyle(
-                  color: Color(0xD9FFFFFF),
+                  color: Colors.white.withValues(alpha: 0.85),
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.2,

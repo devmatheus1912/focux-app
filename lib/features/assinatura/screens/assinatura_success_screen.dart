@@ -127,7 +127,7 @@ class AssinaturaSuccessScreen extends StatelessWidget {
                   onPressed: () => context.go('/dashboard/personal'),
                   style: FilledButton.styleFrom(
                     backgroundColor: accent,
-                    foregroundColor: const Color(0xFF081012),
+                    foregroundColor: EagleTokens.inkDeep,
                     minimumSize: const Size.fromHeight(52),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/brand/focux_brand_copy.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_input_deco.dart';
@@ -278,8 +279,8 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                       const SizedBox(height: TokensStrip.s4),
                       Text(
                         _error!,
-                        style: const TextStyle(
-                          color: Color(0xFFFFB6B6),
+                        style: TextStyle(
+                          color: EagleTokens.authErrorSoft,
                           fontSize: 12.5,
                         ),
                       ),
@@ -367,14 +368,14 @@ class _InviteCodeField extends StatelessWidget {
             ),
             errorBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: Color(0xFFFF8B8B)),
+              borderSide: BorderSide(color: EagleTokens.authErrorBorder),
             ),
             focusedErrorBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: Color(0xFFFF8B8B)),
+              borderSide: BorderSide(color: EagleTokens.authErrorBorder),
             ),
-            errorStyle: const TextStyle(
-              color: Color(0xFFFFB6B6),
+            errorStyle: TextStyle(
+              color: EagleTokens.authErrorSoft,
               fontSize: 11.5,
             ),
           ),

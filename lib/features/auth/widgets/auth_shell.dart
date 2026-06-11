@@ -330,7 +330,7 @@ class AuthGlassCard extends StatelessWidget {
         child: Container(
           padding: padding,
           decoration: BoxDecoration(
-            color: const Color(0x1AFFFFFF),
+            color: Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(radius),
             border: Border.all(color: EagleTokens.glassBorder),
             boxShadow: [
@@ -432,14 +432,14 @@ class AuthField extends StatelessWidget {
             ),
             errorBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: Color(0xFFFF8B8B)),
+              borderSide: BorderSide(color: EagleTokens.authErrorBorder),
             ),
             focusedErrorBorder: FxInputDeco.outlineBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: Color(0xFFFF8B8B)),
+              borderSide: BorderSide(color: EagleTokens.authErrorBorder),
             ),
             errorStyle: const TextStyle(
-              color: Color(0xFFFFB6B6),
+              color: EagleTokens.authErrorSoft,
               fontSize: 11.5,
             ),
           ),

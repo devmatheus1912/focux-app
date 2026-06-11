@@ -98,7 +98,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFF0F1419), Color(0xFF080C10)],
+              colors: [EagleTokens.cinematicBgHi, EagleTokens.cinematicBg],
             ),
           ),
           child: SafeArea(
@@ -173,7 +173,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                               useStore
                                   ? Icons.storefront_outlined
                                   : Icons.card_giftcard,
-                              color: const Color(0xFFF59E0B),
+                              color: EagleTokens.goldStar,
                               size: 22,
                             ),
                             const SizedBox(width: 8),
@@ -182,7 +182,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                                   ? 'Assinatura pela loja'
                                   : '5 dias grátis',
                               style: const TextStyle(
-                                color: Color(0xFFF59E0B),
+                                color: EagleTokens.goldStar,
                                 fontSize: 18,
                                 fontWeight: FontWeight.w800,
                               ),

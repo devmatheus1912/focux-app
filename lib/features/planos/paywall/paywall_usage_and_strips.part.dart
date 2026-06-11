@@ -182,7 +182,7 @@ class _PaywallUsageMeterRowState extends State<_PaywallUsageMeterRow>
                 : (animatedUsed / widget.limit).clamp(0.0, 1.0);
         final barColor =
             widget.atLimit
-                ? const Color(0xFFE85D5D)
+                ? EagleTokens.paywallUsageWarn
                 : widget.nearLimit
                 ? PaywallCatalog.warning
                 : widget.accent;

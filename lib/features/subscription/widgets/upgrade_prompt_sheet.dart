@@ -147,7 +147,7 @@ class UpgradePromptSheet {
                 },
                 style: FilledButton.styleFrom(
                   backgroundColor: accent,
-                  foregroundColor: const Color(0xFF081012),
+                  foregroundColor: EagleTokens.inkDeep,
                   minimumSize: const Size.fromHeight(48),
                 ),
                 child: Text(

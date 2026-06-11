@@ -336,7 +336,7 @@ class _MacroBar extends StatelessWidget {
             if (proteinKcal > 0)
               Flexible(
                 flex: proteinKcal,
-                child: Container(color: const Color(0xFFEF4444)),
+                child: Container(color: EagleTokens.macroProtein),
               ),
             if (carbKcal > 0)
               Flexible(
@@ -346,7 +346,7 @@ class _MacroBar extends StatelessWidget {
             if (fatKcal > 0)
               Flexible(
                 flex: fatKcal,
-                child: Container(color: const Color(0xFFEAB308)),
+                child: Container(color: EagleTokens.macroCarb),
               ),
           ],
         ),
@@ -371,7 +371,7 @@ class _RefeicaoCard extends StatelessWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         decoration: BoxDecoration(
-          color: const Color(0xFFF87171),
+          color: EagleTokens.macroProteinLight,
           borderRadius: BorderRadius.circular(12),
         ),
         child: const Icon(Icons.delete, color: Colors.white),

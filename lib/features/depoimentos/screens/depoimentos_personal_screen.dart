@@ -158,7 +158,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
                                               ? Icons.star
                                               : Icons.star_border,
                                           size: 13,
-                                          color: const Color(0xFFF59E0B),
+                                          color: EagleTokens.goldStar,
                                         ),
                                       ),
                                     ),
@@ -189,7 +189,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
                                     color:
                                         d.aprovado
                                             ? EagleTokens.good
-                                            : const Color(0xFFF59E0B),
+                                            : EagleTokens.goldStar,
                                   ),
                                 ),
                               ),

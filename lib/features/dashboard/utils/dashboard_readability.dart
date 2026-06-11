@@ -40,7 +40,7 @@ Color heroScrim([double alpha = 0.34]) =>
     Colors.black.withValues(alpha: alpha);
 
 /// Transparente sem prefixo Colors. nos gates Tier S+.
-const Color fxTransparent = Color(0x00000000);
+const Color fxTransparent = Colors.transparent;
 
 /// Badge P0/P1/Hoje com contraste AA no card (claro e escuro).
 ({Color background, Color foreground}) dashboardPriorityBadgeColors({

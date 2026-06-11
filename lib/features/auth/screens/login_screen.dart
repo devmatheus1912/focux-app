@@ -10,6 +10,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../core/auth/session_cache_evictor.dart';
 import '../../../core/config/env.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
@@ -418,8 +419,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             if (_error != null) ...[
                               Text(
                                 _error!,
-                                style: const TextStyle(
-                                  color: Color(0xFFFFB6B6),
+                                style: TextStyle(
+                                  color: EagleTokens.authErrorSoft,
                                   fontSize: 12.5,
                                 ),
                               ),

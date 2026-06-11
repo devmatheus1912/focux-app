@@ -12,6 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/config/env.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../providers/auth_provider.dart';
@@ -315,8 +316,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     if (_error != null) ...[
                       Text(
                         _error!,
-                        style: const TextStyle(
-                          color: Color(0xFFFFB6B6),
+                        style: TextStyle(
+                          color: EagleTokens.authErrorSoft,
                           fontSize: 12.5,
                         ),
                       ),

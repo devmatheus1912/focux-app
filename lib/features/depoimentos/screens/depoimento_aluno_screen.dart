@@ -127,7 +127,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
                                 ),
                                 child: Icon(
                                   i < _nota ? Icons.star : Icons.star_border,
-                                  color: const Color(0xFFF59E0B),
+                                  color: EagleTokens.goldStar,
                                   size: 44,
                                 ),
                               ),

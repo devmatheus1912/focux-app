@@ -89,13 +89,13 @@ class RankingScreen extends ConsumerWidget {
                       decoration: BoxDecoration(
                         color: EagleTokens.goldSoft,
                         borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                        border: Border.all(color: const Color(0xFFFFE58A)),
+                        border: Border.all(color: EagleTokens.rankingGoldBorder),
                       ),
                       child: Row(
                         children: [
                           const Icon(
                             Icons.card_giftcard,
-                            color: Color(0xFF8A5A12),
+                            color: EagleTokens.warnDeep,
                             size: 24,
                           ),
                           const SizedBox(width: 12),
@@ -108,14 +108,14 @@ class RankingScreen extends ConsumerWidget {
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
-                                    color: Color(0xFF8A5A12),
+                                    color: EagleTokens.warnDeep,
                                   ),
                                 ),
                                 Text(
                                   '1º lugar: 20% off • 2º lugar: 15% off • 3º lugar: 10% off',
                                   style: const TextStyle(
                                     fontSize: 13,
-                                    color: Color(0xFF8A5A12),
+                                    color: EagleTokens.warnDeep,
                                   ),
                                 ),
                               ],

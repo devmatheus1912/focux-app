@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/brand/focux_microcopy.dart';
+import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../assinatura/data/plano.dart';
 import '../../subscription/models/subscription_plan.dart';
 import 'paywall_plan_sections.dart';
@@ -11,22 +13,22 @@ export 'paywall_plan_sections.dart';
 class PaywallCatalog {
   PaywallCatalog._();
 
-  static const Color brand = Color(0xFF13C2C2);
+  static const Color brand = BrandPalette.defaultPrimary;
 
   /// Teal profundo — tier ENTERPRISE PRO e CTAs de upgrade.
-  static const Color brandDeep = Color(0xFF0D9494);
+  static const Color brandDeep = BrandPalette.defaultInk;
 
   /// Teal slate — tier ENTERPRISE (premium, sem ouro).
-  static const Color tierEnterprise = Color(0xFF1A5F5F);
+  static const Color tierEnterprise = EagleTokens.tierEnterprise;
 
   /// Legado vitrine/API (`badgeColor: gold`) — mapeado para [tierEnterprise] na UI.
   static const Color gold = tierEnterprise;
-  static const Color green = Color(0xFF4ADE80);
-  static const Color warning = Color(0xFFB5760A);
+  static const Color green = EagleTokens.brightGreen;
+  static const Color warning = EagleTokens.warn;
 
   /// Chrome neutro para blocos secundários (accordions, downgrade).
   static Color chromeNeutral(Color ink, {required bool isDark}) =>
-      isDark ? const Color(0xFF5C6B78) : ink.withValues(alpha: 0.38);
+      isDark ? EagleTokens.chromeNeutralDark : ink.withValues(alpha: 0.38);
 
   /// Texto secundário com contraste AA em fundos claros (ui-ux-pro-max).
   static Color readableSecondary(
@@ -54,7 +56,7 @@ class PaywallCatalog {
     SubscriptionPlan.PREMIUM => brand,
     SubscriptionPlan.ENTERPRISE => tierEnterprise,
     SubscriptionPlan.ENTERPRISE_PRO => brandDeep,
-    _ => const Color(0xFF7A8A96),
+    _ => EagleTokens.darkInkMute,
   };
 
   /// Labels e ícones do tier em card claro (contraste AA, independente da marca do personal).
@@ -64,8 +66,8 @@ class PaywallCatalog {
   }) {
     if (isDark) return accentForPlan(plan);
     return switch (plan) {
-      SubscriptionPlan.ENTERPRISE => const Color(0xFF0D4A4A),
-      SubscriptionPlan.ENTERPRISE_PRO => const Color(0xFF066666),
+      SubscriptionPlan.ENTERPRISE => EagleTokens.tierEnterpriseInk,
+      SubscriptionPlan.ENTERPRISE_PRO => EagleTokens.tierEnterpriseProInk,
       SubscriptionPlan.PREMIUM => brandDeep,
       _ => accentForPlan(plan),
     };
@@ -75,9 +77,9 @@ class PaywallCatalog {
   static Color readableTierAccent(Color accent, {required bool isDark}) {
     if (isDark) return accent;
     if (accent == tierEnterprise || accent == gold) {
-      return const Color(0xFF0D4A4A);
+      return EagleTokens.tierEnterpriseInk;
     }
-    if (accent == brandDeep) return const Color(0xFF066666);
+    if (accent == brandDeep) return EagleTokens.tierEnterpriseProInk;
     if (accent == brand) return brandDeep;
     return accent;
   }

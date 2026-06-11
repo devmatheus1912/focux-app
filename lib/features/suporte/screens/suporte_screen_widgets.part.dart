@@ -636,7 +636,7 @@ class _MeusTicketsTabState extends ConsumerState<_MeusTicketsTab> {
           children: [
             const Text(
               'Erro ao carregar tickets',
-              style: TextStyle(color: Color(0xFFB91C1C)),
+              style: TextStyle(color: EagleTokens.suporteError),
             ),
             const SizedBox(height: 8),
             OutlinedButton(

@@ -373,8 +373,10 @@ class _EvolucaoComparativoScreenState
     final unidStr = unidade.isNotEmpty ? ' $unidade' : '';
 
     return Container(
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: Color(0x1A000000))),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(color: Colors.black.withValues(alpha: 0.1)),
+        ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(

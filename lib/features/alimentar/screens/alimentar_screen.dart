@@ -246,14 +246,14 @@ class _MacroBar extends StatelessWidget {
           if (proteinKcal > 0)
             Flexible(
               flex: proteinKcal,
-              child: Container(color: const Color(0xFFEF4444)),
+              child: Container(color: EagleTokens.macroProtein),
             ),
           if (carbKcal > 0)
             Flexible(flex: carbKcal, child: Container(color: EagleTokens.warn)),
           if (fatKcal > 0)
             Flexible(
               flex: fatKcal,
-              child: Container(color: const Color(0xFFEAB308)),
+              child: Container(color: EagleTokens.macroCarb),
             ),
         ],
       ),

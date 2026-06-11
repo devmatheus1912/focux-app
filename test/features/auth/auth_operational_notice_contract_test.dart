@@ -41,6 +41,6 @@ void main() {
     expect(notice, contains('final String title;'));
     expect(notice, contains('final String text;'));
     expect(notice, contains('final String? action;'));
-    expect(notice, contains('Color(0xFFFFB020)'));
+    expect(notice, contains('EagleTokens.opsNotice'));
   });
 }

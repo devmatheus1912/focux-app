@@ -105,10 +105,10 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
 
   Color _colColor(String status, bool isDark, Color fallback) {
     if (status == 'TESTE') {
-      return isDark ? const Color(0xFFE2B46F) : EagleTokens.warn;
+      return EagleTokens.semanticWarn(isDark: isDark);
     }
     if (status == 'ATIVO') {
-      return isDark ? const Color(0xFF6FE296) : EagleTokens.good;
+      return EagleTokens.semanticGood(isDark: isDark);
     }
     if (status == 'INADIMPLENTE') return EagleTokens.bad;
     if (status == 'CANCELADO') {

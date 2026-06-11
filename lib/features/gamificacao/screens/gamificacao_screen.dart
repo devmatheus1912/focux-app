@@ -237,7 +237,7 @@ class _GamificacaoBody extends StatelessWidget {
                                           earned
                                               ? cor.withValues(alpha: 0.13)
                                               : (dark
-                                                  ? const Color(0x0AFFFFFF)
+                                                  ? EagleTokens.gamificationOverlay
                                                   : TokensStrip.borderDefault),
                                       shape: BoxShape.circle,
                                     ),
@@ -381,7 +381,7 @@ class _StreakHeroStatic extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors:
-              dark ? [brandDeep, const Color(0xFF080C10)] : [brand, brandDeep],
+              dark ? [brandDeep, EagleTokens.cinematicBg] : [brand, brandDeep],
         ),
         borderRadius: BorderRadius.circular(26),
       ),

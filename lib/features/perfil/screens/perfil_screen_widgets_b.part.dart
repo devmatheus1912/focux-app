@@ -120,7 +120,7 @@ class _Avatar extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.92),
               boxShadow: const [
                 BoxShadow(
-                  color: Color(0x33000000),
+                  color: EagleTokens.shadowSoft,
                   blurRadius: 20,
                   offset: Offset(0, 10),
                 ),

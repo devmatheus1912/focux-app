@@ -133,13 +133,13 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
         if (isAcquisition)
           PaywallQuickNav(
             primary: primary,
-            ink: isDark ? EagleTokens.darkInk : const Color(0xFF081012),
+            ink: isDark ? EagleTokens.darkInk : EagleTokens.inkDeep,
             onSectionTap: _scrollToPaywallSection,
           )
         else if (!usePlanStudio)
           PaywallSubscriberQuickNav(
             primary: primary,
-            ink: isDark ? EagleTokens.darkInk : const Color(0xFF081012),
+            ink: isDark ? EagleTokens.darkInk : EagleTokens.inkDeep,
             onSectionTap: _scrollToPaywallSection,
           ),
         if (usage != null &&

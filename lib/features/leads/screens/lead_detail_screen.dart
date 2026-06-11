@@ -497,7 +497,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.event, color: Color(0xFF6D28D9)),
+                    const Icon(Icons.event, color: EagleTokens.purpleAccent),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -515,7 +515,7 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                               fontWeight: FontWeight.w500,
                               color:
                                   lead.proximoContato != null
-                                      ? const Color(0xFF6D28D9)
+                                      ? EagleTokens.purpleAccent
                                       : TokensStrip.textSecondary,
                             ),
                           ),

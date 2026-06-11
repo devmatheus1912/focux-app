@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/design_tokens.dart';
+
 class PasswordStrengthMeter extends StatelessWidget {
   const PasswordStrengthMeter({
     super.key,
@@ -41,20 +43,20 @@ class PasswordStrengthMeter extends StatelessWidget {
       return const _PasswordStrength(
         label: 'Senha fraca',
         value: 0.34,
-        color: Color(0xFFFF7A7A),
+        color: EagleTokens.strengthWeak,
       );
     }
     if (score <= 4) {
       return const _PasswordStrength(
         label: 'Senha media',
         value: 0.67,
-        color: Color(0xFFFFC857),
+        color: EagleTokens.strengthMid,
       );
     }
     return const _PasswordStrength(
       label: 'Senha forte',
       value: 1,
-      color: Color(0xFF38E68A),
+      color: EagleTokens.strengthStrong,
     );
   }
 

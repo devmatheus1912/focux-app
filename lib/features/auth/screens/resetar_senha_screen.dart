@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../widgets/auth_shell.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -167,8 +168,8 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
                     if (_error != null) ...[
                       Text(
                         _error!,
-                        style: const TextStyle(
-                          color: Color(0xFFFFB6B6),
+                        style: TextStyle(
+                          color: EagleTokens.authErrorSoft,
                           fontSize: 12.5,
                         ),
                       ),
@@ -177,8 +178,8 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
                     if (_message != null) ...[
                       Text(
                         _message!,
-                        style: const TextStyle(
-                          color: Color(0xFF8FE3B3),
+                        style: TextStyle(
+                          color: EagleTokens.authSuccessSoft,
                           fontSize: 12.5,
                         ),
                       ),

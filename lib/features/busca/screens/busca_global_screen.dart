@@ -156,7 +156,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
             backgroundColor:
                 Theme.of(context).brightness == Brightness.dark
                     ? EagleTokens.surfaceDark
-                    : const Color(0xFFF3F4F6),
+                    : EagleTokens.surfaceGray,
             side: BorderSide.none,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
@@ -185,7 +185,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF717171),
+                  color: EagleTokens.iconGray,
                   letterSpacing: 1,
                 ),
               ),
@@ -478,9 +478,9 @@ class _BuscaItemTile extends StatelessWidget {
     _ => Icons.search,
   };
   Color _colorForTipo(String tipo) => switch (tipo) {
-    'ALUNO' => const Color(0xFF1EC8C8),
-    'TREINO' => const Color(0xFF22C55E),
-    'COBRANCA' => const Color(0xFFF59E0B),
+    'ALUNO' => EagleTokens.legacyBrandCyan,
+    'TREINO' => EagleTokens.buscaTreino,
+    'COBRANCA' => EagleTokens.goldStar,
     _ => TokensStrip.textSecondary,
   };
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/design_tokens.dart';
+
 class AuthOperationalNotice extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -20,10 +22,10 @@ class AuthOperationalNotice extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFB020).withValues(alpha: 0.11),
+        color: EagleTokens.opsNotice.withValues(alpha: 0.11),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: const Color(0xFFFFB020).withValues(alpha: 0.25),
+          color: EagleTokens.opsNotice.withValues(alpha: 0.25),
         ),
       ),
       child: Row(
@@ -33,10 +35,10 @@ class AuthOperationalNotice extends StatelessWidget {
             width: 30,
             height: 30,
             decoration: BoxDecoration(
-              color: const Color(0xFFFFB020).withValues(alpha: 0.14),
+              color: EagleTokens.opsNotice.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, size: 19, color: const Color(0xFFFFD28A)),
+            child: Icon(icon, size: 19, color: EagleTokens.planUsageWarn),
           ),
           const SizedBox(width: 11),
           Expanded(
@@ -65,8 +67,8 @@ class AuthOperationalNotice extends StatelessWidget {
                   const SizedBox(height: 7),
                   Text(
                     action!,
-                    style: const TextStyle(
-                      color: Color(0xFFFFD28A),
+                    style: TextStyle(
+                      color: EagleTokens.planUsageWarn,
                       fontSize: 12.1,
                       fontWeight: FontWeight.w700,
                       height: 1.3,
