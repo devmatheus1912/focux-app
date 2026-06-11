@@ -9,6 +9,11 @@ void main() {
     'lib/features/dashboard/screens/personal_dashboard_screen.dart',
     'lib/features/alunos/screens/alunos_list_screen.dart',
     'lib/features/treinos/screens/treinos_list_screen.dart',
+    'lib/features/financeiro/screens/financeiro_screen.dart',
+    'lib/features/chat/screens/chat_inbox_screen.dart',
+    'lib/features/perfil/screens/perfil_screen.dart',
+    'lib/features/agenda/screens/agenda_screen.dart',
+    'lib/features/notificacoes/screens/notificacoes_screen.dart',
   ];
 
   test('hub screens expõem a11y scope e labels em controles', () {
