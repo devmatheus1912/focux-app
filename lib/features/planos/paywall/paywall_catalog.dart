@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/brand/focux_microcopy.dart';
 import '../../assinatura/data/plano.dart';
 import '../../subscription/models/subscription_plan.dart';
 import 'paywall_plan_sections.dart';
@@ -193,7 +194,7 @@ class PaywallCatalog {
         ),
       if (plan != SubscriptionPlan.FREE)
         PaywallFeatureRow(
-          label: 'Command Center + Focux Score™',
+          label: FocuxMicrocopy.commandCenterPlusFocuxScore,
           included: plano.temRelatorios,
           highlight: plano.temRelatorios,
         ),
@@ -259,9 +260,9 @@ class PaywallCatalog {
       roiStatement: 'Escala sem contratar assistente full-time',
       plans: ['ENTERPRISE'],
     ),
-    'Command Center + Focux Score™': PaywallEducationContent(
+    FocuxMicrocopy.commandCenterPlusFocuxScore: PaywallEducationContent(
       id: 'command_center',
-      title: 'Command Center + Focux Score™',
+      title: FocuxMicrocopy.commandCenterPlusFocuxScore,
       whatIs:
           'Painel do CEO do personal: quem vai cancelar, inadimplência e próxima ação.',
       whyMatters: 'Em 2 minutos você sabe o que priorizar — sem planilha.',
@@ -312,7 +313,7 @@ class PaywallCatalog {
       enterprisePro: '400+/mês',
     ),
     PaywallComparisonRow(
-      feature: 'Command Center+Score™',
+      feature: FocuxMicrocopy.commandCenterPlusScoreCompact,
       free: '—',
       premium: '✓',
       enterprise: '✓',
@@ -486,7 +487,7 @@ class PaywallCatalog {
     PaywallTopFeature(
       rank: 3,
       icon: Icons.dashboard_outlined,
-      title: 'Command Center + Focux Score™',
+      title: FocuxMicrocopy.commandCenterPlusFocuxScore,
       badge: 'ÚNICO NO MERCADO',
       badgeColor: tierEnterprise,
       description:

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/legal/focux_legal.dart';
 import '../../../core/platform/secure_screen.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -218,7 +219,7 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
     SubscriptionPlan.PREMIUM => [
       'Até 20 alunos ativos',
       'PIX e financeiro no app',
-      'IA Copiloto e Command Center',
+      'IA Copiloto e ${FocuxMicrocopy.commandCenter}',
       'Agenda e relatórios avançados',
     ],
     _ => ['Recursos do plano selecionado'],

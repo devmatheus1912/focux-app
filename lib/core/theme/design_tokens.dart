@@ -42,6 +42,21 @@ abstract class EagleTokens {
   static const Color bad = Color(0xFFC73A3A);
   static const Color badSoft = Color(0xFFFCE8E8);
 
+  /// Variantes cinematográficas para dark mode (alertas, scores, NPS).
+  static const Color goodDark = Color(0xFF6FE296);
+  static const Color warnDark = Color(0xFFE2B46F);
+  static const Color badDark = Color(0xFFFF8B8B);
+
+  static Color semanticGood({bool isDark = false}) => isDark ? goodDark : good;
+  static Color semanticWarn({bool isDark = false}) => isDark ? warnDark : warn;
+  static Color semanticBad({bool isDark = false}) => isDark ? badDark : bad;
+  static Color semanticGoodSoft({bool isDark = false}) =>
+      isDark ? goodDark.withValues(alpha: 0.08) : goodSoft;
+  static Color semanticWarnSoft({bool isDark = false}) =>
+      isDark ? warnDark.withValues(alpha: 0.11) : warnSoft;
+  static Color semanticBadSoft({bool isDark = false}) =>
+      isDark ? badDark.withValues(alpha: 0.11) : badSoft;
+
   // Special
   static const Color gold = Color(0xFFE5B84C);
   static const Color goldSoft = Color(0xFFFFF8E6);
@@ -140,24 +155,24 @@ abstract class EagleTokens {
 
   // ── Helper de Aderência ─────────────────────────────────────────────
   static Color aderenciaColor(double taxa, {bool isDark = false}) {
-    if (taxa >= 75) return isDark ? const Color(0xFF6FE296) : good;
-    if (taxa >= 50) return isDark ? const Color(0xFFE2B46F) : warn;
-    return isDark ? const Color(0xFFFF8B8B) : bad;
+    if (taxa >= 75) return semanticGood(isDark: isDark);
+    if (taxa >= 50) return semanticWarn(isDark: isDark);
+    return semanticBad(isDark: isDark);
   }
 
   /// Cor semântica para scores 0–100 (form check, qualidade, etc.).
   static Color scoreColor(int? score, {bool isDark = false}) {
     if (score == null) return isDark ? darkInkMute : inkMute;
-    if (score >= 80) return isDark ? const Color(0xFF6FE296) : good;
-    if (score >= 60) return isDark ? const Color(0xFFE2B46F) : warn;
-    return isDark ? const Color(0xFFFF8B8B) : bad;
+    if (score >= 80) return semanticGood(isDark: isDark);
+    if (score >= 60) return semanticWarn(isDark: isDark);
+    return semanticBad(isDark: isDark);
   }
 
   /// NPS: promotor (9–10), neutro (7–8), detrator (0–6).
   static Color npsScoreColor(int score, {bool isDark = false}) {
-    if (score >= 9) return isDark ? const Color(0xFF6FE296) : good;
-    if (score >= 7) return isDark ? const Color(0xFFE2B46F) : gold;
-    return isDark ? const Color(0xFFFF8B8B) : bad;
+    if (score >= 9) return semanticGood(isDark: isDark);
+    if (score >= 7) return isDark ? warnDark : gold;
+    return semanticBad(isDark: isDark);
   }
 
   /// Barra de força de senha (0–1).

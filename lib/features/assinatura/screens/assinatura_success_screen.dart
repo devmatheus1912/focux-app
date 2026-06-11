@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:rive/rive.dart';
 
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -154,7 +155,7 @@ class AssinaturaSuccessScreen extends StatelessWidget {
     SubscriptionPlan.ENTERPRISE => [
       'Configure marca própria e identidade visual.',
       'Conecte domínio customizado se tiver.',
-      'Use o Command Center para priorizar o dia.',
+      'Use o ${FocuxMicrocopy.commandCenter} para priorizar o dia.',
     ],
     SubscriptionPlan.PREMIUM => [
       'Configure cobrança PIX no chat com alunos.',

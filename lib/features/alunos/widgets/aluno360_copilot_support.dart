@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/brand/focux_microcopy.dart';
 import '../constants/aluno_360_layout.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -271,7 +272,7 @@ class _Aluno360CopilotActionRowState
                         Expanded(
                           child: Semantics(
                             button: true,
-                            label: 'Abrir Command Center',
+                            label: 'Abrir ${FocuxMicrocopy.commandCenter}',
                             child: TextButton.icon(
                               onPressed: _handlePrimary,
                               icon: Icon(
@@ -280,7 +281,7 @@ class _Aluno360CopilotActionRowState
                                 color: widget.primary,
                               ),
                               label: Text(
-                                'Command Center',
+                                FocuxMicrocopy.commandCenter,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: Aluno360Layout.chipLabelStyle(

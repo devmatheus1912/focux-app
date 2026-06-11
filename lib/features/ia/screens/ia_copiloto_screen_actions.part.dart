@@ -466,8 +466,8 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
       FeedbackHelper.showSuccess(
         context,
         persisted
-            ? 'Tarefa salva no Command Center.'
-            : 'Tarefa criada. Confirme no Command Center.',
+            ? 'Tarefa salva no ${FocuxMicrocopy.commandCenter}.'
+            : 'Tarefa criada. Confirme no ${FocuxMicrocopy.commandCenter}.',
       );
     } catch (_) {
       if (!mounted) return;
@@ -558,7 +558,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Vai para o Command Center. Nada é aplicado automaticamente.',
+                                  'Vai para o ${FocuxMicrocopy.commandCenter}. Nada é aplicado automaticamente.',
                                   style: TextStyle(
                                     color: mute,
                                     fontSize: 12,
@@ -614,7 +614,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
                         runSpacing: 8,
                         children: [
                           IaCopilotMetaChip(
-                            label: 'Destino: Command Center',
+                            label: 'Destino: ${FocuxMicrocopy.commandCenter}',
                             icon: Icons.space_dashboard_outlined,
                             brand: brand,
                             ink: ink,

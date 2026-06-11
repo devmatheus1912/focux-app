@@ -18,7 +18,9 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | Tokens unificados | `#13C2C2` em `BrandPalette` + `EagleTokens` |
 | Motion reduced | `fx_page_transition`, `FxStaggerItem` |
 | A11y root scope | Dashboard, alunos, financeiro + gates part-aware |
-| Microcopy PT | `FocuxMicrocopy` + acentos financeiro |
+| Microcopy PT | `FocuxMicrocopy` (Centro de Comando, Índice Focux) |
+| Financeiro split | tab 351 LOC + parts actions/widgets |
+| Semântica dark | `EagleTokens.semantic*` (alertas sem `Color(0x…)`) |
 | Componentes | `FxHorizontalScrollPeek` compartilhado |
 | Charts | `FxChartTheme` |
 | Financeiro typography | `FinanceiroTypography` |

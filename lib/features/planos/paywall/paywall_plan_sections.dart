@@ -1,3 +1,4 @@
+import '../../../core/brand/focux_microcopy.dart';
 import '../../assinatura/data/plano.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../../subscription/plan_entitlements.dart';
@@ -68,7 +69,9 @@ class PaywallPlanSections {
           label: 'Treinos + check-in + biblioteca 190+',
         ),
         const PaywallPlanFeatureItem(label: 'Agenda básica'),
-        const PaywallPlanFeatureItem(label: 'Focux Score™ (visualização)'),
+        const PaywallPlanFeatureItem(
+          label: FocuxMicrocopy.focuxScoreVisualizacao,
+        ),
       ],
     ),
     const PaywallPlanFeatureSection(
@@ -108,7 +111,7 @@ class PaywallPlanSections {
           label: 'Agenda completa + lembretes automáticos',
         ),
         const PaywallPlanFeatureItem(
-          label: 'Focux Score™ + alertas de risco',
+          label: FocuxMicrocopy.focuxScoreAlertasRisco,
           highlight: true,
         ),
         const PaywallPlanFeatureItem(
@@ -147,7 +150,7 @@ class PaywallPlanSections {
         ),
         const PaywallPlanFeatureItem(label: 'Progressão de carga automática'),
         const PaywallPlanFeatureItem(
-          label: 'Command Center + fila do dia',
+          label: FocuxMicrocopy.commandCenterPlusFilaDoDia,
           highlight: true,
         ),
         const PaywallPlanFeatureItem(label: 'Gamificação, ranking e badges'),
@@ -197,7 +200,7 @@ class PaywallPlanSections {
           label: 'Agenda completa + lembretes automáticos',
         ),
         const PaywallPlanFeatureItem(
-          label: 'Focux Score™ + motor de retenção IA',
+          label: FocuxMicrocopy.focuxScoreMotorRetencaoIa,
           highlight: true,
         ),
         const PaywallPlanFeatureItem(
@@ -293,7 +296,7 @@ class PaywallPlanSections {
         ),
         const PaywallPlanFeatureItem(label: 'Progressão de carga automática'),
         const PaywallPlanFeatureItem(
-          label: 'Command Center + fila do dia',
+          label: FocuxMicrocopy.commandCenterPlusFilaDoDia,
           highlight: true,
         ),
         const PaywallPlanFeatureItem(label: 'Gamificação, ranking e badges'),

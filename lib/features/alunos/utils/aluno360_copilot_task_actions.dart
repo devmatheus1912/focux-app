@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -28,7 +29,7 @@ Future<bool> criarTarefaCopilotoFromAluno360({
       if (context.mounted) {
         FeedbackHelper.showInfo(
           context,
-          'Tarefa já aberta no Command Center.',
+          'Tarefa já aberta no ${FocuxMicrocopy.commandCenter}.',
           placement: FeedbackPlacement.operacaoTop,
         );
       }
@@ -63,7 +64,7 @@ Future<bool> criarTarefaCopilotoFromAluno360({
       FeedbackHelper.showOperacaoSuccess(
         context,
         persisted
-            ? 'Tarefa criada no Command Center.'
+            ? 'Tarefa criada no ${FocuxMicrocopy.commandCenter}.'
             : 'Servidor aceitou, mas a tarefa ainda não apareceu.',
       );
     }

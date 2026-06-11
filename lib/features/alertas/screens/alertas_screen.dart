@@ -195,13 +195,13 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
 
   Color _scoreColor(int s, bool isDark) =>
       s >= 2
-          ? (isDark ? const Color(0xFFFF8B8B) : EagleTokens.bad)
-          : (isDark ? const Color(0xFFE2B46F) : EagleTokens.warn);
+          ? EagleTokens.semanticBad(isDark: isDark)
+          : EagleTokens.semanticWarn(isDark: isDark);
 
   Color _scoreBg(int s, bool isDark) =>
       s >= 2
-          ? (isDark ? const Color(0x1FFF8B8B) : EagleTokens.badSoft)
-          : (isDark ? const Color(0x1FE2B46F) : EagleTokens.warnSoft);
+          ? EagleTokens.semanticBadSoft(isDark: isDark)
+          : EagleTokens.semanticWarnSoft(isDark: isDark);
 
   @override
   Widget build(BuildContext context) {
@@ -362,16 +362,11 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color:
-                                isDark
-                                    ? const Color(0x1AFF8B8B)
-                                    : EagleTokens.badSoft,
+                            color: EagleTokens.semanticBadSoft(isDark: isDark),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color:
-                                  isDark
-                                      ? const Color(0x33FF8B8B)
-                                      : const Color(0x269E2B2B),
+                              color: EagleTokens.semanticBad(isDark: isDark)
+                                  .withValues(alpha: isDark ? 0.2 : 0.15),
                             ),
                           ),
                           child: Column(
@@ -381,10 +376,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                 style: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w700,
-                                  color:
-                                      isDark
-                                          ? const Color(0xFFFF8B8B)
-                                          : EagleTokens.bad,
+                                  color: EagleTokens.semanticBad(isDark: isDark),
                                 ),
                               ),
                               Text(
@@ -392,10 +384,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color:
-                                      isDark
-                                          ? const Color(0xFFFF8B8B)
-                                          : EagleTokens.bad,
+                                  color: EagleTokens.semanticBad(isDark: isDark),
                                 ),
                               ),
                             ],
@@ -407,16 +396,11 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color:
-                                isDark
-                                    ? const Color(0x1AE2B46F)
-                                    : EagleTokens.warnSoft,
+                            color: EagleTokens.semanticWarnSoft(isDark: isDark),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color:
-                                  isDark
-                                      ? const Color(0x33E2B46F)
-                                      : const Color(0x268A5A12),
+                              color: EagleTokens.semanticWarn(isDark: isDark)
+                                  .withValues(alpha: isDark ? 0.2 : 0.15),
                             ),
                           ),
                           child: Column(
@@ -426,10 +410,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                 style: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w700,
-                                  color:
-                                      isDark
-                                          ? const Color(0xFFE2B46F)
-                                          : EagleTokens.warn,
+                                  color: EagleTokens.semanticWarn(isDark: isDark),
                                 ),
                               ),
                               Text(
@@ -437,10 +418,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color:
-                                      isDark
-                                          ? const Color(0xFFE2B46F)
-                                          : EagleTokens.warn,
+                                  color: EagleTokens.semanticWarn(isDark: isDark),
                                 ),
                               ),
                             ],
@@ -452,16 +430,11 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color:
-                                isDark
-                                    ? const Color(0x146FE296)
-                                    : EagleTokens.goodSoft,
+                            color: EagleTokens.semanticGoodSoft(isDark: isDark),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color:
-                                  isDark
-                                      ? const Color(0x266FE296)
-                                      : const Color(0x262B6A3F),
+                              color: EagleTokens.semanticGood(isDark: isDark)
+                                  .withValues(alpha: isDark ? 0.15 : 0.15),
                             ),
                           ),
                           child: Column(
@@ -471,10 +444,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                 style: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w700,
-                                  color:
-                                      isDark
-                                          ? const Color(0xFF6FE296)
-                                          : EagleTokens.good,
+                                  color: EagleTokens.semanticGood(isDark: isDark),
                                 ),
                               ),
                               Text(
@@ -482,10 +452,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color:
-                                      isDark
-                                          ? const Color(0xFF6FE296)
-                                          : EagleTokens.good,
+                                  color: EagleTokens.semanticGood(isDark: isDark),
                                 ),
                               ),
                             ],

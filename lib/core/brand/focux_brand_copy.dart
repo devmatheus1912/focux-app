@@ -1,3 +1,5 @@
+import 'focux_microcopy.dart';
+
 /// Copy de marca — fonte única para taglines e microcopy público.
 abstract final class FocuxBrandCopy {
   static const tagline = onboardingHook;
@@ -64,12 +66,12 @@ abstract final class FocuxBrandCopy {
       title: 'Enquanto você organiza, seu aluno ',
       titleHighlight: 'evolui.',
       subtitle:
-          'Command Center para você. Check-in com carga e RPE para ele. '
+          '${FocuxMicrocopy.commandCenter} para você. Check-in com carga e RPE para ele. '
           'Um progresso, zero planilha.',
       metrics: [
         OnboardingMetricCopy(value: '360°', label: 'Visão do aluno'),
         OnboardingMetricCopy(value: 'Ao vivo', label: 'Check-in real'),
-        OnboardingMetricCopy(value: 'Score', label: 'Focux Score™'),
+        OnboardingMetricCopy(value: 'Score', label: FocuxMicrocopy.focuxScore),
       ],
       features: [
         'Comando: quem precisa de você hoje, primeiro',
@@ -106,7 +108,7 @@ abstract final class FocuxBrandCopy {
       metrics: [
         OnboardingMetricCopy(value: 'Live', label: 'Check-in'),
         OnboardingMetricCopy(value: 'PRs', label: 'Recordes'),
-        OnboardingMetricCopy(value: 'Score', label: 'Focux Score™'),
+        OnboardingMetricCopy(value: 'Score', label: FocuxMicrocopy.focuxScore),
       ],
       features: [
         'Treinos atribuídos com carga, descanso e histórico',

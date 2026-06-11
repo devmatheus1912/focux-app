@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
@@ -313,7 +314,8 @@ class Aluno360CopilotCard extends ConsumerWidget {
                     () => const Aluno360CopilotTaskStatus(
                       icon: Icons.sync_rounded,
                       title: 'Sincronizando tarefas',
-                      subtitle: 'Checando Command Center antes de criar.',
+                      subtitle:
+                          'Checando ${FocuxMicrocopy.commandCenter} antes de criar.',
                     ),
                 orElse: () => const SizedBox.shrink(),
               ),

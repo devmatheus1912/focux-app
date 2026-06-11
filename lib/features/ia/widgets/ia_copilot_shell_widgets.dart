@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -31,7 +32,7 @@ class IaCopilotResultActionBar extends StatelessWidget {
             Expanded(
               child: Semantics(
                 button: true,
-                label: 'Criar tarefa no Command Center',
+                label: 'Criar tarefa no ${FocuxMicrocopy.commandCenter}',
                 child: FxLiquidPrimaryButton(
                   label: 'Criar tarefa',
                   icon: Icons.assignment_turned_in_outlined,

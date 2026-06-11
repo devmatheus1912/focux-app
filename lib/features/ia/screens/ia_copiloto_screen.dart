@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -638,7 +639,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                   Expanded(
                                     child: Text(
                                       _tarefaPersistida
-                                          ? 'Tarefa salva no Command Center'
+                                          ? 'Tarefa salva no ${FocuxMicrocopy.commandCenter}'
                                           : 'Tarefa criada, verifique a lista',
                                       style: TextStyle(
                                         color: ink,

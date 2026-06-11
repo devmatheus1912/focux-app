@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../constants/aluno_360_layout.dart';
@@ -150,7 +151,8 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
                     label: 'Tarefa',
                     icon: Icons.task_alt_rounded,
                     primary: primary,
-                    semanticsLabel: 'Abrir tarefa no Command Center',
+                    semanticsLabel:
+                        'Abrir tarefa no ${FocuxMicrocopy.commandCenter}',
                     onPressed: openCommandCenter,
                   ),
                 ),

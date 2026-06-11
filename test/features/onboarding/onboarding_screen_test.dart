@@ -48,7 +48,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1000));
 
-    expect(find.textContaining('Command Center'), findsOneWidget);
+    expect(find.textContaining('Centro de Comando'), findsOneWidget);
 
     await tester.tap(find.text(FocuxBrandCopy.onboardingCtaNext));
     await tester.pump();
@@ -65,7 +65,7 @@ void main() {
 
     expect(find.textContaining('Form check'), findsOneWidget);
     expect(find.textContaining('Mensalidades com PIX'), findsNothing);
-    expect(find.textContaining('Command Center'), findsNothing);
+    expect(find.textContaining('Centro de Comando'), findsNothing);
   });
 
   testWidgets('Já tenho conta marca onboarding e navega para login', (
@@ -168,6 +168,6 @@ void main() {
 
     expect(find.text('360°'), findsNothing);
     expect(find.text('Ao vivo'), findsNothing);
-    expect(find.textContaining('Command Center'), findsOneWidget);
+    expect(find.textContaining('Centro de Comando'), findsOneWidget);
   });
 }
