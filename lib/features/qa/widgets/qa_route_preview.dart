@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../l10n/app_localizations.dart';
 
 import '../../../core/widgets/mesh_scope.dart';
 import '../data/qa_smoke_catalog.dart';
@@ -69,7 +72,20 @@ GoRouter buildQaPreviewRouter(String initialLocation) {
 }
 
 Widget buildQaRoutePreviewApp(String path) {
-  return MaterialApp.router(routerConfig: buildQaPreviewRouter(path));
+  return MaterialApp.router(
+    routerConfig: buildQaPreviewRouter(path),
+    supportedLocales: const [
+      Locale('pt', 'BR'),
+      Locale('en', 'US'),
+      Locale('es', 'ES'),
+    ],
+    localizationsDelegates: const [
+      S.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+  );
 }
 
 Widget _buildQaRouteScreen(Uri uri) {

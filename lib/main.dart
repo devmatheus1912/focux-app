@@ -24,6 +24,7 @@ import 'core/theme/design_tokens.dart';
 import 'core/theme/theme_provider.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/perfil/data/perfil_repository.dart';
+import 'l10n/app_localizations.dart';
 
 void main() {
   // ── runZonedGuarded: captura TODOS os erros async nao tratados ──
@@ -280,6 +281,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
         Locale('es', 'ES'),
       ],
       localizationsDelegates: const [
+        S.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,

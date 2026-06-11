@@ -21,6 +21,7 @@ import '../widgets/auth_shell.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../l10n/app_localizations.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -295,9 +296,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     return fxScreenA11yScope(
-      label: 'Entrar no Focux',
+      label: s.login,
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
@@ -331,9 +333,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Entrar',
-                              style: TextStyle(
+                            Text(
+                              s.login,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 22,
                                 fontWeight: FontWeight.w700,
@@ -358,7 +360,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                             const SizedBox(height: 18),
                             AuthField(
-                              label: 'E-mail',
+                              label: s.email,
                               controller: _emailController,
                               hintText: 'seu@email.com',
                               icon: Icons.person_outline_rounded,
@@ -373,7 +375,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                             const SizedBox(height: 14),
                             AuthField(
-                              label: 'Senha',
+                              label: s.password,
                               controller: _passwordController,
                               hintText: '••••••••',
                               icon: Icons.lock_outline_rounded,
@@ -407,7 +409,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               child: TextButton(
                                 onPressed: () => context.go('/esqueci-senha'),
                                 child: Text(
-                                  'Esqueci minha senha',
+                                  s.forgotPassword,
                                   style: TextStyle(
                                     color: primary,
                                     fontSize: 13,
@@ -427,7 +429,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               const SizedBox(height: 14),
                             ],
                             FxLiquidPrimaryButton(
-                              label: 'Entrar',
+                              label: s.login,
                               onPressed: _loading ? null : _submit,
                               loading: _loading,
                             ),
