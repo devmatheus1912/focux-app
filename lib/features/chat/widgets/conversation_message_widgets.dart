@@ -164,7 +164,7 @@ class ConversationDateDivider extends StatelessWidget {
             label,
             style: TextStyle(
               color:
-                  isDark ? const Color(0xFF94A3B8) : TokensStrip.textSecondary,
+                  isDark ? EagleTokens.slate400 : TokensStrip.textSecondary,
               fontSize: 11,
               fontWeight: FontWeight.w600,
             ),
@@ -240,7 +240,7 @@ class ConversationDeliveryStatus extends StatelessWidget {
   Widget build(BuildContext context) {
     final read = msg.readAt != null;
     final delivered = msg.deliveredAt != null;
-    final iconColor = read ? const Color(0xFF60A5FA) : color;
+    final iconColor = read ? EagleTokens.chatRead : color;
 
     final label =
         read
@@ -440,15 +440,15 @@ class ConversationChatBackdrop extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors:
               isDark
-                  ? const [
-                    Color(0xFF09101F),
-                    Color(0xFF0C1428),
-                    Color(0xFF101B34),
+                  ? [
+                    EagleTokens.darkBg,
+                    EagleTokens.darkCard,
+                    EagleTokens.darkCardHi,
                   ]
-                  : const [
-                    Color(0xFFFBFCFF),
-                    Color(0xFFF5F7FC),
-                    Color(0xFFEEF3FB),
+                  : [
+                    EagleTokens.paperSubtle,
+                    EagleTokens.paper,
+                    EagleTokens.brandSofter,
                   ],
         ),
       ),

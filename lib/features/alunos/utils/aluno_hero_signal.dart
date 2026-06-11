@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/design_tokens.dart';
 import '../data/aluno_contact_utils.dart';
 import '../data/aluno_followup_store.dart';
 import '../data/aluno_repository.dart';
@@ -44,27 +45,27 @@ AlunoHeroStatusVisual alunoHeroStatusVisual(Aluno aluno) {
     return AlunoHeroStatusVisual(
       label: 'Inadimplente',
       background: Colors.white.withValues(alpha: 0.14),
-      foreground: const Color(0xFFFFB4B4),
+      foreground: EagleTokens.riskCoralLight,
     );
   }
   if (aluno.status == 'INATIVO') {
     return AlunoHeroStatusVisual(
       label: 'Inativo',
       background: Colors.white.withValues(alpha: 0.14),
-      foreground: const Color(0xFFFFD59A),
+      foreground: EagleTokens.warmPeach,
     );
   }
   if (aluno.emRisco) {
     return AlunoHeroStatusVisual(
       label: 'Em risco',
-      background: const Color(0xFF7C2D12),
+      background: EagleTokens.dangerBrown,
       foreground: Colors.white,
     );
   }
   return AlunoHeroStatusVisual(
     label: 'Ativo',
     background: Colors.white.withValues(alpha: 0.14),
-    foreground: const Color(0xFF9CF0C0),
+    foreground: EagleTokens.goodAccent,
   );
 }
 

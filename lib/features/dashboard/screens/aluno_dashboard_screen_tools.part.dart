@@ -203,7 +203,7 @@ class _StudentToolTile extends StatelessWidget {
             ? primary.withValues(alpha: isDark ? 0.18 : 0.075)
             : isDark
             ? EagleTokens.darkBg
-            : const Color(0xFFF8FAFC);
+            : EagleTokens.paperSubtle;
     final border =
         action.emphasis
             ? primary.withValues(alpha: 0.16)

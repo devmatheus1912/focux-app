@@ -728,7 +728,7 @@ class _ShortcutBtn extends StatelessWidget {
                           height: 16,
                           decoration: BoxDecoration(
                             color:
-                                isDark ? const Color(0xFF1A2228) : Colors.white,
+                                isDark ? EagleTokens.cardSurfaceDark : Colors.white,
                             shape: BoxShape.circle,
                             border: Border.all(
                               color: mute.withValues(alpha: 0.35),

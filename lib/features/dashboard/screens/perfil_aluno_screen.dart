@@ -631,11 +631,8 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                           end: Alignment.bottomRight,
                           colors:
                               isDark
-                                  ? const [Color(0xFF132344), Color(0xFF0C1731)]
-                                  : const [
-                                    Color(0xFFF2F6FF),
-                                    Color(0xFFFFFFFF),
-                                  ],
+                                  ? [EagleTokens.darkCardHi, EagleTokens.darkBg]
+                                  : [EagleTokens.brandSofter, EagleTokens.card],
                         ),
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(color: line),

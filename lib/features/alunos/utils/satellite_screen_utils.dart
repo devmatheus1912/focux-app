@@ -23,7 +23,7 @@ Color financeiroMensalidadeStatusInk(
   required bool isDark,
 }) {
   if (!isDark && status.trim().toUpperCase() == 'PAGO') {
-    return const Color(0xFF14532D);
+    return EagleTokens.good;
   }
   if (!isDark && status.trim().toUpperCase() == 'ATRASADO') {
     return EagleTokens.bad;

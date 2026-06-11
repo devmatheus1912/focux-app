@@ -65,9 +65,9 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
       case 'PLATÔ':
         return EagleTokens.warn;
       case 'ESTÁVEL':
-        return isDark ? EagleTokens.darkInkMute : const Color(0xFF4B5563);
+        return isDark ? EagleTokens.darkInkMute : EagleTokens.inkGray;
       default:
-        return isDark ? EagleTokens.darkInkMute : const Color(0xFF4B5563);
+        return isDark ? EagleTokens.darkInkMute : EagleTokens.inkGray;
     }
   }
 

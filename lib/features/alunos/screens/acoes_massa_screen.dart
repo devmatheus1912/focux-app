@@ -248,10 +248,10 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
                             },
                           ),
                           if (_processando)
-                            const Positioned.fill(
+                            Positioned.fill(
                               child: ColoredBox(
-                                color: Color(0x44000000),
-                                child: FxLoading(),
+                                color: Colors.black.withValues(alpha: 0.27),
+                                child: const FxLoading(),
                               ),
                             ),
                         ],

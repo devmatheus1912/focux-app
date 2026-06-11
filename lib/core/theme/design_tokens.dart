@@ -57,6 +57,44 @@ abstract class EagleTokens {
   static Color semanticBadSoft({bool isDark = false}) =>
       isDark ? badDark.withValues(alpha: 0.11) : badSoft;
 
+  /// Hubs S+ — lista, hero, chat, IA (evita `Color(0x…)` espalhado).
+  static const Color inkSlate = Color(0xFF475569);
+  static const Color inkGray = Color(0xFF4B5563);
+  static const Color inkSlateMuted = Color(0xFF9AA8B4);
+  static const Color warnAccent = Color(0xFFFFB77A);
+  static const Color warnAccentSoft = Color(0xFFFFB088);
+  static const Color warnDeep = Color(0xFF8A4B00);
+  static const Color warnDeepDark = Color(0xFF7A5A00);
+  static const Color warnSurfaceDark = Color(0xFF3D2A18);
+  static const Color warnSurfaceDarkAlt = Color(0xFF2E2618);
+  static const Color goodAccent = Color(0xFF9CF0C0);
+  static const Color goodSurfaceDark = Color(0xFF1A2E24);
+  static const Color riskCoral = Color(0xFFDC6B6B);
+  static const Color riskCoralLight = Color(0xFFFFB4B4);
+  static const Color warmPeach = Color(0xFFFFD59A);
+  static const Color warmPeachSoft = Color(0xFFE2C48A);
+  static const Color dangerBrown = Color(0xFF7C2D12);
+  static const Color whatsapp = Color(0xFF25D366);
+  static const Color chatRead = Color(0xFF60A5FA);
+  static const Color moneyGreen = Color(0xFF0E9F6E);
+  static const Color copilotSuccess = Color(0xFF2BB673);
+  static const Color iaError = Color(0xFFE25656);
+  static const Color slate400 = Color(0xFF94A3B8);
+  static const Color priorityLow = Color(0xFF64748B);
+  static const Color cardSurfaceDark = Color(0xFF1A2228);
+  static const Color paperSubtle = Color(0xFFF8FAFC);
+  static const Color lineNeutral = Color(0xFFE5E7EB);
+  static const Color lineNeutralDark = Color(0xFF374151);
+  static const Color avatarMint = Color(0xFF5EEAD4);
+  static const Color avatarSky = Color(0xFF7DD3FC);
+  static const Color avatarPink = Color(0xFFF9A8D4);
+  static const Color avatarLavender = Color(0xFFC4B5FD);
+  static const Color avatarOrange = Color(0xFFFDBA74);
+  static const Color riskDeep = Color(0xFF7F1D1D);
+  static const Color riskDeeper = Color(0xFF450A0A);
+  static const Color warmPaper = Color(0xFFFFF4E8);
+  static const Color inkWarmDark = Color(0xFF1A1208);
+
   // Special
   static const Color gold = Color(0xFFE5B84C);
   static const Color goldSoft = Color(0xFFFFF8E6);

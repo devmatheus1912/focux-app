@@ -197,11 +197,11 @@ class Aluno360ModuleTile extends StatelessWidget {
     final isPending = badge == 'Pend.';
     final bg =
         isPending
-            ? (isDark ? const Color(0xFF3D2A18) : EagleTokens.warnSoft)
+            ? (isDark ? EagleTokens.warnSurfaceDark : EagleTokens.warnSoft)
             : primary.withValues(alpha: isDark ? 0.16 : 0.12);
     final ink =
         isPending
-            ? (isDark ? const Color(0xFFFFD59A) : const Color(0xFF7A5A00))
+            ? (isDark ? EagleTokens.warmPeach : EagleTokens.warnDeepDark)
             : badgeInk;
     return Semantics(
       label: _badgeSemanticsLabel,

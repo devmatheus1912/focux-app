@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -547,7 +548,7 @@ class IaCopilotGenerationStatus extends StatelessWidget {
                     width: 8,
                     height: 8,
                     decoration: const BoxDecoration(
-                      color: Color(0xFF2BB673),
+                      color: EagleTokens.copilotSuccess,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -582,7 +583,7 @@ class IaCopilotGenerationStatus extends StatelessWidget {
               value: gerado ? 1.0 : null,
               minHeight: 6,
               backgroundColor: primarySoft,
-              valueColor: const AlwaysStoppedAnimation(Color(0xFF2BB673)),
+              valueColor: const AlwaysStoppedAnimation(EagleTokens.copilotSuccess),
             ),
           ),
           if (gerado) ...[
@@ -601,14 +602,14 @@ class IaCopilotGenerationStatus extends StatelessWidget {
                       children: [
                         const Icon(
                           Icons.check_circle,
-                          color: Color(0xFF2BB673),
+                          color: EagleTokens.copilotSuccess,
                           size: 13,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           s,
                           style: const TextStyle(
-                            color: Color(0xFF2BB673),
+                            color: EagleTokens.copilotSuccess,
                             fontSize: 10.8,
                             fontWeight: FontWeight.w700,
                           ),

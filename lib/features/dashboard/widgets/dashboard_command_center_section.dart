@@ -646,7 +646,7 @@ enum CommandActionTone { primary, hot, money }
 Color commandToneAccent(CommandActionTone tone, Color primary) {
   return switch (tone) {
     CommandActionTone.hot => Color.lerp(EagleTokens.warn, primary, 0.34)!,
-    CommandActionTone.money => const Color(0xFF0E9F6E),
+    CommandActionTone.money => EagleTokens.moneyGreen,
     CommandActionTone.primary => primary,
   };
 }

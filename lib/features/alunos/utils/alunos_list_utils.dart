@@ -6,13 +6,13 @@ import '../data/aluno_repository.dart';
 
 /// Texto secundário da lista — contraste WCAG AA em fundos de card.
 Color alunoListSecondaryInk(bool isDark) =>
-    isDark ? const Color(0xFF9AA8B4) : const Color(0xFF4B5563);
+    isDark ? EagleTokens.inkSlateMuted : EagleTokens.inkGray;
 
 /// Badge «Risco alto» — cores calibradas para leitura em 10px.
 (Color, Color) alunoRiscoAltoBadgeColors(bool isDark) =>
     isDark
-        ? (const Color(0xFFFFB088), const Color(0xFF3D2A18))
-        : (const Color(0xFF8A4F00), const Color(0xFFFFE8CC));
+        ? (EagleTokens.warnAccentSoft, EagleTokens.warnSurfaceDark)
+        : (EagleTokens.warnDeep, EagleTokens.warnSoft);
 
 /// Hero metric chip — mesma família cromática da lista, por nível.
 (Color, Color) alunoHeroRiscoMetricBadgeColors(bool isDark, String nivel) {
@@ -21,11 +21,11 @@ Color alunoListSecondaryInk(bool isDark) =>
     'ALTO' => alunoRiscoAltoBadgeColors(isDark),
     'MÉDIO' || 'MEDIO' =>
       isDark
-          ? (const Color(0xFFE2C48A), const Color(0xFF2E2618))
-          : (const Color(0xFF7A5A00), EagleTokens.warnSoft),
+          ? (EagleTokens.warmPeachSoft, EagleTokens.warnSurfaceDarkAlt)
+          : (EagleTokens.warnDeepDark, EagleTokens.warnSoft),
     'BAIXO' =>
       isDark
-          ? (const Color(0xFF9CF0C0), const Color(0xFF1A2E24))
+          ? (EagleTokens.goodAccent, EagleTokens.goodSurfaceDark)
           : (EagleTokens.good, EagleTokens.goodSoft),
     _ => alunoRiscoAltoBadgeColors(isDark),
   };

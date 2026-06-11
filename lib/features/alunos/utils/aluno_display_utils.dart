@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/design_tokens.dart';
+
 /// Whether the student has a prescription objective on file.
 bool alunoObjectiveIsDefined(String? value) => (value ?? '').trim().isNotEmpty;
 
@@ -91,17 +94,17 @@ String prettyAlunoObjective(String? value) {
 Color alunoAvatarFallbackColor(String name, bool isDark) {
   final palette =
       isDark
-          ? const [
-            Color(0xFF1EC8C8),
-            Color(0xFF26A8A8),
-            Color(0xFF159A9A),
-            Color(0xFF32D4D4),
+          ? [
+            BrandPalette.defaultPrimary,
+            BrandPalette.defaultInk,
+            BrandPalette.defaultSecondary,
+            EagleTokens.brandAccent,
           ]
-          : const [
-            Color(0xFF1EC8C8),
-            Color(0xFF26A8A8),
-            Color(0xFF5EEAD4),
-            Color(0xFF159A9A),
+          : [
+            BrandPalette.defaultPrimary,
+            BrandPalette.defaultInk,
+            EagleTokens.avatarMint,
+            BrandPalette.defaultSecondary,
           ];
   final hash = name.isNotEmpty ? name.codeUnitAt(0) : 0;
   return palette[hash % palette.length];
@@ -110,11 +113,11 @@ Color alunoAvatarFallbackColor(String name, bool isDark) {
 /// Vivid fallback on teal hero — harmonized tints that sit on the gradient.
 Color alunoAvatarHeroFallbackColor(String name) {
   const palette = [
-    Color(0xFF5EEAD4),
-    Color(0xFF7DD3FC),
-    Color(0xFFF9A8D4),
-    Color(0xFFC4B5FD),
-    Color(0xFFFDBA74),
+    EagleTokens.avatarMint,
+    EagleTokens.avatarSky,
+    EagleTokens.avatarPink,
+    EagleTokens.avatarLavender,
+    EagleTokens.avatarOrange,
   ];
   final hash =
       name.isEmpty ? 0 : name.codeUnits.fold<int>(0, (sum, unit) => sum + unit);

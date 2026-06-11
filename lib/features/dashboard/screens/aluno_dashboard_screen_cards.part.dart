@@ -654,7 +654,7 @@ Color _taskPriorityColor(AlunoTaskPriority priority, Color primary) {
   return switch (priority) {
     AlunoTaskPriority.alta => EagleTokens.warn,
     AlunoTaskPriority.media => primary,
-    AlunoTaskPriority.baixa => const Color(0xFF64748B),
+    AlunoTaskPriority.baixa => EagleTokens.priorityLow,
   };
 }
 

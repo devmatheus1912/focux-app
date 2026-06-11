@@ -20,7 +20,8 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | A11y root scope | Dashboard, alunos, financeiro + gates part-aware |
 | Microcopy PT | `FocuxMicrocopy` (Centro de Comando, Índice Focux) |
 | Financeiro split | tab 351 LOC + parts actions/widgets |
-| Semântica dark | `EagleTokens.semantic*` (alertas sem `Color(0x…)`) |
+| Semântica dark | `EagleTokens.semantic*` + hub tokens |
+| Hubs S+ sem hex cru | gate `hub_color_tokens_contract_test` |
 | Componentes | `FxHorizontalScrollPeek` compartilhado |
 | Charts | `FxChartTheme` |
 | Financeiro typography | `FinanceiroTypography` |

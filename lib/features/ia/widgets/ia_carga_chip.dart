@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/motion_preferences.dart';
 
@@ -98,5 +99,5 @@ class IaCargaChip extends StatelessWidget {
   }
 
   static Color _suggestedInk(Color primary) =>
-      Color.lerp(primary, const Color(0xFF0B3D36), 0.42)!;
+      Color.lerp(primary, EagleTokens.brandDeep, 0.42)!;
 }

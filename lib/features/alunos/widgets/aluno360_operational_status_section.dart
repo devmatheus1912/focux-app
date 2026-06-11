@@ -112,12 +112,12 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
     );
     final riscoColor =
         aluno.emRisco
-            ? (isDark ? const Color(0xFFFFB77A) : EagleTokens.warn)
-            : (isDark ? const Color(0xFF6FE296) : EagleTokens.good);
+            ? (isDark ? EagleTokens.warnAccent : EagleTokens.warn)
+            : EagleTokens.semanticGood(isDark: isDark);
     final neutralIdle =
         isDark
-            ? const Color(0xFF374151).withValues(alpha: 0.35)
-            : const Color(0xFFE5E7EB);
+            ? EagleTokens.lineNeutralDark.withValues(alpha: 0.35)
+            : EagleTokens.lineNeutral;
     final showCheckinCta = shouldShowOperacaoCheckinCta(
       operacao: operacao,
       weekHasAnyCheckin: week.hasAnyCheckin,
@@ -302,7 +302,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
                                   size: 14,
                                   color:
                                       isDark
-                                          ? const Color(0xFFFFB77A)
+                                          ? EagleTokens.warnAccent
                                           : EagleTokens.warn,
                                 ),
                                 const SizedBox(width: 8),
@@ -317,8 +317,8 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
                                       fontWeight: FontWeight.w600,
                                       color:
                                           isDark
-                                              ? const Color(0xFFFFB77A)
-                                              : const Color(0xFF8A4B00),
+                                              ? EagleTokens.warnAccent
+                                              : EagleTokens.warnDeep,
                                       height: 1.3,
                                     ),
                                   ),
@@ -338,7 +338,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
                           missColor:
                               isDark
                                   ? EagleTokens.warn
-                                  : const Color(0xFFDC6B6B),
+                                  : EagleTokens.riskCoral,
                           todayRingColor: primary,
                           emptyWeek: !week.hasAnyCheckin,
                         ),
@@ -347,7 +347,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
                       AlunoOperacaoAdherenceLegend(
                         activeColor: EagleTokens.good,
                         missColor:
-                            isDark ? EagleTokens.warn : const Color(0xFFDC6B6B),
+                            isDark ? EagleTokens.warn : EagleTokens.riskCoral,
                         todayRingColor: primary,
                       ),
                       if (showCheckinCta &&
@@ -431,7 +431,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
                           missColor:
                               isDark
                                   ? EagleTokens.warn
-                                  : const Color(0xFFDC6B6B),
+                                  : EagleTokens.riskCoral,
                           todayRingColor: primary,
                           emptyWeek: true,
                         ),
@@ -440,7 +440,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
                       AlunoOperacaoAdherenceLegend(
                         activeColor: EagleTokens.good,
                         missColor:
-                            isDark ? EagleTokens.warn : const Color(0xFFDC6B6B),
+                            isDark ? EagleTokens.warn : EagleTokens.riskCoral,
                         todayRingColor: primary,
                       ),
                     ],

@@ -20,7 +20,7 @@ class _AlunosTriageBanner extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final warn = isDark ? const Color(0xFFFFB77A) : EagleTokens.warn;
+    final warn = isDark ? EagleTokens.warnAccent : EagleTokens.warn;
 
     return Material(
       color: Colors.transparent,
@@ -133,7 +133,7 @@ class _AlunoOutreachActions extends ConsumerWidget {
             compact: true,
             icon: Icons.chat_rounded,
             tooltip: 'WhatsApp',
-            color: const Color(0xFF25D366),
+            color: EagleTokens.whatsapp,
             onTap:
                 () => openAlunoWhatsappOutreach(
                   context,

@@ -84,7 +84,7 @@ class _AlunoOutreachMessageSheet extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : const Color(0xFF475569);
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkSlate;
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final displayName = fxTitleCaseName(alunoNome);
     final firstName = alunoPrimeiroNome(alunoNome);

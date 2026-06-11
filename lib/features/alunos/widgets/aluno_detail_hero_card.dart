@@ -351,13 +351,13 @@ class _IdentityMetricChip extends StatelessWidget {
         emphasis == OperationalMetricEmphasis.alert
             ? (isDark
                 ? accent.withValues(alpha: 0.95)
-                : Color.lerp(accent, const Color(0xFF7F1D1D), 0.35)!)
+                : Color.lerp(accent, EagleTokens.riskDeep, 0.35)!)
             : Color.lerp(ink, accent, 0.35)!;
     final valueColor =
         emphasis == OperationalMetricEmphasis.alert
             ? (isDark
                 ? ink
-                : Color.lerp(accent, const Color(0xFF450A0A), 0.55)!)
+                : Color.lerp(accent, EagleTokens.riskDeeper, 0.55)!)
             : ink;
 
     final semanticsLabel =
@@ -491,8 +491,8 @@ class _HeroRiscoMetricBadge extends StatelessWidget {
     final (ink, bg) = alunoHeroRiscoMetricBadgeColors(isDark, nivel);
     final valueInk =
         isDark
-            ? const Color(0xFFFFF4E8)
-            : Color.lerp(ink, const Color(0xFF1A1208), 0.22)!;
+            ? EagleTokens.warmPaper
+            : Color.lerp(ink, EagleTokens.inkWarmDark, 0.22)!;
     final contentPadding =
         compact
             ? const EdgeInsets.fromLTRB(7, 5, 9, 5)

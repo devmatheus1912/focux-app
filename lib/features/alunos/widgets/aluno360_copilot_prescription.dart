@@ -214,7 +214,7 @@ class _Aluno360CopilotPrescriptionState
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final caption = isDark ? EagleTokens.darkInkMute : const Color(0xFF475569);
+    final caption = isDark ? EagleTokens.darkInkMute : EagleTokens.inkSlate;
     final reason = widget.reason.trim();
     final expandedActionText = widget.fullAction ?? widget.action;
     final hasDistinctFullAction =

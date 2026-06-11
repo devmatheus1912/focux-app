@@ -308,16 +308,16 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                         decoration: BoxDecoration(
                           color:
                               dark
-                                  ? const Color(0x331F1212)
-                                  : const Color(0x14E25656),
+                                  ? EagleTokens.darkBg.withValues(alpha: 0.2)
+                                  : EagleTokens.iaError.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0x33E25656)),
+                          border: Border.all(color: EagleTokens.iaError.withValues(alpha: 0.2)),
                         ),
                         child: Row(
                           children: [
                             const Icon(
                               Icons.error_outline,
-                              color: Color(0xFFE25656),
+                              color: EagleTokens.iaError,
                               size: 20,
                             ),
                             const SizedBox(width: 10),
@@ -380,18 +380,18 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                   decoration: BoxDecoration(
                                     color:
                                         dark
-                                            ? const Color(0x331F1212)
-                                            : const Color(0x14E25656),
+                                            ? EagleTokens.darkBg.withValues(alpha: 0.2)
+                                            : EagleTokens.iaError.withValues(alpha: 0.08),
                                     borderRadius: BorderRadius.circular(14),
                                     border: Border.all(
-                                      color: const Color(0x33E25656),
+                                      color: EagleTokens.iaError.withValues(alpha: 0.2),
                                     ),
                                   ),
                                   child: Row(
                                     children: [
                                       const Icon(
                                         Icons.error_outline,
-                                        color: Color(0xFFE25656),
+                                        color: EagleTokens.iaError,
                                         size: 20,
                                       ),
                                       const SizedBox(width: 10),
@@ -507,8 +507,10 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                         children: [
                                           Text(
                                             'INSIGHTS · ${_mode.toUpperCase()}',
-                                            style: const TextStyle(
-                                              color: Color(0xB3FFFFFF),
+                                            style: TextStyle(
+                                              color: Colors.white.withValues(
+                                                alpha: 0.7,
+                                              ),
                                               fontSize: 10.5,
                                               fontWeight: FontWeight.w600,
                                               letterSpacing: 1.2,
@@ -562,7 +564,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                         mute: mute,
                                         chipBg:
                                             dark
-                                                ? const Color(0x0FFFFFFF)
+                                                ? Colors.white.withValues(alpha: 0.06)
                                                 : TokensStrip.borderDefault,
                                       );
                                     }),

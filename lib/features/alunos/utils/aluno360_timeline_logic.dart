@@ -491,9 +491,9 @@ Color timeline360PriorityInk(Color accent, {required bool isDark}) {
   if (isDark) return accent;
   final hsl = HSLColor.fromColor(accent);
   if (hsl.hue >= 95 && hsl.hue <= 165) {
-    return Color.lerp(accent, const Color(0xFF0F3D3D), 0.42)!;
+    return Color.lerp(accent, EagleTokens.brandDeep, 0.42)!;
   }
-  return Color.lerp(accent, const Color(0xFF14532D), 0.48)!;
+  return Color.lerp(accent, EagleTokens.good, 0.48)!;
 }
 
 bool timeline360BodyExpandable(
