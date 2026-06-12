@@ -55,6 +55,26 @@ Fonte única de tokens visuais e componentes compartilhados do app Flutter.
 4. **Legibilidade** — muted/caption via `dashboard_readability` ou `aluno360_readability`, não alpha arbitrário na UI.
 5. **White-label** — primárias validadas por `CuratedBrandPalette.isReadablePrimary`.
 
+## Hierarquia visual & foco
+
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `lib/core/theme/focux_hierarchy.dart` | `FocuxHierarchy` — papéis tipográficos + camadas de elevação |
+| `lib/core/theme/focux_typography.dart` | Escala semântica (display → caption) |
+| `lib/core/theme/tokens_strip.dart` | `fontH1`/`fontH2`/`fontBody` + `elevation()` |
+| `lib/core/theme/shell_chrome.dart` | Superfícies glass com `elevationLevel` |
+| `lib/core/widgets/fx_input_deco.dart` | Anel de foco em inputs |
+| `lib/features/dashboard/utils/dashboard_day_focus.dart` | Foco narrativo do dia (hub personal) |
+| `lib/features/alunos/widgets/aluno360_operacao_focus_toggle.dart` | Modo foco da operação (Aluno 360) |
+
+### Regras
+
+1. **Títulos** — `FocuxHierarchy.pageTitle` / `sectionTitle`; evitar `fontSize: 32` cru em features.
+2. **Cards** — `cardTitle` + `caption`; KPIs com `kpi` ou `monoMetric`.
+3. **Elevação** — `layerRaised` (4) → `layerSticky` (8) → `layerOverlay` (16) → `layerModal` (24).
+4. **Foco de input** — `FxInputDeco.focusedBorder`; proibido `OutlineInputBorder` fora do core.
+5. **Foco operacional** — um banner/CTA primário por hub (`DashboardDayFocus`, sticky CTA Aluno 360).
+
 ## Tokens
 
 | Arquivo | Responsabilidade |
@@ -99,6 +119,8 @@ Catálogo visual (debug): rota `/qa/tokens-strip` → `TokensStripShowcaseScreen
 | `design_system_pillar_contract_test.dart` | Catálogo + hubs + semânticos |
 | `colors_contrast_pillar_contract_test.dart` | WCAG + semânticos + hubs |
 | `focux_contrast_test.dart` | Pares críticos ≥4.5:1 |
+| `visual_hierarchy_pillar_contract_test.dart` | Escala + elevação + foco hubs |
+| `focux_hierarchy_test.dart` | Ordem tipográfica e camadas |
 | `screen_tier_s_plus_contract_test.dart` | Baseline S+ por tela |
 | `screen_a11y_contract_test.dart` | Root a11y |
 
