@@ -43,6 +43,8 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | `FocuxGestalt` + `focux_gestalt_test` + list shells | ✅ |
 | `information_density_pillar_contract_test` — densidade nos hubs | ✅ |
 | `FocuxDensity` + `focux_density_test` + disclosure/compact | ✅ |
+| `branding_personality_pillar_contract_test` — marca dinâmica nos hubs | ✅ |
+| `FocuxBranding` + `focux_branding_test` + white-label providers | ✅ |
 | `dart run tools/find_orphan_dart.dart` | ✅ |
 | `tool/verify.ps1` | ✅ |
 

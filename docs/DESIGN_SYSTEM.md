@@ -262,6 +262,27 @@ Fonte única de tokens visuais e componentes compartilhados do app Flutter.
 5. **Espaçamento** — densidade via `TokensStrip` / `FocuxDensity.sectionGap`, não padding arbitrário.
 6. **Backend** — API não embute `infoDensity` / `maxVisibleItems` em DTOs.
 
+## Branding & personalidade
+
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `lib/core/brand/focux_branding.dart` | `FocuxBranding` — catálogo white-label e personalidade |
+| `lib/core/brand/focux_brand_copy.dart` | `FocuxBrandCopy` — taglines e tom de produto |
+| `lib/core/theme/brand_palette.dart` | Derivações de cor a partir de `corPrimaria` |
+| `lib/core/theme/curated_brand_palettes.dart` | Paletas premium com `isReadablePrimary` |
+| `lib/core/widgets/focux_brand_tagline.dart` | Tagline unificada (auth/onboarding) |
+| `lib/core/providers/personal_brand_provider.dart` | Identidade do personal (`/api/aluno/personal-brand`) |
+| `lib/core/theme/theme_provider.dart` | `primaryColorProvider`, `hideFocuxBrandingProvider` |
+
+### Regras
+
+1. **Identidade** — hubs usam `Theme.colorScheme.primary` + `BrandPalette`; proibido hex fixo da marca.
+2. **Chrome** — superfícies com `ShellChrome` / `FxShellScaffold` respeitam primária dinâmica.
+3. **Copy de marca** — taglines e onboarding só em `FocuxBrandCopy` + `FocuxBrandTagline`.
+4. **White-label** — `hideFocuxBranding` / `whiteLabelActive` ocultam marca Focux quando ativo.
+5. **Paleta segura** — primárias custom via `CuratedBrandPalette.isReadablePrimary`.
+6. **Backend** — identidade (`corPrimaria`, `logoUrl`) só em DTOs de perfil/landing; hubs operacionais sem `brandTagline` em DTOs.
+
 ## Tokens
 
 | Arquivo | Responsabilidade |
@@ -331,6 +352,8 @@ Catálogo visual (debug): rota `/qa/tokens-strip` → `TokensStripShowcaseScreen
 | `focux_gestalt_test.dart` | Princípios e widgets de seção |
 | `information_density_pillar_contract_test.dart` | Truncamento + compactação + hubs |
 | `focux_density_test.dart` | Tiers e helpers de densidade |
+| `branding_personality_pillar_contract_test.dart` | White-label + paleta dinâmica nos hubs |
+| `focux_branding_test.dart` | Catálogo e providers de marca |
 | `motion_preferences_test.dart` | Reduced motion helpers |
 | `screen_tier_s_plus_contract_test.dart` | Baseline S+ por tela |
 | `screen_a11y_contract_test.dart` | Root a11y |
