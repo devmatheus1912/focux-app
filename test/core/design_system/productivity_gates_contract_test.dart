@@ -24,6 +24,7 @@ void main() {
     'test/core/design_system/motion_design_pillar_contract_test.dart',
     'test/core/design_system/platform_adaptation_pillar_contract_test.dart',
     'test/core/design_system/gestalt_perception_pillar_contract_test.dart',
+    'test/core/design_system/information_density_pillar_contract_test.dart',
     'test/core/design_system/productivity_gates_contract_test.dart',
     'test/core/router/routes_pillar_contract_test.dart',
     'test/core/business_logic/business_logic_contract_test.dart',

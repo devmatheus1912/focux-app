@@ -242,6 +242,26 @@ Fonte única de tokens visuais e componentes compartilhados do app Flutter.
 4. **Figura-fundo** — cards com `fxListCardDecoration` + `ShellChrome` sobre mesh.
 5. **Backend** — API não embute `visualGrouping` / clusters de UI em DTOs.
 
+## Densidade de informação
+
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `lib/core/density/focux_density.dart` | `FocuxDensity` — tiers, helpers e padrões de hub |
+| `lib/core/theme/app_theme.dart` | `VisualDensity.compact` — baseline global |
+| `lib/features/alunos/data/aluno_list_preferences_store.dart` | Preferência de lista compacta (alunos) |
+| `lib/features/dashboard/widgets/dashboard_collapsible_section.dart` | Disclosure progressivo no hub personal |
+| `lib/features/dashboard/constants/dashboard_layout.dart` | Gaps de seção controlados |
+| `lib/features/alunos/constants/aluno_360_layout.dart` | Hero compacto (`compactContactPriority`) |
+
+### Regras
+
+1. **Truncamento** — títulos e métricas com `maxLines` + `TextOverflow.ellipsis`.
+2. **Compactação** — listas densas via toggle (`AlunoListPreferences`) ou `compact:` local.
+3. **Disclosure** — seções longas colapsáveis (`DashboardCollapsibleSection`, `IaExpandableCopy`).
+4. **Segmentação** — hubs grandes divididos em abas (`TabBar`) para reduzir carga cognitiva.
+5. **Espaçamento** — densidade via `TokensStrip` / `FocuxDensity.sectionGap`, não padding arbitrário.
+6. **Backend** — API não embute `infoDensity` / `maxVisibleItems` em DTOs.
+
 ## Tokens
 
 | Arquivo | Responsabilidade |
@@ -309,6 +329,8 @@ Catálogo visual (debug): rota `/qa/tokens-strip` → `TokensStripShowcaseScreen
 | `focux_platform_test.dart` | Breakpoints e shells |
 | `gestalt_perception_pillar_contract_test.dart` | Agrupamento + list shells + hubs |
 | `focux_gestalt_test.dart` | Princípios e widgets de seção |
+| `information_density_pillar_contract_test.dart` | Truncamento + compactação + hubs |
+| `focux_density_test.dart` | Tiers e helpers de densidade |
 | `motion_preferences_test.dart` | Reduced motion helpers |
 | `screen_tier_s_plus_contract_test.dart` | Baseline S+ por tela |
 | `screen_a11y_contract_test.dart` | Root a11y |

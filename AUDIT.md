@@ -41,6 +41,8 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | `FocuxPlatform` + `focux_platform_test` + shells/limiter | ✅ |
 | `gestalt_perception_pillar_contract_test` — agrupamento visual hubs | ✅ |
 | `FocuxGestalt` + `focux_gestalt_test` + list shells | ✅ |
+| `information_density_pillar_contract_test` — densidade nos hubs | ✅ |
+| `FocuxDensity` + `focux_density_test` + disclosure/compact | ✅ |
 | `dart run tools/find_orphan_dart.dart` | ✅ |
 | `tool/verify.ps1` | ✅ |
 
