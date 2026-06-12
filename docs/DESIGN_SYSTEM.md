@@ -302,6 +302,29 @@ Fonte única de tokens visuais e componentes compartilhados do app Flutter.
 5. **Ponto único** — `FocuxDataViz.ensureRenderableSeries` duplica valor para linha visível.
 6. **Backend** — API entrega dados (`evolucaoMensal`, métricas); sem `chartType` / `axisConfig` em DTOs.
 
+## Segurança
+
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `lib/core/security/focux_security.dart` | `FocuxSecurity` — catálogo e padrões de hub |
+| `lib/core/storage/secure_storage.dart` | JWT/role em `FlutterSecureStorage` |
+| `lib/core/api/api_client.dart` | Bearer token, refresh, idempotency, retry |
+| `lib/core/api/tls_certificate_pinning.dart` | Pinning opcional (`API_CERT_PINS`) |
+| `lib/core/auth/session_invalidator.dart` | Logout seguro (`clearAll`) |
+| `lib/core/utils/friendly_error.dart` | Erros humanizados — sem vazar stack/Dio cru |
+| `lib/core/widgets/ia_safety_disclaimer.dart` | Disclaimer obrigatório em telas IA |
+| `lib/features/assinatura/services/subscription_device_guard.dart` | Bloqueio jailbreak/dev mode em IAP |
+
+### Regras
+
+1. **Tokens** — só `SecureStorage`; features não instanciam `FlutterSecureStorage` direto.
+2. **HTTP** — `ApiClient` injeta `Authorization: Bearer`; pinning em pagamentos/IAP.
+3. **Erros** — `friendlyError(e)` em toasts/painéis; proibido `$e` em `FeedbackHelper`.
+4. **Async** — hubs com `.when` para loading/erro; sem dados sensíveis em logs de UI.
+5. **IA** — `IaSafetyDisclaimer` em fluxos generativos.
+6. **CI** — `security.yml` (gitleaks) + `semgrep.yml` (SAST).
+7. **Backend** — isolamento multi-tenant (`CrossTenantIsolationTest`) + `ApiErrorResponse` uniforme.
+
 ## Tokens
 
 | Arquivo | Responsabilidade |
@@ -375,6 +398,8 @@ Catálogo visual (debug): rota `/qa/tokens-strip` → `TokensStripShowcaseScreen
 | `focux_branding_test.dart` | Catálogo e providers de marca |
 | `data_viz_dynamic_content_pillar_contract_test.dart` | Sparklines + gráficos + async nos hubs |
 | `focux_data_viz_test.dart` | Séries e helpers de visualização |
+| `security_pillar_contract_test.dart` | Tokens + erros seguros + IA disclaimer |
+| `focux_security_test.dart` | Storage, pinning e workflows CI |
 | `motion_preferences_test.dart` | Reduced motion helpers |
 | `screen_tier_s_plus_contract_test.dart` | Baseline S+ por tela |
 | `screen_a11y_contract_test.dart` | Root a11y |
