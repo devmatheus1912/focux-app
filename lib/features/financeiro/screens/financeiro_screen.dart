@@ -48,7 +48,10 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
         if (reduceMotionOf(context)) {
           _tabController.index = 1;
         } else {
-          _tabController.animateTo(1);
+          _tabController.animateTo(
+            1,
+            duration: fxMotionDuration(context, normal: const Duration(milliseconds: 280)),
+          );
         }
       });
     }

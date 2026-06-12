@@ -362,6 +362,13 @@ class _FxSpringButtonState extends State<FxSpringButton>
 
   @override
   Widget build(BuildContext context) {
+    if (reduceMotionOf(context)) {
+      return GestureDetector(
+        onTap: widget.onTap,
+        child: widget.child,
+      );
+    }
+
     return GestureDetector(
       onTapDown: widget.onTap != null ? (_) => _press() : null,
       onTapUp:

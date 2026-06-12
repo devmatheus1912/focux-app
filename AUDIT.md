@@ -35,6 +35,8 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | `FocuxMicrocopy` + `focux_microcopy_test` + utils de módulo | ✅ |
 | `navigation_architecture_pillar_contract_test` — safe nav + providers hubs | ✅ |
 | `FocuxNavigation` + `safe_navigation_test` + `routes_pillar_contract_test` | ✅ |
+| `motion_design_pillar_contract_test` — stagger + spring + reduced motion hubs | ✅ |
+| `FocuxMotion` + `focux_motion_test` + `fx_motion` widgets | ✅ |
 | `dart run tools/find_orphan_dart.dart` | ✅ |
 | `tool/verify.ps1` | ✅ |
 

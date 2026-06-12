@@ -186,6 +186,24 @@ Fonte única de tokens visuais e componentes compartilhados do app Flutter.
 4. **Estado** — hubs com `ref.watch` + `providers/`; lógica pesada em `utils/` (Pilar 3).
 5. **Catálogo de rotas** — `routes_pillar_contract_test` + `README.md`; BE sem `deepLinkPath` em DTOs.
 
+## Motion design
+
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `lib/core/motion/focux_motion.dart` | `FocuxMotion` — durações, curvas e catálogo de widgets |
+| `lib/core/utils/motion_preferences.dart` | `fxMotionDuration`, `reduceMotionOf` — reduced motion OS |
+| `lib/core/widgets/fx_motion.dart` | `FxStaggerItem`, `FxSpringButton`, `FxInteractiveGlow`, `FxLiquidPrimaryButton` |
+| `lib/core/router/fx_page_transition.dart` | Transições de página (320ms / easeOutCubic) |
+| `lib/features/dashboard/utils/dashboard_entry_motion.dart` | Entrada fade/slide do hub personal |
+
+### Regras
+
+1. **Listas** — `FxStaggerItem` (stagger 60ms, entrada 400ms); não animar manualmente item a item.
+2. **CTAs** — `FxSpringButton` ou `FxLiquidPrimaryButton`; spring desliga com reduced motion.
+3. **Duração** — `fxMotionDuration` / `FocuxMotion.uiTransitionMs` (220ms); zero se `disableAnimations`.
+4. **Glow/pulse** — `FxInteractiveGlow` respeita `prefersReducedMotion`.
+5. **Backend** — API não embute `animationDuration` / presets de motion em DTOs.
+
 ## Tokens
 
 | Arquivo | Responsabilidade |
@@ -247,6 +265,8 @@ Catálogo visual (debug): rota `/qa/tokens-strip` → `TokensStripShowcaseScreen
 | `navigation_architecture_pillar_contract_test.dart` | Safe nav + providers + hubs |
 | `safe_navigation_test.dart` | `safePopOrGo` e `goPersonalShellTab` |
 | `routes_pillar_contract_test.dart` | Shell tabs + deep links (Pilar 2) |
+| `motion_design_pillar_contract_test.dart` | Stagger + spring + hubs |
+| `focux_motion_test.dart` | Durações e widgets do catálogo |
 | `motion_preferences_test.dart` | Reduced motion helpers |
 | `screen_tier_s_plus_contract_test.dart` | Baseline S+ por tela |
 | `screen_a11y_contract_test.dart` | Root a11y |
