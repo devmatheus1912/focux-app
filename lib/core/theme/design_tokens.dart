@@ -111,6 +111,7 @@ abstract class EagleTokens {
   static const Color checkinTimerDark = Color(0xFF0F1A3C);
   static const Color macroProtein = Color(0xFFEF4444);
   static const Color macroCarb = Color(0xFFEAB308);
+  static const Color macroFat = Color(0xFFF9A825);
   static const Color macroProteinLight = Color(0xFFF87171);
   static const Color surfaceGray = Color(0xFFF3F4F6);
   static const Color iconGray = Color(0xFF717171);

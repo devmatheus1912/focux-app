@@ -10,6 +10,7 @@ void main() {
     'test/core/design_system/screen_a11y_contract_test.dart',
     'test/core/design_system/a11y_controls_contract_test.dart',
     'test/core/design_system/eagle_design_contract_test.dart',
+    'test/core/design_system/design_system_pillar_contract_test.dart',
     'test/core/design_system/productivity_gates_contract_test.dart',
     'test/core/router/routes_pillar_contract_test.dart',
     'test/core/business_logic/business_logic_contract_test.dart',

@@ -195,7 +195,7 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
                                       _macro(
                                         'Gordura',
                                         '${p.gorduraG}g',
-                                        Colors.yellow.shade700,
+                                        EagleTokens.macroFat,
                                       ),
                                   ],
                                 ),

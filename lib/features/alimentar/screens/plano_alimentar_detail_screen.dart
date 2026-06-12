@@ -247,7 +247,7 @@ class _PlanoAlimentarDetailScreenState
                         if (p.gorduraG != null)
                           _MacroChip(
                             '${p.gorduraG}g gord',
-                            Colors.yellow.shade700,
+                            EagleTokens.macroFat,
                           ),
                       ],
                     ),
@@ -432,7 +432,7 @@ class _RefeicaoCard extends StatelessWidget {
                     if (r.carboG != null)
                       _MacroChip('${r.carboG}g carbo', EagleTokens.warn),
                     if (r.gorduraG != null)
-                      _MacroChip('${r.gorduraG}g gord', Colors.yellow.shade700),
+                      _MacroChip('${r.gorduraG}g gord', EagleTokens.macroFat),
                   ],
                 ),
               ],

@@ -13,6 +13,8 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | `productivity_gates_contract_test` (polish + CI + design gates) | ✅ |
 | `routes_pillar_contract_test` (shell + deep links + README) | ✅ |
 | `business_logic_contract_test` (hubs + utils dedicados) | ✅ |
+| `design_system_pillar_contract_test` (tokens + hubs + semânticos) | ✅ |
+| `docs/DESIGN_SYSTEM.md` — catálogo TOKENS STRIP | ✅ |
 | `dart run tools/find_orphan_dart.dart` | ✅ |
 | `tool/verify.ps1` | ✅ |
 
