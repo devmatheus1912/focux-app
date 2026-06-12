@@ -1,0 +1,628 @@
+part of 'treinos_list_screen.dart';
+
+class _EmptyState extends StatelessWidget {
+  final bool isDark;
+  final Color primary;
+  final String? alunoNome;
+  final VoidCallback onCreate;
+
+  const _EmptyState({
+    required this.isDark,
+    required this.primary,
+    this.alunoNome,
+    required this.onCreate,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+
+    final isAlunoContext = (alunoNome ?? '').trim().isNotEmpty;
+    final firstName =
+        isAlunoContext ? alunoNome!.trim().split(RegExp(r'\s+')).first : null;
+    final title =
+        isAlunoContext
+            ? 'Nenhum treino atribuído'
+            : 'Sua biblioteca começa aqui';
+    final subtitle =
+        isAlunoContext
+            ? 'Atribua um plano a $firstName ou crie um treino e vincule ao perfil.'
+            : 'Crie um plano base, adicione exercícios e use como ponto de partida para seus alunos.';
+    final ctaLabel = isAlunoContext ? 'Criar treino' : 'Criar treino';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(28, 20, 28, 150),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 78,
+            height: 78,
+            decoration: BoxDecoration(
+              color: BrandPalette.soft(primary, dark: isDark),
+              borderRadius: BorderRadius.circular(26),
+            ),
+            child: Icon(Icons.fitness_center_rounded, color: primary, size: 34),
+          ),
+          SizedBox(height: TokensStrip.s4),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: AppTypography.inter(
+              color: ink,
+              fontSize: 19,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0,
+            ),
+          ),
+          SizedBox(height: TokensStrip.s2),
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: AppTypography.inter(color: mute, fontSize: 13, height: 1.35),
+          ),
+          SizedBox(height: TokensStrip.s4),
+          SizedBox(
+            width: 220,
+            child: FxLiquidPrimaryButton(
+              label: ctaLabel,
+              icon: Icons.add_rounded,
+              onPressed: onCreate,
+              expand: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NoResultsState extends StatelessWidget {
+  final bool isDark;
+  final Color primary;
+  final VoidCallback onClear;
+
+  const _NoResultsState({
+    required this.isDark,
+    required this.primary,
+    required this.onClear,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(28, 24, 28, 150),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: BrandPalette.soft(primary, dark: isDark),
+              borderRadius: BorderRadius.circular(22),
+            ),
+            child: Icon(Icons.manage_search_rounded, color: primary, size: 31),
+          ),
+          const SizedBox(height: TokensStrip.s4),
+          Text(
+            'Nada encontrado',
+            textAlign: TextAlign.center,
+            style: AppTypography.inter(
+              color: ink,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0,
+            ),
+          ),
+          SizedBox(height: TokensStrip.s2),
+          Text(
+            'Ajuste a busca para encontrar outro treino da biblioteca.',
+            textAlign: TextAlign.center,
+            style: AppTypography.inter(color: mute, fontSize: 13, height: 1.35),
+          ),
+          const SizedBox(height: TokensStrip.s4),
+          OutlinedButton.icon(
+            onPressed: onClear,
+            icon: const Icon(Icons.close_rounded, size: 18),
+            label: const Text('Limpar busca'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String _ptLabel(String raw) {
+  final value = raw.trim();
+  if (value.isEmpty) return value;
+  final normalized = value
+      .toUpperCase()
+      .replaceAll('Á', 'A')
+      .replaceAll('Ã', 'A')
+      .replaceAll('Â', 'A')
+      .replaceAll('É', 'E')
+      .replaceAll('Í', 'I')
+      .replaceAll('Ó', 'O')
+      .replaceAll('Õ', 'O')
+      .replaceAll('Ú', 'U')
+      .replaceAll('Ç', 'C');
+  const labels = {
+    'FORCA': 'Força',
+    'HIPERTROFIA': 'Hipertrofia',
+    'EMAGRECIMENTO': 'Emagrecimento',
+    'CONDICIONAMENTO': 'Condicionamento',
+    'MOBILIDADE': 'Mobilidade',
+    'INICIANTE': 'Iniciante',
+    'INTERMEDIARIO': 'Intermediário',
+    'AVANCADO': 'Avançado',
+  };
+  return labels[normalized] ??
+      value[0].toUpperCase() + value.substring(1).toLowerCase();
+}
+
+class _TreinoCard extends StatelessWidget {
+  final Treino treino;
+  final int index;
+  final bool isDark;
+  final Color primary;
+  final int? alunoId;
+  final String? alunoNome;
+  final bool selectionMode;
+  final bool selected;
+  final VoidCallback onToggleSelection;
+  final VoidCallback onStartSelection;
+  final VoidCallback onActions;
+
+  const _TreinoCard({
+    required this.treino,
+    required this.index,
+    required this.isDark,
+    required this.primary,
+    required this.alunoId,
+    required this.alunoNome,
+    required this.selectionMode,
+    required this.selected,
+    required this.onToggleSelection,
+    required this.onStartSelection,
+    required this.onActions,
+  });
+
+  IconData get _nivelIcon {
+    switch (treino.nivel?.toUpperCase()) {
+      case 'AVANCADO':
+        return Icons.local_fire_department_rounded;
+      case 'INTERMEDIARIO':
+        return Icons.speed_rounded;
+      default:
+        return Icons.eco_rounded;
+    }
+  }
+
+  Color get _nivelColor {
+    switch (treino.nivel?.toUpperCase()) {
+      case 'AVANCADO':
+        return EagleTokens.bad;
+      case 'INTERMEDIARIO':
+        return EagleTokens.warn;
+      default:
+        return EagleTokens.good;
+    }
+  }
+
+  String get _nivelLabel {
+    final nivel = treino.nivel?.trim();
+    if (nivel == null || nivel.isEmpty) {
+      return 'Iniciante';
+    }
+    return _ptLabel(nivel);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final hasExercises = treino.exercicios.isNotEmpty;
+    final series = treino.exercicios.fold<int>(
+      0,
+      (sum, item) => sum + item.series,
+    );
+    final estimatedMinutes =
+        hasExercises ? (treino.exercicios.length * 5).clamp(12, 90) : 0;
+    final displayName = displayWorkoutName(treino.nome);
+    final cardSemantics =
+        selectionMode
+            ? selected
+                ? 'Desmarcar $displayName'
+                : 'Selecionar $displayName'
+            : '$displayName, ${treino.exercicios.length} exercícios, '
+                'toque para abrir, segure para selecionar';
+
+    return Semantics(
+      label: cardSemantics,
+      button: true,
+      child: InkWell(
+        onTap:
+            selectionMode
+                ? onToggleSelection
+                : () => context.push(
+                  '/treinos/${treino.id}',
+                  extra:
+                      alunoId == null
+                          ? null
+                          : {'alunoId': alunoId, 'alunoNome': alunoNome},
+                ),
+        onLongPress: onStartSelection,
+        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        child: Container(
+          padding: const EdgeInsets.all(15),
+          decoration: fxListCardDecoration(
+            context,
+            accent: primary,
+            selected: selected,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: BrandPalette.soft(primary, dark: isDark),
+                      borderRadius: BorderRadius.circular(17),
+                    ),
+                    child: Icon(
+                      hasExercises
+                          ? Icons.fitness_center_rounded
+                          : Icons.build_circle_outlined,
+                      color: primary,
+                      size: 22,
+                    ),
+                  ),
+                  SizedBox(width: TokensStrip.s3),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                displayName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.inter(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 15.5,
+                                  color: ink,
+                                  letterSpacing: 0,
+                                ),
+                              ),
+                            ),
+                            if (treino.isTemplate) ...[
+                              SizedBox(width: TokensStrip.s2),
+                              _TinyBadge(
+                                label: 'base',
+                                color: primary,
+                                isDark: isDark,
+                              ),
+                            ],
+                          ],
+                        ),
+                        SizedBox(height: TokensStrip.s1),
+                        Text(
+                          treino.objetivo?.trim().isNotEmpty == true
+                              ? _ptLabel(treino.objetivo!.trim())
+                              : hasExercises
+                              ? 'Plano pronto para atribuir'
+                              : 'Estrutura aguardando exercícios',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.inter(
+                            color: mute,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: TokensStrip.s3),
+                  if (selectionMode)
+                    Semantics(
+                      label: selected ? 'Desmarcar treino' : 'Marcar treino',
+                      child: Checkbox(
+                        value: selected,
+                        onChanged: (_) => onToggleSelection(),
+                        activeColor: primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    )
+                  else
+                    Semantics(
+                      button: true,
+                      label: 'Ações do treino',
+                      child: InkWell(
+                        onTap: onActions,
+                        borderRadius: BorderRadius.circular(999),
+                        child: Container(
+                          height: 34,
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          decoration: BoxDecoration(
+                            color:
+                                isDark
+                                    ? EagleTokens.darkBg
+                                    : TokensStrip.borderDefault,
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(color: line),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Ações',
+                                style: AppTypography.inter(
+                                  color: mute,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              SizedBox(width: TokensStrip.s1),
+                              Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                color: mute,
+                                size: 16,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              SizedBox(height: TokensStrip.s3),
+              Row(
+                children: [
+                  Expanded(
+                    child: _PlanPill(
+                      icon: Icons.list_alt_rounded,
+                      value:
+                          '${treino.exercicios.length} exerc${treino.exercicios.length == 1 ? '.' : 's.'}',
+                      isDark: isDark,
+                      color: primary,
+                    ),
+                  ),
+                  SizedBox(width: TokensStrip.s2),
+                  Expanded(
+                    child: _PlanPill(
+                      icon: Icons.repeat_rounded,
+                      value: hasExercises ? '$series séries' : 'em montagem',
+                      isDark: isDark,
+                      color: hasExercises ? primary : EagleTokens.warn,
+                    ),
+                  ),
+                  SizedBox(width: TokensStrip.s2),
+                  Expanded(
+                    child: _PlanPill(
+                      icon: _nivelIcon,
+                      value: _nivelLabel,
+                      isDark: isDark,
+                      color: _nivelColor,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: TokensStrip.s3),
+              Row(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(999),
+                      child: LinearProgressIndicator(
+                        minHeight: hasExercises ? 4 : 6,
+                        value: hasExercises ? 1 : 0.28,
+                        backgroundColor:
+                            isDark
+                                ? EagleTokens.darkLine
+                                : TokensStrip.borderDefault,
+                        valueColor: AlwaysStoppedAnimation(
+                          hasExercises
+                              ? EagleTokens.good.withValues(
+                                alpha: isDark ? 0.5 : 0.35,
+                              )
+                              : EagleTokens.warn,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: TokensStrip.s3),
+                  if (hasExercises)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.check_circle_rounded,
+                          size: 13,
+                          color: EagleTokens.good.withValues(
+                            alpha: isDark ? 0.7 : 0.55,
+                          ),
+                        ),
+                        SizedBox(width: TokensStrip.s1),
+                        Text(
+                          '~${estimatedMinutes}min',
+                          style: AppTypography.mono(
+                            color: mute,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    Text(
+                      'finalizar',
+                      style: AppTypography.inter(
+                        color: EagleTokens.warn,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PlanPill extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final bool isDark;
+  final Color color;
+
+  const _PlanPill({
+    required this.icon,
+    required this.value,
+    required this.isDark,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final isMetric = RegExp(r'^\d').hasMatch(value) || value.startsWith('~');
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+      decoration: BoxDecoration(
+        color: BrandPalette.soft(color, dark: isDark),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 13),
+          SizedBox(width: TokensStrip.s1),
+          Expanded(
+            child: FittedBox(
+              alignment: Alignment.centerLeft,
+              fit: BoxFit.scaleDown,
+              child: Text(
+                value,
+                maxLines: 1,
+                style:
+                    isMetric
+                        ? AppTypography.mono(
+                          color: ink,
+                          fontSize: 10.2,
+                          fontWeight: FontWeight.w800,
+                        )
+                        : AppTypography.inter(
+                          color: ink,
+                          fontSize: 10.2,
+                          fontWeight: FontWeight.w800,
+                        ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TinyBadge extends StatelessWidget {
+  final String label;
+  final Color color;
+  final bool isDark;
+
+  const _TinyBadge({
+    required this.label,
+    required this.color,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+      decoration: BoxDecoration(
+        color: BrandPalette.soft(color, dark: isDark),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: AppTypography.inter(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+}
+
+class _TreinosErrorState extends StatelessWidget {
+  final bool isDark;
+  final Color primary;
+  final String message;
+  final VoidCallback onRetry;
+
+  const _TreinosErrorState({
+    required this.isDark,
+    required this.primary,
+    required this.message,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline_rounded, size: 48, color: mute),
+            SizedBox(height: TokensStrip.s3),
+            Text(
+              FocuxMicrocopy.naoFoiPossivelCarregar,
+              style: AppTypography.inter(
+                color: ink,
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            SizedBox(height: TokensStrip.s2),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: AppTypography.inter(color: mute, fontSize: 13),
+            ),
+            const SizedBox(height: TokensStrip.s4),
+            OutlinedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text(FocuxMicrocopy.tentarNovamente),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

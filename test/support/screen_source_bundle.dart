@@ -5,14 +5,17 @@ String readScreenSourceBundle(String mainPath) {
   final mainFile = File(mainPath);
   final main = mainFile.readAsStringSync();
   final baseName = mainFile.uri.pathSegments.last.replaceAll('.dart', '');
-  final parts = mainFile.parent
-      .listSync()
-      .whereType<File>()
-      .where(
-        (file) =>
-            file.path.endsWith('.part.dart') &&
-            file.uri.pathSegments.last.startsWith(baseName),
-      )
+  final declaredParts = RegExp(r"part\s+'([^']+\.part\.dart)';")
+      .allMatches(main)
+      .map((match) => File.fromUri(mainFile.uri.resolve(match.group(1)!)));
+  final siblingParts = mainFile.parent.listSync().whereType<File>().where(
+    (file) =>
+        file.path.endsWith('.part.dart') &&
+        file.uri.pathSegments.last.startsWith(baseName),
+  );
+  final seen = <String>{};
+  final parts = [...declaredParts, ...siblingParts]
+      .where((file) => seen.add(file.resolveSymbolicLinksSync()))
       .map((file) => file.readAsStringSync())
       .join('\n');
   return '$main\n$parts';
@@ -22,8 +25,7 @@ String readScreenSourceBundle(String mainPath) {
 String readPaywallComponentsBundle() {
   const mainPath = 'lib/features/planos/paywall/paywall_components.dart';
   final main = File(mainPath).readAsStringSync();
-  final parts = File(mainPath)
-      .parent
+  final parts = File(mainPath).parent
       .listSync()
       .whereType<File>()
       .where((file) => file.path.endsWith('.part.dart'))
@@ -37,15 +39,12 @@ String readRouterSourceBundle() {
   const dirPath = 'lib/core/router';
   final dir = Directory(dirPath);
   final main = File('$dirPath/app_router.dart').readAsStringSync();
-  final siblings = dir
-      .listSync()
-      .whereType<File>()
-      .where((f) {
-        final name = f.uri.pathSegments.last;
-        return name.startsWith('app_router_') && name.endsWith('.dart');
-      })
-      .toList()
-    ..sort((a, b) => a.path.compareTo(b.path));
+  final siblings =
+      dir.listSync().whereType<File>().where((f) {
+          final name = f.uri.pathSegments.last;
+          return name.startsWith('app_router_') && name.endsWith('.dart');
+        }).toList()
+        ..sort((a, b) => a.path.compareTo(b.path));
   final extra = siblings.map((f) => f.readAsStringSync()).join('\n');
   return '$main\n$extra';
 }

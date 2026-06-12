@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('copiloto usa polish 10/10: shell, semantics e barra fixa', () {
+  test('copiloto usa polish: shell, semantics e barra fixa', () {
     final screen =
         File('lib/features/ia/screens/ia_copiloto_screen.dart').readAsStringSync();
     final shellWidgets =

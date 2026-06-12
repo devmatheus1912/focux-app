@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../support/screen_source_bundle.dart';
 
 void main() {
-  test('agenda usa polish 10/10: rota, semantics, sheets tema', () {
+  test('agenda usa polish: rota, semantics, sheets tema', () {
     final screen = readScreenSourceBundle(
       'lib/features/agenda/screens/agenda_screen.dart',
     );

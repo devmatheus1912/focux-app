@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('dashboard hoje usa microcopy, contraste e a11y 10/10', () {
+  test('dashboard hoje usa microcopy, contraste e a11y', () {
     const paths = [
       'lib/features/dashboard/screens/personal_dashboard_screen.dart',
       'lib/features/dashboard/utils/dashboard_screen_helpers.dart',

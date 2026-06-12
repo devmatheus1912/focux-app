@@ -18,10 +18,10 @@ void main() {
 
       expect(result.usesDirectParse, isTrue);
       expect(result.directAlunos, hasLength(2));
-      expect(result.directAlunos!.first['nome'], 'Ana Silva');
-      expect(result.directAlunos!.first['email'], 'ana@test.com');
-      expect(result.directAlunos!.first['telefone'], '11999998888');
-      expect(result.directAlunos!.first['objetivo'], 'Hipertrofia');
+      expect(result.directAlunos!.first.nome, 'Ana Silva');
+      expect(result.directAlunos!.first.email, 'ana@test.com');
+      expect(result.directAlunos!.first.telefone, '11999998888');
+      expect(result.directAlunos!.first.objetivo, 'Hipertrofia');
     });
 
     test('parseia CSV com ponto e vírgula', () {
@@ -33,8 +33,8 @@ void main() {
       );
 
       expect(result.usesDirectParse, isTrue);
-      expect(result.directAlunos!.single['nome'], 'João');
-      expect(result.directAlunos!.single['email'], 'joao@test.com');
+      expect(result.directAlunos!.single.nome, 'João');
+      expect(result.directAlunos!.single.email, 'joao@test.com');
     });
 
     test('texto livre em TXT vai para IA', () {

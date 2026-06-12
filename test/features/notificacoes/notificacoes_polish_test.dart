@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../support/screen_source_bundle.dart';
 
 void main() {
-  test('notificacoes usa polish 10/10: inbox, a11y e feedback', () {
+  test('notificacoes usa polish: inbox, a11y e feedback', () {
     final screen = readScreenSourceBundle(
       'lib/features/notificacoes/screens/notificacoes_screen.dart',
     );

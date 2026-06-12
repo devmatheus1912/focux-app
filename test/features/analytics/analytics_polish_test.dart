@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../support/screen_source_bundle.dart';
 
 void main() {
-  test('analytics usa polish 10/10: dados reais, a11y e erro', () {
+  test('analytics usa polish: dados reais, a11y e erro', () {
     final screen = readScreenSourceBundle(
       'lib/features/analytics/screens/analytics_screen.dart',
     );

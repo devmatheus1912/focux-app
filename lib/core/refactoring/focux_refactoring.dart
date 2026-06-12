@@ -22,7 +22,7 @@ abstract final class FocuxRefactoring {
     'lib/features/alunos/screens/alunos_list_screen.dart':
         "part 'alunos_list_screen_state.part.dart'",
     'lib/features/treinos/screens/treinos_list_screen.dart':
-        'treinos_list_labels.dart',
+        "part 'treinos_list_screen_state.part.dart'",
     'lib/features/financeiro/screens/financeiro_screen.dart':
         'financeiro_mensalidades_tab.dart',
     'lib/features/ia/screens/ia_copiloto_screen.dart':

@@ -1,18 +1,18 @@
-# Focux — Auditoria 10/10 ✅
+# Focux — Checklist de qualidade
 
-Checklist executável do monorepo. **Status: completo para lançamento TestFlight.**
+Checklist executável do app Flutter. **Status: pronto para TestFlight.**
 
 ## Gates automáticos — Frontend
 
 | Gate | Status |
 |------|--------|
 | `dart analyze --fatal-infos` | ✅ |
-| `flutter test` (913) | ✅ |
+| `flutter test` (917) | ✅ |
 | Tier S+ + a11y (part-aware) | ✅ |
 | Contratos API repositórios | ✅ |
 | `productivity_gates_contract_test` (polish + CI + design gates) | ✅ |
 | `routes_pillar_contract_test` (shell + deep links + README) | ✅ |
-| `business_logic_contract_test` (hubs + utils dedicados) | ✅ |
+| `business_logic_contract_test` (6 hubs + utils/parts dedicados) | ✅ |
 | `design_system_pillar_contract_test` (tokens + hubs + semânticos) | ✅ |
 | `docs/DESIGN_SYSTEM.md` — catálogo TOKENS STRIP | ✅ |
 | `typography_pillar_contract_test` — escala + sem GoogleFonts direto | ✅ |
@@ -53,18 +53,20 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | `FocuxRefactoring` + `focux_refactoring_test` + orphan scan CI | ✅ |
 | `clean_scalable_code_pillar_contract_test` — tipos explícitos nos hubs | ✅ |
 | `FocuxCleanCode` + `focux_clean_code_test` + sparkline/proximaAcao tipados | ✅ |
+| Hubs decompostos: treinos, gamificação, migração, busca | ✅ |
 | `dart run tools/find_orphan_dart.dart` | ✅ |
 | `tool/verify.ps1` | ✅ |
 
-## Design & UX — 10/10
+## Design & UX
 
-| Pilar | Implementação |
+| Área | Implementação |
 |-------|---------------|
 | Tokens unificados | `#13C2C2` em `BrandPalette` + `EagleTokens` |
 | Motion reduced | `fx_page_transition`, `FxStaggerItem` |
 | A11y root scope | Dashboard, alunos, financeiro + gates part-aware |
 | Microcopy PT | `FocuxMicrocopy` (Centro de Comando, Índice Focux) |
 | Financeiro split | tab 351 LOC + parts actions/widgets |
+| Treinos split | entry <100 LOC + parts state/sheets/header/cards |
 | Semântica dark | `EagleTokens.semantic*` + hub tokens |
 | Contraste WCAG | `FocuxContrast` + `dashboard_readability` / `aluno360_readability` |
 | Hierarquia visual | `FocuxHierarchy` + foco do dia / modo operação |

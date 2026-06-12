@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('landing editor usa polish 10/10: feedback tipado e qualidade', () {
+  test('landing editor usa polish: feedback tipado e qualidade', () {
     final screen = File(
       'lib/features/perfil/screens/landing_editor_screen.dart',
     ).readAsStringSync();

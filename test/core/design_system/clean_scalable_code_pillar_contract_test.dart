@@ -83,9 +83,9 @@ void main() {
     expect(cards, isNot(contains('List<Map<String, dynamic>>')));
   });
 
-  test('workspace rule documents clean code principles', () {
-    final rule = File('../.cursor/rules/clean-scalable-code.mdc').readAsStringSync();
-    expect(rule, contains('Lógica fora da UI'));
-    expect(rule, contains('Tipos explícitos'));
+  test('coding standards document clean code principles', () {
+    final doc = File('docs/CODING_STANDARDS.md').readAsStringSync();
+    expect(doc, contains('Lógica fora da UI'));
+    expect(doc, contains('Tipos explícitos'));
   });
 }

@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../support/screen_source_bundle.dart';
 
 void main() {
-  test('financeiro usa polish 10/10: shell fino e tab extraída', () {
+  test('financeiro usa polish: shell fino e tab extraída', () {
     final shell = readScreenSourceBundle(
       'lib/features/financeiro/screens/financeiro_screen.dart',
     );

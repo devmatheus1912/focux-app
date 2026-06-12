@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/utils/pt_br_display.dart';
 
+import '../../support/screen_source_bundle.dart';
+
 void main() {
   group('displayWorkoutName', () {
     test('corrige Forca para Força no card da biblioteca', () {
@@ -10,11 +12,15 @@ void main() {
     });
   });
 
-  test('treinos list sheet usa scroll e microcopy 10/10', () {
+  test('treinos list sheet usa scroll e microcopy', () {
     final screen = [
-      'lib/features/treinos/screens/treinos_list_screen.dart',
-      'lib/features/treinos/utils/treinos_list_labels.dart',
-    ].map((p) => File(p).readAsStringSync()).join('\n');
+      readScreenSourceBundle(
+        'lib/features/treinos/screens/treinos_list_screen.dart',
+      ),
+      File(
+        'lib/features/treinos/utils/treinos_list_labels.dart',
+      ).readAsStringSync(),
+    ].join('\n');
 
     expect(screen, contains('isScrollControlled: true'));
     expect(screen, contains('SingleChildScrollView'));

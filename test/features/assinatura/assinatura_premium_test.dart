@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../support/screen_source_bundle.dart';
 
 void main() {
-  test('assinatura paywall 10/10 com legal e conversao', () {
+  test('assinatura paywall com legal e conversao', () {
     final screen = readScreenSourceBundle(
       'lib/features/assinatura/screens/assinatura_screen.dart',
     );

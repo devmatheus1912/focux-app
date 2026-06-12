@@ -4,6 +4,8 @@ import 'dart:typed_data';
 import 'package:csv/csv.dart';
 import 'package:excel/excel.dart';
 
+import '../models/migracao_aluno_linha.dart';
+
 /// Resultado ao importar CSV/XLSX/TXT para a Migração Focux.
 class MigracaoFileParseResult {
   const MigracaoFileParseResult({
@@ -13,7 +15,7 @@ class MigracaoFileParseResult {
   });
 
   /// Planilha estruturada — vai direto para preview sem IA.
-  final List<Map<String, dynamic>>? directAlunos;
+  final List<MigracaoAlunoLinha>? directAlunos;
 
   /// Texto para colar/processar com IA.
   final String? textForIa;
@@ -122,7 +124,7 @@ class MigracaoFileParser {
     }
   }
 
-  static List<Map<String, dynamic>>? _rowsToAlunos(List<List<dynamic>> rows) {
+  static List<MigracaoAlunoLinha>? _rowsToAlunos(List<List<dynamic>> rows) {
     if (rows.isEmpty) return null;
 
     final header = rows.first.map((c) => _norm(c.toString())).toList();
@@ -158,7 +160,7 @@ class MigracaoFileParser {
       return null;
     }
 
-    final alunos = <Map<String, dynamic>>[];
+    final alunos = <MigracaoAlunoLinha>[];
     for (var i = start; i < rows.length; i++) {
       final row = rows[i];
       if (row.every((c) => c.toString().trim().isEmpty)) continue;
@@ -196,12 +198,14 @@ class MigracaoFileParser {
         continue;
       }
 
-      alunos.add({
-        'nome': (nome == null || nome.isEmpty) ? 'Aluno importado' : nome,
-        if (email != null && email.isNotEmpty) 'email': email,
-        if (telefone != null && telefone.isNotEmpty) 'telefone': telefone,
-        if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
-      });
+      alunos.add(
+        MigracaoAlunoLinha(
+          nome: (nome == null || nome.isEmpty) ? 'Aluno importado' : nome,
+          email: email,
+          telefone: telefone,
+          objetivo: objetivo,
+        ),
+      );
     }
 
     return alunos.isEmpty ? null : alunos;

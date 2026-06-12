@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../support/screen_source_bundle.dart';
 
 void main() {
-  test('gamificacao usa polish 10/10: provider, retry e tokens', () {
+  test('gamificacao usa polish: provider, retry e tokens', () {
     final screen = readScreenSourceBundle(
       'lib/features/gamificacao/screens/gamificacao_screen.dart',
     );

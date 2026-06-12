@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../support/screen_source_bundle.dart';
 
 void main() {
-  test('perfil usa polish 10/10: a11y, acentos e contraste', () {
+  test('perfil usa polish: a11y, acentos e contraste', () {
     final screen = readScreenSourceBundle(
       'lib/features/perfil/screens/perfil_screen.dart',
     );

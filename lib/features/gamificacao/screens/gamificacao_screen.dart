@@ -9,49 +9,12 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/gamificacao_repository.dart';
+import '../models/gamificacao_badge_tile.dart';
 import '../providers/gamificacao_provider.dart';
 import 'package:focux_app/core/widgets/fx_rive_player.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../dashboard/widgets/dashboard_error_state.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
-
-const _badgeCatalog = <String, ({String icon, String label})>{
-  'STREAK_10': (icon: '🔥', label: 'Sequencia 10d'),
-  'PR_CARGA': (icon: '💪', label: 'PR de carga'),
-  'FREQUENCIA_100': (icon: '⭐', label: '100% semana'),
-  'FIRST_AI': (icon: '✨', label: 'Usou a IA'),
-  'TREINOS_50': (icon: '🏆', label: '50 treinos'),
-  'META_ATINGIDA': (icon: '🎯', label: 'Meta atingida'),
-};
-
-List<Map<String, dynamic>> _buildBadgeTiles(GamificacaoData data, Color brand) {
-  final earnedTypes = data.badges.map((b) => b.tipo).toSet();
-  final tiles = <Map<String, dynamic>>[];
-
-  for (final badge in data.badges) {
-    final meta = _badgeCatalog[badge.tipo];
-    tiles.add({
-      'tipo': badge.tipo,
-      'icon': meta?.icon ?? '🏅',
-      'label': meta?.label ?? badge.descricao,
-      'cor': brand,
-      'earned': true,
-    });
-  }
-
-  for (final entry in _badgeCatalog.entries) {
-    if (earnedTypes.contains(entry.key)) continue;
-    tiles.add({
-      'tipo': entry.key,
-      'icon': entry.value.icon,
-      'label': entry.value.label,
-      'cor': TokensStrip.textSecondary,
-      'earned': false,
-    });
-  }
-
-  return tiles;
-}
 
 class GamificacaoScreen extends ConsumerWidget {
   const GamificacaoScreen({super.key});
@@ -136,7 +99,11 @@ class _GamificacaoBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final badges = _buildBadgeTiles(data, brand);
+    final badges = buildGamificacaoBadgeTiles(
+      data,
+      brand,
+      TokensStrip.textSecondary,
+    );
 
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -206,8 +173,8 @@ class _GamificacaoBody extends StatelessWidget {
               childAspectRatio: 0.9,
               children:
                   badges.map((b) {
-                    final earned = b['earned'] as bool;
-                    final cor = b['cor'] as Color;
+                    final earned = b.earned;
+                    final cor = b.cor;
                     return AnimatedOpacity(
                       opacity: earned ? 1.0 : 0.45,
                       duration: const Duration(milliseconds: 300),
@@ -272,7 +239,7 @@ class _GamificacaoBody extends StatelessWidget {
                                                   0,
                                                 ]),
                                         child: Text(
-                                          b['icon'] as String,
+                                          b.icon,
                                           style: const TextStyle(fontSize: 24),
                                         ),
                                       ),
@@ -287,7 +254,7 @@ class _GamificacaoBody extends StatelessWidget {
                                 horizontal: 6,
                               ),
                               child: Text(
-                                b['label'] as String,
+                                b.label,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: ink,

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('editar perfil usa polish 10/10: perfil, a11y e salvando', () {
+  test('editar perfil usa polish: perfil, a11y e salvando', () {
     final screen = File(
       'lib/features/perfil/screens/editar_perfil_screen.dart',
     ).readAsStringSync();

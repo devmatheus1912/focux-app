@@ -20,13 +20,14 @@ O app se conecta ao `focux-backend`, usa JWT para sessao, aplica rotas por perfi
 | Branch | `main` |
 | API producao | `https://focux-backend-production.up.railway.app` |
 | Analyzer | `dart analyze --fatal-warnings --fatal-infos` sem issues |
-| Testes Aluno 360 | 253 specs em `test/features/alunos/` |
+| Testes | `flutter test` — 917 specs |
 
 ### Destaques recentes
 
 - **Aluno 360** (`/alunos/:id`): abas **Operacao**, **Evolucao** e **Ferramentas** com aderencia semanal, timeline, copiloto IA, recovery, risco financeiro, autonomia e evolucao inteligente.
 - **Modo foco da operacao** persistido no backend e sincronizado via `PATCH /api/alunos/{id}/operacao-focus`.
-- **Tokens e motion** centralizados em `lib/features/alunos/constants/aluno_360_layout.dart`; acessibilidade via `lib/core/utils/a11y_announce.dart`.
+- **Hubs operacionais** decompostos (treinos, financeiro, alunos) com logica em `utils/` e `part` files; telas satelite tipadas (busca, gamificacao, migracao).
+- **Design system** documentado em `docs/DESIGN_SYSTEM.md` e `docs/CODING_STANDARDS.md`.
 - **Repositorio enxuto**: `scripts/`, `android/gradle.properties` e `lib/l10n/app_localizations*.dart` sao locais (gitignored); use os arquivos `.example` como base.
 
 ### Areas em evolucao

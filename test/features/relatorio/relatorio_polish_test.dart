@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('relatorio usa polish 10/10: cards, erro amigavel e a11y', () {
+  test('relatorio usa polish: cards, erro amigavel e a11y', () {
     final screen = File(
       'lib/features/relatorio/screens/relatorio_screen.dart',
     ).readAsStringSync();

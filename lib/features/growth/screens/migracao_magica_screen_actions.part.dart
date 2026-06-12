@@ -1,5 +1,7 @@
 part of 'migracao_magica_screen.dart';
 
+// Models: migracao_aluno_linha.dart, migracao_importacao_resumo.dart (imported via main).
+
 extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
   bool get _hasUnsavedWork =>
       _controller.text.trim().isNotEmpty ||
@@ -105,7 +107,7 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
   }
 
   Future<void> _finalizarProcessamento(
-    List<Map<String, dynamic>>? parsed, {
+    List<MigracaoAlunoLinha>? parsed, {
     String successSuffix = '',
   }) async {
     parsed = await _enriquecerComPreview(parsed);
@@ -401,7 +403,7 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     if (alunos == null || alunos.isEmpty) return;
 
     final toSave = alunos
-        .where((a) => a['duplicado'] != true)
+        .where((a) => !a.duplicado)
         .toList(growable: false);
     if (toSave.isEmpty) {
       FeedbackHelper.showError(
@@ -417,12 +419,14 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
       final api = ref.read(apiClientProvider);
       final response = await api.dio.post(
         '/api/v1/migracao/confirmar',
-        data: {'alunos': toSave},
+        data: {'alunos': toSave.map((a) => a.toJson()).toList()},
       );
 
       if (!mounted) return;
       await _mostrarResumoImportacao(
-        Map<String, dynamic>.from(response.data as Map),
+        MigracaoImportacaoResumo.fromJson(
+          Map<String, dynamic>.from(response.data as Map),
+        ),
       );
       setState(() {
         _alunosEncontrados = null;
@@ -439,16 +443,12 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     }
   }
 
-  Future<void> _mostrarResumoImportacao(Map<String, dynamic> data) async {
-    final importados = data['importados'] ?? 0;
-    final duplicados = data['duplicados'] ?? 0;
-    final erros = data['erros'] ?? 0;
-    final mensagem = (data['mensagem'] ?? '').toString();
-    final detalhesRaw = data['detalhes'];
-    final detalhes =
-        detalhesRaw is List
-            ? detalhesRaw.whereType<Map>().toList(growable: false)
-            : const <Map>[];
+  Future<void> _mostrarResumoImportacao(MigracaoImportacaoResumo data) async {
+    final importados = data.importados;
+    final duplicados = data.duplicados;
+    final erros = data.erros;
+    final mensagem = data.mensagem;
+    final detalhes = data.detalhes;
 
     await showDialog<void>(
       context: context,
@@ -522,27 +522,11 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    stat(
-                      'Importados',
-                      importados is int
-                          ? importados
-                          : int.tryParse('$importados') ?? 0,
-                      brand,
-                    ),
+                    stat('Importados', importados, brand),
                     const SizedBox(width: 8),
-                    stat(
-                      'Duplicados',
-                      duplicados is int
-                          ? duplicados
-                          : int.tryParse('$duplicados') ?? 0,
-                      EagleTokens.warn,
-                    ),
+                    stat('Duplicados', duplicados, EagleTokens.warn),
                     const SizedBox(width: 8),
-                    stat(
-                      'Erros',
-                      erros is int ? erros : int.tryParse('$erros') ?? 0,
-                      EagleTokens.bad,
-                    ),
+                    stat('Erros', erros, EagleTokens.bad),
                   ],
                 ),
                 if (detalhes.isNotEmpty) ...[
@@ -554,10 +538,10 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
                       itemCount: detalhes.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 6),
                       itemBuilder: (_, i) {
-                        final item = Map<String, dynamic>.from(detalhes[i]);
-                        final nome = (item['nome'] ?? 'Aluno').toString();
-                        final status = (item['status'] ?? '').toString();
-                        final motivo = (item['motivo'] ?? '').toString();
+                        final item = detalhes[i];
+                        final nome = item.nome;
+                        final status = item.status;
+                        final motivo = item.motivo;
                         Color badgeColor;
                         switch (status) {
                           case 'IMPORTADO':
@@ -637,18 +621,10 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     if (alunos == null || index < 0 || index >= alunos.length) return;
 
     final aluno = alunos[index];
-    final nomeCtrl = TextEditingController(
-      text: (aluno['nome'] ?? '').toString(),
-    );
-    final emailCtrl = TextEditingController(
-      text: (aluno['email'] ?? '').toString(),
-    );
-    final telCtrl = TextEditingController(
-      text: (aluno['telefone'] ?? '').toString(),
-    );
-    final objCtrl = TextEditingController(
-      text: (aluno['objetivo'] ?? '').toString(),
-    );
+    final nomeCtrl = TextEditingController(text: aluno.nome);
+    final emailCtrl = TextEditingController(text: aluno.email ?? '');
+    final telCtrl = TextEditingController(text: aluno.telefone ?? '');
+    final objCtrl = TextEditingController(text: aluno.objetivo ?? '');
 
     final saved = await showModalBottomSheet<bool>(
       context: context,
@@ -715,21 +691,15 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
       return;
     }
 
-    final updated = <String, dynamic>{
-      'nome':
+    final updated = MigracaoAlunoLinha(
+      nome:
           nomeCtrl.text.trim().isEmpty
               ? 'Aluno importado'
               : nomeCtrl.text.trim(),
-    };
-    if (emailCtrl.text.trim().isNotEmpty) {
-      updated['email'] = emailCtrl.text.trim();
-    }
-    if (telCtrl.text.trim().isNotEmpty) {
-      updated['telefone'] = telCtrl.text.trim();
-    }
-    if (objCtrl.text.trim().isNotEmpty) {
-      updated['objetivo'] = objCtrl.text.trim();
-    }
+      email: emailCtrl.text.trim().isEmpty ? null : emailCtrl.text.trim(),
+      telefone: telCtrl.text.trim().isEmpty ? null : telCtrl.text.trim(),
+      objetivo: objCtrl.text.trim().isEmpty ? null : objCtrl.text.trim(),
+    );
 
     nomeCtrl.dispose();
     emailCtrl.dispose();
@@ -742,54 +712,26 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     });
   }
 
-  Future<List<Map<String, dynamic>>?> _enriquecerComPreview(
-    List<Map<String, dynamic>>? alunos,
+  Future<List<MigracaoAlunoLinha>?> _enriquecerComPreview(
+    List<MigracaoAlunoLinha>? alunos,
   ) async {
     if (alunos == null || alunos.isEmpty) return alunos;
     try {
       final api = ref.read(apiClientProvider);
       final response = await api.dio.post(
         '/api/v1/migracao/preview',
-        data: {'alunos': alunos},
+        data: {'alunos': alunos.map((a) => a.toJson()).toList()},
       );
-      final preview = response.data['alunos'];
-      if (preview is List) {
-        return preview
-            .whereType<Map>()
-            .map((item) => Map<String, dynamic>.from(item))
-            .toList();
-      }
+      final preview = MigracaoAlunoLinha.fromPreviewResponse(response.data);
+      if (preview.isNotEmpty) return preview;
     } catch (_) {
-      // Preview é enriquecimento; fallback mantém lista da IA.
+      // Preview é enriquecimento; fallback mantém lista local.
     }
     return alunos;
   }
 
-  List<Map<String, dynamic>>? _parsarResultado(dynamic data) {
-    if (data == null) return null;
-    if (data is String) {
-      try {
-        final decoded = jsonDecode(data);
-        return _parsarResultado(decoded);
-      } catch (_) {
-        return null;
-      }
-    }
-    if (data is Map && data.containsKey('alunos')) {
-      final lista = data['alunos'];
-      if (lista is List) return _normalizarLista(lista);
-    }
-    if (data is List) return _normalizarLista(data);
-    return null;
-  }
-
-  List<Map<String, dynamic>>? _normalizarLista(List lista) {
-    if (lista.isEmpty) return [];
-    return lista
-        .whereType<Map>()
-        .map((item) => Map<String, dynamic>.from(item))
-        .toList();
-  }
+  List<MigracaoAlunoLinha>? _parsarResultado(dynamic data) =>
+      MigracaoAlunoLinha.parseResultado(data);
 
   Future<bool> _confirmDiscard() async {
     final discard = await showDialog<bool>(

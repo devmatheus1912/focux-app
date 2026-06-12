@@ -23,6 +23,8 @@ import '../../planos/data/planos_repository.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../../subscription/plan_entitlements.dart';
+import '../models/migracao_aluno_linha.dart';
+import '../models/migracao_importacao_resumo.dart';
 import '../utils/migracao_file_parser.dart';
 import '../utils/migracao_foto_limits.dart';
 import '../utils/migracao_ocr_service.dart';
@@ -45,7 +47,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
   bool _isImportingFile = false;
   String? _importedFileLabel;
   Uint8List? _importedPhotoBytes;
-  List<Map<String, dynamic>>? _alunosEncontrados;
+  List<MigracaoAlunoLinha>? _alunosEncontrados;
   bool _emptyResult = false;
 
   static const _passos = [
@@ -612,7 +614,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     required Color mute,
     required Color brand,
     required Color brandDeep,
-    required List<Map<String, dynamic>>? alunos,
+    required List<MigracaoAlunoLinha>? alunos,
   }) {
     if (_emptyResult) {
       return _stagger(
@@ -690,11 +692,11 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
             ...alunos.asMap().entries.map((entry) {
               final index = entry.key;
               final aluno = entry.value;
-              final nome = (aluno['nome'] ?? 'Desconhecido').toString();
-              final email = (aluno['email'] ?? '').toString();
-              final telefone = (aluno['telefone'] ?? '').toString();
-              final objetivo = (aluno['objetivo'] ?? '').toString();
-              final duplicado = aluno['duplicado'] == true;
+              final nome = aluno.nome.isEmpty ? 'Desconhecido' : aluno.nome;
+              final email = aluno.email ?? '';
+              final telefone = aluno.telefone ?? '';
+              final objetivo = aluno.objetivo ?? '';
+              final duplicado = aluno.duplicado;
               final meta = [
                 if (email.isNotEmpty) email,
                 if (telefone.isNotEmpty) telefone,
@@ -816,7 +818,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
             const SizedBox(height: TokensStrip.s3),
             FxLiquidPrimaryButton(
               label:
-                  'Confirmar e salvar ${alunos.where((a) => a['duplicado'] != true).length} alunos',
+                  'Confirmar e salvar ${alunos.where((a) => !a.duplicado).length} alunos',
               icon: Icons.check_rounded,
               loading: _isSaving,
               loadingLabel: 'Salvando alunos...',

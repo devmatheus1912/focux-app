@@ -352,7 +352,7 @@ Fonte única de tokens visuais e componentes compartilhados do app Flutter.
 | `lib/features/alunos/utils/alunos_list_sparkline_logic.dart` | Métricas puras do sparkline da lista |
 | `test/core/business_logic/business_logic_contract_test.dart` | Lógica fora da UI nos hubs críticos |
 | `test/core/design_system/clean_scalable_code_pillar_contract_test.dart` | Gate tipos explícitos nos 6 hubs |
-| `.cursor/rules/clean-scalable-code.mdc` | Princípios obrigatórios do monorepo |
+| `docs/CODING_STANDARDS.md` | Princípios de código limpo e escalável |
 
 ### Regras
 

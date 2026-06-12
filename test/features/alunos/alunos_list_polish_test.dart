@@ -15,7 +15,7 @@ String _alunosListLibrarySource() {
 }
 
 void main() {
-  test('alunos list usa microcopy, chips de status e scroll peek 10/10', () {
+  test('alunos list usa microcopy, chips de status e scroll peek', () {
     final screen = _alunosListLibrarySource();
 
     expect(screen, contains('alunosSelectionTitle'));

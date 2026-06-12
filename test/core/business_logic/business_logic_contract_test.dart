@@ -2,13 +2,31 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// Pilar 3 — Lógica de negócio: hubs e controllers tier-1 delegam para services/utils.
+/// Pilar 3 — Lógica de negócio: hubs delegam para utils/parts dedicados.
 void main() {
   const hubScreens = {
-    'lib/features/dashboard/screens/personal_dashboard_screen.dart':
-        'lib/features/dashboard/utils/dashboard_scroll_logic.dart',
-    'lib/features/alunos/screens/aluno_detail_screen.dart':
-        'lib/features/alunos/utils/aluno360_operacao_logic.dart',
+    'lib/features/dashboard/screens/personal_dashboard_screen.dart': [
+      'dashboard_scroll_logic.dart',
+      'dashboard_onboarding_logic.dart',
+    ],
+    'lib/features/alunos/screens/aluno_detail_screen.dart': [
+      'aluno360_operacao_logic.dart',
+      'aluno360_copilot_logic.dart',
+    ],
+    'lib/features/alunos/screens/alunos_list_screen.dart': [
+      'alunos_list_sparkline_logic.dart',
+      "part 'alunos_list_screen_state.part.dart'",
+    ],
+    'lib/features/treinos/screens/treinos_list_screen.dart': [
+      'treinos_list_labels.dart',
+      "part 'treinos_list_screen_state.part.dart'",
+    ],
+    'lib/features/financeiro/screens/financeiro_screen.dart': [
+      'financeiro_mensalidades_tab.dart',
+    ],
+    'lib/features/ia/screens/ia_copiloto_screen.dart': [
+      "part 'ia_copiloto_screen_actions.part.dart'",
+    ],
   };
 
   const requiredLogicFiles = [
@@ -16,19 +34,23 @@ void main() {
     'lib/features/dashboard/utils/dashboard_onboarding_logic.dart',
     'lib/features/alunos/utils/aluno360_operacao_logic.dart',
     'lib/features/alunos/utils/aluno360_copilot_logic.dart',
+    'lib/features/alunos/utils/alunos_list_sparkline_logic.dart',
+    'lib/features/treinos/utils/treinos_list_labels.dart',
+    'lib/features/financeiro/screens/financeiro_mensalidades_tab.dart',
+    'lib/features/treinos/screens/treinos_list_screen_state.part.dart',
+    'lib/features/ia/screens/ia_copiloto_screen_actions.part.dart',
   ];
 
-  test('hub screens import dedicated logic utils', () {
+  test('hub screens import dedicated logic utils or parts', () {
     for (final entry in hubScreens.entries) {
       final screen = File(entry.key).readAsStringSync();
-      final logicPath = entry.value;
-      expect(File(logicPath).existsSync(), isTrue, reason: 'Logic ausente: $logicPath');
-      final logicFile = logicPath.split('/').last;
-      expect(
-        screen,
-        contains(logicFile),
-        reason: '${entry.key} deve importar $logicFile',
-      );
+      for (final marker in entry.value) {
+        expect(
+          screen,
+          contains(marker),
+          reason: '${entry.key} deve referenciar $marker',
+        );
+      }
     }
   });
 
@@ -46,5 +68,16 @@ void main() {
     expect(screen, isNot(contains('_showsFloatingPrioritiesChip')));
     expect(screen, contains('dashboard_scroll_logic.dart'));
     expect(screen, contains('dashboard_onboarding_logic.dart'));
+  });
+
+  test('treinos list hub is decomposed under 100 LOC entry file', () {
+    final lines = File(
+      'lib/features/treinos/screens/treinos_list_screen.dart',
+    ).readAsLinesSync().length;
+    expect(lines, lessThan(100));
+    final screen = File(
+      'lib/features/treinos/screens/treinos_list_screen.dart',
+    ).readAsStringSync();
+    expect(screen, contains("part 'treinos_list_screen_state.part.dart'"));
   });
 }

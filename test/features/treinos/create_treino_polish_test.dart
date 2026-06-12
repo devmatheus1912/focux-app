@@ -8,7 +8,7 @@ void main() {
     expect(displayWorkoutName('Treino Forca'), 'Treino Força');
   });
 
-  test('create treino screen polish 10/10', () {
+  test('create treino screen polish', () {
     final screen =
         File(
           'lib/features/treinos/screens/create_treino_screen.dart',
