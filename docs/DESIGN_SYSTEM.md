@@ -223,6 +223,25 @@ Fonte única de tokens visuais e componentes compartilhados do app Flutter.
 4. **Módulos** — `DashboardLayout`, `Aluno360Layout` alinhados a `FocuxPlatform.desktopMaxContent`.
 5. **Backend** — API não embute `platformSpecific` / layouts por OS em DTOs.
 
+## Gestalt & percepção
+
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `lib/core/gestalt/focux_gestalt.dart` | `FocuxGestalt` — princípios e padrões de agrupamento |
+| `lib/core/theme/focux_hierarchy.dart` | Hierarquia tipográfica (complementa proximidade) |
+| `lib/core/widgets/fx_shell_scaffold.dart` | `fxListTileCardShell`, `fxListCardDecoration` |
+| `lib/core/widgets/fx_horizontal_scroll_peek.dart` | Continuidade em carrosséis horizontais |
+| `lib/features/alunos/widgets/aluno360_section_header.dart` | Cabeçalho de seção Aluno 360 |
+| `lib/features/dashboard/utils/dashboard_screen_helpers.dart` | `dashboardSectionKickerStyle` |
+
+### Regras
+
+1. **Proximidade** — blocos relacionados no mesmo card/seção (`Aluno360SectionHeader`, `DashboardCollapsibleSection`).
+2. **Similaridade** — listas via `fxListTileCardShell`; proibido `ListTile` cru (`eagle_design_contract_test`).
+3. **Continuidade** — carrosséis com `FxHorizontalScrollPeek` / `DashboardHorizontalScrollPeek`.
+4. **Figura-fundo** — cards com `fxListCardDecoration` + `ShellChrome` sobre mesh.
+5. **Backend** — API não embute `visualGrouping` / clusters de UI em DTOs.
+
 ## Tokens
 
 | Arquivo | Responsabilidade |
@@ -288,6 +307,8 @@ Catálogo visual (debug): rota `/qa/tokens-strip` → `TokensStripShowcaseScreen
 | `focux_motion_test.dart` | Durações e widgets do catálogo |
 | `platform_adaptation_pillar_contract_test.dart` | Breakpoints + safe area + hubs |
 | `focux_platform_test.dart` | Breakpoints e shells |
+| `gestalt_perception_pillar_contract_test.dart` | Agrupamento + list shells + hubs |
+| `focux_gestalt_test.dart` | Princípios e widgets de seção |
 | `motion_preferences_test.dart` | Reduced motion helpers |
 | `screen_tier_s_plus_contract_test.dart` | Baseline S+ por tela |
 | `screen_a11y_contract_test.dart` | Root a11y |
