@@ -1,8 +1,7 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 import 'brand_palette.dart';
+import 'focux_contrast.dart';
 
 /// Curated primary + secondary pairs — always safe together in the app.
 class CuratedBrandPalette {
@@ -124,13 +123,13 @@ class CuratedBrandPalette {
     return best;
   }
 
-  static Color readableOn(Color background) => _readableOn(background);
+  static Color readableOn(Color background) => FocuxContrast.readableOn(background);
 
   static bool isReadablePrimary(Color primary) {
     final hsl = HSLColor.fromColor(primary);
     if (hsl.lightness > 0.86) return false;
-    final onPrimary = _readableOn(primary);
-    final contrast = _contrastRatio(primary, onPrimary);
+    final onPrimary = FocuxContrast.readableOn(primary);
+    final contrast = FocuxContrast.contrastRatio(primary, onPrimary);
     if (contrast < 4.5) return false;
     // Dark neutrals (charcoal/obsidian) are valid brand primaries.
     if (hsl.lightness <= 0.18) return true;
@@ -148,7 +147,7 @@ class CuratedBrandPalette {
         (primaryHsl.lightness - secondaryHsl.lightness).abs();
 
     if (hueDelta < 18 && lightnessDelta < 0.12) return false;
-    if (_contrastRatio(primary, secondary) < 1.35) return false;
+    if (FocuxContrast.contrastRatio(primary, secondary) < 1.35) return false;
     return true;
   }
 
@@ -161,34 +160,6 @@ class CuratedBrandPalette {
     final normalizedPrimary = safePrimary(primary);
     if (isSafePair(normalizedPrimary, secondary)) return secondary;
     return closest(normalizedPrimary, secondary).secondary;
-  }
-
-  static Color _readableOn(Color background) {
-    return ThemeData.estimateBrightnessForColor(background) == Brightness.dark
-        ? Colors.white
-        : const Color(0xFF111318);
-  }
-
-  static double _contrastRatio(Color a, Color b) {
-    final l1 = _relativeLuminance(a);
-    final l2 = _relativeLuminance(b);
-    final lighter = l1 > l2 ? l1 : l2;
-    final darker = l1 > l2 ? l2 : l1;
-    return (lighter + 0.05) / (darker + 0.05);
-  }
-
-  static double _relativeLuminance(Color color) {
-    double channel(double value) {
-      final v = value / 255;
-      return v <= 0.03928
-          ? v / 12.92
-          : math.pow((v + 0.055) / 1.055, 2.4).toDouble();
-    }
-
-    final r = channel(color.r * 255);
-    final g = channel(color.g * 255);
-    final b = channel(color.b * 255);
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   }
 
   static double _hueDistance(double a, double b) {

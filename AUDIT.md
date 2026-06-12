@@ -19,6 +19,8 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | `FocuxTypography` — monoMetric, headline, body, kpiCondensed | ✅ |
 | `spacing_layout_pillar_contract_test` — grade 8pt + layout hubs | ✅ |
 | `FocuxSpacing` + `DashboardLayout` / `Aluno360Layout` | ✅ |
+| `colors_contrast_pillar_contract_test` — WCAG + semânticos + hubs | ✅ |
+| `FocuxContrast` + `focux_contrast_test` (pares ≥4.5:1) | ✅ |
 | `dart run tools/find_orphan_dart.dart` | ✅ |
 | `tool/verify.ps1` | ✅ |
 
@@ -32,6 +34,7 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | Microcopy PT | `FocuxMicrocopy` (Centro de Comando, Índice Focux) |
 | Financeiro split | tab 351 LOC + parts actions/widgets |
 | Semântica dark | `EagleTokens.semantic*` + hub tokens |
+| Contraste WCAG | `FocuxContrast` + `dashboard_readability` / `aluno360_readability` |
 | Features sem hex cru | gate `features_color_tokens_contract_test` (exc. QA + Google) |
 | Componentes | `FxHorizontalScrollPeek` compartilhado |
 | Charts | `FxChartTheme` |

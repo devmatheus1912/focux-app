@@ -37,6 +37,24 @@ Fonte única de tokens visuais e componentes compartilhados do app Flutter.
 3. **Desktop** — hubs com `FxContentWidthLimiter`
 4. **Módulos grandes** — extrair `*_layout.dart` quando o hub passar de ~150 LOC de padding
 
+## Cores & contraste
+
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `lib/core/theme/focux_contrast.dart` | `FocuxContrast` — WCAG AA (≥4.5:1), `readableOn` |
+| `lib/core/theme/design_tokens.dart` | `EagleTokens.semantic*` + variantes dark |
+| `lib/core/theme/curated_brand_palettes.dart` | White-label seguro — `isReadablePrimary` |
+| `lib/features/dashboard/utils/dashboard_readability.dart` | Muted/caption do hub personal |
+| `lib/features/alunos/utils/aluno360_readability.dart` | Muted/caption do Aluno 360 |
+
+### Regras
+
+1. **Cores** — `EagleTokens.*`, `BrandPalette`, `Theme.of(context).colorScheme`; sem `Color(0x…)` nem `Colors.red/green/blue/…`.
+2. **Contraste** — texto body ≥ **4.5:1** (WCAG AA); usar `FocuxContrast.meetsWcagAa` em testes de pares críticos.
+3. **Semânticos** — `semanticGood/Warn/Bad` (+ soft/dark); scores via `aderenciaColor` / `scoreColor`.
+4. **Legibilidade** — muted/caption via `dashboard_readability` ou `aluno360_readability`, não alpha arbitrário na UI.
+5. **White-label** — primárias validadas por `CuratedBrandPalette.isReadablePrimary`.
+
 ## Tokens
 
 | Arquivo | Responsabilidade |
@@ -79,6 +97,8 @@ Catálogo visual (debug): rota `/qa/tokens-strip` → `TokensStripShowcaseScreen
 | `eagle_design_contract_test.dart` | Anti-patterns Fx |
 | `features_color_tokens_contract_test.dart` | Sem hex cru |
 | `design_system_pillar_contract_test.dart` | Catálogo + hubs + semânticos |
+| `colors_contrast_pillar_contract_test.dart` | WCAG + semânticos + hubs |
+| `focux_contrast_test.dart` | Pares críticos ≥4.5:1 |
 | `screen_tier_s_plus_contract_test.dart` | Baseline S+ por tela |
 | `screen_a11y_contract_test.dart` | Root a11y |
 

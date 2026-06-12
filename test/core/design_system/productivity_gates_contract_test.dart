@@ -13,6 +13,7 @@ void main() {
     'test/core/design_system/design_system_pillar_contract_test.dart',
     'test/core/design_system/typography_pillar_contract_test.dart',
     'test/core/design_system/spacing_layout_pillar_contract_test.dart',
+    'test/core/design_system/colors_contrast_pillar_contract_test.dart',
     'test/core/design_system/productivity_gates_contract_test.dart',
     'test/core/router/routes_pillar_contract_test.dart',
     'test/core/business_logic/business_logic_contract_test.dart',
