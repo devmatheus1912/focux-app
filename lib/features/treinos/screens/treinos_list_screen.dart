@@ -450,7 +450,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                         sliver: SliverList.separated(
                           itemCount: filteredTreinos.length,
                           separatorBuilder:
-                              (_, __) => const SizedBox(height: 12),
+                              (_, __) => SizedBox(height: TokensStrip.s3),
                           itemBuilder:
                               (context, i) => FxStaggerItem(
                                 index: i,
@@ -561,7 +561,7 @@ class _DeleteWorkoutSheet extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 18),
+              SizedBox(height: TokensStrip.s4),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -578,7 +578,7 @@ class _DeleteWorkoutSheet extends StatelessWidget {
                       size: 23,
                     ),
                   ),
-                  const SizedBox(width: 13),
+                  SizedBox(width: TokensStrip.s3),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -592,7 +592,7 @@ class _DeleteWorkoutSheet extends StatelessWidget {
                             letterSpacing: 0,
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        SizedBox(height: TokensStrip.s2),
                         Text(
                           body,
                           style: AppTypography.inter(
@@ -607,7 +607,7 @@ class _DeleteWorkoutSheet extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 18),
+              SizedBox(height: TokensStrip.s4),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -619,7 +619,7 @@ class _DeleteWorkoutSheet extends StatelessWidget {
                 child: Row(
                   children: [
                     Icon(Icons.history_rounded, color: mute, size: 18),
-                    const SizedBox(width: 9),
+                    SizedBox(width: TokensStrip.s2),
                     Expanded(
                       child: Text(
                         unlinkOnly
@@ -635,7 +635,7 @@ class _DeleteWorkoutSheet extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 18),
+              SizedBox(height: TokensStrip.s4),
               Row(
                 children: [
                   Expanded(
@@ -655,7 +655,7 @@ class _DeleteWorkoutSheet extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: TokensStrip.s3),
                   Expanded(
                     child: FilledButton(
                       onPressed: () => Navigator.of(context).pop(true),
@@ -723,7 +723,7 @@ class _TreinoActionsSheet extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 18),
+              SizedBox(height: TokensStrip.s4),
               Row(
                 children: [
                   Container(
@@ -739,7 +739,7 @@ class _TreinoActionsSheet extends StatelessWidget {
                       size: 20,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: TokensStrip.s3),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -754,7 +754,7 @@ class _TreinoActionsSheet extends StatelessWidget {
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                        const SizedBox(height: 3),
+                        SizedBox(height: TokensStrip.s1),
                         Text(
                           'Abra, atribua ou replique este plano.',
                           style: AppTypography.inter(
@@ -870,7 +870,7 @@ class _TreinoActionTile extends StatelessWidget {
                 ),
                 child: Icon(icon, color: tint, size: 18),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: TokensStrip.s3),
               Expanded(
                 child: Text(
                   label,
@@ -933,7 +933,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
-              const SizedBox(height: 18),
+              SizedBox(height: TokensStrip.s4),
               Row(
                 children: [
                   Container(
@@ -949,7 +949,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                       size: 20,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: TokensStrip.s3),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -962,7 +962,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                        const SizedBox(height: 3),
+                        SizedBox(height: TokensStrip.s1),
                         Text(
                           widget.alunos.isEmpty
                               ? 'Cadastre um aluno antes.'
@@ -1008,7 +1008,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                     child: ListView.separated(
                       shrinkWrap: true,
                       itemCount: widget.alunos.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      separatorBuilder: (_, __) => SizedBox(height: TokensStrip.s2),
                       itemBuilder: (context, index) {
                         final aluno = widget.alunos[index];
                         final selected = selectedAlunoId == aluno.id;
@@ -1066,7 +1066,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 12),
+                                SizedBox(width: TokensStrip.s3),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
@@ -1082,7 +1082,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                                           fontWeight: FontWeight.w800,
                                         ),
                                       ),
-                                      const SizedBox(height: 3),
+                                      SizedBox(height: TokensStrip.s1),
                                       Text(
                                         aluno.objetivo?.trim().isNotEmpty ==
                                                 true
@@ -1137,7 +1137,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: TokensStrip.s3),
                   Expanded(
                     child: FilledButton(
                       onPressed:
@@ -1211,7 +1211,7 @@ class _TreinosHeader extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: TokensStrip.s3),
           ],
           Expanded(
             child: Column(
@@ -1230,7 +1230,7 @@ class _TreinosHeader extends StatelessWidget {
                     letterSpacing: 0,
                   ),
                 ),
-                const SizedBox(height: 3),
+                SizedBox(height: TokensStrip.s1),
                 Text(
                   alunoId == null
                       ? 'Treinos'
@@ -1250,9 +1250,9 @@ class _TreinosHeader extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: TokensStrip.s2),
           const ShellThemeToggle(size: 36),
-          const SizedBox(width: 8),
+          SizedBox(width: TokensStrip.s2),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
@@ -1343,7 +1343,7 @@ class _TreinosCommandCard extends StatelessWidget {
                     color: heroTealInk(),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: TokensStrip.s3),
               ],
               Expanded(
                 child: Column(
@@ -1373,7 +1373,7 @@ class _TreinosCommandCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: TokensStrip.s3),
               TextButton.icon(
                 onPressed: onCreate,
                 style: TextButton.styleFrom(
@@ -1513,7 +1513,7 @@ class _CommandMetric extends StatelessWidget {
               height: 1,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: TokensStrip.s1),
           Text(
             label,
             maxLines: 1,
@@ -1643,7 +1643,7 @@ class _LibraryControls extends StatelessWidget {
                             size: 19,
                           ),
                         ),
-                        const SizedBox(width: 10),
+                        SizedBox(width: TokensStrip.s3),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1683,7 +1683,7 @@ class _LibraryControls extends StatelessWidget {
                             size: 19,
                           ),
                         ),
-                        const SizedBox(width: 6),
+                        SizedBox(width: TokensStrip.s2),
                         FilledButton.icon(
                           onPressed: onDeleteSelected,
                           icon: const Icon(
@@ -1719,7 +1719,7 @@ class _LibraryControls extends StatelessWidget {
                             size: 18,
                           ),
                         ),
-                        const SizedBox(width: 10),
+                        SizedBox(width: TokensStrip.s3),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1750,7 +1750,7 @@ class _LibraryControls extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: TokensStrip.s2),
                         FilledButton.tonalIcon(
                           onPressed: onSelectAll,
                           icon: const Icon(Icons.checklist_rounded, size: 17),
@@ -1771,7 +1771,7 @@ class _LibraryControls extends StatelessWidget {
                       ],
                     ),
           ),
-          const SizedBox(height: 11),
+          SizedBox(height: TokensStrip.s3),
           Semantics(
             label: 'Buscar treino por nome, objetivo ou nível',
             textField: true,
@@ -1886,7 +1886,7 @@ class _EmptyState extends StatelessWidget {
             ),
             child: Icon(Icons.fitness_center_rounded, color: primary, size: 34),
           ),
-          const SizedBox(height: 18),
+          SizedBox(height: TokensStrip.s4),
           Text(
             title,
             textAlign: TextAlign.center,
@@ -1897,13 +1897,13 @@ class _EmptyState extends StatelessWidget {
               letterSpacing: 0,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: TokensStrip.s2),
           Text(
             subtitle,
             textAlign: TextAlign.center,
             style: AppTypography.inter(color: mute, fontSize: 13, height: 1.35),
           ),
-          const SizedBox(height: 18),
+          SizedBox(height: TokensStrip.s4),
           SizedBox(
             width: 220,
             child: FxLiquidPrimaryButton(
@@ -1960,7 +1960,7 @@ class _NoResultsState extends StatelessWidget {
               letterSpacing: 0,
             ),
           ),
-          const SizedBox(height: 7),
+          SizedBox(height: TokensStrip.s2),
           Text(
             'Ajuste a busca para encontrar outro treino da biblioteca.',
             textAlign: TextAlign.center,
@@ -2127,7 +2127,7 @@ class _TreinoCard extends StatelessWidget {
                       size: 22,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: TokensStrip.s3),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2148,7 +2148,7 @@ class _TreinoCard extends StatelessWidget {
                               ),
                             ),
                             if (treino.isTemplate) ...[
-                              const SizedBox(width: 8),
+                              SizedBox(width: TokensStrip.s2),
                               _TinyBadge(
                                 label: 'base',
                                 color: primary,
@@ -2157,7 +2157,7 @@ class _TreinoCard extends StatelessWidget {
                             ],
                           ],
                         ),
-                        const SizedBox(height: 5),
+                        SizedBox(height: TokensStrip.s1),
                         Text(
                           treino.objetivo?.trim().isNotEmpty == true
                               ? _ptLabel(treino.objetivo!.trim())
@@ -2175,7 +2175,7 @@ class _TreinoCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: TokensStrip.s3),
                   if (selectionMode)
                     Semantics(
                       label: selected ? 'Desmarcar treino' : 'Marcar treino',
@@ -2218,7 +2218,7 @@ class _TreinoCard extends StatelessWidget {
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
-                              const SizedBox(width: 3),
+                              SizedBox(width: TokensStrip.s1),
                               Icon(
                                 Icons.keyboard_arrow_down_rounded,
                                 color: mute,
@@ -2231,7 +2231,7 @@ class _TreinoCard extends StatelessWidget {
                     ),
                 ],
               ),
-              const SizedBox(height: 14),
+              SizedBox(height: TokensStrip.s3),
               Row(
                 children: [
                   Expanded(
@@ -2243,7 +2243,7 @@ class _TreinoCard extends StatelessWidget {
                       color: primary,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: TokensStrip.s2),
                   Expanded(
                     child: _PlanPill(
                       icon: Icons.repeat_rounded,
@@ -2252,7 +2252,7 @@ class _TreinoCard extends StatelessWidget {
                       color: hasExercises ? primary : EagleTokens.warn,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: TokensStrip.s2),
                   Expanded(
                     child: _PlanPill(
                       icon: _nivelIcon,
@@ -2263,7 +2263,7 @@ class _TreinoCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: TokensStrip.s3),
               Row(
                 children: [
                   Expanded(
@@ -2286,7 +2286,7 @@ class _TreinoCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: TokensStrip.s3),
                   if (hasExercises)
                     Row(
                       mainAxisSize: MainAxisSize.min,
@@ -2298,7 +2298,7 @@ class _TreinoCard extends StatelessWidget {
                             alpha: isDark ? 0.7 : 0.55,
                           ),
                         ),
-                        const SizedBox(width: 4),
+                        SizedBox(width: TokensStrip.s1),
                         Text(
                           '~${estimatedMinutes}min',
                           style: AppTypography.mono(
@@ -2355,7 +2355,7 @@ class _PlanPill extends StatelessWidget {
       child: Row(
         children: [
           Icon(icon, color: color, size: 13),
-          const SizedBox(width: 5),
+          SizedBox(width: TokensStrip.s1),
           Expanded(
             child: FittedBox(
               alignment: Alignment.centerLeft,
@@ -2440,7 +2440,7 @@ class _TreinosErrorState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.error_outline_rounded, size: 48, color: mute),
-            const SizedBox(height: 12),
+            SizedBox(height: TokensStrip.s3),
             Text(
               'Não foi possível carregar',
               style: AppTypography.inter(
@@ -2449,7 +2449,7 @@ class _TreinosErrorState extends StatelessWidget {
                 fontWeight: FontWeight.w800,
               ),
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: TokensStrip.s2),
             Text(
               message,
               textAlign: TextAlign.center,

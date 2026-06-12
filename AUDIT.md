@@ -17,6 +17,8 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | `docs/DESIGN_SYSTEM.md` — catálogo TOKENS STRIP | ✅ |
 | `typography_pillar_contract_test` — escala + sem GoogleFonts direto | ✅ |
 | `FocuxTypography` — monoMetric, headline, body, kpiCondensed | ✅ |
+| `spacing_layout_pillar_contract_test` — grade 8pt + layout hubs | ✅ |
+| `FocuxSpacing` + `DashboardLayout` / `Aluno360Layout` | ✅ |
 | `dart run tools/find_orphan_dart.dart` | ✅ |
 | `tool/verify.ps1` | ✅ |
 

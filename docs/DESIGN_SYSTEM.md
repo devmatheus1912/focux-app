@@ -19,6 +19,24 @@ Fonte única de tokens visuais e componentes compartilhados do app Flutter.
 4. **Proibido** — `GoogleFonts.*` direto em `lib/features/` (exc. QA showcase)
 5. **Proibido** — `FontWeight.bold` (use `w700`/`w800`)
 
+## Espaçamento & layout
+
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `lib/core/theme/focux_spacing.dart` | `FocuxSpacing` — padding, gaps, radius helpers |
+| `lib/core/theme/tokens_strip.dart` | Grade 8pt: `s1`–`s9` (4–80px), `rInput`/`rCard`/`rButton` |
+| `lib/core/theme/design_tokens.dart` | `EagleTokens.radiusXs`–`radiusXl` |
+| `lib/core/widgets/fx_content_width_limiter.dart` | Largura máx. 960px em desktop |
+| `lib/features/alunos/constants/aluno_360_layout.dart` | Layout hub Aluno 360 |
+| `lib/features/dashboard/constants/dashboard_layout.dart` | Layout hub personal |
+
+### Regras
+
+1. **Espaçamento** — `TokensStrip.s*` ou `FocuxSpacing`; evitar `SizedBox(height: 7)` fora da grade
+2. **Radius** — `TokensStrip.rCard` / `EagleTokens.radiusMd`
+3. **Desktop** — hubs com `FxContentWidthLimiter`
+4. **Módulos grandes** — extrair `*_layout.dart` quando o hub passar de ~150 LOC de padding
+
 ## Tokens
 
 | Arquivo | Responsabilidade |

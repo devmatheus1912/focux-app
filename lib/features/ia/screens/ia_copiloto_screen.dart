@@ -173,7 +173,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 10),
+                  SizedBox(height: TokensStrip.s3),
 
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
@@ -320,7 +320,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                               color: EagleTokens.iaError,
                               size: 20,
                             ),
-                            const SizedBox(width: 10),
+                            SizedBox(width: TokensStrip.s3),
                             Expanded(
                               child: Text(
                                 _erroIaTexto(_erro!),
@@ -394,7 +394,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                         color: EagleTokens.iaError,
                                         size: 20,
                                       ),
-                                      const SizedBox(width: 10),
+                                      SizedBox(width: TokensStrip.s3),
                                       Expanded(
                                         child: Text(
                                           _erroIaTexto(e),
@@ -448,7 +448,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
-                                      const SizedBox(height: 6),
+                                      SizedBox(height: TokensStrip.s2),
                                       Text(
                                         'Adicione mais treinos e check-ins para que a IA gere recomendações personalizadas.',
                                         style: TextStyle(
@@ -516,7 +516,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                               letterSpacing: 1.2,
                                             ),
                                           ),
-                                          const SizedBox(height: 6),
+                                          SizedBox(height: TokensStrip.s2),
                                           Text(
                                             '${insights.length} recomendações geradas',
                                             style: const TextStyle(
@@ -593,7 +593,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Icon(Icons.auto_awesome, size: 16, color: brand),
-                          const SizedBox(width: 8),
+                          SizedBox(width: TokensStrip.s2),
                           Expanded(
                             child: Text(
                               _resultNote,
@@ -637,7 +637,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                     color: brand,
                                     size: 17,
                                   ),
-                                  const SizedBox(width: 7),
+                                  SizedBox(width: TokensStrip.s2),
                                   Expanded(
                                     child: Text(
                                       _tarefaPersistida
@@ -661,7 +661,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 6),
+                              SizedBox(height: TokensStrip.s2),
                               Text(
                                 (_proximaAcao!['acao'] ??
                                         _proximaAcao!['titulo'] ??
@@ -674,7 +674,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                   height: 1.35,
                                 ),
                               ),
-                              const SizedBox(height: 10),
+                              SizedBox(height: TokensStrip.s3),
                               Row(
                                 children: [
                                   Expanded(
@@ -690,7 +690,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                       label: const Text('Ver tarefa'),
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: TokensStrip.s2),
                                   Expanded(
                                     child: FxLiquidPrimaryButton(
                                       label: 'Abrir aluno',

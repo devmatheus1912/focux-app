@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
@@ -121,7 +122,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            const SizedBox(width: 6),
+                            SizedBox(width: TokensStrip.s2),
                             Icon(
                               Icons.keyboard_arrow_down,
                               size: 16,
@@ -204,7 +205,7 @@ class _FinanceiroAlunoContextBanner extends ConsumerWidget {
         child: Row(
           children: [
             Icon(Icons.person_outline, color: EagleTokens.warn, size: 18),
-            const SizedBox(width: 8),
+            SizedBox(width: TokensStrip.s2),
             Expanded(
               child: Text(
                 'Mensalidades de $nome',

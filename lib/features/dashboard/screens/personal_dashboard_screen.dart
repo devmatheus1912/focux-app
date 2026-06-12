@@ -40,6 +40,7 @@ import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import '../utils/dashboard_scroll_logic.dart';
 import '../utils/dashboard_onboarding_logic.dart';
+import '../constants/dashboard_layout.dart';
 import '../widgets/dashboard_horizontal_scroll_peek.dart';
 import '../widgets/dashboard_header_profile_avatar.dart';
 import '../widgets/dashboard_financial_hero_section.dart';
@@ -526,14 +527,14 @@ class _PersonalDashboardScreenState
                                   ],
                                 ),
                               ),
-                              const SizedBox(width: 8),
+                              SizedBox(width: DashboardLayout.headerIconGap),
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   const ShellThemeToggle(size: 36),
-                                  const SizedBox(width: 6),
+                                  SizedBox(width: DashboardLayout.headerIconGap),
                                   const NotificacaoBadgeButton(size: 36),
-                                  const SizedBox(width: 6),
+                                  SizedBox(width: DashboardLayout.headerIconGap),
                                   DashboardHeaderProfileAvatar(
                                     primary: primary,
                                     isDark: themeDark,
@@ -670,7 +671,7 @@ class _PersonalDashboardScreenState
                                         itemCount: attentionItemCount,
                                         separatorBuilder:
                                             (_, __) =>
-                                                const SizedBox(width: 12),
+                                                SizedBox(width: TokensStrip.s3),
                                         itemBuilder: (context, index) {
                                           if (index <
                                               attentionRiskItems.length) {
@@ -728,7 +729,9 @@ class _PersonalDashboardScreenState
                             ),
                           ),
                         ),
-                        const SliverToBoxAdapter(child: SizedBox(height: 8)),
+                        SliverToBoxAdapter(
+                          child: SizedBox(height: DashboardLayout.sliverSectionGap),
+                        ),
                       ],
 
                       // PULSO DO DIA — operação antes de receita
@@ -770,7 +773,9 @@ class _PersonalDashboardScreenState
                         ),
                       ),
 
-                      const SliverToBoxAdapter(child: SizedBox(height: 8)),
+                      SliverToBoxAdapter(
+                        child: SizedBox(height: DashboardLayout.sliverSectionGap),
+                      ),
                       SliverToBoxAdapter(
                         child: DashboardCollapsibleSection(
                           title: 'Aderência da semana',
@@ -787,7 +792,9 @@ class _PersonalDashboardScreenState
                         ),
                       ),
 
-                      const SliverToBoxAdapter(child: SizedBox(height: 4)),
+                      SliverToBoxAdapter(
+                        child: SizedBox(height: DashboardLayout.sliverTightGap),
+                      ),
                       SliverToBoxAdapter(
                         child: DashboardCollapsibleSection(
                           title: 'Panorama financeiro',
@@ -822,7 +829,9 @@ class _PersonalDashboardScreenState
                         ),
                       ),
 
-                      const SliverToBoxAdapter(child: SizedBox(height: 12)),
+                      SliverToBoxAdapter(
+                        child: SizedBox(height: TokensStrip.s3),
+                      ),
                       SliverToBoxAdapter(
                         child: DashboardCollapsibleToolsSection(
                           isDark: themeDark,
