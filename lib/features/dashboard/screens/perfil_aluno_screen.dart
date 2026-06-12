@@ -13,6 +13,7 @@ import '../../alunos/providers/alunos_provider.dart';
 import '../../anamnese/data/anamnese_repository.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../evolucao/data/evolucao_repository.dart';
+import '../utils/birth_date_api_format.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -183,7 +184,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
         'tipoConsultoria': _tipoConsultoria.text.trim(),
         'peso': double.tryParse(_peso.text.trim().replaceAll(',', '.')),
         'altura': double.tryParse(_altura.text.trim().replaceAll(',', '.')),
-        'dataNascimento': _dataNascimento.text.trim(),
+        'dataNascimento': normalizeBirthDateForApi(_dataNascimento.text),
         'fotoUrl': _fotoUrl,
       });
       await anamneseRepo.salvarMinha({

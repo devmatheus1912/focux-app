@@ -22,8 +22,13 @@ Future<QaEndpointResult> runQaSmokeEndpoint(QaSmokeEndpoint endpoint) async {
   try {
     final response = await dio.request<dynamic>(
       endpoint.path,
+      data: _qaSmokeRequestBody(endpoint),
       queryParameters: endpoint.queryParameters,
-      options: Options(method: endpoint.method, validateStatus: (_) => true),
+      options: Options(
+        method: endpoint.method,
+        validateStatus: (_) => true,
+        contentType: Headers.jsonContentType,
+      ),
     );
 
     final status = response.statusCode ?? 0;
@@ -97,6 +102,27 @@ List<int> _expectedStatus(
     'POST' => [200, 201, 202, 400, 422],
     'DELETE' => [200, 204, 400, 404, 422],
     _ => [200, 201, 202, 204, 400, 422],
+  };
+}
+
+Object? _qaSmokeRequestBody(QaSmokeEndpoint endpoint) {
+  return switch (endpoint.id) {
+    'alunos-create' => {
+      'nome': 'QA Smoke',
+      'email': 'qa-smoke-${DateTime.now().millisecondsSinceEpoch}@focux.test',
+    },
+    'migracao-texto' => {'conteudo': 'qa-smoke'},
+    'migracao-preview' => {
+      'alunos': [
+        {'nome': 'QA Smoke', 'email': 'qa-smoke@focux.test'},
+      ],
+    },
+    'iap-verify' => {'platform': 'ios', 'productId': 'qa.smoke'},
+    _ =>
+      switch (endpoint.method) {
+        'POST' || 'PUT' || 'PATCH' => <String, dynamic>{},
+        _ => null,
+      },
   };
 }
 
