@@ -40,7 +40,7 @@ class FxGlassSurface extends StatelessWidget {
     Widget surface = Container(
       padding: padding,
       decoration: decoration,
-      child: child,
+      child: Material(color: Colors.transparent, child: child),
     );
 
     if (blur) {

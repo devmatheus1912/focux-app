@@ -15,7 +15,9 @@ class QaEndpointResult {
 Future<QaEndpointResult> runQaSmokeEndpoint(QaSmokeEndpoint endpoint) async {
   final dio = ApiClient().dio;
   final token = (await SecureStorage.getToken())?.trim();
+  final role = (await SecureStorage.getRole())?.trim().toUpperCase();
   final isAuthed = token != null && token.isNotEmpty;
+  final roleMatches = _roleMatchesEndpoint(role, endpoint.authMode);
 
   try {
     final response = await dio.request<dynamic>(
@@ -25,13 +27,27 @@ Future<QaEndpointResult> runQaSmokeEndpoint(QaSmokeEndpoint endpoint) async {
     );
 
     final status = response.statusCode ?? 0;
-    final expected = _expectedStatus(endpoint, isAuthed: isAuthed);
+    final expected = _expectedStatus(
+      endpoint,
+      isAuthed: isAuthed,
+      roleMatches: roleMatches,
+    );
     final ok = expected.contains(status);
 
     return QaEndpointResult(
       ok: ok,
       statusCode: status,
-      error: ok ? null : 'HTTP $status (esperado: ${expected.join(' ou ')})',
+      error:
+          ok
+              ? null
+              : _formatEndpointError(
+                status: status,
+                expected: expected,
+                isAuthed: isAuthed,
+                role: role,
+                roleMatches: roleMatches,
+                authMode: endpoint.authMode,
+              ),
     );
   } on DioException catch (e) {
     return QaEndpointResult(
@@ -44,9 +60,31 @@ Future<QaEndpointResult> runQaSmokeEndpoint(QaSmokeEndpoint endpoint) async {
   }
 }
 
-List<int> _expectedStatus(QaSmokeEndpoint endpoint, {required bool isAuthed}) {
+bool _roleMatchesEndpoint(String? role, String authMode) {
+  if (authMode == 'PUBLIC') return true;
+  final normalized = role?.trim().toUpperCase();
+  if (normalized == null || normalized.isEmpty) return false;
+
+  return switch (authMode) {
+    'PERSONAL' => normalized == 'PERSONAL',
+    'ALUNO' => normalized == 'ALUNO',
+    'PERSONAL_OR_ALUNO' =>
+      normalized == 'PERSONAL' || normalized == 'ALUNO',
+    _ => true,
+  };
+}
+
+List<int> _expectedStatus(
+  QaSmokeEndpoint endpoint, {
+  required bool isAuthed,
+  required bool roleMatches,
+}) {
   if (!isAuthed) {
     return [endpoint.expectedAnonymousStatus];
+  }
+
+  if (!roleMatches) {
+    return [403];
   }
 
   if (endpoint.isPublic) {
@@ -60,4 +98,21 @@ List<int> _expectedStatus(QaSmokeEndpoint endpoint, {required bool isAuthed}) {
     'DELETE' => [200, 204, 400, 404, 422],
     _ => [200, 201, 202, 204, 400, 422],
   };
+}
+
+String _formatEndpointError({
+  required int status,
+  required List<int> expected,
+  required bool isAuthed,
+  required String? role,
+  required bool roleMatches,
+  required String authMode,
+}) {
+  final base = 'HTTP $status (esperado: ${expected.join(' ou ')})';
+  if (!isAuthed) return base;
+  if (!roleMatches) {
+    final current = role?.trim().isNotEmpty == true ? role! : 'desconhecido';
+    return '$base — sessão $current, endpoint exige $authMode';
+  }
+  return base;
 }

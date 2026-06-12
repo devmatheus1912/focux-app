@@ -36,13 +36,7 @@ import '../../treinos/screens/treinos_list_screen.dart';
 import 'qa_preview_session.dart';
 
 /// Builds smoke-test screen previews with GoRouter + mesh for QA pumps.
-Widget buildQaRoutePreview(String path) {
-  final uri = Uri.parse(path.startsWith('/') ? path : '/$path');
-  final screen = _buildQaRouteScreen(uri);
-
-  // MeshScope evita GoRouterState em FxRouteChrome e simula shell mesh.
-  return MeshScope(active: true, child: screen);
-}
+Widget buildQaRoutePreview(String path) => buildQaRoutePreviewApp(path);
 
 /// Router harness for widget tests — screens de auth leem [GoRouterState].
 GoRouter buildQaPreviewRouter(String initialLocation) {
