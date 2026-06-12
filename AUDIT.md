@@ -12,6 +12,7 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | Contratos API repositórios | ✅ |
 | `productivity_gates_contract_test` (polish + CI + design gates) | ✅ |
 | `routes_pillar_contract_test` (shell + deep links + README) | ✅ |
+| `business_logic_contract_test` (hubs + utils dedicados) | ✅ |
 | `dart run tools/find_orphan_dart.dart` | ✅ |
 | `tool/verify.ps1` | ✅ |
 

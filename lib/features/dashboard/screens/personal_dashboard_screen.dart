@@ -38,6 +38,8 @@ import '../widgets/dashboard_attention_card.dart';
 import '../widgets/dashboard_collapsible_section.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_screen_helpers.dart';
+import '../utils/dashboard_scroll_logic.dart';
+import '../utils/dashboard_onboarding_logic.dart';
 import '../widgets/dashboard_horizontal_scroll_peek.dart';
 import '../widgets/dashboard_header_profile_avatar.dart';
 import '../widgets/dashboard_financial_hero_section.dart';
@@ -56,9 +58,6 @@ class PersonalDashboardScreen extends ConsumerStatefulWidget {
   ConsumerState<PersonalDashboardScreen> createState() =>
       _PersonalDashboardScreenState();
 }
-
-/// Scroll offset until which the floating priorities chip stays visible (sticky takes over after).
-const _commandCenterPrioritiesFloatingMaxOffset = 220;
 
 class _PersonalDashboardScreenState
     extends ConsumerState<PersonalDashboardScreen>
@@ -135,19 +134,18 @@ class _PersonalDashboardScreenState
     }
   }
 
-  bool _showsFloatingPrioritiesChip(double offset) =>
-      offset >= 80 && offset < _commandCenterPrioritiesFloatingMaxOffset;
-
   void _onHomeScroll() {
     if (!_homeScrollController.hasClients) return;
     final offset = _homeScrollController.offset;
-    if ((offset - _homeScrollOffset).abs() < 2) return;
-    final wasFloating = _showsFloatingPrioritiesChip(_homeScrollOffset);
-    final nowFloating = _showsFloatingPrioritiesChip(offset);
-    final wasStickyChip = _homeScrollOffset >= 80;
-    final nowStickyChip = offset >= 80;
+    if (!dashboardScrollOffsetMeaningfullyChanged(_homeScrollOffset, offset)) {
+      return;
+    }
+    final shouldRebuild = dashboardScrollVisualStateChanged(
+      previousOffset: _homeScrollOffset,
+      newOffset: offset,
+    );
     _homeScrollOffset = offset;
-    if (wasFloating != nowFloating || wasStickyChip != nowStickyChip) {
+    if (shouldRebuild) {
       setState(() {});
     }
   }
@@ -173,8 +171,13 @@ class _PersonalDashboardScreenState
     try {
       final w =
           await OnboardingRepository(ref.read(apiClientProvider)).wizard();
-      if (!mounted || w.wizardCompleto) return;
-      if (w.progressPercent >= 100) return;
+      if (!mounted) return;
+      if (!dashboardShouldOpenOnboardingWizard(
+        wizardCompleto: w.wizardCompleto,
+        progressPercent: w.progressPercent,
+      )) {
+        return;
+      }
       context.push('/onboarding/wizard');
     } catch (_) {}
   }
@@ -837,7 +840,7 @@ class _PersonalDashboardScreenState
                 ),
                 if (showStickyPrioritiesAction &&
                     stickyCommandActionsLabel != null &&
-                    _showsFloatingPrioritiesChip(_homeScrollOffset))
+                    dashboardShowsFloatingPrioritiesChip(_homeScrollOffset))
                   Positioned(
                     top: MediaQuery.paddingOf(context).top + 4,
                     right: TokensStrip.s4,

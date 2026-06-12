@@ -12,6 +12,7 @@ void main() {
     'test/core/design_system/eagle_design_contract_test.dart',
     'test/core/design_system/productivity_gates_contract_test.dart',
     'test/core/router/routes_pillar_contract_test.dart',
+    'test/core/business_logic/business_logic_contract_test.dart',
   ];
 
   const excludedScreens = {
