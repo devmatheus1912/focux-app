@@ -113,6 +113,24 @@ Fonte única de tokens visuais e componentes compartilhados do app Flutter.
 4. **Operação Aluno 360** — `FeedbackHelper.showOperacao*` com `FeedbackPlacement.operacaoTop`.
 5. **Async** — telas com `.when` / loading devem ter estado de erro + loading DS (gate Tier S+).
 
+## Acessibilidade
+
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `lib/core/a11y/focux_a11y.dart` | `FocuxA11y` — catálogo e gates de leitor de tela |
+| `lib/core/widgets/fx_screen_a11y.dart` | `fxScreenA11yScope` — escopo root Semantics |
+| `lib/core/utils/a11y_announce.dart` | `fxAnnounce` — anúncios TalkBack/VoiceOver |
+| `lib/features/dashboard/utils/dashboard_a11y.dart` | Labels PT-BR do hub personal |
+| `lib/features/alunos/utils/aluno360_a11y.dart` | Labels PT-BR do Aluno 360 |
+
+### Regras
+
+1. **Root scope** — toda tela de produção com `fxScreenA11yScope` ou `Semantics(container: true)`.
+2. **Labels** — botões/ícones com `tooltip`, `semanticsLabel` ou `Semantics(label:)` em PT-BR.
+3. **Hubs** — utils dedicados (`dashboard_a11y`, `aluno360_a11y`) para carrosséis e seções.
+4. **Anúncios** — mudanças de estado via `fxAnnounce` quando o contexto muda sem foco.
+5. **Manual** — auditoria trimestral TalkBack/VoiceOver (`docs/MANUAL-TRIMESTRAL.md`).
+
 ## Tokens
 
 | Arquivo | Responsabilidade |
@@ -164,6 +182,10 @@ Catálogo visual (debug): rota `/qa/tokens-strip` → `TokensStripShowcaseScreen
 | `eagle_design_contract_test.dart` | Anti-patterns (loading/input/list) |
 | `ux_feedback_pillar_contract_test.dart` | Toasts + friendlyError + hubs |
 | `friendly_error_test.dart` | Humanização HTTP/timeout |
+| `accessibility_pillar_contract_test.dart` | Escopo root + labels hubs |
+| `a11y_labels_test.dart` | Rótulos PT-BR dashboard/aluno360 |
+| `screen_a11y_contract_test.dart` | Root a11y em todas as telas |
+| `a11y_controls_contract_test.dart` | Labels em controles |
 | `screen_tier_s_plus_contract_test.dart` | Baseline S+ por tela |
 | `screen_a11y_contract_test.dart` | Root a11y |
 
