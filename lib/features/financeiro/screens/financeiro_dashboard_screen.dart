@@ -10,6 +10,7 @@ import '../data/financeiro_repository.dart';
 import '../../pricing/widgets/smart_pricing_card.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -116,7 +117,7 @@ class _FinanceiroDashboardScreenState
               OutlinedButton.icon(
                 onPressed: _load,
                 icon: const Icon(Icons.refresh_rounded, size: 18),
-                label: const Text('Tentar novamente'),
+                label: const Text(FocuxMicrocopy.tentarNovamente),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: primaryErr,
                   side: BorderSide(color: primaryErr.withValues(alpha: 0.3)),

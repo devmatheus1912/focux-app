@@ -409,7 +409,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
       }
       return '${erro.message}$refText';
     }
-    return 'Não foi possível gerar agora. Tente novamente.';
+    return friendlyError(erro, fallback: FocuxMicrocopy.iaErroGenerico);
   }
 
   Future<void> _atribuir() async {

@@ -30,6 +30,7 @@ import '../../subscription/widgets/trial_countdown_banner.dart';
 import '../../subscription/widgets/dashboard_activation_cta.dart';
 import '../../onboarding/providers/onboarding_provider.dart';
 import '../utils/dashboard_day_focus.dart';
+import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_a11y.dart';
 import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_sparkline_helpers.dart';
@@ -417,7 +418,9 @@ class _PersonalDashboardScreenState
             final showStickyPrioritiesAction =
                 dashboardNextActions.length > 1 && _homeScrollOffset >= 80;
             final stickyCommandActionsLabel =
-                dashboardNextActions.length > 1 ? 'Ver prioridades' : null;
+                dashboardNextActions.length > 1
+                    ? DashboardMicrocopy.verPrioridades
+                    : null;
 
             void openCommandQuickActions() {
               if (dashboardNextActions.length < 2) return;
@@ -461,7 +464,10 @@ class _PersonalDashboardScreenState
                     ref.invalidate(onboardingStatusProvider);
                     await _loadFinFromHome();
                     if (context.mounted) {
-                      FeedbackHelper.showSuccess(context, 'Painel atualizado');
+                      FeedbackHelper.showSuccess(
+                        context,
+                        DashboardMicrocopy.painelAtualizado,
+                      );
                     }
                   },
                   child: CustomScrollView(
@@ -797,7 +803,7 @@ class _PersonalDashboardScreenState
                       ),
                       SliverToBoxAdapter(
                         child: DashboardCollapsibleSection(
-                          title: 'Panorama financeiro',
+                          title: DashboardMicrocopy.panoramaFinanceiro,
                           collapsedHint:
                               receitaAtual > 0
                                   ? 'R\$ ${receitaAtual.toInt()} recebido · toque para expandir'

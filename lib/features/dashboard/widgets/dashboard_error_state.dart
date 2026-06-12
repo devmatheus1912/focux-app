@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 
@@ -45,7 +46,7 @@ class DashboardErrorState extends StatelessWidget {
             ),
             const SizedBox(height: 18),
             Text(
-              'Algo saiu do ar',
+              FocuxMicrocopy.algoSaiuDoAr,
               style: AppTypography.inter(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -63,7 +64,7 @@ class DashboardErrorState extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('Tentar novamente'),
+              label: const Text(FocuxMicrocopy.tentarNovamente),
               style: OutlinedButton.styleFrom(
                 foregroundColor: primary,
                 side: BorderSide(color: primary.withValues(alpha: 0.3)),

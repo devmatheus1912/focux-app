@@ -9,6 +9,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/fx_icon.dart';
@@ -2454,7 +2455,7 @@ class _TreinosErrorState extends StatelessWidget {
             Icon(Icons.error_outline_rounded, size: 48, color: mute),
             SizedBox(height: TokensStrip.s3),
             Text(
-              'Não foi possível carregar',
+              FocuxMicrocopy.naoFoiPossivelCarregar,
               style: AppTypography.inter(
                 color: ink,
                 fontSize: 17,
@@ -2471,7 +2472,7 @@ class _TreinosErrorState extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Tentar novamente'),
+              label: const Text(FocuxMicrocopy.tentarNovamente),
             ),
           ],
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/brand/focux_microcopy.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -409,7 +410,9 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                             () => ref.invalidate(
                                               insightsProvider(query),
                                             ),
-                                        child: const Text('Recarregar'),
+                                        child: const Text(
+                                          FocuxMicrocopy.tentarNovamente,
+                                        ),
                                       ),
                                     ],
                                   ),

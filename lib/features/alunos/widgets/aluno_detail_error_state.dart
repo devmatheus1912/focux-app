@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../constants/aluno_360_layout.dart';
+import '../utils/aluno360_microcopy.dart';
 
 class AlunoDetailErrorState extends StatelessWidget {
   const AlunoDetailErrorState({
@@ -42,7 +44,7 @@ class AlunoDetailErrorState extends StatelessWidget {
             ),
             const SizedBox(height: 18),
             Text(
-              'Não foi possível carregar o aluno',
+              Aluno360Microcopy.naoFoiPossivelCarregarAluno,
               textAlign: TextAlign.center,
               style: AppTypography.inter(
                 fontSize: 18,
@@ -61,7 +63,7 @@ class AlunoDetailErrorState extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('Tentar novamente'),
+              label: const Text(FocuxMicrocopy.tentarNovamente),
               style: Aluno360Layout.operacaoOutlinedButtonStyle(
                 context,
                 primary,

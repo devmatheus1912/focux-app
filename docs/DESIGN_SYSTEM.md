@@ -151,6 +151,23 @@ Fonte única de tokens visuais e componentes compartilhados do app Flutter.
 4. **Navegação** — rotas shell via `fxTransitionPage` (fade/slide ou child direto).
 5. **Backend** — API não embute `skeletonDelay` / hints de loading em DTOs.
 
+## Microcopy / UX writing
+
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `lib/core/brand/focux_microcopy.dart` | `FocuxMicrocopy` — ações e rótulos globais PT-BR |
+| `lib/core/utils/friendly_error.dart` | `friendlyError` — mensagens humanizadas de API/rede |
+| `lib/features/dashboard/utils/dashboard_microcopy.dart` | Títulos e CTAs do hub personal |
+| `lib/features/alunos/utils/aluno360_microcopy.dart` | Rótulos do hub Aluno 360 |
+
+### Regras
+
+1. **Ações** — `FocuxMicrocopy.tentarNovamente`, `cancelar`, `salvar`; evitar literais duplicados.
+2. **Erros** — `friendlyError(e)` em painéis e toasts; títulos via `FocuxMicrocopy` ou utils de módulo.
+3. **Hubs** — utils dedicados (`dashboard_microcopy`, `aluno360_microcopy`) para seções recorrentes.
+4. **Idioma** — PT-BR em UI de produção; proibido inglês cru (`Loading`, `Retry`, `Save`).
+5. **Backend** — API não embute `buttonLabel` / `ctaText` / chaves de microcopy em DTOs.
+
 ## Tokens
 
 | Arquivo | Responsabilidade |
@@ -207,6 +224,8 @@ Catálogo visual (debug): rota `/qa/tokens-strip` → `TokensStripShowcaseScreen
 | `screen_a11y_contract_test.dart` | Root a11y em todas as telas |
 | `a11y_controls_contract_test.dart` | Labels em controles |
 | `perceived_performance_pillar_contract_test.dart` | Skeleton + motion + hubs |
+| `microcopy_pillar_contract_test.dart` | PT-BR + friendlyError + hubs |
+| `focux_microcopy_test.dart` | Catálogo e utils de módulo |
 | `motion_preferences_test.dart` | Reduced motion helpers |
 | `screen_tier_s_plus_contract_test.dart` | Baseline S+ por tela |
 | `screen_a11y_contract_test.dart` | Root a11y |

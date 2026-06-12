@@ -543,7 +543,7 @@ class _AlunosErrorState extends StatelessWidget {
               ),
               const SizedBox(height: TokensStrip.s4),
               Text(
-                'Erro ao carregar alunos',
+                FocuxMicrocopy.erroAoCarregarAlunos,
                 textAlign: TextAlign.center,
                 style: AppTypography.inter(
                   color: ink,
@@ -562,7 +562,7 @@ class _AlunosErrorState extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh_rounded, size: 18),
-                label: const Text('Tentar novamente'),
+                label: const Text(FocuxMicrocopy.tentarNovamente),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: primary,
                   side: BorderSide(color: primary.withValues(alpha: 0.35)),

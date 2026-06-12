@@ -31,6 +31,8 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | `FocuxA11y` + `a11y_labels_test` + gates screen/a11y | ✅ |
 | `perceived_performance_pillar_contract_test` — skeleton + motion hubs | ✅ |
 | `FocuxPerformance` + `motion_preferences_test` + tier S+ loading | ✅ |
+| `microcopy_pillar_contract_test` — PT-BR + friendlyError + hubs | ✅ |
+| `FocuxMicrocopy` + `focux_microcopy_test` + utils de módulo | ✅ |
 | `dart run tools/find_orphan_dart.dart` | ✅ |
 | `tool/verify.ps1` | ✅ |
 
