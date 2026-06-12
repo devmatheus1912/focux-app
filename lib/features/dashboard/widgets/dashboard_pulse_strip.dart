@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_typography.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -313,7 +313,7 @@ class DashboardPulseChip extends StatelessWidget {
                           value,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.jetBrainsMono(
+                          style: AppTypography.mono(
                             fontSize: valueSize,
                             fontWeight: FontWeight.w700,
                             color: ink,

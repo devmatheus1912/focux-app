@@ -534,7 +534,7 @@ class _AgendaAlunoSheetState extends State<_AgendaAlunoSheet> {
                             const Spacer(),
                             Text(
                               '${alunos.length}/${widget.alunos.length}',
-                              style: GoogleFonts.jetBrainsMono(
+                              style: AppTypography.mono(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
                                 color: primary,
@@ -831,7 +831,7 @@ class _AgendaDateTimeSheetState extends State<_AgendaDateTimeSheet> {
                         ),
                         child: Text(
                           _timeLabel(slot),
-                          style: GoogleFonts.jetBrainsMono(
+                          style: AppTypography.mono(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                             color: selected ? Colors.white : chrome.ink,

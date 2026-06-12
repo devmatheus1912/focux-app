@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -291,7 +291,7 @@ class _MensalidadeCard extends StatelessWidget {
               ),
               Text(
                 'R\$ ${m.valor.toStringAsFixed(0)}',
-                style: GoogleFonts.jetBrainsMono(
+                style: AppTypography.mono(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                   color: ink,

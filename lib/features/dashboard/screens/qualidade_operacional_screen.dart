@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -181,7 +181,7 @@ class _QualidadeBody extends StatelessWidget {
                 const SizedBox(height: TokensStrip.s4),
                 Text(
                   '${data.score}',
-                  style: GoogleFonts.jetBrainsMono(
+                  style: AppTypography.mono(
                     fontSize: 64,
                     fontWeight: FontWeight.w800,
                     color: Colors.white,
@@ -191,7 +191,7 @@ class _QualidadeBody extends StatelessWidget {
                 ),
                 Text(
                   '/100',
-                  style: GoogleFonts.jetBrainsMono(
+                  style: AppTypography.mono(
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                     color: Colors.white.withValues(alpha: 0.5),
@@ -454,7 +454,7 @@ class _ScoreRow extends StatelessWidget {
           width: 32,
           child: Text(
             '$value',
-            style: GoogleFonts.jetBrainsMono(
+            style: AppTypography.mono(
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: ink,
@@ -601,7 +601,7 @@ class _MetricCompareCard extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       yourValue,
-                      style: GoogleFonts.jetBrainsMono(
+                      style: AppTypography.mono(
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
                         color: ink,
@@ -628,7 +628,7 @@ class _MetricCompareCard extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       marketValue,
-                      style: GoogleFonts.jetBrainsMono(
+                      style: AppTypography.mono(
                         fontSize: 22,
                         fontWeight: FontWeight.w500,
                         color: mute,

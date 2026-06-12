@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -401,7 +401,7 @@ class _RefeicaoCard extends StatelessWidget {
                       child: Text(
                         r.horario!,
                         textAlign: TextAlign.right,
-                        style: GoogleFonts.jetBrainsMono(
+                        style: AppTypography.mono(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: Theme.of(context).colorScheme.primary,

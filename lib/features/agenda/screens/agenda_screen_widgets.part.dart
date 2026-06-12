@@ -56,7 +56,7 @@ class _AgendaEmptyState extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         selectedDate,
-                        style: GoogleFonts.jetBrainsMono(
+                        style: AppTypography.mono(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: chrome.mute,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_typography.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../core/theme/brand_palette.dart';
@@ -253,7 +253,7 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
                             child: Text(
                               '${a.aderenciaPercent}%',
                               textAlign: TextAlign.right,
-                              style: GoogleFonts.jetBrainsMono(
+                              style: AppTypography.mono(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                                 color: ink,

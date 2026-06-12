@@ -2,6 +2,23 @@
 
 Fonte única de tokens visuais e componentes compartilhados do app Flutter.
 
+## Tipografia
+
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `lib/core/theme/app_typography.dart` | `AppTypography` — Inter, JetBrains Mono, Barlow Condensed |
+| `lib/core/theme/focux_typography.dart` | `FocuxTypography` — escala semântica (display, body, monoMetric, kpiCondensed) |
+| `lib/core/theme/tokens_strip.dart` | Tamanhos: `fontH1` 32, `fontH2` 22, `fontBody` 15, `fontBodySm` 13 |
+| `lib/features/financeiro/utils/financeiro_typography.dart` | Tipografia do módulo financeiro |
+
+### Regras
+
+1. **UI** — `AppTypography.inter` ou `Theme.of(context).textTheme`
+2. **Métricas/números** — `AppTypography.mono` ou `FocuxTypography.monoMetric`
+3. **KPI condensado** — `FocuxTypography.kpiCondensed`
+4. **Proibido** — `GoogleFonts.*` direto em `lib/features/` (exc. QA showcase)
+5. **Proibido** — `FontWeight.bold` (use `w700`/`w800`)
+
 ## Tokens
 
 | Arquivo | Responsabilidade |

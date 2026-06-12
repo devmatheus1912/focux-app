@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_typography.dart';
 
 import '../utils/dashboard_readability.dart';
 
@@ -183,7 +183,7 @@ class DashboardHeroMiniStat extends StatelessWidget {
                 ),
             ],
           ),
-          style: GoogleFonts.jetBrainsMono(
+          style: AppTypography.mono(
             color: Colors.white,
             fontSize: 17,
             fontWeight: FontWeight.w600,

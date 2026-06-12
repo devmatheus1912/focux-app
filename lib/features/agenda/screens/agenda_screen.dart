@@ -9,7 +9,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../features/alunos/data/aluno_repository.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/agenda_repository.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -566,7 +566,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                         children: [
                                           Text(
                                             '${e.inicio.hour.toString().padLeft(2, '0')}:${e.inicio.minute.toString().padLeft(2, '0')}',
-                                            style: GoogleFonts.jetBrainsMono(
+                                            style: AppTypography.mono(
                                               fontSize: 13,
                                               fontWeight: FontWeight.w600,
                                               color: primary,

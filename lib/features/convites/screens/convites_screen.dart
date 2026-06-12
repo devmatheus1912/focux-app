@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_typography.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/router/safe_navigation.dart';
@@ -211,7 +211,7 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                               ),
                               child: SelectableText(
                                 _shareLink,
-                                style: GoogleFonts.jetBrainsMono(
+                                style: AppTypography.mono(
                                   fontSize: 12.5,
                                   height: 1.45,
                                   color: ink,
