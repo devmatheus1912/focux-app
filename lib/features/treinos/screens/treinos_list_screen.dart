@@ -21,16 +21,8 @@ import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../data/treino_repository.dart';
 import '../providers/treinos_provider.dart';
+import '../utils/treinos_list_labels.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
-
-String _readyPlansLabel(int count) =>
-    count == 1 ? '1 plano pronto para uso.' : '$count planos prontos para uso.';
-
-String _readyCountLabel(int count) =>
-    count == 1 ? '1 pronto' : '$count prontos';
-
-String _templateCountLabel(int count) =>
-    count == 1 ? '1 template' : '$count templates';
 
 class TreinosListScreen extends ConsumerWidget {
   final int? alunoId;
@@ -1374,7 +1366,7 @@ class _TreinosCommandCard extends StatelessWidget {
                     Text(
                       assembling == 0
                           ? ultraCompact
-                              ? _readyPlansLabel(treinos.length)
+                              ? TreinosListLabels.readyPlans(treinos.length)
                               : 'Todos os planos têm exercícios.'
                           : '$assembling plano${assembling == 1 ? '' : 's'} ainda em montagem.',
                       style: AppTypography.inter(
@@ -1477,7 +1469,7 @@ class _CommandInlineMetrics extends StatelessWidget {
         border: Border.all(color: heroTealSurface(0.10)),
       ),
       child: Text(
-        '${_readyCountLabel(ready)} · $totalExercises exercícios · ${_templateCountLabel(templates)}',
+        '${TreinosListLabels.readyCount(ready)} · $totalExercises exercícios · ${TreinosListLabels.templateCount(templates)}',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: AppTypography.inter(

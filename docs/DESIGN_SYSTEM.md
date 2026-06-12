@@ -325,6 +325,24 @@ Fonte única de tokens visuais e componentes compartilhados do app Flutter.
 6. **CI** — `security.yml` (gitleaks) + `semgrep.yml` (SAST).
 7. **Backend** — isolamento multi-tenant (`CrossTenantIsolationTest`) + `ApiErrorResponse` uniforme.
 
+## Refatoração robusta
+
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `lib/core/refactoring/focux_refactoring.dart` | `FocuxRefactoring` — limiares e mapa de módulos |
+| `tools/find_orphan_dart.dart` | Detecta arquivos Dart órfãos em `lib/` |
+| `test/support/screen_source_bundle.dart` | Bundle de `part` para gates |
+| `test/core/business_logic/business_logic_contract_test.dart` | Lógica fora de hubs críticos |
+
+### Regras
+
+1. **Lógica fora da UI** — regras em `utils/`; widgets só renderizam (`business_logic_contract_test`).
+2. **Telas grandes** — acima de 900 LOC: `part` ou `utils/` do módulo (`FocuxRefactoring.monolithicPartThreshold`).
+3. **Parts** — `readScreenSourceBundle` inclui `*.part.dart` do mesmo stem nos gates.
+4. **Módulos** — financeiro/alunos usam tabs/parts; dashboard/aluno 360 com `*_logic.dart`.
+5. **Órfãos** — CI executa `find_orphan_dart.dart`.
+6. **Backend** — controllers tier-1 sem `Repository`; services extraídos (`BusinessLogicContractTest`).
+
 ## Tokens
 
 | Arquivo | Responsabilidade |
@@ -400,6 +418,8 @@ Catálogo visual (debug): rota `/qa/tokens-strip` → `TokensStripShowcaseScreen
 | `focux_data_viz_test.dart` | Séries e helpers de visualização |
 | `security_pillar_contract_test.dart` | Tokens + erros seguros + IA disclaimer |
 | `focux_security_test.dart` | Storage, pinning e workflows CI |
+| `robust_refactoring_pillar_contract_test.dart` | Parts/utils + hubs decompostos |
+| `focux_refactoring_test.dart` | Limiares e orphan scan |
 | `motion_preferences_test.dart` | Reduced motion helpers |
 | `screen_tier_s_plus_contract_test.dart` | Baseline S+ por tela |
 | `screen_a11y_contract_test.dart` | Root a11y |

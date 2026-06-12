@@ -49,6 +49,8 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | `FocuxDataViz` + `focux_data_viz_test` + `FxSparkline` | ✅ |
 | `security_pillar_contract_test` — erros seguros e tokens nos hubs | ✅ |
 | `FocuxSecurity` + `focux_security_test` + gitleaks/semgrep CI | ✅ |
+| `robust_refactoring_pillar_contract_test` — decomposição nos hubs | ✅ |
+| `FocuxRefactoring` + `focux_refactoring_test` + orphan scan CI | ✅ |
 | `dart run tools/find_orphan_dart.dart` | ✅ |
 | `tool/verify.ps1` | ✅ |
 
