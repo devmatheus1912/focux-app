@@ -421,13 +421,10 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
       final repo = IaRepository(ref.read(apiClientProvider));
       final acaoAtual =
           _proximaAcao ?? await repo.proximaAcao(_selectedAlunoId!);
-      final textoAcao =
-          (acaoAtual['acao'] ??
-                  acaoAtual['titulo'] ??
-                  acaoAtual['mensagem'] ??
-                  '')
-              .toString();
-      final motivo = (acaoAtual['motivo'] ?? '').toString();
+      final textoAcao = acaoAtual.displayText == 'Sem detalhe'
+          ? ''
+          : acaoAtual.displayText;
+      final motivo = acaoAtual.motivo;
       final draft = await _confirmarCriarTarefa(
         textoAcao.isEmpty ? 'Revisar aluno no Copiloto' : textoAcao,
         motivo,
@@ -443,8 +440,8 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
             'COPILOT_${_modeDisplay.toUpperCase()}_STUDENT_${_selectedAlunoId!}',
         createdFromInsight: true,
       );
-      final actionKey = (acao['actionKey'] ?? '').toString();
-      var persisted = actionKey.isNotEmpty;
+      final actionKey = acao.actionKey ?? '';
+      var persisted = acao.hasPersistedActionKey;
       if (persisted) {
         try {
           final abertas = await ref

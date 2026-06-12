@@ -343,6 +343,26 @@ Fonte única de tokens visuais e componentes compartilhados do app Flutter.
 5. **Órfãos** — CI executa `find_orphan_dart.dart`.
 6. **Backend** — controllers tier-1 sem `Repository`; services extraídos (`BusinessLogicContractTest`).
 
+## Código limpo & escalável
+
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `lib/core/clean_code/focux_clean_code.dart` | `FocuxCleanCode` — padrões de composição e anti-padrões |
+| `lib/features/ia/models/ia_copilot_proxima_acao.dart` | DTO imutável — parse na borda API |
+| `lib/features/alunos/utils/alunos_list_sparkline_logic.dart` | Métricas puras do sparkline da lista |
+| `test/core/business_logic/business_logic_contract_test.dart` | Lógica fora da UI nos hubs críticos |
+| `test/core/design_system/clean_scalable_code_pillar_contract_test.dart` | Gate tipos explícitos nos 6 hubs |
+| `.cursor/rules/clean-scalable-code.mdc` | Princípios obrigatórios do monorepo |
+
+### Regras
+
+1. **Tipos explícitos** — hubs sem `Map<String, dynamic>`; parse em models/DTOs na borda.
+2. **Lógica fora da UI** — formatação e regras em `utils/` testáveis (`business_logic_contract_test`).
+3. **Composição** — hubs usam `TokensStrip`, `FxShellScaffold`, `Aluno360Layout` / `DashboardLayout`.
+4. **Providers finos** — estado derivado calculado fora de `build()`.
+5. **Single responsibility** — extrair ao misturar layout + regra (~150 LOC úteis).
+6. **Backend** — DTOs imutáveis, services pequenos (`CleanScalableCodeContractTest`).
+
 ## Tokens
 
 | Arquivo | Responsabilidade |

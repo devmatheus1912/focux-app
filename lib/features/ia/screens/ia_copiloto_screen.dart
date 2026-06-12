@@ -24,6 +24,7 @@ import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../providers/ia_copilot_providers.dart';
 import '../widgets/ia_copilot_shell_widgets.dart';
+import '../models/ia_copilot_proxima_acao.dart';
 import '../widgets/ia_copilot_insight_widgets.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 part 'ia_copiloto_screen_actions.part.dart';
@@ -44,7 +45,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
   String? _selectedAlunoNome;
   // BUG-21: tempo real de geração
   int _geracaoMs = 0;
-  Map<String, dynamic>? _proximaAcao;
+  IaCopilotProximaAcao? _proximaAcao;
   bool _tarefaCriada = false;
   bool _tarefaPersistida = false;
   final _modes = ['Treino', 'Dieta', 'Progressão'];
@@ -654,9 +655,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                                     ),
                                   ),
                                   IaCopilotTinyTypeChip(
-                                    label:
-                                        (_proximaAcao!['status'] ?? 'ABERTO')
-                                            .toString(),
+                                    label: _proximaAcao!.statusLabel,
                                     color: brand,
                                     background: Colors.white.withValues(
                                       alpha: 0.72,
@@ -666,11 +665,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
                               ),
                               SizedBox(height: TokensStrip.s2),
                               Text(
-                                (_proximaAcao!['acao'] ??
-                                        _proximaAcao!['titulo'] ??
-                                        _proximaAcao!['mensagem'] ??
-                                        'Sem detalhe')
-                                    .toString(),
+                                _proximaAcao!.displayText,
                                 style: TextStyle(
                                   color: mute,
                                   fontSize: 12.3,

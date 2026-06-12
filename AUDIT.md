@@ -51,6 +51,8 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | `FocuxSecurity` + `focux_security_test` + gitleaks/semgrep CI | ✅ |
 | `robust_refactoring_pillar_contract_test` — decomposição nos hubs | ✅ |
 | `FocuxRefactoring` + `focux_refactoring_test` + orphan scan CI | ✅ |
+| `clean_scalable_code_pillar_contract_test` — tipos explícitos nos hubs | ✅ |
+| `FocuxCleanCode` + `focux_clean_code_test` + sparkline/proximaAcao tipados | ✅ |
 | `dart run tools/find_orphan_dart.dart` | ✅ |
 | `tool/verify.ps1` | ✅ |
 

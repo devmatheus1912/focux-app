@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../subscription/models/subscription_plan.dart';
+import '../models/ia_copilot_proxima_acao.dart';
 import '../models/ia_progressao_carga_result.dart';
 import '../models/progressao_sugestao.dart';
 
@@ -202,13 +203,15 @@ class IaRepository {
     });
   }
 
-  Future<Map<String, dynamic>> proximaAcao(int alunoId) async {
+  Future<IaCopilotProximaAcao> proximaAcao(int alunoId) async {
     return _withIaErrorContext(() async {
       final r = await _dio.get(
         '/api/ia/copiloto/proxima-acao/$alunoId',
         options: _iaOpts,
       );
-      return r.data as Map<String, dynamic>;
+      return IaCopilotProximaAcao.fromJson(
+        Map<String, dynamic>.from(r.data as Map),
+      );
     });
   }
 
@@ -241,7 +244,7 @@ class IaRepository {
     });
   }
 
-  Future<Map<String, dynamic>> salvarAcaoCopiloto({
+  Future<IaCopilotProximaAcao> salvarAcaoCopiloto({
     required int alunoId,
     required String acao,
     String? motivo,
@@ -264,7 +267,9 @@ class IaRepository {
           'createdFromInsight': createdFromInsight,
         },
       );
-      return r.data as Map<String, dynamic>;
+      return IaCopilotProximaAcao.fromJson(
+        Map<String, dynamic>.from(r.data as Map),
+      );
     });
   }
 

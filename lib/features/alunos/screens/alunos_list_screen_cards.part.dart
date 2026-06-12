@@ -317,7 +317,7 @@ class _AlunoCardFX extends ConsumerStatefulWidget {
 }
 
 class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
-  List<Map<String, dynamic>>? _dados;
+  List<AderenciaWeekPoint>? _aderenciaPoints;
 
   @override
   void initState() {
@@ -330,8 +330,11 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
   Future<void> _loadSparkline() async {
     try {
       final repo = AlunoRepository(ref.read(apiClientProvider));
-      final res = await repo.aderenciaSemanal(widget.aluno.id);
-      if (mounted) setState(() => _dados = res);
+      final bundle = await repo.aderenciaSemanalBundle(widget.aluno.id);
+      if (!mounted) return;
+      setState(
+        () => _aderenciaPoints = parseAderenciaSemanal(bundle.dias),
+      );
     } catch (_) {}
   }
 
@@ -375,15 +378,13 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
 
     final avatarColor = alunoAvatarFallbackColor(displayName, isDark);
 
-    final sparkValues = (_dados ?? const <Map<String, dynamic>>[])
-        .map((e) => (e['checkins'] as num?)?.toDouble() ?? 0.0)
-        .toList(growable: false);
-    final weeklyCheckins = sparkValues.fold<double>(0, (p, v) => p + v).round();
-    final aderenciaPercent =
-        widget.aluno.aderenciaPercent ??
-        (sparkValues.isEmpty
-            ? null
-            : ((weeklyCheckins / 7.0) * 100).round().clamp(0, 100));
+    final sparkline = alunosListSparklineMetrics(
+      points: _aderenciaPoints ?? const [],
+      cachedAderenciaPercent: widget.aluno.aderenciaPercent,
+    );
+    final sparkValues = sparkline.sparkValues;
+    final weeklyCheckins = sparkline.weeklyCheckins;
+    final aderenciaPercent = sparkline.aderenciaPercent;
     final aderColor = EagleTokens.aderenciaColor(
       (aderenciaPercent ?? 0).toDouble(),
       isDark: isDark,
