@@ -7,6 +7,7 @@ import '../../../core/utils/fx_utils.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/aderencia_provider.dart';
 import '../../alunos/data/aluno_repository.dart';
@@ -384,7 +385,7 @@ class _PersonalDashboardScreenState
                 context.go('/financeiro');
                 return;
               }
-              context.go('/alunos?filtro=risco');
+              goPersonalShellTab(context, '/alunos?filtro=risco');
             }
 
             final filaAcoes = commandAsync.maybeWhen(
@@ -646,7 +647,10 @@ class _PersonalDashboardScreenState
                                   child: TextButton(
                                     onPressed:
                                         () =>
-                                            context.go('/alunos?filtro=risco'),
+                                            goPersonalShellTab(
+                                              context,
+                                              '/alunos?filtro=risco',
+                                            ),
                                     child: Text(
                                       riscoAlto > 1
                                           ? 'Ver tudo · +${riscoAlto - 1}'
@@ -759,13 +763,21 @@ class _PersonalDashboardScreenState
                             agendaHoje: agendaHoje,
                             hideRiscoChip: alunosEmRisco.isNotEmpty,
                             primary: primary,
-                            onAtivos: () => context.go('/alunos?filtro=ativos'),
+                            onAtivos:
+                                () => goPersonalShellTab(
+                                  context,
+                                  '/alunos?filtro=ativos',
+                                ),
                             onCheckins: () => context.go('/checkin/historico'),
-                            onAgenda: () => context.go('/agenda'),
+                            onAgenda:
+                                () => goPersonalShellTab(context, '/agenda'),
                             onRisco:
                                 riscoAlto > 0
-                                    ? () => context.go('/alunos?filtro=risco')
-                                    : () => context.go('/alunos'),
+                                    ? () => goPersonalShellTab(
+                                      context,
+                                      '/alunos?filtro=risco',
+                                    )
+                                    : () => goPersonalShellTab(context, '/alunos'),
                             showEmptyTrendCta:
                                 !checkinsTrend.any((v) => v > 0) &&
                                 alunosAtivos > 0 &&

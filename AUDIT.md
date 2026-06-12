@@ -33,6 +33,8 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | `FocuxPerformance` + `motion_preferences_test` + tier S+ loading | ✅ |
 | `microcopy_pillar_contract_test` — PT-BR + friendlyError + hubs | ✅ |
 | `FocuxMicrocopy` + `focux_microcopy_test` + utils de módulo | ✅ |
+| `navigation_architecture_pillar_contract_test` — safe nav + providers hubs | ✅ |
+| `FocuxNavigation` + `safe_navigation_test` + `routes_pillar_contract_test` | ✅ |
 | `dart run tools/find_orphan_dart.dart` | ✅ |
 | `tool/verify.ps1` | ✅ |
 

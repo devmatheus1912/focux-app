@@ -168,6 +168,24 @@ Fonte única de tokens visuais e componentes compartilhados do app Flutter.
 4. **Idioma** — PT-BR em UI de produção; proibido inglês cru (`Loading`, `Retry`, `Save`).
 5. **Backend** — API não embute `buttonLabel` / `ctaText` / chaves de microcopy em DTOs.
 
+## Navegação & arquitetura
+
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `lib/core/navigation/focux_navigation.dart` | `FocuxNavigation` — catálogo shell + padrões de hub |
+| `lib/core/router/safe_navigation.dart` | `safePopOrGo`, `goPersonalShellTab` — back e troca de aba |
+| `lib/core/router/role_home.dart` | `goToRoleHome`, `roleHomePath` — home por papel |
+| `lib/core/router/fx_page_transition.dart` | Transições de rota no shell |
+| `lib/core/router/app_router.dart` | GoRouter — shells Personal e Aluno |
+
+### Regras
+
+1. **Rotas** — `context.push` / `context.go` (GoRouter); proibido `Navigator.push` + `MaterialPageRoute` em hubs.
+2. **Back** — `safePopOrGo(context, fallback)` ou `safePopOr` com fallback explícito.
+3. **Shell tabs** — `/alunos`, `/treinos`, `/agenda`, `/ia/copiloto` via `goPersonalShellTab`; deep links (`/financeiro`) via `context.go`.
+4. **Estado** — hubs com `ref.watch` + `providers/`; lógica pesada em `utils/` (Pilar 3).
+5. **Catálogo de rotas** — `routes_pillar_contract_test` + `README.md`; BE sem `deepLinkPath` em DTOs.
+
 ## Tokens
 
 | Arquivo | Responsabilidade |
@@ -226,6 +244,9 @@ Catálogo visual (debug): rota `/qa/tokens-strip` → `TokensStripShowcaseScreen
 | `perceived_performance_pillar_contract_test.dart` | Skeleton + motion + hubs |
 | `microcopy_pillar_contract_test.dart` | PT-BR + friendlyError + hubs |
 | `focux_microcopy_test.dart` | Catálogo e utils de módulo |
+| `navigation_architecture_pillar_contract_test.dart` | Safe nav + providers + hubs |
+| `safe_navigation_test.dart` | `safePopOrGo` e `goPersonalShellTab` |
+| `routes_pillar_contract_test.dart` | Shell tabs + deep links (Pilar 2) |
 | `motion_preferences_test.dart` | Reduced motion helpers |
 | `screen_tier_s_plus_contract_test.dart` | Baseline S+ por tela |
 | `screen_a11y_contract_test.dart` | Root a11y |
