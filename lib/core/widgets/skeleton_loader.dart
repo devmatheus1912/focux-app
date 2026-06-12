@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../utils/motion_preferences.dart';
+
 class SkeletonLoader extends StatefulWidget {
   final double width;
   final double height;
@@ -38,8 +40,22 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final staticColor =
+        isDark ? const Color(0xFF2A2A2A) : Colors.grey.shade300;
+
+    if (reduceMotionOf(context)) {
+      return Container(
+        width: widget.width,
+        height: widget.height,
+        decoration: BoxDecoration(
+          color: staticColor,
+          borderRadius: BorderRadius.circular(widget.borderRadius),
+        ),
+      );
+    }
+
     final colorTween = ColorTween(
-      begin: isDark ? const Color(0xFF2A2A2A) : Colors.grey.shade300,
+      begin: staticColor,
       end: isDark ? const Color(0xFF3A3A3A) : Colors.grey.shade100,
     );
 

@@ -18,6 +18,7 @@ void main() {
     'test/core/design_system/components_consistency_pillar_contract_test.dart',
     'test/core/design_system/ux_feedback_pillar_contract_test.dart',
     'test/core/design_system/accessibility_pillar_contract_test.dart',
+    'test/core/design_system/perceived_performance_pillar_contract_test.dart',
     'test/core/design_system/productivity_gates_contract_test.dart',
     'test/core/router/routes_pillar_contract_test.dart',
     'test/core/business_logic/business_logic_contract_test.dart',

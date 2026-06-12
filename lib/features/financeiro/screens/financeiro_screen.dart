@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/utils/motion_preferences.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -43,7 +44,12 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
     _tabController = TabController(length: 3, vsync: this);
     if (widget.initialAlunoId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _tabController.animateTo(1);
+        if (!mounted) return;
+        if (reduceMotionOf(context)) {
+          _tabController.index = 1;
+        } else {
+          _tabController.animateTo(1);
+        }
       });
     }
   }

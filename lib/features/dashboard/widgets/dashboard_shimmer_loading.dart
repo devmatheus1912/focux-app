@@ -3,6 +3,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/motion_preferences.dart';
 
 class DashboardShimmerLoading extends StatelessWidget {
   const DashboardShimmerLoading({super.key, required this.themeDark});
@@ -24,10 +25,7 @@ class DashboardShimmerLoading extends StatelessWidget {
       ),
     );
 
-    return Shimmer.fromColors(
-      baseColor: base,
-      highlightColor: highlight,
-      child: SingleChildScrollView(
+    final content = SingleChildScrollView(
         physics: const NeverScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 6, 16, 20),
         child: Column(
@@ -116,7 +114,16 @@ class DashboardShimmerLoading extends StatelessWidget {
             ],
           ],
         ),
-      ),
+      );
+
+    if (reduceMotionOf(context)) {
+      return content;
+    }
+
+    return Shimmer.fromColors(
+      baseColor: base,
+      highlightColor: highlight,
+      child: content,
     );
   }
 }

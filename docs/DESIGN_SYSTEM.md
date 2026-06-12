@@ -131,6 +131,26 @@ Fonte única de tokens visuais e componentes compartilhados do app Flutter.
 4. **Anúncios** — mudanças de estado via `fxAnnounce` quando o contexto muda sem foco.
 5. **Manual** — auditoria trimestral TalkBack/VoiceOver (`docs/MANUAL-TRIMESTRAL.md`).
 
+## Performance percebida
+
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `lib/core/performance/focux_performance.dart` | `FocuxPerformance` — catálogo loading + motion |
+| `lib/core/utils/motion_preferences.dart` | `reduceMotionOf`, `fxMotionDuration` — reduced motion OS |
+| `lib/core/router/fx_page_transition.dart` | `fxTransitionPage` — transições shell sem animação quando reduzida |
+| `lib/core/widgets/skeleton_loader.dart` | `SkeletonLoader`, `SkeletonList` — placeholder estático se reduced motion |
+| `lib/core/widgets/fx_loading.dart` | `FxLoading`, `sectionShimmer` — spinner e skeleton de seção |
+| `lib/core/widgets/fx_motion.dart` | `FxStaggerItem` — entrada em lista respeitando reduced motion |
+| `lib/features/dashboard/widgets/dashboard_shimmer_loading.dart` | Skeleton do hub personal |
+
+### Regras
+
+1. **Async** — estados `loading` usam skeleton/shimmer (`SkeletonList`, `DashboardShimmer`, `FxLoading`); proibido `CircularProgressIndicator` em `lib/features/`.
+2. **Reduced motion** — `reduceMotionOf` / `prefersReducedMotion` antes de animar; skeletons estáticos quando `MediaQuery.disableAnimations`.
+3. **Listas** — `FxStaggerItem` para entrada progressiva (já desliga com reduced motion).
+4. **Navegação** — rotas shell via `fxTransitionPage` (fade/slide ou child direto).
+5. **Backend** — API não embute `skeletonDelay` / hints de loading em DTOs.
+
 ## Tokens
 
 | Arquivo | Responsabilidade |
@@ -186,6 +206,8 @@ Catálogo visual (debug): rota `/qa/tokens-strip` → `TokensStripShowcaseScreen
 | `a11y_labels_test.dart` | Rótulos PT-BR dashboard/aluno360 |
 | `screen_a11y_contract_test.dart` | Root a11y em todas as telas |
 | `a11y_controls_contract_test.dart` | Labels em controles |
+| `perceived_performance_pillar_contract_test.dart` | Skeleton + motion + hubs |
+| `motion_preferences_test.dart` | Reduced motion helpers |
 | `screen_tier_s_plus_contract_test.dart` | Baseline S+ por tela |
 | `screen_a11y_contract_test.dart` | Root a11y |
 

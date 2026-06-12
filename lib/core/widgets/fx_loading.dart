@@ -3,6 +3,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../theme/design_tokens.dart';
 import '../theme/tokens_strip.dart';
+import '../utils/motion_preferences.dart';
 
 /// Premium loading indicator — sized, subtle, and consistent.
 /// Drop-in replacement for the banned `Center(child: CircularProgressIndicator())`.
@@ -54,38 +55,44 @@ class FxLoading extends StatelessWidget {
       ),
     );
 
+    final content = SizedBox(
+      height: height,
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (showHeader) ...[
+            Row(
+              children: [
+                bone(38, 38, radius: 13),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      bone(140, 13, radius: 8),
+                      const SizedBox(height: 6),
+                      bone(96, 10, radius: 6),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+          ],
+          Expanded(child: bone(double.infinity, double.infinity, radius: 16)),
+        ],
+      ),
+    );
+
+    if (reduceMotionOf(context)) {
+      return content;
+    }
+
     return Shimmer.fromColors(
       baseColor: base,
       highlightColor: highlight,
-      child: SizedBox(
-        height: height,
-        width: double.infinity,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (showHeader) ...[
-              Row(
-                children: [
-                  bone(38, 38, radius: 13),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        bone(140, 13, radius: 8),
-                        const SizedBox(height: 6),
-                        bone(96, 10, radius: 6),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-            ],
-            Expanded(child: bone(double.infinity, double.infinity, radius: 16)),
-          ],
-        ),
-      ),
+      child: content,
     );
   }
 
