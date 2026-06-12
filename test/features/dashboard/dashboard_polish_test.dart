@@ -15,11 +15,12 @@ void main() {
       'lib/features/dashboard/widgets/dashboard_tools_section.dart',
       'lib/features/dashboard/widgets/dashboard_financial_hero_section.dart',
       'lib/features/dashboard/widgets/dashboard_shimmer_loading.dart',
+      'lib/features/dashboard/utils/dashboard_microcopy.dart',
     ];
     final screen = paths.map((p) => File(p).readAsStringSync()).join('\n');
 
     expect(screen, contains('dashboardSectionKickerStyle'));
-    expect(screen, contains("'Panorama financeiro'"));
+    expect(screen, contains('panoramaFinanceiro'));
     expect(screen, contains('receitaAtual > 0'));
     expect(screen, contains(r'R\$ 0 recebido · meta do mês'));
     expect(screen, contains("'Pulso operacional'"));

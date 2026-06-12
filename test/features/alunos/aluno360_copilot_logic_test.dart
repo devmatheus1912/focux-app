@@ -3,6 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_copilot_logic.dart';
+import 'package:focux_app/features/ia/models/ia_copilot_proxima_acao.dart';
+
+IaCopilotProximaAcao _iaPayload(Map<String, dynamic> json) =>
+    IaCopilotProximaAcao.fromJson(json);
 
 Aluno _aluno({
   String nome = 'Beatriz',
@@ -34,10 +38,10 @@ Aluno _aluno({
 void main() {
   group('copilotActionFromIa', () {
     test('maps IA payload to display action', () {
-      final action = copilotActionFromIa(const {
+      final action = copilotActionFromIa(_iaPayload({
         'acao': 'Enviar mensagem curta pedindo retorno ao treino',
         'motivo': '14 dias sem atividade',
-      });
+      }));
       expect(action['titulo'], 'Sugestão IA');
       expect(action['fonte'], 'IA');
       expect(action['acao'], contains('mensagem'));
@@ -55,10 +59,10 @@ void main() {
       final merged = resolveCopilotProximaAcaoResumo(
         proximaAcao360: seed,
         forceIa: true,
-        iaAsync: const AsyncValue.data({
+        iaAsync: AsyncValue.data(_iaPayload({
           'acao': 'Retomar contato com mensagem objetiva sobre aderência',
           'motivo': 'Baixa frequência nos últimos 14 dias',
-        }),
+        })),
       );
       expect(merged?.fonte, 'IA');
       expect(merged?.acao, contains('Retomar contato'));
@@ -221,7 +225,7 @@ void main() {
       expect(
         copilotCardSubtitle(
           forceIa: true,
-          iaAsync: const AsyncValue.data({'acao': 'Teste'}),
+          iaAsync: AsyncValue.data(_iaPayload({'acao': 'Teste'})),
           resumoLoading: false,
         ),
         'Atualizado com IA · toque em atualizar para regenerar',
@@ -243,7 +247,7 @@ void main() {
       expect(
         copilotCardSubtitle(
           forceIa: true,
-          iaAsync: const AsyncValue.data({'acao': 'Teste'}),
+          iaAsync: AsyncValue.data(_iaPayload({'acao': 'Teste'})),
           resumoLoading: false,
           compact: true,
         ),
@@ -255,7 +259,7 @@ void main() {
       expect(
         copilotCardSubtitle(
           forceIa: true,
-          iaAsync: const AsyncValue.data({'acao': 'Teste'}),
+          iaAsync: AsyncValue.data(_iaPayload({'acao': 'Teste'})),
           resumoLoading: false,
           iaRefreshing: true,
         ),
@@ -307,10 +311,10 @@ void main() {
           'Entre em contato com Beatriz Carvalho para reavivar o interesse no treinamento e solicitar a sincronização dos dados do wearable.';
       final content = resolveCopilotPrescriptionFromAction(
         aluno,
-        copilotActionFromIa(const {
+        copilotActionFromIa(_iaPayload({
           'acao': raw,
           'motivo': 'Última atividade há 999 dia(s), aderência de 0%',
-        }),
+        })),
         'fallback',
       );
       expect(content.action, 'Retomar contato e pedir sync do wearable.');
@@ -327,10 +331,10 @@ void main() {
       );
       final content = resolveCopilotPrescriptionFromAction(
         _aluno(),
-        copilotActionFromIa(const {
+        copilotActionFromIa(_iaPayload({
           'acao': 'Retomar contato e checar como está o treino.',
           'motivo': 'Priorize contato · sem registro recente · aderência 0%',
-        }),
+        })),
         'fallback',
       );
       expect(content.fullAction, isNull);
@@ -689,14 +693,14 @@ void main() {
 
   group('proximaAcaoResumoFromIaPayload', () {
     test('parses enrichment fields from IA API', () {
-      final resumo = proximaAcaoResumoFromIaPayload({
+      final resumo = proximaAcaoResumoFromIaPayload(_iaPayload({
         'acao': 'Contate Beatriz para sync wearable',
         'motivo': 'Sem treinos recentes',
         'tipoAcao': 'WEARABLE',
         'mensagemSugerida': 'Oi, Beatriz. Sync.',
         'stickyLabel': 'Retomar contato · wearable',
         'stickyLabelCompact': 'Contato',
-      });
+      }));
       expect(resumo?.tipoAcao, 'WEARABLE');
       expect(resumo?.mensagemSugerida, 'Oi, Beatriz. Sync.');
       expect(resumo?.stickyLabelCompact, 'Contato');

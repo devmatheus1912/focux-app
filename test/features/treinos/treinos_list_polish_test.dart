@@ -11,10 +11,10 @@ void main() {
   });
 
   test('treinos list sheet usa scroll e microcopy 10/10', () {
-    final screen =
-        File(
-          'lib/features/treinos/screens/treinos_list_screen.dart',
-        ).readAsStringSync();
+    final screen = [
+      'lib/features/treinos/screens/treinos_list_screen.dart',
+      'lib/features/treinos/utils/treinos_list_labels.dart',
+    ].map((p) => File(p).readAsStringSync()).join('\n');
 
     expect(screen, contains('isScrollControlled: true'));
     expect(screen, contains('SingleChildScrollView'));
@@ -23,7 +23,7 @@ void main() {
     expect(screen, contains('control_point_duplicate_rounded'));
     expect(screen, contains('assignment_ind_rounded'));
     expect(screen, contains('displayWorkoutName(treino.nome)'));
-    expect(screen, contains('_readyPlansLabel'));
+    expect(screen, contains('TreinosListLabels.readyPlans'));
     expect(screen, contains('segure para selecionar'));
   });
 }

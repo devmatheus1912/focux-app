@@ -49,8 +49,8 @@ Future<bool> criarTarefaCopilotoFromAluno360({
           'ALUNO_360_${aluno.id}_${DateTime.now().millisecondsSinceEpoch}',
       createdFromInsight: true,
     );
-    final actionKey = (saved['actionKey'] ?? '').toString();
-    var persisted = actionKey.isNotEmpty;
+    final actionKey = saved.actionKey ?? '';
+    var persisted = saved.hasPersistedActionKey;
     if (persisted) {
       final abertas = await ref
           .read(dashboardRepositoryProvider)

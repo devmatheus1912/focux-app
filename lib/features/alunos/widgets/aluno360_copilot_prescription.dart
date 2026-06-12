@@ -4,6 +4,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../ia/models/ia_copilot_proxima_acao.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_copilot_logic.dart';
@@ -425,7 +426,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
   final String fallback;
   final Map<String, dynamic>? seed360;
   final bool forceIa;
-  final AsyncValue<Map<String, dynamic>>? iaAsync;
+  final AsyncValue<IaCopilotProximaAcao>? iaAsync;
   final bool resumoLoading;
   final bool bundleLoading;
   final bool bundleRefreshing;

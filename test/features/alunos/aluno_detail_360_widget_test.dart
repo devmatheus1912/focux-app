@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/widgets/operational_metric_tile.dart';
 import 'package:focux_app/features/alertas/data/alertas_repository.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
+import 'package:focux_app/features/ia/models/ia_copilot_proxima_acao.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
 import 'package:focux_app/features/alunos/providers/aluno_followup_provider.dart';
 import 'package:focux_app/features/alunos/providers/alunos_provider.dart';
@@ -80,7 +81,7 @@ List<Override> _beatrizOverrides() {
             ..state = const AsyncValue.data(Timeline360PagedState(events: [])),
     ),
     alunoCopilotoActionProvider(_contactPriorityAlunoId)
-        .overrideWith((ref) async => const {}),
+        .overrideWith((ref) async => IaCopilotProximaAcao.empty),
     alertasConfigProvider.overrideWith(
       (ref) async => AlertasConfiguracao(
         diasSemTreino: 7,
@@ -175,7 +176,8 @@ List<Override> _aluno360Overrides() {
           Timeline360PagedNotifier(ref, _alunoId)
             ..state = const AsyncValue.data(Timeline360PagedState(events: [])),
     ),
-    alunoCopilotoActionProvider(_alunoId).overrideWith((ref) async => const {}),
+    alunoCopilotoActionProvider(_alunoId)
+        .overrideWith((ref) async => IaCopilotProximaAcao.empty),
     alertasConfigProvider.overrideWith(
       (ref) async => AlertasConfiguracao(
         diasSemTreino: 7,

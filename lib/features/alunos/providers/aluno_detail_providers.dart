@@ -7,6 +7,7 @@ import '../../dashboard/data/command_center_data.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../health/data/health_repository.dart';
 import '../../ia/data/ia_repository.dart';
+import '../../ia/models/ia_copilot_proxima_acao.dart';
 import '../data/aluno_copilot_ia_cache_store.dart';
 import '../data/aluno_operacao_focus_store.dart';
 import '../data/aluno_repository.dart';
@@ -122,7 +123,7 @@ final alunoCopilotIaRefreshingProvider = StateProvider.family<bool, int>(
 );
 
 final alunoCopilotoActionProvider =
-    FutureProvider.family<Map<String, dynamic>, int>((ref, alunoId) async {
+    FutureProvider.family<IaCopilotProximaAcao, int>((ref, alunoId) async {
       final skipCache = ref.watch(alunoCopilotIaSkipCacheProvider(alunoId));
       if (!skipCache) {
         final cached = await AlunoCopilotIaCacheStore.loadIfFresh(alunoId);
@@ -152,7 +153,7 @@ final aluno360OperacaoProvider =
       final hasOpenTask =
           findOpenCopilotTask(openActions) != null ||
           (bundle.hasOpenCopilotTask ?? false);
-      final backendWearable = iaAsync?.valueOrNull?['wearableRelevant'];
+      final backendWearable = iaAsync?.valueOrNull?.wearableRelevant;
       final bundledWearable = bundle.hasWearableHistory;
       final wearableRelevant =
           backendWearable is bool

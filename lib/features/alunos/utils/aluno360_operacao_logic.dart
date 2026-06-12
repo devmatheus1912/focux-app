@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../dashboard/data/command_center_data.dart';
 import '../data/aluno_contact_utils.dart';
+import '../../ia/models/ia_copilot_proxima_acao.dart';
 import '../data/aluno_repository.dart';
 import 'aluno360_copilot_logic.dart';
 import 'aluno_hero_signal.dart';
@@ -739,7 +740,7 @@ Aluno360OperacaoSnapshot resolveAluno360OperacaoSnapshot({
   required Aluno aluno,
   required ProximaAcaoResumo? proximaAcao360,
   required bool forceIa,
-  required AsyncValue<Map<String, dynamic>>? iaAsync,
+  required AsyncValue<IaCopilotProximaAcao>? iaAsync,
   required bool hasOpenTask,
   required bool followUpDue,
   bool wearableRelevant = true,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../ia/models/ia_copilot_proxima_acao.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno_display_utils.dart';
 
@@ -94,14 +95,12 @@ Map<String, dynamic> copilotActionFrom360(ProximaAcaoResumo proxima) => {
   'prioridade': proxima.prioridade,
 };
 
-Map<String, dynamic> copilotActionFromIa(Map<String, dynamic> action) {
-  final raw =
-      (action['acao'] ?? action['mensagem'] ?? action['descricao'] ?? '')
-          .toString();
+Map<String, dynamic> copilotActionFromIa(IaCopilotProximaAcao action) {
+  final raw = action.rawAcaoOrFallback;
   final acao = normalizeIaCopilotAcao(raw);
-  final motivoRaw =
-      (action['motivo'] ?? 'Gerado com base nos sinais atuais do aluno.')
-          .toString();
+  final motivoRaw = action.motivo.isEmpty
+      ? 'Gerado com base nos sinais atuais do aluno.'
+      : action.motivo;
   return {
     'titulo': 'Sugestão IA',
     'acao': acao.isEmpty ? cleanCopilotText(raw) : acao,
@@ -114,7 +113,7 @@ Map<String, dynamic> copilotActionFromIa(Map<String, dynamic> action) {
 ProximaAcaoResumo? resolveCopilotProximaAcaoResumo({
   required ProximaAcaoResumo? proximaAcao360,
   required bool forceIa,
-  required AsyncValue<Map<String, dynamic>>? iaAsync,
+  required AsyncValue<IaCopilotProximaAcao>? iaAsync,
 }) {
   if (forceIa && iaAsync != null) {
     return iaAsync.maybeWhen(
@@ -128,27 +127,26 @@ ProximaAcaoResumo? resolveCopilotProximaAcaoResumo({
 }
 
 ProximaAcaoResumo? proximaAcaoResumoFromIaPayload(
-  Map<String, dynamic> action, {
+  IaCopilotProximaAcao action, {
   ProximaAcaoResumo? fallback,
 }) {
-  final raw =
-      (action['acao'] ?? action['mensagem'] ?? action['descricao'] ?? '')
-          .toString();
+  final raw = action.rawAcaoOrFallback;
   final acao = normalizeIaCopilotAcao(raw);
-  if (acao.isEmpty && raw.trim().isEmpty) return fallback;
+  if (acao.isEmpty && raw.isEmpty) return fallback;
   return ProximaAcaoResumo(
     acao: acao.isEmpty ? cleanCopilotText(raw) : acao,
     motivo: formatCopilotIaMotivo(
-      (action['motivo'] ?? 'Gerado com base nos sinais atuais do aluno.')
-          .toString(),
+      action.motivo.isEmpty
+          ? 'Gerado com base nos sinais atuais do aluno.'
+          : action.motivo,
     ),
     fonte: 'IA',
     prioridade: 'P1',
-    tipoAcao: action['tipoAcao'] as String?,
-    mensagemSugerida: action['mensagemSugerida'] as String?,
-    stickyLabel: action['stickyLabel'] as String?,
-    stickyLabelCompact: action['stickyLabelCompact'] as String?,
-    wearableRelevant: action['wearableRelevant'] as bool?,
+    tipoAcao: action.tipoAcao,
+    mensagemSugerida: action.mensagemSugerida,
+    stickyLabel: action.stickyLabel,
+    stickyLabelCompact: action.stickyLabelCompact,
+    wearableRelevant: action.wearableRelevant,
   );
 }
 
@@ -193,7 +191,7 @@ String sanitizeCopilotAcaoWearable(
 
 String copilotCardSubtitle({
   required bool forceIa,
-  required AsyncValue<Map<String, dynamic>>? iaAsync,
+  required AsyncValue<IaCopilotProximaAcao>? iaAsync,
   required bool resumoLoading,
   bool compact = false,
   bool iaRefreshing = false,
@@ -529,18 +527,15 @@ List<Aluno360CopilotSignal> resolveCopilotSignals({
 String resolveCopilotAcao({
   required Map<String, dynamic>? seed360,
   required bool forceIa,
-  required AsyncValue<Map<String, dynamic>>? iaAsync,
+  required AsyncValue<IaCopilotProximaAcao>? iaAsync,
   required String fallback,
 }) {
   if (forceIa && iaAsync != null) {
     return iaAsync.maybeWhen(
       data: (action) {
-        final raw =
-            (action['acao'] ??
-                    action['mensagem'] ??
-                    action['descricao'] ??
-                    fallback)
-                .toString();
+        final raw = action.rawAcaoOrFallback.isEmpty
+            ? fallback
+            : action.rawAcaoOrFallback;
         final normalized = normalizeIaCopilotAcao(raw);
         return cleanCopilotText(normalized.isEmpty ? raw : normalized);
       },
