@@ -68,7 +68,10 @@ class _TreinoExerciseReorderListState
     } catch (error) {
       if (!mounted) return;
       setState(() => _items = snapshot);
-      FeedbackHelper.showError(context, 'Erro ao reordenar: $error');
+      FeedbackHelper.showError(
+        context,
+        friendlyError(error, fallback: 'Erro ao reordenar exercícios.'),
+      );
     }
   }
 
@@ -89,7 +92,10 @@ class _TreinoExerciseReorderListState
       widget.ref.invalidate(treinoProvider(widget.treinoId));
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showError(context, 'Erro ao remover: $e');
+        FeedbackHelper.showError(
+          context,
+          friendlyError(e, fallback: 'Erro ao remover exercício.'),
+        );
       }
     }
   }
@@ -141,7 +147,7 @@ class _TreinoExerciseReorderListState
               if (mounted) {
                 FeedbackHelper.showError(
                   this.context,
-                  'Erro ao duplicar: $error',
+                  friendlyError(error, fallback: 'Erro ao duplicar exercício.'),
                 );
               }
             }
@@ -173,7 +179,10 @@ class _TreinoExerciseReorderListState
                         if (mounted) {
                           FeedbackHelper.showError(
                             this.context,
-                            'Erro ao substituir: $error',
+                            friendlyError(
+                              error,
+                              fallback: 'Erro ao substituir exercício.',
+                            ),
                           );
                         }
                       }

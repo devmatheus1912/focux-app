@@ -130,7 +130,10 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       FeedbackHelper.showSuccess(context, 'Treino atribuído ao aluno.');
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, 'Não foi possível atribuir: $e');
+      FeedbackHelper.showError(
+        context,
+        friendlyError(e, fallback: 'Não foi possível atribuir o treino.'),
+      );
     }
   }
 
@@ -142,7 +145,10 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       FeedbackHelper.showSuccess(context, 'Treino duplicado.');
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, 'Não foi possível duplicar: $e');
+      FeedbackHelper.showError(
+        context,
+        friendlyError(e, fallback: 'Não foi possível duplicar o treino.'),
+      );
     }
   }
 
@@ -171,7 +177,10 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       );
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, 'Não foi possível copiar: $e');
+      FeedbackHelper.showError(
+        context,
+        friendlyError(e, fallback: 'Não foi possível copiar o treino.'),
+      );
     }
   }
 
@@ -252,7 +261,10 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       );
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, 'Não foi possível remover: $e');
+      FeedbackHelper.showError(
+        context,
+        friendlyError(e, fallback: 'Não foi possível remover o treino.'),
+      );
     }
   }
 

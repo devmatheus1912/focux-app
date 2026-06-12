@@ -25,6 +25,8 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | `FocuxHierarchy` + `focux_hierarchy_test` | ✅ |
 | `components_consistency_pillar_contract_test` — catálogo Fx + hubs | ✅ |
 | `FocuxComponents` + `eagle_design_contract_test` | ✅ |
+| `ux_feedback_pillar_contract_test` — toasts + friendlyError + hubs | ✅ |
+| `FocuxFeedback` + `friendly_error_test` | ✅ |
 | `dart run tools/find_orphan_dart.dart` | ✅ |
 | `tool/verify.ps1` | ✅ |
 
@@ -41,6 +43,7 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | Contraste WCAG | `FocuxContrast` + `dashboard_readability` / `aluno360_readability` |
 | Hierarquia visual | `FocuxHierarchy` + foco do dia / modo operação |
 | Componentes Fx | `FocuxComponents` — loading, shell, feedback, listas |
+| UX & feedback | `FeedbackHelper` + `friendlyError` — sem `$e` em toasts |
 | Features sem hex cru | gate `features_color_tokens_contract_test` (exc. QA + Google) |
 | Componentes | `FxHorizontalScrollPeek` compartilhado |
 | Charts | `FxChartTheme` |

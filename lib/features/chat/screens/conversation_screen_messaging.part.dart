@@ -141,7 +141,7 @@ extension ConversationScreenMessaging on _ConversationScreenState {
       if (mounted) {
         FeedbackHelper.showError(
           context,
-          'Nao foi possivel selecionar o arquivo: $e',
+          friendlyError(e, fallback: 'Não foi possível selecionar o arquivo.'),
         );
       }
       return;
@@ -239,7 +239,10 @@ extension ConversationScreenMessaging on _ConversationScreenState {
       });
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, 'Nao foi possivel iniciar o audio: $e');
+      FeedbackHelper.showError(
+        context,
+        friendlyError(e, fallback: 'Não foi possível iniciar o áudio.'),
+      );
     }
   }
 
@@ -264,7 +267,7 @@ extension ConversationScreenMessaging on _ConversationScreenState {
       if (!mounted) return;
       FeedbackHelper.showError(
         context,
-        'Nao foi possivel finalizar o audio: $e',
+        friendlyError(e, fallback: 'Não foi possível finalizar o áudio.'),
       );
       return;
     }
@@ -292,7 +295,10 @@ extension ConversationScreenMessaging on _ConversationScreenState {
       );
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, 'Nao foi possivel enviar o audio: $e');
+      FeedbackHelper.showError(
+        context,
+        friendlyError(e, fallback: 'Não foi possível enviar o áudio.'),
+      );
     }
   }
 

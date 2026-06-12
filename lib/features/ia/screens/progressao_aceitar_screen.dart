@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -312,7 +313,10 @@ class _ProgressaoAceitarScreenState
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showError(context, 'Não foi possível concluir: $e');
+        FeedbackHelper.showError(
+          context,
+          friendlyError(e, fallback: 'Não foi possível concluir a progressão.'),
+        );
       }
     } finally {
       if (mounted) setState(() => _actingOnId = null);

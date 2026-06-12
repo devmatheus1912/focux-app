@@ -96,6 +96,23 @@ Fonte única de tokens visuais e componentes compartilhados do app Flutter.
 4. **Shell** — hubs com `FxShellScaffold` ou `FxShellAppBar` + `fxScreenA11yScope`.
 5. **Catálogo** — ≥15 widgets `fx_*` em `lib/core/widgets/`; versão `FocuxComponents.version`.
 
+## UX & feedback
+
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `lib/core/ux/focux_feedback.dart` | `FocuxFeedback` — catálogo de toasts e estados |
+| `lib/core/widgets/feedback_helper.dart` | `FeedbackHelper` — success/error/warn/info + haptics |
+| `lib/core/utils/friendly_error.dart` | `friendlyError` — humaniza `DioException` e erros opacos |
+| `lib/core/widgets/fx_empty_state.dart` | Estados vazios com CTA opcional |
+
+### Regras
+
+1. **Toasts** — `FeedbackHelper.showSuccess/Error/Warn/Info`; proibido `ScaffoldMessenger` e `SnackBar` em features.
+2. **Erros** — `friendlyError(e)` em toasts e painéis; proibido interpolar `$e` / `$error` na UI.
+3. **Vazios** — `FxEmptyState` ou widget de módulo (`DashboardErrorState`, `AlunoDetailErrorState`).
+4. **Operação Aluno 360** — `FeedbackHelper.showOperacao*` com `FeedbackPlacement.operacaoTop`.
+5. **Async** — telas com `.when` / loading devem ter estado de erro + loading DS (gate Tier S+).
+
 ## Tokens
 
 | Arquivo | Responsabilidade |
@@ -145,6 +162,8 @@ Catálogo visual (debug): rota `/qa/tokens-strip` → `TokensStripShowcaseScreen
 | `components_consistency_pillar_contract_test.dart` | Catálogo Fx + hubs |
 | `focux_components_test.dart` | Paths do catálogo |
 | `eagle_design_contract_test.dart` | Anti-patterns (loading/input/list) |
+| `ux_feedback_pillar_contract_test.dart` | Toasts + friendlyError + hubs |
+| `friendly_error_test.dart` | Humanização HTTP/timeout |
 | `screen_tier_s_plus_contract_test.dart` | Baseline S+ por tela |
 | `screen_a11y_contract_test.dart` | Root a11y |
 

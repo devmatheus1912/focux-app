@@ -127,7 +127,10 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showError(context, 'Erro ao gerar link iCal: $e');
+        FeedbackHelper.showError(
+          context,
+          friendlyError(e, fallback: 'Erro ao gerar link iCal.'),
+        );
       }
     }
   }
