@@ -731,7 +731,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                 _filtro == AlunoFiltro.todos &&
                 (contatoCount > 0 || riscoCount > 0);
             final listBottomGap =
-                MediaQuery.sizeOf(context).width < 390 ? 28.0 : 36.0;
+                FocuxPlatform.isCompact(context) ? 28.0 : 36.0;
 
             return SafeArea(
               bottom: false,

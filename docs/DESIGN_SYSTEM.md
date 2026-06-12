@@ -204,6 +204,25 @@ Fonte única de tokens visuais e componentes compartilhados do app Flutter.
 4. **Glow/pulse** — `FxInteractiveGlow` respeita `prefersReducedMotion`.
 5. **Backend** — API não embute `animationDuration` / presets de motion em DTOs.
 
+## Adaptação de plataforma
+
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `lib/core/platform/focux_platform.dart` | `FocuxPlatform` — breakpoints, safe area, catálogo shell |
+| `lib/core/widgets/fx_content_width_limiter.dart` | Largura máx. 960px em tablet/desktop |
+| `lib/core/widgets/fx_shell_scaffold.dart` | Scaffold com SafeArea + limiter opcional |
+| `lib/core/theme/shell_chrome.dart` | Superfícies glass light/dark |
+| `lib/core/screens/main_shell.dart` / `aluno_shell.dart` | Dock + clearance por safe area |
+| `lib/core/theme/fx_page_transitions_builder.dart` | Transições em todas as `TargetPlatform` |
+
+### Regras
+
+1. **Breakpoints** — compacto `< 390px` via `FocuxPlatform.isCompact`; desktop `960px` max content.
+2. **Safe area** — `FocuxPlatform.safeBottomInset` / `safeTopInset`; `SafeArea` em scrolls full-bleed.
+3. **Hubs desktop** — `FxContentWidthLimiter` ou `FxShellScaffold(constrainWidth: true)`.
+4. **Módulos** — `DashboardLayout`, `Aluno360Layout` alinhados a `FocuxPlatform.desktopMaxContent`.
+5. **Backend** — API não embute `platformSpecific` / layouts por OS em DTOs.
+
 ## Tokens
 
 | Arquivo | Responsabilidade |
@@ -267,6 +286,8 @@ Catálogo visual (debug): rota `/qa/tokens-strip` → `TokensStripShowcaseScreen
 | `routes_pillar_contract_test.dart` | Shell tabs + deep links (Pilar 2) |
 | `motion_design_pillar_contract_test.dart` | Stagger + spring + hubs |
 | `focux_motion_test.dart` | Durações e widgets do catálogo |
+| `platform_adaptation_pillar_contract_test.dart` | Breakpoints + safe area + hubs |
+| `focux_platform_test.dart` | Breakpoints e shells |
 | `motion_preferences_test.dart` | Reduced motion helpers |
 | `screen_tier_s_plus_contract_test.dart` | Baseline S+ por tela |
 | `screen_a11y_contract_test.dart` | Root a11y |

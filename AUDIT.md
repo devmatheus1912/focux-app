@@ -37,6 +37,8 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | `FocuxNavigation` + `safe_navigation_test` + `routes_pillar_contract_test` | ✅ |
 | `motion_design_pillar_contract_test` — stagger + spring + reduced motion hubs | ✅ |
 | `FocuxMotion` + `focux_motion_test` + `fx_motion` widgets | ✅ |
+| `platform_adaptation_pillar_contract_test` — breakpoints + safe area hubs | ✅ |
+| `FocuxPlatform` + `focux_platform_test` + shells/limiter | ✅ |
 | `dart run tools/find_orphan_dart.dart` | ✅ |
 | `tool/verify.ps1` | ✅ |
 

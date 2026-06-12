@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../platform/focux_platform.dart';
+
 /// Centers shell content on wide screens (tablet / desktop).
 class FxContentWidthLimiter extends StatelessWidget {
   const FxContentWidthLimiter({
     super.key,
     required this.child,
-    this.maxWidth = 960,
+    this.maxWidth = FocuxPlatform.desktopMaxContent,
   });
 
   final Widget child;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
+import '../platform/focux_platform.dart';
 import '../widgets/cinematic_mesh_background.dart';
 import '../widgets/fx_dock.dart';
 import '../widgets/mesh_scope.dart';
@@ -14,8 +15,8 @@ class AlunoShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bottomInset = MediaQuery.of(context).padding.bottom;
-    final compact = MediaQuery.sizeOf(context).width < 390;
+    final bottomInset = FocuxPlatform.safeBottomInset(context);
+    final compact = FocuxPlatform.isCompact(context);
     final dockClearance = bottomInset + (compact ? 88.0 : 98.0);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
