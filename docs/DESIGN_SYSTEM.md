@@ -283,6 +283,25 @@ Fonte única de tokens visuais e componentes compartilhados do app Flutter.
 5. **Paleta segura** — primárias custom via `CuratedBrandPalette.isReadablePrimary`.
 6. **Backend** — identidade (`corPrimaria`, `logoUrl`) só em DTOs de perfil/landing; hubs operacionais sem `brandTagline` em DTOs.
 
+## Data viz & conteúdo dinâmico
+
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `lib/core/data_viz/focux_data_viz.dart` | `FocuxDataViz` — tipos de viz e helpers de série |
+| `lib/core/theme/fx_chart_theme.dart` | `FxChartTheme` — cores/eixos para `fl_chart` |
+| `lib/core/widgets/fx_sparkline.dart` | `FxSparkline` — mini-séries em cards |
+| `lib/features/dashboard/utils/dashboard_sparkline_helpers.dart` | Séries check-in/receita do hub personal |
+| `lib/features/alunos/utils/aluno360_evolucao_inteligente_logic.dart` | Série de volume Aluno 360 |
+
+### Regras
+
+1. **Séries** — transformação numérica em `utils/` (`dashboard_sparkline_helpers`, `aluno360_evolucao_inteligente_logic`).
+2. **Sparklines** — `FxSparkline`; séries vazias degradam para trilho neutro, não quebram layout.
+3. **Gráficos** — `fl_chart` ou barras custom com tokens (`FxChartTheme`, `BrandPalette`).
+4. **Conteúdo dinâmico** — hubs com `ref.watch` + `.when` (loading/erro/dados); insights IA via `insightsProvider`.
+5. **Ponto único** — `FocuxDataViz.ensureRenderableSeries` duplica valor para linha visível.
+6. **Backend** — API entrega dados (`evolucaoMensal`, métricas); sem `chartType` / `axisConfig` em DTOs.
+
 ## Tokens
 
 | Arquivo | Responsabilidade |
@@ -354,6 +373,8 @@ Catálogo visual (debug): rota `/qa/tokens-strip` → `TokensStripShowcaseScreen
 | `focux_density_test.dart` | Tiers e helpers de densidade |
 | `branding_personality_pillar_contract_test.dart` | White-label + paleta dinâmica nos hubs |
 | `focux_branding_test.dart` | Catálogo e providers de marca |
+| `data_viz_dynamic_content_pillar_contract_test.dart` | Sparklines + gráficos + async nos hubs |
+| `focux_data_viz_test.dart` | Séries e helpers de visualização |
 | `motion_preferences_test.dart` | Reduced motion helpers |
 | `screen_tier_s_plus_contract_test.dart` | Baseline S+ por tela |
 | `screen_a11y_contract_test.dart` | Root a11y |
