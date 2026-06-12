@@ -75,6 +75,27 @@ Fonte única de tokens visuais e componentes compartilhados do app Flutter.
 4. **Foco de input** — `FxInputDeco.focusedBorder`; proibido `OutlineInputBorder` fora do core.
 5. **Foco operacional** — um banner/CTA primário por hub (`DashboardDayFocus`, sticky CTA Aluno 360).
 
+## Componentes & consistência
+
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `lib/core/widgets/focux_components.dart` | `FocuxComponents` — catálogo e padrões de hub |
+| `lib/core/widgets/fx_loading.dart` | Loading — nunca `CircularProgressIndicator` direto |
+| `lib/core/widgets/fx_empty_state.dart` | Estados vazios padronizados |
+| `lib/core/widgets/fx_shell_scaffold.dart` | Shell com mesh/glass + `FxShellAppBar` |
+| `lib/core/widgets/feedback_helper.dart` | SnackBar/toast — nunca `ScaffoldMessenger` direto |
+| `lib/core/widgets/fx_input_deco.dart` | Inputs — nunca `OutlineInputBorder` cru |
+| `lib/core/widgets/fx_bottom_sheet.dart` | `showFxBottomSheet` — entrada suave |
+| `lib/core/widgets/fx_screen_a11y.dart` | `fxScreenA11yScope` — root semantics |
+
+### Regras
+
+1. **Feedback** — `FeedbackHelper`; proibido `ScaffoldMessenger.of` em features.
+2. **Loading** — `FxLoading`, `SkeletonLoader` ou shimmer do módulo; proibido `CircularProgressIndicator` cru.
+3. **Listas** — `fxListTileCardShell` / `FxSatelliteListTile`; proibido `ListTile` cru.
+4. **Shell** — hubs com `FxShellScaffold` ou `FxShellAppBar` + `fxScreenA11yScope`.
+5. **Catálogo** — ≥15 widgets `fx_*` em `lib/core/widgets/`; versão `FocuxComponents.version`.
+
 ## Tokens
 
 | Arquivo | Responsabilidade |
@@ -121,6 +142,9 @@ Catálogo visual (debug): rota `/qa/tokens-strip` → `TokensStripShowcaseScreen
 | `focux_contrast_test.dart` | Pares críticos ≥4.5:1 |
 | `visual_hierarchy_pillar_contract_test.dart` | Escala + elevação + foco hubs |
 | `focux_hierarchy_test.dart` | Ordem tipográfica e camadas |
+| `components_consistency_pillar_contract_test.dart` | Catálogo Fx + hubs |
+| `focux_components_test.dart` | Paths do catálogo |
+| `eagle_design_contract_test.dart` | Anti-patterns (loading/input/list) |
 | `screen_tier_s_plus_contract_test.dart` | Baseline S+ por tela |
 | `screen_a11y_contract_test.dart` | Root a11y |
 

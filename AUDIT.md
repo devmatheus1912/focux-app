@@ -23,6 +23,8 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | `FocuxContrast` + `focux_contrast_test` (pares ≥4.5:1) | ✅ |
 | `visual_hierarchy_pillar_contract_test` — escala + elevação + foco hubs | ✅ |
 | `FocuxHierarchy` + `focux_hierarchy_test` | ✅ |
+| `components_consistency_pillar_contract_test` — catálogo Fx + hubs | ✅ |
+| `FocuxComponents` + `eagle_design_contract_test` | ✅ |
 | `dart run tools/find_orphan_dart.dart` | ✅ |
 | `tool/verify.ps1` | ✅ |
 
@@ -38,6 +40,7 @@ Checklist executável do monorepo. **Status: completo para lançamento TestFligh
 | Semântica dark | `EagleTokens.semantic*` + hub tokens |
 | Contraste WCAG | `FocuxContrast` + `dashboard_readability` / `aluno360_readability` |
 | Hierarquia visual | `FocuxHierarchy` + foco do dia / modo operação |
+| Componentes Fx | `FocuxComponents` — loading, shell, feedback, listas |
 | Features sem hex cru | gate `features_color_tokens_contract_test` (exc. QA + Google) |
 | Componentes | `FxHorizontalScrollPeek` compartilhado |
 | Charts | `FxChartTheme` |
