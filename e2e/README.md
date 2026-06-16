@@ -96,6 +96,7 @@ e2e/
 | BoxConstraints meus treinos aluno | aluno/02-meus-treinos-P1.spec.ts |
 | /api/ia/* 403 aluno | aluno/04-ia-aluno-P1.spec.ts |
 | /api/aluno/anamnese 404 | aluno/06-anamnese-P1.spec.ts |
+| Hubs refatorados (chat, copiloto, migracao, exercicios) | personal/11-rotas-criticas-P0.spec.ts |
 
 ## Falhas esperadas hoje
 

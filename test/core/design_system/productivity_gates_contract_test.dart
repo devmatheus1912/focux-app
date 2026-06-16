@@ -31,6 +31,7 @@ void main() {
     'test/core/design_system/robust_refactoring_pillar_contract_test.dart',
     'test/core/design_system/clean_scalable_code_pillar_contract_test.dart',
     'test/core/design_system/productivity_gates_contract_test.dart',
+    'test/core/e2e/e2e_critical_routes_contract_test.dart',
     'test/core/router/routes_pillar_contract_test.dart',
     'test/core/business_logic/business_logic_contract_test.dart',
   ];
