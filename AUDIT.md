@@ -54,7 +54,7 @@ Checklist executável do app Flutter. **Status: pronto para TestFlight.**
 | `clean_scalable_code_pillar_contract_test` — tipos explícitos nos hubs | ✅ |
 | `FocuxCleanCode` + `focux_clean_code_test` + sparkline/proximaAcao tipados | ✅ |
 | Hubs decompostos: treinos, gamificação, migração, busca | ✅ |
-| Monolitos decompostos: add_exercicio_screen (entry 27 LOC) | ✅ |
+| Monolitos decompostos: add_exercicio_screen, perfil_aluno_screen | ✅ |
 | `dart run tools/find_orphan_dart.dart` | ✅ |
 | `tool/verify.ps1` | ✅ |
 

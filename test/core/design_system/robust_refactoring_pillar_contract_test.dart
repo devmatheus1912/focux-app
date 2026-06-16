@@ -99,4 +99,15 @@ void main() {
     ).readAsStringSync();
     expect(screen, contains("part 'add_exercicio_screen_state.part.dart'"));
   });
+
+  test('perfil aluno entry file stays decomposed under 100 LOC', () {
+    final lines = File(
+      'lib/features/dashboard/screens/perfil_aluno_screen.dart',
+    ).readAsLinesSync().length;
+    expect(lines, lessThan(100));
+    final screen = File(
+      'lib/features/dashboard/screens/perfil_aluno_screen.dart',
+    ).readAsStringSync();
+    expect(screen, contains("part 'perfil_aluno_screen_state.part.dart'"));
+  });
 }
