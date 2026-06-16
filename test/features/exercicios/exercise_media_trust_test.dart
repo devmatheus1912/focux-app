@@ -52,10 +52,9 @@ void main() {
     final builder = readScreenSourceBundle(
       'lib/features/treinos/screens/add_exercicio_to_treino_screen.dart',
     );
-    final detail =
-        File(
-          'lib/features/exercicios/screens/exercicio_detail_screen.dart',
-        ).readAsStringSync();
+    final detail = readScreenSourceBundle(
+      'lib/features/exercicios/screens/exercicio_detail_screen.dart',
+    );
     final treinoDetail = readScreenSourceBundle(
       'lib/features/treinos/screens/treino_detail_screen.dart',
     );

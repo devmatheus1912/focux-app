@@ -136,4 +136,40 @@ void main() {
     expect(screen, contains("part 'ia_copiloto_screen_build.part.dart'"));
     expect(screen, contains("part 'ia_copiloto_screen_actions.part.dart'"));
   });
+
+  test('chat inbox entry stays decomposed under 100 LOC', () {
+    final lines = File(
+      'lib/features/chat/screens/chat_inbox_screen.dart',
+    ).readAsLinesSync().length;
+    expect(lines, lessThan(100));
+    final screen = File(
+      'lib/features/chat/screens/chat_inbox_screen.dart',
+    ).readAsStringSync();
+    expect(screen, contains("part 'chat_inbox_screen_state.part.dart'"));
+    expect(screen, contains("part 'chat_inbox_screen_widgets.part.dart'"));
+  });
+
+  test('exercicio detail entry stays decomposed under 100 LOC', () {
+    final lines = File(
+      'lib/features/exercicios/screens/exercicio_detail_screen.dart',
+    ).readAsLinesSync().length;
+    expect(lines, lessThan(100));
+    final screen = File(
+      'lib/features/exercicios/screens/exercicio_detail_screen.dart',
+    ).readAsStringSync();
+    expect(screen, contains("part 'exercicio_detail_screen_state.part.dart'"));
+    expect(screen, contains("part 'exercicio_detail_screen_widgets.part.dart'"));
+  });
+
+  test('migracao magica entry stays decomposed under 100 LOC', () {
+    final lines = File(
+      'lib/features/growth/screens/migracao_magica_screen.dart',
+    ).readAsLinesSync().length;
+    expect(lines, lessThan(100));
+    final screen = File(
+      'lib/features/growth/screens/migracao_magica_screen.dart',
+    ).readAsStringSync();
+    expect(screen, contains("part 'migracao_magica_screen_state.part.dart'"));
+    expect(screen, contains("part 'migracao_magica_screen_actions.part.dart'"));
+  });
 }
