@@ -88,4 +88,16 @@ void main() {
     expect(doc, contains('Lógica fora da UI'));
     expect(doc, contains('Tipos explícitos'));
   });
+
+  test('typed satellite screens avoid raw map state', () {
+    const typedScreens = [
+      'lib/features/perfil/screens/equipe_screen.dart',
+      'lib/features/loja/screens/loja_screen.dart',
+    ];
+    for (final path in typedScreens) {
+      final source = File(path).readAsStringSync();
+      expect(source, isNot(contains('List<Map<String, dynamic>>')));
+      expect(source, contains('/models/'));
+    }
+  });
 }

@@ -1,51 +1,20 @@
-import 'package:dio/dio.dart';
-
 import 'package:flutter/material.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/api/api_client.dart';
-
 import '../../../core/theme/tokens_strip.dart';
-
 import '../../../core/utils/friendly_error.dart';
-
 import '../../../core/widgets/feature_gate.dart';
-
 import '../../../core/widgets/feedback_helper.dart';
-
 import '../../../core/widgets/fx_empty_state.dart';
-
 import '../../../core/widgets/fx_loading.dart';
-
 import '../../../core/widgets/fx_motion.dart';
-
 import '../../../core/widgets/fx_shell_scaffold.dart';
-
 import '../../auth/providers/auth_provider.dart';
-
 import '../../subscription/models/subscription_plan.dart';
+import '../data/equipe_repository.dart';
+import '../models/tenant_membro.dart';
 
-class EquipeRepository {
-  final Dio _dio;
-
-  EquipeRepository(ApiClient c) : _dio = c.dio;
-
-  Future<List<Map<String, dynamic>>> listar() async {
-    final r = await _dio.get('/api/tenant/membros');
-
-    return (r.data as List).cast<Map<String, dynamic>>();
-  }
-
-  Future<void> convidar({required String email}) async {
-    await _dio.post(
-      '/api/tenant/membros',
-      data: {'userEmail': email, 'role': 'ASSISTENTE'},
-    );
-  }
-}
-
-final _equipeRepo = Provider(
+final equipeRepositoryProvider = Provider(
   (ref) => EquipeRepository(ref.read(apiClientProvider)),
 );
 
@@ -57,38 +26,30 @@ class EquipeScreen extends ConsumerStatefulWidget {
 }
 
 class _EquipeScreenState extends ConsumerState<EquipeScreen> {
-  List<Map<String, dynamic>> _membros = [];
-
+  List<TenantMembro> _membros = [];
   bool _loading = true;
-
   String? _error;
 
   @override
   void initState() {
     super.initState();
-
     _load();
   }
 
   Future<void> _load() async {
     setState(() {
       _loading = true;
-
       _error = null;
     });
 
     try {
-      _membros = await ref.read(_equipeRepo).listar();
-
+      _membros = await ref.read(equipeRepositoryProvider).listar();
       if (!mounted) return;
-
       setState(() => _loading = false);
     } catch (e) {
       if (!mounted) return;
-
       setState(() {
         _loading = false;
-
         _error = friendlyError(e);
       });
     }
@@ -96,49 +57,37 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
 
   Future<void> _convidar() async {
     final ctrl = TextEditingController();
-
     final ok = await showDialog<bool>(
       context: context,
-
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Convidar assistente'),
-
-            content: TextField(
-              controller: ctrl,
-
-              decoration: const InputDecoration(labelText: 'Email'),
-
-              keyboardType: TextInputType.emailAddress,
-            ),
-
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
-              ),
-
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Convidar'),
-              ),
-            ],
+      builder: (ctx) => AlertDialog(
+        title: const Text('Convidar assistente'),
+        content: TextField(
+          controller: ctrl,
+          decoration: const InputDecoration(labelText: 'Email'),
+          keyboardType: TextInputType.emailAddress,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
           ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Convidar'),
+          ),
+        ],
+      ),
     );
 
     if (ok != true || ctrl.text.trim().isEmpty) return;
 
     try {
-      await ref.read(_equipeRepo).convidar(email: ctrl.text.trim());
-
+      await ref.read(equipeRepositoryProvider).convidar(email: ctrl.text.trim());
       await _load();
-
       if (!mounted) return;
-
       FeedbackHelper.showSuccess(context, 'Convite enviado');
     } catch (e) {
       if (!mounted) return;
-
       FeedbackHelper.showError(context, friendlyError(e));
     }
   }
@@ -149,98 +98,69 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
 
     return FeatureGate(
       featureName: 'Equipe',
-
       requiredPlan: SubscriptionPlan.ENTERPRISE,
-
       capability: 'equipeRbac',
-
       child: FxShellScaffold(
         appBar: const FxShellAppBar(
           title: 'Equipe',
-
           subtitle: 'Assistentes e permissões',
         ),
-
         floatingActionButton: Semantics(
           label: 'Convidar membro da equipe',
-
           button: true,
-
           child: FloatingActionButton.extended(
             onPressed: _convidar,
-
             icon: const Icon(Icons.person_add),
-
             label: const Text('Convidar'),
           ),
         ),
-
-        body:
-            _loading
-                ? const Center(child: FxLoading())
-                : _error != null
-                ? FxEmptyState(
-                  icon: 'alert-triangle',
-
-                  title: 'Erro ao carregar',
-
-                  subtitle: _error,
-
-                  action: FxEmptyAction(
-                    label: 'Tentar novamente',
-                    onTap: _load,
+        body: _loading
+            ? const Center(child: FxLoading())
+            : _error != null
+            ? FxEmptyState(
+                icon: 'alert-triangle',
+                title: 'Erro ao carregar',
+                subtitle: _error,
+                action: FxEmptyAction(label: 'Tentar novamente', onTap: _load),
+              )
+            : _membros.isEmpty
+            ? FxEmptyState(
+                icon: 'users',
+                title: 'Nenhum membro',
+                subtitle: 'Convide assistentes para escalar sua operação.',
+                action: FxEmptyAction(label: 'Convidar', onTap: _convidar),
+              )
+            : RefreshIndicator(
+                onRefresh: _load,
+                child: ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s4,
+                    TokensStrip.s2,
+                    TokensStrip.s4,
+                    96,
                   ),
-                )
-                : _membros.isEmpty
-                ? FxEmptyState(
-                  icon: 'users',
-
-                  title: 'Nenhum membro',
-
-                  subtitle: 'Convide assistentes para escalar sua operação.',
-
-                  action: FxEmptyAction(label: 'Convidar', onTap: _convidar),
-                )
-                : RefreshIndicator(
-                  onRefresh: _load,
-
-                  child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
-
-                      TokensStrip.s2,
-
-                      TokensStrip.s4,
-
-                      96,
-                    ),
-
-                    itemCount: _membros.length,
-
-                    itemBuilder: (_, i) {
-                      final m = _membros[i];
-
-                      return FxStaggerItem(
-                        index: i,
-
-                        child: Semantics(
-                          label: 'Membro ${m['userEmail']}',
-
-                          child: FxSatelliteListTile(
-                            accent: scheme.primary,
-                            title: m['userEmail'] as String? ?? 'Membro',
-                            titleCase: false,
-                            subtitle: Text('${m['role']} · ${m['status']}'),
-                            leading: Icon(
-                              Icons.person_outline,
-                              color: scheme.primary,
-                            ),
+                  itemCount: _membros.length,
+                  itemBuilder: (_, i) {
+                    final membro = _membros[i];
+                    return FxStaggerItem(
+                      index: i,
+                      child: Semantics(
+                        label: 'Membro ${membro.userEmail}',
+                        child: FxSatelliteListTile(
+                          accent: scheme.primary,
+                          title: membro.userEmail,
+                          titleCase: false,
+                          subtitle: Text('${membro.role} · ${membro.status}'),
+                          leading: Icon(
+                            Icons.person_outline,
+                            color: scheme.primary,
                           ),
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
+              ),
       ),
     );
   }

@@ -13,6 +13,8 @@ abstract final class FocuxCleanCode {
     'lib/core/refactoring/focux_refactoring.dart',
     'lib/features/alunos/utils/alunos_list_sparkline_logic.dart',
     'lib/features/ia/models/ia_copilot_proxima_acao.dart',
+    'lib/features/perfil/models/tenant_membro.dart',
+    'lib/features/loja/models/loja_pedido.dart',
   ];
 
   static const List<String> hubCompositionPatterns = [
