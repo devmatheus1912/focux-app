@@ -20,7 +20,7 @@ O app se conecta ao `focux-backend`, usa JWT para sessao, aplica rotas por perfi
 | Branch | `main` |
 | API producao | `https://focux-backend-production.up.railway.app` |
 | Analyzer | `dart analyze --fatal-warnings --fatal-infos` sem issues |
-| Testes | `flutter test` — 917 specs |
+| Testes | `flutter test` — 935 specs |
 
 ### Destaques recentes
 

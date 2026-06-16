@@ -77,7 +77,7 @@ jobs:
           E2E_ALUNO_SENHA: ${{ secrets.E2E_ALUNO_SENHA }}
           E2E_ALUNO_ID: ${{ secrets.E2E_ALUNO_ID }}
           CI: 'true'
-        run: npm run test:smoke
+        run: npm run test:p0
 
       - name: Upload Playwright report
         if: always()

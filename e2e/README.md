@@ -41,7 +41,7 @@ npm test
 # só P0 (release-blocker)
 npm run test:p0
 
-# só smoke
+# CI executa @p0 (8 specs); smoke (@smoke) é subconjunto
 npm run test:smoke
 
 # com browser visível (debug)

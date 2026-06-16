@@ -172,4 +172,37 @@ void main() {
     expect(screen, contains("part 'migracao_magica_screen_state.part.dart'"));
     expect(screen, contains("part 'migracao_magica_screen_actions.part.dart'"));
   });
+
+  test('financeiro dashboard entry stays decomposed under 100 LOC', () {
+    final lines = File(
+      'lib/features/financeiro/screens/financeiro_dashboard_screen.dart',
+    ).readAsLinesSync().length;
+    expect(lines, lessThan(100));
+    final screen = File(
+      'lib/features/financeiro/screens/financeiro_dashboard_screen.dart',
+    ).readAsStringSync();
+    expect(screen, contains("part 'financeiro_dashboard_screen_state.part.dart'"));
+  });
+
+  test('meus treinos entry stays decomposed under 200 LOC', () {
+    final lines = File(
+      'lib/features/checkin/screens/meus_treinos_screen.dart',
+    ).readAsLinesSync().length;
+    expect(lines, lessThan(200));
+    expect(
+      File('lib/features/checkin/screens/meus_treinos_screen.dart').readAsStringSync(),
+      contains("part 'meus_treinos_screen_widgets.part.dart'"),
+    );
+  });
+
+  test('create treino entry stays decomposed under 100 LOC', () {
+    final lines = File(
+      'lib/features/treinos/screens/create_treino_screen.dart',
+    ).readAsLinesSync().length;
+    expect(lines, lessThan(100));
+    expect(
+      File('lib/features/treinos/screens/create_treino_screen.dart').readAsStringSync(),
+      contains("part 'create_treino_screen_state.part.dart'"),
+    );
+  });
 }

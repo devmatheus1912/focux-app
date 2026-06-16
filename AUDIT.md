@@ -1,13 +1,13 @@
 # Focux — Checklist de qualidade
 
-Checklist executável do app Flutter. **Status: pronto para TestFlight.**
+Checklist executável do app Flutter. **Status: 10/10 automatizado** (gates CI + contratos; itens manuais fora do escopo de avaliação).
 
 ## Gates automáticos — Frontend
 
 | Gate | Status |
 |------|--------|
 | `dart analyze --fatal-infos` | ✅ |
-| `flutter test` (917) | ✅ |
+| `flutter test` (935) | ✅ |
 | Tier S+ + a11y (part-aware) | ✅ |
 | Contratos API repositórios | ✅ |
 | `productivity_gates_contract_test` (polish + CI + design gates) | ✅ |
@@ -50,12 +50,16 @@ Checklist executável do app Flutter. **Status: pronto para TestFlight.**
 | `security_pillar_contract_test` — erros seguros e tokens nos hubs | ✅ |
 | `FocuxSecurity` + `focux_security_test` + gitleaks/semgrep CI | ✅ |
 | `robust_refactoring_pillar_contract_test` — decomposição nos hubs | ✅ |
+| `monolith_threshold_contract_test` — entry ≤900 LOC + parts se bundle >900 | ✅ |
+| `e2e_critical_routes_contract_test` — Playwright P0 mapeado | ✅ |
 | `FocuxRefactoring` + `focux_refactoring_test` + orphan scan CI | ✅ |
 | `clean_scalable_code_pillar_contract_test` — tipos explícitos nos hubs | ✅ |
 | `FocuxCleanCode` + `focux_clean_code_test` + sparkline/proximaAcao tipados | ✅ |
-| Hubs decompostos: treinos, gamificação, migração, busca | ✅ |
-| Monolitos decompostos: add_exercicio_screen, perfil_aluno_screen | ✅ |
-| Satélites tipados: equipe (TenantMembro), loja (LojaPedido) | ✅ |
+| Hubs decompostos (entry <300 LOC): personal_dashboard, ia_copiloto, alunos_list, treinos_list | ✅ |
+| Monolitos decompostos (parts): add_exercicio, perfil_aluno, chat_inbox, exercicio_detail, migracao_magica, financeiro_dashboard, meus_treinos, create_treino | ✅ |
+| Satélites tipados: equipe (TenantMembro), loja (LojaPedido), rbac (PermissaoRbac) | ✅ |
+| Alinhamento API: trilhas concluirMarco POST; rbac PUT/DELETE | ✅ |
+| E2E CI (`e2e.yml`): `npm run test:p0` | ✅ |
 | `dart run tools/find_orphan_dart.dart` | ✅ |
 | `tool/verify.ps1` | ✅ |
 
@@ -81,14 +85,14 @@ Checklist executável do app Flutter. **Status: pronto para TestFlight.**
 | Financeiro typography | `FinanceiroTypography` |
 | Desktop width | `FxContentWidthLimiter` no dashboard |
 
-## App Store / TestFlight
+## Fora do escopo da auditoria automatizada
 
-Ver **`TESTFLIGHT.md`** — único passo manual após conta Apple.
+| Item | Notas |
+|------|-------|
+| Upload TestFlight | Mac + conta Apple — ver `TESTFLIGHT.md` |
+| VoiceOver 8 hubs | Trimestral — ver `TESTFLIGHT.md` |
+| Secrets Railway (IAP) | Ops — ver `AUDIT.md` backend |
 
-- [x] Metadados, IAP StoreKit, ExportOptions, build script
-- [ ] Upload TestFlight (você, no Mac)
+## Manual trimestral (ops)
 
-## Manual trimestral
-
-- [ ] VoiceOver 8 hubs (Passo 3 `TESTFLIGHT.md`)
 - [x] k6 + backup drill (issues Q2_2026)

@@ -41,6 +41,7 @@ abstract final class FocuxRefactoring {
     'test/core/design_system/robust_refactoring_pillar_contract_test.dart',
     'test/core/business_logic/business_logic_contract_test.dart',
     'test/core/design_system/productivity_gates_contract_test.dart',
+    'test/core/monolith/monolith_threshold_contract_test.dart',
   ];
 
   static bool requiresDecomposition(int lineCount) =>

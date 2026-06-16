@@ -99,9 +99,9 @@ void main() {
   });
 
   test('financeiro hub exposes bar and donut charts', () {
-    final dashboard =
-        File('lib/features/financeiro/screens/financeiro_dashboard_screen.dart')
-            .readAsStringSync();
+    final dashboard = readScreenSourceBundle(
+      'lib/features/financeiro/screens/financeiro_dashboard_screen.dart',
+    );
     expect(dashboard, contains('_EvolucaoChart'));
 
     final resumo =

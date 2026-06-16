@@ -1,7 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/utils/pt_br_display.dart';
+
+import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('displayWorkoutName corrige Forca no preview do novo treino', () {
@@ -9,10 +9,9 @@ void main() {
   });
 
   test('create treino screen polish', () {
-    final screen =
-        File(
-          'lib/features/treinos/screens/create_treino_screen.dart',
-        ).readAsStringSync();
+    final screen = readScreenSourceBundle(
+      'lib/features/treinos/screens/create_treino_screen.dart',
+    );
 
     expect(screen, contains('displayWorkoutName(_nomeCtrl.text.trim())'));
     expect(screen, contains('Deslize para ver mais modelos'));
