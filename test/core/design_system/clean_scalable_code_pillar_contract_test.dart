@@ -60,9 +60,9 @@ void main() {
   });
 
   test('ia copilot uses typed proxima acao model', () {
-    final screen = File(
+    final screen = readScreenSourceBundle(
       'lib/features/ia/screens/ia_copiloto_screen.dart',
-    ).readAsStringSync();
+    );
     final provider = File(
       'lib/features/ia/providers/ia_copilot_providers.dart',
     ).readAsStringSync();

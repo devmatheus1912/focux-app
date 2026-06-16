@@ -16,7 +16,7 @@ abstract final class FocuxRefactoring {
 
   static const Map<String, String> hubDecompositionMarkers = {
     'lib/features/dashboard/screens/personal_dashboard_screen.dart':
-        'dashboard_scroll_logic.dart',
+        "part 'personal_dashboard_screen_state.part.dart'",
     'lib/features/alunos/screens/aluno_detail_screen.dart':
         'aluno360_operacao_logic.dart',
     'lib/features/alunos/screens/alunos_list_screen.dart':

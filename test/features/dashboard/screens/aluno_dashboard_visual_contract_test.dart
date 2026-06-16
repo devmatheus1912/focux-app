@@ -51,10 +51,9 @@ void main() {
   });
 
   test('student profile and autonomy copy keep Portuguese accents', () {
-    final profile =
-        File(
-          'lib/features/dashboard/screens/perfil_aluno_screen.dart',
-        ).readAsStringSync();
+    final profile = readScreenSourceBundle(
+      'lib/features/dashboard/screens/perfil_aluno_screen.dart',
+    );
     final plan =
         File(
           'lib/features/dashboard/data/aluno_autonomy_plan.dart',

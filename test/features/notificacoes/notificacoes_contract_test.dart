@@ -30,9 +30,9 @@ void main() {
     final alunoDashboard = File(
       'lib/features/dashboard/screens/aluno_dashboard_screen.dart',
     ).readAsStringSync();
-    final personalDashboard = File(
+    final personalDashboard = readScreenSourceBundle(
       'lib/features/dashboard/screens/personal_dashboard_screen.dart',
-    ).readAsStringSync();
+    );
     final screen = File(
       'lib/features/notificacoes/screens/notificacoes_screen.dart',
     ).readAsStringSync();

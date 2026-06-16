@@ -6,6 +6,7 @@ void main() {
   test('dashboard hoje usa microcopy, contraste e a11y', () {
     const paths = [
       'lib/features/dashboard/screens/personal_dashboard_screen.dart',
+      'lib/features/dashboard/screens/personal_dashboard_screen_build.part.dart',
       'lib/features/dashboard/utils/dashboard_screen_helpers.dart',
       'lib/features/dashboard/widgets/dashboard_horizontal_scroll_peek.dart',
       'lib/core/widgets/fx_horizontal_scroll_peek.dart',

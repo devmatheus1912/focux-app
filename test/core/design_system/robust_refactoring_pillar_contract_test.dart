@@ -110,4 +110,30 @@ void main() {
     ).readAsStringSync();
     expect(screen, contains("part 'perfil_aluno_screen_state.part.dart'"));
   });
+
+  test('personal dashboard entry stays decomposed under 300 LOC', () {
+    final lines = File(
+      'lib/features/dashboard/screens/personal_dashboard_screen.dart',
+    ).readAsLinesSync().length;
+    expect(lines, lessThan(300));
+    final screen = File(
+      'lib/features/dashboard/screens/personal_dashboard_screen.dart',
+    ).readAsStringSync();
+    expect(screen, contains("part 'personal_dashboard_screen_state.part.dart'"));
+    expect(screen, contains("part 'personal_dashboard_screen_build.part.dart'"));
+    expect(screen, contains('dashboard_scroll_logic.dart'));
+  });
+
+  test('ia copiloto entry stays decomposed under 300 LOC', () {
+    final lines = File(
+      'lib/features/ia/screens/ia_copiloto_screen.dart',
+    ).readAsLinesSync().length;
+    expect(lines, lessThan(300));
+    final screen = File(
+      'lib/features/ia/screens/ia_copiloto_screen.dart',
+    ).readAsStringSync();
+    expect(screen, contains("part 'ia_copiloto_screen_state.part.dart'"));
+    expect(screen, contains("part 'ia_copiloto_screen_build.part.dart'"));
+    expect(screen, contains("part 'ia_copiloto_screen_actions.part.dart'"));
+  });
 }

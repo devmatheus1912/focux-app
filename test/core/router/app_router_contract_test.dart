@@ -113,10 +113,9 @@ void main() {
         File(
           'lib/features/checkin/screens/checkin_screen.dart',
         ).readAsStringSync();
-    final copilot =
-        File(
-          'lib/features/ia/screens/ia_copiloto_screen.dart',
-        ).readAsStringSync();
+    final copilot = readScreenSourceBundle(
+      'lib/features/ia/screens/ia_copiloto_screen.dart',
+    );
     final chat =
         File(
           'lib/features/chat/screens/conversation_screen.dart',

@@ -6,6 +6,7 @@ void main() {
   test('command center autonomy bottlenecks keep compact layout safe', () {
     const paths = [
       'lib/features/dashboard/screens/personal_dashboard_screen.dart',
+      'lib/features/dashboard/screens/personal_dashboard_screen_build.part.dart',
       'lib/features/dashboard/widgets/dashboard_command_center_section.dart',
       'lib/features/dashboard/widgets/dashboard_command_center_sticky_header.dart',
       'lib/features/dashboard/widgets/dashboard_command_center_section_actions.part.dart',
