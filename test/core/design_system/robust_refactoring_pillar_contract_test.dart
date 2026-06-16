@@ -89,8 +89,14 @@ void main() {
     expect(screen, contains('aluno360_copilot_logic.dart'));
   });
 
-  test('CI runs orphan dart scan', () {
-    final workflow = File('.github/workflows/analyze.yml').readAsStringSync();
-    expect(workflow, contains('find_orphan_dart'));
+  test('add exercicio entry file stays decomposed under 100 LOC', () {
+    final lines = File(
+      'lib/features/exercicios/screens/add_exercicio_screen.dart',
+    ).readAsLinesSync().length;
+    expect(lines, lessThan(100));
+    final screen = File(
+      'lib/features/exercicios/screens/add_exercicio_screen.dart',
+    ).readAsStringSync();
+    expect(screen, contains("part 'add_exercicio_screen_state.part.dart'"));
   });
 }

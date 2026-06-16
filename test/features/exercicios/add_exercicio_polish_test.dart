@@ -1,13 +1,12 @@
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
+
+import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('novo exercicio biblioteca polish', () {
-    final screen =
-        File(
-          'lib/features/exercicios/screens/add_exercicio_screen.dart',
-        ).readAsStringSync();
+    final screen = readScreenSourceBundle(
+      'lib/features/exercicios/screens/add_exercicio_screen.dart',
+    );
 
     expect(screen, contains("'Novo exercício'"));
     expect(screen, contains('Erro ao cadastrar exercício.'));
