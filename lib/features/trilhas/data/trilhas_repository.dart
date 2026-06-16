@@ -14,7 +14,10 @@ class TrilhasRepository {
     await _dio.post('/api/trilhas', data: body);
   }
 
-  Future<void> concluirMarco(int marcoId) async {
-    await _dio.patch('/api/trilhas/marcos/$marcoId/concluir');
+  Future<void> concluirMarco({
+    required int trilhaId,
+    required int marcoId,
+  }) async {
+    await _dio.post('/api/trilhas/$trilhaId/marcos/$marcoId/concluir');
   }
 }

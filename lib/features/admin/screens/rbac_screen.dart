@@ -9,56 +9,26 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../auth/providers/auth_provider.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import '../data/rbac_repository.dart';
+import '../models/permissao_rbac.dart';
 
-// ─── Models ───────────────────────────────────────────────────────────────────
+final rbacRepositoryProvider = Provider(
+  (ref) => RbacRepository(ref.read(apiClientProvider)),
+);
 
-class PermissaoModel {
-  final int id;
-  final int personalOwnerId;
-  final int usuarioConvidadoId;
-  final String recurso;
-  final String nivelAcesso;
-
-  PermissaoModel({
-    required this.id,
-    required this.personalOwnerId,
-    required this.usuarioConvidadoId,
-    required this.recurso,
-    required this.nivelAcesso,
-  });
-
-  factory PermissaoModel.fromJson(Map<String, dynamic> j) => PermissaoModel(
-    id: j['id'],
-    personalOwnerId: j['personalOwnerId'],
-    usuarioConvidadoId: j['usuarioConvidadoId'],
-    recurso: j['recurso'],
-    nivelAcesso: j['nivelAcesso'],
-  );
-}
-
-// ─── Providers ────────────────────────────────────────────────────────────────
-
-final permissoesProvider = FutureProvider<List<PermissaoModel>>((ref) async {
-  final api = ref.read(apiClientProvider);
-  final res = await api.dio.get('/api/rbac/permissoes');
-  return (res.data as List).map((e) => PermissaoModel.fromJson(e)).toList();
+final permissoesRbacProvider = FutureProvider<List<PermissaoRbac>>((ref) async {
+  return ref.read(rbacRepositoryProvider).listar();
 });
 
-// ─── Screen ───────────────────────────────────────────────────────────────────
-
-class RbacScreen extends ConsumerStatefulWidget {
+class RbacScreen extends ConsumerWidget {
   const RbacScreen({super.key});
 
   @override
-  ConsumerState<RbacScreen> createState() => _RbacScreenState();
-}
-
-class _RbacScreenState extends ConsumerState<RbacScreen> {
-  @override
-  Widget build(BuildContext context) {
-    final permissoesAsync = ref.watch(permissoesProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final permissoesAsync = ref.watch(permissoesRbacProvider);
     final primary = Theme.of(context).colorScheme.primary;
 
     return fxScreenA11yScope(
@@ -67,12 +37,12 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Controle de Acessos',
-          subtitle: 'Permissões da equipe (RBAC)',
+          subtitle: 'Permissões operacionais do personal',
           actions: [
             IconButton(
               icon: const Icon(Icons.add_rounded),
-              tooltip: 'Conceder novo acesso',
-              onPressed: () => _showConcederAcesso(context, ref),
+              tooltip: 'Conceder permissão',
+              onPressed: () => _showConcederPermissao(context, ref),
             ),
           ],
         ),
@@ -89,12 +59,12 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
             if (permissoes.isEmpty) {
               return FxEmptyState(
                 icon: 'shield',
-                title: 'Nenhuma permissão especial concedida',
+                title: 'Nenhuma permissão configurada',
                 subtitle:
-                    'Conceda acessos pontuais para assistentes da sua equipe.',
+                    'Defina níveis de acesso por recurso (Alunos, Financeiro, Treinos…).',
                 action: FxEmptyAction(
-                  label: 'Conceder acesso',
-                  onTap: () => _showConcederAcesso(context, ref),
+                  label: 'Conceder permissão',
+                  onTap: () => _showConcederPermissao(context, ref),
                 ),
               );
             }
@@ -109,38 +79,29 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor:
-                          p.nivelAcesso == 'ADMIN'
+                          p.nivel == 'ADMIN'
                               ? EagleTokens.bad.withValues(alpha: 0.1)
                               : primary.withValues(alpha: 0.1),
                       child: Icon(
-                        p.nivelAcesso == 'ADMIN'
+                        p.nivel == 'ADMIN'
                             ? Icons.security
                             : Icons.vpn_key,
                         color:
-                            p.nivelAcesso == 'ADMIN'
-                                ? EagleTokens.bad
-                                : primary,
+                            p.nivel == 'ADMIN' ? EagleTokens.bad : primary,
                       ),
                     ),
                     title: Text(
-                      'Recurso: ${p.recurso}',
+                      p.recurso,
                       style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
-                    subtitle: Text(
-                      'ID Assistente: ${p.usuarioConvidadoId} • Nível: ${p.nivelAcesso}',
-                    ),
+                    subtitle: Text('Nível: ${p.nivel}'),
                     trailing: IconButton(
                       icon: const Icon(
                         Icons.delete_outline,
                         color: EagleTokens.bad,
                       ),
-                      tooltip: 'Revogar acesso',
-                      onPressed:
-                          () => _revogarAcesso(
-                            ref,
-                            p.usuarioConvidadoId,
-                            p.recurso,
-                          ),
+                      tooltip: 'Revogar permissão',
+                      onPressed: () => _revogarPermissao(context, ref, p.recurso),
                     ),
                   ),
                 );
@@ -152,119 +113,100 @@ class _RbacScreenState extends ConsumerState<RbacScreen> {
     );
   }
 
-  void _showConcederAcesso(BuildContext context, WidgetRef ref) {
-    final usuarioIdCtrl = TextEditingController();
-    String recursoSelecionado = 'FINANCEIRO';
-    String nivelSelecionado = 'READ';
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder:
-          (ctx) => StatefulBuilder(
-            builder: (ctx, setState) {
-              return Padding(
-                padding: EdgeInsets.fromLTRB(
-                  16,
-                  20,
-                  16,
-                  MediaQuery.of(ctx).viewInsets.bottom + 20,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Text(
-                      'Conceder Acesso',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: TokensStrip.s4),
-                    TextField(
-                      controller: usuarioIdCtrl,
-                      decoration: FxInputDeco.build(
-                        context,
-                        'ID do Usuário/Assistente',
-                      ),
-                      keyboardType: TextInputType.number,
-                    ),
-                    const SizedBox(height: TokensStrip.s4),
-                    DropdownButtonFormField<String>(
-                      initialValue: recursoSelecionado,
-                      decoration: FxInputDeco.build(context, 'Recurso'),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'FINANCEIRO',
-                          child: Text('Financeiro'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'TREINOS',
-                          child: Text('Treinos'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'ALUNOS',
-                          child: Text('Alunos e CRM'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'CONFIG',
-                          child: Text('Configurações'),
-                        ),
-                      ],
-                      onChanged: (v) => setState(() => recursoSelecionado = v!),
-                    ),
-                    const SizedBox(height: TokensStrip.s4),
-                    DropdownButtonFormField<String>(
-                      initialValue: nivelSelecionado,
-                      decoration: FxInputDeco.build(context, 'Nível de Acesso'),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'READ',
-                          child: Text('Leitura (READ)'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'WRITE',
-                          child: Text('Edição (WRITE)'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'ADMIN',
-                          child: Text('Administrador (ADMIN)'),
-                        ),
-                      ],
-                      onChanged: (v) => setState(() => nivelSelecionado = v!),
-                    ),
-                    const SizedBox(height: TokensStrip.s5),
-                    FxLiquidPrimaryButton(
-                      label: 'Salvar',
-                      onPressed: () async {
-                        if (usuarioIdCtrl.text.isEmpty) return;
-                        final api = ref.read(apiClientProvider);
-                        await api.dio.post(
-                          '/api/rbac/permissoes',
-                          data: {
-                            'usuarioConvidadoId': int.parse(usuarioIdCtrl.text),
-                            'recurso': recursoSelecionado,
-                            'nivelAcesso': nivelSelecionado,
-                          },
-                        );
-                        ref.invalidate(permissoesProvider);
-                        if (ctx.mounted) Navigator.pop(ctx);
-                      },
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-    );
+  Future<void> _revogarPermissao(
+    BuildContext context,
+    WidgetRef ref,
+    String recurso,
+  ) async {
+    try {
+      await ref.read(rbacRepositoryProvider).revogar(recurso);
+      ref.invalidate(permissoesRbacProvider);
+    } catch (e) {
+      if (context.mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    }
   }
 
-  void _revogarAcesso(WidgetRef ref, int usuarioId, String recurso) async {
-    final api = ref.read(apiClientProvider);
-    await api.dio.delete(
-      '/api/rbac/permissoes/$recurso?usuarioConvidadoId=$usuarioId',
+  void _showConcederPermissao(BuildContext context, WidgetRef ref) {
+    var recursoSelecionado = permissoesRbacRecursos.first;
+    var nivelSelecionado = permissoesRbacNiveis.first;
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                20,
+                16,
+                MediaQuery.of(ctx).viewInsets.bottom + 20,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Conceder permissão',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: TokensStrip.s4),
+                  DropdownButtonFormField<String>(
+                    initialValue: recursoSelecionado,
+                    decoration: FxInputDeco.build(context, 'Recurso'),
+                    items:
+                        permissoesRbacRecursos
+                            .map(
+                              (r) => DropdownMenuItem(value: r, child: Text(r)),
+                            )
+                            .toList(),
+                    onChanged:
+                        (v) => setState(() => recursoSelecionado = v!),
+                  ),
+                  const SizedBox(height: TokensStrip.s4),
+                  DropdownButtonFormField<String>(
+                    initialValue: nivelSelecionado,
+                    decoration: FxInputDeco.build(context, 'Nível'),
+                    items:
+                        permissoesRbacNiveis
+                            .map(
+                              (n) => DropdownMenuItem(
+                                value: n,
+                                child: Text(n),
+                              ),
+                            )
+                            .toList(),
+                    onChanged: (v) => setState(() => nivelSelecionado = v!),
+                  ),
+                  const SizedBox(height: TokensStrip.s5),
+                  FxLiquidPrimaryButton(
+                    label: 'Salvar',
+                    onPressed: () async {
+                      try {
+                        await ref
+                            .read(rbacRepositoryProvider)
+                            .conceder(
+                              recurso: recursoSelecionado,
+                              nivel: nivelSelecionado,
+                            );
+                        ref.invalidate(permissoesRbacProvider);
+                        if (ctx.mounted) Navigator.pop(ctx);
+                      } catch (e) {
+                        if (ctx.mounted) {
+                          FeedbackHelper.showError(ctx, friendlyError(e));
+                        }
+                      }
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
-    ref.invalidate(permissoesProvider);
   }
 }
