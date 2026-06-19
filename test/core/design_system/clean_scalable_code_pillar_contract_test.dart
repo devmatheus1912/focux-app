@@ -93,6 +93,8 @@ void main() {
     const typedScreens = [
       'lib/features/perfil/screens/equipe_screen.dart',
       'lib/features/loja/screens/loja_screen.dart',
+      'lib/features/admin/screens/rbac_screen.dart',
+      'lib/features/trilhas/screens/trilhas_screen.dart',
     ];
     for (final path in typedScreens) {
       final source = File(path).readAsStringSync();

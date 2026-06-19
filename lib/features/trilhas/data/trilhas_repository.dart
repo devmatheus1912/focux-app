@@ -1,17 +1,20 @@
 import 'package:dio/dio.dart';
+
 import '../../../core/api/api_client.dart';
+import '../models/trilha.dart';
 
 class TrilhasRepository {
-  final Dio _dio;
   TrilhasRepository(ApiClient client) : _dio = client.dio;
 
-  Future<List<Map<String, dynamic>>> listarPorAluno(int alunoId) async {
-    final r = await _dio.get('/api/trilhas/aluno/$alunoId');
-    return (r.data as List).cast<Map<String, dynamic>>();
+  final Dio _dio;
+
+  Future<List<TrilhaModel>> listarPorAluno(int alunoId) async {
+    final response = await _dio.get('/api/trilhas/aluno/$alunoId');
+    return TrilhaModel.parseList(response.data);
   }
 
-  Future<void> criarTrilha(Map<String, dynamic> body) async {
-    await _dio.post('/api/trilhas', data: body);
+  Future<void> criarTrilha(NovaTrilhaRequest request) async {
+    await _dio.post('/api/trilhas', data: request.toJson());
   }
 
   Future<void> concluirMarco({

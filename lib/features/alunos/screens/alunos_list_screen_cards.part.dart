@@ -382,7 +382,6 @@ class _AlunoCardFXState extends ConsumerState<_AlunoCardFX> {
       points: _aderenciaPoints ?? const [],
       cachedAderenciaPercent: widget.aluno.aderenciaPercent,
     );
-    final sparkValues = sparkline.sparkValues;
     final weeklyCheckins = sparkline.weeklyCheckins;
     final aderenciaPercent = sparkline.aderenciaPercent;
     final aderColor = EagleTokens.aderenciaColor(

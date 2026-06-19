@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/utils/friendly_error.dart';

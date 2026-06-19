@@ -111,6 +111,26 @@ void main() {
     expect(screen, contains("part 'perfil_aluno_screen_state.part.dart'"));
   });
 
+  test('aluno detail entry stays decomposed under 300 LOC', () {
+    final lines = File(
+      'lib/features/alunos/screens/aluno_detail_screen.dart',
+    ).readAsLinesSync().length;
+    expect(lines, lessThan(300));
+    final screen = File(
+      'lib/features/alunos/screens/aluno_detail_screen.dart',
+    ).readAsStringSync();
+    expect(screen, contains("part 'aluno_detail_screen_state.part.dart'"));
+    expect(screen, contains('aluno360_operacao_logic.dart'));
+    expect(screen, contains('aluno360_copilot_logic.dart'));
+  });
+
+  test('all hub entries stay decomposed under 300 LOC', () {
+    for (final path in hubScreens) {
+      final lines = File(path).readAsLinesSync().length;
+      expect(lines, lessThan(300), reason: '$path entry $lines LOC');
+    }
+  });
+
   test('personal dashboard entry stays decomposed under 300 LOC', () {
     final lines = File(
       'lib/features/dashboard/screens/personal_dashboard_screen.dart',

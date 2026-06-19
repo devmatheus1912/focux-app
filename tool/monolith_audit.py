@@ -17,17 +17,25 @@ EXCLUDE = {
 
 def bundle_lines(main: Path) -> int:
     text = main.read_text(encoding="utf-8")
-    base = main.stem
-    parts = list(main.parent.glob(f"{base}*.part.dart"))
-    sibling_parts = [p for p in main.parent.glob("*.part.dart") if p.name.startswith(base.replace("_screen", ""))]
-    all_parts = set(parts) | set(sibling_parts)
-    declared = re.findall(r"part\s+'([^']+\.part\.dart)';", text)
-    for rel in declared:
-        all_parts.add(main.parent / rel)
+    base_name = main.stem
     total = len(text.splitlines())
-    for p in all_parts:
-        if p.exists():
-            total += len(p.read_text(encoding="utf-8").splitlines())
+    seen: set[str] = set()
+
+    for rel in re.findall(r"part\s+'([^']+\.part\.dart)';", text):
+        part_path = main.parent / rel
+        key = str(part_path.resolve())
+        if part_path.exists() and key not in seen:
+            seen.add(key)
+            total += len(part_path.read_text(encoding="utf-8").splitlines())
+
+    for part_path in main.parent.glob("*.part.dart"):
+        if not part_path.name.startswith(base_name):
+            continue
+        key = str(part_path.resolve())
+        if key not in seen:
+            seen.add(key)
+            total += len(part_path.read_text(encoding="utf-8").splitlines())
+
     return total
 
 

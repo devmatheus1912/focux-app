@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 String _alunoDetailLibrarySource() {
   const dir = 'lib/features/alunos/screens';
   const mainFile = '$dir/aluno_detail_screen.dart';
+  const statePartFile = '$dir/aluno_detail_screen_state.part.dart';
   const providersFile = 'lib/features/alunos/providers/aluno_detail_providers.dart';
   const heroWidgetFile = 'lib/features/alunos/widgets/aluno_detail_hero_card.dart';
   const operacaoTabFile =
@@ -77,6 +78,7 @@ String _alunoDetailLibrarySource() {
       'lib/features/alunos/widgets/aluno_detail_loading_skeleton.dart';
   const alunoRepositoryFile = 'lib/features/alunos/data/aluno_repository.dart';
   final main = File(mainFile).readAsStringSync();
+  final statePart = File(statePartFile).readAsStringSync();
   final providers = File(providersFile).readAsStringSync();
   final heroWidget = File(heroWidgetFile).readAsStringSync();
   final headerWidget = File(headerWidgetFile).readAsStringSync();
@@ -116,7 +118,7 @@ String _alunoDetailLibrarySource() {
   final detailErrorState = File(detailErrorStateFile).readAsStringSync();
   final detailLoadingSkeleton = File(detailLoadingSkeletonFile).readAsStringSync();
   final alunoRepository = File(alunoRepositoryFile).readAsStringSync();
-  return '$main\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachSheet\n$copilotCard\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$actionEmptyPanel\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$emptyMiniState\n$detailErrorState\n$detailLoadingSkeleton\n$alunoRepository';
+  return '$main\n$statePart\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachSheet\n$copilotCard\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$actionEmptyPanel\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$emptyMiniState\n$detailErrorState\n$detailLoadingSkeleton\n$alunoRepository';
 }
 
 void main() {

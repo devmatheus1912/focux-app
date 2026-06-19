@@ -7,7 +7,7 @@ Checklist executável do app Flutter. **Status: 10/10 automatizado** (gates CI +
 | Gate | Status |
 |------|--------|
 | `dart analyze --fatal-infos` | ✅ |
-| `flutter test` (935) | ✅ |
+| `flutter test` (937) | ✅ |
 | Tier S+ + a11y (part-aware) | ✅ |
 | Contratos API repositórios | ✅ |
 | `productivity_gates_contract_test` (polish + CI + design gates) | ✅ |
@@ -55,9 +55,9 @@ Checklist executável do app Flutter. **Status: 10/10 automatizado** (gates CI +
 | `FocuxRefactoring` + `focux_refactoring_test` + orphan scan CI | ✅ |
 | `clean_scalable_code_pillar_contract_test` — tipos explícitos nos hubs | ✅ |
 | `FocuxCleanCode` + `focux_clean_code_test` + sparkline/proximaAcao tipados | ✅ |
-| Hubs decompostos (entry <300 LOC): personal_dashboard, ia_copiloto, alunos_list, treinos_list | ✅ |
+| Hubs decompostos (entry <300 LOC): personal_dashboard, ia_copiloto, alunos_list, treinos_list, financeiro_screen, aluno_detail | ✅ |
 | Monolitos decompostos (parts): add_exercicio, perfil_aluno, chat_inbox, exercicio_detail, migracao_magica, financeiro_dashboard, meus_treinos, create_treino | ✅ |
-| Satélites tipados: equipe (TenantMembro), loja (LojaPedido), rbac (PermissaoRbac) | ✅ |
+| Satélites tipados: equipe (TenantMembro), loja (LojaPedido), rbac (PermissaoRbac), trilhas (TrilhaModel) | ✅ |
 | Alinhamento API: trilhas concluirMarco POST; rbac PUT/DELETE | ✅ |
 | E2E CI (`e2e.yml`): `npm run test:p0` | ✅ |
 | `dart run tools/find_orphan_dart.dart` | ✅ |

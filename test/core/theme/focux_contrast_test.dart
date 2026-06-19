@@ -18,7 +18,7 @@ void main() {
       expect(
         FocuxContrast.meetsWcagAa(fg, bg),
         isTrue,
-        reason: '${fg.value.toRadixString(16)} on ${bg.value.toRadixString(16)}',
+        reason: '${fg.toARGB32().toRadixString(16)} on ${bg.toARGB32().toRadixString(16)}',
       );
     }
 
@@ -34,7 +34,7 @@ void main() {
       expect(
         FocuxContrast.meetsWcagAa(fg, bg),
         isTrue,
-        reason: '$label ${fg.value.toRadixString(16)} on ${bg.value.toRadixString(16)}',
+        reason: '$label ${fg.toARGB32().toRadixString(16)} on ${bg.toARGB32().toRadixString(16)}',
       );
     }
   });
@@ -53,7 +53,7 @@ void main() {
       expect(
         FocuxContrast.meetsWcagAa(fg, bg, largeText: true),
         isTrue,
-        reason: 'accent ${fg.value.toRadixString(16)} on ${bg.value.toRadixString(16)}',
+        reason: 'accent ${fg.toARGB32().toRadixString(16)} on ${bg.toARGB32().toRadixString(16)}',
       );
     }
   });
@@ -72,7 +72,7 @@ void main() {
       expect(
         FocuxContrast.meetsWcagAa(fg, bg),
         isTrue,
-        reason: '${fg.value.toRadixString(16)} on ${bg.value.toRadixString(16)}',
+        reason: '${fg.toARGB32().toRadixString(16)} on ${bg.toARGB32().toRadixString(16)}',
       );
     }
   });

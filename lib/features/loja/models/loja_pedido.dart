@@ -56,5 +56,5 @@ class LojaCheckoutResult {
         pedidoId: json['pedidoId'] as int?,
         pixCopiaECola: (json['pixCopiaECola'] ?? '').toString(),
         valor: LojaPedido.readValor(json['valor']),
-      ));
+      );
 }

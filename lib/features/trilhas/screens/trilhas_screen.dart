@@ -10,89 +10,8 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../features/auth/providers/auth_provider.dart';
-
-// ─── Models ───────────────────────────────────────────────────────────────────
-
-class MarcoModel {
-  final int id;
-  final String titulo;
-  final int ordem;
-  final bool concluido;
-
-  MarcoModel({
-    required this.id,
-    required this.titulo,
-    required this.ordem,
-    required this.concluido,
-  });
-
-  factory MarcoModel.fromJson(Map<String, dynamic> j) => MarcoModel(
-    id: j['id'],
-    titulo: j['titulo'],
-    ordem: j['ordem'],
-    concluido: j['concluido'] ?? false,
-  );
-}
-
-class TrilhaModel {
-  final int id;
-  final int alunoId;
-  final String titulo;
-  final String? descricao;
-  final String metaTipo;
-  final double? metaValor;
-  final double valorAtual;
-  final double percentualConclusao;
-  final bool concluida;
-  final String? dataFim;
-  final List<MarcoModel> marcos;
-
-  TrilhaModel({
-    required this.id,
-    required this.alunoId,
-    required this.titulo,
-    this.descricao,
-    required this.metaTipo,
-    this.metaValor,
-    required this.valorAtual,
-    required this.percentualConclusao,
-    required this.concluida,
-    this.dataFim,
-    required this.marcos,
-  });
-
-  factory TrilhaModel.fromJson(Map<String, dynamic> j) => TrilhaModel(
-    id: j['id'],
-    alunoId: j['alunoId'],
-    titulo: j['titulo'],
-    descricao: j['descricao'],
-    metaTipo: j['metaTipo'] ?? 'TREINOS',
-    metaValor:
-        j['metaValor'] != null ? (j['metaValor'] as num).toDouble() : null,
-    valorAtual: (j['valorAtual'] ?? 0).toDouble(),
-    percentualConclusao: (j['percentualConclusao'] ?? 0).toDouble(),
-    concluida: j['concluida'] ?? false,
-    dataFim: j['dataFim'],
-    marcos:
-        (j['marcos'] as List? ?? [])
-            .map((e) => MarcoModel.fromJson(e as Map<String, dynamic>))
-            .toList(),
-  );
-}
-
-// ─── Providers ────────────────────────────────────────────────────────────────
-
-final trilhasAlunoProvider = FutureProvider.family<List<TrilhaModel>, int>((
-  ref,
-  alunoId,
-) async {
-  final api = ref.read(apiClientProvider);
-  final res = await api.dio.get('/api/trilhas/aluno/$alunoId');
-  return (res.data as List)
-      .map((e) => TrilhaModel.fromJson(e as Map<String, dynamic>))
-      .toList();
-});
+import '../models/trilha.dart';
+import '../providers/trilhas_provider.dart';
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
@@ -239,18 +158,16 @@ class TrilhasScreen extends ConsumerWidget {
                       label: 'Criar Trilha',
                       onPressed: () async {
                         if (tituloCtrl.text.trim().isEmpty) return;
-                        final api = ref.read(apiClientProvider);
-                        await api.dio.post(
-                          '/api/trilhas',
-                          data: {
-                            'alunoId': alunoId,
-                            'titulo': tituloCtrl.text.trim(),
-                            'descricao':
+                        await ref.read(trilhasRepositoryProvider).criarTrilha(
+                          NovaTrilhaRequest(
+                            alunoId: alunoId,
+                            titulo: tituloCtrl.text.trim(),
+                            descricao:
                                 descCtrl.text.trim().isEmpty
                                     ? null
                                     : descCtrl.text.trim(),
-                            'metaTipo': metaTipo,
-                          },
+                            metaTipo: metaTipo,
+                          ),
                         );
                         ref.invalidate(trilhasAlunoProvider(alunoId));
                         if (ctx.mounted) Navigator.pop(ctx);
@@ -439,9 +356,9 @@ class _MarcoTile extends StatelessWidget {
               marco.concluido
                   ? null
                   : () async {
-                    final api = ref.read(apiClientProvider);
-                    await api.dio.post(
-                      '/api/trilhas/$trilhaId/marcos/${marco.id}/concluir',
+                    await ref.read(trilhasRepositoryProvider).concluirMarco(
+                      trilhaId: trilhaId,
+                      marcoId: marco.id,
                     );
                     ref.invalidate(trilhasAlunoProvider(alunoId));
                   },

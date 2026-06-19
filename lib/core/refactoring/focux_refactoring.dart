@@ -18,7 +18,7 @@ abstract final class FocuxRefactoring {
     'lib/features/dashboard/screens/personal_dashboard_screen.dart':
         "part 'personal_dashboard_screen_state.part.dart'",
     'lib/features/alunos/screens/aluno_detail_screen.dart':
-        'aluno360_operacao_logic.dart',
+        "part 'aluno_detail_screen_state.part.dart'",
     'lib/features/alunos/screens/alunos_list_screen.dart':
         "part 'alunos_list_screen_state.part.dart'",
     'lib/features/treinos/screens/treinos_list_screen.dart':

@@ -15,6 +15,8 @@ abstract final class FocuxCleanCode {
     'lib/features/ia/models/ia_copilot_proxima_acao.dart',
     'lib/features/perfil/models/tenant_membro.dart',
     'lib/features/loja/models/loja_pedido.dart',
+    'lib/features/trilhas/models/trilha.dart',
+    'lib/features/admin/models/permissao_rbac.dart',
   ];
 
   static const List<String> hubCompositionPatterns = [
