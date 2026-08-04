@@ -17,11 +17,13 @@ import '../utils/dashboard_readability.dart';
 class DashboardAderenciaSemanaWidget extends StatelessWidget {
   final bool isDark;
   final bool retentionFocus;
+  final bool suppressEmptyActions;
 
   const DashboardAderenciaSemanaWidget({
     super.key,
     required this.isDark,
     this.retentionFocus = false,
+    this.suppressEmptyActions = false,
   });
 
   @override
@@ -148,11 +150,17 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
                   retentionFocus: retentionFocus,
                 ),
                 primaryAction:
-                    retentionFocus ? 'Ver alunos em risco' : 'Ver agenda',
+                    suppressEmptyActions
+                        ? null
+                        : (retentionFocus
+                            ? 'Ver alunos em risco'
+                            : 'Ver agenda'),
                 onPrimary:
-                    retentionFocus
-                        ? () => context.go('/alunos?filtro=risco')
-                        : () => context.go('/agenda'),
+                    suppressEmptyActions
+                        ? null
+                        : (retentionFocus
+                            ? () => context.go('/alunos?filtro=risco')
+                            : () => context.go('/agenda')),
               );
             }
 
@@ -166,14 +174,22 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
                 body: DashboardAderenciaCopy.stoppedBody(
                   retentionFocus: retentionFocus,
                 ),
-                primaryAction: retentionFocus ? 'Revisar base' : 'Ver agenda',
-                secondaryAction: retentionFocus ? null : 'Plano retomada',
+                primaryAction:
+                    suppressEmptyActions
+                        ? null
+                        : (retentionFocus ? 'Revisar base' : 'Ver agenda'),
+                secondaryAction:
+                    suppressEmptyActions || retentionFocus
+                        ? null
+                        : 'Plano retomada',
                 onPrimary:
-                    retentionFocus
-                        ? () => context.push('/retencao')
-                        : () => context.go('/agenda'),
+                    suppressEmptyActions
+                        ? null
+                        : (retentionFocus
+                            ? () => context.push('/retencao')
+                            : () => context.go('/agenda')),
                 onSecondary:
-                    retentionFocus
+                    suppressEmptyActions || retentionFocus
                         ? null
                         : () => context.push('/dashboard/qualidade'),
               );
@@ -285,8 +301,8 @@ class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
     required this.mute,
     required this.title,
     required this.body,
-    required this.primaryAction,
-    required this.onPrimary,
+    this.primaryAction,
+    this.onPrimary,
     this.secondaryAction,
     this.onSecondary,
   });
@@ -296,8 +312,8 @@ class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
   final Color mute;
   final String title;
   final String body;
-  final String primaryAction;
-  final VoidCallback onPrimary;
+  final String? primaryAction;
+  final VoidCallback? onPrimary;
   final String? secondaryAction;
   final VoidCallback? onSecondary;
 
@@ -360,71 +376,80 @@ class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final stacked = constraints.maxWidth < 340;
-              final primaryBtn = SizedBox(
-                width: stacked ? double.infinity : null,
-                child: FilledButton(
-                  onPressed: onPrimary,
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(44),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(TokensStrip.rButton),
+          if (primaryAction != null && onPrimary != null) ...[
+            const SizedBox(height: 14),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final stacked = constraints.maxWidth < 340;
+                final primaryBtn = SizedBox(
+                  width: stacked ? double.infinity : null,
+                  child: FilledButton(
+                    onPressed: onPrimary,
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(44),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          TokensStrip.rButton,
+                        ),
+                      ),
                     ),
+                    child: Text(primaryAction!),
                   ),
-                  child: Text(primaryAction),
-                ),
-              );
-              final secondaryBtn =
-                  secondaryAction != null && onSecondary != null
-                      ? SizedBox(
-                        width: stacked ? double.infinity : null,
-                        child: OutlinedButton(
-                          onPressed: onSecondary,
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(44),
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                TokensStrip.rButton,
+                );
+                final secondaryBtn =
+                    secondaryAction != null && onSecondary != null
+                        ? SizedBox(
+                          width: stacked ? double.infinity : null,
+                          child: OutlinedButton(
+                            onPressed: onSecondary,
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size.fromHeight(44),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  TokensStrip.rButton,
+                                ),
+                              ),
+                            ),
+                            child: Text(
+                              secondaryAction!,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 12.5,
+                                height: 1.1,
                               ),
                             ),
                           ),
-                          child: Text(
-                            secondaryAction!,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 12.5, height: 1.1),
-                          ),
-                        ),
-                      )
-                      : null;
+                        )
+                        : null;
 
-              if (stacked) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                if (stacked) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      primaryBtn,
+                      if (secondaryBtn != null) ...[
+                        const SizedBox(height: 8),
+                        secondaryBtn,
+                      ],
+                    ],
+                  );
+                }
+
+                return Row(
                   children: [
-                    primaryBtn,
+                    Expanded(child: primaryBtn),
                     if (secondaryBtn != null) ...[
-                      const SizedBox(height: 8),
-                      secondaryBtn,
+                      const SizedBox(width: 8),
+                      Expanded(child: secondaryBtn),
                     ],
                   ],
                 );
-              }
-
-              return Row(
-                children: [
-                  Expanded(child: primaryBtn),
-                  if (secondaryBtn != null) ...[
-                    const SizedBox(width: 8),
-                    Expanded(child: secondaryBtn),
-                  ],
-                ],
-              );
-            },
-          ),
+              },
+            ),
+          ],
         ],
       ),
     );

@@ -83,4 +83,8 @@ String financePercentLabel(double progressRaw, {required bool exceeded}) {
 Color pulseCheckinsAccent({
   required int checkinsHoje,
   required Color neutralAccent,
-}) => checkinsHoje > 0 ? EagleTokens.good : neutralAccent;
+  Color? emptyAccent,
+}) =>
+    checkinsHoje > 0
+        ? EagleTokens.good
+        : (emptyAccent ?? neutralAccent);

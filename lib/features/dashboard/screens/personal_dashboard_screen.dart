@@ -33,6 +33,7 @@ import '../../onboarding/providers/onboarding_provider.dart';
 import '../utils/dashboard_day_focus.dart';
 import '../utils/dashboard_home_focus.dart';
 import '../utils/dashboard_home_focus_store.dart';
+import '../utils/dashboard_haptic.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_a11y.dart';
 import '../utils/dashboard_readability.dart';

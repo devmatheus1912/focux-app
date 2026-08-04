@@ -266,31 +266,31 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                       if (!focusRules.hidePromoBanners) ...[
                         const SliverToBoxAdapter(child: TrialCountdownBanner()),
                         const SliverToBoxAdapter(child: PlanUsageBanner()),
-                      ],
-                      if (!focusRules.focusMode || onboardingIncomplete)
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              TokensStrip.s4,
-                              4,
-                              TokensStrip.s4,
-                              0,
+                        if (onboardingIncomplete)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                TokensStrip.s4,
+                                4,
+                                TokensStrip.s4,
+                                0,
+                              ),
+                              child: SetupOnboardingWidget(),
                             ),
-                            child: SetupOnboardingWidget(),
+                          )
+                        else
+                          SliverToBoxAdapter(
+                            child: DashboardActivationCta(
+                              alunosAtivos: alunosAtivos,
+                              temTreinos:
+                                  primeiroTreinoCriado || checkinsHoje > 0,
+                              temFinanceiro:
+                                  _finData != null &&
+                                  (_finData!.receitaMes > 0 ||
+                                      _finData!.vencimentosProximos.isNotEmpty),
+                            ),
                           ),
-                        ),
-                      if (!onboardingIncomplete && !focusRules.focusMode)
-                        SliverToBoxAdapter(
-                          child: DashboardActivationCta(
-                            alunosAtivos: alunosAtivos,
-                            temTreinos:
-                                primeiroTreinoCriado || checkinsHoje > 0,
-                            temFinanceiro:
-                                _finData != null &&
-                                (_finData!.receitaMes > 0 ||
-                                    _finData!.vencimentosProximos.isNotEmpty),
-                          ),
-                        ),
+                      ],
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(
@@ -345,14 +345,31 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                       ),
                                       padding: EdgeInsets.zero,
                                       onPressed: _toggleFocusMode,
-                                      icon: Icon(
-                                        _focusMode
-                                            ? Icons.bolt_rounded
-                                            : Icons.bolt_outlined,
-                                        size: 22,
-                                        color: BrandPalette.sectionLink(
-                                          primary,
-                                          dark: themeDark,
+                                      icon: AnimatedSwitcher(
+                                        duration: const Duration(
+                                          milliseconds: 220,
+                                        ),
+                                        switchInCurve: Curves.easeOutCubic,
+                                        switchOutCurve: Curves.easeInCubic,
+                                        transitionBuilder: (child, anim) {
+                                          return ScaleTransition(
+                                            scale: anim,
+                                            child: FadeTransition(
+                                              opacity: anim,
+                                              child: child,
+                                            ),
+                                          );
+                                        },
+                                        child: Icon(
+                                          _focusMode
+                                              ? Icons.bolt_rounded
+                                              : Icons.bolt_outlined,
+                                          key: ValueKey(_focusMode),
+                                          size: 22,
+                                          color: BrandPalette.sectionLink(
+                                            primary,
+                                            dark: themeDark,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -392,6 +409,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                           isDark: themeDark,
                           primary: primary,
                           subtitle: commandCenterSubtitle,
+                          compact: focusRules.compactCommandSticky,
                           showPrioritiesAction: showStickyPrioritiesAction,
                           trailingActionLabel: stickyCommandActionsLabel,
                           onTrailingAction:
@@ -612,12 +630,20 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                             showEmptyTrendCta:
                                 !checkinsTrend.any((v) => v > 0) &&
                                 alunosAtivos > 0 &&
-                                !dayFocusCoversRetention &&
-                                !primeiroTreinoCriado &&
-                                checkinsHoje == 0,
-                            emptyTrendCtaLabel: 'Agendar primeiro treino',
+                                checkinsHoje == 0 &&
+                                !focusRules.suppressSecondaryEmptyCtas,
+                            emptyTrendCtaLabel:
+                                primeiroTreinoCriado
+                                    ? 'Ver agenda'
+                                    : 'Agendar primeiro treino',
                             onEmptyTrendCta:
-                                () => context.push('/treinos/novo'),
+                                () =>
+                                    primeiroTreinoCriado
+                                        ? goPersonalShellTab(
+                                          context,
+                                          '/agenda',
+                                        )
+                                        : context.push('/treinos/novo'),
                           ),
                         ),
                       ),
@@ -643,6 +669,8 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                           child: DashboardAderenciaSemanaWidget(
                             isDark: themeDark,
                             retentionFocus: dayFocusCoversRetention,
+                            suppressEmptyActions:
+                                focusRules.suppressSecondaryEmptyCtas,
                           ),
                         ),
                       ),

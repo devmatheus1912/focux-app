@@ -4,3 +4,8 @@ import 'package:flutter/services.dart';
 void dashboardHapticCollapseToggle() {
   HapticFeedback.selectionClick();
 }
+
+/// Feedback ao ligar/desligar modo foco.
+void dashboardHapticFocusToggle() {
+  HapticFeedback.lightImpact();
+}

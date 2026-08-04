@@ -32,7 +32,7 @@ class DashboardDayFocus {
       return DashboardDayFocus(
         headline: 'Retomada urgente da base',
         detail:
-            '$riscoAlto de $alunosAtivos precisam de contato hoje — comece pela Central de Comando.',
+            '$riscoAlto de $alunosAtivos precisam de contato hoje — priorize a próxima ação.',
         semanticLabel:
             'Foco do dia: retomada urgente. $riscoAlto de $alunosAtivos alunos precisam de contato.',
       );

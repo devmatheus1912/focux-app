@@ -11,6 +11,8 @@ class DashboardHomeFocusRules {
     required this.hideSecondaryRiskCtas,
     required this.hidePromoBanners,
     required this.collapseQuickLinks,
+    required this.suppressSecondaryEmptyCtas,
+    required this.compactCommandSticky,
     required this.maxVisibleNextActions,
   });
 
@@ -23,6 +25,10 @@ class DashboardHomeFocusRules {
   final bool hidePromoBanners;
   /// Com foco ligado, atalhos rápidos começam recolhidos.
   final bool collapseQuickLinks;
+  /// Esconde CTAs de empty (aderência/pulso) que competem com o P1.
+  final bool suppressSecondaryEmptyCtas;
+  /// Sticky da Central mais compacto (menos título duplicado).
+  final bool compactCommandSticky;
   final int maxVisibleNextActions;
 
   static bool coversRetention(DashboardDayFocus focus) {
@@ -48,15 +54,19 @@ class DashboardHomeFocusRules {
     required double receitaAtual,
   }) {
     final covers = coversRetention(dayFocus);
+    final dense = focusMode || covers;
     return DashboardHomeFocusRules(
       focusMode: focusMode,
       dayFocusCoversRetention: covers,
-      collapseAttention: focusMode || covers || riscoAlto > 3,
+      collapseAttention: dense || riscoAlto > 3,
       collapseAderencia: true,
-      collapseFinance: focusMode || covers || receitaAtual <= 0,
-      hideSecondaryRiskCtas: focusMode || covers,
-      hidePromoBanners: focusMode,
+      collapseFinance: dense || receitaAtual <= 0,
+      hideSecondaryRiskCtas: dense,
+      // Promo/ativação nunca compete com retomada — mesmo com foco desligado.
+      hidePromoBanners: dense,
       collapseQuickLinks: focusMode,
+      suppressSecondaryEmptyCtas: dense,
+      compactCommandSticky: focusMode,
       maxVisibleNextActions: focusMode ? 2 : 3,
     );
   }
@@ -68,14 +78,14 @@ abstract final class DashboardAderenciaCopy {
 
   static String emptyBody({required bool retentionFocus}) {
     if (retentionFocus) {
-      return 'Ranking volta com treinos. Prioridade de contato já está no Foco do dia.';
+      return 'Ranking volta com treinos. Prioridade de contato já está no topo.';
     }
     return 'Quando alunos treinarem, a aderência aparece aqui com ranking automático.';
   }
 
   static String stoppedBody({required bool retentionFocus}) {
     if (retentionFocus) {
-      return 'Sem treinos na semana. Use Revisar base se ainda precisar de outro caminho.';
+      return 'Sem treinos na semana. Prioridade de contato já está no topo.';
     }
     return 'Acione alunos sem treino esta semana pela agenda ou pela base.';
   }

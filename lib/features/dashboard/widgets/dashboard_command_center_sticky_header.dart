@@ -12,6 +12,7 @@ class DashboardCommandCenterStickyHeaderDelegate
     required this.isDark,
     required this.primary,
     required this.subtitle,
+    this.compact = false,
     this.showPrioritiesAction = false,
     this.trailingActionLabel,
     this.onTrailingAction,
@@ -20,18 +21,21 @@ class DashboardCommandCenterStickyHeaderDelegate
   final bool isDark;
   final Color primary;
   final String subtitle;
+  /// Modo foco: sticky curto, sem subtítulo — evita título duplicado.
+  final bool compact;
   final bool showPrioritiesAction;
   final String? trailingActionLabel;
   final VoidCallback? onTrailingAction;
 
   static const double _maxExtent = 72;
   static const double _minExtent = 48;
+  static const double _compactExtent = 44;
 
   @override
-  double get minExtent => _minExtent;
+  double get minExtent => compact ? _compactExtent : _minExtent;
 
   @override
-  double get maxExtent => _maxExtent;
+  double get maxExtent => compact ? _compactExtent : _maxExtent;
 
   @override
   Widget build(
@@ -41,8 +45,9 @@ class DashboardCommandCenterStickyHeaderDelegate
   ) {
     final heading = BrandPalette.sectionHeading(primary, dark: isDark);
     final mute = dashboardReadableCaption(context, isDark: isDark);
-    final progress = (shrinkOffset / (_maxExtent - _minExtent)).clamp(0.0, 1.0);
-    final showSubtitle = progress < 0.55;
+    final range = (maxExtent - minExtent).clamp(1.0, 100.0);
+    final progress = (shrinkOffset / range).clamp(0.0, 1.0);
+    final showSubtitle = !compact && progress < 0.55;
     final link = BrandPalette.sectionLink(primary, dark: isDark);
     final hasTrailing =
         trailingActionLabel != null &&
@@ -74,13 +79,15 @@ class DashboardCommandCenterStickyHeaderDelegate
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final compact = constraints.maxHeight < 52;
+              final layoutCompact = compact || constraints.maxHeight < 52;
               final showSubtitleLine =
-                  showSubtitle && !compact && !showPrioritiesAction;
+                  showSubtitle && !layoutCompact && !showPrioritiesAction;
               final chipLabel =
-                  compact && hasTrailing ? 'Prioridades' : trailingActionLabel;
-              final topPad = compact ? 4.0 : (8 - (4 * progress));
-              final bottomPad = compact ? 4.0 : 8.0;
+                  layoutCompact && hasTrailing
+                      ? 'Prioridades'
+                      : trailingActionLabel;
+              final topPad = layoutCompact ? 4.0 : (8 - (4 * progress));
+              final bottomPad = layoutCompact ? 4.0 : 8.0;
 
               return Padding(
                 padding: EdgeInsets.fromLTRB(
@@ -108,10 +115,10 @@ class DashboardCommandCenterStickyHeaderDelegate
                                   fontSize:
                                       TokensStrip.fontH2 -
                                       (2 * progress) -
-                                      (compact ? 1 : 0),
+                                      (layoutCompact ? 1 : 0),
                                   fontWeight: TokensStrip.weightH2,
                                   letterSpacing: TokensStrip.trackingH2,
-                                  height: compact ? 1.05 : 1.12,
+                                  height: layoutCompact ? 1.05 : 1.12,
                                   color: heading,
                                 ),
                               ),
@@ -143,7 +150,7 @@ class DashboardCommandCenterStickyHeaderDelegate
                           child: TextButton(
                             onPressed: onTrailingAction,
                             style: TextButton.styleFrom(
-                              minimumSize: Size(48, compact ? 36 : 40),
+                              minimumSize: Size(48, layoutCompact ? 36 : 40),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 10,
                               ),
@@ -155,7 +162,7 @@ class DashboardCommandCenterStickyHeaderDelegate
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTypography.inter(
-                                fontSize: compact ? 11 : 11.5,
+                                fontSize: layoutCompact ? 11 : 11.5,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
@@ -179,6 +186,7 @@ class DashboardCommandCenterStickyHeaderDelegate
     return oldDelegate.isDark != isDark ||
         oldDelegate.primary != primary ||
         oldDelegate.subtitle != subtitle ||
+        oldDelegate.compact != compact ||
         oldDelegate.showPrioritiesAction != showPrioritiesAction ||
         oldDelegate.trailingActionLabel != trailingActionLabel;
   }

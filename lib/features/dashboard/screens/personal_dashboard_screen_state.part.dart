@@ -78,10 +78,12 @@ class _PersonalDashboardScreenState
   }
 
   Future<void> _toggleFocusMode() async {
+    dashboardHapticFocusToggle();
     final next = !_focusMode;
     setState(() {
       _focusMode = next;
       _persistedFocusMode = next;
+      _attentionSectionResetToken++;
     });
     await DashboardHomeFocusStore.save(next);
   }

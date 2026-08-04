@@ -56,7 +56,15 @@ class DashboardDayPulseStrip extends StatelessWidget {
         riscoAlto > 0 ? EagleTokens.warn : TokensStrip.badgeSuccess;
     final tight = MediaQuery.sizeOf(context).width < 400;
     final gap = tight ? 6.0 : TokensStrip.s2;
-    final neutralAccent = dashboardReadableCaption(context, isDark: isDark);
+    final mute = dashboardReadableMuted(context, isDark: isDark);
+    final caption = dashboardReadableCaption(context, isDark: isDark);
+    final ativosAccent = alunosAtivos > 0 ? primary : caption;
+    final checkinsAccent = pulseCheckinsAccent(
+      checkinsHoje: checkinsHoje,
+      neutralAccent: caption,
+      emptyAccent: alunosAtivos > 0 ? EagleTokens.warn : caption,
+    );
+    final agendaAccent = agendaHoje > 0 ? primary : caption;
 
     return dashboardEntryMotion(
       context: context,
@@ -77,9 +85,10 @@ class DashboardDayPulseStrip extends StatelessWidget {
                   icon: 'users',
                   value: alunosAtivos.toString(),
                   label: 'Ativos',
-                  accent: neutralAccent,
+                  accent: ativosAccent,
                   isDark: isDark,
                   compact: tight,
+                  empty: alunosAtivos == 0,
                   onTap: onAtivos,
                 ),
               ),
@@ -89,12 +98,10 @@ class DashboardDayPulseStrip extends StatelessWidget {
                   icon: 'circle-check',
                   value: checkinsHoje.toString(),
                   label: tight ? 'Checks' : 'Check-ins',
-                  accent: pulseCheckinsAccent(
-                    checkinsHoje: checkinsHoje,
-                    neutralAccent: neutralAccent,
-                  ),
+                  accent: checkinsAccent,
                   isDark: isDark,
                   compact: tight,
+                  empty: checkinsHoje == 0,
                   onTap: onCheckins,
                 ),
               ),
@@ -106,9 +113,10 @@ class DashboardDayPulseStrip extends StatelessWidget {
                           icon: 'calendar',
                           value: agendaHoje.toString(),
                           label: tight ? 'Agenda' : 'Agenda hoje',
-                          accent: neutralAccent,
+                          accent: agendaAccent,
                           isDark: isDark,
                           compact: tight,
+                          empty: agendaHoje == 0,
                           onTap: onAgenda,
                         )
                         : DashboardPulseChip(
@@ -119,6 +127,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
                           accent: riscoAccent,
                           isDark: isDark,
                           compact: tight,
+                          empty: riscoAlto == 0,
                           onTap: onRisco,
                         ),
               ),
@@ -127,7 +136,6 @@ class DashboardDayPulseStrip extends StatelessWidget {
           const SizedBox(height: 8),
           Builder(
             builder: (context) {
-              final mute = dashboardReadableMuted(context, isDark: isDark);
               final hasTrend = checkinsTrend.any((v) => v > 0);
               return Semantics(
                 label:
@@ -155,7 +163,9 @@ class DashboardDayPulseStrip extends StatelessWidget {
                               if (!hasTrend) ...[
                                 const SizedBox(height: 2),
                                 Text(
-                                  'Sem check-ins nos últimos 7 dias',
+                                  alunosAtivos > 0
+                                      ? 'Base ativa · nenhum treino nos últimos 7 dias'
+                                      : 'Sem check-ins nos últimos 7 dias',
                                   style: AppTypography.inter(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
@@ -176,7 +186,8 @@ class DashboardDayPulseStrip extends StatelessWidget {
                               hasTrend
                                   ? pulseCheckinsAccent(
                                     checkinsHoje: checkinsHoje,
-                                    neutralAccent: neutralAccent,
+                                    neutralAccent: caption,
+                                    emptyAccent: primary,
                                   )
                                   : mute.withValues(alpha: 0.55),
                           width: 88,
@@ -212,9 +223,9 @@ class DashboardDayPulseStrip extends StatelessWidget {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   icon: Icon(
-                    emptyTrendCtaLabel!.contains('treino')
-                        ? Icons.fitness_center_rounded
-                        : Icons.calendar_today_rounded,
+                    emptyTrendCtaLabel!.toLowerCase().contains('agenda')
+                        ? Icons.calendar_today_rounded
+                        : Icons.fitness_center_rounded,
                     size: 16,
                   ),
                   label: Text(
@@ -244,6 +255,7 @@ class DashboardPulseChip extends StatelessWidget {
     required this.isDark,
     required this.compact,
     required this.onTap,
+    this.empty = false,
   });
 
   final String icon;
@@ -252,6 +264,7 @@ class DashboardPulseChip extends StatelessWidget {
   final Color accent;
   final bool isDark;
   final bool compact;
+  final bool empty;
   final VoidCallback onTap;
 
   @override
@@ -262,6 +275,10 @@ class DashboardPulseChip extends StatelessWidget {
     final valueSize = compact ? 14.0 : 15.0;
     final labelSize = compact ? 9.5 : 10.0;
     final hPad = compact ? 7.0 : 9.0;
+    final emphasis =
+        empty
+            ? OperationalMetricEmphasis.muted
+            : OperationalMetricEmphasis.normal;
 
     return Semantics(
       button: true,
@@ -277,6 +294,7 @@ class DashboardPulseChip extends StatelessWidget {
               accent: accent,
               isDark: isDark,
               radius: TokensStrip.rCard,
+              emphasis: emphasis,
             ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 48),
@@ -290,7 +308,9 @@ class DashboardPulseChip extends StatelessWidget {
                         width: iconSize,
                         height: iconSize,
                         decoration: BoxDecoration(
-                          color: accent.withValues(alpha: isDark ? 0.18 : 0.10),
+                          color: accent.withValues(
+                            alpha: isDark ? 0.22 : 0.14,
+                          ),
                           borderRadius: BorderRadius.circular(
                             TokensStrip.rInput,
                           ),
@@ -330,7 +350,7 @@ class DashboardPulseChip extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: labelSize,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                         color: accent,
                         height: 1.1,
                       ),
