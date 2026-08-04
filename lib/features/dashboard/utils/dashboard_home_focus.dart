@@ -10,6 +10,7 @@ class DashboardHomeFocusRules {
     required this.collapseFinance,
     required this.hideSecondaryRiskCtas,
     required this.hidePromoBanners,
+    required this.collapseQuickLinks,
     required this.maxVisibleNextActions,
   });
 
@@ -20,6 +21,8 @@ class DashboardHomeFocusRules {
   final bool collapseFinance;
   final bool hideSecondaryRiskCtas;
   final bool hidePromoBanners;
+  /// Com foco ligado, atalhos rápidos começam recolhidos.
+  final bool collapseQuickLinks;
   final int maxVisibleNextActions;
 
   static bool coversRetention(DashboardDayFocus focus) {
@@ -53,6 +56,7 @@ class DashboardHomeFocusRules {
       collapseFinance: focusMode || covers || receitaAtual <= 0,
       hideSecondaryRiskCtas: focusMode || covers,
       hidePromoBanners: focusMode,
+      collapseQuickLinks: focusMode,
       maxVisibleNextActions: focusMode ? 2 : 3,
     );
   }
@@ -64,7 +68,7 @@ abstract final class DashboardAderenciaCopy {
 
   static String emptyBody({required bool retentionFocus}) {
     if (retentionFocus) {
-      return 'Ranking volta quando houver treinos — o contato de hoje já está acima.';
+      return 'Ranking volta com treinos. Prioridade de contato já está no Foco do dia.';
     }
     return 'Quando alunos treinarem, a aderência aparece aqui com ranking automático.';
   }

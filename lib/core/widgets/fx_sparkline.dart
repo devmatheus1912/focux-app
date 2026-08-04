@@ -20,8 +20,6 @@ class FxSparkline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (data.isEmpty) return SizedBox(width: width, height: height);
-
     return SizedBox(
       width: width,
       height: height,
@@ -163,17 +161,22 @@ class _SparklinePainter extends CustomPainter {
   void _paintEmptyTrack(Canvas canvas, Size size, double padding) {
     final trackPaint =
         Paint()
-          ..color = color.withValues(alpha: 0.22)
+          ..color = color.withValues(alpha: 0.28)
           ..strokeWidth = 1.4
           ..style = PaintingStyle.stroke
           ..strokeCap = StrokeCap.round;
 
-    final y = size.height - padding - 1;
-    canvas.drawLine(
-      Offset(padding, y),
-      Offset(size.width - padding, y),
-      trackPaint,
-    );
+    final y = size.height / 2;
+    // Trilha tracejada — empty state legível sem caixa cinza.
+    const dash = 4.0;
+    const gap = 3.0;
+    var x = padding;
+    final end = size.width - padding;
+    while (x < end) {
+      final x2 = (x + dash).clamp(padding, end);
+      canvas.drawLine(Offset(x, y), Offset(x2, y), trackPaint);
+      x += dash + gap;
+    }
   }
 
   @override

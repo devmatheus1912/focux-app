@@ -32,7 +32,7 @@ class DashboardDayFocus {
       return DashboardDayFocus(
         headline: 'Retomada urgente da base',
         detail:
-            '$riscoAlto de $alunosAtivos precisam de contato hoje — comece pelos cards abaixo.',
+            '$riscoAlto de $alunosAtivos precisam de contato hoje — comece pela Central de Comando.',
         semanticLabel:
             'Foco do dia: retomada urgente. $riscoAlto de $alunosAtivos alunos precisam de contato.',
       );
@@ -40,7 +40,7 @@ class DashboardDayFocus {
     if (riscoAlto > 0) {
       return DashboardDayFocus(
         headline: 'Acompanhar alunos em risco',
-        detail: '$riscoAlto no radar · revise antes que a aderência caia.',
+        detail: '$riscoAlto no radar · revise o contato ainda hoje.',
         semanticLabel:
             'Foco do dia: $riscoAlto alunos em risco precisam de acompanhamento.',
       );

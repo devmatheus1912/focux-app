@@ -9,6 +9,7 @@ void main() {
       icon: 'payments',
       label: 'Cobrança auto',
       featureName: 'financeiro',
+      group: DashboardToolGroup.receita,
     );
     expect(
       dashboardShortcutSemanticsLabel(shortcut),

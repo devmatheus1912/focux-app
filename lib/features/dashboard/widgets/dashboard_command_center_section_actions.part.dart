@@ -88,16 +88,18 @@ class CommandActionPanel extends StatelessWidget {
         if (loading)
           CommandActionsShimmer(isDark: isDark, primary: primary)
         else if (unavailable)
-          CommandLoadingTile(
+          CommandStatusTile(
             isDark: isDark,
             primary: primary,
+            icon: Icons.cloud_off_rounded,
             title: 'Central temporariamente indisponível',
             subtitle: 'Puxe para atualizar ou tente em instantes.',
           )
         else if (actions.isEmpty)
-          CommandLoadingTile(
+          CommandStatusTile(
             isDark: isDark,
             primary: primary,
+            icon: Icons.check_circle_outline_rounded,
             title: 'Operação sob controle',
             subtitle: 'Nenhuma ação crítica para agora.',
           )
@@ -158,16 +160,19 @@ class CommandActionsShimmer extends StatelessWidget {
   }
 }
 
-class CommandLoadingTile extends StatelessWidget {
+/// Empty / unavailable — static icon (sem shimmer de loading).
+class CommandStatusTile extends StatelessWidget {
   final bool isDark;
   final Color primary;
+  final IconData icon;
   final String title;
   final String subtitle;
 
-  const CommandLoadingTile({
+  const CommandStatusTile({
     super.key,
     required this.isDark,
     required this.primary,
+    required this.icon,
     required this.title,
     required this.subtitle,
   });
@@ -182,17 +187,15 @@ class CommandLoadingTile extends StatelessWidget {
       decoration: chrome.panel(radius: TokensStrip.rCard, accent: primary),
       child: Row(
         children: [
-          Shimmer.fromColors(
-            baseColor: primary.withValues(alpha: isDark ? 0.18 : 0.10),
-            highlightColor: primary.withValues(alpha: isDark ? 0.32 : 0.18),
-            child: Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: primary.withValues(alpha: isDark ? 0.24 : 0.14),
-                borderRadius: BorderRadius.circular(15),
-              ),
+          Container(
+            width: 38,
+            height: 38,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: primary.withValues(alpha: isDark ? 0.18 : 0.10),
+              borderRadius: BorderRadius.circular(15),
             ),
+            child: Icon(icon, size: 20, color: primary),
           ),
           const SizedBox(width: 12),
           Expanded(

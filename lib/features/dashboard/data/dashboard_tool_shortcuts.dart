@@ -3,11 +3,23 @@ import '../../planos/utils/plano_capability.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../../subscription/plan_entitlements.dart';
 
+/// Bucket visual da Home «Mais ferramentas».
+enum DashboardToolGroup {
+  operacao('Operação'),
+  receita('Receita'),
+  crescimento('Crescimento'),
+  sistema('Sistema');
+
+  const DashboardToolGroup(this.title);
+  final String title;
+}
+
 /// Atalho do grid «Mais ferramentas» — capability alinhada ao [FeatureGate] da rota.
 class DashboardToolShortcut {
   const DashboardToolShortcut({
     required this.icon,
     required this.label,
+    required this.group,
     this.route,
     this.capability,
     this.featureName,
@@ -16,6 +28,7 @@ class DashboardToolShortcut {
 
   final String icon;
   final String label;
+  final DashboardToolGroup group;
   final String? route;
   final String? capability;
   final String? featureName;
@@ -47,32 +60,20 @@ class DashboardToolShortcut {
       icon: 'dumbbell',
       label: 'Exercícios',
       route: '/exercicios',
+      group: DashboardToolGroup.operacao,
     ),
-    DashboardToolShortcut(icon: 'article', label: 'Feed', route: '/feed'),
     DashboardToolShortcut(
-      icon: 'trend',
-      label: 'Leads',
-      route: '/leads',
-      capability: 'financeiro',
-      featureName: 'CRM e Leads',
-    ),
-    DashboardToolShortcut(icon: 'home', label: 'Indique', route: '/referral'),
-    DashboardToolShortcut(
-      icon: 'spark',
-      label: 'Ofertas',
-      route: '/ofertas-upsell',
+      icon: 'article',
+      label: 'Feed',
+      route: '/feed',
+      group: DashboardToolGroup.operacao,
     ),
     DashboardToolShortcut(
       icon: 'flame',
       label: 'Hábitos',
       route: '/habitos',
       capability: 'habitCoaching',
-    ),
-    DashboardToolShortcut(
-      icon: 'zap',
-      label: 'Automações',
-      route: '/automacoes',
-      capability: 'automacoes',
+      group: DashboardToolGroup.operacao,
     ),
     DashboardToolShortcut(
       icon: 'plus',
@@ -80,42 +81,29 @@ class DashboardToolShortcut {
       route: '/desafios',
       capability: 'comunidadeGrupos',
       featureName: 'Desafios e ranking',
+      group: DashboardToolGroup.operacao,
     ),
     DashboardToolShortcut(
-      icon: 'coin',
-      label: 'Loja',
-      route: '/loja',
-      capability: 'lojaDigital',
-      featureName: 'Loja digital',
+      icon: 'trend',
+      label: 'Leads',
+      route: '/leads',
+      capability: 'financeiro',
+      featureName: 'CRM e Leads',
+      group: DashboardToolGroup.crescimento,
     ),
     DashboardToolShortcut(
-      icon: 'users',
-      label: 'Equipe',
-      route: '/perfil/equipe',
-      capability: 'equipeRbac',
-      featureName: 'Equipe e RBAC',
+      icon: 'home',
+      label: 'Indique',
+      route: '/referral',
+      group: DashboardToolGroup.crescimento,
     ),
-    DashboardToolShortcut(icon: 'coin', label: 'Pacotes', route: '/pacotes'),
     DashboardToolShortcut(
       icon: 'message-circle',
       label: 'Lead Público',
       route: '/leads-publicos',
       capability: 'financeiro',
       featureName: 'Captura de leads',
-    ),
-    DashboardToolShortcut(
-      icon: 'dollar-sign',
-      label: 'Receita recorrente',
-      route: '/relatorio/business',
-      capability: 'relatorios',
-      featureName: 'Relatórios de negócio',
-    ),
-    DashboardToolShortcut(
-      icon: 'alert-triangle',
-      label: 'Cobrança auto',
-      route: '/dunning',
-      capability: 'financeiro',
-      featureName: 'Cobrança automática',
+      group: DashboardToolGroup.crescimento,
     ),
     DashboardToolShortcut(
       icon: 'route',
@@ -123,6 +111,7 @@ class DashboardToolShortcut {
       route: '/winback',
       capability: 'automacoes',
       featureName: 'Automação win-back',
+      group: DashboardToolGroup.crescimento,
     ),
     DashboardToolShortcut(
       icon: 'sun',
@@ -130,6 +119,49 @@ class DashboardToolShortcut {
       landingEditor: true,
       capability: 'landingCompleta',
       featureName: 'Landing page completa',
+      group: DashboardToolGroup.crescimento,
+    ),
+    DashboardToolShortcut(
+      icon: 'star',
+      label: 'Pesquisa NPS',
+      route: '/nps',
+      group: DashboardToolGroup.crescimento,
+    ),
+    DashboardToolShortcut(
+      icon: 'spark',
+      label: 'Ofertas',
+      route: '/ofertas-upsell',
+      group: DashboardToolGroup.receita,
+    ),
+    DashboardToolShortcut(
+      icon: 'coin',
+      label: 'Pacotes',
+      route: '/pacotes',
+      group: DashboardToolGroup.receita,
+    ),
+    DashboardToolShortcut(
+      icon: 'coin',
+      label: 'Loja',
+      route: '/loja',
+      capability: 'lojaDigital',
+      featureName: 'Loja digital',
+      group: DashboardToolGroup.receita,
+    ),
+    DashboardToolShortcut(
+      icon: 'dollar-sign',
+      label: 'Receita recorrente',
+      route: '/relatorio/business',
+      capability: 'relatorios',
+      featureName: 'Relatórios de negócio',
+      group: DashboardToolGroup.receita,
+    ),
+    DashboardToolShortcut(
+      icon: 'alert-triangle',
+      label: 'Cobrança auto',
+      route: '/dunning',
+      capability: 'financeiro',
+      featureName: 'Cobrança automática',
+      group: DashboardToolGroup.receita,
     ),
     DashboardToolShortcut(
       icon: 'calendar',
@@ -137,29 +169,48 @@ class DashboardToolShortcut {
       route: '/recorrencia',
       capability: 'financeiro',
       featureName: 'Recorrência de alunos',
+      group: DashboardToolGroup.receita,
     ),
-    DashboardToolShortcut(icon: 'star', label: 'Pesquisa NPS', route: '/nps'),
+    DashboardToolShortcut(
+      icon: 'zap',
+      label: 'Automações',
+      route: '/automacoes',
+      capability: 'automacoes',
+      group: DashboardToolGroup.sistema,
+    ),
+    DashboardToolShortcut(
+      icon: 'users',
+      label: 'Equipe',
+      route: '/perfil/equipe',
+      capability: 'equipeRbac',
+      featureName: 'Equipe e RBAC',
+      group: DashboardToolGroup.sistema,
+    ),
     DashboardToolShortcut(
       icon: 'chat',
       label: 'Grupo',
       route: '/grupo-aulas',
       capability: 'comunidadeGrupos',
       featureName: 'Turmas em grupo',
+      group: DashboardToolGroup.sistema,
     ),
     DashboardToolShortcut(
       icon: 'arrow-left',
       label: 'Configuração inicial',
       route: '/onboarding/wizard',
+      group: DashboardToolGroup.sistema,
     ),
     DashboardToolShortcut(
       icon: 'circle-check',
       label: 'Qualidade',
       route: '/dashboard/qualidade',
+      group: DashboardToolGroup.sistema,
     ),
     DashboardToolShortcut(
       icon: 'bell',
       label: 'Broadcasts',
       route: '/broadcasts',
+      group: DashboardToolGroup.sistema,
     ),
   ];
 
@@ -170,6 +221,7 @@ class DashboardToolShortcut {
       route: '/leads-publicos',
       capability: 'financeiro',
       featureName: 'Captura pública',
+      group: DashboardToolGroup.crescimento,
     ),
     DashboardToolShortcut(
       icon: 'moon',
@@ -177,13 +229,15 @@ class DashboardToolShortcut {
       route: '/white-label',
       capability: 'whiteLabel',
       featureName: 'Identidade visual e marca própria',
+      group: DashboardToolGroup.sistema,
     ),
     DashboardToolShortcut(
       icon: 'dollar-sign',
-      label: 'Preços inteligentes',
+      label: 'Preços',
       route: '/financeiro',
       capability: 'financeiro',
-      featureName: 'Financeiro',
+      featureName: 'Financeiro e preços',
+      group: DashboardToolGroup.receita,
     ),
     DashboardToolShortcut(
       icon: 'article',
@@ -191,6 +245,7 @@ class DashboardToolShortcut {
       landingEditor: true,
       capability: 'landingCompleta',
       featureName: 'Landing page completa',
+      group: DashboardToolGroup.crescimento,
     ),
   ];
 }

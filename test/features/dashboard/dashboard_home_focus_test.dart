@@ -36,7 +36,24 @@ void main() {
       expect(rules.collapseFinance, isTrue);
       expect(rules.hidePromoBanners, isTrue);
       expect(rules.hideSecondaryRiskCtas, isTrue);
+      expect(rules.collapseQuickLinks, isTrue);
       expect(rules.maxVisibleNextActions, 2);
+    });
+
+    test('focus off keeps quick links available by default expanded', () {
+      const focus = DashboardDayFocus(
+        headline: 'Rotina estável',
+        detail: 'x',
+        semanticLabel: 'foco',
+      );
+      final rules = DashboardHomeFocusRules.resolve(
+        focusMode: false,
+        dayFocus: focus,
+        riscoAlto: 0,
+        receitaAtual: 1000,
+      );
+      expect(rules.collapseQuickLinks, isFalse);
+      expect(rules.maxVisibleNextActions, 3);
     });
   });
 

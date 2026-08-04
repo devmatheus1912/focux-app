@@ -36,6 +36,7 @@ class DashboardCommandCenterSection extends ConsumerStatefulWidget {
   final bool hideRiskSummary;
   final String? contextualSubtitle;
   final bool hideHeader;
+  final bool collapseQuickLinks;
   final int maxVisibleNextActions;
 
   const DashboardCommandCenterSection({
@@ -46,6 +47,7 @@ class DashboardCommandCenterSection extends ConsumerStatefulWidget {
     this.hideRiskSummary = false,
     this.contextualSubtitle,
     this.hideHeader = false,
+    this.collapseQuickLinks = true,
     this.maxVisibleNextActions = 2,
   });
 
@@ -56,7 +58,21 @@ class DashboardCommandCenterSection extends ConsumerStatefulWidget {
 
 class DashboardCommandCenterSectionState
     extends ConsumerState<DashboardCommandCenterSection> {
-  bool _quickLinksExpanded = false;
+  late bool _quickLinksExpanded;
+
+  @override
+  void initState() {
+    super.initState();
+    _quickLinksExpanded = !widget.collapseQuickLinks;
+  }
+
+  @override
+  void didUpdateWidget(covariant DashboardCommandCenterSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.collapseQuickLinks && !oldWidget.collapseQuickLinks) {
+      _quickLinksExpanded = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -307,7 +323,9 @@ class DashboardCommandCenterSectionState
           primary: primary,
           loading: isCommandPreparing,
           unavailable: commandUnavailable,
-          actions: nextActions.take(2).toList(growable: false),
+          actions: nextActions
+              .take(widget.maxVisibleNextActions)
+              .toList(growable: false),
           prioritiesActionLabel: showPrioritiesLink ? 'Ver prioridades' : null,
           onPrioritiesTap:
               showPrioritiesLink

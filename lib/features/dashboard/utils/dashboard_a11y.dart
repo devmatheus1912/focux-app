@@ -9,7 +9,7 @@ String dashboardShortcutSemanticsLabel(DashboardToolShortcut shortcut) {
     'Pesquisa NPS' => 'Pesquisa de satisfação NPS',
     'Configuração inicial' => 'Assistente de configuração inicial',
     'Retorno rápido' => 'Atalhos de retorno sobre investimento',
-    'Preços inteligentes' => 'Financeiro e precificação',
+    'Preços' || 'Preços inteligentes' => 'Financeiro e precificação',
     'Marca própria' => 'Identidade visual e logo personalizados',
     'Captura pública' => 'Captura de leads públicos',
     _ => shortcut.displayFeatureName,

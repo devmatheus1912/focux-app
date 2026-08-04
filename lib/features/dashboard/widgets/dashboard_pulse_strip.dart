@@ -167,27 +167,23 @@ class DashboardDayPulseStrip extends StatelessWidget {
                             ],
                           ),
                         ),
-                        if (hasTrend)
-                          FxSparkline(
-                            data: checkinsTrend,
-                            color: pulseCheckinsAccent(
-                              checkinsHoje: checkinsHoje,
-                              neutralAccent: neutralAccent,
-                            ),
-                            width: 88,
-                            height: 24,
-                          )
-                        else
-                          Container(
-                            width: 88,
-                            height: 24,
-                            alignment: Alignment.centerRight,
-                            child: Icon(
-                              Icons.timeline_rounded,
-                              size: 20,
-                              color: mute,
-                            ),
-                          ),
+                        FxSparkline(
+                          data:
+                              hasTrend
+                                  ? checkinsTrend
+                                  : const [0, 0, 0, 0, 0, 0, 0],
+                          color:
+                              hasTrend
+                                  ? pulseCheckinsAccent(
+                                    checkinsHoje: checkinsHoje,
+                                    neutralAccent: neutralAccent,
+                                  )
+                                  : mute.withValues(alpha: 0.55),
+                          width: 88,
+                          height: 24,
+                          strokeWidth: hasTrend ? 2.0 : 1.4,
+                          fill: hasTrend,
+                        ),
                       ],
                     ),
                   ),

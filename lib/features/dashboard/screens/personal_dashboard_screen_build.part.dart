@@ -147,9 +147,17 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
             final dayFocusCoversRetention = focusRules.dayFocusCoversRetention;
 
             final attentionRiskItems =
-                alunosEmRisco.take(riskDominante ? 2 : 4).toList();
+                alunosEmRisco
+                    .take(
+                      focusRules.focusMode
+                          ? 1
+                          : (riskDominante ? 2 : 4),
+                    )
+                    .toList();
             final attentionVencItems =
-                (_finData?.vencimentosProximos ?? const []).take(2).toList();
+                (_finData?.vencimentosProximos ?? const [])
+                    .take(focusRules.focusMode ? 1 : 2)
+                    .toList();
             final attentionItemCount =
                 attentionRiskItems.length + attentionVencItems.length;
             const commandCenterSubtitle =
@@ -339,8 +347,8 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                       onPressed: _toggleFocusMode,
                                       icon: Icon(
                                         _focusMode
-                                            ? Icons.center_focus_strong_rounded
-                                            : Icons.center_focus_weak_rounded,
+                                            ? Icons.bolt_rounded
+                                            : Icons.bolt_outlined,
                                         size: 22,
                                         color: BrandPalette.sectionLink(
                                           primary,
@@ -410,6 +418,8 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                               hideRiskSummary: alunosEmRisco.isNotEmpty,
                               hideHeader: true,
                               contextualSubtitle: commandCenterSubtitle,
+                              collapseQuickLinks:
+                                  focusRules.collapseQuickLinks,
                               maxVisibleNextActions:
                                   focusRules.maxVisibleNextActions,
                             ),
@@ -455,22 +465,23 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: TextButton(
-                                    onPressed: () => context.push('/retencao'),
-                                    child: const Text('Saúde da base'),
+                                if (!dayFocusCoversRetention)
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: TextButton(
+                                      onPressed:
+                                          () => context.push('/retencao'),
+                                      child: const Text('Saúde da base'),
+                                    ),
                                   ),
-                                ),
                                 Align(
                                   alignment: Alignment.centerRight,
                                   child: TextButton(
                                     onPressed:
-                                        () =>
-                                            goPersonalShellTab(
-                                              context,
-                                              '/alunos?filtro=risco',
-                                            ),
+                                        () => goPersonalShellTab(
+                                          context,
+                                          '/alunos?filtro=risco',
+                                        ),
                                     child: Text(
                                       riscoAlto > 1
                                           ? 'Ver tudo · +${riscoAlto - 1}'
