@@ -10,7 +10,7 @@ class DashboardToolGroupSection {
   final List<DashboardToolShortcut> shortcuts;
 }
 
-/// Agrupa atalhos para escaneabilidade (Gestalt / densidade).
+/// Agrupa atalhos por rota/capability (não por label frágil).
 List<DashboardToolGroupSection> groupDashboardToolShortcuts(
   List<DashboardToolShortcut> shortcuts,
 ) {
@@ -20,8 +20,7 @@ List<DashboardToolGroupSection> groupDashboardToolShortcuts(
   final sistema = <DashboardToolShortcut>[];
 
   for (final shortcut in shortcuts) {
-    final key = _groupKey(shortcut);
-    switch (key) {
+    switch (_groupKey(shortcut)) {
       case _ToolGroupKey.receita:
         receita.add(shortcut);
       case _ToolGroupKey.growth:
@@ -48,37 +47,44 @@ List<DashboardToolGroupSection> groupDashboardToolShortcuts(
 enum _ToolGroupKey { operacao, receita, growth, sistema }
 
 _ToolGroupKey _groupKey(DashboardToolShortcut shortcut) {
-  final label = shortcut.label;
-  if (shortcut.capability == 'financeiro' ||
-      {
-        'Cobrança auto',
-        'Receita recorrente',
-        'Recorrência',
-        'Loja',
-        'Ofertas',
-      }.contains(label)) {
-    return _ToolGroupKey.receita;
-  }
-  if ({
-    'Leads',
-    'Lead Público',
-    'Landing',
-    'Indique',
-    'Recuperação',
-    'Pesquisa NPS',
-  }.contains(label)) {
+  final route = shortcut.route ?? '';
+  final cap = shortcut.capability ?? '';
+
+  // Growth antes de capability financeiro (Leads usa cap financeiro).
+  if (route.contains('/leads') ||
+      route.contains('/landing') ||
+      route.contains('/referral') ||
+      route.contains('/recuperacao') ||
+      route.contains('/nps') ||
+      route.contains('/captura') ||
+      route.contains('/marca')) {
     return _ToolGroupKey.growth;
   }
-  if ({
-    'Automações',
-    'Broadcasts',
-    'Configuração inicial',
-    'Qualidade',
-    'Equipe',
-    'Grupo',
-  }.contains(label)) {
+
+  if (cap == 'financeiro' ||
+      cap == 'lojaDigital' ||
+      route.contains('/financeiro') ||
+      route.contains('/loja') ||
+      route.contains('/ofertas') ||
+      route.contains('/pacotes') ||
+      route.contains('/recorrencia') ||
+      route.contains('/cobranca') ||
+      route.contains('/receita')) {
+    return _ToolGroupKey.receita;
+  }
+
+  if (cap == 'automacoes' ||
+      cap == 'equipeRbac' ||
+      route.contains('/automacoes') ||
+      route.contains('/broadcast') ||
+      route.contains('/equipe') ||
+      route.contains('/grupo') ||
+      route.contains('/setup') ||
+      route.contains('/qualidade') ||
+      route.contains('/configuracao')) {
     return _ToolGroupKey.sistema;
   }
+
   return _ToolGroupKey.operacao;
 }
 

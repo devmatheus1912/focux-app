@@ -1,25 +1,5 @@
 part of 'dashboard_command_center_section.dart';
 
-class CommandActionItem {
-  final String icon;
-  final String title;
-  final String subtitle;
-  final String route;
-  final CommandActionTone tone;
-  final bool isRadarStudent;
-  final String? priorityBadge;
-
-  const CommandActionItem({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.route,
-    required this.tone,
-    this.isRadarStudent = false,
-    this.priorityBadge,
-  });
-}
-
 class CommandActionPanel extends StatelessWidget {
   final bool isDark;
   final Color primary;
@@ -52,7 +32,7 @@ class CommandActionPanel extends StatelessWidget {
             FxIcon(name: 'route', size: 17, color: rowAccent),
             const SizedBox(width: 8),
             Text(
-              'Próximas ações',
+              DashboardMicrocopy.proximasAcoes,
               style: TokensStrip.h2(
                 color: heading,
                 fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
@@ -86,7 +66,7 @@ class CommandActionPanel extends StatelessWidget {
               )
             else
               Text(
-                'Impacto hoje',
+                DashboardMicrocopy.impactoHoje,
                 style: TextStyle(
                   color: BrandPalette.sectionLink(primary, dark: isDark),
                   fontSize: 12,

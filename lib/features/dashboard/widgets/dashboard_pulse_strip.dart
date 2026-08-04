@@ -6,6 +6,7 @@ import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../utils/dashboard_entry_motion.dart';
+import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_screen_helpers.dart';
 
@@ -65,7 +66,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Pulso operacional',
+            DashboardMicrocopy.pulsoOperacional,
             style: dashboardSectionKickerStyle(context, isDark: isDark),
           ),
           const SizedBox(height: 6),

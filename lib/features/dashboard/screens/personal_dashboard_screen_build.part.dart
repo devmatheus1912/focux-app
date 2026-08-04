@@ -126,9 +126,25 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
               vencimentosPendentes: vencimentosCount,
               riskDominante: riskDominante,
             );
-            final dayFocusCoversRetention =
-                dayFocus.headline == 'Cobrança e retenção hoje' ||
-                dayFocus.headline == 'Retomada urgente da base';
+            if (_focusPreferenceLoaded && _persistedFocusMode == null) {
+              final autoFocus = DashboardHomeFocusRules.defaultFocusMode(
+                dayFocus: dayFocus,
+                riskDominante: riskDominante,
+              );
+              if (_focusMode != autoFocus) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
+                  setState(() => _focusMode = autoFocus);
+                });
+              }
+            }
+            final focusRules = DashboardHomeFocusRules.resolve(
+              focusMode: _focusMode,
+              dayFocus: dayFocus,
+              riscoAlto: riscoAlto,
+              receitaAtual: receitaAtual,
+            );
+            final dayFocusCoversRetention = focusRules.dayFocusCoversRetention;
 
             final attentionRiskItems =
                 alunosEmRisco.take(riskDominante ? 2 : 4).toList();
@@ -137,7 +153,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
             final attentionItemCount =
                 attentionRiskItems.length + attentionVencItems.length;
             const commandCenterSubtitle =
-                'Próximas ações com maior impacto hoje.';
+                DashboardMicrocopy.commandCenterSubtitle;
 
             void openAttentionReview() {
               if (attentionRiskItems.isNotEmpty) {
@@ -178,6 +194,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
               agendaHoje: agendaHoje,
               hideRiskSummary: alunosEmRisco.isNotEmpty,
               isCommandPreparing: commandAsync.isLoading,
+              maxItems: focusRules.maxVisibleNextActions,
             );
             final showStickyPrioritiesAction =
                 dashboardNextActions.length > 1 && _homeScrollOffset >= 80;
@@ -238,20 +255,23 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                     controller: _homeScrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
                     slivers: [
-                      const SliverToBoxAdapter(child: TrialCountdownBanner()),
-                      const SliverToBoxAdapter(child: PlanUsageBanner()),
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            TokensStrip.s4,
-                            4,
-                            TokensStrip.s4,
-                            0,
+                      if (!focusRules.hidePromoBanners) ...[
+                        const SliverToBoxAdapter(child: TrialCountdownBanner()),
+                        const SliverToBoxAdapter(child: PlanUsageBanner()),
+                      ],
+                      if (!focusRules.focusMode || onboardingIncomplete)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              TokensStrip.s4,
+                              4,
+                              TokensStrip.s4,
+                              0,
+                            ),
+                            child: SetupOnboardingWidget(),
                           ),
-                          child: SetupOnboardingWidget(),
                         ),
-                      ),
-                      if (!onboardingIncomplete)
+                      if (!onboardingIncomplete && !focusRules.focusMode)
                         SliverToBoxAdapter(
                           child: DashboardActivationCta(
                             alunosAtivos: alunosAtivos,
@@ -301,6 +321,35 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
+                                  Semantics(
+                                    button: true,
+                                    toggled: _focusMode,
+                                    label:
+                                        _focusMode
+                                            ? DashboardMicrocopy.modoFocoOn
+                                            : DashboardMicrocopy.modoFocoOff,
+                                    child: IconButton(
+                                      tooltip: DashboardMicrocopy.modoFoco,
+                                      visualDensity: VisualDensity.compact,
+                                      constraints: const BoxConstraints(
+                                        minWidth: 36,
+                                        minHeight: 36,
+                                      ),
+                                      padding: EdgeInsets.zero,
+                                      onPressed: _toggleFocusMode,
+                                      icon: Icon(
+                                        _focusMode
+                                            ? Icons.center_focus_strong_rounded
+                                            : Icons.center_focus_weak_rounded,
+                                        size: 22,
+                                        color: BrandPalette.sectionLink(
+                                          primary,
+                                          dark: themeDark,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: DashboardLayout.headerIconGap),
                                   const ShellThemeToggle(size: 36),
                                   SizedBox(width: DashboardLayout.headerIconGap),
                                   const NotificacaoBadgeButton(size: 36),
@@ -361,12 +410,16 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                               hideRiskSummary: alunosEmRisco.isNotEmpty,
                               hideHeader: true,
                               contextualSubtitle: commandCenterSubtitle,
+                              maxVisibleNextActions:
+                                  focusRules.maxVisibleNextActions,
                             ),
                           ),
                         ),
                       ),
 
-                      if (riscoAlto > 0 && !attentionVisible)
+                      if (riscoAlto > 0 &&
+                          !attentionVisible &&
+                          !focusRules.hideSecondaryRiskCtas)
                         SliverToBoxAdapter(
                           child: Align(
                             alignment: Alignment.centerRight,
@@ -381,19 +434,23 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                       if (attentionVisible) ...[
                         SliverToBoxAdapter(
                           child: DashboardCollapsibleSection(
-                            title: 'Precisa de atenção',
+                            title: DashboardMicrocopy.precisaDeAtencao,
                             collapsedHint:
-                                riskDominante
-                                    ? '$riscoAlto de $alunosAtivos · toque em Revisar'
+                                dayFocusCoversRetention
+                                    ? 'Revisar · sinais já cobertos no Foco do dia'
+                                    : riskDominante
+                                    ? '$riscoAlto de $alunosAtivos · Revisar'
                                     : riscoAlto > 0
-                                    ? '$riscoAlto no radar · toque em Revisar'
-                                    : 'Cobranças pendentes · toque em Revisar',
+                                    ? '$riscoAlto no radar · Revisar'
+                                    : 'Cobranças pendentes · Revisar',
                             collapsedActionLabel: 'Revisar',
                             onCollapsedAction: openAttentionReview,
-                            collapsedPreview: attentionCollapsedPreview,
+                            collapsedPreview:
+                                dayFocusCoversRetention
+                                    ? null
+                                    : attentionCollapsedPreview,
                             isDark: themeDark,
-                            initiallyExpanded:
-                                !dayFocusCoversRetention && riscoAlto <= 3,
+                            initiallyExpanded: !focusRules.collapseAttention,
                             resetToken: _attentionSectionResetToken,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -559,13 +616,19 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                       ),
                       SliverToBoxAdapter(
                         child: DashboardCollapsibleSection(
-                          title: 'Aderência da semana',
+                          title: DashboardMicrocopy.aderenciaDaSemana,
                           collapsedHint:
-                              'Treinos parados e ranking · toque para expandir',
+                              dayFocusCoversRetention
+                                  ? 'Ranking semanal · expandir se precisar'
+                                  : 'Treinos e ranking · ${DashboardMicrocopy.toqueParaExpandir}',
                           isDark: themeDark,
-                          headerActionLabel: 'Relatório',
+                          initiallyExpanded: !focusRules.collapseAderencia,
+                          headerActionLabel:
+                              focusRules.focusMode ? null : 'Relatório',
                           onHeaderAction:
-                              () => context.push('/relatorios/global'),
+                              focusRules.focusMode
+                                  ? null
+                                  : () => context.push('/relatorios/global'),
                           child: DashboardAderenciaSemanaWidget(
                             isDark: themeDark,
                             retentionFocus: dayFocusCoversRetention,
@@ -581,11 +644,10 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                           title: DashboardMicrocopy.panoramaFinanceiro,
                           collapsedHint:
                               receitaAtual > 0
-                                  ? 'R\$ ${receitaAtual.toInt()} recebido · toque para expandir'
-                                  : 'R\$ 0 recebido · meta do mês · toque para expandir',
+                                  ? 'R\$ ${receitaAtual.toInt()} recebido · ${DashboardMicrocopy.toqueParaExpandir}'
+                                  : 'R\$ 0 recebido · meta do mês',
                           isDark: themeDark,
-                          initiallyExpanded:
-                              !dayFocusCoversRetention && receitaAtual > 0,
+                          initiallyExpanded: !focusRules.collapseFinance,
                           child: dashboardEntryMotion(
                             context: context,
                             fade: _heroFade,

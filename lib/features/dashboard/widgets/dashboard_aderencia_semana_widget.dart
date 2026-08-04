@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import '../providers/aderencia_provider.dart';
+import '../utils/dashboard_home_focus.dart';
 import '../utils/dashboard_readability.dart';
 
 class DashboardAderenciaSemanaWidget extends StatelessWidget {
@@ -143,10 +144,9 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
                 primary: primary,
                 mute: mute,
                 title: 'Sem check-ins nesta semana',
-                body:
-                    retentionFocus
-                        ? 'Priorize contato com alunos em risco antes de abrir a agenda.'
-                        : 'Quando alunos treinarem, a aderência aparece aqui com ranking automático.',
+                body: DashboardAderenciaCopy.emptyBody(
+                  retentionFocus: retentionFocus,
+                ),
                 primaryAction:
                     retentionFocus ? 'Ver alunos em risco' : 'Ver agenda',
                 onPrimary:
@@ -163,15 +163,19 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
                 primary: primary,
                 mute: mute,
                 title: 'Treinos parados na semana',
-                body:
-                    'Acione alunos sem treino esta semana — o foco do dia já está no topo.',
+                body: DashboardAderenciaCopy.stoppedBody(
+                  retentionFocus: retentionFocus,
+                ),
                 primaryAction: retentionFocus ? 'Revisar base' : 'Ver agenda',
-                secondaryAction: 'Plano retomada',
+                secondaryAction: retentionFocus ? null : 'Plano retomada',
                 onPrimary:
                     retentionFocus
                         ? () => context.push('/retencao')
                         : () => context.go('/agenda'),
-                onSecondary: () => context.push('/dashboard/qualidade'),
+                onSecondary:
+                    retentionFocus
+                        ? null
+                        : () => context.push('/dashboard/qualidade'),
               );
             }
 

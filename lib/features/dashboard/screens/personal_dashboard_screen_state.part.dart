@@ -12,6 +12,9 @@ class _PersonalDashboardScreenState
   VoidCallback? _routeListener;
   RouteInformationProvider? _routeInformationProvider;
   bool _motionConfigured = false;
+  bool? _persistedFocusMode;
+  bool _focusMode = true;
+  bool _focusPreferenceLoaded = false;
 
   late AnimationController _gradientCtrl;
   late AnimationController _counterCtrl;
@@ -55,10 +58,32 @@ class _PersonalDashboardScreenState
     _homeScrollController = ScrollController();
     _homeScrollController.addListener(_onHomeScroll);
     _loadFinFromHome();
+    _loadFocusPreference();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _maybeShowOnboardingWizard();
       _bindDashboardReturnListener();
     });
+  }
+
+  Future<void> _loadFocusPreference() async {
+    final persisted = await DashboardHomeFocusStore.load();
+    if (!mounted) return;
+    setState(() {
+      _persistedFocusMode = persisted;
+      _focusPreferenceLoaded = true;
+      if (persisted != null) {
+        _focusMode = persisted;
+      }
+    });
+  }
+
+  Future<void> _toggleFocusMode() async {
+    final next = !_focusMode;
+    setState(() {
+      _focusMode = next;
+      _persistedFocusMode = next;
+    });
+    await DashboardHomeFocusStore.save(next);
   }
 
   @override

@@ -3,29 +3,73 @@ import '../../../core/api/api_client.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import 'command_center_data.dart';
 
+class DashboardAderenciaTopItem {
+  final int alunoId;
+  final String nome;
+  final String? objetivo;
+  final List<double> sparkline;
+  final int totalCheckinsSemana;
+  final int aderenciaPercent;
+
+  const DashboardAderenciaTopItem({
+    required this.alunoId,
+    required this.nome,
+    required this.objetivo,
+    required this.sparkline,
+    required this.totalCheckinsSemana,
+    required this.aderenciaPercent,
+  });
+
+  factory DashboardAderenciaTopItem.fromJson(Map<String, dynamic> json) {
+    final sparkRaw = json['sparkline'] as List<dynamic>? ?? const [];
+    return DashboardAderenciaTopItem(
+      alunoId: (json['alunoId'] as num).toInt(),
+      nome: json['nome'] as String? ?? '',
+      objetivo: json['objetivo'] as String?,
+      sparkline:
+          sparkRaw.map((e) => (e as num?)?.toDouble() ?? 0.0).toList(growable: false),
+      totalCheckinsSemana: (json['totalCheckinsSemana'] as num?)?.toInt() ?? 0,
+      aderenciaPercent: (json['aderenciaPercent'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
 class DashboardHomeBundle {
   final DashboardData personal;
   final CommandCenterData commandCenter;
   final FinanceiroDashboard financeiro;
+  final List<DashboardAderenciaTopItem> topAderencia;
 
   DashboardHomeBundle({
     required this.personal,
     required this.commandCenter,
     required this.financeiro,
+    this.topAderencia = const [],
   });
 
-  factory DashboardHomeBundle.fromJson(Map<String, dynamic> json) =>
-      DashboardHomeBundle(
-        personal: DashboardData.fromJson(
-          json['personal'] as Map<String, dynamic>,
-        ),
-        commandCenter: CommandCenterData.fromJson(
-          json['commandCenter'] as Map<String, dynamic>,
-        ),
-        financeiro: FinanceiroDashboard.fromJson(
-          json['financeiro'] as Map<String, dynamic>,
-        ),
-      );
+  factory DashboardHomeBundle.fromJson(Map<String, dynamic> json) {
+    final topRaw = json['topAderencia'] as List<dynamic>? ?? const [];
+    return DashboardHomeBundle(
+      personal: DashboardData.fromJson(
+        json['personal'] as Map<String, dynamic>,
+      ),
+      commandCenter: CommandCenterData.fromJson(
+        json['commandCenter'] as Map<String, dynamic>,
+      ),
+      financeiro: FinanceiroDashboard.fromJson(
+        json['financeiro'] as Map<String, dynamic>,
+      ),
+      topAderencia:
+          topRaw
+              .whereType<Map>()
+              .map(
+                (e) => DashboardAderenciaTopItem.fromJson(
+                  Map<String, dynamic>.from(e),
+                ),
+              )
+              .toList(growable: false),
+    );
+  }
 }
 
 class DashboardData {

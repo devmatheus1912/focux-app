@@ -12,6 +12,7 @@ import '../../planos/utils/effective_plano_features.dart';
 import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_a11y.dart';
 import '../utils/dashboard_haptic.dart';
+import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
 import '../utils/dashboard_tool_groups.dart';
@@ -39,7 +40,7 @@ class DashboardRoiQuickLinksRow extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Retorno rápido',
+            DashboardMicrocopy.retornoRapido,
             style: dashboardSectionKickerStyle(context, isDark: isDark),
           ),
           const SizedBox(height: 8),
@@ -110,7 +111,14 @@ class _RoiShortcutChip extends StatelessWidget {
         label: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(shortcut.label),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 120),
+              child: Text(
+                shortcut.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
             if (locked && tierLabel != null) ...[
               const SizedBox(width: 6),
               Container(
@@ -255,7 +263,7 @@ class DashboardExpandableToolGroupsState
   @override
   void initState() {
     super.initState();
-    _openGroups = {'Operação'};
+    _openGroups = <String>{};
   }
 
   @override
@@ -266,7 +274,7 @@ class DashboardExpandableToolGroupsState
     if (q.isNotEmpty && q != oldQ) {
       _openGroups = widget.groups.map((g) => g.title).toSet();
     } else if (q.isEmpty && oldQ.isNotEmpty) {
-      _openGroups = {'Operação'};
+      _openGroups = <String>{};
     }
   }
 
@@ -435,7 +443,7 @@ class DashboardCollapsibleToolsSectionState
               button: true,
               expanded: _expanded,
               label: dashboardCollapsibleSemanticsLabel(
-                'Mais ferramentas',
+                DashboardMicrocopy.maisFerramentas,
                 _expanded,
                 collapsedHint: collapsedHint,
               ),
@@ -466,7 +474,7 @@ class DashboardCollapsibleToolsSectionState
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Mais ferramentas',
+                              DashboardMicrocopy.maisFerramentas,
                               style: AppTypography.inter(
                                 fontSize: TokensStrip.fontH2,
                                 fontWeight: TokensStrip.weightH2,
@@ -521,7 +529,7 @@ class DashboardCollapsibleToolsSectionState
                         _searchQuery.isEmpty) ...[
                       const SizedBox(height: 12),
                       Text(
-                        'Recentes',
+                        DashboardMicrocopy.recentes,
                         style: dashboardSectionKickerStyle(
                           context,
                           isDark: widget.isDark,
@@ -558,7 +566,7 @@ class DashboardCollapsibleToolsSectionState
                     const SizedBox(height: 12),
                     Semantics(
                       textField: true,
-                      label: 'Buscar ferramenta',
+                      label: DashboardMicrocopy.buscarFerramenta,
                       child: TextField(
                         onChanged: (v) => setState(() => _searchQuery = v),
                         style: AppTypography.inter(
@@ -569,7 +577,7 @@ class DashboardCollapsibleToolsSectionState
                                   : TokensStrip.textPrimary,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'Buscar ferramenta…',
+                          hintText: DashboardMicrocopy.buscarFerramenta,
                           hintStyle: TextStyle(color: mute),
                           prefixIcon: Icon(Icons.search_rounded, color: mute),
                           isDense: true,

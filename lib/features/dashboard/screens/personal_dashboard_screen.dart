@@ -31,6 +31,8 @@ import '../../subscription/widgets/trial_countdown_banner.dart';
 import '../../subscription/widgets/dashboard_activation_cta.dart';
 import '../../onboarding/providers/onboarding_provider.dart';
 import '../utils/dashboard_day_focus.dart';
+import '../utils/dashboard_home_focus.dart';
+import '../utils/dashboard_home_focus_store.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_a11y.dart';
 import '../utils/dashboard_readability.dart';

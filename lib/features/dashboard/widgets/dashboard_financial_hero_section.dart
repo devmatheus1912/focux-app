@@ -74,10 +74,16 @@ class DashboardFinancialHeroSection extends StatelessWidget {
     if (meta > 0) {
       return 'Meta R\$ ${meta.toStringAsFixed(0)}';
     }
-    if (ticket > 0) {
+    // Ticket médio só com receita real — evita R$1100 “fantasma” em mês zerado.
+    if (receitaAtual > 0 && ticket > 0) {
       return 'Ticket médio R\$ ${ticket.toStringAsFixed(0)} · defina meta no financeiro';
     }
     return 'Defina a meta mensal no financeiro';
+  }
+
+  bool get _showTicketMedio {
+    final ticket = finData?.ticketMedio ?? 0;
+    return receitaAtual > 0 && ticket > 0;
   }
 
   Widget _receitaAmount(BuildContext context) {
@@ -367,15 +373,17 @@ class DashboardFinancialHeroSection extends StatelessWidget {
               value: '${finData?.totalInadimplentes ?? 0}',
               suffix: ' alunos',
             ),
-            Container(
-              width: 1,
-              height: 30,
-              color: Colors.white.withValues(alpha: 0.15),
-            ),
-            DashboardHeroMiniStat(
-              label: 'Ticket médio',
-              value: 'R\$ ${finData?.ticketMedio.toStringAsFixed(0) ?? '0'}',
-            ),
+            if (_showTicketMedio) ...[
+              Container(
+                width: 1,
+                height: 30,
+                color: Colors.white.withValues(alpha: 0.15),
+              ),
+              DashboardHeroMiniStat(
+                label: 'Ticket médio',
+                value: 'R\$ ${finData!.ticketMedio.toStringAsFixed(0)}',
+              ),
+            ],
           ],
         ),
       ],

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
 
 class DashboardCommandCenterStickyHeaderDelegate
@@ -53,7 +54,9 @@ class DashboardCommandCenterStickyHeaderDelegate
     return Semantics(
       header: true,
       label:
-          showSubtitle ? 'Central de Comando. $subtitle' : 'Central de Comando',
+          showSubtitle
+              ? '${DashboardMicrocopy.commandCenterTitle}. $subtitle'
+              : DashboardMicrocopy.commandCenterTitle,
       child: Material(
         color:
             isDark ? EagleTokens.darkBg : Theme.of(context).colorScheme.surface,
@@ -98,7 +101,7 @@ class DashboardCommandCenterStickyHeaderDelegate
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Central de Comando',
+                                DashboardMicrocopy.commandCenterTitle,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: AppTypography.inter(
