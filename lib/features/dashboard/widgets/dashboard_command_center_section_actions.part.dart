@@ -392,7 +392,9 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
     super.initState();
     final radarCount =
         widget.actions.where((action) => action.isRadarStudent).length;
-    _radarExpanded = radarCount <= 2;
+    final impactOnly = widget.actions.where((a) => !a.isRadarStudent).isEmpty;
+    // Só alunos no sheet → já abre expandido (é o conteúdo principal).
+    _radarExpanded = radarCount <= 2 || impactOnly;
   }
 
   void _openAction(CommandActionItem item) {
@@ -463,7 +465,9 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Todas as prioridades',
+                        impactActions.isEmpty && radarActions.isNotEmpty
+                            ? 'Ações por aluno'
+                            : 'Todas as prioridades',
                         style: TokensStrip.h2(
                           color: primary,
                           fontFamily:
@@ -474,7 +478,9 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Ordenadas pelo impacto de hoje.',
+                        impactActions.isEmpty && radarActions.isNotEmpty
+                            ? 'Contato e retenção dos alunos em risco.'
+                            : 'Extra além do que já está na Home.',
                         style: TokensStrip.bodyMuted(
                           color: mute,
                           fontFamily:
@@ -513,53 +519,56 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
                     ),
                   ],
                   if (radarActions.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    Semantics(
-                      button: true,
-                      expanded: _radarExpanded,
-                      label:
-                          'Ações por aluno, ${radarActions.length} itens. '
-                          '${_radarExpanded ? 'Expandido' : 'Recolhido'}',
-                      child: InkWell(
-                        onTap: () {
-                          dashboardHapticCollapseToggle();
-                          setState(() => _radarExpanded = !_radarExpanded);
-                        },
-                        borderRadius: BorderRadius.circular(TokensStrip.rInput),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 4,
-                            vertical: 8,
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  'Ações por aluno (${radarActions.length})',
-                                  style: AppTypography.inter(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w800,
-                                    color: heading,
+                    if (impactActions.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Semantics(
+                        button: true,
+                        expanded: _radarExpanded,
+                        label:
+                            'Ações por aluno, ${radarActions.length} itens. '
+                            '${_radarExpanded ? 'Expandido' : 'Recolhido'}',
+                        child: InkWell(
+                          onTap: () {
+                            dashboardHapticCollapseToggle();
+                            setState(() => _radarExpanded = !_radarExpanded);
+                          },
+                          borderRadius:
+                              BorderRadius.circular(TokensStrip.rInput),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 8,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    'Ações por aluno (${radarActions.length})',
+                                    style: AppTypography.inter(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w800,
+                                      color: heading,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              AnimatedRotation(
-                                turns: _radarExpanded ? 0.25 : 0,
-                                duration: const Duration(milliseconds: 220),
-                                curve: Curves.easeOutCubic,
-                                child: Icon(
-                                  Icons.chevron_right_rounded,
-                                  size: 22,
-                                  color: link,
+                                AnimatedRotation(
+                                  turns: _radarExpanded ? 0.25 : 0,
+                                  duration: const Duration(milliseconds: 220),
+                                  curve: Curves.easeOutCubic,
+                                  child: Icon(
+                                    Icons.chevron_right_rounded,
+                                    size: 22,
+                                    color: link,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    if (_radarExpanded) ...[
-                      const SizedBox(height: 8),
+                    ],
+                    if (_radarExpanded || impactActions.isEmpty) ...[
+                      if (impactActions.isNotEmpty) const SizedBox(height: 8),
                       for (
                         var index = 0;
                         index < radarActions.length;

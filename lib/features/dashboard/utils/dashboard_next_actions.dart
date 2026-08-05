@@ -203,6 +203,7 @@ bool dashboardShouldShowPrioritiesLink({
   return sheet.any((a) => !visibleKeys.contains('${a.title}|${a.route}'));
 }
 
+/// Sheet: só impacto extra (não espelha a lista da Home) + ações por aluno.
 List<CommandActionItem> buildDashboardSheetActions({
   required List<CommandActionItem> curated,
   required List<FilaAcaoResumo> filaAcoes,
@@ -214,7 +215,8 @@ List<CommandActionItem> buildDashboardSheetActions({
   }
   final hasBillingCurated = curated.any(_isBillingAction);
   final hasRiskCurated = curated.any(_isRiskAction);
-  final impact = <CommandActionItem>[...curated];
+  // Não repetir P0/P1 já visíveis na Home — só o que a lista curta não cobre.
+  final impact = <CommandActionItem>[];
   for (final action in filaAcoes) {
     if (hasBillingCurated &&
         (action.actionKey == 'BILLING_PENDING' || action.tipo == 'COBRANCA')) {

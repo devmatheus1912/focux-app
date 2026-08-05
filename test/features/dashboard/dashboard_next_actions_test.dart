@@ -144,6 +144,7 @@ void main() {
       );
 
       expect(sheet.where((a) => a.isRadarStudent).length, 2);
+      expect(sheet.every((a) => a.isRadarStudent), isTrue);
       expect(
         dashboardShouldShowPrioritiesLink(
           visible: curated,
@@ -152,7 +153,45 @@ void main() {
         ),
         isTrue,
       );
-      expect(sheet.first.subtitle, contains('8 alunos'));
+    });
+
+    test('omits curated P0/P1 and keeps only extras plus students', () {
+      final curated = buildDashboardNextActions(
+        filaAcoes: const [],
+        unreadCount: 0,
+        alunosRisco: 3,
+        cobrancasPendentes: 1,
+        agendaHoje: 0,
+        hideRiskSummary: true,
+        isCommandPreparing: false,
+        maxItems: 2,
+      );
+      final sheet = buildDashboardSheetActions(
+        curated: curated,
+        filaAcoes: [
+          _fila(
+            actionKey: 'PLAN_REVIEW',
+            tipo: 'OPERACAO',
+            titulo: 'Revisar planos',
+            descricao: '3 planos desatualizados',
+            acaoUrl: '/planos',
+            prioridade: 'P2',
+          ),
+        ],
+        riskStudents: [(id: 1, nome: 'Ana')],
+      );
+
+      final curatedKeys = {
+        for (final a in curated) '${a.title}|${a.route}',
+      };
+      expect(
+        sheet.where((a) => !a.isRadarStudent).any(
+          (a) => curatedKeys.contains('${a.title}|${a.route}'),
+        ),
+        isFalse,
+      );
+      expect(sheet.any((a) => a.title == 'Revisar planos'), isTrue);
+      expect(sheet.any((a) => a.isRadarStudent && a.title == 'Ana'), isTrue);
     });
   });
 }
