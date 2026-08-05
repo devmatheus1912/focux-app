@@ -15,7 +15,14 @@ abstract final class DashboardMicrocopy {
   static const maisFerramentas = 'Mais ferramentas';
   static const ferramentasEmDestaque = 'Ferramentas em destaque';
   static const verCatalogoCompleto = 'Ver catálogo completo';
+  static const catalogoCompleto = 'Catálogo completo';
   static const buscarFerramenta = 'Buscar ferramenta...';
+  static const tendencia7Dias = 'Tendência 7 dias';
+  static const tendenciaVaziaChip = 'Sem treinos';
+  static const tendenciaVaziaBase =
+      'Base ativa · nenhum treino nos últimos 7 dias';
+  static const tendenciaVaziaGeral = 'Sem check-ins nos últimos 7 dias';
+  static const abrirMensagens = 'Abrir mensagens';
   static const proximasAcoes = 'Próximas ações';
   static const commandCenterTitle = 'Central de Comando';
   static const commandCenterSubtitle = 'Próximas ações com maior impacto hoje.';

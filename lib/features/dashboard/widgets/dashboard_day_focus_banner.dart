@@ -6,6 +6,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../utils/dashboard_day_focus.dart';
+import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_readability.dart';
 
 class DashboardDayFocusBanner extends StatelessWidget {
@@ -25,6 +26,7 @@ class DashboardDayFocusBanner extends StatelessWidget {
     final accent = BrandPalette.sectionAccent(primary, dark: isDark);
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = dashboardReadableMuted(context, isDark: isDark);
+    final reduceMotion = TokensStrip.prefersReducedMotion(context);
 
     return Semantics(
       container: true,
@@ -36,7 +38,20 @@ class DashboardDayFocusBanner extends StatelessWidget {
           TokensStrip.s4,
           TokensStrip.s3,
         ),
-        child: DecoratedBox(
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: reduceMotion ? 1 : 0.96, end: 1),
+          duration: dashboardMotionDuration(
+            context,
+            normal: const Duration(milliseconds: 320),
+          ),
+          curve: Curves.easeOutCubic,
+          builder: (context, scale, child) {
+            return Opacity(
+              opacity: reduceMotion ? 1 : (0.55 + (0.45 * ((scale - 0.96) / 0.04).clamp(0.0, 1.0))),
+              child: Transform.scale(scale: scale, alignment: Alignment.topCenter, child: child),
+            );
+          },
+          child: DecoratedBox(
           decoration: fxStripCardDecoration(
             context,
             accent: primary,
@@ -99,6 +114,7 @@ class DashboardDayFocusBanner extends StatelessWidget {
               ],
             ),
           ),
+        ),
         ),
       ),
     );

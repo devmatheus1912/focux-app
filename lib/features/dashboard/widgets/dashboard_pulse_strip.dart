@@ -137,11 +137,15 @@ class DashboardDayPulseStrip extends StatelessWidget {
           Builder(
             builder: (context) {
               final hasTrend = checkinsTrend.any((v) => v > 0);
+              final emptyDetail =
+                  alunosAtivos > 0
+                      ? DashboardMicrocopy.tendenciaVaziaBase
+                      : DashboardMicrocopy.tendenciaVaziaGeral;
               return Semantics(
                 label:
                     hasTrend
                         ? 'Tendência de check-ins nos últimos 7 dias'
-                        : 'Sem check-ins nos últimos 7 dias',
+                        : emptyDetail,
                 child: InkWell(
                   onTap: onCheckins,
                   borderRadius: BorderRadius.circular(TokensStrip.rInput),
@@ -154,7 +158,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Tendência 7 dias',
+                                DashboardMicrocopy.tendencia7Dias,
                                 style: dashboardSectionKickerStyle(
                                   context,
                                   isDark: isDark,
@@ -163,9 +167,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
                               if (!hasTrend) ...[
                                 const SizedBox(height: 2),
                                 Text(
-                                  alunosAtivos > 0
-                                      ? 'Base ativa · nenhum treino nos últimos 7 dias'
-                                      : 'Sem check-ins nos últimos 7 dias',
+                                  emptyDetail,
                                   style: AppTypography.inter(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
@@ -177,24 +179,24 @@ class DashboardDayPulseStrip extends StatelessWidget {
                             ],
                           ),
                         ),
-                        FxSparkline(
-                          data:
-                              hasTrend
-                                  ? checkinsTrend
-                                  : const [0, 0, 0, 0, 0, 0, 0],
-                          color:
-                              hasTrend
-                                  ? pulseCheckinsAccent(
-                                    checkinsHoje: checkinsHoje,
-                                    neutralAccent: caption,
-                                    emptyAccent: primary,
-                                  )
-                                  : mute.withValues(alpha: 0.55),
-                          width: 88,
-                          height: 24,
-                          strokeWidth: hasTrend ? 2.0 : 1.4,
-                          fill: hasTrend,
-                        ),
+                        if (hasTrend)
+                          FxSparkline(
+                            data: checkinsTrend,
+                            color: pulseCheckinsAccent(
+                              checkinsHoje: checkinsHoje,
+                              neutralAccent: caption,
+                              emptyAccent: primary,
+                            ),
+                            width: 88,
+                            height: 24,
+                            strokeWidth: 2.0,
+                            fill: true,
+                          )
+                        else
+                          _DashboardTrendEmptyChip(
+                            isDark: isDark,
+                            accent: mute,
+                          ),
                       ],
                     ),
                   ),
@@ -359,6 +361,50 @@ class DashboardPulseChip extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Empty state da tendência — chip legível no lugar da trilha tracejada.
+class _DashboardTrendEmptyChip extends StatelessWidget {
+  const _DashboardTrendEmptyChip({
+    required this.isDark,
+    required this.accent,
+  });
+
+  final bool isDark;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: DashboardMicrocopy.tendenciaVaziaChip,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: accent.withValues(alpha: isDark ? 0.16 : 0.10),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: accent.withValues(alpha: 0.28)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FxIcon(name: 'calendar', size: 12, color: accent),
+              const SizedBox(width: 5),
+              Text(
+                DashboardMicrocopy.tendenciaVaziaChip,
+                style: AppTypography.inter(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: accent,
+                  height: 1.1,
+                ),
+              ),
+            ],
           ),
         ),
       ),

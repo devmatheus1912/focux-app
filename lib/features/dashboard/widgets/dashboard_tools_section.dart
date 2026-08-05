@@ -56,11 +56,16 @@ class DashboardCollapsibleToolsSectionState
       features,
     );
     final unlockedCount = totalTools - lockedCount;
+    final featuredShortcuts = DashboardToolShortcut.featuredTools;
+    final featuredCount = featuredShortcuts.length;
     final collapsedHint =
         lockedCount > 0
-            ? '$unlockedCount liberados · $lockedCount no upgrade'
-            : '$totalTools atalhos no catálogo';
-    final featuredShortcuts = DashboardToolShortcut.featuredTools;
+            ? '$featuredCount em destaque · $lockedCount no upgrade'
+            : '$featuredCount em destaque · $totalTools no catálogo';
+    final expandedHint =
+        lockedCount > 0
+            ? '$unlockedCount liberados · busca e grupos'
+            : '$totalTools atalhos · busca e grupos';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -116,7 +121,7 @@ class DashboardCollapsibleToolsSectionState
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              _expanded ? 'Catálogo completo' : collapsedHint,
+                              _expanded ? expandedHint : collapsedHint,
                               style: AppTypography.inter(
                                 fontSize: TokensStrip.fontBodySm,
                                 fontWeight: FontWeight.w500,

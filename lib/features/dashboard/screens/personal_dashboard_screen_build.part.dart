@@ -473,6 +473,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                               prioritiesSheetActions: prioritiesSheetActions,
                               showPrioritiesLink: showPrioritiesLink,
                               panelKey: _commandPanelKey,
+                              mensagensNaoLidas: home.pulse?.mensagensNaoLidas,
                               hideHeader: true,
                               contextualSubtitle: commandCenterSubtitle,
                               collapseQuickLinks: focusRules.collapseQuickLinks,

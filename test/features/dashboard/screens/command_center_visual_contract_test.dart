@@ -22,6 +22,8 @@ void main() {
       'lib/features/dashboard/utils/dashboard_home_focus.dart',
       'lib/features/dashboard/data/dashboard_repository.dart',
       'lib/features/dashboard/data/dashboard_tool_shortcuts.dart',
+      'lib/features/dashboard/utils/dashboard_chat_subtitle.dart',
+      'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
     ];
     final widget = paths.map((p) => File(p).readAsStringSync()).join('\n');
 
@@ -56,6 +58,10 @@ void main() {
     expect(widget, contains('riskOwnedByDayFocus'));
     expect(widget, contains('featuredTools'));
     expect(widget, contains('attentionRiskLimit'));
+    expect(widget, contains('dashboardChatShortcutSubtitle'));
+    expect(widget, contains('tendenciaVaziaChip'));
+    expect(widget, contains('_DashboardTrendEmptyChip'));
+    expect(widget, contains('mensagensNaoLidas'));
     expect(widget, contains('dashboardScrollOffsetMeaningfullyChanged'));
     expect(widget, contains('dashboardScrollVisualStateChanged'));
     expect(widget, isNot(contains('DashboardMicrocopy.recentes')));

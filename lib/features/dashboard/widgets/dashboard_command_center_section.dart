@@ -16,6 +16,7 @@ import '../../chat/screens/chat_inbox_screen.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
+import '../utils/dashboard_chat_subtitle.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_haptic.dart';
 import '../utils/dashboard_microcopy.dart';
@@ -49,6 +50,9 @@ class DashboardCommandCenterSection extends ConsumerStatefulWidget {
   /// viewport e decidir o CTA sticky.
   final GlobalKey? panelKey;
 
+  /// Não-lidas do BFF `pulse` (preferidas ao inbox se informadas).
+  final int? mensagensNaoLidas;
+
   final String? contextualSubtitle;
   final bool hideHeader;
   final bool collapseQuickLinks;
@@ -62,6 +66,7 @@ class DashboardCommandCenterSection extends ConsumerStatefulWidget {
     required this.prioritiesSheetActions,
     required this.showPrioritiesLink,
     this.panelKey,
+    this.mensagensNaoLidas,
     this.contextualSubtitle,
     this.hideHeader = false,
     this.collapseQuickLinks = true,
@@ -112,18 +117,19 @@ class DashboardCommandCenterSectionState
     final commandAsync = ref.watch(commandCenterProvider);
     final isCommandPreparing = commandAsync.isLoading;
     final commandUnavailable = commandAsync.hasError;
-    final unreadCount = chatAsync.maybeWhen(
+    final unreadFromInbox = chatAsync.maybeWhen(
       data: (items) => items.fold<int>(0, (sum, i) => sum + i.naoLidas),
       orElse: () => 0,
     );
+    final unreadCount = widget.mensagensNaoLidas ?? unreadFromInbox;
     final totalConversas = chatAsync.maybeWhen(
       data: (items) => items.length,
       orElse: () => 0,
     );
-    final chatSubtitle =
-        unreadCount > 0
-            ? '$unreadCount não lida${unreadCount == 1 ? '' : 's'}'
-            : '$totalConversas conversa${totalConversas == 1 ? '' : 's'}';
+    final chatSubtitle = dashboardChatShortcutSubtitle(
+      unreadCount: unreadCount,
+      conversationCount: totalConversas,
+    );
 
     final alunosAsync = ref.watch(alunosProvider);
     final alunosAtivos = alunosAsync.maybeWhen(

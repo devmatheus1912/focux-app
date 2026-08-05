@@ -4,19 +4,20 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 
-/// Texto secundário do dashboard com contraste ≥ 4.5:1 (WCAG AA) em fundos claros.
+/// Texto secundário do dashboard com contraste ≥ 4.5:1 (WCAG AA).
+/// Em dark, mistura mute→ink para captions não ficarem “apagadas” no grid.
 Color dashboardReadableMuted(BuildContext context, {required bool isDark}) {
   if (isDark) {
-    return EagleTokens.darkInkMute.withValues(alpha: 0.92);
+    return Color.lerp(EagleTokens.darkInkMute, EagleTokens.darkInk, 0.42)!;
   }
-  return TokensStrip.textPrimary.withValues(alpha: 0.76);
+  return TokensStrip.textPrimary.withValues(alpha: 0.78);
 }
 
 Color dashboardReadableCaption(BuildContext context, {required bool isDark}) {
   if (isDark) {
-    return EagleTokens.darkInkMute.withValues(alpha: 0.88);
+    return Color.lerp(EagleTokens.darkInkMute, EagleTokens.darkInk, 0.28)!;
   }
-  return TokensStrip.textPrimary.withValues(alpha: 0.72);
+  return TokensStrip.textPrimary.withValues(alpha: 0.74);
 }
 
 /// Texto secundário sobre gradiente teal (hero financeiro) — ≥4.5:1 WCAG AA.
