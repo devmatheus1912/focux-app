@@ -66,6 +66,9 @@ void main() {
     expect(shortcutsFile, contains("label: 'Marca própria'"));
     expect(screen, isNot(contains('retornoRapido')));
     expect(screen, isNot(contains('DashboardRoiQuickLinksRow')));
+    expect(screen, contains('DashboardMicrocopy.commandCenterTitle'));
+    expect(screen, contains('featuredTools'));
+    expect(screen, contains('verCatalogoCompleto'));
 
     final semanticsCount = 'Semantics('.allMatches(screen).length;
     expect(semanticsCount, greaterThanOrEqualTo(10));

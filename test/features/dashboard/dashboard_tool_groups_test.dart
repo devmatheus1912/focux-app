@@ -57,4 +57,49 @@ void main() {
       );
     });
   });
+
+  group('DashboardToolShortcut.featuredTools', () {
+    test('curates a slim, high-value subset for the default grid', () {
+      final featured = DashboardToolShortcut.featuredTools;
+      expect(featured, isNotEmpty);
+      expect(featured.length, lessThanOrEqualTo(10));
+      expect(featured.every((s) => s.featured), isTrue);
+      expect(
+        featured.toSet().length,
+        featured.length,
+        reason: 'no duplicate featured shortcuts',
+      );
+      for (final s in featured) {
+        expect(DashboardToolShortcut.moreTools, contains(s));
+      }
+    });
+
+    test('spans more than one group for a balanced default grid', () {
+      final groups =
+          DashboardToolShortcut.featuredTools.map((s) => s.group).toSet();
+      expect(groups.length, greaterThan(1));
+    });
+  });
+
+  group('duplicate icon fixes', () {
+    test('Pacotes and Loja use distinct icons', () {
+      final pacotes = DashboardToolShortcut.moreTools.firstWhere(
+        (s) => s.label == 'Pacotes',
+      );
+      final loja = DashboardToolShortcut.moreTools.firstWhere(
+        (s) => s.label == 'Loja',
+      );
+      expect(pacotes.icon, isNot(loja.icon));
+    });
+
+    test('Preços and Receita recorrente use distinct icons', () {
+      final precos = DashboardToolShortcut.moreTools.firstWhere(
+        (s) => s.label == 'Preços',
+      );
+      final receitaRecorrente = DashboardToolShortcut.moreTools.firstWhere(
+        (s) => s.label == 'Receita recorrente',
+      );
+      expect(precos.icon, isNot(receitaRecorrente.icon));
+    });
+  });
 }

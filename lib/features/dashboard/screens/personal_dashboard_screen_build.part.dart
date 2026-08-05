@@ -81,7 +81,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                 );
 
                 final hoje = DateTime.now();
-                final checkinsHoje = historicoCheckinsAsync.maybeWhen(
+                final checkinsFromHistorico = historicoCheckinsAsync.maybeWhen(
                   data: (items) {
                     bool sameDay(DateTime a, DateTime b) =>
                         a.year == b.year &&
@@ -95,6 +95,9 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                   },
                   orElse: () => 0,
                 );
+                // Prefer BFF pulse (single round-trip); fallback to historico.
+                final checkinsHoje =
+                    home.pulse?.checkinsHoje ?? checkinsFromHistorico;
                 final checkinsTrend = historicoCheckinsAsync.maybeWhen(
                   data:
                       (items) => dashboardCheckinsSparklineUltimos7Dias(items),
@@ -107,10 +110,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                   data: (cc) => cc.agendaHoje.length,
                   orElse: () => 0,
                 );
-                final attentionVisible =
-                    alunosEmRisco.isNotEmpty ||
-                    (_finData != null &&
-                        _finData!.vencimentosProximos.isNotEmpty);
                 final onboardingAsync = ref.watch(onboardingStatusProvider);
                 final onboardingIncomplete = onboardingAsync.maybeWhen(
                   data: (s) => !s.ativacaoCompleta,
@@ -158,15 +157,28 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                 final attentionRiskItems =
                     alunosEmRisco
                         .take(
-                          focusRules.focusMode ? 1 : (riskDominante ? 2 : 4),
+                          DashboardHomeFocusRules.attentionRiskLimit(
+                            dayFocusCoversRetention: dayFocusCoversRetention,
+                            focusMode: focusRules.focusMode,
+                            riskDominante: riskDominante,
+                          ),
                         )
                         .toList();
                 final attentionVencItems =
                     (_finData?.vencimentosProximos ?? const [])
-                        .take(focusRules.focusMode ? 1 : 2)
+                        .take(
+                          DashboardHomeFocusRules.attentionVencLimit(
+                            dayFocus: dayFocus,
+                            dayFocusCoversRetention: dayFocusCoversRetention,
+                            focusMode: focusRules.focusMode,
+                          ),
+                        )
                         .toList();
                 final attentionItemCount =
                     attentionRiskItems.length + attentionVencItems.length;
+                // Sem vencimentos e sem cards de risco (dono é o Foco do dia)
+                // → a seção some em vez de mostrar um "revisar" vazio.
+                final attentionVisible = attentionItemCount > 0;
                 const commandCenterSubtitle =
                     DashboardMicrocopy.commandCenterSubtitle;
 
@@ -187,7 +199,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                   orElse: () => const <FilaAcaoResumo>[],
                 );
                 final chatAsync = ref.watch(chatInboxProvider);
-                final unreadCount = chatAsync.maybeWhen(
+                final unreadFromInbox = chatAsync.maybeWhen(
                   data:
                       (items) => items.fold<int>(
                         0,
@@ -195,6 +207,8 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                       ),
                   orElse: () => 0,
                 );
+                final unreadCount =
+                    home.pulse?.mensagensNaoLidas ?? unreadFromInbox;
                 final cobrancasPendentes = commandAsync.maybeWhen(
                   data: (cc) => cc.cobrancasPendentes.length,
                   orElse: () => _finData?.totalInadimplentes ?? 0,
@@ -209,6 +223,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                   cobrancasPendentes: cobrancasPendentes,
                   agendaHoje: agendaHoje,
                   hideRiskSummary: alunosEmRisco.isNotEmpty,
+                  riskOwnedByDayFocus: dayFocusCoversRetention,
                   isCommandPreparing: commandAsync.isLoading,
                   maxItems: focusRules.maxVisibleNextActions,
                 );
@@ -222,10 +237,13 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                   sheet: prioritiesSheetActions,
                   isPreparing: commandAsync.isLoading,
                 );
-                // Sticky só depois do painel sair da tela — um único CTA no viewport.
+                // Sticky só depois do painel de próximas ações sair da tela
+                // (medido via GlobalKey) — um único CTA no viewport.
                 final showStickyPrioritiesAction =
-                    showPrioritiesLink &&
-                    dashboardShowsStickyPrioritiesAction(_homeScrollOffset);
+                    dashboardShowsStickyPrioritiesAction(
+                      panelOffscreen: _prioritiesPanelOffscreen,
+                      showPrioritiesLink: showPrioritiesLink,
+                    );
                 final stickyCommandActionsLabel =
                     showStickyPrioritiesAction
                         ? DashboardMicrocopy.verPrioridades
@@ -451,12 +469,13 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                               isDark: themeDark,
                               primary: primary,
                               finData: _finData,
-                              hideRiskSummary: alunosEmRisco.isNotEmpty,
+                              nextActions: dashboardNextActions,
+                              prioritiesSheetActions: prioritiesSheetActions,
+                              showPrioritiesLink: showPrioritiesLink,
+                              panelKey: _commandPanelKey,
                               hideHeader: true,
                               contextualSubtitle: commandCenterSubtitle,
                               collapseQuickLinks: focusRules.collapseQuickLinks,
-                              maxVisibleNextActions:
-                                  focusRules.maxVisibleNextActions,
                             ),
                           ),
                         ),
@@ -481,8 +500,9 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                           child: DashboardCollapsibleSection(
                             title: DashboardMicrocopy.precisaDeAtencao,
                             collapsedHint:
-                                dayFocusCoversRetention
-                                    ? 'Revisar · sinais já cobertos no Foco do dia'
+                                attentionRiskItems.isEmpty &&
+                                        attentionVencItems.isNotEmpty
+                                    ? '${attentionVencItems.length} vencimento${attentionVencItems.length == 1 ? '' : 's'} pendente${attentionVencItems.length == 1 ? '' : 's'} · Revisar'
                                     : riskDominante
                                     ? '$riscoAlto de $alunosAtivos · Revisar'
                                     : riscoAlto > 0
@@ -490,10 +510,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                     : 'Cobranças pendentes · Revisar',
                             collapsedActionLabel: 'Revisar',
                             onCollapsedAction: openAttentionReview,
-                            collapsedPreview:
-                                dayFocusCoversRetention
-                                    ? null
-                                    : attentionCollapsedPreview,
+                            collapsedPreview: attentionCollapsedPreview,
                             isDark: themeDark,
                             initiallyExpanded: !focusRules.collapseAttention,
                             resetToken: _attentionSectionResetToken,

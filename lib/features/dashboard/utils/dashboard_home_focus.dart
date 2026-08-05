@@ -31,6 +31,34 @@ class DashboardHomeFocusRules {
   final bool compactCommandSticky;
   final int maxVisibleNextActions;
 
+  /// Quantos cards de risco "Precisa de atenção" pode mostrar.
+  ///
+  /// Quando o Foco do dia já cobre retenção, o risco vira dono único da
+  /// narrativa lá em cima (P0 na Central) — aqui zeramos para não ecoar o
+  /// mesmo sinal duas vezes. Sem esse dono, seguimos a densidade normal.
+  static int attentionRiskLimit({
+    required bool dayFocusCoversRetention,
+    required bool focusMode,
+    required bool riskDominante,
+  }) {
+    if (dayFocusCoversRetention) return 0;
+    if (focusMode) return 1;
+    return riskDominante ? 2 : 4;
+  }
+
+  /// Vencimentos em "Precisa de atenção" — some quando o Foco já é cobrança.
+  static int attentionVencLimit({
+    required DashboardDayFocus dayFocus,
+    required bool dayFocusCoversRetention,
+    required bool focusMode,
+  }) {
+    if (dayFocusCoversRetention &&
+        dayFocus.headline == 'Cobrança e retenção hoje') {
+      return 0;
+    }
+    return focusMode ? 1 : 2;
+  }
+
   static bool coversRetention(DashboardDayFocus focus) {
     return focus.headline == 'Cobrança e retenção hoje' ||
         focus.headline == 'Retomada urgente da base' ||

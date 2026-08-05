@@ -53,13 +53,14 @@ const Color fxTransparent = Colors.transparent;
     final warn = EagleTokens.warn;
     if (isDark) {
       return (
-        background: warn.withValues(alpha: 0.32),
-        foreground: Colors.white.withValues(alpha: 0.96),
+        background: warn.withValues(alpha: 0.42),
+        foreground: Colors.white,
       );
     }
+    // Fundo mais opaco + texto escurecido para contraste AA em fundo claro.
     return (
-      background: warn.withValues(alpha: 0.20),
-      foreground: Color.lerp(warn, Colors.black, 0.35)!,
+      background: warn.withValues(alpha: 0.26),
+      foreground: Color.lerp(warn, Colors.black, 0.55)!,
     );
   }
   if (normalized == 'P1') {

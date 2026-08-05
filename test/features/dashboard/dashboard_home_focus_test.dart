@@ -77,6 +77,88 @@ void main() {
     });
   });
 
+  group('DashboardHomeFocusRules.attentionVencLimit', () {
+    test('zeroes vencimentos when focus is cobrança e retenção', () {
+      const focus = DashboardDayFocus(
+        headline: 'Cobrança e retenção hoje',
+        detail: 'x',
+        semanticLabel: 'foco',
+      );
+      expect(
+        DashboardHomeFocusRules.attentionVencLimit(
+          dayFocus: focus,
+          dayFocusCoversRetention: true,
+          focusMode: true,
+        ),
+        0,
+      );
+    });
+
+    test('keeps vencimentos when focus is only risk retomada', () {
+      const focus = DashboardDayFocus(
+        headline: 'Retomada urgente da base',
+        detail: 'x',
+        semanticLabel: 'foco',
+      );
+      expect(
+        DashboardHomeFocusRules.attentionVencLimit(
+          dayFocus: focus,
+          dayFocusCoversRetention: true,
+          focusMode: false,
+        ),
+        2,
+      );
+    });
+  });
+
+  group('DashboardHomeFocusRules.attentionRiskLimit', () {
+    test('zeroes risk cards when day focus already owns retention', () {
+      expect(
+        DashboardHomeFocusRules.attentionRiskLimit(
+          dayFocusCoversRetention: true,
+          focusMode: false,
+          riskDominante: true,
+        ),
+        0,
+      );
+      expect(
+        DashboardHomeFocusRules.attentionRiskLimit(
+          dayFocusCoversRetention: true,
+          focusMode: true,
+          riskDominante: false,
+        ),
+        0,
+      );
+    });
+
+    test('respects focus mode and risk dominance when not covered', () {
+      expect(
+        DashboardHomeFocusRules.attentionRiskLimit(
+          dayFocusCoversRetention: false,
+          focusMode: true,
+          riskDominante: false,
+        ),
+        1,
+      );
+      expect(
+        DashboardHomeFocusRules.attentionRiskLimit(
+          dayFocusCoversRetention: false,
+          focusMode: false,
+          riskDominante: true,
+        ),
+        2,
+      );
+      expect(
+        DashboardHomeFocusRules.attentionRiskLimit(
+          dayFocusCoversRetention: false,
+          focusMode: false,
+          riskDominante: false,
+        ),
+        4,
+      );
+    });
+  });
+
   group('DashboardAderenciaCopy', () {
     test('does not echo foco do dia when retention focus', () {
       final body = DashboardAderenciaCopy.stoppedBody(retentionFocus: true);

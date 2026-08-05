@@ -13,6 +13,10 @@ typedef DashboardRiskStudentRef = ({int id, String nome});
 /// Ordem fixa de impacto: **P0 risco → P1 cobrança → mensagens → resto**.
 /// Mesmo com [hideRiskSummary] (Atenção já cobre o radar), o P0 permanece
 /// na Central para alinhar com o Foco do dia — só muda o copy.
+///
+/// [riskOwnedByDayFocus]: o Foco do dia já é o narrador único do risco
+/// (banner + P0 na Central); o card aqui não repete a contagem — só chama
+/// para a ação.
 List<CommandActionItem> buildDashboardNextActions({
   required List<FilaAcaoResumo> filaAcoes,
   required int unreadCount,
@@ -21,6 +25,7 @@ List<CommandActionItem> buildDashboardNextActions({
   required int agendaHoje,
   required bool hideRiskSummary,
   required bool isCommandPreparing,
+  bool riskOwnedByDayFocus = false,
   int maxItems = 6,
 }) {
   final copilotAcoes = filaAcoes.where((a) => a.tipo == 'IA_COPILOTO').toList();
@@ -50,16 +55,28 @@ List<CommandActionItem> buildDashboardNextActions({
   final nextActions = <CommandActionItem>[
     if (alunosRisco > 0)
       CommandActionItem(
-        icon: hideRiskSummary ? 'zap' : 'alert-triangle',
+        icon:
+            riskOwnedByDayFocus
+                ? 'route'
+                : hideRiskSummary
+                ? 'zap'
+                : 'alert-triangle',
         title:
-            hideRiskSummary
+            riskOwnedByDayFocus
+                ? 'Abrir fila de retenção'
+                : hideRiskSummary
                 ? 'Recuperar alunos em risco'
                 : 'Contato hoje',
         subtitle:
-            hideRiskSummary
+            riskOwnedByDayFocus
+                ? 'Trabalhar o P0 agora'
+                : hideRiskSummary
                 ? '$alunosRisco aluno${alunosRisco == 1 ? '' : 's'} com risco de abandono'
                 : '$alunosRisco no radar · risco, inadimplência ou pausa no treino',
-        route: hideRiskSummary ? '/retencao' : '/alunos?filtro=contato',
+        route:
+            (riskOwnedByDayFocus || hideRiskSummary)
+                ? '/retencao'
+                : '/alunos?filtro=contato',
         tone: CommandActionTone.hot,
         priorityBadge: 'P0',
       ),

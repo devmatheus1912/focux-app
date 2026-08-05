@@ -34,21 +34,41 @@ class DashboardAderenciaTopItem {
   }
 }
 
+/// Pulso operacional embutido no BFF `/home` (evita sidecars no first paint).
+class DashboardPulseSnapshot {
+  final int? checkinsHoje;
+  final int? mensagensNaoLidas;
+
+  const DashboardPulseSnapshot({
+    this.checkinsHoje,
+    this.mensagensNaoLidas,
+  });
+
+  factory DashboardPulseSnapshot.fromJson(Map<String, dynamic> json) =>
+      DashboardPulseSnapshot(
+        checkinsHoje: (json['checkinsHoje'] as num?)?.toInt(),
+        mensagensNaoLidas: (json['mensagensNaoLidas'] as num?)?.toInt(),
+      );
+}
+
 class DashboardHomeBundle {
   final DashboardData personal;
   final CommandCenterData commandCenter;
   final FinanceiroDashboard financeiro;
   final List<DashboardAderenciaTopItem> topAderencia;
+  final DashboardPulseSnapshot? pulse;
 
   DashboardHomeBundle({
     required this.personal,
     required this.commandCenter,
     required this.financeiro,
     this.topAderencia = const [],
+    this.pulse,
   });
 
   factory DashboardHomeBundle.fromJson(Map<String, dynamic> json) {
     final topRaw = json['topAderencia'] as List<dynamic>? ?? const [];
+    final pulseRaw = json['pulse'];
     return DashboardHomeBundle(
       personal: DashboardData.fromJson(
         json['personal'] as Map<String, dynamic>,
@@ -68,6 +88,12 @@ class DashboardHomeBundle {
                 ),
               )
               .toList(growable: false),
+      pulse:
+          pulseRaw is Map
+              ? DashboardPulseSnapshot.fromJson(
+                Map<String, dynamic>.from(pulseRaw),
+              )
+              : null,
     );
   }
 }

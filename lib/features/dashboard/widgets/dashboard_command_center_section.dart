@@ -37,22 +37,34 @@ class DashboardCommandCenterSection extends ConsumerStatefulWidget {
   final bool isDark;
   final Color primary;
   final FinanceiroDashboard? finData;
-  final bool hideRiskSummary;
+
+  /// Fila curada e prioridades — computadas UMA vez pelo pai
+  /// (`personal_dashboard_screen_build.part.dart`) e só renderizadas aqui.
+  /// Esta seção é puramente apresentacional para essas listas.
+  final List<CommandActionItem> nextActions;
+  final List<CommandActionItem> prioritiesSheetActions;
+  final bool showPrioritiesLink;
+
+  /// Key da região do painel — usada pelo pai para medir quando ele sai da
+  /// viewport e decidir o CTA sticky.
+  final GlobalKey? panelKey;
+
   final String? contextualSubtitle;
   final bool hideHeader;
   final bool collapseQuickLinks;
-  final int maxVisibleNextActions;
 
   const DashboardCommandCenterSection({
     super.key,
     required this.isDark,
     required this.primary,
     required this.finData,
-    this.hideRiskSummary = false,
+    required this.nextActions,
+    required this.prioritiesSheetActions,
+    required this.showPrioritiesLink,
+    this.panelKey,
     this.contextualSubtitle,
     this.hideHeader = false,
     this.collapseQuickLinks = true,
-    this.maxVisibleNextActions = 2,
   });
 
   @override
@@ -83,7 +95,9 @@ class DashboardCommandCenterSectionState
     final isDark = widget.isDark;
     final primary = widget.primary;
     final finData = widget.finData;
-    final hideRiskSummary = widget.hideRiskSummary;
+    final nextActions = widget.nextActions;
+    final prioritiesSheetActions = widget.prioritiesSheetActions;
+    final showPrioritiesLink = widget.showPrioritiesLink;
     final contextualSubtitle = widget.contextualSubtitle;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
@@ -92,7 +106,8 @@ class DashboardCommandCenterSectionState
     final actionColor = BrandPalette.sectionAction(primary, dark: isDark);
     final rowAccent = BrandPalette.sectionAccent(primary, dark: isDark);
 
-    // Chat inbox — count total unread messages
+    // Watches abaixo servem só para os subtítulos dos Atalhos rápidos —
+    // a fila de próximas ações já chega pronta via [widget.nextActions].
     final chatAsync = ref.watch(chatInboxProvider);
     final commandAsync = ref.watch(commandCenterProvider);
     final isCommandPreparing = commandAsync.isLoading;
@@ -110,78 +125,28 @@ class DashboardCommandCenterSectionState
             ? '$unreadCount não lida${unreadCount == 1 ? '' : 's'}'
             : '$totalConversas conversa${totalConversas == 1 ? '' : 's'}';
 
-    // Alunos — active student count (already in parent but we watch again for isolation)
     final alunosAsync = ref.watch(alunosProvider);
     final alunosAtivos = alunosAsync.maybeWhen(
       data: (alunos) => alunos.where((a) => a.status == 'ATIVO').length,
       orElse: () => 0,
     );
 
-    // Agenda today — count from agendaHojeProvider (commandCenterProvider)
     final agendaHoje = commandAsync.maybeWhen(
       data: (cc) => cc.agendaHoje.length,
       orElse: () => 0,
     );
     final agendaSubtitle = agendaHoje > 0 ? '$agendaHoje hoje' : 'Sem agenda';
 
-    // Financeiro — monthly revenue from already-loaded _finData
     final receitaMes = finData?.receitaMes ?? 0;
     final finSubtitle =
         receitaMes > 0
             ? 'R\$ ${receitaMes.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}'
             : 'Ver finanças';
 
-    // Mesma fonte do Foco do dia (alunos.emRisco), com fallback do BFF.
-    final alunosRiscoFromList = alunosAsync.maybeWhen(
-      data: (alunos) => alunos.where((a) => a.emRisco).length,
-      orElse: () => 0,
-    );
-    final alunosRiscoFromCommand = commandAsync.maybeWhen(
-      data: (cc) => cc.alunosEmRisco.length,
-      orElse: () => 0,
-    );
-    final alunosRisco =
-        alunosRiscoFromList > alunosRiscoFromCommand
-            ? alunosRiscoFromList
-            : alunosRiscoFromCommand;
-    final riskStudents = alunosAsync.maybeWhen(
+    final copilotAcoes = commandAsync.maybeWhen(
       data:
-          (alunos) =>
-              alunos
-                  .where((a) => a.emRisco)
-                  .map((a) => (id: a.id, nome: a.nome))
-                  .toList(growable: false),
-      orElse: () => const <DashboardRiskStudentRef>[],
-    );
-    final filaAcoes = commandAsync.maybeWhen(
-      data: (cc) => cc.filaAcoes,
+          (cc) => cc.filaAcoes.where((a) => a.tipo == 'IA_COPILOTO').toList(),
       orElse: () => const <FilaAcaoResumo>[],
-    );
-    final copilotAcoes =
-        filaAcoes.where((a) => a.tipo == 'IA_COPILOTO').toList();
-    final cobrancasPendentes = commandAsync.maybeWhen(
-      data: (cc) => cc.cobrancasPendentes.length,
-      orElse: () => finData?.totalInadimplentes ?? 0,
-    );
-    final nextActions = buildDashboardNextActions(
-      filaAcoes: filaAcoes,
-      unreadCount: unreadCount,
-      alunosRisco: alunosRisco,
-      cobrancasPendentes: cobrancasPendentes,
-      agendaHoje: agendaHoje,
-      hideRiskSummary: hideRiskSummary,
-      isCommandPreparing: isCommandPreparing,
-      maxItems: widget.maxVisibleNextActions,
-    );
-    final prioritiesSheetActions = buildDashboardSheetActions(
-      curated: nextActions,
-      filaAcoes: filaAcoes,
-      riskStudents: riskStudents,
-    );
-    final showPrioritiesLink = dashboardShouldShowPrioritiesLink(
-      visible: nextActions,
-      sheet: prioritiesSheetActions,
-      isPreparing: isCommandPreparing,
     );
 
     Widget card({
@@ -195,57 +160,61 @@ class DashboardCommandCenterSectionState
         width: width,
         child: Padding(
           padding: const EdgeInsets.only(right: 10),
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(TokensStrip.rCard),
-            child: Container(
-              padding: const EdgeInsets.all(13),
-              decoration: fxStripCardDecoration(
-                context,
-                accent: primary,
-                radius: TokensStrip.rCard,
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 34,
-                    height: 34,
-                    decoration: BoxDecoration(
-                      color: primarySoft,
-                      borderRadius: BorderRadius.circular(13),
+          child: Semantics(
+            button: true,
+            label: '$title. $subtitle',
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(TokensStrip.rCard),
+              child: Container(
+                padding: const EdgeInsets.all(13),
+                decoration: fxStripCardDecoration(
+                  context,
+                  accent: primary,
+                  radius: TokensStrip.rCard,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        color: primarySoft,
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                      child: Center(
+                        child: FxIcon(name: icon, size: 17, color: rowAccent),
+                      ),
                     ),
-                    child: Center(
-                      child: FxIcon(name: icon, size: 17, color: rowAccent),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          title,
-                          style: dashboardCardTitleStyle(
-                            ink,
-                          ).copyWith(fontWeight: FontWeight.w800),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          subtitle,
-                          style: dashboardCardSubtitleStyle(
-                            context,
-                            isDark: isDark,
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            title,
+                            style: dashboardCardTitleStyle(
+                              ink,
+                            ).copyWith(fontWeight: FontWeight.w800),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                          const SizedBox(height: 3),
+                          Text(
+                            subtitle,
+                            style: dashboardCardSubtitleStyle(
+                              context,
+                              isDark: isDark,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -264,7 +233,7 @@ class DashboardCommandCenterSectionState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Central de Comando',
+                      DashboardMicrocopy.commandCenterTitle,
                       style: AppTypography.inter(
                         fontSize: TokensStrip.fontH2,
                         fontWeight: TokensStrip.weightH2,
@@ -316,8 +285,8 @@ class DashboardCommandCenterSectionState
                         children: [
                           Text(
                             isCommandPreparing
-                                ? 'lendo sinais'
-                                : 'Ver prioridades',
+                                ? DashboardMicrocopy.lendoSinais
+                                : DashboardMicrocopy.verPrioridades,
                             style: dashboardChipLabelStyle(
                               dashboardPrioritiesChipForeground(
                                 primary,
@@ -345,14 +314,14 @@ class DashboardCommandCenterSectionState
           ),
         if (!widget.hideHeader) const SizedBox(height: 20),
         CommandActionPanel(
+          key: widget.panelKey,
           isDark: isDark,
           primary: primary,
           loading: isCommandPreparing,
           unavailable: commandUnavailable,
-          actions: nextActions
-              .take(widget.maxVisibleNextActions)
-              .toList(growable: false),
-          prioritiesActionLabel: showPrioritiesLink ? 'Ver prioridades' : null,
+          actions: nextActions,
+          prioritiesActionLabel:
+              showPrioritiesLink ? DashboardMicrocopy.verPrioridades : null,
           onPrioritiesTap:
               showPrioritiesLink
                   ? () => showCommandActionsSheet(

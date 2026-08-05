@@ -46,6 +46,26 @@ void main() {
       expect(actions[1].title, 'Cobrar pendências');
     });
 
+    test('risk owned by day focus opens retention queue without repeating count', () {
+      final actions = buildDashboardNextActions(
+        filaAcoes: const [],
+        unreadCount: 0,
+        alunosRisco: 5,
+        cobrancasPendentes: 0,
+        agendaHoje: 0,
+        hideRiskSummary: true,
+        riskOwnedByDayFocus: true,
+        isCommandPreparing: false,
+        maxItems: 2,
+      );
+
+      expect(actions.first.title, 'Abrir fila de retenção');
+      expect(actions.first.subtitle, 'Trabalhar o P0 agora');
+      expect(actions.first.subtitle, isNot(contains('5')));
+      expect(actions.first.route, '/retencao');
+      expect(actions.first.priorityBadge, 'P0');
+    });
+
     test('prioritizes billing when no risk and respects maxItems', () {
       final actions = buildDashboardNextActions(
         filaAcoes: const [],

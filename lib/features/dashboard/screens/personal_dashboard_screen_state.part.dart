@@ -7,6 +7,8 @@ class _PersonalDashboardScreenState
   bool _loadingFin = true;
   double _homeScrollOffset = 0;
   late final ScrollController _homeScrollController;
+  final GlobalKey _commandPanelKey = GlobalKey();
+  bool _prioritiesPanelOffscreen = false;
   int _attentionSectionResetToken = 0;
   String? _lastTrackedLocation;
   VoidCallback? _routeListener;
@@ -108,13 +110,24 @@ class _PersonalDashboardScreenState
     if (!dashboardScrollOffsetMeaningfullyChanged(_homeScrollOffset, offset)) {
       return;
     }
-    final shouldRebuild = dashboardScrollVisualStateChanged(
-      previousOffset: _homeScrollOffset,
-      newOffset: offset,
-    );
     _homeScrollOffset = offset;
-    if (shouldRebuild) {
-      setState(() {});
+    _measureCommandPanelOffscreen();
+  }
+
+  /// Mede se o painel de próximas ações saiu da viewport (abaixo do sticky
+  /// header) — dita quando o CTA "Ver prioridades" aparece fixo no topo.
+  void _measureCommandPanelOffscreen() {
+    final box =
+        _commandPanelKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null || !box.attached || !box.hasSize) return;
+    final panelBottom = box.localToGlobal(Offset.zero).dy + box.size.height;
+    final headerReserve = MediaQuery.of(context).padding.top + 56;
+    final offscreen = panelBottom <= headerReserve;
+    if (dashboardScrollVisualStateChanged(
+      previousPanelOffscreen: _prioritiesPanelOffscreen,
+      newPanelOffscreen: offscreen,
+    )) {
+      setState(() => _prioritiesPanelOffscreen = offscreen);
     }
   }
 

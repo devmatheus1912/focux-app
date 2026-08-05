@@ -7,24 +7,53 @@ void main() {
     expect(dashboardShowsFloatingPrioritiesChip(150), isFalse);
   });
 
-  test('sticky priorities only after panel leaves the viewport', () {
-    expect(dashboardShowsStickyPrioritiesAction(80), isFalse);
-    expect(dashboardShowsStickyPrioritiesAction(219), isFalse);
-    expect(dashboardShowsStickyPrioritiesAction(220), isTrue);
+  group('dashboardShowsStickyPrioritiesAction', () {
+    test('sticky only when panel is offscreen and link is available', () {
+      expect(
+        dashboardShowsStickyPrioritiesAction(
+          panelOffscreen: false,
+          showPrioritiesLink: true,
+        ),
+        isFalse,
+      );
+      expect(
+        dashboardShowsStickyPrioritiesAction(
+          panelOffscreen: true,
+          showPrioritiesLink: false,
+        ),
+        isFalse,
+      );
+      expect(
+        dashboardShowsStickyPrioritiesAction(
+          panelOffscreen: true,
+          showPrioritiesLink: true,
+        ),
+        isTrue,
+      );
+    });
   });
 
-  test('scroll visual state changes on sticky priorities threshold', () {
-    expect(
-      dashboardScrollVisualStateChanged(previousOffset: 50, newOffset: 55),
-      isFalse,
-    );
-    expect(
-      dashboardScrollVisualStateChanged(previousOffset: 70, newOffset: 90),
-      isFalse,
-    );
-    expect(
-      dashboardScrollVisualStateChanged(previousOffset: 200, newOffset: 230),
-      isTrue,
-    );
+  test('scroll offset epsilon avoids rebuild noise', () {
+    expect(dashboardScrollOffsetMeaningfullyChanged(50, 51), isFalse);
+    expect(dashboardScrollOffsetMeaningfullyChanged(50, 53), isTrue);
+  });
+
+  group('dashboardScrollVisualStateChanged', () {
+    test('changes only when panel visibility flips', () {
+      expect(
+        dashboardScrollVisualStateChanged(
+          previousPanelOffscreen: false,
+          newPanelOffscreen: false,
+        ),
+        isFalse,
+      );
+      expect(
+        dashboardScrollVisualStateChanged(
+          previousPanelOffscreen: false,
+          newPanelOffscreen: true,
+        ),
+        isTrue,
+      );
+    });
   });
 }

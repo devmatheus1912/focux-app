@@ -59,7 +59,8 @@ class DashboardCollapsibleToolsSectionState
     final collapsedHint =
         lockedCount > 0
             ? '$unlockedCount liberados · $lockedCount no upgrade'
-            : '$totalTools atalhos · toque para expandir';
+            : '$totalTools atalhos no catálogo';
+    final featuredShortcuts = DashboardToolShortcut.featuredTools;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -115,9 +116,7 @@ class DashboardCollapsibleToolsSectionState
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              _expanded
-                                  ? 'Acessos menos frequentes'
-                                  : collapsedHint,
+                              _expanded ? 'Catálogo completo' : collapsedHint,
                               style: AppTypography.inter(
                                 fontSize: TokensStrip.fontBodySm,
                                 fontWeight: FontWeight.w500,
@@ -144,7 +143,67 @@ class DashboardCollapsibleToolsSectionState
             ),
           ),
           AnimatedCrossFade(
-            firstChild: const SizedBox.shrink(),
+            firstChild: Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  DashboardShortcutGrid(
+                    shortcuts: featuredShortcuts,
+                    isDark: widget.isDark,
+                    aspectRatio: widget.shortcutAspectRatio,
+                    onShortcut:
+                        (shortcut) =>
+                            openDashboardShortcut(context, ref, shortcut),
+                  ),
+                  const SizedBox(height: 6),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: Semantics(
+                        button: true,
+                        label: DashboardMicrocopy.verCatalogoCompleto,
+                        child: InkWell(
+                          onTap: () {
+                            dashboardHapticCollapseToggle();
+                            setState(() => _expanded = true);
+                          },
+                          borderRadius: BorderRadius.circular(
+                            TokensStrip.rInput,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 6,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  DashboardMicrocopy.verCatalogoCompleto,
+                                  style: AppTypography.inter(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: link,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.chevron_right_rounded,
+                                  size: 16,
+                                  color: link,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             secondChild: SafeArea(
               top: true,
               bottom: false,

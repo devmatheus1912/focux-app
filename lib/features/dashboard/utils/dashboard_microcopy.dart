@@ -6,12 +6,15 @@ abstract final class DashboardMicrocopy {
   static const pulsoOperacional = 'Pulso operacional';
   static const impactoHoje = 'Impacto hoje';
   static const verPrioridades = 'Ver prioridades';
+  static const lendoSinais = 'lendo sinais';
   static const verTudo = 'Ver tudo';
   static const painelAtualizado = 'Painel atualizado';
   static const scrollPeekHint = 'Deslize horizontalmente para ver mais';
   static const precisaDeAtencao = 'Precisa de atenção';
   static const aderenciaDaSemana = 'Aderência da semana';
   static const maisFerramentas = 'Mais ferramentas';
+  static const ferramentasEmDestaque = 'Ferramentas em destaque';
+  static const verCatalogoCompleto = 'Ver catálogo completo';
   static const buscarFerramenta = 'Buscar ferramenta...';
   static const proximasAcoes = 'Próximas ações';
   static const commandCenterTitle = 'Central de Comando';

@@ -1,33 +1,28 @@
 /// Regras puras de scroll do hub personal.
 ///
-/// «Ver prioridades» no painel fica visível no topo; no sticky só depois que
-/// a linha do painel saiu da viewport — evita 2–3 CTAs iguais na mesma tela.
-const double dashboardStickyPrioritiesMinOffset = 220;
+/// «Ver prioridades» no painel fica visível no topo; no sticky só aparece
+/// depois que o painel de próximas ações (medido via GlobalKey) sai
+/// fisicamente da viewport — evita 2–3 CTAs iguais na mesma tela.
 const double dashboardScrollOffsetEpsilon = 2;
 
 /// @Deprecated — chip flutuante removido (duplicava sticky + painel).
-const double dashboardStickyChipMinOffset = 80;
-const double dashboardFloatingChipMaxOffset =
-    dashboardStickyPrioritiesMinOffset;
-
 bool dashboardShowsFloatingPrioritiesChip(double offset) => false;
 
-bool dashboardShowsStickyPrioritiesAction(double offset) =>
-    offset >= dashboardStickyPrioritiesMinOffset;
-
-bool dashboardShowsStickyChip(double offset) =>
-    dashboardShowsStickyPrioritiesAction(offset);
+/// Sticky só quando o painel de próximas ações saiu da viewport (medido via
+/// GlobalKey em runtime) e ainda há prioridades extras para ver.
+bool dashboardShowsStickyPrioritiesAction({
+  required bool panelOffscreen,
+  required bool showPrioritiesLink,
+}) => panelOffscreen && showPrioritiesLink;
 
 bool dashboardScrollOffsetMeaningfullyChanged(
   double previousOffset,
   double newOffset,
 ) => (newOffset - previousOffset).abs() >= dashboardScrollOffsetEpsilon;
 
+/// Só vale a pena reconstruir a árvore quando a visibilidade do painel
+/// realmente muda (evita rebuilds a cada pixel de scroll).
 bool dashboardScrollVisualStateChanged({
-  required double previousOffset,
-  required double newOffset,
-}) {
-  final wasSticky = dashboardShowsStickyPrioritiesAction(previousOffset);
-  final nowSticky = dashboardShowsStickyPrioritiesAction(newOffset);
-  return wasSticky != nowSticky;
-}
+  required bool previousPanelOffscreen,
+  required bool newPanelOffscreen,
+}) => previousPanelOffscreen != newPanelOffscreen;

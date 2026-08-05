@@ -24,6 +24,7 @@ class DashboardToolShortcut {
     this.capability,
     this.featureName,
     this.landingEditor = false,
+    this.featured = false,
   });
 
   final String icon;
@@ -33,6 +34,10 @@ class DashboardToolShortcut {
   final String? capability;
   final String? featureName;
   final bool landingEditor;
+
+  /// Alto valor de negócio — aparece na grade em destaque (fora do
+  /// catálogo completo) para reduzir a carga cognitiva do "Mais ferramentas".
+  final bool featured;
 
   String get displayFeatureName => featureName ?? label;
 
@@ -74,6 +79,7 @@ class DashboardToolShortcut {
       route: '/habitos',
       capability: 'habitCoaching',
       group: DashboardToolGroup.operacao,
+      featured: true,
     ),
     DashboardToolShortcut(
       icon: 'plus',
@@ -82,6 +88,7 @@ class DashboardToolShortcut {
       capability: 'comunidadeGrupos',
       featureName: 'Desafios e ranking',
       group: DashboardToolGroup.operacao,
+      featured: true,
     ),
     DashboardToolShortcut(
       icon: 'trend',
@@ -90,6 +97,7 @@ class DashboardToolShortcut {
       capability: 'financeiro',
       featureName: 'CRM e Leads',
       group: DashboardToolGroup.crescimento,
+      featured: true,
     ),
     DashboardToolShortcut(
       icon: 'home',
@@ -112,6 +120,7 @@ class DashboardToolShortcut {
       capability: 'automacoes',
       featureName: 'Automação win-back',
       group: DashboardToolGroup.crescimento,
+      featured: true,
     ),
     DashboardToolShortcut(
       icon: 'sun',
@@ -120,6 +129,7 @@ class DashboardToolShortcut {
       capability: 'landingCompleta',
       featureName: 'Landing page completa',
       group: DashboardToolGroup.crescimento,
+      featured: true,
     ),
     DashboardToolShortcut(
       icon: 'star',
@@ -138,9 +148,10 @@ class DashboardToolShortcut {
       label: 'Pacotes',
       route: '/pacotes',
       group: DashboardToolGroup.receita,
+      featured: true,
     ),
     DashboardToolShortcut(
-      icon: 'coin',
+      icon: 'pix',
       label: 'Loja',
       route: '/loja',
       capability: 'lojaDigital',
@@ -156,7 +167,7 @@ class DashboardToolShortcut {
       group: DashboardToolGroup.receita,
     ),
     DashboardToolShortcut(
-      icon: 'dollar-sign',
+      icon: 'trend',
       label: 'Receita recorrente',
       route: '/relatorio/business',
       capability: 'relatorios',
@@ -170,6 +181,7 @@ class DashboardToolShortcut {
       capability: 'financeiro',
       featureName: 'Cobrança automática',
       group: DashboardToolGroup.receita,
+      featured: true,
     ),
     DashboardToolShortcut(
       icon: 'calendar',
@@ -178,6 +190,7 @@ class DashboardToolShortcut {
       capability: 'financeiro',
       featureName: 'Recorrência de alunos',
       group: DashboardToolGroup.receita,
+      featured: true,
     ),
     DashboardToolShortcut(
       icon: 'moon',
@@ -193,6 +206,7 @@ class DashboardToolShortcut {
       route: '/automacoes',
       capability: 'automacoes',
       group: DashboardToolGroup.sistema,
+      featured: true,
     ),
     DashboardToolShortcut(
       icon: 'users',
@@ -227,6 +241,12 @@ class DashboardToolShortcut {
       label: 'Broadcasts',
       route: '/broadcasts',
       group: DashboardToolGroup.sistema,
+      featured: true,
     ),
   ];
+
+  /// Subconjunto de alto valor mostrado por padrão — o catálogo completo
+  /// fica atrás de "Ver catálogo completo" para reduzir densidade visual.
+  static List<DashboardToolShortcut> get featuredTools =>
+      moreTools.where((s) => s.featured).toList(growable: false);
 }

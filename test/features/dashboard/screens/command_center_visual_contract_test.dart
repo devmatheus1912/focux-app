@@ -7,6 +7,7 @@ void main() {
     const paths = [
       'lib/features/dashboard/screens/personal_dashboard_screen.dart',
       'lib/features/dashboard/screens/personal_dashboard_screen_build.part.dart',
+      'lib/features/dashboard/screens/personal_dashboard_screen_state.part.dart',
       'lib/features/dashboard/widgets/dashboard_command_center_section.dart',
       'lib/features/dashboard/widgets/dashboard_command_center_sticky_header.dart',
       'lib/features/dashboard/widgets/dashboard_command_center_section_actions.part.dart',
@@ -19,6 +20,8 @@ void main() {
       'lib/features/dashboard/utils/dashboard_microcopy.dart',
       'lib/features/dashboard/utils/dashboard_next_actions.dart',
       'lib/features/dashboard/utils/dashboard_home_focus.dart',
+      'lib/features/dashboard/data/dashboard_repository.dart',
+      'lib/features/dashboard/data/dashboard_tool_shortcuts.dart',
     ];
     final widget = paths.map((p) => File(p).readAsStringSync()).join('\n');
 
@@ -47,8 +50,14 @@ void main() {
       contains('showPrioritiesAction: showStickyPrioritiesAction'),
     );
     expect(widget, contains('dashboardShowsStickyPrioritiesAction'));
-    expect(widget, contains('dashboardStickyPrioritiesMinOffset'));
+    expect(widget, contains('panelOffscreen'));
+    expect(widget, contains('_commandPanelKey'));
+    expect(widget, contains('DashboardPulseSnapshot'));
+    expect(widget, contains('riskOwnedByDayFocus'));
+    expect(widget, contains('featuredTools'));
+    expect(widget, contains('attentionRiskLimit'));
     expect(widget, contains('dashboardScrollOffsetMeaningfullyChanged'));
+    expect(widget, contains('dashboardScrollVisualStateChanged'));
     expect(widget, isNot(contains('DashboardMicrocopy.recentes')));
     expect(
       widget,
@@ -78,5 +87,12 @@ void main() {
     expect(widget, contains('isRiskEchoCopy'));
     expect(widget, contains('BrandPalette.sectionHeading'));
     expect(widget, contains('BrandPalette.sectionAction'));
+
+    // Central de Comando é apresentacional — a fila é computada uma vez só.
+    expect(widget, contains('required this.nextActions'));
+    expect(widget, contains('required this.prioritiesSheetActions'));
+    expect(widget, contains('required this.showPrioritiesLink'));
+    expect(widget, contains('final nextActions = widget.nextActions'));
+    expect(widget, contains('riskOwnedByDayFocus'));
   });
 }
