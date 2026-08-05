@@ -20,6 +20,7 @@ void main() {
       expect(
         groups['Receita'],
         containsAll([
+          'Preços',
           'Receita recorrente',
           'Cobrança auto',
           'Recorrência',
@@ -36,6 +37,7 @@ void main() {
       expect(
         groups['Sistema'],
         containsAll([
+          'Marca própria',
           'Automações',
           'Equipe',
           'Configuração inicial',

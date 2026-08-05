@@ -14,10 +14,8 @@ import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
 import '../utils/dashboard_tool_groups.dart';
-import 'dashboard_roi_quick_links.dart';
 import 'dashboard_tool_grid.dart';
 
-export 'dashboard_roi_quick_links.dart';
 export 'dashboard_tool_grid.dart';
 
 class DashboardCollapsibleToolsSection extends ConsumerStatefulWidget {
@@ -156,8 +154,6 @@ class DashboardCollapsibleToolsSectionState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    DashboardRoiQuickLinksRow(isDark: widget.isDark),
-                    const SizedBox(height: 12),
                     Semantics(
                       textField: true,
                       label: DashboardMicrocopy.buscarFerramenta,

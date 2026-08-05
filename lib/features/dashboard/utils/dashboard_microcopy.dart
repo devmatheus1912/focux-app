@@ -12,7 +12,6 @@ abstract final class DashboardMicrocopy {
   static const precisaDeAtencao = 'Precisa de atenção';
   static const aderenciaDaSemana = 'Aderência da semana';
   static const maisFerramentas = 'Mais ferramentas';
-  static const retornoRapido = 'Retorno rápido';
   static const buscarFerramenta = 'Buscar ferramenta...';
   static const proximasAcoes = 'Próximas ações';
   static const commandCenterTitle = 'Central de Comando';

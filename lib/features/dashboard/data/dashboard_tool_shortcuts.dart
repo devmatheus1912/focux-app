@@ -149,6 +149,14 @@ class DashboardToolShortcut {
     ),
     DashboardToolShortcut(
       icon: 'dollar-sign',
+      label: 'Preços',
+      route: '/financeiro',
+      capability: 'financeiro',
+      featureName: 'Financeiro e preços',
+      group: DashboardToolGroup.receita,
+    ),
+    DashboardToolShortcut(
+      icon: 'dollar-sign',
       label: 'Receita recorrente',
       route: '/relatorio/business',
       capability: 'relatorios',
@@ -170,6 +178,14 @@ class DashboardToolShortcut {
       capability: 'financeiro',
       featureName: 'Recorrência de alunos',
       group: DashboardToolGroup.receita,
+    ),
+    DashboardToolShortcut(
+      icon: 'moon',
+      label: 'Marca própria',
+      route: '/white-label',
+      capability: 'whiteLabel',
+      featureName: 'Identidade visual e marca própria',
+      group: DashboardToolGroup.sistema,
     ),
     DashboardToolShortcut(
       icon: 'zap',
@@ -211,41 +227,6 @@ class DashboardToolShortcut {
       label: 'Broadcasts',
       route: '/broadcasts',
       group: DashboardToolGroup.sistema,
-    ),
-  ];
-
-  static const List<DashboardToolShortcut> roiQuickLinks = [
-    DashboardToolShortcut(
-      icon: 'message-circle',
-      label: 'Captura pública',
-      route: '/leads-publicos',
-      capability: 'financeiro',
-      featureName: 'Captura pública',
-      group: DashboardToolGroup.crescimento,
-    ),
-    DashboardToolShortcut(
-      icon: 'moon',
-      label: 'Marca própria',
-      route: '/white-label',
-      capability: 'whiteLabel',
-      featureName: 'Identidade visual e marca própria',
-      group: DashboardToolGroup.sistema,
-    ),
-    DashboardToolShortcut(
-      icon: 'dollar-sign',
-      label: 'Preços',
-      route: '/financeiro',
-      capability: 'financeiro',
-      featureName: 'Financeiro e preços',
-      group: DashboardToolGroup.receita,
-    ),
-    DashboardToolShortcut(
-      icon: 'article',
-      label: 'Landing',
-      landingEditor: true,
-      capability: 'landingCompleta',
-      featureName: 'Landing page completa',
-      group: DashboardToolGroup.crescimento,
     ),
   ];
 }

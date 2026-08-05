@@ -8,10 +8,9 @@ String dashboardShortcutSemanticsLabel(DashboardToolShortcut shortcut) {
     'Receita recorrente' => 'Relatório de receita recorrente NDR e MRR',
     'Pesquisa NPS' => 'Pesquisa de satisfação NPS',
     'Configuração inicial' => 'Assistente de configuração inicial',
-    'Retorno rápido' => 'Atalhos de retorno sobre investimento',
     'Preços' || 'Preços inteligentes' => 'Financeiro e precificação',
     'Marca própria' => 'Identidade visual e logo personalizados',
-    'Captura pública' => 'Captura de leads públicos',
+    'Lead Público' || 'Captura pública' => 'Captura de leads públicos',
     _ => shortcut.displayFeatureName,
   };
 }

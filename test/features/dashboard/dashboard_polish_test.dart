@@ -61,10 +61,11 @@ void main() {
     final shortcutsFile = File(
       'lib/features/dashboard/data/dashboard_tool_shortcuts.dart',
     ).readAsStringSync();
-    final roiStart = shortcutsFile.indexOf('roiQuickLinks = [');
-    final roiEnd = shortcutsFile.indexOf('];', roiStart);
-    expect(roiStart, greaterThan(0));
-    expect(shortcutsFile.substring(roiStart, roiEnd), isNot(contains("'Pacotes'")));
+    expect(shortcutsFile, isNot(contains('roiQuickLinks')));
+    expect(shortcutsFile, contains("label: 'Preços'"));
+    expect(shortcutsFile, contains("label: 'Marca própria'"));
+    expect(screen, isNot(contains('retornoRapido')));
+    expect(screen, isNot(contains('DashboardRoiQuickLinksRow')));
 
     final semanticsCount = 'Semantics('.allMatches(screen).length;
     expect(semanticsCount, greaterThanOrEqualTo(10));
