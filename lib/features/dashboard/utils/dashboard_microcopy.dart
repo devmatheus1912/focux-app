@@ -13,12 +13,10 @@ abstract final class DashboardMicrocopy {
   static const aderenciaDaSemana = 'Aderência da semana';
   static const maisFerramentas = 'Mais ferramentas';
   static const retornoRapido = 'Retorno rápido';
-  static const recentes = 'Recentes';
   static const buscarFerramenta = 'Buscar ferramenta...';
   static const proximasAcoes = 'Próximas ações';
   static const commandCenterTitle = 'Central de Comando';
-  static const commandCenterSubtitle =
-      'Próximas ações com maior impacto hoje.';
+  static const commandCenterSubtitle = 'Próximas ações com maior impacto hoje.';
   static const modoFoco = 'Modo foco';
   static const modoFocoOn = 'Modo foco ligado';
   static const modoFocoOff = 'Modo foco desligado';

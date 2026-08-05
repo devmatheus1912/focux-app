@@ -42,12 +42,20 @@ void main() {
     expect(widget, contains("collapsedActionLabel: 'Revisar'"));
     expect(widget, contains('trailingActionLabel: stickyCommandActionsLabel'));
     expect(widget, contains('verPrioridades'));
-    expect(widget, contains('showPrioritiesAction: showStickyPrioritiesAction'));
-    expect(widget, contains('_homeScrollOffset >= 80'));
-    expect(widget, contains('dashboardShowsFloatingPrioritiesChip'));
+    expect(
+      widget,
+      contains('showPrioritiesAction: showStickyPrioritiesAction'),
+    );
+    expect(widget, contains('dashboardShowsStickyPrioritiesAction'));
+    expect(widget, contains('dashboardStickyPrioritiesMinOffset'));
     expect(widget, contains('dashboardScrollOffsetMeaningfullyChanged'));
-    expect(widget, contains('DashboardToolRecentStore'));
-    expect(widget, contains('recentes'));
+    expect(widget, isNot(contains('DashboardMicrocopy.recentes')));
+    expect(
+      widget,
+      isNot(
+        contains('dashboardShowsFloatingPrioritiesChip(_homeScrollOffset)'),
+      ),
+    );
     expect(widget, contains('prioritiesActionLabel'));
     expect(widget, contains('showPrioritiesLink'));
     expect(widget, contains('CommandPrioritiesSheet'));

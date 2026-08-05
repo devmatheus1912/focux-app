@@ -21,233 +21,240 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
           body: SafeArea(
             bottom: false,
             child: homeAsync.when(
-          loading: () => DashboardShimmerLoading(themeDark: themeDark),
-          error:
-              (e, _) => DashboardErrorState(
-                chromeOnDark: chromeOnDark,
-                primary: primary,
-                message: friendlyError(e),
-                onRetry: () {
-                  ref.invalidate(dashboardHomeProvider);
-                  ref.invalidate(alunosProvider);
-                  _loadFinFromHome();
-                },
-              ),
-          data: (home) {
-            final data = home.personal;
-            final screenWidth = MediaQuery.sizeOf(context).width;
-            final isCompactPhone = screenWidth < 390;
-            final shortcutAspectRatio = isCompactPhone ? 2.75 : 3.05;
+              loading: () => DashboardShimmerLoading(themeDark: themeDark),
+              error:
+                  (e, _) => DashboardErrorState(
+                    chromeOnDark: chromeOnDark,
+                    primary: primary,
+                    message: friendlyError(e),
+                    onRetry: () {
+                      ref.invalidate(dashboardHomeProvider);
+                      ref.invalidate(alunosProvider);
+                      _loadFinFromHome();
+                    },
+                  ),
+              data: (home) {
+                final data = home.personal;
+                final screenWidth = MediaQuery.sizeOf(context).width;
+                final isCompactPhone = screenWidth < 390;
+                final shortcutAspectRatio = isCompactPhone ? 2.75 : 3.05;
 
-            // Computed values for hero card
-            final monthNames = [
-              'janeiro',
-              'fevereiro',
-              'março',
-              'abril',
-              'maio',
-              'junho',
-              'julho',
-              'agosto',
-              'setembro',
-              'outubro',
-              'novembro',
-              'dezembro',
-            ];
-            final mes = monthNames[DateTime.now().month - 1];
-            final pendente = ((_finData?.previsaoReceita ?? 0) -
-                    (_finData?.receitaMes ?? 0))
-                .clamp(0.0, double.infinity);
-            final metaReceita = _finData?.previsaoReceita ?? 0;
-            final receitaAtual = _finData?.receitaMes ?? 0;
-            final progressRaw =
-                metaReceita > 0 ? receitaAtual / metaReceita : 0.0;
-            final metaSuperada = metaReceita > 0 && receitaAtual >= metaReceita;
+                // Computed values for hero card
+                final monthNames = [
+                  'janeiro',
+                  'fevereiro',
+                  'março',
+                  'abril',
+                  'maio',
+                  'junho',
+                  'julho',
+                  'agosto',
+                  'setembro',
+                  'outubro',
+                  'novembro',
+                  'dezembro',
+                ];
+                final mes = monthNames[DateTime.now().month - 1];
+                final pendente = ((_finData?.previsaoReceita ?? 0) -
+                        (_finData?.receitaMes ?? 0))
+                    .clamp(0.0, double.infinity);
+                final metaReceita = _finData?.previsaoReceita ?? 0;
+                final receitaAtual = _finData?.receitaMes ?? 0;
+                final progressRaw =
+                    metaReceita > 0 ? receitaAtual / metaReceita : 0.0;
+                final metaSuperada =
+                    metaReceita > 0 && receitaAtual >= metaReceita;
 
-            final alunosAtivos = alunosAsync.maybeWhen(
-              data: (alunos) => alunos.where((a) => a.status == 'ATIVO').length,
-              orElse: () => data.alunosAtivos,
-            );
-            final riscoAlto = alunosAsync.maybeWhen(
-              data: (alunos) => alunos.where((a) => a.emRisco).length,
-              orElse: () => 0,
-            );
-            final alunosEmRisco = alunosAsync.maybeWhen(
-              data: (alunos) => alunos.where((a) => a.emRisco).toList(),
-              orElse: () => const <Aluno>[],
-            );
+                final alunosAtivos = alunosAsync.maybeWhen(
+                  data:
+                      (alunos) =>
+                          alunos.where((a) => a.status == 'ATIVO').length,
+                  orElse: () => data.alunosAtivos,
+                );
+                final riscoAlto = alunosAsync.maybeWhen(
+                  data: (alunos) => alunos.where((a) => a.emRisco).length,
+                  orElse: () => 0,
+                );
+                final alunosEmRisco = alunosAsync.maybeWhen(
+                  data: (alunos) => alunos.where((a) => a.emRisco).toList(),
+                  orElse: () => const <Aluno>[],
+                );
 
-            final hoje = DateTime.now();
-            final checkinsHoje = historicoCheckinsAsync.maybeWhen(
-              data: (items) {
-                bool sameDay(DateTime a, DateTime b) =>
-                    a.year == b.year && a.month == b.month && a.day == b.day;
-                return items.where((e) {
-                  final concluded = DateTime.tryParse(e.concluidoEm ?? '');
-                  if (concluded == null) return false;
-                  return sameDay(concluded.toLocal(), hoje);
-                }).length;
-              },
-              orElse: () => 0,
-            );
-            final checkinsTrend = historicoCheckinsAsync.maybeWhen(
-              data: (items) => dashboardCheckinsSparklineUltimos7Dias(items),
-              orElse: () => List<double>.filled(7, 0),
-            );
-            final receitaTrend = dashboardReceitaSparklineMensal(
-              _finData?.evolucaoMensal ?? const [],
-            );
-            final agendaHoje = commandAsync.maybeWhen(
-              data: (cc) => cc.agendaHoje.length,
-              orElse: () => 0,
-            );
-            final attentionVisible =
-                alunosEmRisco.isNotEmpty ||
-                (_finData != null && _finData!.vencimentosProximos.isNotEmpty);
-            final onboardingAsync = ref.watch(onboardingStatusProvider);
-            final onboardingIncomplete = onboardingAsync.maybeWhen(
-              data: (s) => !s.ativacaoCompleta,
-              orElse: () => false,
-            );
-            final primeiroTreinoCriado = onboardingAsync.maybeWhen(
-              data: (s) => s.primeiroTreinoCriado,
-              orElse: () => false,
-            );
-            final riskDominante =
-                alunosAtivos > 0 &&
-                riscoAlto >= math.max(2, (alunosAtivos * 0.5).ceil());
-            final vencimentosCount = _finData?.vencimentosProximos.length ?? 0;
-            final dayFocus = DashboardDayFocus.resolve(
-              riscoAlto: riscoAlto,
-              alunosAtivos: alunosAtivos,
-              checkinsHoje: checkinsHoje,
-              agendaHoje: agendaHoje,
-              receitaMes: receitaAtual,
-              vencimentosPendentes: vencimentosCount,
-              riskDominante: riskDominante,
-            );
-            if (_focusPreferenceLoaded && _persistedFocusMode == null) {
-              final autoFocus = DashboardHomeFocusRules.defaultFocusMode(
-                dayFocus: dayFocus,
-                riskDominante: riskDominante,
-              );
-              if (_focusMode != autoFocus) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (!mounted) return;
-                  setState(() => _focusMode = autoFocus);
-                });
-              }
-            }
-            final focusRules = DashboardHomeFocusRules.resolve(
-              focusMode: _focusMode,
-              dayFocus: dayFocus,
-              riscoAlto: riscoAlto,
-              receitaAtual: receitaAtual,
-            );
-            final dayFocusCoversRetention = focusRules.dayFocusCoversRetention;
+                final hoje = DateTime.now();
+                final checkinsHoje = historicoCheckinsAsync.maybeWhen(
+                  data: (items) {
+                    bool sameDay(DateTime a, DateTime b) =>
+                        a.year == b.year &&
+                        a.month == b.month &&
+                        a.day == b.day;
+                    return items.where((e) {
+                      final concluded = DateTime.tryParse(e.concluidoEm ?? '');
+                      if (concluded == null) return false;
+                      return sameDay(concluded.toLocal(), hoje);
+                    }).length;
+                  },
+                  orElse: () => 0,
+                );
+                final checkinsTrend = historicoCheckinsAsync.maybeWhen(
+                  data:
+                      (items) => dashboardCheckinsSparklineUltimos7Dias(items),
+                  orElse: () => List<double>.filled(7, 0),
+                );
+                final receitaTrend = dashboardReceitaSparklineMensal(
+                  _finData?.evolucaoMensal ?? const [],
+                );
+                final agendaHoje = commandAsync.maybeWhen(
+                  data: (cc) => cc.agendaHoje.length,
+                  orElse: () => 0,
+                );
+                final attentionVisible =
+                    alunosEmRisco.isNotEmpty ||
+                    (_finData != null &&
+                        _finData!.vencimentosProximos.isNotEmpty);
+                final onboardingAsync = ref.watch(onboardingStatusProvider);
+                final onboardingIncomplete = onboardingAsync.maybeWhen(
+                  data: (s) => !s.ativacaoCompleta,
+                  orElse: () => false,
+                );
+                final primeiroTreinoCriado = onboardingAsync.maybeWhen(
+                  data: (s) => s.primeiroTreinoCriado,
+                  orElse: () => false,
+                );
+                final riskDominante =
+                    alunosAtivos > 0 &&
+                    riscoAlto >= math.max(2, (alunosAtivos * 0.5).ceil());
+                final vencimentosCount =
+                    _finData?.vencimentosProximos.length ?? 0;
+                final dayFocus = DashboardDayFocus.resolve(
+                  riscoAlto: riscoAlto,
+                  alunosAtivos: alunosAtivos,
+                  checkinsHoje: checkinsHoje,
+                  agendaHoje: agendaHoje,
+                  receitaMes: receitaAtual,
+                  vencimentosPendentes: vencimentosCount,
+                  riskDominante: riskDominante,
+                );
+                if (_focusPreferenceLoaded && _persistedFocusMode == null) {
+                  final autoFocus = DashboardHomeFocusRules.defaultFocusMode(
+                    dayFocus: dayFocus,
+                    riskDominante: riskDominante,
+                  );
+                  if (_focusMode != autoFocus) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (!mounted) return;
+                      setState(() => _focusMode = autoFocus);
+                    });
+                  }
+                }
+                final focusRules = DashboardHomeFocusRules.resolve(
+                  focusMode: _focusMode,
+                  dayFocus: dayFocus,
+                  riscoAlto: riscoAlto,
+                  receitaAtual: receitaAtual,
+                );
+                final dayFocusCoversRetention =
+                    focusRules.dayFocusCoversRetention;
 
-            final attentionRiskItems =
-                alunosEmRisco
-                    .take(
-                      focusRules.focusMode
-                          ? 1
-                          : (riskDominante ? 2 : 4),
-                    )
-                    .toList();
-            final attentionVencItems =
-                (_finData?.vencimentosProximos ?? const [])
-                    .take(focusRules.focusMode ? 1 : 2)
-                    .toList();
-            final attentionItemCount =
-                attentionRiskItems.length + attentionVencItems.length;
-            const commandCenterSubtitle =
-                DashboardMicrocopy.commandCenterSubtitle;
+                final attentionRiskItems =
+                    alunosEmRisco
+                        .take(
+                          focusRules.focusMode ? 1 : (riskDominante ? 2 : 4),
+                        )
+                        .toList();
+                final attentionVencItems =
+                    (_finData?.vencimentosProximos ?? const [])
+                        .take(focusRules.focusMode ? 1 : 2)
+                        .toList();
+                final attentionItemCount =
+                    attentionRiskItems.length + attentionVencItems.length;
+                const commandCenterSubtitle =
+                    DashboardMicrocopy.commandCenterSubtitle;
 
-            void openAttentionReview() {
-              if (attentionRiskItems.isNotEmpty) {
-                context.push('/alunos/${attentionRiskItems.first.id}');
-                return;
-              }
-              if (attentionVencItems.isNotEmpty) {
-                context.go('/financeiro');
-                return;
-              }
-              goPersonalShellTab(context, '/alunos?filtro=risco');
-            }
+                void openAttentionReview() {
+                  if (attentionRiskItems.isNotEmpty) {
+                    context.push('/alunos/${attentionRiskItems.first.id}');
+                    return;
+                  }
+                  if (attentionVencItems.isNotEmpty) {
+                    context.go('/financeiro');
+                    return;
+                  }
+                  goPersonalShellTab(context, '/alunos?filtro=risco');
+                }
 
-            final filaAcoes = commandAsync.maybeWhen(
-              data: (cc) => cc.filaAcoes,
-              orElse: () => const <FilaAcaoResumo>[],
-            );
-            final chatAsync = ref.watch(chatInboxProvider);
-            final unreadCount = chatAsync.maybeWhen(
-              data:
-                  (items) =>
-                      items.fold<int>(0, (sum, item) => sum + item.naoLidas),
-              orElse: () => 0,
-            );
-            final cobrancasPendentes = commandAsync.maybeWhen(
-              data: (cc) => cc.cobrancasPendentes.length,
-              orElse: () => _finData?.totalInadimplentes ?? 0,
-            );
-            final riskStudentsForSheet =
-                alunosEmRisco
+                final filaAcoes = commandAsync.maybeWhen(
+                  data: (cc) => cc.filaAcoes,
+                  orElse: () => const <FilaAcaoResumo>[],
+                );
+                final chatAsync = ref.watch(chatInboxProvider);
+                final unreadCount = chatAsync.maybeWhen(
+                  data:
+                      (items) => items.fold<int>(
+                        0,
+                        (sum, item) => sum + item.naoLidas,
+                      ),
+                  orElse: () => 0,
+                );
+                final cobrancasPendentes = commandAsync.maybeWhen(
+                  data: (cc) => cc.cobrancasPendentes.length,
+                  orElse: () => _finData?.totalInadimplentes ?? 0,
+                );
+                final riskStudentsForSheet = alunosEmRisco
                     .map((a) => (id: a.id, nome: a.nome))
                     .toList(growable: false);
-            final dashboardNextActions = buildDashboardNextActions(
-              filaAcoes: filaAcoes,
-              unreadCount: unreadCount,
-              alunosRisco: riscoAlto,
-              cobrancasPendentes: cobrancasPendentes,
-              agendaHoje: agendaHoje,
-              hideRiskSummary: alunosEmRisco.isNotEmpty,
-              isCommandPreparing: commandAsync.isLoading,
-              maxItems: focusRules.maxVisibleNextActions,
-            );
-            final prioritiesSheetActions = buildDashboardSheetActions(
-              curated: dashboardNextActions,
-              filaAcoes: filaAcoes,
-              riskStudents: riskStudentsForSheet,
-            );
-            final showPrioritiesLink = dashboardShouldShowPrioritiesLink(
-              visible: dashboardNextActions,
-              sheet: prioritiesSheetActions,
-              isPreparing: commandAsync.isLoading,
-            );
-            final showStickyPrioritiesAction =
-                showPrioritiesLink && _homeScrollOffset >= 80;
-            final stickyCommandActionsLabel =
-                showPrioritiesLink ? DashboardMicrocopy.verPrioridades : null;
+                final dashboardNextActions = buildDashboardNextActions(
+                  filaAcoes: filaAcoes,
+                  unreadCount: unreadCount,
+                  alunosRisco: riscoAlto,
+                  cobrancasPendentes: cobrancasPendentes,
+                  agendaHoje: agendaHoje,
+                  hideRiskSummary: alunosEmRisco.isNotEmpty,
+                  isCommandPreparing: commandAsync.isLoading,
+                  maxItems: focusRules.maxVisibleNextActions,
+                );
+                final prioritiesSheetActions = buildDashboardSheetActions(
+                  curated: dashboardNextActions,
+                  filaAcoes: filaAcoes,
+                  riskStudents: riskStudentsForSheet,
+                );
+                final showPrioritiesLink = dashboardShouldShowPrioritiesLink(
+                  visible: dashboardNextActions,
+                  sheet: prioritiesSheetActions,
+                  isPreparing: commandAsync.isLoading,
+                );
+                // Sticky só depois do painel sair da tela — um único CTA no viewport.
+                final showStickyPrioritiesAction =
+                    showPrioritiesLink &&
+                    dashboardShowsStickyPrioritiesAction(_homeScrollOffset);
+                final stickyCommandActionsLabel =
+                    showStickyPrioritiesAction
+                        ? DashboardMicrocopy.verPrioridades
+                        : null;
 
-            void openCommandQuickActions() {
-              if (!showPrioritiesLink) return;
-              showCommandActionsSheet(
-                context,
-                isDark: themeDark,
-                primary: primary,
-                actions: prioritiesSheetActions,
-              );
-            }
+                void openCommandQuickActions() {
+                  if (!showPrioritiesLink) return;
+                  showCommandActionsSheet(
+                    context,
+                    isDark: themeDark,
+                    primary: primary,
+                    actions: prioritiesSheetActions,
+                  );
+                }
 
-            final String? attentionCollapsedPreview;
-            if (attentionRiskItems.isNotEmpty) {
-              final first = attentionRiskItems.first;
-              attentionCollapsedPreview =
-                  '${first.nome} · ${attentionSignalLabel(first)}';
-            } else if (attentionVencItems.isNotEmpty) {
-              final first = attentionVencItems.first;
-              attentionCollapsedPreview =
-                  '${first.alunoNome} · R\$ ${first.valor.toStringAsFixed(0)} pendente';
-            } else {
-              attentionCollapsedPreview = null;
-            }
+                final String? attentionCollapsedPreview;
+                if (attentionRiskItems.isNotEmpty) {
+                  final first = attentionRiskItems.first;
+                  attentionCollapsedPreview =
+                      '${first.nome} · ${attentionSignalLabel(first)}';
+                } else if (attentionVencItems.isNotEmpty) {
+                  final first = attentionVencItems.first;
+                  attentionCollapsedPreview =
+                      '${first.alunoNome} · R\$ ${first.valor.toStringAsFixed(0)} pendente';
+                } else {
+                  attentionCollapsedPreview = null;
+                }
 
-            final link = BrandPalette.sectionLink(primary, dark: themeDark);
-
-            return Stack(
-              clipBehavior: Clip.none,
-              children: [
-                RefreshIndicator(
+                return RefreshIndicator(
                   onRefresh: () async {
                     ref.invalidate(dashboardHomeProvider);
                     ref.invalidate(alunosProvider);
@@ -379,11 +386,17 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                       ),
                                     ),
                                   ),
-                                  SizedBox(width: DashboardLayout.headerIconGap),
+                                  SizedBox(
+                                    width: DashboardLayout.headerIconGap,
+                                  ),
                                   const ShellThemeToggle(size: 36),
-                                  SizedBox(width: DashboardLayout.headerIconGap),
+                                  SizedBox(
+                                    width: DashboardLayout.headerIconGap,
+                                  ),
                                   const NotificacaoBadgeButton(size: 36),
-                                  SizedBox(width: DashboardLayout.headerIconGap),
+                                  SizedBox(
+                                    width: DashboardLayout.headerIconGap,
+                                  ),
                                   DashboardHeaderProfileAvatar(
                                     primary: primary,
                                     isDark: themeDark,
@@ -441,8 +454,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                               hideRiskSummary: alunosEmRisco.isNotEmpty,
                               hideHeader: true,
                               contextualSubtitle: commandCenterSubtitle,
-                              collapseQuickLinks:
-                                  focusRules.collapseQuickLinks,
+                              collapseQuickLinks: focusRules.collapseQuickLinks,
                               maxVisibleNextActions:
                                   focusRules.maxVisibleNextActions,
                             ),
@@ -594,7 +606,9 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                           ),
                         ),
                         SliverToBoxAdapter(
-                          child: SizedBox(height: DashboardLayout.sliverSectionGap),
+                          child: SizedBox(
+                            height: DashboardLayout.sliverSectionGap,
+                          ),
                         ),
                       ],
 
@@ -631,7 +645,8 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                       context,
                                       '/alunos?filtro=risco',
                                     )
-                                    : () => goPersonalShellTab(context, '/alunos'),
+                                    : () =>
+                                        goPersonalShellTab(context, '/alunos'),
                             showEmptyTrendCta:
                                 !checkinsTrend.any((v) => v > 0) &&
                                 alunosAtivos > 0 &&
@@ -644,17 +659,16 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                             onEmptyTrendCta:
                                 () =>
                                     primeiroTreinoCriado
-                                        ? goPersonalShellTab(
-                                          context,
-                                          '/agenda',
-                                        )
+                                        ? goPersonalShellTab(context, '/agenda')
                                         : context.push('/treinos/novo'),
                           ),
                         ),
                       ),
 
                       SliverToBoxAdapter(
-                        child: SizedBox(height: DashboardLayout.sliverSectionGap),
+                        child: SizedBox(
+                          height: DashboardLayout.sliverSectionGap,
+                        ),
                       ),
                       SliverToBoxAdapter(
                         child: DashboardCollapsibleSection(
@@ -733,46 +747,8 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                       ),
                     ],
                   ),
-                ),
-                if (showStickyPrioritiesAction &&
-                    stickyCommandActionsLabel != null &&
-                    dashboardShowsFloatingPrioritiesChip(_homeScrollOffset))
-                  Positioned(
-                    top: MediaQuery.paddingOf(context).top + 4,
-                    right: TokensStrip.s4,
-                    child: Semantics(
-                      button: true,
-                      label: stickyCommandActionsLabel,
-                      child: Material(
-                        elevation: 2,
-                        shadowColor: Colors.black.withValues(
-                          alpha: themeDark ? 0.35 : 0.12,
-                        ),
-                        color:
-                            themeDark
-                                ? EagleTokens.darkCard
-                                : Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(999),
-                        child: InkWell(
-                          onTap: openCommandQuickActions,
-                          borderRadius: BorderRadius.circular(999),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            child: Text(
-                              stickyCommandActionsLabel,
-                              style: dashboardChipLabelStyle(link),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            );
-          },
+                );
+              },
             ),
           ),
         ),

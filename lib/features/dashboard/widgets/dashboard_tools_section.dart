@@ -12,10 +12,8 @@ import '../utils/dashboard_a11y.dart';
 import '../utils/dashboard_haptic.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
-import '../utils/dashboard_screen_helpers.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
 import '../utils/dashboard_tool_groups.dart';
-import '../utils/dashboard_tool_recent_store.dart';
 import 'dashboard_roi_quick_links.dart';
 import 'dashboard_tool_grid.dart';
 
@@ -41,19 +39,6 @@ class DashboardCollapsibleToolsSectionState
     extends ConsumerState<DashboardCollapsibleToolsSection> {
   bool _expanded = false;
   String _searchQuery = '';
-  List<DashboardToolShortcut> _recentShortcuts = const [];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadRecentShortcuts();
-  }
-
-  Future<void> _loadRecentShortcuts() async {
-    final recents = await DashboardToolRecentStore.loadRecentShortcuts();
-    if (!mounted) return;
-    setState(() => _recentShortcuts = recents);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,11 +86,7 @@ class DashboardCollapsibleToolsSectionState
               child: InkWell(
                 onTap: () {
                   dashboardHapticCollapseToggle();
-                  final nextExpanded = !_expanded;
-                  setState(() => _expanded = nextExpanded);
-                  if (nextExpanded) {
-                    _loadRecentShortcuts();
-                  }
+                  setState(() => _expanded = !_expanded);
                 },
                 borderRadius: BorderRadius.circular(TokensStrip.rCard),
                 child: Ink(
@@ -176,44 +157,6 @@ class DashboardCollapsibleToolsSectionState
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     DashboardRoiQuickLinksRow(isDark: widget.isDark),
-                    if (_recentShortcuts.isNotEmpty &&
-                        _searchQuery.isEmpty) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        DashboardMicrocopy.recentes,
-                        style: dashboardSectionKickerStyle(
-                          context,
-                          isDark: widget.isDark,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            for (final shortcut in _recentShortcuts) ...[
-                              DashboardRoiShortcutChip(
-                                shortcut: shortcut,
-                                isDark: widget.isDark,
-                                locked: !shortcut.isUnlocked(features),
-                                tierLabel:
-                                    shortcut.isUnlocked(features)
-                                        ? null
-                                        : shortcut.tierBadgeLabel(),
-                                linkColor: link,
-                                onTap:
-                                    () => openDashboardShortcut(
-                                      context,
-                                      ref,
-                                      shortcut,
-                                    ),
-                              ),
-                              const SizedBox(width: 8),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ],
                     const SizedBox(height: 12),
                     Semantics(
                       textField: true,
