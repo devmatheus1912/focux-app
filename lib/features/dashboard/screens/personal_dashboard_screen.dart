@@ -44,6 +44,7 @@ import '../widgets/dashboard_collapsible_section.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import '../utils/dashboard_scroll_logic.dart';
+import '../utils/dashboard_unread.dart';
 import '../utils/dashboard_onboarding_logic.dart';
 import '../constants/dashboard_layout.dart';
 import '../widgets/dashboard_horizontal_scroll_peek.dart';

@@ -207,8 +207,11 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                       ),
                   orElse: () => 0,
                 );
-                final unreadCount =
-                    home.pulse?.mensagensNaoLidas ?? unreadFromInbox;
+                final unreadCount = dashboardResolveUnreadCount(
+                  pulseUnread: home.pulse?.mensagensNaoLidas,
+                  inboxReady: chatAsync.hasValue,
+                  inboxUnread: unreadFromInbox,
+                );
                 final cobrancasPendentes = commandAsync.maybeWhen(
                   data: (cc) => cc.cobrancasPendentes.length,
                   orElse: () => _finData?.totalInadimplentes ?? 0,

@@ -10,14 +10,14 @@ Color dashboardReadableMuted(BuildContext context, {required bool isDark}) {
   if (isDark) {
     return Color.lerp(EagleTokens.darkInkMute, EagleTokens.darkInk, 0.42)!;
   }
-  return TokensStrip.textPrimary.withValues(alpha: 0.78);
+  return TokensStrip.textPrimary.withValues(alpha: 0.82);
 }
 
 Color dashboardReadableCaption(BuildContext context, {required bool isDark}) {
   if (isDark) {
-    return Color.lerp(EagleTokens.darkInkMute, EagleTokens.darkInk, 0.28)!;
+    return Color.lerp(EagleTokens.darkInkMute, EagleTokens.darkInk, 0.35)!;
   }
-  return TokensStrip.textPrimary.withValues(alpha: 0.74);
+  return TokensStrip.textPrimary.withValues(alpha: 0.80);
 }
 
 /// Texto secundário sobre gradiente teal (hero financeiro) — ≥4.5:1 WCAG AA.

@@ -22,6 +22,7 @@ import '../utils/dashboard_haptic.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_next_actions.dart';
 import '../utils/dashboard_readability.dart';
+import '../utils/dashboard_unread.dart';
 import 'dashboard_horizontal_scroll_peek.dart';
 
 export '../data/command_action_item.dart';
@@ -121,7 +122,11 @@ class DashboardCommandCenterSectionState
       data: (items) => items.fold<int>(0, (sum, i) => sum + i.naoLidas),
       orElse: () => 0,
     );
-    final unreadCount = widget.mensagensNaoLidas ?? unreadFromInbox;
+    final unreadCount = dashboardResolveUnreadCount(
+      pulseUnread: widget.mensagensNaoLidas,
+      inboxReady: chatAsync.hasValue,
+      inboxUnread: unreadFromInbox,
+    );
     final totalConversas = chatAsync.maybeWhen(
       data: (items) => items.length,
       orElse: () => 0,

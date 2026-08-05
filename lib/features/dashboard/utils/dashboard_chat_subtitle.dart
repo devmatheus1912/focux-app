@@ -1,4 +1,4 @@
-/// Subtítulo do atalho Mensagens — prioriza não-lidas do BFF pulse.
+/// Subtítulo do atalho Mensagens — não-lidas primeiro; senão conversas.
 String dashboardChatShortcutSubtitle({
   required int unreadCount,
   required int conversationCount,
