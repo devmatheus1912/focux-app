@@ -67,15 +67,16 @@ class DashboardCollapsibleToolsSectionState
       _searchQuery,
     );
     final groups = groupDashboardToolShortcuts(shortcuts);
+    final totalTools = DashboardToolShortcut.moreTools.length;
     final lockedCount = countLockedShortcuts(
       DashboardToolShortcut.moreTools,
       features,
     );
-    final unlockedCount = shortcuts.length - lockedCount;
+    final unlockedCount = totalTools - lockedCount;
     final collapsedHint =
         lockedCount > 0
             ? '$unlockedCount liberados · $lockedCount no upgrade'
-            : '${shortcuts.length} atalhos · toque para expandir';
+            : '$totalTools atalhos · toque para expandir';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(

@@ -5,6 +5,9 @@ import 'dashboard_screen_helpers.dart';
 
 export '../data/command_action_item.dart';
 
+/// Aluno em risco para enriquecer o sheet (ações por aluno).
+typedef DashboardRiskStudentRef = ({int id, String nome});
+
 /// Monta a fila curada de próximas ações da Home / Central de Comando.
 ///
 /// Ordem fixa de impacto: **P0 risco → P1 cobrança → mensagens → resto**.
@@ -45,7 +48,6 @@ List<CommandActionItem> buildDashboardNextActions({
               ));
 
   final nextActions = <CommandActionItem>[
-    // P0 — retenção / contato (sempre antes de cobrança).
     if (alunosRisco > 0)
       CommandActionItem(
         icon: hideRiskSummary ? 'zap' : 'alert-triangle',
@@ -57,12 +59,10 @@ List<CommandActionItem> buildDashboardNextActions({
             hideRiskSummary
                 ? '$alunosRisco aluno${alunosRisco == 1 ? '' : 's'} com risco de abandono'
                 : '$alunosRisco no radar · risco, inadimplência ou pausa no treino',
-        route:
-            hideRiskSummary ? '/retencao' : '/alunos?filtro=contato',
+        route: hideRiskSummary ? '/retencao' : '/alunos?filtro=contato',
         tone: CommandActionTone.hot,
         priorityBadge: 'P0',
       ),
-    // P1 — receita.
     if (cobrancasPendentes > 0)
       CommandActionItem(
         icon: 'dollar-sign',
@@ -154,6 +154,7 @@ int dashboardActionPriorityRank(CommandActionItem item) {
 }
 
 bool _isRiskAction(CommandActionItem item) {
+  if (item.isRadarStudent) return false;
   final title = item.title.toLowerCase();
   final route = item.route.toLowerCase();
   return item.priorityBadge == 'P0' ||
@@ -172,9 +173,23 @@ bool _isBillingAction(CommandActionItem item) {
       item.title.toLowerCase().contains('cobrar');
 }
 
+/// Sheet só vale a pena se tiver item além do que já está na lista visível.
+bool dashboardShouldShowPrioritiesLink({
+  required List<CommandActionItem> visible,
+  required List<CommandActionItem> sheet,
+  required bool isPreparing,
+}) {
+  if (isPreparing || sheet.isEmpty) return false;
+  final visibleKeys = {
+    for (final a in visible) '${a.title}|${a.route}',
+  };
+  return sheet.any((a) => !visibleKeys.contains('${a.title}|${a.route}'));
+}
+
 List<CommandActionItem> buildDashboardSheetActions({
   required List<CommandActionItem> curated,
   required List<FilaAcaoResumo> filaAcoes,
+  List<DashboardRiskStudentRef> riskStudents = const [],
 }) {
   final seenKeys = <String>{};
   for (final item in curated) {
@@ -182,7 +197,7 @@ List<CommandActionItem> buildDashboardSheetActions({
   }
   final hasBillingCurated = curated.any(_isBillingAction);
   final hasRiskCurated = curated.any(_isRiskAction);
-  final merged = <CommandActionItem>[...curated];
+  final impact = <CommandActionItem>[...curated];
   for (final action in filaAcoes) {
     if (hasBillingCurated &&
         (action.actionKey == 'BILLING_PENDING' || action.tipo == 'COBRANCA')) {
@@ -195,19 +210,41 @@ List<CommandActionItem> buildDashboardSheetActions({
       continue;
     }
     final item = sheetItemFromFila(action);
+    if (item.isRadarStudent) continue;
     final key = '${item.title}|${item.route}';
     if (seenKeys.contains(key)) continue;
     if (hasRiskCurated && _isRiskAction(item)) continue;
     if (hasBillingCurated && _isBillingAction(item)) continue;
     seenKeys.add(key);
-    merged.add(item);
+    impact.add(item);
   }
-  merged.sort((a, b) {
+  impact.sort((a, b) {
     final byRank = dashboardActionPriorityRank(
       a,
     ).compareTo(dashboardActionPriorityRank(b));
     if (byRank != 0) return byRank;
     return a.title.compareTo(b.title);
   });
-  return merged.take(12).toList();
+
+  final radar = <CommandActionItem>[];
+  for (final student in riskStudents.take(8)) {
+    final route = '/alunos/${student.id}';
+    final key = '${student.nome}|$route';
+    if (seenKeys.contains(key)) continue;
+    seenKeys.add(key);
+    radar.add(
+      CommandActionItem(
+        icon: 'users',
+        title: student.nome,
+        subtitle: 'Contato e retenção',
+        route: route,
+        tone: CommandActionTone.hot,
+        isRadarStudent: true,
+        priorityBadge: 'P0',
+      ),
+    );
+  }
+  radar.sort((a, b) => a.title.compareTo(b.title));
+
+  return [...impact.take(6), ...radar];
 }

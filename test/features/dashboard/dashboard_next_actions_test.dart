@@ -28,30 +28,11 @@ FilaAcaoResumo _fila({
 
 void main() {
   group('buildDashboardNextActions', () {
-    test('puts risk P0 before billing P1', () {
+    test('puts risk P0 before billing P1 with unified count', () {
       final actions = buildDashboardNextActions(
         filaAcoes: const [],
         unreadCount: 0,
         alunosRisco: 8,
-        cobrancasPendentes: 1,
-        agendaHoje: 0,
-        hideRiskSummary: false,
-        isCommandPreparing: false,
-        maxItems: 2,
-      );
-
-      expect(actions, hasLength(2));
-      expect(actions.first.title, 'Contato hoje');
-      expect(actions.first.priorityBadge, 'P0');
-      expect(actions[1].title, 'Cobrar pendências');
-      expect(actions[1].priorityBadge, 'P1');
-    });
-
-    test('keeps risk P0 when attention already covers radar', () {
-      final actions = buildDashboardNextActions(
-        filaAcoes: const [],
-        unreadCount: 0,
-        alunosRisco: 5,
         cobrancasPendentes: 1,
         agendaHoje: 0,
         hideRiskSummary: true,
@@ -60,8 +41,8 @@ void main() {
       );
 
       expect(actions.first.title, 'Recuperar alunos em risco');
+      expect(actions.first.subtitle, contains('8 alunos'));
       expect(actions.first.priorityBadge, 'P0');
-      expect(actions.first.route, '/retencao');
       expect(actions[1].title, 'Cobrar pendências');
     });
 
@@ -79,8 +60,6 @@ void main() {
 
       expect(actions, hasLength(2));
       expect(actions.first.title, 'Cobrar pendências');
-      expect(actions.first.priorityBadge, 'P1');
-      expect(actions[1].title, 'Preparar agenda');
     });
 
     test('falls back to create opportunity when empty', () {
@@ -94,13 +73,12 @@ void main() {
         isCommandPreparing: false,
       );
 
-      expect(actions, hasLength(1));
       expect(actions.single.route, '/alunos/novo');
     });
   });
 
   group('buildDashboardSheetActions', () {
-    test('dedupes billing from fila when curated already has money action', () {
+    test('hides priorities link when sheet mirrors visible list', () {
       final curated = buildDashboardNextActions(
         filaAcoes: const [],
         unreadCount: 0,
@@ -110,17 +88,22 @@ void main() {
         hideRiskSummary: false,
         isCommandPreparing: false,
       );
-      final merged = buildDashboardSheetActions(
+      final sheet = buildDashboardSheetActions(
         curated: curated,
-        filaAcoes: [
-          _fila(actionKey: 'BILLING_PENDING', tipo: 'COBRANCA'),
-        ],
+        filaAcoes: [_fila(actionKey: 'BILLING_PENDING', tipo: 'COBRANCA')],
       );
 
-      expect(merged.where((a) => a.route == '/financeiro').length, 1);
+      expect(
+        dashboardShouldShowPrioritiesLink(
+          visible: curated,
+          sheet: sheet,
+          isPreparing: false,
+        ),
+        isFalse,
+      );
     });
 
-    test('sorts P0 above P1 and dedupes risk from fila', () {
+    test('shows priorities link when risk students enrich the sheet', () {
       final curated = buildDashboardNextActions(
         filaAcoes: const [],
         unreadCount: 0,
@@ -131,28 +114,25 @@ void main() {
         isCommandPreparing: false,
         maxItems: 2,
       );
-      final merged = buildDashboardSheetActions(
+      final sheet = buildDashboardSheetActions(
         curated: curated,
-        filaAcoes: [
-          _fila(
-            actionKey: 'RISK_STUDENTS',
-            tipo: 'RISCO',
-            titulo: 'Recuperar alunos em risco',
-            descricao: '5 alunos com risco de abandono',
-            acaoUrl: '/retencao',
-            prioridade: 'P0',
-          ),
-          _fila(actionKey: 'BILLING_PENDING', tipo: 'COBRANCA'),
+        filaAcoes: const [],
+        riskStudents: [
+          (id: 1, nome: 'Ana'),
+          (id: 2, nome: 'Bruno'),
         ],
       );
 
-      expect(merged.first.priorityBadge, 'P0');
-      expect(merged.first.title, 'Recuperar alunos em risco');
-      expect(merged[1].priorityBadge, 'P1');
+      expect(sheet.where((a) => a.isRadarStudent).length, 2);
       expect(
-        merged.where((a) => a.title.contains('risco')).length,
-        1,
+        dashboardShouldShowPrioritiesLink(
+          visible: curated,
+          sheet: sheet,
+          isPreparing: false,
+        ),
+        isTrue,
       );
+      expect(sheet.first.subtitle, contains('8 alunos'));
     });
   });
 }

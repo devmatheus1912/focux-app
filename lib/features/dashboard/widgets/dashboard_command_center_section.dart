@@ -25,7 +25,11 @@ import 'dashboard_horizontal_scroll_peek.dart';
 
 export '../data/command_action_item.dart';
 export '../utils/dashboard_next_actions.dart'
-    show buildDashboardNextActions, buildDashboardSheetActions;
+    show
+        buildDashboardNextActions,
+        buildDashboardSheetActions,
+        dashboardShouldShowPrioritiesLink,
+        DashboardRiskStudentRef;
 
 part 'dashboard_command_center_section_actions.part.dart';
 
@@ -127,9 +131,27 @@ class DashboardCommandCenterSectionState
             ? 'R\$ ${receitaMes.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}'
             : 'Ver finanças';
 
-    final alunosRisco = commandAsync.maybeWhen(
+    // Mesma fonte do Foco do dia (alunos.emRisco), com fallback do BFF.
+    final alunosRiscoFromList = alunosAsync.maybeWhen(
+      data: (alunos) => alunos.where((a) => a.emRisco).length,
+      orElse: () => 0,
+    );
+    final alunosRiscoFromCommand = commandAsync.maybeWhen(
       data: (cc) => cc.alunosEmRisco.length,
       orElse: () => 0,
+    );
+    final alunosRisco =
+        alunosRiscoFromList > alunosRiscoFromCommand
+            ? alunosRiscoFromList
+            : alunosRiscoFromCommand;
+    final riskStudents = alunosAsync.maybeWhen(
+      data:
+          (alunos) =>
+              alunos
+                  .where((a) => a.emRisco)
+                  .map((a) => (id: a.id, nome: a.nome))
+                  .toList(growable: false),
+      orElse: () => const <DashboardRiskStudentRef>[],
     );
     final filaAcoes = commandAsync.maybeWhen(
       data: (cc) => cc.filaAcoes,
@@ -154,9 +176,13 @@ class DashboardCommandCenterSectionState
     final prioritiesSheetActions = buildDashboardSheetActions(
       curated: nextActions,
       filaAcoes: filaAcoes,
+      riskStudents: riskStudents,
     );
-    final showPrioritiesLink =
-        prioritiesSheetActions.length > 1 && !isCommandPreparing;
+    final showPrioritiesLink = dashboardShouldShowPrioritiesLink(
+      visible: nextActions,
+      sheet: prioritiesSheetActions,
+      isPreparing: isCommandPreparing,
+    );
 
     Widget card({
       required double width,

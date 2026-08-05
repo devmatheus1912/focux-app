@@ -186,44 +186,46 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                       items.fold<int>(0, (sum, item) => sum + item.naoLidas),
               orElse: () => 0,
             );
-            final alunosRiscoCount = commandAsync.maybeWhen(
-              data: (cc) => cc.alunosEmRisco.length,
-              orElse: () => 0,
-            );
             final cobrancasPendentes = commandAsync.maybeWhen(
               data: (cc) => cc.cobrancasPendentes.length,
               orElse: () => _finData?.totalInadimplentes ?? 0,
             );
-            // Contagem alinhada ao Foco do dia (riscoAlto), não só ao BFF parcial.
-            final alunosRiscoForActions =
-                riscoAlto > alunosRiscoCount ? riscoAlto : alunosRiscoCount;
+            final riskStudentsForSheet =
+                alunosEmRisco
+                    .map((a) => (id: a.id, nome: a.nome))
+                    .toList(growable: false);
             final dashboardNextActions = buildDashboardNextActions(
               filaAcoes: filaAcoes,
               unreadCount: unreadCount,
-              alunosRisco: alunosRiscoForActions,
+              alunosRisco: riscoAlto,
               cobrancasPendentes: cobrancasPendentes,
               agendaHoje: agendaHoje,
               hideRiskSummary: alunosEmRisco.isNotEmpty,
               isCommandPreparing: commandAsync.isLoading,
               maxItems: focusRules.maxVisibleNextActions,
             );
+            final prioritiesSheetActions = buildDashboardSheetActions(
+              curated: dashboardNextActions,
+              filaAcoes: filaAcoes,
+              riskStudents: riskStudentsForSheet,
+            );
+            final showPrioritiesLink = dashboardShouldShowPrioritiesLink(
+              visible: dashboardNextActions,
+              sheet: prioritiesSheetActions,
+              isPreparing: commandAsync.isLoading,
+            );
             final showStickyPrioritiesAction =
-                dashboardNextActions.length > 1 && _homeScrollOffset >= 80;
+                showPrioritiesLink && _homeScrollOffset >= 80;
             final stickyCommandActionsLabel =
-                dashboardNextActions.length > 1
-                    ? DashboardMicrocopy.verPrioridades
-                    : null;
+                showPrioritiesLink ? DashboardMicrocopy.verPrioridades : null;
 
             void openCommandQuickActions() {
-              if (dashboardNextActions.length < 2) return;
+              if (!showPrioritiesLink) return;
               showCommandActionsSheet(
                 context,
                 isDark: themeDark,
                 primary: primary,
-                actions: buildDashboardSheetActions(
-                  curated: dashboardNextActions,
-                  filaAcoes: filaAcoes,
-                ),
+                actions: prioritiesSheetActions,
               );
             }
 
