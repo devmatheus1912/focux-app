@@ -305,6 +305,7 @@ class CommandActionTile extends StatelessWidget {
                                     dashboardPriorityBadgeColors(
                                       isDark: isDark,
                                       accent: accent,
+                                      badge: badge,
                                     );
                                 return Container(
                                   padding: const EdgeInsets.symmetric(

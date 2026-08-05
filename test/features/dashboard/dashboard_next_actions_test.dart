@@ -8,6 +8,7 @@ FilaAcaoResumo _fila({
   String titulo = 'Cobrar',
   String descricao = 'Pendência',
   String acaoUrl = '/financeiro',
+  String prioridade = 'P1',
 }) {
   return FilaAcaoResumo(
     tipo: tipo,
@@ -15,7 +16,7 @@ FilaAcaoResumo _fila({
     titulo: titulo,
     descricao: descricao,
     acaoUrl: acaoUrl,
-    prioridade: 'P1',
+    prioridade: prioridade,
     severidade: 'MEDIA',
     responsavel: 'Personal',
     sla: 'Hoje',
@@ -27,7 +28,44 @@ FilaAcaoResumo _fila({
 
 void main() {
   group('buildDashboardNextActions', () {
-    test('prioritizes billing and respects maxItems', () {
+    test('puts risk P0 before billing P1', () {
+      final actions = buildDashboardNextActions(
+        filaAcoes: const [],
+        unreadCount: 0,
+        alunosRisco: 8,
+        cobrancasPendentes: 1,
+        agendaHoje: 0,
+        hideRiskSummary: false,
+        isCommandPreparing: false,
+        maxItems: 2,
+      );
+
+      expect(actions, hasLength(2));
+      expect(actions.first.title, 'Contato hoje');
+      expect(actions.first.priorityBadge, 'P0');
+      expect(actions[1].title, 'Cobrar pendências');
+      expect(actions[1].priorityBadge, 'P1');
+    });
+
+    test('keeps risk P0 when attention already covers radar', () {
+      final actions = buildDashboardNextActions(
+        filaAcoes: const [],
+        unreadCount: 0,
+        alunosRisco: 5,
+        cobrancasPendentes: 1,
+        agendaHoje: 0,
+        hideRiskSummary: true,
+        isCommandPreparing: false,
+        maxItems: 2,
+      );
+
+      expect(actions.first.title, 'Recuperar alunos em risco');
+      expect(actions.first.priorityBadge, 'P0');
+      expect(actions.first.route, '/retencao');
+      expect(actions[1].title, 'Cobrar pendências');
+    });
+
+    test('prioritizes billing when no risk and respects maxItems', () {
       final actions = buildDashboardNextActions(
         filaAcoes: const [],
         unreadCount: 0,
@@ -43,20 +81,6 @@ void main() {
       expect(actions.first.title, 'Cobrar pendências');
       expect(actions.first.priorityBadge, 'P1');
       expect(actions[1].title, 'Preparar agenda');
-    });
-
-    test('hides risk summary when already covered by attention rail', () {
-      final actions = buildDashboardNextActions(
-        filaAcoes: const [],
-        unreadCount: 0,
-        alunosRisco: 5,
-        cobrancasPendentes: 0,
-        agendaHoje: 0,
-        hideRiskSummary: true,
-        isCommandPreparing: false,
-      );
-
-      expect(actions.any((a) => a.title == 'Contato hoje'), isFalse);
     });
 
     test('falls back to create opportunity when empty', () {
@@ -94,6 +118,41 @@ void main() {
       );
 
       expect(merged.where((a) => a.route == '/financeiro').length, 1);
+    });
+
+    test('sorts P0 above P1 and dedupes risk from fila', () {
+      final curated = buildDashboardNextActions(
+        filaAcoes: const [],
+        unreadCount: 0,
+        alunosRisco: 8,
+        cobrancasPendentes: 1,
+        agendaHoje: 0,
+        hideRiskSummary: true,
+        isCommandPreparing: false,
+        maxItems: 2,
+      );
+      final merged = buildDashboardSheetActions(
+        curated: curated,
+        filaAcoes: [
+          _fila(
+            actionKey: 'RISK_STUDENTS',
+            tipo: 'RISCO',
+            titulo: 'Recuperar alunos em risco',
+            descricao: '5 alunos com risco de abandono',
+            acaoUrl: '/retencao',
+            prioridade: 'P0',
+          ),
+          _fila(actionKey: 'BILLING_PENDING', tipo: 'COBRANCA'),
+        ],
+      );
+
+      expect(merged.first.priorityBadge, 'P0');
+      expect(merged.first.title, 'Recuperar alunos em risco');
+      expect(merged[1].priorityBadge, 'P1');
+      expect(
+        merged.where((a) => a.title.contains('risco')).length,
+        1,
+      );
     });
   });
 }

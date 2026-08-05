@@ -46,7 +46,34 @@ const Color fxTransparent = Colors.transparent;
 ({Color background, Color foreground}) dashboardPriorityBadgeColors({
   required bool isDark,
   required Color accent,
+  String? badge,
 }) {
+  final normalized = badge?.trim().toUpperCase();
+  if (normalized == 'P0') {
+    final warn = EagleTokens.warn;
+    if (isDark) {
+      return (
+        background: warn.withValues(alpha: 0.32),
+        foreground: Colors.white.withValues(alpha: 0.96),
+      );
+    }
+    return (
+      background: warn.withValues(alpha: 0.20),
+      foreground: Color.lerp(warn, Colors.black, 0.35)!,
+    );
+  }
+  if (normalized == 'P1') {
+    if (isDark) {
+      return (
+        background: accent.withValues(alpha: 0.40),
+        foreground: Colors.white.withValues(alpha: 0.96),
+      );
+    }
+    return (
+      background: accent.withValues(alpha: 0.18),
+      foreground: Color.lerp(accent, Colors.black, 0.28)!,
+    );
+  }
   if (isDark) {
     return (
       background: accent.withValues(alpha: 0.34),

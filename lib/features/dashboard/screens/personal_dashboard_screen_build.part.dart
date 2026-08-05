@@ -194,10 +194,13 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
               data: (cc) => cc.cobrancasPendentes.length,
               orElse: () => _finData?.totalInadimplentes ?? 0,
             );
+            // Contagem alinhada ao Foco do dia (riscoAlto), não só ao BFF parcial.
+            final alunosRiscoForActions =
+                riscoAlto > alunosRiscoCount ? riscoAlto : alunosRiscoCount;
             final dashboardNextActions = buildDashboardNextActions(
               filaAcoes: filaAcoes,
               unreadCount: unreadCount,
-              alunosRisco: alunosRiscoCount,
+              alunosRisco: alunosRiscoForActions,
               cobrancasPendentes: cobrancasPendentes,
               agendaHoje: agendaHoje,
               hideRiskSummary: alunosEmRisco.isNotEmpty,
