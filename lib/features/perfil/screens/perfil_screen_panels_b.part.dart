@@ -346,7 +346,7 @@ class _ProfessionalDataPanel extends StatelessWidget {
             label: 'Telefone / WhatsApp',
             value:
                 (perfil.telefone != null && perfil.telefone!.trim().isNotEmpty)
-                    ? perfil.telefone!
+                    ? BrPhone.formatDisplay(perfil.telefone)
                     : 'Não informado',
             accent: accent,
             mute: mute,

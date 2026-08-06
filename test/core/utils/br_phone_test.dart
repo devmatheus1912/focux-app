@@ -15,5 +15,10 @@ void main() {
       expect(BrPhone.validateOptional('11 3333-4444'), isNull);
       expect(BrPhone.validateOptional('123'), isNotNull);
     });
+
+    test('formatDisplay masks API digits', () {
+      expect(BrPhone.formatDisplay('11999990000'), '(11) 99999-0000');
+      expect(BrPhone.formatDisplay(null), '');
+    });
   });
 }

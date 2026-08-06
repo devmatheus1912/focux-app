@@ -23,6 +23,18 @@ abstract final class BrPhone {
     return null;
   }
 
+  /// Formata dígitos da API para máscara de UI.
+  static String formatDisplay(String? raw) {
+    final digits = digitsOnly(raw ?? '');
+    if (digits.isEmpty) return '';
+    return formatter()
+        .formatEditUpdate(
+          const TextEditingValue(),
+          TextEditingValue(text: digits),
+        )
+        .text;
+  }
+
   static TextInputFormatter formatter() => const BrPhoneInputFormatter();
 }
 

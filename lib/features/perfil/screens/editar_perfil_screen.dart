@@ -9,6 +9,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/br_phone.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -33,6 +34,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
   final _formKey = GlobalKey<FormState>();
 
   late final TextEditingController _nomeCtrl;
+  late final TextEditingController _telefoneCtrl;
   late final TextEditingController _crefCtrl;
   late final TextEditingController _especialidadeCtrl;
   late final TextEditingController _especialidadesCtrl;
@@ -48,6 +50,9 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
   void initState() {
     super.initState();
     _nomeCtrl = TextEditingController(text: widget.perfil.nome);
+    _telefoneCtrl = TextEditingController(
+      text: BrPhone.formatDisplay(widget.perfil.telefone),
+    );
     _crefCtrl = TextEditingController(text: widget.perfil.cref ?? '');
     _especialidadeCtrl = TextEditingController(
       text: widget.perfil.especialidade ?? '',
@@ -65,6 +70,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
   @override
   void dispose() {
     _nomeCtrl.dispose();
+    _telefoneCtrl.dispose();
     _crefCtrl.dispose();
     _especialidadeCtrl.dispose();
     _especialidadesCtrl.dispose();
@@ -115,6 +121,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
           .read(perfilRepositoryProvider)
           .atualizar(
             nome: _nomeCtrl.text.trim(),
+            telefone: BrPhone.normalizeOrNull(_telefoneCtrl.text) ?? '',
             cref: _crefCtrl.text.trim().isEmpty ? null : _crefCtrl.text.trim(),
             especialidade:
                 _especialidadeCtrl.text.trim().isEmpty
@@ -291,21 +298,41 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                     child: _SectionCard(
                       title: 'Dados pessoais',
                       showHint: true,
-                      child: Semantics(
-                        label: 'Nome completo',
-                        child: TextFormField(
-                          controller: _nomeCtrl,
-                          decoration: FxInputDeco.build(
-                            context,
-                            'Nome completo',
-                            icon: Icons.person_outline_rounded,
+                      child: Column(
+                        children: [
+                          Semantics(
+                            label: 'Nome completo',
+                            child: TextFormField(
+                              controller: _nomeCtrl,
+                              decoration: FxInputDeco.build(
+                                context,
+                                'Nome completo',
+                                icon: Icons.person_outline_rounded,
+                              ),
+                              validator:
+                                  (v) =>
+                                      v == null || v.isEmpty
+                                          ? 'Informe o nome'
+                                          : null,
+                            ),
                           ),
-                          validator:
-                              (v) =>
-                                  v == null || v.isEmpty
-                                      ? 'Informe o nome'
-                                      : null,
-                        ),
+                          const SizedBox(height: 12),
+                          Semantics(
+                            label: 'Telefone ou WhatsApp',
+                            child: TextFormField(
+                              controller: _telefoneCtrl,
+                              keyboardType: TextInputType.phone,
+                              inputFormatters: [BrPhone.formatter()],
+                              decoration: FxInputDeco.build(
+                                context,
+                                'Telefone / WhatsApp',
+                                icon: Icons.phone_iphone_rounded,
+                                hint: '(11) 99999-0000',
+                              ),
+                              validator: BrPhone.validateOptional,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
