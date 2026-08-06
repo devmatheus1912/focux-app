@@ -1,5 +1,7 @@
 import 'package:flutter/services.dart';
 
+import '../../../core/utils/br_phone.dart';
+
 /// Validação e hints para chaves PIX na carteira do personal.
 class WalletPixValidation {
   WalletPixValidation._();
@@ -38,7 +40,7 @@ class WalletPixValidation {
     return switch (tipo) {
       'CPF' => [_CpfInputFormatter()],
       'CNPJ' => [_CnpjInputFormatter()],
-      'TELEFONE' => [_PhoneInputFormatter()],
+      'TELEFONE' => [BrPhone.formatter()],
       _ => const [],
     };
   }
@@ -58,7 +60,7 @@ class WalletPixValidation {
     final formatter = switch (tipo) {
       'CPF' => _CpfInputFormatter(),
       'CNPJ' => _CnpjInputFormatter(),
-      'TELEFONE' => _PhoneInputFormatter(),
+      'TELEFONE' => BrPhone.formatter(),
       _ => null,
     };
     if (formatter == null) return raw.trim();
@@ -192,30 +194,3 @@ class _CnpjInputFormatter extends TextInputFormatter {
   }
 }
 
-class _PhoneInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    final digits = newValue.text.replaceAll(RegExp(r'\D'), '');
-    if (digits.length > 11) return oldValue;
-
-    final buffer = StringBuffer();
-    for (var i = 0; i < digits.length; i++) {
-      if (i == 0) buffer.write('(');
-      if (i == 2) buffer.write(') ');
-      if (digits.length > 10 && i == 7) {
-        buffer.write('-');
-      } else if (digits.length <= 10 && i == 6) {
-        buffer.write('-');
-      }
-      buffer.write(digits[i]);
-    }
-
-    return TextEditingValue(
-      text: buffer.toString(),
-      selection: TextSelection.collapsed(offset: buffer.length),
-    );
-  }
-}

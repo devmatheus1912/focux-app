@@ -13,6 +13,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/config/env.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/hero_teal.dart';
+import '../../../core/utils/br_phone.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../providers/auth_provider.dart';
@@ -86,6 +88,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             _emailController.text.trim(),
             _passwordController.text,
             referralCodigo: widget.referralCodigo,
+            telefone: BrPhone.normalizeOrNull(_phoneController.text),
           );
 
       if (!mounted) {
@@ -201,7 +204,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       label: 'Criar conta personal',
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
+          statusBarColor: fxTransparent,
           statusBarIconBrightness: Brightness.light,
           statusBarBrightness: Brightness.dark,
         ),
@@ -220,10 +223,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     const SizedBox(height: TokensStrip.s4),
                     const AuthRoleHeader(roleLabel: 'PERSONAL'),
                     const SizedBox(height: 22),
-                    const Text(
+                    Text(
                       'Criar conta',
-                      style: TextStyle(
-                        color: Colors.white,
+                      style: AppTypography.inter(
+                        color: heroTealInk(),
                         fontSize: 28,
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.7,
@@ -233,9 +236,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     const SizedBox(height: 6),
                     Text(
                       'Comece com sua conta e escolha o plano depois.',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.5),
+                      style: AppTypography.inter(
+                        color: heroTealSurface(0.82),
                         fontSize: 13.5,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(height: 26),
@@ -292,7 +296,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           _showPassword
                               ? Icons.visibility_off_outlined
                               : Icons.visibility_outlined,
-                          color: Colors.white.withValues(alpha: 0.72),
+                          color: heroTealSurface(0.82),
                           size: 18,
                         ),
                       ),
@@ -310,6 +314,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       icon: Icons.phone_iphone_rounded,
                       keyboardType: TextInputType.phone,
                       textInputAction: TextInputAction.done,
+                      inputFormatters: [BrPhone.formatter()],
+                      validator: BrPhone.validateOptional,
                       onFieldSubmitted: (_) => _submit(),
                     ),
                     const SizedBox(height: 28),
@@ -349,8 +355,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     Center(
                       child: Text.rich(
                         TextSpan(
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.35),
+                          style: AppTypography.inter(
+                            color: heroTealSurface(0.78),
                             fontSize: 11.5,
                             height: 1.5,
                           ),
@@ -360,7 +366,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             ),
                             TextSpan(
                               text: 'Termos de uso',
-                              style: TextStyle(color: primary),
+                              style: TextStyle(
+                                color: primary,
+                                fontWeight: FontWeight.w700,
+                              ),
                               recognizer:
                                   TapGestureRecognizer()
                                     ..onTap =
@@ -374,7 +383,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             const TextSpan(text: ' e a '),
                             TextSpan(
                               text: 'Política de privacidade',
-                              style: TextStyle(color: primary),
+                              style: TextStyle(
+                                color: primary,
+                                fontWeight: FontWeight.w700,
+                              ),
                               recognizer:
                                   TapGestureRecognizer()
                                     ..onTap =
@@ -412,21 +424,21 @@ class _AuthDivider extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: Divider(color: Colors.white.withValues(alpha: 0.2), height: 1),
+          child: Divider(color: heroTealSurface(0.22), height: 1),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Text(
             label,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.65),
+            style: AppTypography.inter(
+              color: heroTealSurface(0.82),
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
           ),
         ),
         Expanded(
-          child: Divider(color: Colors.white.withValues(alpha: 0.2), height: 1),
+          child: Divider(color: heroTealSurface(0.22), height: 1),
         ),
       ],
     );

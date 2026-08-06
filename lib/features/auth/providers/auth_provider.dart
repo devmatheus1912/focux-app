@@ -68,12 +68,14 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     String email,
     String password, {
     String? referralCodigo,
+    String? telefone,
   }) async {
     await _repo.registerPersonal(
       nome,
       email,
       password,
       referralCodigo: referralCodigo,
+      telefone: telefone,
     );
     _currentRole = UserRole.personal;
     _isAdmin = false;

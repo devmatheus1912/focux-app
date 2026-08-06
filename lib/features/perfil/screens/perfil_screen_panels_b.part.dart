@@ -342,6 +342,18 @@ class _ProfessionalDataPanel extends StatelessWidget {
             line: line,
           ),
           _InfoTile(
+            icon: Icons.phone_iphone_rounded,
+            label: 'Telefone / WhatsApp',
+            value:
+                (perfil.telefone != null && perfil.telefone!.trim().isNotEmpty)
+                    ? perfil.telefone!
+                    : 'Não informado',
+            accent: accent,
+            mute: mute,
+            line: line,
+            onTap: onEdit,
+          ),
+          _InfoTile(
             icon: Icons.badge_outlined,
             label: 'CREF',
             value: perfil.cref ?? 'Não informado',

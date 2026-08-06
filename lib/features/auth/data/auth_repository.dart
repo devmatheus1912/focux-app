@@ -169,6 +169,7 @@ class AuthRepository {
     String email,
     String password, {
     String? referralCodigo,
+    String? telefone,
   }) async {
     final response = await _dio.post(
       '/api/auth/register/personal',
@@ -178,6 +179,7 @@ class AuthRepository {
         'senha': password,
         if (referralCodigo != null && referralCodigo.isNotEmpty)
           'referralCodigo': referralCodigo,
+        if (telefone != null && telefone.isNotEmpty) 'telefone': telefone,
       },
     );
     final token = response.data['token'] as String;

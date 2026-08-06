@@ -3,9 +3,12 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter/services.dart';
+
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/theme_provider.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
@@ -371,6 +374,7 @@ class AuthField extends StatelessWidget {
     this.onFieldSubmitted,
     this.suffix,
     this.focusNode,
+    this.inputFormatters,
   });
 
   final String label;
@@ -384,6 +388,7 @@ class AuthField extends StatelessWidget {
   final ValueChanged<String>? onFieldSubmitted;
   final Widget? suffix;
   final FocusNode? focusNode;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) {
@@ -393,8 +398,8 @@ class AuthField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.78),
+          style: AppTypography.inter(
+            color: heroTealSurface(0.86),
             fontSize: 12.5,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.5,
@@ -406,14 +411,15 @@ class AuthField extends StatelessWidget {
           focusNode: focusNode,
           keyboardType: keyboardType,
           textInputAction: textInputAction,
+          inputFormatters: inputFormatters,
           validator: validator,
           obscureText: obscureText,
           onFieldSubmitted: onFieldSubmitted,
-          style: const TextStyle(color: Colors.white, fontSize: 15),
+          style: AppTypography.inter(color: heroTealInk(), fontSize: 15),
           decoration: InputDecoration(
             hintText: hintText,
-            hintStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.62),
+            hintStyle: AppTypography.inter(
+              color: heroTealSurface(0.72),
               fontSize: 15,
             ),
             prefixIcon:
@@ -421,7 +427,7 @@ class AuthField extends StatelessWidget {
                     ? null
                     : Icon(
                       icon,
-                      color: Colors.white.withValues(alpha: 0.5),
+                      color: heroTealSurface(0.78),
                       size: 18,
                     ),
             suffixIcon: suffix,

@@ -63,6 +63,7 @@ class PerfilPersonal {
   final int id;
   final String nome;
   final String email;
+  final String? telefone;
   final String? cref;
   final String? especialidade;
   final String? logoUrl;
@@ -114,6 +115,7 @@ class PerfilPersonal {
     required this.id,
     required this.nome,
     required this.email,
+    this.telefone,
     this.cref,
     this.especialidade,
     this.logoUrl,
@@ -164,6 +166,7 @@ class PerfilPersonal {
     id: json['id'] as int,
     nome: json['nome'] as String,
     email: json['email'] as String,
+    telefone: json['telefone'] as String?,
     cref: json['cref'] as String?,
     especialidade: json['especialidade'] as String?,
     logoUrl: json['logoUrl'] as String?,
@@ -240,6 +243,7 @@ class PerfilRepository {
   Future<PerfilPersonal> atualizar({
     String? nome,
     String? cref,
+    String? telefone,
     String? especialidade,
     String? logoUrl,
     String? corPrimaria,
@@ -252,6 +256,7 @@ class PerfilRepository {
       data: {
         if (nome != null) 'nome': nome,
         if (cref != null) 'cref': cref,
+        if (telefone != null) 'telefone': telefone,
         if (especialidade != null) 'especialidade': especialidade,
         if (logoUrl != null) 'logoUrl': logoUrl,
         if (corPrimaria != null) 'corPrimaria': corPrimaria,
