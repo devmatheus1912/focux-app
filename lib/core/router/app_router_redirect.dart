@@ -6,18 +6,26 @@ import '../storage/secure_storage.dart';
 
 /// Auth guards and route access helpers for [AppRouter].
 Future<String?> authRedirect(GoRouterState state) async {
-  if (isPublicLocation(state.uri.path)) {
+  final path = state.uri.path;
+  final token = (await SecureStorage.getToken())?.trim();
+  final hasToken = token != null && token.isNotEmpty;
+
+  // Sessão ativa: sai do funil pré-login (onboarding / login sem return-to).
+  if (hasToken &&
+      shouldLeavePreLoginGate(path, state.uri.queryParameters)) {
+    return homePathForRole(await SecureStorage.getRole());
+  }
+
+  if (isPublicLocation(path)) {
     return null;
   }
 
-  final token = (await SecureStorage.getToken())?.trim();
-  if (token == null || token.isEmpty) {
+  if (!hasToken) {
     final from = Uri.encodeComponent(state.uri.toString());
     return from.isEmpty ? '/login' : '/login?from=$from';
   }
 
   final role = await SecureStorage.getRole();
-  final path = state.uri.path;
   if (role == 'ALUNO' && isPersonalOnlyLocation(path)) {
     return '/dashboard/aluno';
   }
@@ -26,6 +34,18 @@ Future<String?> authRedirect(GoRouterState state) async {
   }
 
   return null;
+}
+
+/// Home da role após login (ou ao pular o gate pré-login com token).
+String homePathForRole(String? role) {
+  return role == 'ALUNO' ? '/dashboard/aluno' : '/dashboard/personal';
+}
+
+/// Com token: `/onboarding` sempre; `/login` só se não houver `from` (deep-link).
+bool shouldLeavePreLoginGate(String path, Map<String, String> query) {
+  if (path == '/onboarding') return true;
+  if (path == '/login' && !query.containsKey('from')) return true;
+  return false;
 }
 
 bool isPublicLocation(String path) {

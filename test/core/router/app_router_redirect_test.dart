@@ -14,4 +14,16 @@ void main() {
     expect(isPersonalOnlyLocation('/alunos/42'), isTrue);
     expect(isAlunoOnlyLocation('/checkin/treinos'), isTrue);
   });
+
+  test('logged-in users leave pre-login gate', () {
+    expect(shouldLeavePreLoginGate('/onboarding', const {}), isTrue);
+    expect(shouldLeavePreLoginGate('/login', const {}), isTrue);
+    expect(
+      shouldLeavePreLoginGate('/login', const {'from': '/dashboard/personal'}),
+      isFalse,
+    );
+    expect(shouldLeavePreLoginGate('/register', const {}), isFalse);
+    expect(homePathForRole('ALUNO'), '/dashboard/aluno');
+    expect(homePathForRole('PERSONAL'), '/dashboard/personal');
+  });
 }

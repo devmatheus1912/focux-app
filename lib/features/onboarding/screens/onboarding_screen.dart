@@ -2,24 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../core/api/api_client.dart';
+import '../../../core/brand/brand_pulse.dart';
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../dashboard/utils/dashboard_readability.dart';
 import '../../../core/utils/motion_preferences.dart';
+import '../../../core/widgets/auth_grid_painter.dart';
 import '../../../core/widgets/focux_official_logo.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../auth/widgets/auth_shell.dart';
+import '../data/brand_pulse_repository.dart';
 
 part 'onboarding_screen_widgets.part.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// FOCUX PERSONAL — FxIntroSlides (Onboarding) — Premium V2
-// Staggered entry animations, visual metric anchors, spring physics
-// ─────────────────────────────────────────────────────────────────────────────
-
+/// Onboarding pré-login — 2 slides × Personal/Aluno.
 class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({super.key});
+  const OnboardingScreen({super.key, this.socialProofLoader});
+
+  /// Override em testes; null usa [BrandPulseRepository].
+  final Future<List<BrandSocialProofItem>> Function()? socialProofLoader;
+
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
@@ -29,6 +34,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   final _page = PageController();
   int _current = 0;
   OnboardingPersona _persona = OnboardingPersona.personal;
+  String _socialProofLine = FocuxBrandCopy.onboardingSocialProofFallback;
 
   PageController get _activePage => _page;
 
@@ -79,6 +85,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             : _pageIconsPersonal;
     return List.generate(slides.length, (i) {
       final slide = slides[i];
+      final pageIcons = icons[i];
       return _OBData(
         title: slide.title,
         titleHighlight: slide.titleHighlight,
@@ -88,7 +95,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           (j) => _MetricChip(
             label: slide.metrics[j].label,
             value: slide.metrics[j].value,
-            icon: icons[i][j],
+            icon: pageIcons[j.clamp(0, pageIcons.length - 1)],
           ),
         ),
         features: slide.features,
@@ -147,7 +154,24 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _gridFadeCtrl.forward();
+      _loadSocialProof();
     });
+  }
+
+  Future<void> _loadSocialProof() async {
+    try {
+      final loader =
+          widget.socialProofLoader ??
+          () => BrandPulseRepository(ApiClient()).fetchSocialProof();
+      final items = await loader().timeout(const Duration(milliseconds: 2500));
+      final line = formatBrandSocialProofLine(items);
+      if (!mounted) return;
+      if (line != _socialProofLine) {
+        setState(() => _socialProofLine = line);
+      }
+    } catch (_) {
+      // Mantém fallback neutro — onboarding não depende de rede.
+    }
   }
 
   @override
@@ -253,91 +277,25 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           body: Stack(
             fit: StackFit.expand,
             children: [
-              // ── Background ──
               Container(color: TokensStrip.cinematicBg),
-
-              // Grid pattern — fade-in suave após splash flat
               FadeTransition(
                 opacity: CurvedAnimation(
                   parent: _gridFadeCtrl,
                   curve: Curves.easeOutCubic,
                 ),
-                child: CustomPaint(
-                  painter: _AuthGridPainter(),
+                child: const CustomPaint(
+                  painter: AuthGridPainter(),
                   size: Size.infinite,
                 ),
               ),
-
-              // ── Content ──
               SafeArea(
                 child: Column(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: AuthRoleToggle(
-                              isAluno: _persona == OnboardingPersona.aluno,
-                              onPersonalTap:
-                                  () => _setPersona(OnboardingPersona.personal),
-                              onAlunoTap:
-                                  () => _setPersona(OnboardingPersona.aluno),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Semantics(
-                            button: true,
-                            label: FocuxBrandCopy.onboardingSkip,
-                            child: Material(
-                              color: fxTransparent,
-                              child: InkWell(
-                                onTap: _skip,
-                                borderRadius: BorderRadius.circular(99),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 10,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: heroTealSurface(0.04),
-                                    borderRadius: BorderRadius.circular(99),
-                                    border: Border.all(
-                                      color: heroTealInk().withValues(
-                                        alpha: 0.12,
-                                      ),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        FocuxBrandCopy.onboardingSkip,
-                                        style: AppTypography.inter(
-                                          color: heroTealInk().withValues(
-                                            alpha: 0.70,
-                                          ),
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      Icon(
-                                        Icons.chevron_right_rounded,
-                                        size: 16,
-                                        color: heroTealInk().withValues(
-                                          alpha: 0.55,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    _OnboardingHeader(
+                      persona: _persona,
+                      onPersonaChanged: _setPersona,
+                      onSkip: _skip,
                     ),
-
                     Expanded(
                       child: Semantics(
                         label: 'Slide ${_current + 1} de ${pages.length}',
@@ -362,89 +320,22 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         ),
                       ),
                     ),
-
-                    // Prova social só no primeiro slide — menos ruído nos demais
-                    if (_current == 0)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
-                        child: _OnboardingSocialProof(primary: primary),
-                      )
-                    else
-                      const SizedBox(height: 4),
-
-                    // Dots
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4, bottom: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          pages.length,
-                          (i) => Semantics(
-                            button: true,
-                            selected: _current == i,
-                            label: 'Ir para slide ${i + 1}',
-                            child: SizedBox(
-                              width: 44,
-                              height: 44,
-                              child: Center(
-                                child: GestureDetector(
-                                  onTap:
-                                      () => _activePage.animateToPage(
-                                        i,
-                                        duration: const Duration(
-                                          milliseconds: 400,
-                                        ),
-                                        curve: Curves.easeOutCubic,
-                                      ),
-                                  child: _SlideDot(
-                                    active: _current == i,
-                                    primary: primary,
-                                  ),
-                                ),
-                              ),
-                            ),
+                    _OnboardingFooter(
+                      primary: primary,
+                      pageCount: pages.length,
+                      current: _current,
+                      isLast: isLast,
+                      persona: _persona,
+                      socialProofLine:
+                          _current == 0 ? _socialProofLine : null,
+                      onDotTap:
+                          (i) => _activePage.animateToPage(
+                            i,
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeOutCubic,
                           ),
-                        ),
-                      ),
-                    ),
-
-                    // CTA
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: TokensStrip.s5,
-                      ),
-                      child: Column(
-                        children: [
-                          FxLiquidSecondaryButton(
-                            label: FocuxBrandCopy.onboardingExistingAccountCta,
-                            icon: Icons.login_rounded,
-                            onPressed: _goLogin,
-                          ),
-                          const SizedBox(height: 10),
-                          FxLiquidPrimaryButton(
-                            label:
-                                isLast
-                                    ? FocuxBrandCopy.onboardingCtaFinish
-                                    : FocuxBrandCopy.onboardingCtaNext,
-                            onPressed: _next,
-                          ),
-                          if (isLast) ...[
-                            const SizedBox(height: 8),
-                            Text(
-                              FocuxBrandCopy.onboardingCtaFinishHint,
-                              textAlign: TextAlign.center,
-                              style: AppTypography.inter(
-                                color: heroTealSurface(0.78),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                          SizedBox(
-                            height: MediaQuery.paddingOf(context).bottom + 4,
-                          ),
-                        ],
-                      ),
+                      onLogin: _goLogin,
+                      onPrimary: _next,
                     ),
                   ],
                 ),
@@ -456,7 +347,3 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     );
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// DATA
-// ═══════════════════════════════════════════════════════════════════════════

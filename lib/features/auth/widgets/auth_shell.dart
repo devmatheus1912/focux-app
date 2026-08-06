@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
@@ -300,8 +301,16 @@ class AuthRoleToggle extends StatelessWidget {
       ),
       child: Row(
         children: [
-          tab(label: 'Personal', selected: !isAluno, onTap: onPersonalTap),
-          tab(label: 'Aluno', selected: isAluno, onTap: onAlunoTap),
+          tab(
+            label: FocuxBrandCopy.onboardingPersonaPersonal,
+            selected: !isAluno,
+            onTap: onPersonalTap,
+          ),
+          tab(
+            label: FocuxBrandCopy.onboardingPersonaAluno,
+            selected: isAluno,
+            onTap: onAlunoTap,
+          ),
         ],
       ),
     );

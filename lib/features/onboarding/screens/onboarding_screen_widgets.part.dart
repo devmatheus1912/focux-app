@@ -46,9 +46,178 @@ class _SlideDot extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PAGE WIDGET — with staggered entry animations + metric chips
-// ═══════════════════════════════════════════════════════════════════════════
+class _OnboardingHeader extends StatelessWidget {
+  const _OnboardingHeader({
+    required this.persona,
+    required this.onPersonaChanged,
+    required this.onSkip,
+  });
+
+  final OnboardingPersona persona;
+  final ValueChanged<OnboardingPersona> onPersonaChanged;
+  final VoidCallback onSkip;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: AuthRoleToggle(
+              isAluno: persona == OnboardingPersona.aluno,
+              onPersonalTap: () => onPersonaChanged(OnboardingPersona.personal),
+              onAlunoTap: () => onPersonaChanged(OnboardingPersona.aluno),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Semantics(
+            button: true,
+            label: FocuxBrandCopy.onboardingSkip,
+            child: Material(
+              color: fxTransparent,
+              child: InkWell(
+                onTap: onSkip,
+                borderRadius: BorderRadius.circular(99),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: heroTealSurface(0.04),
+                    borderRadius: BorderRadius.circular(99),
+                    border: Border.all(
+                      color: heroTealInk().withValues(alpha: 0.12),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        FocuxBrandCopy.onboardingSkip,
+                        style: AppTypography.inter(
+                          color: heroTealInk().withValues(alpha: 0.70),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        size: 16,
+                        color: heroTealInk().withValues(alpha: 0.55),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OnboardingFooter extends StatelessWidget {
+  const _OnboardingFooter({
+    required this.primary,
+    required this.pageCount,
+    required this.current,
+    required this.isLast,
+    required this.persona,
+    required this.onDotTap,
+    required this.onLogin,
+    required this.onPrimary,
+    this.socialProofLine,
+  });
+
+  final Color primary;
+  final int pageCount;
+  final int current;
+  final bool isLast;
+  final OnboardingPersona persona;
+  final String? socialProofLine;
+  final ValueChanged<int> onDotTap;
+  final VoidCallback onLogin;
+  final VoidCallback onPrimary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (socialProofLine != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+            child: _OnboardingSocialProof(
+              primary: primary,
+              line: socialProofLine!,
+            ),
+          )
+        else
+          const SizedBox(height: 4),
+        Padding(
+          padding: const EdgeInsets.only(top: 4, bottom: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              pageCount,
+              (i) => Semantics(
+                button: true,
+                selected: current == i,
+                label: 'Ir para slide ${i + 1}',
+                child: SizedBox(
+                  width: 44,
+                  height: 44,
+                  child: Center(
+                    child: GestureDetector(
+                      onTap: () => onDotTap(i),
+                      child: _SlideDot(active: current == i, primary: primary),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s5),
+          child: Column(
+            children: [
+              FxLiquidSecondaryButton(
+                label: FocuxBrandCopy.onboardingExistingAccountCta,
+                icon: Icons.login_rounded,
+                onPressed: onLogin,
+              ),
+              const SizedBox(height: 10),
+              FxLiquidPrimaryButton(
+                label:
+                    isLast
+                        ? FocuxBrandCopy.onboardingFinishCta(persona)
+                        : FocuxBrandCopy.onboardingCtaNext,
+                onPressed: onPrimary,
+              ),
+              if (isLast) ...[
+                const SizedBox(height: 8),
+                Text(
+                  FocuxBrandCopy.onboardingFinishHint(persona),
+                  textAlign: TextAlign.center,
+                  style: AppTypography.inter(
+                    color: heroTealSurface(0.78),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+              SizedBox(height: MediaQuery.paddingOf(context).bottom + 4),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
 
 class _OBPageWidget extends StatelessWidget {
   final int pageIndex;
@@ -90,12 +259,16 @@ class _OBPageWidget extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final titleSize =
         pageIndex == 0 ? (compact ? 24.0 : 26.0) : (compact ? 25.0 : 27.0);
-    final showMetrics = pageIndex == 0 && !compact;
+    // Slide 1: métricas (se houver e não compact). Slide 2: checklist.
+    // Nunca os dois no mesmo viewport (hero budget).
+    final showMetrics =
+        pageIndex == 0 && !compact && data.metrics.isNotEmpty;
+    final showFeatures = data.features.isNotEmpty;
 
     return AnimatedBuilder(
       animation: fade,
       builder:
-          (_, __) => SingleChildScrollView(
+          (_, _) => SingleChildScrollView(
             physics: const ClampingScrollPhysics(),
             padding: EdgeInsets.fromLTRB(
               20,
@@ -111,7 +284,6 @@ class _OBPageWidget extends StatelessWidget {
                   alignment: Alignment.center,
                   child: _buildHero(),
                 ),
-
                 if (pageIndex == 0) ...[
                   SizedBox(height: compact ? 4 : 8),
                   Transform.translate(
@@ -125,9 +297,7 @@ class _OBPageWidget extends StatelessWidget {
                     ),
                   ),
                 ],
-
                 SizedBox(height: pageIndex == 0 ? (compact ? 8 : 12) : 14),
-
                 Transform.translate(
                   offset: Offset(0, titleSlide.value),
                   child: Opacity(
@@ -153,9 +323,7 @@ class _OBPageWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 8),
-
                 Transform.translate(
                   offset: Offset(0, subtitleSlide.value),
                   child: Opacity(
@@ -175,9 +343,7 @@ class _OBPageWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 SizedBox(height: pageIndex == 0 ? (compact ? 10 : 14) : 12),
-
                 if (showMetrics)
                   Transform.translate(
                     offset: Offset(0, metricsSlide.value),
@@ -198,71 +364,73 @@ class _OBPageWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                if (showMetrics) const SizedBox(height: 10),
-
-                Transform.translate(
-                  offset: Offset(0, metricsSlide.value * 0.7),
-                  child: Opacity(
-                    opacity: fade.value.clamp(0.0, 1.0),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: pageIndex == 0 ? 10 : 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: heroTealSurface(0.04),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: heroTealSurface(0.10),
+                if (showFeatures) ...[
+                  if (showMetrics) const SizedBox(height: 10),
+                  Transform.translate(
+                    offset: Offset(0, metricsSlide.value * 0.7),
+                    child: Opacity(
+                      opacity: fade.value.clamp(0.0, 1.0),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: pageIndex == 0 ? 10 : 12,
                         ),
-                      ),
-                      child: Column(
-                        children:
-                            data.features.asMap().entries.map((e) {
-                              final isLast = e.key == data.features.length - 1;
-                              return Padding(
-                                padding: EdgeInsets.only(
-                                  bottom: isLast ? 0 : 9,
-                                ),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      width: 22,
-                                      height: 22,
-                                      decoration: BoxDecoration(
-                                        color: primary.withValues(alpha: 0.14),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        Icons.check_rounded,
-                                        size: 13,
-                                        color: primary,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Text(
-                                        e.value,
-                                        style: AppTypography.inter(
-                                          color: heroTealInk().withValues(
-                                            alpha: 0.82,
+                        decoration: BoxDecoration(
+                          color: heroTealSurface(0.04),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: heroTealSurface(0.10)),
+                        ),
+                        child: Column(
+                          children:
+                              data.features.asMap().entries.map((e) {
+                                final isLast =
+                                    e.key == data.features.length - 1;
+                                return Padding(
+                                  padding: EdgeInsets.only(
+                                    bottom: isLast ? 0 : 9,
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        width: 22,
+                                        height: 22,
+                                        decoration: BoxDecoration(
+                                          color: primary.withValues(
+                                            alpha: 0.14,
                                           ),
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500,
-                                          height: 1.38,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.check_rounded,
+                                          size: 13,
+                                          color: primary,
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Text(
+                                          e.value,
+                                          style: AppTypography.inter(
+                                            color: heroTealInk().withValues(
+                                              alpha: 0.82,
+                                            ),
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500,
+                                            height: 1.38,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
@@ -271,14 +439,15 @@ class _OBPageWidget extends StatelessWidget {
 }
 
 class _OnboardingSocialProof extends StatelessWidget {
-  const _OnboardingSocialProof({required this.primary});
+  const _OnboardingSocialProof({required this.primary, required this.line});
 
   final Color primary;
+  final String line;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: FocuxBrandCopy.onboardingSocialProof,
+      label: line,
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
@@ -295,7 +464,7 @@ class _OnboardingSocialProof extends StatelessWidget {
             const SizedBox(width: 8),
             Flexible(
               child: Text(
-                FocuxBrandCopy.onboardingSocialProof,
+                line,
                 textAlign: TextAlign.center,
                 style: AppTypography.inter(
                   color: heroTealSurface(0.78),
@@ -362,10 +531,6 @@ class _OnboardingHook extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// METRIC CHIP — visual anchor replacing dead space
-// ═══════════════════════════════════════════════════════════════════════════
-
 class _MetricChipWidget extends StatelessWidget {
   final _MetricChip metric;
   final Color primary;
@@ -410,28 +575,4 @@ class _MetricChipWidget extends StatelessWidget {
       ),
     );
   }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// GRID
-// ═══════════════════════════════════════════════════════════════════════════
-
-class _AuthGridPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final p =
-        Paint()
-          ..color = EagleTokens.brandAccent.withValues(alpha: 0.045)
-          ..strokeWidth = 0.5
-          ..style = PaintingStyle.stroke;
-    for (double x = 0; x < size.width; x += 30) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), p);
-    }
-    for (double y = 0; y < size.height; y += 30) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), p);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter old) => false;
 }

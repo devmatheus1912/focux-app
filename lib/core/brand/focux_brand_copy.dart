@@ -18,8 +18,12 @@ abstract final class FocuxBrandCopy {
 
   static const onboardingHookAlunoHighlight = 'mesmo app.';
 
-  static const onboardingSocialProof =
-      '+200 personal trainers · alunos treinando todo dia';
+  /// Fallback neutro quando o pulse público não responde (sem número inventado).
+  static const onboardingSocialProofFallback =
+      'Personais e alunos treinando todo dia';
+
+  @Deprecated('Use onboardingSocialProofFallback ou formatBrandSocialProofLine')
+  static const onboardingSocialProof = onboardingSocialProofFallback;
 
   static const onboardingSkip = 'Pular';
 
@@ -28,6 +32,22 @@ abstract final class FocuxBrandCopy {
   static const onboardingCtaFinish = 'Começar grátis';
 
   static const onboardingCtaFinishHint = 'Grátis para começar · sem cartão';
+
+  /// Aluno exige convite no register — CTA não promete “grátis sem fricção”.
+  static const onboardingCtaFinishAluno = 'Entrar com convite';
+
+  static const onboardingCtaFinishHintAluno =
+      'Precisa do código do seu personal';
+
+  static String onboardingFinishCta(OnboardingPersona persona) =>
+      persona == OnboardingPersona.aluno
+          ? onboardingCtaFinishAluno
+          : onboardingCtaFinish;
+
+  static String onboardingFinishHint(OnboardingPersona persona) =>
+      persona == OnboardingPersona.aluno
+          ? onboardingCtaFinishHintAluno
+          : onboardingCtaFinishHint;
 
   static const onboardingLoginLead = 'Já treina com a gente? ';
 
@@ -73,11 +93,8 @@ abstract final class FocuxBrandCopy {
         OnboardingMetricCopy(value: 'Ao vivo', label: 'Check-in real'),
         OnboardingMetricCopy(value: 'Score', label: FocuxMicrocopy.focuxScore),
       ],
-      features: [
-        'Comando: quem precisa de você hoje, primeiro',
-        'Check-in com timer, RPE e histórico no app',
-        'Aderência, risco e PRs no perfil 360',
-      ],
+      // Checklist no slide 2 — slide 1 fica marca + headline + métricas.
+      features: [],
     ),
     OnboardingSlideCopy(
       title: 'Copiloto, PIX e fila do dia. ',
@@ -85,11 +102,8 @@ abstract final class FocuxBrandCopy {
       subtitle:
           'IA com contexto real de cada aluno, cobranças no painel e '
           'próxima ação em um toque — você decide.',
-      metrics: [
-        OnboardingMetricCopy(value: '3', label: 'Modos IA'),
-        OnboardingMetricCopy(value: 'PIX', label: 'Cobrar fácil'),
-        OnboardingMetricCopy(value: 'Fila', label: 'Do dia'),
-      ],
+      // Slide 2 = checklist; métricas só no slide 1 (hero budget).
+      metrics: [],
       features: [
         'Modos Treino, Dieta e Progressão por aluno',
         'Mensalidades com PIX, QR e alerta de inadimplência',
@@ -110,11 +124,8 @@ abstract final class FocuxBrandCopy {
         OnboardingMetricCopy(value: 'PRs', label: 'Recordes'),
         OnboardingMetricCopy(value: 'Score', label: FocuxMicrocopy.focuxScore),
       ],
-      features: [
-        'Treinos atribuídos com carga, descanso e histórico',
-        'Evolução semanal e recordes pessoais visíveis',
-        'Chat com seu personal no mesmo app do treino',
-      ],
+      // Checklist no slide 2 — slide 1 fica marca + headline + métricas.
+      features: [],
     ),
     OnboardingSlideCopy(
       title: 'IA, form check e mensalidade. ',
@@ -122,14 +133,10 @@ abstract final class FocuxBrandCopy {
       subtitle:
           'Assistente com contexto do seu treino, feedback em vídeo e '
           'status de pagamento claro — tudo no mesmo app.',
-      metrics: [
-        OnboardingMetricCopy(value: 'Chat', label: 'Assistente IA'),
-        OnboardingMetricCopy(value: 'Form', label: 'Check vídeo'),
-        OnboardingMetricCopy(value: 'Status', label: 'Mensalidade'),
-      ],
+      metrics: [],
       features: [
-        'Assistente IA para dúvidas de treino e execução',
-        'Form check para feedback do personal com vídeo',
+        'Treinos atribuídos com carga, descanso e histórico',
+        'Assistente IA e Form check com vídeo do personal',
         'Minhas mensalidades com status claro por mês',
       ],
     ),

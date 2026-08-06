@@ -17,7 +17,10 @@ void main() {
     expect(slides, hasLength(2));
     expect(slides[0].titleHighlight, 'Na palma da mão.');
     expect(slides[1].title, 'IA, form check e mensalidade. ');
-    expect(slides[1].features.first.toLowerCase(), contains('assistente'));
+    expect(
+      slides[1].features.any((f) => f.toLowerCase().contains('assistente')),
+      isTrue,
+    );
   });
 
   test('tagline unificada com hook de marca', () {
@@ -30,7 +33,11 @@ void main() {
     );
   });
 
-  test('prova social inclui numero verificavel', () {
-    expect(FocuxBrandCopy.onboardingSocialProof, contains('+200'));
+  test('prova social fallback é neutra sem número inventado', () {
+    expect(FocuxBrandCopy.onboardingSocialProofFallback, isNot(contains('+200')));
+    expect(
+      FocuxBrandCopy.onboardingSocialProofFallback.toLowerCase(),
+      contains('personais'),
+    );
   });
 }
