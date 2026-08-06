@@ -7,18 +7,24 @@ void main() {
     final login = File(
       'lib/features/auth/screens/login_screen.dart',
     ).readAsStringSync();
+    final util = File(
+      'lib/features/auth/utils/post_login_redirect.dart',
+    ).readAsStringSync();
 
+    expect(login, contains("import '../utils/post_login_redirect.dart';"));
     expect(login, contains("_postLoginRedirect(context, isAluno: true)"));
     expect(login, contains("_postLoginRedirect(context, isAluno: false)"));
     expect(login, contains("GoRouterState.of(context).uri.queryParameters['from']"));
-    expect(login, contains('String? _safePostLoginPath'));
-    expect(login, contains("from.startsWith('//')"));
-    expect(login, contains("from.contains('://')"));
-    expect(login, contains('bool _isPublicAuthPath'));
-    expect(login, contains('bool _isAlunoPath'));
-    expect(login, contains('bool _isPersonalPath'));
-    expect(login, contains("path == '/financeiro'"));
-    expect(login, contains("path == '/dashboard/aluno'"));
+    expect(login, contains('safePostLoginPath(from, isAluno: isAluno)'));
+
+    expect(util, contains('String? safePostLoginPath'));
+    expect(util, contains("from.startsWith('//')"));
+    expect(util, contains("from.contains('://')"));
+    expect(util, contains('bool isPublicAuthPath'));
+    expect(util, contains('bool isAlunoPath'));
+    expect(util, contains('bool isPersonalPath'));
+    expect(util, contains("path == '/financeiro'"));
+    expect(util, contains("path == '/dashboard/aluno'"));
   });
 
   test('student password change still overrides from route', () {

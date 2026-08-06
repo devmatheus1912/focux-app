@@ -278,10 +278,15 @@ class AuthRepository {
   Future<PasswordResetRequestResult> solicitarResetSenha({
     required String email,
     required bool isAluno,
+    String? personalSlug,
   }) async {
     final response = await _dio.post(
       '/api/auth/esqueci-senha',
-      data: {'email': email, 'tipo': isAluno ? 'ALUNO' : 'PERSONAL'},
+      data: {
+        'email': email,
+        'tipo': isAluno ? 'ALUNO' : 'PERSONAL',
+        if (personalSlug != null) 'personalSlug': personalSlug,
+      },
     );
     return PasswordResetRequestResult.fromJson(
       response.data as Map<String, dynamic>,

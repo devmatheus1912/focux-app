@@ -1,25 +1,28 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/api/api_client.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/hero_teal.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../data/auth_repository.dart';
+import '../providers/auth_provider.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_screen_a11y.dart';
 
-class EsqueciSenhaScreen extends StatefulWidget {
+class EsqueciSenhaScreen extends ConsumerStatefulWidget {
   const EsqueciSenhaScreen({super.key});
 
   @override
-  State<EsqueciSenhaScreen> createState() => _EsqueciSenhaScreenState();
+  ConsumerState<EsqueciSenhaScreen> createState() =>
+      _EsqueciSenhaScreenState();
 }
 
-class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
+class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   bool _loading = false;
@@ -27,6 +30,8 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
   String? _error;
   String? _hint;
   bool _isAluno = false;
+  bool _roleFromQueryApplied = false;
+  String? _personalSlug;
   bool? _emailDeliveryAvailable;
   AuthEnvironmentStatus? _environmentStatus;
 
@@ -36,9 +41,27 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
     _loadCapabilities();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_roleFromQueryApplied) return;
+    _roleFromQueryApplied = true;
+    final params = GoRouterState.of(context).uri.queryParameters;
+    final role = params['role']?.trim().toLowerCase();
+    if (role == 'aluno') {
+      _isAluno = true;
+    } else if (role == 'personal') {
+      _isAluno = false;
+    }
+    final slug = params['p']?.trim();
+    if (slug != null && slug.isNotEmpty) {
+      _personalSlug = slug;
+    }
+  }
+
   Future<void> _loadCapabilities() async {
     try {
-      final status = await AuthRepository(ApiClient()).environmentStatus();
+      final status = await ref.read(authRepositoryProvider).environmentStatus();
       if (!mounted) return;
       setState(() {
         _environmentStatus = status;
@@ -71,10 +94,13 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
     HapticFeedback.mediumImpact();
 
     try {
-      final result = await AuthRepository(ApiClient()).solicitarResetSenha(
-        email: _emailController.text.trim(),
-        isAluno: _isAluno,
-      );
+      final result = await ref
+          .read(authRepositoryProvider)
+          .solicitarResetSenha(
+            email: _emailController.text.trim(),
+            isAluno: _isAluno,
+            personalSlug: _isAluno ? _personalSlug : null,
+          );
 
       if (!mounted) {
         return;
@@ -142,9 +168,10 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
     return 'Configurar SMTP no ambiente real antes da publicação.';
   }
 
+  String get _loginPath => '/login?role=${_isAluno ? 'aluno' : 'personal'}';
+
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
     return fxScreenA11yScope(
       label: 'Recuperar senha',
       child: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -167,25 +194,18 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AuthBackButton(onTap: () => context.go('/login')),
+                    AuthBackButton(onTap: () => context.go(_loginPath)),
                     const SizedBox(height: 28),
-                    Container(
-                      width: 72,
-                      height: 72,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(22),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.12),
-                        ),
-                      ),
-                      child: Icon(Icons.send_rounded, color: primary, size: 30),
+                    AuthRoleHeader(
+                      roleLabel: _isAluno ? 'ALUNO' : 'PERSONAL',
+                      center: true,
+                      width: 118,
                     ),
                     const SizedBox(height: TokensStrip.s5),
-                    const Text(
+                    Text(
                       'Recuperar senha',
-                      style: TextStyle(
-                        color: Colors.white,
+                      style: AppTypography.inter(
+                        color: heroTealInk(),
                         fontSize: 30,
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.8,
@@ -197,87 +217,28 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                       constraints: const BoxConstraints(maxWidth: 320),
                       child: Text(
                         'Digite seu e-mail e vamos enviar um link pra redefinir sua senha.',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.55),
+                        style: AppTypography.inter(
+                          color: heroTealSurface(0.78),
                           fontSize: 14.5,
                           height: 1.55,
                         ),
                       ),
                     ),
                     const SizedBox(height: 32),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => setState(() => _isAluno = false),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 180),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10,
-                                ),
-                                decoration: BoxDecoration(
-                                  color:
-                                      !_isAluno
-                                          ? Colors.white.withValues(alpha: 0.18)
-                                          : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Text(
-                                  'Personal',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(
-                                      alpha: !_isAluno ? 1 : 0.55,
-                                    ),
-                                    fontWeight:
-                                        !_isAluno
-                                            ? FontWeight.w700
-                                            : FontWeight.w500,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => setState(() => _isAluno = true),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 180),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10,
-                                ),
-                                decoration: BoxDecoration(
-                                  color:
-                                      _isAluno
-                                          ? Colors.white.withValues(alpha: 0.18)
-                                          : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Text(
-                                  'Aluno',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(
-                                      alpha: _isAluno ? 1 : 0.55,
-                                    ),
-                                    fontWeight:
-                                        _isAluno
-                                            ? FontWeight.w700
-                                            : FontWeight.w500,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    AuthRoleToggle(
+                      isAluno: _isAluno,
+                      onPersonalTap: () {
+                        if (_isAluno) {
+                          HapticFeedback.selectionClick();
+                          setState(() => _isAluno = false);
+                        }
+                      },
+                      onAlunoTap: () {
+                        if (!_isAluno) {
+                          HapticFeedback.selectionClick();
+                          setState(() => _isAluno = true);
+                        }
+                      },
                     ),
                     const SizedBox(height: 18),
                     AuthField(
@@ -306,21 +267,27 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                       const SizedBox(height: 18),
                     ],
                     if (_error != null) ...[
-                      Text(
-                        _error!,
-                        style: TextStyle(
-                          color: EagleTokens.authErrorSoft,
-                          fontSize: 12.5,
+                      Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          _error!,
+                          style: TextStyle(
+                            color: EagleTokens.authErrorSoft,
+                            fontSize: 12.5,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 14),
                     ],
                     if (_message != null) ...[
-                      Text(
-                        _message!,
-                        style: TextStyle(
-                          color: EagleTokens.authSuccessSoft,
-                          fontSize: 12.5,
+                      Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          _message!,
+                          style: TextStyle(
+                            color: EagleTokens.authSuccessSoft,
+                            fontSize: 12.5,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -328,8 +295,8 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                     if (_hint != null) ...[
                       Text(
                         _hint!,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.58),
+                        style: AppTypography.inter(
+                          color: heroTealSurface(0.78),
                           fontSize: 12.5,
                           height: 1.45,
                         ),
@@ -344,26 +311,11 @@ class _EsqueciSenhaScreenState extends State<EsqueciSenhaScreen> {
                     ),
                     const SizedBox(height: 20),
                     Center(
-                      child: GestureDetector(
-                        onTap: () => context.go('/login'),
-                        child: RichText(
-                          text: TextSpan(
-                            style: const TextStyle(
-                              color: Color.fromRGBO(255, 255, 255, 0.4),
-                              fontSize: 13,
-                            ),
-                            children: [
-                              TextSpan(text: 'Lembrei a senha · '),
-                              TextSpan(
-                                text: 'Voltar ao login',
-                                style: TextStyle(
-                                  color: primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                      child: AuthTextLink(
+                        text: 'Lembrei a senha · ',
+                        actionText: 'Voltar ao login',
+                        onTap: () => context.go(_loginPath),
+                        fontSize: 13,
                       ),
                     ),
                   ],

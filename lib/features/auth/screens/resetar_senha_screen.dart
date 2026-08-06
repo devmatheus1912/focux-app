@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/hero_teal.dart';
 import '../../../core/widgets/fx_motion.dart';
-import '../widgets/auth_shell.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../widgets/auth_shell.dart';
+import '../widgets/password_strength_meter.dart';
 
 class ResetarSenhaScreen extends StatefulWidget {
   final String? token;
@@ -19,6 +21,8 @@ class ResetarSenhaScreen extends StatefulWidget {
 }
 
 class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
+  static const _minPasswordLength = 8;
+
   final _formKey = GlobalKey<FormState>();
   final _tokenController = TextEditingController();
   final _senhaController = TextEditingController();
@@ -26,11 +30,30 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
   bool _loading = false;
   String? _error;
   String? _message;
+  String? _role;
+  bool _roleFromQueryApplied = false;
 
   @override
   void initState() {
     super.initState();
     _tokenController.text = widget.token ?? '';
+    _senhaController.addListener(() {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_roleFromQueryApplied) return;
+    _roleFromQueryApplied = true;
+    final role =
+        GoRouterState.of(
+          context,
+        ).uri.queryParameters['role']?.trim().toLowerCase();
+    if (role == 'aluno' || role == 'personal') {
+      _role = role;
+    }
   }
 
   @override
@@ -40,6 +63,8 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
     _confirmarController.dispose();
     super.dispose();
   }
+
+  String get _loginPath => _role == null ? '/login' : '/login?role=$_role';
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -61,7 +86,7 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
       if (!mounted) return;
       setState(() => _message = 'Senha alterada. Entre novamente.');
       Future<void>.delayed(const Duration(milliseconds: 900), () {
-        if (mounted) context.go('/login');
+        if (mounted) context.go(_loginPath);
       });
     } catch (error) {
       HapticFeedback.heavyImpact();
@@ -73,9 +98,9 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
 
   String _mapError(Object error) {
     if (error is DioException && error.response?.statusCode == null) {
-      return 'Sem conexao com o servidor.';
+      return 'Sem conexão com o servidor.';
     }
-    return 'Token invalido, expirado ou senha recusada.';
+    return 'Token inválido, expirado ou senha recusada.';
   }
 
   @override
@@ -99,13 +124,19 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
                   children: [
                     AuthBackButton(
                       showLabel: true,
-                      onTap: () => context.go('/login'),
+                      onTap: () => context.go(_loginPath),
                     ),
-                    const SizedBox(height: 28),
-                    const Text(
+                    const SizedBox(height: 20),
+                    AuthRoleHeader(
+                      roleLabel: _role == 'aluno' ? 'ALUNO' : 'PERSONAL',
+                      center: true,
+                      width: 118,
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
                       'Nova senha',
-                      style: TextStyle(
-                        color: Colors.white,
+                      style: AppTypography.inter(
+                        color: heroTealInk(),
                         fontSize: 30,
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.8,
@@ -113,9 +144,9 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Use o token recebido por email para redefinir sua senha.',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.55),
+                      'Use o token recebido por e-mail para redefinir sua senha.',
+                      style: AppTypography.inter(
+                        color: heroTealSurface(0.78),
                         fontSize: 14.5,
                         height: 1.55,
                       ),
@@ -137,50 +168,63 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
                     AuthField(
                       label: 'Nova senha',
                       controller: _senhaController,
-                      hintText: 'minimo 6 caracteres',
+                      hintText: 'Mín. $_minPasswordLength caracteres',
                       icon: Icons.lock_outline_rounded,
                       obscureText: true,
                       textInputAction: TextInputAction.next,
                       validator: (value) {
-                        if (value == null || value.length < 6) {
-                          return 'Minimo 6 caracteres.';
+                        if (value == null || value.length < _minPasswordLength) {
+                          return 'A senha precisa ter no mínimo $_minPasswordLength caracteres.';
                         }
                         return null;
                       },
                     ),
+                    if (_senhaController.text.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      PasswordStrengthMeter(
+                        password: _senhaController.text,
+                        minLength: _minPasswordLength,
+                      ),
+                    ],
                     const SizedBox(height: 14),
                     AuthField(
                       label: 'Confirmar senha',
                       controller: _confirmarController,
-                      hintText: 'repita a senha',
+                      hintText: 'Repita a senha',
                       icon: Icons.lock_reset_rounded,
                       obscureText: true,
                       textInputAction: TextInputAction.done,
                       onFieldSubmitted: (_) => _submit(),
                       validator: (value) {
                         if (value != _senhaController.text) {
-                          return 'As senhas nao conferem.';
+                          return 'As senhas não conferem.';
                         }
                         return null;
                       },
                     ),
                     const SizedBox(height: 20),
                     if (_error != null) ...[
-                      Text(
-                        _error!,
-                        style: TextStyle(
-                          color: EagleTokens.authErrorSoft,
-                          fontSize: 12.5,
+                      Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          _error!,
+                          style: TextStyle(
+                            color: EagleTokens.authErrorSoft,
+                            fontSize: 12.5,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 12),
                     ],
                     if (_message != null) ...[
-                      Text(
-                        _message!,
-                        style: TextStyle(
-                          color: EagleTokens.authSuccessSoft,
-                          fontSize: 12.5,
+                      Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          _message!,
+                          style: TextStyle(
+                            color: EagleTokens.authSuccessSoft,
+                            fontSize: 12.5,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 12),

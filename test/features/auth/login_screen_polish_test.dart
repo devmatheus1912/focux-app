@@ -5,10 +5,29 @@ import '../../support/screen_source_bundle.dart';
 void main() {
   test('login cumpre contrato Tier S+', () {
     final screen = readScreenSourceBundle('lib/features/auth/screens/login_screen.dart');
+    final shell = readScreenSourceBundle('lib/features/auth/widgets/auth_shell.dart');
     expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
+
+    // Esqueci-senha herda o papel selecionado no login (personal/aluno).
+    expect(
+      screen,
+      contains(r"/esqueci-senha?role=${_isAluno ? 'aluno' : 'personal'}"),
+    );
+
+    // Lockup de marca compartilhado — largura única para Personal e Aluno.
+    expect(screen, contains('AuthLoginBrandHeader'));
+    expect(shell, contains('kAuthFormLogoWidth = 128.0'));
+    expect(shell, contains('width: kAuthFormLogoWidth'));
+
+    // Segurança: nunca logar token/conta do Google no console.
+    expect(screen, isNot(contains('debugPrint')));
+    expect(screen, isNot(contains('idToken.length')));
+
+    // Paleta hero teal para textos sobre o mesh cinematográfico.
+    expect(screen, anyOf(contains('heroTeal'), contains('AuthLoginBrandHeader')));
   });
 }

@@ -1,6 +1,5 @@
 import 'dart:io' show Platform;
 
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,17 +10,20 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../../../core/auth/session_cache_evictor.dart';
 import '../../../core/config/env.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../../dashboard/utils/dashboard_home_prefetch.dart';
 import '../providers/auth_provider.dart';
+import '../utils/auth_error_messages.dart';
+import '../utils/post_login_redirect.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/google_sign_in_button.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -165,7 +167,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } catch (error) {
       HapticFeedback.heavyImpact();
       setState(() {
-        _error = _mapError(error);
+        _error = mapLoginError(error);
       });
     } finally {
       if (mounted) {
@@ -197,9 +199,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (account == null) return;
       final auth = await account.authentication;
       final idToken = auth.idToken;
-      debugPrint(
-        '[GoogleSignIn] account=${account.email} idToken=${idToken == null ? "null" : "len=${idToken.length}"}',
-      );
       if (idToken == null || idToken.isEmpty) {
         throw StateError('Google nao retornou idToken.');
       }
@@ -215,7 +214,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } catch (error) {
       HapticFeedback.heavyImpact();
       if (!mounted) return;
-      setState(() => _error = _mapGoogleError(error));
+      setState(() => _error = mapGoogleSignInError(error, isAluno: _isAluno));
     } finally {
       if (mounted) setState(() => _loadingGoogle = false);
     }
@@ -225,7 +224,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final fallback = isAluno ? '/dashboard/aluno' : '/dashboard/personal';
     final from = GoRouterState.of(context).uri.queryParameters['from'];
     if (from == null) return fallback;
-    return _safePostLoginPath(from, isAluno: isAluno) ?? fallback;
+    return safePostLoginPath(from, isAluno: isAluno) ?? fallback;
   }
 
   Future<String> _postPersonalLoginRedirect(BuildContext context) async {
@@ -252,47 +251,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return fallback;
   }
 
-  String _mapError(Object error) {
-    if (error is DioException) {
-      final statusCode = error.response?.statusCode;
-      if (statusCode == null) return 'Sem conexão com o servidor.';
-      if (statusCode == 401) return 'Email ou senha incorretos.';
-    }
-    return 'Não foi possível entrar agora.';
-  }
-
-  String _mapGoogleError(Object error) {
-    debugPrint('[GoogleSignIn] error: $error');
-    if (error is DioException) {
-      final statusCode = error.response?.statusCode;
-      final body = error.response?.data;
-      debugPrint('[GoogleSignIn] dio status=$statusCode body=$body');
-      if (statusCode == 401) {
-        return _isAluno
-            ? 'Este Google nao esta vinculado a um aluno.'
-            : 'Nao foi possivel validar sua conta Google.';
-      }
-      if (statusCode == 403) {
-        return 'Conta sem permissao para entrar como ${_isAluno ? "aluno" : "personal"}.';
-      }
-      if (statusCode == 503) {
-        return 'Google ainda nao esta configurado neste ambiente. Use e-mail e senha por enquanto.';
-      }
-      if (statusCode == null) return 'Sem conexao com o servidor.';
-      final msg =
-          (body is Map && body['message'] is String)
-              ? body['message'] as String
-              : null;
-      return msg != null && msg.isNotEmpty
-          ? msg
-          : 'Erro $statusCode no Google login.';
-    }
-    if (error is StateError) {
-      return 'Google nao devolveu idToken. Verifique SHA-1 e google-services.json.';
-    }
-    return 'Nao foi possivel entrar com Google: $error';
-  }
-
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
@@ -307,12 +265,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         child: Scaffold(
           body: AuthShell(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(
-                TokensStrip.s5,
-                52,
-                TokensStrip.s5,
-                36,
-              ),
+              padding: const EdgeInsets.fromLTRB(22, 52, 22, 36),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   minHeight: MediaQuery.of(context).size.height - 100,
@@ -326,15 +279,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         isAluno: _isAluno,
                         taglineSize: 14.5,
                       ),
-                      const SizedBox(height: 26),
+                      const SizedBox(height: 18),
                       AuthGlassCard(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Entrar',
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: AppTypography.inter(
+                                color: heroTealInk(),
                                 fontSize: 22,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: -0.4,
@@ -386,18 +339,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 }
                                 return null;
                               },
-                              suffix: TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _showPassword = !_showPassword;
-                                  });
-                                },
-                                child: Text(
-                                  _showPassword ? 'Ocultar' : 'Ver',
-                                  style: TextStyle(
-                                    color: primary,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
+                              suffix: Semantics(
+                                button: true,
+                                label:
+                                    _showPassword
+                                        ? 'Ocultar senha'
+                                        : 'Mostrar senha',
+                                child: TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _showPassword = !_showPassword;
+                                    });
+                                  },
+                                  child: Text(
+                                    _showPassword ? 'Ocultar' : 'Ver',
+                                    style: TextStyle(
+                                      color: primary,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -405,7 +365,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             Align(
                               alignment: Alignment.centerRight,
                               child: TextButton(
-                                onPressed: () => context.go('/esqueci-senha'),
+                                onPressed:
+                                    () => context.go(
+                                      '/esqueci-senha?role=${_isAluno ? 'aluno' : 'personal'}',
+                                    ),
                                 child: Text(
                                   'Esqueci minha senha',
                                   style: TextStyle(
@@ -417,11 +380,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ),
                             ),
                             if (_error != null) ...[
-                              Text(
-                                _error!,
-                                style: TextStyle(
-                                  color: EagleTokens.authErrorSoft,
-                                  fontSize: 12.5,
+                              Semantics(
+                                liveRegion: true,
+                                child: Text(
+                                  _error!,
+                                  style: TextStyle(
+                                    color: EagleTokens.authErrorSoft,
+                                    fontSize: 12.5,
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 14),
@@ -459,30 +425,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      GestureDetector(
+                      AuthTextLink(
+                        text: 'Não tem conta? ',
+                        actionText: 'Criar conta grátis',
                         onTap:
                             () => context.go(
                               _isAluno ? '/register/aluno' : '/register',
                             ),
-                        child: RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.78),
-                              fontSize: 14,
-                            ),
-                            children: [
-                              const TextSpan(text: 'Não tem conta? '),
-                              TextSpan(
-                                text: 'Criar conta grátis',
-                                style: TextStyle(
-                                  color: primary,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                       ),
                     ],
                   ),
@@ -505,110 +454,21 @@ class _AuthDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(
-          child: Divider(color: Colors.white.withValues(alpha: 0.2), height: 1),
-        ),
+        Expanded(child: Divider(color: heroTealSurface(0.2), height: 1)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Text(
             label,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.65),
+            style: AppTypography.inter(
+              color: heroTealSurface(0.72),
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
           ),
         ),
-        Expanded(
-          child: Divider(color: Colors.white.withValues(alpha: 0.2), height: 1),
-        ),
+        Expanded(child: Divider(color: heroTealSurface(0.2), height: 1)),
       ],
     );
   }
 }
 
-String? _safePostLoginPath(String rawFrom, {required bool isAluno}) {
-  final from = rawFrom.trim();
-  if (from.isEmpty ||
-      !from.startsWith('/') ||
-      from.startsWith('//') ||
-      from.contains('://')) {
-    return null;
-  }
-
-  final uri = Uri.tryParse(from);
-  final path = uri?.path ?? '';
-  if (path.isEmpty || _isPublicAuthPath(path)) return null;
-
-  if (isAluno) {
-    return _isAlunoPath(path) ? from : null;
-  }
-  return _isPersonalPath(path) ? from : null;
-}
-
-bool _isPublicAuthPath(String path) {
-  return path == '/' ||
-      path == '/home' ||
-      path == '/dashboard' ||
-      path == '/dashboard/home' ||
-      path == '/login' ||
-      path == '/register' ||
-      path == '/register/aluno' ||
-      path == '/onboarding' ||
-      path == '/esqueci-senha' ||
-      path == '/resetar-senha';
-}
-
-bool _isAlunoPath(String path) {
-  return path == '/dashboard/aluno' ||
-      path == '/aluno/ativacao' ||
-      path == '/aluno/perfil' ||
-      path == '/aluno/definir-senha' ||
-      path == '/chat/aluno' ||
-      path == '/financeiro/aluno' ||
-      path == '/feed/aluno' ||
-      path == '/agenda/aluno' ||
-      path == '/ia/aluno' ||
-      path == '/depoimentos-aluno' ||
-      path == '/gamificacao' ||
-      path == '/notificacoes' ||
-      path == '/suporte' ||
-      path == '/checkin/treinos' ||
-      path == '/checkin/executar' ||
-      path == '/checkin/historico';
-}
-
-bool _isPersonalPath(String path) {
-  if (path == '/dashboard/personal' ||
-      path == '/dashboard/qualidade' ||
-      path == '/ia/copiloto' ||
-      path == '/ia/chat' ||
-      path == '/ia/progressao/aceitar' ||
-      path == '/alunos' ||
-      path == '/treinos' ||
-      path == '/agenda' ||
-      path == '/agenda/novo' ||
-      path == '/financeiro' ||
-      path == '/feed' ||
-      path == '/broadcasts' ||
-      path == '/leads' ||
-      path == '/alertas' ||
-      path == '/relatorios/global' ||
-      path == '/suporte' ||
-      path == '/perfil' ||
-      path == '/identidade-visual' ||
-      path == '/setup/identidade' ||
-      path == '/planos' ||
-      path == '/paywall' ||
-      path == '/assinatura') {
-    return true;
-  }
-
-  return path.startsWith('/alunos/') ||
-      path.startsWith('/treinos/') ||
-      path.startsWith('/exercicios') ||
-      path.startsWith('/alertas/') ||
-      path.startsWith('/avaliacao/') ||
-      path.startsWith('/anamnese/') ||
-      path.startsWith('/alimentar/');
-}

@@ -16,6 +16,10 @@ import '../../../core/widgets/focux_official_logo.dart';
 import '../../../core/widgets/focux_brand_tagline.dart';
 import '../../../core/widgets/cinematic_mesh_background.dart';
 
+/// Largura ideal do lockup Focux nas telas de formulário (login/esqueci).
+/// Cadastro (register/register_aluno) mantém 118 por convenção própria.
+const double kAuthFormLogoWidth = 128.0;
+
 class AuthShell extends StatelessWidget {
   const AuthShell({
     super.key,
@@ -81,7 +85,7 @@ class AuthRoleHeader extends StatelessWidget {
     super.key,
     required this.roleLabel,
     this.center = false,
-    this.width = 168,
+    this.width = kAuthFormLogoWidth,
   });
 
   final String roleLabel;
@@ -99,7 +103,8 @@ class AuthRoleHeader extends StatelessWidget {
   }
 }
 
-/// Cabeçalho do login — lockup oficial Focux (Personal) ou ícone + papel (Aluno).
+/// Cabeçalho do login — mesmo lockup oficial Focux para Personal e Aluno,
+/// apenas trocando o rótulo do papel. Nenhuma variante é apenas ícone.
 /// Nunca usa logoUrl de sessão anterior (evita foto de perfil no login).
 class AuthLoginBrandHeader extends ConsumerWidget {
   const AuthLoginBrandHeader({
@@ -122,7 +127,11 @@ class AuthLoginBrandHeader extends ConsumerWidget {
               ? Column(
                 key: const ValueKey('login-aluno'),
                 children: [
-                  const AuthRoleHeader(roleLabel: 'ALUNO', center: true),
+                  const AuthRoleHeader(
+                    roleLabel: 'ALUNO',
+                    center: true,
+                    width: kAuthFormLogoWidth,
+                  ),
                   const SizedBox(height: 14),
                   AuthWordmark(taglineSize: taglineSize),
                 ],
@@ -130,10 +139,10 @@ class AuthLoginBrandHeader extends ConsumerWidget {
               : Column(
                 key: const ValueKey('login-personal'),
                 children: [
-                  Semantics(
-                    label: 'Focux Personal',
-                    image: true,
-                    child: FocuxOfficialLogo.full(width: 188),
+                  const AuthRoleHeader(
+                    roleLabel: 'PERSONAL',
+                    center: true,
+                    width: kAuthFormLogoWidth,
                   ),
                   const SizedBox(height: 16),
                   AuthWordmark(taglineSize: taglineSize),
@@ -257,7 +266,7 @@ class AuthRoleToggle extends StatelessWidget {
                 label,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: selected ? 1.0 : 0.48),
+                  color: Colors.white.withValues(alpha: selected ? 1.0 : 0.72),
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                   fontSize: 13,
                 ),
@@ -615,22 +624,25 @@ class AuthBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final button = GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 38,
-        height: 38,
-        decoration: BoxDecoration(
-          color: EagleTokens.glassFill,
-          shape: BoxShape.circle,
-          border: Border.all(color: EagleTokens.glassBorder),
-        ),
-        child: const Icon(
-          Icons.chevron_left_rounded,
-          color: Colors.white,
-          size: 22,
-        ),
+    final icon = Container(
+      width: 38,
+      height: 38,
+      decoration: BoxDecoration(
+        color: EagleTokens.glassFill,
+        shape: BoxShape.circle,
+        border: Border.all(color: EagleTokens.glassBorder),
       ),
+      child: const Icon(
+        Icons.chevron_left_rounded,
+        color: Colors.white,
+        size: 22,
+      ),
+    );
+
+    final button = Semantics(
+      button: true,
+      label: 'Voltar',
+      child: GestureDetector(onTap: onTap, child: icon),
     );
 
     if (!showLabel) {
@@ -651,6 +663,56 @@ class AuthBackButton extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Link de rich text acessível para rodapés de auth (ex.: "Não tem conta? Criar conta").
+/// Expõe Semantics(link, button) em vez de depender apenas do gesto visual.
+class AuthTextLink extends StatelessWidget {
+  const AuthTextLink({
+    super.key,
+    required this.text,
+    required this.actionText,
+    required this.onTap,
+    this.textColor,
+    this.actionColor,
+    this.fontSize = 14,
+  });
+
+  final String text;
+  final String actionText;
+  final VoidCallback onTap;
+  final Color? textColor;
+  final Color? actionColor;
+  final double fontSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = actionColor ?? Theme.of(context).colorScheme.primary;
+    return Semantics(
+      link: true,
+      button: true,
+      label: '$text$actionText',
+      child: GestureDetector(
+        onTap: onTap,
+        child: RichText(
+          textAlign: TextAlign.center,
+          text: TextSpan(
+            style: AppTypography.inter(
+              color: textColor ?? heroTealSurface(0.72),
+              fontSize: fontSize,
+            ),
+            children: [
+              TextSpan(text: text),
+              TextSpan(
+                text: actionText,
+                style: TextStyle(color: primary, fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
