@@ -9,6 +9,11 @@ void main() {
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
+    expect(
+      screen.indexOf('Criar conta'),
+      lessThan(screen.indexOf('authInviteExistingAccountCta')),
+    );
+    expect(screen, contains('width: 118'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 }

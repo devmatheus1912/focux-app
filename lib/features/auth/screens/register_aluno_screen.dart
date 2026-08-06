@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../providers/auth_provider.dart';
@@ -115,9 +114,13 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                     AuthBackButton(
                       onTap: () => context.go('/login?role=aluno'),
                     ),
-                    const SizedBox(height: TokensStrip.s4),
-                    const AuthRoleHeader(roleLabel: 'ALUNO'),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 10),
+                    const AuthRoleHeader(
+                      roleLabel: 'ALUNO',
+                      center: true,
+                      width: 118,
+                    ),
+                    const SizedBox(height: 12),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14,
@@ -150,12 +153,12 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     const Text(
                       'Ativar conta',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 28,
+                        fontSize: 26,
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.7,
                         height: 1.15,
@@ -171,7 +174,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                       ),
                     ),
                     if (widget.personalSlug != null) ...[
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(14),
@@ -204,12 +207,12 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                         ),
                       ),
                     ],
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 18),
                     _InviteCodeField(
                       controller: _conviteCtrl,
                       primary: primary,
                     ),
-                    const SizedBox(height: TokensStrip.s5),
+                    const SizedBox(height: 10),
                     AuthField(
                       label: 'Nome completo',
                       controller: _nomeCtrl,
@@ -223,7 +226,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: TokensStrip.s4),
+                    const SizedBox(height: 10),
                     AuthField(
                       label: 'E-mail',
                       controller: _emailCtrl,
@@ -238,7 +241,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: TokensStrip.s4),
+                    const SizedBox(height: 10),
                     AuthField(
                       label: 'Senha',
                       controller: _senhaCtrl,
@@ -276,7 +279,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                       ),
                     ],
                     if (_error != null) ...[
-                      const SizedBox(height: TokensStrip.s4),
+                      const SizedBox(height: 10),
                       Text(
                         _error!,
                         style: TextStyle(
@@ -285,7 +288,13 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                         ),
                       ),
                     ],
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 22),
+                    FxLiquidPrimaryButton(
+                      label: 'Criar conta',
+                      loading: _loading,
+                      onPressed: _loading ? null : _submit,
+                    ),
+                    const SizedBox(height: 10),
                     FxLiquidSecondaryButton(
                       label: FocuxBrandCopy.authInviteExistingAccountCta,
                       icon: Icons.login_rounded,
@@ -293,12 +302,6 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                           _loading
                               ? null
                               : () => context.go('/login?role=aluno'),
-                    ),
-                    const SizedBox(height: 10),
-                    FxLiquidPrimaryButton(
-                      label: 'Criar conta',
-                      loading: _loading,
-                      onPressed: _loading ? null : _submit,
                     ),
                     SizedBox(height: MediaQuery.paddingOf(context).bottom + 8),
                   ],
