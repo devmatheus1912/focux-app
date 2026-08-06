@@ -75,54 +75,27 @@ class AuthLogoMark extends ConsumerWidget {
 }
 
 /// Cabeçalho compacto para cadastro — ícone + FOCUX / papel (sem lockup duplicado).
+/// Cabeçalho de marca nas telas auth — mesmo lockup oficial do splash/onboarding.
 class AuthRoleHeader extends StatelessWidget {
   const AuthRoleHeader({
     super.key,
     required this.roleLabel,
     this.center = false,
+    this.width = 168,
   });
 
   final String roleLabel;
   final bool center;
+  final double width;
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final row = Row(
-      mainAxisSize: center ? MainAxisSize.min : MainAxisSize.max,
-      children: [
-        const FocuxOfficialLogo.icon(size: 52),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'FOCUX',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.3,
-              ),
-            ),
-            Text(
-              roleLabel,
-              style: TextStyle(
-                color: primary.withValues(alpha: 0.95),
-                fontSize: 9.5,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 2.1,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-
-    return Semantics(
+    final logo = Semantics(
       label: 'Focux $roleLabel',
-      child: center ? Center(child: row) : row,
+      image: true,
+      child: FocuxOfficialLogo.full(width: width),
     );
+    return center ? Center(child: logo) : logo;
   }
 }
 
