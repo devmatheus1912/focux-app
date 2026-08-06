@@ -21,7 +21,6 @@ import '../providers/auth_provider.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../widgets/password_strength_meter.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -220,14 +219,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     AuthBackButton(
                       onTap: () => context.go('/login?role=personal'),
                     ),
-                    const SizedBox(height: TokensStrip.s4),
-                    const AuthRoleHeader(roleLabel: 'PERSONAL'),
-                    const SizedBox(height: 22),
+                    const SizedBox(height: 10),
+                    const AuthRoleHeader(
+                      roleLabel: 'PERSONAL',
+                      center: true,
+                      width: 118,
+                    ),
+                    const SizedBox(height: 16),
                     Text(
                       'Criar conta',
                       style: AppTypography.inter(
                         color: heroTealInk(),
-                        fontSize: 28,
+                        fontSize: 26,
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.7,
                         height: 1.15,
@@ -242,7 +245,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 26),
+                    const SizedBox(height: 20),
                     AuthField(
                       label: 'Nome completo',
                       controller: _nameController,
@@ -256,7 +259,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
                     AuthField(
                       label: 'E-mail',
                       controller: _emailController,
@@ -271,7 +274,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
                     AuthField(
                       label: 'Senha',
                       controller: _passwordController,
@@ -306,7 +309,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       const SizedBox(height: 8),
                       PasswordStrengthMeter(password: _passwordController.text),
                     ],
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
                     AuthField(
                       label: 'Telefone / WhatsApp',
                       controller: _phoneController,
@@ -318,7 +321,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       validator: BrPhone.validateOptional,
                       onFieldSubmitted: (_) => _submit(),
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 22),
                     if (_error != null) ...[
                       Text(
                         _error!,
@@ -327,8 +330,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           fontSize: 12.5,
                         ),
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 12),
                     ],
+                    FxLiquidPrimaryButton(
+                      label: 'Criar minha conta',
+                      loading: _loading,
+                      onPressed: _loading ? null : _submit,
+                    ),
+                    const SizedBox(height: 10),
                     FxLiquidSecondaryButton(
                       label: FocuxBrandCopy.onboardingExistingAccountCta,
                       icon: Icons.login_rounded,
@@ -337,13 +346,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               ? null
                               : () => context.go('/login?role=personal'),
                     ),
-                    const SizedBox(height: 10),
-                    FxLiquidPrimaryButton(
-                      label: 'Criar minha conta',
-                      loading: _loading,
-                      onPressed: _loading ? null : _submit,
-                    ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
                     const _AuthDivider(label: 'ou cadastre com'),
                     const SizedBox(height: 12),
                     GoogleSignInButton(
@@ -351,7 +354,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       isLoading: _loadingGoogle,
                       onPressed: _loadingGoogle ? null : _submitGoogle,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
                     Center(
                       child: Text.rich(
                         TextSpan(

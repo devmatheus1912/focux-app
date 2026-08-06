@@ -12,6 +12,12 @@ void main() {
     expect(screen, contains('BrPhone'));
     expect(screen, contains('telefone:'));
     expect(screen, contains('heroTeal'));
+    // Primário antes do secondary (hierarquia de CTA).
+    expect(
+      screen.indexOf('Criar minha conta'),
+      lessThan(screen.indexOf('onboardingExistingAccountCta')),
+    );
+    expect(screen, contains('width: 118'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(8));
   });
 }
