@@ -385,14 +385,24 @@ class _ProfessionalDataPanel extends StatelessWidget {
             ),
           ],
           const SizedBox(height: TokensStrip.s3),
-          FxLiquidPrimaryButton(
-            icon: Icons.edit_outlined,
-            label: summary.ctaLabel,
-            onPressed: () {
-              HapticFeedback.selectionClick();
-              onEdit();
-            },
-          ),
+          if (summary.missingPhone)
+            FxLiquidPrimaryButton(
+              icon: Icons.edit_outlined,
+              label: summary.ctaLabel,
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                onEdit();
+              },
+            )
+          else
+            FxLiquidSecondaryButton(
+              icon: Icons.edit_outlined,
+              label: summary.ctaLabel,
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                onEdit();
+              },
+            ),
         ],
       ),
     );

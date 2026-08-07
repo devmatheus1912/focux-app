@@ -24,6 +24,7 @@ void main() {
     expect(screen, contains('Mais ferramentas'));
     expect(screen, contains('Operação'));
     expect(screen, contains('GatedProfileShortcuts'));
+    expect(screen, contains('FxLiquidSecondaryButton'));
     expect(screen, contains('if (!profileComplete)'));
     expect(screen, isNot(contains('_PerfilGrowthSection')));
     expect(screen, contains('Conta e segurança'));
