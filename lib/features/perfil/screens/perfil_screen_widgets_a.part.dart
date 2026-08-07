@@ -430,7 +430,10 @@ class _PerfilBody extends StatelessWidget {
                         ],
                         _CardSection(
                           title: 'Marca e vitrine',
-                          subtitle: 'Link para divulgar e preview do aluno.',
+                          subtitle:
+                              profileComplete
+                                  ? 'Link e compartilhamento da vitrine.'
+                                  : 'Link para divulgar e preview do aluno.',
                           trailingLabel: 'Editar',
                           onTrailingTap: () {
                             HapticFeedback.selectionClick();
@@ -445,34 +448,36 @@ class _PerfilBody extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    onTap: () {
-                                      HapticFeedback.selectionClick();
-                                      context.push('/identidade-visual');
-                                    },
-                                    borderRadius: BorderRadius.circular(14),
-                                    child: _BrandPreview(
-                                      primary: heroPrimary,
-                                      secondary: heroSecondary,
-                                      profileName: perfil.nome,
-                                      subtitle: brandSubtitle,
-                                      logoUrl:
-                                          perfil.logoUrl ?? dashboard.logoUrl,
-                                      isDark: isDark,
-                                      compact: true,
+                                if (!profileComplete) ...[
+                                  Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () {
+                                        HapticFeedback.selectionClick();
+                                        context.push('/identidade-visual');
+                                      },
+                                      borderRadius: BorderRadius.circular(14),
+                                      child: _BrandPreview(
+                                        primary: heroPrimary,
+                                        secondary: heroSecondary,
+                                        profileName: perfil.nome,
+                                        subtitle: brandSubtitle,
+                                        logoUrl:
+                                            perfil.logoUrl ?? dashboard.logoUrl,
+                                        isDark: isDark,
+                                        compact: true,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: TokensStrip.s2),
-                                _BrandPaletteStrip(
-                                  primary: primaryColor,
-                                  secondary: secondaryColor,
-                                  mute: mute,
-                                  usingDefault: usingDefaultBrand,
-                                ),
-                                const SizedBox(height: TokensStrip.s2),
+                                  const SizedBox(height: TokensStrip.s2),
+                                  _BrandPaletteStrip(
+                                    primary: primaryColor,
+                                    secondary: secondaryColor,
+                                    mute: mute,
+                                    usingDefault: usingDefaultBrand,
+                                  ),
+                                  const SizedBox(height: TokensStrip.s2),
+                                ],
                                 _PerfilPublicLinkCard(
                                   slug: perfil.slug,
                                   accent: accent,
@@ -489,17 +494,6 @@ class _PerfilBody extends StatelessWidget {
                             ),
                           ),
                         ),
-                        if (profileComplete) ...[
-                          const SizedBox(height: TokensStrip.s3),
-                          _CompletenessCard(
-                            score: profileScore,
-                            accent: accent,
-                            isDark: isDark,
-                            items: readiness.items,
-                            nextStep: readiness.nextStep,
-                            onChecklistAction: onChecklistAction,
-                          ),
-                        ],
                         const SizedBox(height: TokensStrip.s3),
                         _ProfessionalDataPanel(
                           summary: professionalSummary,
@@ -579,39 +573,32 @@ class _PerfilBody extends StatelessWidget {
                                       ),
                                     ),
                                     children: [
-                                      _PerfilGrowthSection(
+                                      GatedProfileShortcuts(
                                         accent: accent,
                                         actionInk: actionInk,
                                         mute: mute,
                                         line: line,
-                                        isDark: isDark,
-                                        child: GatedProfileShortcuts(
-                                          accent: accent,
-                                          actionInk: actionInk,
-                                          mute: mute,
-                                          line: line,
-                                          tileBuilder:
-                                              ({
-                                                required icon,
-                                                required label,
-                                                required value,
-                                                required onTap,
-                                                required locked,
-                                                upgradeTierLabel,
-                                              }) => _ActionTile(
-                                                icon: icon,
-                                                label: label,
-                                                value: value,
-                                                accent: accent,
-                                                actionInk: actionInk,
-                                                mute: mute,
-                                                line: line,
-                                                locked: locked,
-                                                upgradeTierLabel:
-                                                    upgradeTierLabel,
-                                                onTap: onTap,
-                                              ),
-                                        ),
+                                        tileBuilder:
+                                            ({
+                                              required icon,
+                                              required label,
+                                              required value,
+                                              required onTap,
+                                              required locked,
+                                              upgradeTierLabel,
+                                            }) => _ActionTile(
+                                              icon: icon,
+                                              label: label,
+                                              value: value,
+                                              accent: accent,
+                                              actionInk: actionInk,
+                                              mute: mute,
+                                              line: line,
+                                              locked: locked,
+                                              upgradeTierLabel:
+                                                  upgradeTierLabel,
+                                              onTap: onTap,
+                                            ),
                                       ),
                                     ],
                                   ),

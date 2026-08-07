@@ -23,8 +23,9 @@ void main() {
     expect(screen, contains('_PerfilDebugTools'));
     expect(screen, contains('Mais ferramentas'));
     expect(screen, contains('Operação'));
-    expect(screen, contains('_PerfilGrowthSection'));
+    expect(screen, contains('GatedProfileShortcuts'));
     expect(screen, contains('if (!profileComplete)'));
+    expect(screen, isNot(contains('_PerfilGrowthSection')));
     expect(screen, contains('Conta e segurança'));
     expect(screen, isNot(contains('_PerfilBottomActions')));
     expect(screen, isNot(contains('Conta e plano')));

@@ -297,7 +297,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                     index: 0,
                     child: _SectionCard(
                       title: 'Dados pessoais',
-                      showHint: true,
+                      showHint: false,
                       child: Column(
                         children: [
                           Semantics(

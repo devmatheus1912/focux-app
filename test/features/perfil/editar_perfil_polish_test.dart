@@ -12,7 +12,7 @@ void main() {
     expect(screen, contains("loadingLabel: 'Salvando…'"));
     expect(screen, contains('Semantics('));
     expect(screen, contains('Salvando alterações do perfil'));
-    expect(screen, contains('showHint: true'));
+    expect(screen, contains('showHint: false'));
     expect(screen, isNot(contains('google_fonts')));
   });
 }
