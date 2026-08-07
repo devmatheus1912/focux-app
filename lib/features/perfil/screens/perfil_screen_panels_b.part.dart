@@ -321,24 +321,18 @@ class _ChecklistChip extends StatelessWidget {
 }
 
 class _ProfessionalDataPanel extends StatelessWidget {
-  final PerfilPersonal perfil;
-  final DashboardData dashboard;
-  final String bioText;
+  final PerfilProfessionalSummary summary;
   final Color accent;
   final Color actionInk;
   final Color mute;
-  final Color line;
   final bool isDark;
   final VoidCallback onEdit;
 
   const _ProfessionalDataPanel({
-    required this.perfil,
-    required this.dashboard,
-    required this.bioText,
+    required this.summary,
     required this.accent,
     required this.actionInk,
     required this.mute,
-    required this.line,
     required this.isDark,
     required this.onEdit,
   });
@@ -349,112 +343,71 @@ class _ProfessionalDataPanel extends StatelessWidget {
 
     return _CardSection(
       title: 'Dados profissionais',
-      subtitle: 'Contrato, canais públicos e prova de autoridade.',
-      trailingLabel: 'Editar',
-      onTrailingTap: onEdit,
+      subtitle: 'Resumo do cadastro — detalhes na edição.',
       isDark: isDark,
       accent: accent,
       actionInk: actionInk,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _InfoTile(
-            icon: Icons.email_outlined,
-            label: 'Email',
-            value: perfil.email,
-            accent: accent,
-            mute: mute,
-            line: line,
-          ),
-          _InfoTile(
-            icon: Icons.phone_iphone_rounded,
-            label: 'Telefone / WhatsApp',
-            value:
-                (perfil.telefone != null && perfil.telefone!.trim().isNotEmpty)
-                    ? BrPhone.formatDisplay(perfil.telefone)
-                    : 'Não informado',
-            accent: accent,
-            mute: mute,
-            line: line,
-            // Entry point único além do "Editar" da seção: só destaca lacuna.
-            onTap:
-                (perfil.telefone == null || perfil.telefone!.trim().isEmpty)
-                    ? onEdit
-                    : null,
-          ),
-          _InfoTile(
-            icon: Icons.badge_outlined,
-            label: 'CREF',
-            value: perfil.cref ?? 'Não informado',
-            accent: accent,
-            mute: mute,
-            line: line,
-          ),
-          _InfoTile(
-            icon: Icons.trending_up_outlined,
-            label: 'Especialidade',
-            value:
-                perfil.especialidades ??
-                perfil.especialidade ??
-                'Não informada',
-            accent: accent,
-            mute: mute,
-            line: line,
-          ),
-          _InfoTile(
-            icon: Icons.alternate_email,
-            label: 'Instagram',
-            value: _formatInstagram(perfil.instagram ?? dashboard.instagram),
-            accent: accent,
-            mute: mute,
-            line: line,
-            showDivider: bioText.isNotEmpty,
-          ),
-          if (bioText.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: TokensStrip.s3),
-              child: Semantics(
-                label: 'Bio profissional. $bioText',
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _LeadingIcon(
-                      icon: Icons.notes_outlined,
-                      background:
-                          isDark
-                              ? accent.withValues(alpha: 0.14)
-                              : BrandPalette.soft(accent),
-                      color: accent,
+          Semantics(
+            label: 'Dados profissionais. ${summary.lines.join('. ')}',
+            child: Wrap(
+              spacing: TokensStrip.s2,
+              runSpacing: TokensStrip.s2,
+              children: [
+                for (final line in summary.lines)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 7,
                     ),
-                    const SizedBox(width: TokensStrip.s3),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Bio profissional',
-                            style: TextStyle(
-                              color: mute,
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            bioText,
-                            style: TextStyle(
-                              color: ink,
-                              fontSize: 13.5,
-                              height: 1.45,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
+                    decoration: BoxDecoration(
+                      color:
+                          isDark
+                              ? Colors.white.withValues(alpha: 0.06)
+                              : TokensStrip.borderDefault.withValues(
+                                alpha: 0.65,
+                              ),
+                      borderRadius: BorderRadius.circular(TokensStrip.rPill),
+                      border:
+                          line.toLowerCase().contains('pendente')
+                              ? Border.all(
+                                color: accent.withValues(alpha: 0.35),
+                              )
+                              : null,
+                    ),
+                    child: Text(
+                      line,
+                      style: TextStyle(
+                        color:
+                            line.toLowerCase().contains('pendente')
+                                ? actionInk
+                                : ink,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                  ],
-                ),
-              ),
+                  ),
+              ],
             ),
+          ),
+          if (summary.missingPhone) ...[
+            const SizedBox(height: TokensStrip.s2),
+            Text(
+              'WhatsApp é o canal que o aluno usa para te achar.',
+              style: TextStyle(color: mute, fontSize: 12, height: 1.35),
+            ),
+          ],
+          const SizedBox(height: TokensStrip.s3),
+          FxLiquidPrimaryButton(
+            icon: Icons.edit_outlined,
+            label: summary.ctaLabel,
+            onPressed: () {
+              HapticFeedback.selectionClick();
+              onEdit();
+            },
+          ),
         ],
       ),
     );

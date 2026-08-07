@@ -25,6 +25,7 @@ import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../utils/brand_slogan_display.dart';
 import '../utils/perfil_plan_labels.dart';
+import '../utils/perfil_professional_summary.dart';
 import '../utils/perfil_readiness.dart';
 import '../../subscription/utils/landing_editor_access.dart';
 import '../../dashboard/widgets/gated_profile_shortcuts.dart';

@@ -169,32 +169,16 @@ class _PerfilBody extends StatelessWidget {
       }
       return 'Marca ativa no app';
     }();
-    final bioText =
-        (perfil.descricaoProfissional ?? dashboard.descricaoProfissional ?? '')
-            .trim();
-
-    final stats = [
-      _ProfileStat(
-        label: 'Alunos',
-        value: loadingMetrics ? '--' : dashboard.totalAlunos.toString(),
-        icon: Icons.groups_2_outlined,
-        onTap: () => goPersonalShellTab(context, '/alunos'),
-      ),
-      _ProfileStat(
-        label: 'Ativos',
-        value: loadingMetrics ? '--' : dashboard.alunosAtivos.toString(),
-        icon: Icons.bolt_outlined,
-        onTap: () => goPersonalShellTab(context, '/alunos?filtro=ativos'),
-      ),
-      _ProfileStat(
-        label: 'Marca',
-        value: '$profileScore%',
-        icon: Icons.tune,
-        onTap: () => context.push('/identidade-visual'),
-      ),
-    ];
+    final professionalSummary = PerfilProfessionalSummary.from(
+      perfil: perfil,
+      dashboard: dashboard,
+    );
 
     final profileComplete = profileScore >= 100;
+    final alunosLabel =
+        loadingMetrics
+            ? '—'
+            : '${dashboard.totalAlunos} alunos · ${dashboard.alunosAtivos} ativos';
     final usingDefaultBrand = _usesDefaultPalette(primaryColor, secondaryColor);
     // Sticky Meus alunos / Copiloto — CTA de gap fica só na prontidão (topo).
     const scrollBottomPad = 108.0;
@@ -309,9 +293,14 @@ class _PerfilBody extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: TokensStrip.s2),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          padding: const EdgeInsets.fromLTRB(
+                            TokensStrip.s4,
+                            0,
+                            TokensStrip.s4,
+                            TokensStrip.s3,
+                          ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
@@ -321,70 +310,91 @@ class _PerfilBody extends StatelessWidget {
                                 primaryColor: primaryColor,
                                 onTap: onPickPhoto,
                                 loading: uploadingPhoto,
+                                compact: true,
+                                showEditBadge: false,
                                 semanticsLabel:
                                     uploadingPhoto
                                         ? 'Enviando foto do perfil'
                                         : 'Alterar foto do perfil',
                               ),
-                              const SizedBox(width: 14),
+                              const SizedBox(width: TokensStrip.s3),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    _PlanPill(
-                                      label: perfilPlanPillLabel(perfil.plano),
+                                    Row(
+                                      children: [
+                                        _PlanPill(
+                                          label: perfilPlanPillLabel(
+                                            perfil.plano,
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        _HeroMarcaChip(
+                                          score: profileScore,
+                                          onTap: () {
+                                            HapticFeedback.selectionClick();
+                                            if (!profileComplete) {
+                                              // Prontidão está logo abaixo.
+                                              return;
+                                            }
+                                            context.push('/identidade-visual');
+                                          },
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 7),
+                                    const SizedBox(height: 6),
                                     Text(
                                       perfil.nome,
-                                      maxLines: 2,
+                                      maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: theme.textTheme.headlineSmall
+                                      style: theme.textTheme.titleLarge
                                           ?.copyWith(
                                             color: Colors.white,
                                             fontWeight: FontWeight.w900,
-                                            height: 0.98,
+                                            height: 1.05,
                                           ),
                                     ),
-                                    const SizedBox(height: 5),
+                                    const SizedBox(height: 3),
                                     Text(
                                       _buildSubtitle(perfil),
-                                      maxLines: 2,
+                                      maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         color: Colors.white.withValues(
                                           alpha: 0.86,
                                         ),
                                         fontSize: 12.5,
-                                        height: 1.25,
+                                        height: 1.2,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Semantics(
+                                      button: true,
+                                      label: '$alunosLabel. Abrir alunos',
+                                      child: InkWell(
+                                        onTap: () {
+                                          HapticFeedback.selectionClick();
+                                          goPersonalShellTab(
+                                            context,
+                                            '/alunos',
+                                          );
+                                        },
+                                        child: Text(
+                                          alunosLabel,
+                                          style: TextStyle(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.78,
+                                            ),
+                                            fontSize: 11.5,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: TokensStrip.s3),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            TokensStrip.s4,
-                            0,
-                            TokensStrip.s4,
-                            TokensStrip.s4,
-                          ),
-                          child: Row(
-                            children: [
-                              for (var index = 0; index < stats.length; index++)
-                                Expanded(
-                                  child: Padding(
-                                    padding: EdgeInsets.only(
-                                      left: index == 0 ? 0 : 6,
-                                      right: index == stats.length - 1 ? 0 : 6,
-                                    ),
-                                    child: _HeroStatPill(stat: stats[index]),
-                                  ),
-                                ),
                             ],
                           ),
                         ),
@@ -498,13 +508,10 @@ class _PerfilBody extends StatelessWidget {
                         ],
                         const SizedBox(height: TokensStrip.s3),
                         _ProfessionalDataPanel(
-                          perfil: perfil,
-                          dashboard: dashboard,
-                          bioText: bioText,
+                          summary: professionalSummary,
                           accent: accent,
                           actionInk: actionInk,
                           mute: mute,
-                          line: line,
                           isDark: isDark,
                           onEdit: onEditPerfil,
                         ),

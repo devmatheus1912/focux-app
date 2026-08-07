@@ -8,7 +8,7 @@ import 'package:focux_app/features/perfil/providers/perfil_provider.dart';
 import 'package:focux_app/features/perfil/screens/perfil_screen.dart';
 
 void main() {
-  testWidgets('perfil personal renders premium controls and readiness', (
+  testWidgets('perfil personal renders compact hub for the coach', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 1200);
@@ -22,9 +22,7 @@ void main() {
           perfilProvider.overrideWith((ref) async => _perfilFixture),
           dashboardProvider.overrideWith((ref) async => _dashboardFixture),
         ],
-        child: MaterialApp(
-          home: const PerfilScreen(),
-        ),
+        child: const MaterialApp(home: PerfilScreen()),
       ),
     );
 
@@ -32,12 +30,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 800));
 
     expect(find.text('QA Coach'), findsWidgets);
-    // Incompleto: prontidão sobe para o 1º bloco de conteúdo.
+    expect(find.textContaining('Marca'), findsWidgets);
     expect(find.text('Prontidão comercial'), findsOneWidget);
     expect(find.text('Marca e vitrine'), findsOneWidget);
-    expect(find.text('Marca'), findsWidgets);
     expect(find.text('Copiar'), findsOneWidget);
-    expect(find.text('Paleta ativa · toque para editar'), findsOneWidget);
+    expect(find.text('Completar cadastro'), findsOneWidget);
+    expect(find.text('WhatsApp pendente'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Carteira e PIX'),
@@ -45,11 +43,8 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.text('Operação'), findsOneWidget);
-    expect(find.text('Conta e segurança'), findsOneWidget);
-    expect(find.text('Carteira e PIX'), findsOneWidget);
     expect(find.text('Meus alunos'), findsOneWidget);
     expect(find.text('Copiloto IA'), findsOneWidget);
   });

@@ -1,86 +1,39 @@
 part of 'perfil_screen.dart';
 
-class _ProfileStat {
-  final String label;
-  final String value;
-  final IconData icon;
-  final VoidCallback? onTap;
+class _HeroMarcaChip extends StatelessWidget {
+  const _HeroMarcaChip({required this.score, required this.onTap});
 
-  const _ProfileStat({
-    required this.label,
-    required this.value,
-    required this.icon,
-    this.onTap,
-  });
-}
-
-class _HeroStatPill extends StatelessWidget {
-  const _HeroStatPill({required this.stat});
-
-  final _ProfileStat stat;
+  final int score;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final cell = Container(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            stat.icon,
-            size: 15,
-            color: Colors.white.withValues(alpha: 0.82),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            stat.value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 17,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            stat.label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.84),
-              fontSize: 10.5,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-
     return Semantics(
-      button: stat.onTap != null,
-      label:
-          stat.onTap != null
-              ? '${stat.label}: ${stat.value}. Abrir'
-              : '${stat.label}: ${stat.value}',
-      child:
-          stat.onTap == null
-              ? cell
-              : Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    stat.onTap!();
-                  },
-                  borderRadius: BorderRadius.circular(14),
-                  child: cell,
-                ),
+      button: true,
+      label: 'Marca $score por cento',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(TokensStrip.rPill),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(TokensStrip.rPill),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            ),
+            child: Text(
+              'Marca $score%',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w800,
               ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -163,6 +116,8 @@ class _Avatar extends StatelessWidget {
   final VoidCallback onTap;
   final bool loading;
   final String semanticsLabel;
+  final bool compact;
+  final bool showEditBadge;
 
   const _Avatar({
     required this.nome,
@@ -171,10 +126,13 @@ class _Avatar extends StatelessWidget {
     required this.onTap,
     required this.loading,
     required this.semanticsLabel,
+    this.compact = false,
+    this.showEditBadge = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    final size = compact ? 64.0 : 82.0;
     return Semantics(
       button: true,
       label: semanticsLabel,
@@ -182,40 +140,48 @@ class _Avatar extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          Container(
-            width: 82,
-            height: 82,
-            padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: 0.92),
-              boxShadow: const [
-                BoxShadow(
-                  color: EagleTokens.shadowSoft,
-                  blurRadius: 20,
-                  offset: Offset(0, 10),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: loading ? null : onTap,
+              customBorder: const CircleBorder(),
+              child: Container(
+                width: size,
+                height: size,
+                padding: const EdgeInsets.all(2.5),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.92),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: EagleTokens.shadowSoft,
+                      blurRadius: 16,
+                      offset: Offset(0, 8),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: CircleAvatar(
-              backgroundColor: Colors.white,
-              backgroundImage:
-                  logoUrl != null && logoUrl!.isNotEmpty
-                      ? NetworkImage(logoUrl!)
-                      : null,
-              child:
-                  logoUrl == null || logoUrl!.isEmpty
-                      ? Text(
-                        _initials(nome),
-                        style: TextStyle(
-                          fontSize: 27,
-                          fontWeight: FontWeight.w900,
-                          color: primaryColor,
-                        ),
-                      )
-                      : null,
+                child: CircleAvatar(
+                  backgroundColor: Colors.white,
+                  backgroundImage:
+                      logoUrl != null && logoUrl!.isNotEmpty
+                          ? NetworkImage(logoUrl!)
+                          : null,
+                  child:
+                      logoUrl == null || logoUrl!.isEmpty
+                          ? Text(
+                            _initials(nome),
+                            style: TextStyle(
+                              fontSize: compact ? 22 : 27,
+                              fontWeight: FontWeight.w900,
+                              color: primaryColor,
+                            ),
+                          )
+                          : null,
+                ),
+              ),
             ),
           ),
+          if (showEditBadge)
           Positioned(
             right: 1,
             bottom: 1,

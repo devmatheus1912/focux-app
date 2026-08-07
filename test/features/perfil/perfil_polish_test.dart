@@ -18,7 +18,8 @@ void main() {
     expect(screen, contains('_PerfilPublicLinkCard'));
     expect(screen, contains('Marca e vitrine'));
     expect(screen, contains('Sua vitrine online'));
-    expect(screen, contains('_HeroStatPill'));
+    expect(screen, contains('_HeroMarcaChip'));
+    expect(screen, contains('PerfilProfessionalSummary'));
     expect(screen, contains('_PerfilDebugTools'));
     expect(screen, contains('Operação'));
     expect(screen, contains('_PerfilGrowthSection'));
