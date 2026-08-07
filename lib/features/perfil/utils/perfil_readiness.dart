@@ -40,6 +40,7 @@ class PerfilReadinessView {
 
   static const _order = [
     'Foto',
+    'Telefone',
     'CREF',
     'Especialidade',
     'Bio',
@@ -101,6 +102,7 @@ class PerfilReadinessView {
 
     final missing = <String>{};
     if (!_hasText(perfil.logoUrl ?? dashboard.logoUrl)) missing.add('Foto');
+    if (!_hasText(perfil.telefone)) missing.add('Telefone');
     if (!_hasText(perfil.cref)) missing.add('CREF');
     if (!_hasText(perfil.especialidades ?? perfil.especialidade)) {
       missing.add('Especialidade');
@@ -124,6 +126,7 @@ class PerfilReadinessView {
   static PerfilChecklistAction _actionFor(String label) {
     return switch (label) {
       'Foto' => PerfilChecklistAction.photo,
+      'Telefone' => PerfilChecklistAction.editProfile,
       'CREF' => PerfilChecklistAction.editProfile,
       'Especialidade' => PerfilChecklistAction.editProfile,
       'Bio' => PerfilChecklistAction.editProfile,
@@ -135,12 +138,19 @@ class PerfilReadinessView {
   }
 
   static String _buttonLabelFor(PerfilChecklistItem item) {
-    return switch (item.action) {
-      PerfilChecklistAction.photo => 'Adicionar foto',
-      PerfilChecklistAction.editProfile => 'Completar cadastro',
-      PerfilChecklistAction.brand => 'Ajustar marca',
-      PerfilChecklistAction.wallet => 'Configurar PIX',
-      PerfilChecklistAction.convites => 'Convidar alunos',
+    return switch (item.label) {
+      'Foto' => 'Adicionar foto',
+      'Telefone' => 'Adicionar telefone',
+      'CREF' || 'Especialidade' || 'Bio' || 'Instagram' => 'Completar cadastro',
+      'Paleta' => 'Ajustar marca',
+      'PIX' => 'Configurar PIX',
+      _ => switch (item.action) {
+        PerfilChecklistAction.photo => 'Adicionar foto',
+        PerfilChecklistAction.editProfile => 'Completar cadastro',
+        PerfilChecklistAction.brand => 'Ajustar marca',
+        PerfilChecklistAction.wallet => 'Configurar PIX',
+        PerfilChecklistAction.convites => 'Convidar alunos',
+      },
     };
   }
 

@@ -48,7 +48,9 @@ void main() {
     expect(find.text('Operação'), findsOneWidget);
     expect(find.text('Conta e segurança'), findsOneWidget);
     expect(find.text('Carteira e PIX'), findsOneWidget);
+    // Sticky CTA sempre visível (Meus alunos + Copiloto).
     expect(find.text('Meus alunos'), findsOneWidget);
+    expect(find.text('Copiloto IA'), findsOneWidget);
   });
 }
 

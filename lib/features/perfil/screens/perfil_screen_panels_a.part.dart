@@ -1,5 +1,32 @@
 part of 'perfil_screen.dart';
 
+/// Entrada suave do conteúdo do perfil (respeita reduce-motion).
+class _PerfilContentEntrance extends StatelessWidget {
+  const _PerfilContentEntrance({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (TokensStrip.prefersReducedMotion(context)) return child;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 380),
+      curve: Curves.easeOutCubic,
+      builder: (context, t, child) {
+        return Opacity(
+          opacity: t,
+          child: Transform.translate(
+            offset: Offset(0, 12 * (1 - t)),
+            child: child,
+          ),
+        );
+      },
+      child: child,
+    );
+  }
+}
+
 class _PerfilStickyBar extends StatelessWidget {
   const _PerfilStickyBar({
     required this.accent,

@@ -79,7 +79,7 @@ class _CompletenessCard extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 10),
             TweenAnimationBuilder<double>(
               tween: Tween<double>(begin: 0, end: score / 100),
               duration: const Duration(milliseconds: 700),
@@ -351,7 +351,11 @@ class _ProfessionalDataPanel extends StatelessWidget {
             accent: accent,
             mute: mute,
             line: line,
-            onTap: onEdit,
+            // Entry point único além do "Editar" da seção: só destaca lacuna.
+            onTap:
+                (perfil.telefone == null || perfil.telefone!.trim().isEmpty)
+                    ? onEdit
+                    : null,
           ),
           _InfoTile(
             icon: Icons.badge_outlined,
@@ -360,7 +364,6 @@ class _ProfessionalDataPanel extends StatelessWidget {
             accent: accent,
             mute: mute,
             line: line,
-            onTap: onEdit,
           ),
           _InfoTile(
             icon: Icons.trending_up_outlined,
@@ -372,7 +375,6 @@ class _ProfessionalDataPanel extends StatelessWidget {
             accent: accent,
             mute: mute,
             line: line,
-            onTap: onEdit,
           ),
           _InfoTile(
             icon: Icons.alternate_email,
@@ -381,7 +383,6 @@ class _ProfessionalDataPanel extends StatelessWidget {
             accent: accent,
             mute: mute,
             line: line,
-            onTap: onEdit,
             showDivider: bioText.isNotEmpty,
           ),
           if (bioText.isNotEmpty)
@@ -832,45 +833,65 @@ class _ProfileTexturePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-void _showDeleteAccountDialog(BuildContext context) {
-  showDialog(
+void _showDeleteAccountDialog(
+  BuildContext context, {
+  required Future<void> Function() onSessionCleared,
+}) {
+  showDialog<void>(
     context: context,
-    builder:
-        (ctx) => AlertDialog(
-          title: const Text('Excluir conta'),
-          content: const Text(
-            'Esta ação é irreversível. Todos os seus dados pessoais serão anonimizados '
-            'conforme a LGPD (Art. 18). Dados financeiros serão mantidos por 5 anos '
-            'conforme legislação fiscal.\n\n'
-            'Deseja realmente excluir sua conta?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancelar'),
+    barrierDismissible: false,
+    builder: (ctx) {
+      var loading = false;
+      return StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          return AlertDialog(
+            title: const Text('Excluir conta'),
+            content: const Text(
+              'Esta ação é irreversível. Todos os seus dados pessoais serão anonimizados '
+              'conforme a LGPD (Art. 18). Dados financeiros serão mantidos por 5 anos '
+              'conforme legislação fiscal.\n\n'
+              'Deseja realmente excluir sua conta?',
             ),
-            FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: EagleTokens.bad),
-              onPressed: () async {
-                Navigator.of(ctx).pop();
-                try {
-                  final dio = ApiClient().dio;
-                  await dio.delete('/api/lgpd/me/delete');
-                  if (!context.mounted) return;
-                  FeedbackHelper.showSuccess(
-                    context,
-                    'Conta excluída com sucesso.',
-                  );
-                  GoRouter.of(context).go('/login');
-                } catch (e) {
-                  if (!context.mounted) return;
-                  FeedbackHelper.showError(context, friendlyError(e));
-                }
-              },
-              child: const Text('Excluir definitivamente'),
-            ),
-          ],
-        ),
+            actions: [
+              TextButton(
+                onPressed: loading ? null : () => Navigator.of(ctx).pop(),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(backgroundColor: EagleTokens.bad),
+                onPressed:
+                    loading
+                        ? null
+                        : () async {
+                          setDialogState(() => loading = true);
+                          try {
+                            final dio = ApiClient().dio;
+                            await dio.delete('/api/lgpd/me/delete');
+                            if (!ctx.mounted) return;
+                            Navigator.of(ctx).pop();
+                            if (!context.mounted) return;
+                            FeedbackHelper.showSuccess(
+                              context,
+                              'Conta excluída com sucesso.',
+                            );
+                            await onSessionCleared();
+                          } catch (e) {
+                            if (!ctx.mounted) return;
+                            setDialogState(() => loading = false);
+                            if (!context.mounted) return;
+                            FeedbackHelper.showError(
+                              context,
+                              friendlyError(e),
+                            );
+                          }
+                        },
+                child: Text(loading ? 'Excluindo…' : 'Excluir definitivamente'),
+              ),
+            ],
+          );
+        },
+      );
+    },
   );
 }
 
