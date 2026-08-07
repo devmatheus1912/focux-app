@@ -32,10 +32,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 800));
 
     expect(find.text('QA Coach'), findsWidgets);
+    // Incompleto: prontidão sobe para o 1º bloco de conteúdo.
     expect(find.text('Prontidão comercial'), findsOneWidget);
-    expect(find.text('Identidade visual'), findsOneWidget);
+    expect(find.text('Marca e vitrine'), findsOneWidget);
     expect(find.text('Marca'), findsWidgets);
-    expect(find.text('Sua paleta está ativa · toque para editar'), findsOneWidget);
+    expect(find.text('Copiar'), findsOneWidget);
+    expect(find.text('Paleta ativa · toque para editar'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Carteira e PIX'),
@@ -48,7 +50,6 @@ void main() {
     expect(find.text('Operação'), findsOneWidget);
     expect(find.text('Conta e segurança'), findsOneWidget);
     expect(find.text('Carteira e PIX'), findsOneWidget);
-    // Sticky CTA sempre visível (Meus alunos + Copiloto).
     expect(find.text('Meus alunos'), findsOneWidget);
     expect(find.text('Copiloto IA'), findsOneWidget);
   });

@@ -371,101 +371,27 @@ class _PerfilBody extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 14),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.16),
-                            borderRadius: const BorderRadius.only(
-                              bottomLeft: Radius.circular(28),
-                              bottomRight: Radius.circular(28),
-                            ),
-                            border: Border(
-                              top: BorderSide(
-                                color: Colors.white.withValues(alpha: 0.12),
-                              ),
-                            ),
+                        const SizedBox(height: TokensStrip.s3),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            TokensStrip.s4,
+                            0,
+                            TokensStrip.s4,
+                            TokensStrip.s4,
                           ),
                           child: Row(
-                            children: List.generate(stats.length, (index) {
-                              final item = stats[index];
-                              final cell = Container(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10,
-                                  horizontal: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  border:
-                                      index < stats.length - 1
-                                          ? Border(
-                                            right: BorderSide(
-                                              color: Colors.white.withValues(
-                                                alpha: 0.10,
-                                              ),
-                                            ),
-                                          )
-                                          : null,
-                                ),
-                                child: Column(
-                                  children: [
-                                    Icon(
-                                      item.icon,
-                                      size: 15,
-                                      color: Colors.white.withValues(
-                                        alpha: 0.78,
-                                      ),
+                            children: [
+                              for (var index = 0; index < stats.length; index++)
+                                Expanded(
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                      left: index == 0 ? 0 : 6,
+                                      right: index == stats.length - 1 ? 0 : 6,
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      item.value,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w900,
-                                        letterSpacing: 0,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      item.label,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.82,
-                                        ),
-                                        fontSize: 10.5,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
+                                    child: _HeroStatPill(stat: stats[index]),
+                                  ),
                                 ),
-                              );
-
-                              return Expanded(
-                                child: Semantics(
-                                  button: item.onTap != null,
-                                  label:
-                                      item.onTap != null
-                                          ? '${item.label}: ${item.value}. Abrir'
-                                          : '${item.label}: ${item.value}',
-                                  child:
-                                      item.onTap == null
-                                          ? cell
-                                          : Material(
-                                            color: Colors.transparent,
-                                            child: InkWell(
-                                              onTap: () {
-                                                HapticFeedback.selectionClick();
-                                                item.onTap!();
-                                              },
-                                              child: cell,
-                                            ),
-                                          ),
-                                ),
-                              );
-                            }),
+                            ],
                           ),
                         ),
                       ],
@@ -486,11 +412,22 @@ class _PerfilBody extends StatelessWidget {
                   Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        if (!profileComplete) ...[
+                          _CompletenessCard(
+                            score: profileScore,
+                            accent: accent,
+                            isDark: isDark,
+                            items: readiness.items,
+                            nextStep: readiness.nextStep,
+                            onChecklistAction: onChecklistAction,
+                          ),
+                          const SizedBox(height: TokensStrip.s3),
+                        ],
                         _CardSection(
-                          title: 'Identidade visual',
+                          title: 'Marca e vitrine',
                           subtitle:
-                              'Logo, slogan e paleta aplicados no app e na experiência do aluno.',
-                          trailingLabel: 'Abrir',
+                              'Como o aluno te vê e o link para divulgar.',
+                          trailingLabel: 'Editar marca',
                           onTrailingTap: () {
                             HapticFeedback.selectionClick();
                             context.push('/identidade-visual');
@@ -500,8 +437,7 @@ class _PerfilBody extends StatelessWidget {
                           actionInk: actionInk,
                           child: Semantics(
                             container: true,
-                            label:
-                                'Identidade visual da marca e vitrine online',
+                            label: 'Marca e vitrine online',
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -512,7 +448,7 @@ class _PerfilBody extends StatelessWidget {
                                       HapticFeedback.selectionClick();
                                       context.push('/identidade-visual');
                                     },
-                                    borderRadius: BorderRadius.circular(18),
+                                    borderRadius: BorderRadius.circular(16),
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -526,8 +462,9 @@ class _PerfilBody extends StatelessWidget {
                                               perfil.logoUrl ??
                                               dashboard.logoUrl,
                                           isDark: isDark,
+                                          compact: true,
                                         ),
-                                        const SizedBox(height: TokensStrip.s3),
+                                        const SizedBox(height: TokensStrip.s2),
                                         _BrandPaletteStrip(
                                           primary: primaryColor,
                                           secondary: secondaryColor,
@@ -554,15 +491,17 @@ class _PerfilBody extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: TokensStrip.s3),
-                        _CompletenessCard(
-                          score: profileScore,
-                          accent: accent,
-                          isDark: isDark,
-                          items: readiness.items,
-                          nextStep: readiness.nextStep,
-                          onChecklistAction: onChecklistAction,
-                        ),
+                        if (profileComplete) ...[
+                          const SizedBox(height: TokensStrip.s3),
+                          _CompletenessCard(
+                            score: profileScore,
+                            accent: accent,
+                            isDark: isDark,
+                            items: readiness.items,
+                            nextStep: readiness.nextStep,
+                            onChecklistAction: onChecklistAction,
+                          ),
+                        ],
                         const SizedBox(height: TokensStrip.s3),
                         _ProfessionalDataPanel(
                           perfil: perfil,

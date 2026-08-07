@@ -161,6 +161,7 @@ class _BrandPreview extends StatelessWidget {
   final String subtitle;
   final String? logoUrl;
   final bool isDark;
+  final bool compact;
 
   const _BrandPreview({
     required this.primary,
@@ -169,27 +170,33 @@ class _BrandPreview extends StatelessWidget {
     required this.subtitle,
     this.logoUrl,
     required this.isDark,
+    this.compact = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final logoSize = compact ? 40.0 : 50.0;
+    final pad = compact ? 12.0 : 15.0;
     return Container(
-      padding: const EdgeInsets.all(15),
+      padding: EdgeInsets.all(pad),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(compact ? 14 : 18),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [primary, secondary],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: primary.withValues(alpha: 0.28),
-            blurRadius: 22,
-            offset: const Offset(0, 10),
-            spreadRadius: -6,
-          ),
-        ],
+        boxShadow:
+            compact
+                ? null
+                : [
+                  BoxShadow(
+                    color: primary.withValues(alpha: 0.28),
+                    blurRadius: 22,
+                    offset: const Offset(0, 10),
+                    spreadRadius: -6,
+                  ),
+                ],
       ),
       child: Stack(
         clipBehavior: Clip.none,
@@ -198,18 +205,11 @@ class _BrandPreview extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 50,
-                height: 50,
+                width: logoSize,
+                height: logoSize,
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.94),
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.12),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  borderRadius: BorderRadius.circular(compact ? 12 : 15),
                 ),
                 clipBehavior: Clip.antiAlias,
                 child:
@@ -221,12 +221,16 @@ class _BrandPreview extends StatelessWidget {
                               (_, __, ___) => Icon(
                                 Icons.fitness_center,
                                 color: primary,
-                                size: 22,
+                                size: compact ? 18 : 22,
                               ),
                         )
-                        : Icon(Icons.fitness_center, color: primary, size: 22),
+                        : Icon(
+                          Icons.fitness_center,
+                          color: primary,
+                          size: compact ? 18 : 22,
+                        ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(right: 52),
@@ -237,20 +241,20 @@ class _BrandPreview extends StatelessWidget {
                         profileName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 15,
+                          fontSize: compact ? 14 : 15,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 3),
                       Text(
                         subtitle,
-                        maxLines: 2,
+                        maxLines: compact ? 1 : 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.88),
-                          fontSize: 11.5,
+                          fontSize: compact ? 11 : 11.5,
                           height: 1.3,
                           fontWeight: FontWeight.w600,
                         ),
@@ -268,7 +272,7 @@ class _BrandPreview extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.18),
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: BorderRadius.circular(TokensStrip.rPill),
                 border: Border.all(color: Colors.white.withValues(alpha: 0.34)),
               ),
               child: Row(
@@ -302,6 +306,7 @@ class _BrandPreview extends StatelessWidget {
   }
 }
 
+/// Bloco share-first da vitrine (dentro de Marca e vitrine).
 class _PerfilPublicLinkCard extends StatelessWidget {
   const _PerfilPublicLinkCard({
     required this.slug,
@@ -344,15 +349,14 @@ class _PerfilPublicLinkCard extends StatelessWidget {
                 color: ink,
                 fontSize: 13,
                 fontWeight: FontWeight.w800,
-                letterSpacing: -0.15,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: TokensStrip.s1),
             Text(
-              'Defina seu link público para compartilhar no Instagram e WhatsApp.',
+              'Crie o link público para divulgar no Instagram e WhatsApp.',
               style: TextStyle(color: mute, fontSize: 12, height: 1.35),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: TokensStrip.s2),
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton.icon(
@@ -375,169 +379,137 @@ class _PerfilPublicLinkCard extends StatelessWidget {
     return Semantics(
       container: true,
       label: 'Sua vitrine online. Link $displayLabel',
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: accent.withValues(alpha: 0.22)),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              accent.withValues(alpha: isDark ? 0.14 : 0.07),
-              accent.withValues(alpha: isDark ? 0.06 : 0.03),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Link público',
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              Semantics(
+                button: true,
+                label: 'Personalizar página',
+                child: TextButton(
+                  onPressed: () {
+                    HapticFeedback.selectionClick();
+                    onOpenEditor();
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: actionInk,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    minimumSize: const Size(48, 40),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text('Personalizar página'),
+                ),
+              ),
             ],
           ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+          const SizedBox(height: TokensStrip.s2),
+          Container(
+            width: double.infinity,
+            constraints: const BoxConstraints(minHeight: 52),
+            padding: const EdgeInsets.only(left: 12),
+            decoration: BoxDecoration(
+              color: (isDark ? EagleTokens.darkCard : Colors.white).withValues(
+                alpha: isDark ? 0.92 : 0.96,
+              ),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: accent.withValues(alpha: 0.18)),
+            ),
+            child: Row(
               children: [
+                Icon(Icons.link_rounded, size: 18, color: actionInk),
+                const SizedBox(width: 8),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Sua vitrine online',
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.15,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Compartilhe no Instagram, WhatsApp e bio.',
-                        style: TextStyle(
-                          color: mute,
-                          fontSize: 11.5,
-                          height: 1.3,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    displayLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.2,
+                    ),
                   ),
                 ),
                 Semantics(
                   button: true,
-                  label: 'Personalizar landing',
-                  child: TextButton(
-                    onPressed: () {
-                      HapticFeedback.selectionClick();
-                      onOpenEditor();
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: actionInk,
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      minimumSize: const Size(48, 36),
-                    ),
-                    child: const Text('Personalizar'),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-              decoration: BoxDecoration(
-                color: (isDark ? EagleTokens.darkCard : Colors.white)
-                    .withValues(alpha: isDark ? 0.92 : 0.96),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: accent.withValues(alpha: 0.16)),
-                boxShadow: [
-                  BoxShadow(
-                    color: accent.withValues(alpha: 0.08),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.link_rounded, size: 16, color: actionInk),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      displayLabel,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                  ),
-                  Semantics(
-                    button: true,
-                    label: 'Copiar link $displayLabel',
-                    child: IconButton(
-                      tooltip: 'Copiar link',
-                      visualDensity: VisualDensity.compact,
-                      onPressed: () {
-                        HapticFeedback.selectionClick();
-                        copyLandingLink(
-                          context,
-                          url: copyUrl,
-                          successMessage: 'Link copiado para compartilhar.',
-                        );
-                      },
-                      icon: Icon(
-                        Icons.copy_rounded,
-                        size: 18,
-                        color: actionInk,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      HapticFeedback.selectionClick();
-                      openLandingLink(context, url: copyUrl);
-                    },
-                    icon: const Icon(Icons.open_in_new_rounded, size: 17),
-                    label: const Text('Ver ao vivo'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: actionInk,
-                      side: BorderSide(color: accent.withValues(alpha: 0.35)),
-                      padding: const EdgeInsets.symmetric(vertical: 11),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: FilledButton.icon(
+                  label: 'Copiar link $displayLabel',
+                  child: TextButton.icon(
                     onPressed: () {
                       HapticFeedback.selectionClick();
                       copyLandingLink(
                         context,
                         url: copyUrl,
-                        successMessage: 'Link copiado para compartilhar.',
+                        successMessage: 'Link copiado. Cole no Instagram ou WhatsApp.',
                       );
                     },
-                    icon: const Icon(Icons.ios_share_rounded, size: 17),
-                    label: const Text('Compartilhar'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: accent,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 11),
+                    style: TextButton.styleFrom(
+                      foregroundColor: actionInk,
+                      minimumSize: const Size(48, 48),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
                     ),
+                    icon: const Icon(Icons.copy_rounded, size: 18),
+                    label: const Text('Copiar'),
                   ),
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    HapticFeedback.selectionClick();
+                    openLandingLink(context, url: copyUrl);
+                  },
+                  icon: const Icon(Icons.open_in_new_rounded, size: 17),
+                  label: const Text('Ver ao vivo'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: actionInk,
+                    side: BorderSide(color: accent.withValues(alpha: 0.35)),
+                    minimumSize: const Size(48, 48),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+              const SizedBox(width: TokensStrip.s2),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () {
+                    HapticFeedback.selectionClick();
+                    copyLandingLink(
+                      context,
+                      url: copyUrl,
+                      successMessage:
+                          'Link pronto para compartilhar no Instagram ou WhatsApp.',
+                    );
+                  },
+                  icon: const Icon(Icons.ios_share_rounded, size: 17),
+                  label: const Text('Compartilhar'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: accent,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(48, 48),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

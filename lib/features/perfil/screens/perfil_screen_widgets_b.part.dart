@@ -14,6 +14,77 @@ class _ProfileStat {
   });
 }
 
+class _HeroStatPill extends StatelessWidget {
+  const _HeroStatPill({required this.stat});
+
+  final _ProfileStat stat;
+
+  @override
+  Widget build(BuildContext context) {
+    final cell = Container(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            stat.icon,
+            size: 15,
+            color: Colors.white.withValues(alpha: 0.82),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            stat.value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 17,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            stat.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.84),
+              fontSize: 10.5,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return Semantics(
+      button: stat.onTap != null,
+      label:
+          stat.onTap != null
+              ? '${stat.label}: ${stat.value}. Abrir'
+              : '${stat.label}: ${stat.value}',
+      child:
+          stat.onTap == null
+              ? cell
+              : Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    stat.onTap!();
+                  },
+                  borderRadius: BorderRadius.circular(14),
+                  child: cell,
+                ),
+              ),
+    );
+  }
+}
+
 class _PlanPill extends StatelessWidget {
   final String label;
 
@@ -324,8 +395,8 @@ class _BrandPaletteStrip extends StatelessWidget {
         Expanded(
           child: Text(
             usingDefault
-                ? 'Paleta padrão Focux · toque para personalizar'
-                : 'Sua paleta está ativa · toque para editar',
+                ? 'Paleta padrão · toque para personalizar'
+                : 'Paleta ativa · toque para editar',
             style: TextStyle(
               color: mute,
               fontSize: 11.5,
