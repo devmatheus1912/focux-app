@@ -1,32 +1,5 @@
 part of 'perfil_screen.dart';
 
-/// Entrada suave do conteúdo do perfil (respeita reduce-motion).
-class _PerfilContentEntrance extends StatelessWidget {
-  const _PerfilContentEntrance({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    if (TokensStrip.prefersReducedMotion(context)) return child;
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 380),
-      curve: Curves.easeOutCubic,
-      builder: (context, t, child) {
-        return Opacity(
-          opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, 12 * (1 - t)),
-            child: child,
-          ),
-        );
-      },
-      child: child,
-    );
-  }
-}
-
 class _PerfilStickyBar extends StatelessWidget {
   const _PerfilStickyBar({
     required this.accent,
@@ -45,8 +18,7 @@ class _PerfilStickyBar extends StatelessWidget {
       color: Colors.transparent,
       child: Container(
         decoration: BoxDecoration(
-          color: (isDark ? EagleTokens.darkCard : TokensStrip.cardBg)
-              .withValues(alpha: 0.96),
+          color: chrome.sheetFill.withValues(alpha: isDark ? 0.96 : 0.98),
           border: Border(
             top: BorderSide(color: chrome.line.withValues(alpha: 0.7)),
           ),
@@ -58,47 +30,54 @@ class _PerfilStickyBar extends StatelessWidget {
             ),
           ],
         ),
-        padding: const EdgeInsets.fromLTRB(18, 12, 18, 12),
         child: SafeArea(
           top: false,
-          child: SizedBox(
-            height: 52,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Semantics(
-                    button: true,
-                    label: 'Meus alunos',
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: actionInk,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s4,
+              10,
+              TokensStrip.s4,
+              12,
+            ),
+            child: SizedBox(
+              height: 52,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Semantics(
+                      button: true,
+                      label: 'Meus alunos',
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: actionInk,
+                        ),
+                        onPressed: () {
+                          HapticFeedback.selectionClick();
+                          goPersonalShellTab(context, '/alunos');
+                        },
+                        icon: const Icon(Icons.groups_2_outlined, size: 18),
+                        label: const Text('Meus alunos'),
                       ),
-                      onPressed: () {
-                        HapticFeedback.selectionClick();
-                        goPersonalShellTab(context, '/alunos');
-                      },
-                      icon: const Icon(Icons.groups_2_outlined, size: 18),
-                      label: const Text('Meus alunos'),
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Semantics(
-                    button: true,
-                    label: 'Copiloto IA',
-                    child: FxLiquidPrimaryButton(
-                      expand: true,
-                      icon: Icons.auto_awesome_outlined,
+                  const SizedBox(width: TokensStrip.s3),
+                  Expanded(
+                    child: Semantics(
+                      button: true,
                       label: 'Copiloto IA',
-                      onPressed: () {
-                        HapticFeedback.selectionClick();
-                        goPersonalShellTab(context, '/ia/copiloto');
-                      },
+                      child: FxLiquidPrimaryButton(
+                        expand: true,
+                        icon: Icons.auto_awesome_outlined,
+                        label: 'Copiloto IA',
+                        onPressed: () {
+                          HapticFeedback.selectionClick();
+                          goPersonalShellTab(context, '/ia/copiloto');
+                        },
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

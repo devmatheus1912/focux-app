@@ -28,6 +28,42 @@ void main() {
     expect(view.nextStep?.buttonLabel, 'Adicionar telefone');
     expect(view.nextStep?.action, PerfilChecklistAction.editProfile);
   });
+
+  test('perfilReadinessGapCopy pluralizes correctly', () {
+    expect(perfilReadinessGapCopy(0), contains('pronto'));
+    expect(perfilReadinessGapCopy(1), 'Falta 1 passo para fechar o perfil comercial.');
+    expect(perfilReadinessGapCopy(2), 'Faltam 2 passos para fechar o perfil comercial.');
+  });
+
+  test('PIX status stays consistent between checklist and wallet helper', () {
+    final withPix = PerfilReadinessView.from(
+      perfil: _perfilCompleteExceptPhone,
+      dashboard: _dashboardFixture,
+    );
+    expect(withPix.isPixDone, isTrue);
+    expect(perfilHasWallet(_perfilCompleteExceptPhone), isTrue);
+
+    final noPix = PerfilReadinessView.from(
+      perfil: PerfilPersonal(
+        id: 1,
+        nome: 'QA',
+        email: 'qa@example.com',
+        logoUrl: 'https://cdn.example/logo.png',
+        telefone: '11999998888',
+        cref: '123456-G/SP',
+        especialidade: 'Hipertrofia',
+        especialidades: 'Hipertrofia',
+        corPrimaria: '#2D4FB7',
+        corSecundaria: '#3F63E4',
+        plano: 'ENTERPRISE',
+        descricaoProfissional: 'Bio',
+        instagram: '@qa',
+      ),
+      dashboard: _dashboardFixture,
+    );
+    expect(noPix.isPixDone, isFalse);
+    expect(noPix.nextStep?.label, 'PIX');
+  });
 }
 
 final _perfilFixture = PerfilPersonal(

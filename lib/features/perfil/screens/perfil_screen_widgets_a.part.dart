@@ -203,12 +203,12 @@ class _PerfilBody extends StatelessWidget {
         );
     final profileComplete = profileScore >= 100;
     final usingDefaultBrand = _usesDefaultPalette(primaryColor, secondaryColor);
-    final safeBottom = MediaQuery.paddingOf(context).bottom;
-    final scrollBottomPad =
-        88 + safeBottom + (profileComplete ? 0 : 72);
+    final scrollBottomPad = 108.0 + (profileComplete ? 0.0 : 72.0);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return FxShellScaffold(
+      useMesh: true,
+      safeArea: false,
+      constrainWidth: true,
       bottomNavigationBar: _PerfilStickyBar(
         accent: accent,
         actionInk: actionInk,
@@ -475,11 +475,15 @@ class _PerfilBody extends StatelessWidget {
               ),
             ),
             SliverPadding(
-              padding: EdgeInsets.fromLTRB(18, 12, 18, scrollBottomPad),
+              padding: EdgeInsets.fromLTRB(
+                TokensStrip.s4,
+                TokensStrip.s3,
+                TokensStrip.s4,
+                scrollBottomPad,
+              ),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  _PerfilContentEntrance(
-                    child: Column(
+                  Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         _CardSection(
@@ -523,7 +527,7 @@ class _PerfilBody extends StatelessWidget {
                                               dashboard.logoUrl,
                                           isDark: isDark,
                                         ),
-                                        const SizedBox(height: 10),
+                                        const SizedBox(height: TokensStrip.s3),
                                         _BrandPaletteStrip(
                                           primary: primaryColor,
                                           secondary: secondaryColor,
@@ -534,7 +538,7 @@ class _PerfilBody extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 10),
+                                const SizedBox(height: TokensStrip.s3),
                                 _PerfilPublicLinkCard(
                                   slug: perfil.slug,
                                   accent: accent,
@@ -550,7 +554,7 @@ class _PerfilBody extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: TokensStrip.s3),
                         _CompletenessCard(
                           score: profileScore,
                           accent: accent,
@@ -559,7 +563,7 @@ class _PerfilBody extends StatelessWidget {
                           nextStep: readiness.nextStep,
                           onChecklistAction: onChecklistAction,
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: TokensStrip.s3),
                         _ProfessionalDataPanel(
                           perfil: perfil,
                           dashboard: dashboard,
@@ -571,7 +575,7 @@ class _PerfilBody extends StatelessWidget {
                           isDark: isDark,
                           onEdit: onEditPerfil,
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: TokensStrip.s3),
                         _CardSection(
                           title: 'Operação',
                           subtitle:
@@ -595,7 +599,7 @@ class _PerfilBody extends StatelessWidget {
                                 icon: Icons.account_balance_wallet_outlined,
                                 label: 'Carteira e PIX',
                                 value:
-                                    _hasWallet(perfil)
+                                    readiness.isPixDone
                                         ? 'Completa'
                                         : 'Configurar',
                                 accent: accent,
@@ -650,7 +654,7 @@ class _PerfilBody extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: TokensStrip.s3),
                         _CardSection(
                           title: 'Conta e segurança',
                           subtitle:
@@ -734,14 +738,13 @@ class _PerfilBody extends StatelessWidget {
                           const SizedBox(height: TokensStrip.s4),
                           _PerfilBottomActions(
                             profileComplete: profileComplete,
-                            walletComplete: _hasWallet(perfil),
+                            walletComplete: readiness.isPixDone,
                             primaryCta: primaryCta,
                             onChecklistAction: onChecklistAction,
                           ),
                         ],
                       ],
                     ),
-                  ),
                 ]),
               ),
             ),

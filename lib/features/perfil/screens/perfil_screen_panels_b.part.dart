@@ -32,7 +32,7 @@ class _CompletenessCard extends StatelessWidget {
               : 'Prontidão comercial. $score por cento.',
       child: Container(
         padding: const EdgeInsets.all(TokensStrip.s4),
-        decoration: chrome.panel(radius: 20),
+        decoration: chrome.panel(radius: 16, accent: accent),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -51,11 +51,11 @@ class _CompletenessCard extends StatelessWidget {
                           letterSpacing: -0.2,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: TokensStrip.s1),
                       Text(
-                        complete
-                            ? 'Seu perfil comercial está pronto para operar.'
-                            : 'Faltam ${items.where((item) => !item.done).length} passos para parecer premium.',
+                        perfilReadinessGapCopy(
+                          items.where((item) => !item.done).length,
+                        ),
                         style: TextStyle(
                           color: mute,
                           fontSize: 12,
@@ -79,7 +79,7 @@ class _CompletenessCard extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: TokensStrip.s3),
             TweenAnimationBuilder<double>(
               tween: Tween<double>(begin: 0, end: score / 100),
               duration: const Duration(milliseconds: 700),
@@ -118,13 +118,13 @@ class _CompletenessCard extends StatelessWidget {
                 );
               },
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: TokensStrip.s3),
             if (complete)
               _ReadyFocusStrip(accent: accent, isDark: isDark)
             else
               Wrap(
-                spacing: 7,
-                runSpacing: 7,
+                spacing: TokensStrip.s2,
+                runSpacing: TokensStrip.s2,
                 children:
                     items
                         .map(
@@ -140,7 +140,7 @@ class _CompletenessCard extends StatelessWidget {
                         .toList(),
               ),
             if (!complete) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: TokensStrip.s3),
               FxLiquidPrimaryButton(
                 icon: Icons.arrow_forward_rounded,
                 label: nextStep?.buttonLabel ?? 'Completar perfil',
@@ -251,44 +251,52 @@ class _ChecklistChip extends StatelessWidget {
         item.done
             ? accent
             : (isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary);
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(999),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-          decoration: BoxDecoration(
-            color:
-                item.done
-                    ? accent.withValues(alpha: isDark ? 0.16 : 0.09)
-                    : (isDark
-                        ? Colors.white.withValues(alpha: 0.05)
-                        : TokensStrip.borderDefault),
-            borderRadius: BorderRadius.circular(999),
-            border:
-                onTap != null
-                    ? Border.all(color: accent.withValues(alpha: 0.22))
-                    : null,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                item.done ? Icons.check_circle : Icons.radio_button_unchecked,
-                size: 14,
-                color: color,
-              ),
-              const SizedBox(width: 5),
-              Text(
-                item.label,
-                style: TextStyle(
+    final statusLabel =
+        item.done
+            ? '${item.label}, concluído'
+            : '${item.label}, pendente. Toque para completar';
+    return Semantics(
+      button: onTap != null,
+      label: statusLabel,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(TokensStrip.rPill),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+            decoration: BoxDecoration(
+              color:
+                  item.done
+                      ? accent.withValues(alpha: isDark ? 0.16 : 0.09)
+                      : (isDark
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : TokensStrip.borderDefault),
+              borderRadius: BorderRadius.circular(TokensStrip.rPill),
+              border:
+                  onTap != null
+                      ? Border.all(color: accent.withValues(alpha: 0.22))
+                      : null,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  item.done ? Icons.check_circle : Icons.radio_button_unchecked,
+                  size: 14,
                   color: color,
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w800,
                 ),
-              ),
-            ],
+                const SizedBox(width: 5),
+                Text(
+                  item.label,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -387,52 +395,47 @@ class _ProfessionalDataPanel extends StatelessWidget {
           ),
           if (bioText.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.only(top: 13),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: onEdit,
-                  borderRadius: BorderRadius.circular(14),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _LeadingIcon(
-                        icon: Icons.notes_outlined,
-                        background:
-                            isDark
-                                ? accent.withValues(alpha: 0.14)
-                                : BrandPalette.soft(accent),
-                        color: accent,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Bio profissional',
-                              style: TextStyle(
-                                color: mute,
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w500,
-                              ),
+              padding: const EdgeInsets.only(top: TokensStrip.s3),
+              child: Semantics(
+                label: 'Bio profissional. $bioText',
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _LeadingIcon(
+                      icon: Icons.notes_outlined,
+                      background:
+                          isDark
+                              ? accent.withValues(alpha: 0.14)
+                              : BrandPalette.soft(accent),
+                      color: accent,
+                    ),
+                    const SizedBox(width: TokensStrip.s3),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Bio profissional',
+                            style: TextStyle(
+                              color: mute,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w500,
                             ),
-                            const SizedBox(height: 3),
-                            Text(
-                              bioText,
-                              style: TextStyle(
-                                color: ink,
-                                fontSize: 13.5,
-                                height: 1.45,
-                                fontWeight: FontWeight.w500,
-                              ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            bioText,
+                            style: TextStyle(
+                              color: ink,
+                              fontSize: 13.5,
+                              height: 1.45,
+                              fontWeight: FontWeight.w500,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      Icon(Icons.chevron_right, size: 18, color: mute),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -894,14 +897,6 @@ void _showDeleteAccountDialog(
     },
   );
 }
-
-bool _hasWallet(PerfilPersonal perfil) =>
-    _hasText(perfil.chavePix) ||
-    (_hasText(perfil.banco) &&
-        _hasText(perfil.agencia) &&
-        _hasText(perfil.conta));
-
-bool _hasText(String? value) => value != null && value.trim().isNotEmpty;
 
 String _buildSubtitle(PerfilPersonal perfil) {
   final specialty = perfil.especialidade ?? 'Personal Trainer';

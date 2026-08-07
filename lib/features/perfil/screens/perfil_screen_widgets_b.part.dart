@@ -207,9 +207,9 @@ class _CardSection extends StatelessWidget {
       container: true,
       label: a11yTitle,
       child: Container(
-        decoration: chrome.panel(radius: 20),
+        decoration: chrome.panel(radius: 16, accent: accent),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 16),
+          padding: const EdgeInsets.all(TokensStrip.s4),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -231,7 +231,7 @@ class _CardSection extends StatelessWidget {
                           ),
                         ),
                         if (subtitle != null) ...[
-                          const SizedBox(height: 4),
+                          const SizedBox(height: TokensStrip.s1),
                           Text(
                             subtitle!,
                             style: TextStyle(

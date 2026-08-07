@@ -27,6 +27,24 @@ class PerfilNextStep {
   final PerfilChecklistAction action;
 }
 
+/// Carteira comercial pronta (PIX ou dados bancários completos).
+bool perfilHasWallet(PerfilPersonal perfil) =>
+    _hasText(perfil.chavePix) ||
+    (_hasText(perfil.banco) &&
+        _hasText(perfil.agencia) &&
+        _hasText(perfil.conta));
+
+/// Microcopy de lacunas da prontidão (singular/plural).
+String perfilReadinessGapCopy(int missingCount) {
+  if (missingCount <= 0) {
+    return 'Seu perfil comercial está pronto para operar.';
+  }
+  if (missingCount == 1) {
+    return 'Falta 1 passo para fechar o perfil comercial.';
+  }
+  return 'Faltam $missingCount passos para fechar o perfil comercial.';
+}
+
 class PerfilReadinessView {
   const PerfilReadinessView({
     required this.score,
@@ -37,6 +55,11 @@ class PerfilReadinessView {
   final int score;
   final List<PerfilChecklistItem> items;
   final PerfilNextStep? nextStep;
+
+  bool get isPixDone =>
+      items.any((item) => item.label == 'PIX' && item.done);
+
+  int get missingCount => items.where((item) => !item.done).length;
 
   static const _order = [
     'Foto',
@@ -65,8 +88,8 @@ class PerfilReadinessView {
             )
             .toList();
 
+    // Score sempre alinhado aos chips (evita % vs PIX divergentes).
     final score =
-        perfil.readinessPercent ??
         ((items.where((item) => item.done).length / items.length) * 100)
             .round();
 
@@ -92,14 +115,20 @@ class PerfilReadinessView {
     return PerfilReadinessView(score: score, items: items, nextStep: nextStep);
   }
 
+  /// União API ∪ local: se qualquer lado marca lacuna, a UI mostra lacuna.
   static Set<String> _missingLabels(
     PerfilPersonal perfil,
     DashboardData dashboard,
   ) {
-    if (perfil.readinessMissing != null) {
-      return perfil.readinessMissing!.toSet();
-    }
+    final local = _localMissing(perfil, dashboard);
+    final fromApi = perfil.readinessMissing?.toSet() ?? const <String>{};
+    return local.union(fromApi);
+  }
 
+  static Set<String> _localMissing(
+    PerfilPersonal perfil,
+    DashboardData dashboard,
+  ) {
     final missing = <String>{};
     if (!_hasText(perfil.logoUrl ?? dashboard.logoUrl)) missing.add('Foto');
     if (!_hasText(perfil.telefone)) missing.add('Telefone');
@@ -119,7 +148,7 @@ class PerfilReadinessView {
         !_hasText(perfil.corSecundaria ?? dashboard.corSecundaria)) {
       missing.add('Paleta');
     }
-    if (!_hasWallet(perfil)) missing.add('PIX');
+    if (!perfilHasWallet(perfil)) missing.add('PIX');
     return missing;
   }
 
@@ -153,13 +182,6 @@ class PerfilReadinessView {
       },
     };
   }
-
-  static bool _hasWallet(PerfilPersonal perfil) =>
-      _hasText(perfil.chavePix) ||
-      (_hasText(perfil.banco) &&
-          _hasText(perfil.agencia) &&
-          _hasText(perfil.conta));
-
-  static bool _hasText(String? value) =>
-      value != null && value.trim().isNotEmpty;
 }
+
+bool _hasText(String? value) => value != null && value.trim().isNotEmpty;
