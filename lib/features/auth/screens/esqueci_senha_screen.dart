@@ -214,7 +214,7 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                       child: Text(
                         'Digite seu e-mail e vamos enviar um link pra redefinir sua senha.',
                         style: AppTypography.inter(
-                          color: heroTealSurface(0.78),
+                          color: heroTealSurface(0.82),
                           fontSize: 14.5,
                           height: 1.55,
                         ),
@@ -292,7 +292,7 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                       Text(
                         _hint!,
                         style: AppTypography.inter(
-                          color: heroTealSurface(0.78),
+                          color: heroTealSurface(0.82),
                           fontSize: 12.5,
                           height: 1.45,
                         ),

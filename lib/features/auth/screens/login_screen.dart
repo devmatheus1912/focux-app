@@ -459,7 +459,7 @@ class _AuthDivider extends StatelessWidget {
           child: Text(
             label,
             style: AppTypography.inter(
-              color: heroTealSurface(0.72),
+              color: heroTealSurface(0.82),
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),

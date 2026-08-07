@@ -299,7 +299,7 @@ class AuthRoleToggle extends StatelessWidget {
                 label,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: selected ? 1.0 : 0.72),
+                  color: Colors.white.withValues(alpha: selected ? 1.0 : 0.82),
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                   fontSize: 13,
                 ),
@@ -733,7 +733,7 @@ class AuthTextLink extends StatelessWidget {
           textAlign: TextAlign.center,
           text: TextSpan(
             style: AppTypography.inter(
-              color: textColor ?? heroTealSurface(0.72),
+              color: textColor ?? heroTealSurface(0.82),
               fontSize: fontSize,
             ),
             children: [
