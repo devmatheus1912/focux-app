@@ -59,8 +59,8 @@ class _DefinirSenhaAlunoScreenState
     final pwd = _novaSenhaCtrl.text;
     if (pwd.isEmpty) return 0;
     double score = 0;
-    if (pwd.length >= 6) score += 0.25;
-    if (pwd.length >= 8) score += 0.15;
+    if (pwd.length >= 8) score += 0.3;
+    if (pwd.length >= 12) score += 0.1;
     if (RegExp(r'[A-Z]').hasMatch(pwd)) score += 0.2;
     if (RegExp(r'[0-9]').hasMatch(pwd)) score += 0.2;
     if (RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(pwd)) score += 0.2;
@@ -315,8 +315,8 @@ class _DefinirSenhaAlunoScreenState
                                 if (v == null || v.isEmpty) {
                                   return 'Informe a nova senha';
                                 }
-                                if (v.length < 6) {
-                                  return 'Mínimo de 6 caracteres';
+                                if (v.length < 8) {
+                                  return 'Mínimo de 8 caracteres';
                                 }
                                 return null;
                               },

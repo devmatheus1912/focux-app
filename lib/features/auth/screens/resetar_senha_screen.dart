@@ -116,23 +116,24 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
         child: Scaffold(
           body: AuthShell(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(22, 60, 22, 40),
+              padding: authScrollPadding(context, top: 48, bottomExtra: 28),
               child: Form(
                 key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AuthBackButton(
-                      showLabel: true,
-                      onTap: () => context.go(_loginPath),
-                    ),
-                    const SizedBox(height: 20),
-                    AuthRoleHeader(
-                      roleLabel: _role == 'aluno' ? 'ALUNO' : 'PERSONAL',
-                      center: true,
-                      width: 118,
-                    ),
-                    const SizedBox(height: 20),
+                child: AuthFormEntrance(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AuthBackButton(
+                        showLabel: true,
+                        onTap: () => context.go(_loginPath),
+                      ),
+                      const SizedBox(height: 16),
+                      AuthRoleHeader(
+                        roleLabel: _role == 'aluno' ? 'ALUNO' : 'PERSONAL',
+                        center: true,
+                        width: authLogoWidthFor(context),
+                      ),
+                      const SizedBox(height: 16),
                     Text(
                       'Nova senha',
                       style: AppTypography.inter(
@@ -229,13 +230,14 @@ class _ResetarSenhaScreenState extends State<ResetarSenhaScreen> {
                       ),
                       const SizedBox(height: 12),
                     ],
-                    FxLiquidPrimaryButton(
-                      label: 'Alterar senha',
-                      icon: Icons.check_rounded,
-                      loading: _loading,
-                      onPressed: _loading ? null : _submit,
-                    ),
-                  ],
+                      FxLiquidPrimaryButton(
+                        label: 'Alterar senha',
+                        icon: Icons.check_rounded,
+                        loading: _loading,
+                        onPressed: _loading ? null : _submit,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

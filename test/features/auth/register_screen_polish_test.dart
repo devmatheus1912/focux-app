@@ -17,7 +17,9 @@ void main() {
       screen.indexOf('Criar minha conta'),
       lessThan(screen.indexOf('onboardingExistingAccountCta')),
     );
-    expect(screen, contains('width: 118'));
+    expect(screen, contains('authLogoWidthFor'));
+    expect(screen, contains('authScrollPadding'));
+    expect(screen, contains('AuthFormEntrance'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(8));
   });
 }

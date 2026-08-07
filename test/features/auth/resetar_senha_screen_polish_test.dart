@@ -22,5 +22,7 @@ void main() {
 
     // Erro/sucesso anunciados por leitores de tela.
     expect(screen, contains('liveRegion: true'));
+    expect(screen, contains('AuthFormEntrance'));
+    expect(screen, contains('authLogoWidthFor'));
   });
 }

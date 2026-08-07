@@ -105,22 +105,23 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
         child: Scaffold(
           body: AuthShell(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(22, 54, 22, 30),
+              padding: authScrollPadding(context, top: 48, bottomExtra: 28),
               child: Form(
                 key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AuthBackButton(
-                      onTap: () => context.go('/login?role=aluno'),
-                    ),
-                    const SizedBox(height: 10),
-                    const AuthRoleHeader(
-                      roleLabel: 'ALUNO',
-                      center: true,
-                      width: 118,
-                    ),
-                    const SizedBox(height: 12),
+                child: AuthFormEntrance(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AuthBackButton(
+                        onTap: () => context.go('/login?role=aluno'),
+                      ),
+                      const SizedBox(height: 8),
+                      AuthRoleHeader(
+                        roleLabel: 'ALUNO',
+                        center: true,
+                        width: authLogoWidthFor(context),
+                      ),
+                      const SizedBox(height: 12),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14,
@@ -245,7 +246,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                     AuthField(
                       label: 'Senha',
                       controller: _senhaCtrl,
-                      hintText: 'Mínimo 6 caracteres',
+                      hintText: 'Mín. 8 caracteres',
                       icon: Icons.lock_outline_rounded,
                       obscureText: !_senhaVisivel,
                       textInputAction: TextInputAction.done,
@@ -255,7 +256,9 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                         if (v == null || v.isEmpty) {
                           return 'Informe a senha.';
                         }
-                        if (v.length < 6) return 'Mínimo de 6 caracteres.';
+                        if (v.length < 8) {
+                          return 'A senha precisa ter no mínimo 8 caracteres.';
+                        }
                         return null;
                       },
                       suffix: IconButton(
@@ -275,7 +278,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                       const SizedBox(height: 8),
                       PasswordStrengthMeter(
                         password: _senhaCtrl.text,
-                        minLength: 6,
+                        minLength: 8,
                       ),
                     ],
                     if (_error != null) ...[
@@ -303,8 +306,9 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                               ? null
                               : () => context.go('/login?role=aluno'),
                     ),
-                    SizedBox(height: MediaQuery.paddingOf(context).bottom + 8),
-                  ],
+                      const SizedBox(height: 8),
+                    ],
+                  ),
                 ),
               ),
             ),

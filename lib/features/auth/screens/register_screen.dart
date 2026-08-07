@@ -210,42 +210,43 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         child: Scaffold(
           body: AuthShell(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(22, 54, 22, 30),
+              padding: authScrollPadding(context, top: 48, bottomExtra: 28),
               child: Form(
                 key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AuthBackButton(
-                      onTap: () => context.go('/login?role=personal'),
-                    ),
-                    const SizedBox(height: 10),
-                    const AuthRoleHeader(
-                      roleLabel: 'PERSONAL',
-                      center: true,
-                      width: 118,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Criar conta',
-                      style: AppTypography.inter(
-                        color: heroTealInk(),
-                        fontSize: 26,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.7,
-                        height: 1.15,
+                child: AuthFormEntrance(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AuthBackButton(
+                        onTap: () => context.go('/login?role=personal'),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Comece com sua conta e escolha o plano depois.',
-                      style: AppTypography.inter(
-                        color: heroTealSurface(0.82),
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w500,
+                      const SizedBox(height: 8),
+                      AuthRoleHeader(
+                        roleLabel: 'PERSONAL',
+                        center: true,
+                        width: authLogoWidthFor(context),
                       ),
-                    ),
-                    const SizedBox(height: 20),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Criar conta',
+                        style: AppTypography.inter(
+                          color: heroTealInk(),
+                          fontSize: 26,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.7,
+                          height: 1.15,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Comece com sua conta e escolha o plano depois.',
+                        style: AppTypography.inter(
+                          color: heroTealSurface(0.82),
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
                     AuthField(
                       label: 'Nome completo',
                       controller: _nameController,
@@ -407,6 +408,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                     ),
                   ],
+                  ),
                 ),
               ),
             ),

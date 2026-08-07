@@ -20,8 +20,12 @@ void main() {
 
     // Lockup de marca compartilhado — largura única para Personal e Aluno.
     expect(screen, contains('AuthLoginBrandHeader'));
-    expect(shell, contains('kAuthFormLogoWidth = 128.0'));
-    expect(shell, contains('width: kAuthFormLogoWidth'));
+    expect(shell, contains('AuthFormEntrance'));
+    expect(screen, contains('authScrollPadding'));
+    expect(
+      readScreenSourceBundle('lib/features/auth/utils/auth_layout.dart'),
+      contains('kAuthFormLogoWidth = 118.0'),
+    );
 
     // Segurança: nunca logar token/conta do Google no console.
     expect(screen, isNot(contains('debugPrint')));

@@ -12,13 +12,14 @@ import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/theme_provider.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/focux_official_logo.dart';
 import '../../../core/widgets/focux_brand_tagline.dart';
 import '../../../core/widgets/cinematic_mesh_background.dart';
+import '../utils/auth_layout.dart';
 
-/// Largura ideal do lockup Focux nas telas de formulário (login/esqueci).
-/// Cadastro (register/register_aluno) mantém 118 por convenção própria.
-const double kAuthFormLogoWidth = 128.0;
+export '../utils/auth_layout.dart'
+    show kAuthFormLogoWidth, authLogoWidthFor, authScrollPadding;
 
 class AuthShell extends StatelessWidget {
   const AuthShell({
@@ -59,7 +60,11 @@ class AuthShell extends StatelessWidget {
 }
 
 class AuthLogoMark extends ConsumerWidget {
-  const AuthLogoMark({super.key, this.width = 188, this.forceOfficial = false});
+  const AuthLogoMark({
+    super.key,
+    this.width = kAuthFormLogoWidth,
+    this.forceOfficial = false,
+  });
 
   final double width;
 
@@ -110,7 +115,7 @@ class AuthLoginBrandHeader extends ConsumerWidget {
   const AuthLoginBrandHeader({
     super.key,
     required this.isAluno,
-    this.taglineSize = 14.5,
+    this.taglineSize = 13.5,
   });
 
   final bool isAluno;
@@ -118,6 +123,7 @@ class AuthLoginBrandHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final logoWidth = authLogoWidthFor(context, withTagline: true);
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 280),
       switchInCurve: Curves.easeOutCubic,
@@ -127,27 +133,54 @@ class AuthLoginBrandHeader extends ConsumerWidget {
               ? Column(
                 key: const ValueKey('login-aluno'),
                 children: [
-                  const AuthRoleHeader(
+                  AuthRoleHeader(
                     roleLabel: 'ALUNO',
                     center: true,
-                    width: kAuthFormLogoWidth,
+                    width: logoWidth,
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 10),
                   AuthWordmark(taglineSize: taglineSize),
                 ],
               )
               : Column(
                 key: const ValueKey('login-personal'),
                 children: [
-                  const AuthRoleHeader(
+                  AuthRoleHeader(
                     roleLabel: 'PERSONAL',
                     center: true,
-                    width: kAuthFormLogoWidth,
+                    width: logoWidth,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   AuthWordmark(taglineSize: taglineSize),
                 ],
               ),
+    );
+  }
+}
+
+/// Entrada suave do formulário auth (respeita reduce-motion).
+class AuthFormEntrance extends StatelessWidget {
+  const AuthFormEntrance({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (TokensStrip.prefersReducedMotion(context)) return child;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOutCubic,
+      builder: (context, t, child) {
+        return Opacity(
+          opacity: t,
+          child: Transform.translate(
+            offset: Offset(0, 10 * (1 - t)),
+            child: child,
+          ),
+        );
+      },
+      child: child,
     );
   }
 }

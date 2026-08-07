@@ -17,7 +17,8 @@ void main() {
 
     // Toggle de papel reutilizado (com haptics) e lockup de 118px.
     expect(screen, contains('AuthRoleToggle'));
-    expect(screen, contains('width: 118'));
+    expect(screen, contains('authLogoWidthFor'));
+    expect(screen, contains('AuthFormEntrance'));
 
     // Papel é lido da query e propagado de volta ao login.
     expect(screen, contains("params['role']"));

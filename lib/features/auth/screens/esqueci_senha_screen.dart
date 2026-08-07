@@ -183,25 +183,21 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
         child: Scaffold(
           body: AuthShell(
             child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(
-                22,
-                48,
-                22,
-                24 + MediaQuery.viewPaddingOf(context).bottom,
-              ),
+              padding: authScrollPadding(context, top: 44, bottomExtra: 24),
               child: Form(
                 key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AuthBackButton(onTap: () => context.go(_loginPath)),
-                    const SizedBox(height: 28),
-                    AuthRoleHeader(
-                      roleLabel: _isAluno ? 'ALUNO' : 'PERSONAL',
-                      center: true,
-                      width: 118,
-                    ),
-                    const SizedBox(height: TokensStrip.s5),
+                child: AuthFormEntrance(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AuthBackButton(onTap: () => context.go(_loginPath)),
+                      const SizedBox(height: 20),
+                      AuthRoleHeader(
+                        roleLabel: _isAluno ? 'ALUNO' : 'PERSONAL',
+                        center: true,
+                        width: authLogoWidthFor(context),
+                      ),
+                      const SizedBox(height: 16),
                     Text(
                       'Recuperar senha',
                       style: AppTypography.inter(
@@ -310,15 +306,16 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                       onPressed: _loading ? null : _submit,
                     ),
                     const SizedBox(height: 20),
-                    Center(
-                      child: AuthTextLink(
-                        text: 'Lembrei a senha · ',
-                        actionText: 'Voltar ao login',
-                        onTap: () => context.go(_loginPath),
-                        fontSize: 13,
+                      Center(
+                        child: AuthTextLink(
+                          text: 'Lembrei a senha · ',
+                          actionText: 'Voltar ao login',
+                          onTap: () => context.go(_loginPath),
+                          fontSize: 13,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
