@@ -441,3 +441,73 @@ class _PaletteDot extends StatelessWidget {
     );
   }
 }
+
+/// Ferramentas de QA — recolhidas, fora do fluxo do personal.
+class _PerfilDebugTools extends StatelessWidget {
+  const _PerfilDebugTools({
+    required this.accent,
+    required this.actionInk,
+    required this.mute,
+    required this.line,
+  });
+
+  final Color accent;
+  final Color actionInk;
+  final Color mute;
+  final Color line;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          childrenPadding: EdgeInsets.zero,
+          initiallyExpanded: false,
+          iconColor: mute,
+          collapsedIconColor: mute,
+          title: Text(
+            'Ferramentas de desenvolvimento',
+            style: TextStyle(
+              color: mute,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          subtitle: Text(
+            'Só em debug — fora do fluxo do personal',
+            style: TextStyle(
+              color: mute.withValues(alpha: 0.85),
+              fontSize: 11,
+            ),
+          ),
+          children: [
+            _ActionTile(
+              icon: Icons.palette_outlined,
+              label: 'TOKENS STRIP',
+              value: 'Design system',
+              accent: accent,
+              actionInk: actionInk,
+              mute: mute,
+              line: line,
+              onTap: () => context.go('/qa/tokens-strip'),
+            ),
+            _ActionTile(
+              icon: Icons.science_outlined,
+              label: 'QA Smoke Test',
+              value: 'Smoke',
+              accent: accent,
+              actionInk: actionInk,
+              mute: mute,
+              line: line,
+              showDivider: false,
+              onTap: () => context.go('/qa/smoke'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

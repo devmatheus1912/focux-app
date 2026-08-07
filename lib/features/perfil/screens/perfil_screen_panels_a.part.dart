@@ -86,74 +86,6 @@ class _PerfilStickyBar extends StatelessWidget {
   }
 }
 
-class _PerfilBottomActions extends StatelessWidget {
-  final bool profileComplete;
-  final bool walletComplete;
-  final PerfilNextStep primaryCta;
-  final void Function(PerfilChecklistAction action) onChecklistAction;
-
-  const _PerfilBottomActions({
-    required this.profileComplete,
-    required this.walletComplete,
-    required this.primaryCta,
-    required this.onChecklistAction,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (profileComplete) {
-      return const SizedBox.shrink();
-    }
-
-    if (!walletComplete) {
-      return SizedBox(
-        height: 52,
-        child: Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  HapticFeedback.selectionClick();
-                  context.push('/perfil/wallet');
-                },
-                icon: const Icon(Icons.account_balance_wallet_outlined),
-                label: const Text('Configurar PIX'),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: FxLiquidPrimaryButton(
-                expand: true,
-                icon:
-                    primaryCta.action == PerfilChecklistAction.convites
-                        ? Icons.person_add_outlined
-                        : Icons.arrow_forward_rounded,
-                label: primaryCta.buttonLabel,
-                onPressed: () {
-                  HapticFeedback.selectionClick();
-                  onChecklistAction(primaryCta.action);
-                },
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return FxLiquidPrimaryButton(
-      icon:
-          primaryCta.action == PerfilChecklistAction.convites
-              ? Icons.person_add_outlined
-              : Icons.arrow_forward_rounded,
-      label: primaryCta.buttonLabel,
-      onPressed: () {
-        HapticFeedback.selectionClick();
-        onChecklistAction(primaryCta.action);
-      },
-    );
-  }
-}
-
 class _BrandPreview extends StatelessWidget {
   final Color primary;
   final Color secondary;
@@ -250,12 +182,12 @@ class _BrandPreview extends StatelessWidget {
                       const SizedBox(height: 3),
                       Text(
                         subtitle,
-                        maxLines: compact ? 1 : 2,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.88),
                           fontSize: compact ? 11 : 11.5,
-                          height: 1.3,
+                          height: 1.28,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

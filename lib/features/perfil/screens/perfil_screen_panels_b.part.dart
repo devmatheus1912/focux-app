@@ -168,11 +168,12 @@ class _ReadyStamp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final stamp = Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(TokensStrip.rPill),
+        border: Border.all(color: accent.withValues(alpha: 0.22)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -190,6 +191,21 @@ class _ReadyStamp extends StatelessWidget {
           ),
         ],
       ),
+    );
+
+    if (TokensStrip.prefersReducedMotion(context)) return stamp;
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.88, end: 1),
+      duration: const Duration(milliseconds: 420),
+      curve: Curves.easeOutBack,
+      builder: (context, t, child) {
+        return Transform.scale(
+          scale: t,
+          child: Opacity(opacity: t.clamp(0.0, 1.0), child: child),
+        );
+      },
+      child: stamp,
     );
   }
 }
@@ -220,7 +236,7 @@ class _ReadyFocusStrip extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Operação pronta — use o Copiloto IA, convide alunos e acompanhe pelo dashboard.',
+              'Tudo pronto — compartilhe a vitrine ou abra o Copiloto IA.',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(

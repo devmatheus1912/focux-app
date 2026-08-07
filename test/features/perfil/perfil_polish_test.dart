@@ -19,10 +19,12 @@ void main() {
     expect(screen, contains('Marca e vitrine'));
     expect(screen, contains('Sua vitrine online'));
     expect(screen, contains('_HeroStatPill'));
+    expect(screen, contains('_PerfilDebugTools'));
     expect(screen, contains('Operação'));
     expect(screen, contains('_PerfilGrowthSection'));
     expect(screen, contains('if (!profileComplete)'));
     expect(screen, contains('Conta e segurança'));
+    expect(screen, isNot(contains('_PerfilBottomActions')));
     expect(screen, isNot(contains('Conta e plano')));
     expect(screen, isNot(contains('Nao informado')));
     expect(screen, isNot(contains('Politica de privacidade')));

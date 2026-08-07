@@ -194,16 +194,10 @@ class _PerfilBody extends StatelessWidget {
       ),
     ];
 
-    final primaryCta =
-        readiness.nextStep ??
-        const PerfilNextStep(
-          label: 'Operação',
-          buttonLabel: 'Convidar alunos',
-          action: PerfilChecklistAction.convites,
-        );
     final profileComplete = profileScore >= 100;
     final usingDefaultBrand = _usesDefaultPalette(primaryColor, secondaryColor);
-    final scrollBottomPad = 108.0 + (profileComplete ? 0.0 : 72.0);
+    // Sticky Meus alunos / Copiloto — CTA de gap fica só na prontidão (topo).
+    const scrollBottomPad = 108.0;
 
     return FxShellScaffold(
       useMesh: true,
@@ -623,26 +617,6 @@ class _PerfilBody extends StatelessWidget {
                                 line: line,
                                 onTap: () => FocuxLegal.openPrivacy(),
                               ),
-                              if (kDebugMode) ...[
-                                _ActionTile(
-                                  icon: Icons.palette_outlined,
-                                  label: 'TOKENS STRIP (design system)',
-                                  value: 'Só em debug',
-                                  accent: accent,
-                                  mute: mute,
-                                  line: line,
-                                  onTap: () => context.go('/qa/tokens-strip'),
-                                ),
-                                _ActionTile(
-                                  icon: Icons.science_outlined,
-                                  label: 'QA Smoke Test',
-                                  value: 'Só em debug',
-                                  accent: accent,
-                                  mute: mute,
-                                  line: line,
-                                  onTap: () => context.go('/qa/smoke'),
-                                ),
-                              ],
                               _ActionTile(
                                 icon: Icons.logout,
                                 label: 'Sair da conta',
@@ -663,25 +637,23 @@ class _PerfilBody extends StatelessWidget {
                                 mute: mute,
                                 line: line,
                                 danger: true,
-                                showDivider: false,
+                                showDivider: kDebugMode,
                                 onTap:
                                     () => _showDeleteAccountDialog(
                                       context,
                                       onSessionCleared: onLogout,
                                     ),
                               ),
+                              if (kDebugMode)
+                                _PerfilDebugTools(
+                                  accent: accent,
+                                  actionInk: actionInk,
+                                  mute: mute,
+                                  line: line,
+                                ),
                             ],
                           ),
                         ),
-                        if (!profileComplete) ...[
-                          const SizedBox(height: TokensStrip.s4),
-                          _PerfilBottomActions(
-                            profileComplete: profileComplete,
-                            walletComplete: readiness.isPixDone,
-                            primaryCta: primaryCta,
-                            onChecklistAction: onChecklistAction,
-                          ),
-                        ],
                       ],
                     ),
                 ]),
