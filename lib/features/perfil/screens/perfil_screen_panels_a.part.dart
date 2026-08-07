@@ -247,6 +247,7 @@ class _PerfilPublicLinkCard extends StatelessWidget {
     required this.mute,
     required this.isDark,
     required this.onOpenEditor,
+    this.compact = false,
   });
 
   final String? slug;
@@ -255,6 +256,7 @@ class _PerfilPublicLinkCard extends StatelessWidget {
   final Color mute;
   final bool isDark;
   final VoidCallback onOpenEditor;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -264,44 +266,13 @@ class _PerfilPublicLinkCard extends StatelessWidget {
     final hasSlug = normalizedSlug != null && normalizedSlug.isNotEmpty;
 
     if (!hasSlug) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: chrome.line),
-          color: accent.withValues(alpha: isDark ? 0.08 : 0.04),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Sua vitrine online',
-              style: TextStyle(
-                color: ink,
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: TokensStrip.s1),
-            Text(
-              'Crie o link público para divulgar no Instagram e WhatsApp.',
-              style: TextStyle(color: mute, fontSize: 12, height: 1.35),
-            ),
-            const SizedBox(height: TokensStrip.s2),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: () {
-                  HapticFeedback.selectionClick();
-                  onOpenEditor();
-                },
-                icon: const Icon(Icons.add_link_rounded, size: 18),
-                label: const Text('Criar link público'),
-              ),
-            ),
-          ],
-        ),
+      return TextButton.icon(
+        onPressed: () {
+          HapticFeedback.selectionClick();
+          onOpenEditor();
+        },
+        icon: const Icon(Icons.add_link_rounded, size: 18),
+        label: const Text('Criar link público'),
       );
     }
 
@@ -314,41 +285,9 @@ class _PerfilPublicLinkCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Link público',
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-              Semantics(
-                button: true,
-                label: 'Personalizar página',
-                child: TextButton(
-                  onPressed: () {
-                    HapticFeedback.selectionClick();
-                    onOpenEditor();
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: actionInk,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    minimumSize: const Size(48, 40),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: const Text('Personalizar página'),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: TokensStrip.s2),
           Container(
             width: double.infinity,
-            constraints: const BoxConstraints(minHeight: 52),
+            constraints: const BoxConstraints(minHeight: 48),
             padding: const EdgeInsets.only(left: 12),
             decoration: BoxDecoration(
               color: (isDark ? EagleTokens.darkCard : Colors.white).withValues(
@@ -368,9 +307,8 @@ class _PerfilPublicLinkCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: ink,
-                      fontSize: 14,
+                      fontSize: 13.5,
                       fontWeight: FontWeight.w800,
-                      letterSpacing: -0.2,
                     ),
                   ),
                 ),
@@ -383,13 +321,14 @@ class _PerfilPublicLinkCard extends StatelessWidget {
                       copyLandingLink(
                         context,
                         url: copyUrl,
-                        successMessage: 'Link copiado. Cole no Instagram ou WhatsApp.',
+                        successMessage:
+                            'Link copiado. Cole no Instagram ou WhatsApp.',
                       );
                     },
                     style: TextButton.styleFrom(
                       foregroundColor: actionInk,
                       minimumSize: const Size(48, 48),
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
                     ),
                     icon: const Icon(Icons.copy_rounded, size: 18),
                     label: const Text('Copiar'),
@@ -398,7 +337,7 @@ class _PerfilPublicLinkCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: TokensStrip.s3),
+          const SizedBox(height: TokensStrip.s2),
           Row(
             children: [
               Expanded(
@@ -407,13 +346,13 @@ class _PerfilPublicLinkCard extends StatelessWidget {
                     HapticFeedback.selectionClick();
                     openLandingLink(context, url: copyUrl);
                   },
-                  icon: const Icon(Icons.open_in_new_rounded, size: 17),
+                  icon: const Icon(Icons.open_in_new_rounded, size: 16),
                   label: const Text('Ver ao vivo'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: actionInk,
                     side: BorderSide(color: accent.withValues(alpha: 0.35)),
-                    minimumSize: const Size(48, 48),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    minimumSize: const Size(44, 44),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                 ),
               ),
@@ -429,18 +368,50 @@ class _PerfilPublicLinkCard extends StatelessWidget {
                           'Link pronto para compartilhar no Instagram ou WhatsApp.',
                     );
                   },
-                  icon: const Icon(Icons.ios_share_rounded, size: 17),
+                  icon: const Icon(Icons.ios_share_rounded, size: 16),
                   label: const Text('Compartilhar'),
                   style: FilledButton.styleFrom(
                     backgroundColor: accent,
                     foregroundColor: Colors.white,
-                    minimumSize: const Size(48, 48),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    minimumSize: const Size(44, 44),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                 ),
               ),
             ],
           ),
+          if (!compact) ...[
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  onOpenEditor();
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: actionInk,
+                  minimumSize: const Size(48, 40),
+                ),
+                child: const Text('Personalizar página'),
+              ),
+            ),
+          ] else
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  onOpenEditor();
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: actionInk,
+                  minimumSize: const Size(48, 36),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                ),
+                child: const Text('Personalizar página'),
+              ),
+            ),
         ],
       ),
     );

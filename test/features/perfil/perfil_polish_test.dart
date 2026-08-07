@@ -21,6 +21,7 @@ void main() {
     expect(screen, contains('_HeroMarcaChip'));
     expect(screen, contains('PerfilProfessionalSummary'));
     expect(screen, contains('_PerfilDebugTools'));
+    expect(screen, contains('Mais ferramentas'));
     expect(screen, contains('Operação'));
     expect(screen, contains('_PerfilGrowthSection'));
     expect(screen, contains('if (!profileComplete)'));

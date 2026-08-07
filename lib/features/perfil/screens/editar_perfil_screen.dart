@@ -199,10 +199,10 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
           bottom: false,
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(
-              TokensStrip.s5,
-              8,
-              TokensStrip.s5,
-              24,
+              TokensStrip.s4,
+              6,
+              TokensStrip.s4,
+              20,
             ),
             child: Form(
               key: _formKey,
@@ -226,7 +226,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                           alignment: Alignment.bottomRight,
                           children: [
                             CircleAvatar(
-                              radius: 54,
+                              radius: 44,
                               backgroundColor: primary.withValues(alpha: 0.12),
                               backgroundImage:
                                   _logoUrl != null
@@ -285,14 +285,14 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Center(
                     child: Text(
                       'Toque no ícone para trocar a foto',
                       style: TextStyle(fontSize: 12, color: mute),
                     ),
                   ),
-                  const SizedBox(height: 22),
+                  const SizedBox(height: TokensStrip.s3),
                   FxStaggerItem(
                     index: 0,
                     child: _SectionCard(
@@ -316,7 +316,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                                           : null,
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: TokensStrip.s2),
                           Semantics(
                             label: 'Telefone ou WhatsApp',
                             child: TextFormField(
@@ -336,7 +336,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: TokensStrip.s3),
                   FxStaggerItem(
                     index: 1,
                     child: _SectionCard(
@@ -355,7 +355,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: TokensStrip.s2),
                           Semantics(
                             label: 'Especialidade principal',
                             child: TextFormField(
@@ -368,7 +368,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: TokensStrip.s2),
                           Semantics(
                             label: 'Áreas de atuação opcional',
                             child: TextFormField(
@@ -381,7 +381,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: TokensStrip.s2),
                           Semantics(
                             label: 'Instagram opcional',
                             child: TextFormField(
@@ -398,7 +398,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: TokensStrip.s3),
                   FxStaggerItem(
                     index: 2,
                     child: _SectionCard(
@@ -466,7 +466,12 @@ class _SectionCard extends StatelessWidget {
       container: true,
       label: a11y,
       child: Container(
-        padding: const EdgeInsets.all(TokensStrip.s4),
+        padding: const EdgeInsets.fromLTRB(
+          TokensStrip.s3,
+          TokensStrip.s3,
+          TokensStrip.s3,
+          TokensStrip.s3,
+        ),
         decoration: fxListCardDecoration(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -480,13 +485,13 @@ class _SectionCard extends StatelessWidget {
               ),
             ),
             if (showHint) ...[
-              const SizedBox(height: 4),
+              const SizedBox(height: 3),
               Text(
                 _hintCopy,
-                style: TextStyle(color: mute, fontSize: 11.5, height: 1.3),
+                style: TextStyle(color: mute, fontSize: 11.5, height: 1.25),
               ),
             ],
-            const SizedBox(height: 14),
+            const SizedBox(height: TokensStrip.s2),
             child,
           ],
         ),

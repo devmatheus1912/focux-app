@@ -139,6 +139,7 @@ class _PerfilBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final themePrimary = theme.colorScheme.primary;
@@ -429,9 +430,8 @@ class _PerfilBody extends StatelessWidget {
                         ],
                         _CardSection(
                           title: 'Marca e vitrine',
-                          subtitle:
-                              'Como o aluno te vê e o link para divulgar.',
-                          trailingLabel: 'Editar marca',
+                          subtitle: 'Link para divulgar e preview do aluno.',
+                          trailingLabel: 'Editar',
                           onTrailingTap: () {
                             HapticFeedback.selectionClick();
                             context.push('/identidade-visual');
@@ -452,40 +452,34 @@ class _PerfilBody extends StatelessWidget {
                                       HapticFeedback.selectionClick();
                                       context.push('/identidade-visual');
                                     },
-                                    borderRadius: BorderRadius.circular(16),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        _BrandPreview(
-                                          primary: heroPrimary,
-                                          secondary: heroSecondary,
-                                          profileName: perfil.nome,
-                                          subtitle: brandSubtitle,
-                                          logoUrl:
-                                              perfil.logoUrl ??
-                                              dashboard.logoUrl,
-                                          isDark: isDark,
-                                          compact: true,
-                                        ),
-                                        const SizedBox(height: TokensStrip.s2),
-                                        _BrandPaletteStrip(
-                                          primary: primaryColor,
-                                          secondary: secondaryColor,
-                                          mute: mute,
-                                          usingDefault: usingDefaultBrand,
-                                        ),
-                                      ],
+                                    borderRadius: BorderRadius.circular(14),
+                                    child: _BrandPreview(
+                                      primary: heroPrimary,
+                                      secondary: heroSecondary,
+                                      profileName: perfil.nome,
+                                      subtitle: brandSubtitle,
+                                      logoUrl:
+                                          perfil.logoUrl ?? dashboard.logoUrl,
+                                      isDark: isDark,
+                                      compact: true,
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: TokensStrip.s3),
+                                const SizedBox(height: TokensStrip.s2),
+                                _BrandPaletteStrip(
+                                  primary: primaryColor,
+                                  secondary: secondaryColor,
+                                  mute: mute,
+                                  usingDefault: usingDefaultBrand,
+                                ),
+                                const SizedBox(height: TokensStrip.s2),
                                 _PerfilPublicLinkCard(
                                   slug: perfil.slug,
                                   accent: accent,
                                   actionInk: actionInk,
                                   mute: mute,
                                   isDark: isDark,
+                                  compact: true,
                                   onOpenEditor: () {
                                     HapticFeedback.selectionClick();
                                     onOpenLandingEditor();
@@ -518,8 +512,7 @@ class _PerfilBody extends StatelessWidget {
                         const SizedBox(height: TokensStrip.s3),
                         _CardSection(
                           title: 'Operação',
-                          subtitle:
-                              'Plano, carteira e ferramentas de crescimento.',
+                          subtitle: 'Plano, carteira e crescimento.',
                           isDark: isDark,
                           accent: accent,
                           actionInk: actionInk,
@@ -558,37 +551,70 @@ class _PerfilBody extends StatelessWidget {
                                 line: line,
                                 onTap: () => context.push('/migracao-magica'),
                               ),
-                              _PerfilGrowthSection(
-                                accent: accent,
-                                actionInk: actionInk,
-                                mute: mute,
-                                line: line,
-                                isDark: isDark,
-                                child: GatedProfileShortcuts(
-                                  accent: accent,
-                                  actionInk: actionInk,
-                                  mute: mute,
-                                  line: line,
-                                  tileBuilder:
-                                      ({
-                                        required icon,
-                                        required label,
-                                        required value,
-                                        required onTap,
-                                        required locked,
-                                        upgradeTierLabel,
-                                      }) => _ActionTile(
-                                        icon: icon,
-                                        label: label,
-                                        value: value,
+                              Material(
+                                color: Colors.transparent,
+                                child: Theme(
+                                  data: Theme.of(context).copyWith(
+                                    dividerColor: Colors.transparent,
+                                  ),
+                                  child: ExpansionTile(
+                                    tilePadding: EdgeInsets.zero,
+                                    childrenPadding: EdgeInsets.zero,
+                                    initiallyExpanded: false,
+                                    iconColor: mute,
+                                    collapsedIconColor: mute,
+                                    title: Text(
+                                      'Mais ferramentas',
+                                      style: TextStyle(
+                                        color: ink,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      'Crescimento, loja, equipe e hábitos',
+                                      style: TextStyle(
+                                        color: mute,
+                                        fontSize: 11.5,
+                                      ),
+                                    ),
+                                    children: [
+                                      _PerfilGrowthSection(
                                         accent: accent,
                                         actionInk: actionInk,
                                         mute: mute,
                                         line: line,
-                                        locked: locked,
-                                        upgradeTierLabel: upgradeTierLabel,
-                                        onTap: onTap,
+                                        isDark: isDark,
+                                        child: GatedProfileShortcuts(
+                                          accent: accent,
+                                          actionInk: actionInk,
+                                          mute: mute,
+                                          line: line,
+                                          tileBuilder:
+                                              ({
+                                                required icon,
+                                                required label,
+                                                required value,
+                                                required onTap,
+                                                required locked,
+                                                upgradeTierLabel,
+                                              }) => _ActionTile(
+                                                icon: icon,
+                                                label: label,
+                                                value: value,
+                                                accent: accent,
+                                                actionInk: actionInk,
+                                                mute: mute,
+                                                line: line,
+                                                locked: locked,
+                                                upgradeTierLabel:
+                                                    upgradeTierLabel,
+                                                onTap: onTap,
+                                              ),
+                                        ),
                                       ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ],

@@ -31,7 +31,12 @@ class _CompletenessCard extends StatelessWidget {
               ? 'Perfil pronto. $score por cento de prontidão comercial.'
               : 'Prontidão comercial. $score por cento.',
       child: Container(
-        padding: const EdgeInsets.all(TokensStrip.s4),
+        padding: const EdgeInsets.fromLTRB(
+          TokensStrip.s4,
+          TokensStrip.s3,
+          TokensStrip.s4,
+          TokensStrip.s3,
+        ),
         decoration: chrome.panel(radius: 16, accent: accent),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,30 +44,14 @@ class _CompletenessCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        complete ? 'Perfil pronto' : 'Prontidão comercial',
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.2,
-                        ),
-                      ),
-                      const SizedBox(height: TokensStrip.s1),
-                      Text(
-                        perfilReadinessGapCopy(
-                          items.where((item) => !item.done).length,
-                        ),
-                        style: TextStyle(
-                          color: mute,
-                          fontSize: 12,
-                          height: 1.35,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    complete ? 'Perfil pronto' : 'Prontidão comercial',
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.2,
+                    ),
                   ),
                 ),
                 if (complete)
@@ -72,14 +61,20 @@ class _CompletenessCard extends StatelessWidget {
                     '$score%',
                     style: TextStyle(
                       color: accent,
-                      fontSize: 26,
+                      fontSize: 22,
                       fontWeight: FontWeight.w900,
-                      letterSpacing: 0,
                     ),
                   ),
               ],
             ),
-            const SizedBox(height: TokensStrip.s3),
+            const SizedBox(height: 6),
+            Text(
+              perfilReadinessGapCopy(
+                items.where((item) => !item.done).length,
+              ),
+              style: TextStyle(color: mute, fontSize: 12, height: 1.3),
+            ),
+            const SizedBox(height: TokensStrip.s2),
             TweenAnimationBuilder<double>(
               tween: Tween<double>(begin: 0, end: score / 100),
               duration: const Duration(milliseconds: 700),
@@ -88,7 +83,7 @@ class _CompletenessCard extends StatelessWidget {
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(999),
                   child: SizedBox(
-                    height: 9,
+                    height: 6,
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
@@ -101,16 +96,7 @@ class _CompletenessCard extends StatelessWidget {
                         FractionallySizedBox(
                           alignment: Alignment.centerLeft,
                           widthFactor: value,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  accent.withValues(alpha: 0.72),
-                                  accent,
-                                ],
-                              ),
-                            ),
-                          ),
+                          child: ColoredBox(color: accent),
                         ),
                       ],
                     ),
@@ -118,29 +104,28 @@ class _CompletenessCard extends StatelessWidget {
                 );
               },
             ),
-            const SizedBox(height: TokensStrip.s3),
-            if (complete)
-              _ReadyFocusStrip(accent: accent, isDark: isDark)
-            else
+            if (complete) ...[
+              const SizedBox(height: TokensStrip.s2),
+              _ReadyFocusStrip(accent: accent, isDark: isDark),
+            ] else ...[
+              const SizedBox(height: TokensStrip.s2),
+              // Só lacunas — evita nuvem de chips concluídos.
               Wrap(
                 spacing: TokensStrip.s2,
                 runSpacing: TokensStrip.s2,
                 children:
                     items
+                        .where((item) => !item.done)
                         .map(
                           (item) => _ChecklistChip(
                             item: item,
                             accent: accent,
-                            onTap:
-                                item.done
-                                    ? null
-                                    : () => onChecklistAction(item.action),
+                            onTap: () => onChecklistAction(item.action),
                           ),
                         )
                         .toList(),
               ),
-            if (!complete) ...[
-              const SizedBox(height: TokensStrip.s3),
+              const SizedBox(height: TokensStrip.s2),
               FxLiquidPrimaryButton(
                 icon: Icons.arrow_forward_rounded,
                 label: nextStep?.buttonLabel ?? 'Completar perfil',
