@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../features/alunos/data/aluno_copilot_ia_cache_store.dart';
 import '../api/offline_sync_service.dart';
 import '../cache/offline_cache.dart';
 import '../storage/secure_storage.dart';
@@ -15,6 +16,7 @@ class SessionInvalidator {
       OfflineCache.clearAll(),
       LocalCache.clearAll(),
       OfflineSyncService.clearQueue(),
+      AlunoCopilotIaCacheStore.clearAll(),
     ]);
     _notifier.value++;
     if (kDebugMode && reason != null && reason.isNotEmpty) {

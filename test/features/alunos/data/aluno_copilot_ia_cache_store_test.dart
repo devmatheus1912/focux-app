@@ -1,13 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/data/aluno_copilot_ia_cache_store.dart';
 import 'package:focux_app/features/ia/models/ia_copilot_proxima_acao.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-
   setUp(() async {
-    SharedPreferences.setMockInitialValues({});
+    await AlunoCopilotIaCacheStore.clearAll();
   });
 
   test('save and loadIfFresh returns payload within ttl', () async {

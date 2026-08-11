@@ -33,6 +33,12 @@ class Env {
         .toList();
   }
 
+  /// Em release store: falha ao iniciar Dio sem pins (evita pinning “fantasma”).
+  static const bool requireApiCertPins = bool.fromEnvironment(
+    'REQUIRE_API_CERT_PINS',
+    defaultValue: false,
+  );
+
   /// Public URL used for shareable landing links.
   ///
   /// Today the canonical `focux.app` domain points to another web project, so

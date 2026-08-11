@@ -218,19 +218,37 @@ class ApiClient {
   }
 
   /// Lista de prefixos de rota cuja resposta GET deve ser cacheada
-  /// localmente para uso offline. Mantemos o conjunto pequeno e
-  /// dirigido aos fluxos críticos do dia-a-dia (Hoje, Alunos, Treinos).
+  /// localmente para uso offline. Sem PII pesada (alunos/perfil/LGPD).
   static bool _shouldCachePath(String path) {
+    if (_isSensitiveDiskCachePath(path)) return false;
     const cacheable = [
-      '/api/personal/perfil',
       '/api/planos/me',
       '/api/planos/vitrine',
-      '/api/alunos',
       '/api/treinos',
       '/api/dashboard',
       '/api/hoje',
     ];
     for (final prefix in cacheable) {
+      if (path == prefix ||
+          path.startsWith('$prefix?') ||
+          path.startsWith('$prefix/')) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Nunca gravar em SharedPreferences (PII / saúde / comunidade).
+  static bool _isSensitiveDiskCachePath(String path) {
+    const blocked = [
+      '/api/alunos',
+      '/api/personal/perfil',
+      '/api/lgpd',
+      '/api/comunidade',
+      '/api/health',
+      '/api/webhooks',
+    ];
+    for (final prefix in blocked) {
       if (path == prefix ||
           path.startsWith('$prefix?') ||
           path.startsWith('$prefix/')) {
