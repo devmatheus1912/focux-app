@@ -11,31 +11,32 @@ O Focux Personal e o sistema operacional do personal trainer moderno. O app Flut
 
 O app se conecta ao `focux-backend`, usa JWT para sessao, aplica rotas por perfil e consome a mesma API multi-tenant que isola cada personal e seus alunos.
 
-## Estado atual (jun/2026)
+## Estado atual (ago/2026)
 
 | Item | Valor |
 |---|---|
-| Versao | `1.1.0+2` |
-| Flutter / Dart | 3.44 / SDK `^3.7` |
+| Versao | `1.2.0+3` |
+| Flutter / Dart | SDK `^3.7` |
 | Branch | `main` |
-| API producao | `https://focux-backend-production.up.railway.app` |
-| Analyzer | `dart analyze --fatal-warnings --fatal-infos` sem issues |
-| Testes | `flutter test` — 935 specs |
+| API | Backend Focux em producao (Railway) — URL via `API_URL` / defaults do `Env` |
+| Site legal/marketing | [focuxpersonal.com](https://focuxpersonal.com) |
+| Testes | suite em `test/` (~970 casos) |
 
 ### Destaques recentes
 
-- **Aluno 360** (`/alunos/:id`): abas **Operacao**, **Evolucao** e **Ferramentas** com aderencia semanal, timeline, copiloto IA, recovery, risco financeiro, autonomia e evolucao inteligente.
-- **Modo foco da operacao** persistido no backend e sincronizado via `PATCH /api/alunos/{id}/operacao-focus`.
-- **Hubs operacionais** decompostos (treinos, financeiro, alunos) com logica em `utils/` e `part` files; telas satelite tipadas (busca, gamificacao, migracao).
-- **Design system** documentado em `docs/DESIGN_SYSTEM.md` e `docs/CODING_STANDARDS.md`.
-- **Repositorio enxuto**: `scripts/`, `android/gradle.properties` e `lib/l10n/app_localizations*.dart` sao locais (gitignored); use os arquivos `.example` como base.
+- **Home / Command Center** do personal com modo foco, next-actions e hubs densificados.
+- **Aluno 360**: Operacao, Evolucao e Ferramentas (aderencia, timeline, copiloto, recovery, risco financeiro).
+- **Sessao**: logout limpa tokens, caches locais e leftovers de entitlement; web nao persiste JWT em storage persistente.
+- **TLS**: builds de loja exigem pins (`API_CERT_PINS` + `REQUIRE_API_CERT_PINS`); cobre Dio e WebSocket/STOMP.
+- **Design system** em `docs/DESIGN_SYSTEM.md` e `docs/CODING_STANDARDS.md`.
+- **Repo enxuto**: `scripts/`, `android/gradle.properties` e l10n gerados sao locais (gitignored); use os `.example`.
 
 ### Areas em evolucao
 
-- habitos e recorrencia;
-- monetizacao / ofertas upsell;
-- QA smoke catalog e E2E Playwright;
-- iOS apos estabilizacao Android;
+- IAP com contas pagas App Store / Play (verify + notificacoes de lifecycle);
+- E2E / smoke de rotas criticas;
+- iOS apos base Android consolidada;
+- habitos, recorrencia e ofertas enterprise;
 - health/recovery e pose coach.
 
 ## Stack
@@ -578,8 +579,10 @@ Variaveis por `--dart-define`:
 
 | Variavel | Default | Uso |
 |---|---|---|
-| `API_URL` | `https://focux-backend-production.up.railway.app` | Backend HTTP |
-| `PUBLIC_WEB_URL` | `https://focux-backend-production.up.railway.app` | Links publicos/landing |
+| `API_URL` | URL HTTPS do backend | Backend HTTP |
+| `PUBLIC_WEB_URL` | URL publica do site/landing | Links publicos |
+| `API_CERT_PINS` | pins SHA-256 (obrigatorio em release store) | TLS pinning |
+| `REQUIRE_API_CERT_PINS` | `true` em release | Falha se pin ausente |
 | `WS_URL` | Derivado de `API_URL` | WebSocket |
 | `GOOGLE_WEB_CLIENT_ID` | Client ID publico default | Google Sign-In |
 
@@ -667,9 +670,12 @@ Copie `android/gradle.properties.example` para `android/gradle.properties` e aju
 ### Android APK
 
 ```bash
+# Preferir tools/release/build-android.sh (exige API_CERT_PINS)
 flutter build apk --release \
-  --dart-define=API_URL=https://focux-backend-production.up.railway.app \
-  --dart-define=PUBLIC_WEB_URL=https://focux.app
+  --dart-define=API_URL=https://SEU_BACKEND \
+  --dart-define=PUBLIC_WEB_URL=https://focuxpersonal.com \
+  --dart-define=API_CERT_PINS=sha256/SEU_PIN \
+  --dart-define=REQUIRE_API_CERT_PINS=true
 ```
 
 Saida:
@@ -688,8 +694,8 @@ flutter build appbundle --release
 
 ```bash
 flutter build web --release \
-  --dart-define=API_URL=https://focux-backend-production.up.railway.app \
-  --dart-define=PUBLIC_WEB_URL=https://focux.app
+  --dart-define=API_URL=https://SEU_BACKEND \
+  --dart-define=PUBLIC_WEB_URL=https://focuxpersonal.com
 ```
 
 Saida:
@@ -789,45 +795,36 @@ flutter gen-l10n
 
 ## Backend
 
-Repositorio backend: `focux-backend`
+Repositorio: `focux-backend` (deploy Railway). Configure `API_URL` no app para o host HTTPS do ambiente. Health check via Actuator no profile de producao (detalhes nao expostos por padrao).
 
-Producao:
+## Seguranca (app)
 
-```text
-https://focux-backend-production.up.railway.app
-```
+Postura atual (alto nivel):
 
-Health:
-
-```text
-https://focux-backend-production.up.railway.app/actuator/health
-```
-
-## Seguranca de credenciais
+- Autenticacao JWT; refresh com rotacao; logout invalida sessao local e no backend.
+- Storage seguro para tokens no mobile; limpeza de cache/offline no logout.
+- Builds de release exigem certificate pinning da API (scripts em `tools/release/`).
+- App Links / Universal Links com paths allowlisted; deep-link metadata vem do backend/site quando configurado.
+- Autorizacao e isolamento de tenant sao responsabilidade do backend — o app nao e fonte de verdade.
 
 Nunca commitar:
 
 - `.env.local` e variantes;
 - `android/gradle.properties` (use `.example`);
-- `android/key.properties`, keystores (`.jks`, `.keystore`);
+- `android/key.properties`, keystores;
 - `google-services.json` / `GoogleService-Info.plist` reais (use `*.example`);
 - service accounts Firebase;
 - senhas de review, admin ou QA no codigo ou markdown.
 
-`GOOGLE_WEB_CLIENT_ID` e publico, mas deve ser configuravel por ambiente. Tokens JWT ficam em `flutter_secure_storage`. O backend e a fonte de verdade para autorizacao, plano e tenant.
-
-Metadados de App Store (conta demo, notas de review) ficam em `APP_STORE_METADATA.md` — senhas apenas via variaveis de ambiente no backend (`FOCUX_REVIEW_ACCOUNT_PASSWORD`).
+`GOOGLE_WEB_CLIENT_ID` e um identificador publico OAuth; configure por ambiente. Senhas de conta de review so via env no backend.
 
 ## Roadmap operacional
 
-Prioridades atuais:
-
-1. Aluno 360 e Command Center como cockpit principal do personal.
-2. Estabilidade Android e pipeline de release.
-3. iOS apos base Android consolidada.
-4. QA smoke + E2E Playwright para rotas criticas.
-5. Habitos, recorrencia e monetizacao enterprise.
-6. Health/recovery, wearables e pose coach.
+1. Release Android/iOS com pins e deep links de producao.
+2. IAP completo (verify + notificacoes das lojas).
+3. QA smoke + E2E nas rotas criticas.
+4. Habitos, recorrencia e monetizacao enterprise.
+5. Health/recovery, wearables e pose coach.
 
 ## Licenca
 
