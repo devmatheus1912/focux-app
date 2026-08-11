@@ -18,7 +18,7 @@ O app se conecta ao `focux-backend`, usa JWT para sessao, aplica rotas por perfi
 | Versao | `1.2.0+3` |
 | Flutter / Dart | SDK `^3.7` |
 | Branch | `main` |
-| API | Backend Focux em producao (Railway) — URL via `API_URL` / defaults do `Env` |
+| API | Backend Focux (Railway) — URL configuravel no app |
 | Site legal/marketing | [focuxpersonal.com](https://focuxpersonal.com) |
 | Testes | suite em `test/` (~970 casos) |
 
@@ -27,7 +27,7 @@ O app se conecta ao `focux-backend`, usa JWT para sessao, aplica rotas por perfi
 - **Home / Command Center** do personal com modo foco, next-actions e hubs densificados.
 - **Aluno 360**: Operacao, Evolucao e Ferramentas (aderencia, timeline, copiloto, recovery, risco financeiro).
 - **Sessao**: logout limpa tokens, caches locais e leftovers de entitlement; web nao persiste JWT em storage persistente.
-- **TLS**: builds de loja exigem pins (`API_CERT_PINS` + `REQUIRE_API_CERT_PINS`); cobre Dio e WebSocket/STOMP.
+- **TLS**: builds de loja exigem certificate pinning da API (Dio + WebSocket/STOMP).
 - **Design system** em `docs/DESIGN_SYSTEM.md` e `docs/CODING_STANDARDS.md`.
 - **Repo enxuto**: `scripts/`, `android/gradle.properties` e l10n gerados sao locais (gitignored); use os `.example`.
 
@@ -569,31 +569,15 @@ e2e/
 
 ## Ambientes
 
-Configuracao central:
+Configuracao central em `lib/core/config/env.dart` (lidos via `--dart-define` / flavors).
+
+Para desenvolvimento local basta apontar a URL do backend (e, se precisar, a URL web publica). Demais defines (OAuth, pins TLS, etc.) ficam nos scripts de release / `.env.local` — **nao** documentamos aqui a lista completa de secrets nem valores.
 
 ```text
-lib/core/config/env.dart
+.env.local.example   → modelo local
+.env.local           → gitignored
+tools/release/       → builds de loja (pins obrigatorios)
 ```
-
-Variaveis por `--dart-define`:
-
-| Variavel | Default | Uso |
-|---|---|---|
-| `API_URL` | URL HTTPS do backend | Backend HTTP |
-| `PUBLIC_WEB_URL` | URL publica do site/landing | Links publicos |
-| `API_CERT_PINS` | pins SHA-256 (obrigatorio em release store) | TLS pinning |
-| `REQUIRE_API_CERT_PINS` | `true` em release | Falha se pin ausente |
-| `WS_URL` | Derivado de `API_URL` | WebSocket |
-| `GOOGLE_WEB_CLIENT_ID` | Client ID publico default | Google Sign-In |
-
-Arquivo local:
-
-```text
-.env.local.example
-.env.local
-```
-
-`.env.local` e gitignored. Copie de `.env.local.example` antes de rodar.
 
 ## Rodando localmente
 
@@ -634,9 +618,8 @@ flutter run -d chrome --web-port 61791 \
 
 ```bash
 flutter run \
-  --dart-define=API_URL=https://staging-api.focux.app \
-  --dart-define=PUBLIC_WEB_URL=https://staging.focux.app \
-  --dart-define=GOOGLE_WEB_CLIENT_ID=<client-id>
+  --dart-define=API_URL=https://SEU_BACKEND \
+  --dart-define=PUBLIC_WEB_URL=https://SEU_SITE
 ```
 
 No Windows PowerShell:
@@ -670,12 +653,10 @@ Copie `android/gradle.properties.example` para `android/gradle.properties` e aju
 ### Android APK
 
 ```bash
-# Preferir tools/release/build-android.sh (exige API_CERT_PINS)
+# Preferir tools/release/build-android.sh (exige pins TLS da API)
 flutter build apk --release \
   --dart-define=API_URL=https://SEU_BACKEND \
-  --dart-define=PUBLIC_WEB_URL=https://focuxpersonal.com \
-  --dart-define=API_CERT_PINS=sha256/SEU_PIN \
-  --dart-define=REQUIRE_API_CERT_PINS=true
+  --dart-define=PUBLIC_WEB_URL=https://focuxpersonal.com
 ```
 
 Saida:
@@ -795,7 +776,7 @@ flutter gen-l10n
 
 ## Backend
 
-Repositorio: `focux-backend` (deploy Railway). Configure `API_URL` no app para o host HTTPS do ambiente. Health check via Actuator no profile de producao (detalhes nao expostos por padrao).
+Repositorio: `focux-backend` (deploy Railway). Aponte o app para o host HTTPS do ambiente desejado.
 
 ## Seguranca (app)
 
@@ -816,7 +797,7 @@ Nunca commitar:
 - service accounts Firebase;
 - senhas de review, admin ou QA no codigo ou markdown.
 
-`GOOGLE_WEB_CLIENT_ID` e um identificador publico OAuth; configure por ambiente. Senhas de conta de review so via env no backend.
+Client IDs OAuth publicos e senhas de review ficam so no deploy / docs internos do time — nao neste README.
 
 ## Roadmap operacional
 
