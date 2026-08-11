@@ -33,10 +33,10 @@ class Env {
         .toList();
   }
 
-  /// Em release store: falha ao iniciar Dio sem pins (evita pinning “fantasma”).
+  /// Em release store: falha sem pins. Preferir `true` nos scripts build-*.sh.
   static const bool requireApiCertPins = bool.fromEnvironment(
     'REQUIRE_API_CERT_PINS',
-    defaultValue: false,
+    defaultValue: true,
   );
 
   /// Public URL used for shareable landing links.

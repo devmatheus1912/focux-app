@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:dio/dio.dart';
 import 'core/api/api_client.dart';
+import 'core/api/tls_certificate_pinning.dart';
 import 'core/auth/session_cache_evictor.dart';
 import 'core/fcm/fcm_service.dart';
 import 'core/fcm/plan_sync_coordinator.dart';
@@ -33,6 +34,7 @@ void main() {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+      TlsCertificatePinning.installGlobalOverrides();
       await HomeWidgetService.init();
 
       SystemChrome.setSystemUIOverlayStyle(
