@@ -82,8 +82,11 @@ class OfflineSyncService {
   static const _queueKey = 'offline_outbox_queue';
   static const _maxAttempts = 8;
 
-  /// Add a failed request to the queue
+  /// Add a failed request to the queue (sem body sensível).
   static Future<void> enqueueRequest(RequestOptions options) async {
+    if (_isSensitivePath(options.path)) {
+      return;
+    }
     final prefs = await SharedPreferences.getInstance();
     final queueStr = prefs.getString(_queueKey);
     final List<dynamic> queueList =
@@ -92,13 +95,37 @@ class OfflineSyncService {
     final req = QueuedRequest(
       path: options.path,
       method: options.method,
-      data: options.data,
+      data: _sanitizeQueueData(options.path, options.data),
       queryParameters: options.queryParameters,
       idempotencyKey: _readIdempotencyKey(options.headers),
     );
 
     queueList.add(req.toJson());
     await prefs.setString(_queueKey, jsonEncode(queueList));
+  }
+
+  static bool _isSensitivePath(String path) {
+    final p = path.toLowerCase();
+    return p.contains('/chat') ||
+        p.contains('/anamnese') ||
+        p.contains('/health') ||
+        p.contains('/lgpd') ||
+        p.contains('/wallet') ||
+        p.contains('/mensalidade') ||
+        p.contains('/pagamento') ||
+        p.contains('/auth');
+  }
+
+  static dynamic _sanitizeQueueData(String path, dynamic data) {
+    if (data == null) return null;
+    if (data is FormData) return null;
+    if (_isSensitivePath(path)) return null;
+    return data;
+  }
+
+  static Future<void> clearQueue() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_queueKey);
   }
 
   /// Get the number of pending requests
@@ -240,8 +267,12 @@ class LocalCache {
     }
   }
 
-  static Future<void> invalidate(String cacheKey) async {
+  /// Clear all LocalCache entries (logout / session invalidate).
+  static Future<void> clearAll() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_key(cacheKey));
+    final keys = prefs.getKeys().where((k) => k.startsWith(_prefix)).toList();
+    for (final key in keys) {
+      await prefs.remove(key);
+    }
   }
 }

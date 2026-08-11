@@ -294,6 +294,22 @@ class AuthRepository {
   }
 
   Future<void> logout() async {
-    await SecureStorage.clearAll();
+    final refresh = await SecureStorage.getRefreshToken();
+    if (refresh != null && refresh.isNotEmpty) {
+      try {
+        await _dio.post(
+          '/api/auth/logout',
+          data: {'refreshToken': refresh},
+          options: Options(
+            extra: {
+              'fxNoInvalidate': true,
+              'fxNoOfflineQueue': true,
+            },
+          ),
+        );
+      } catch (_) {
+        // Best-effort revoke — limpeza local segue no SessionInvalidator.
+      }
+    }
   }
 }

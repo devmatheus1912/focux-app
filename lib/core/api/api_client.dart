@@ -163,10 +163,8 @@ class ApiClient {
                 await reporterDio.post(
                   '/api/suporte/analisar-erro',
                   data: {
-                    'erro':
-                        e.message ?? e.error?.toString() ?? 'Erro desconhecido',
-                    'stacktrace':
-                        'Path: ${e.requestOptions.path}\nMethod: ${e.requestOptions.method}\nStatus: ${e.response?.statusCode}\nResponse: ${e.response?.data}',
+                    'erro': _safeErrorMessage(e),
+                    'stacktrace': _safeErrorContext(e),
                   },
                 );
               }
@@ -199,6 +197,7 @@ class ApiClient {
   }
 
   static bool _canQueueOfflineMutation(RequestOptions options) {
+    if (options.extra['fxNoOfflineQueue'] == true) return false;
     if (_isAuthPath(options.path)) return false;
     if (options.path == '/api/suporte/analisar-erro') return false;
 
@@ -290,5 +289,20 @@ class ApiClient {
 
   static bool _isAuthPath(String path) {
     return path.contains('/auth/');
+  }
+
+  static String _safeErrorMessage(DioException e) {
+    final status = e.response?.statusCode;
+    final type = e.type.name;
+    return 'DioException($type)${status != null ? ' status=$status' : ''}';
+  }
+
+  static String _safeErrorContext(DioException e) {
+    final path = _normalizePath(e.requestOptions.path);
+    return 'Path: $path\nMethod: ${e.requestOptions.method}\nStatus: ${e.response?.statusCode}';
+  }
+
+  static String _normalizePath(String path) {
+    return path.replaceAll(RegExp(r'/\d+'), '/:id');
   }
 }
