@@ -8,10 +8,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:url_launcher/url_launcher.dart';
-
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/config/env.dart';
+import '../../../core/legal/focux_legal.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/utils/br_phone.dart';
@@ -377,12 +376,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               recognizer:
                                   TapGestureRecognizer()
                                     ..onTap =
-                                        () => launchUrl(
-                                          Uri.parse(
-                                            'https://focux-backend-production.up.railway.app/termos.html',
-                                          ),
-                                          mode: LaunchMode.externalApplication,
-                                        ),
+                                        () => FocuxLegal.openTerms(),
                             ),
                             const TextSpan(text: ' e a '),
                             TextSpan(
@@ -394,12 +388,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               recognizer:
                                   TapGestureRecognizer()
                                     ..onTap =
-                                        () => launchUrl(
-                                          Uri.parse(
-                                            'https://focux-backend-production.up.railway.app/privacidade.html',
-                                          ),
-                                          mode: LaunchMode.externalApplication,
-                                        ),
+                                        () => FocuxLegal.openPrivacy(),
                             ),
                             const TextSpan(text: '.'),
                           ],

@@ -51,10 +51,10 @@ Health & Fitness
 Productivity
 
 ## Privacy Policy URL
-https://focux.app/privacidade
+https://focuxpersonal.com/privacidade
 
 ## Terms of Service URL
-https://focux.app/termos
+https://focuxpersonal.com/termos
 
 ## Support URL
 https://focux.app/suporte

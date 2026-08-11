@@ -4,16 +4,13 @@ import 'package:url_launcher/url_launcher.dart';
 abstract class FocuxLegal {
   FocuxLegal._();
 
-  static const String termsUrl =
-      'https://focux-backend-production.up.railway.app/termos.html';
-  static const String privacyUrl =
-      'https://focux-backend-production.up.railway.app/privacidade.html';
+  static const String termsUrl = 'https://focuxpersonal.com/termos';
+  static const String privacyUrl = 'https://focuxpersonal.com/privacidade';
 
   /// Vitrine completa (comparativo, ROI, features) — fora do app; ativar quando a web estiver no ar.
   static const bool plansMarketingWebLive = false;
 
-  static const String plansMarketingUrl =
-      'https://focux-backend-production.up.railway.app/planos.html';
+  static const String plansMarketingUrl = 'https://focuxpersonal.com';
 
   static Future<bool> openTerms() => _open(termsUrl);
 

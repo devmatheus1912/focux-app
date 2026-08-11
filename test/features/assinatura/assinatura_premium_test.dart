@@ -32,7 +32,7 @@ void main() {
     expect(layout, contains('_paywallSecondaryText'));
     expect(layout, contains('AnimatedSwitcher'));
 
-    expect(legal, contains('termos.html'));
-    expect(legal, contains('privacidade.html'));
+    expect(legal, contains('focuxpersonal.com/termos'));
+    expect(legal, contains('focuxpersonal.com/privacidade'));
   });
 }
