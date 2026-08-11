@@ -626,9 +626,8 @@ No Windows PowerShell:
 
 ```powershell
 flutter run `
-  --dart-define=API_URL=https://staging-api.focux.app `
-  --dart-define=PUBLIC_WEB_URL=https://staging.focux.app `
-  --dart-define=GOOGLE_WEB_CLIENT_ID=<client-id>
+  --dart-define=API_URL=https://SEU_BACKEND `
+  --dart-define=PUBLIC_WEB_URL=https://SEU_SITE
 ```
 
 ## Scripts locais
