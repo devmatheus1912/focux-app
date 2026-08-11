@@ -119,6 +119,7 @@ class ApiClient {
               final refreshToken = await SecureStorage.getRefreshToken();
               if (refreshToken != null) {
                 final refreshDio = Dio(BaseOptions(baseUrl: _baseUrl));
+                TlsCertificatePinning.apply(refreshDio);
                 final resp = await refreshDio.post(
                   '/api/auth/refresh',
                   data: {'refreshToken': refreshToken},
@@ -137,7 +138,14 @@ class ApiClient {
                 return handler.resolve(retryResp);
               }
             } catch (refreshErr) {
-              debugPrint('[ApiClient] Refresh failed: $refreshErr');
+              if (kDebugMode) {
+                final status = refreshErr is DioException
+                    ? refreshErr.response?.statusCode
+                    : null;
+                debugPrint(
+                  '[ApiClient] Refresh failed${status != null ? ' status=$status' : ''}',
+                );
+              }
             }
             _isRefreshing = false;
           }
@@ -159,6 +167,7 @@ class ApiClient {
               final role = await SecureStorage.getRole();
               if (token != null && role == 'PERSONAL') {
                 final reporterDio = Dio(BaseOptions(baseUrl: _baseUrl));
+                TlsCertificatePinning.apply(reporterDio);
                 reporterDio.options.headers['Authorization'] = 'Bearer $token';
                 await reporterDio.post(
                   '/api/suporte/analisar-erro',
@@ -217,16 +226,12 @@ class ApiClient {
     return 'fx-$time-$randA$randB';
   }
 
-  /// Lista de prefixos de rota cuja resposta GET deve ser cacheada
-  /// localmente para uso offline. Sem PII pesada (alunos/perfil/LGPD).
+  /// Catálogo não-PII apenas (planos). Dashboard/hoje/treinos ficam fora do disco.
   static bool _shouldCachePath(String path) {
     if (_isSensitiveDiskCachePath(path)) return false;
     const cacheable = [
       '/api/planos/me',
       '/api/planos/vitrine',
-      '/api/treinos',
-      '/api/dashboard',
-      '/api/hoje',
     ];
     for (final prefix in cacheable) {
       if (path == prefix ||
@@ -238,7 +243,7 @@ class ApiClient {
     return false;
   }
 
-  /// Nunca gravar em SharedPreferences (PII / saúde / comunidade).
+  /// Nunca gravar em SharedPreferences (PII / saúde / operação).
   static bool _isSensitiveDiskCachePath(String path) {
     const blocked = [
       '/api/alunos',
@@ -247,6 +252,11 @@ class ApiClient {
       '/api/comunidade',
       '/api/health',
       '/api/webhooks',
+      '/api/dashboard',
+      '/api/hoje',
+      '/api/treinos',
+      '/api/ia',
+      '/api/leads',
     ];
     for (final prefix in blocked) {
       if (path == prefix ||

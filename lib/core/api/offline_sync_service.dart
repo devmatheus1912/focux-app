@@ -113,7 +113,14 @@ class OfflineSyncService {
         p.contains('/wallet') ||
         p.contains('/mensalidade') ||
         p.contains('/pagamento') ||
-        p.contains('/auth');
+        p.contains('/auth') ||
+        p.contains('/alunos') ||
+        p.contains('/leads') ||
+        p.contains('/personal/perfil') ||
+        p.contains('/ia') ||
+        p.contains('/comunidade') ||
+        p.contains('/fcm') ||
+        p.contains('/upload');
   }
 
   static dynamic _sanitizeQueueData(String path, dynamic data) {
@@ -271,6 +278,16 @@ class LocalCache {
   static Future<void> clearAll() async {
     final prefs = await SharedPreferences.getInstance();
     final keys = prefs.getKeys().where((k) => k.startsWith(_prefix)).toList();
+    for (final key in keys) {
+      await prefs.remove(key);
+    }
+  }
+
+  /// Remove entradas cujo cacheKey começa com [pathPrefix].
+  static Future<void> invalidate(String pathPrefix) async {
+    final prefs = await SharedPreferences.getInstance();
+    final needle = '$_prefix$pathPrefix';
+    final keys = prefs.getKeys().where((k) => k.startsWith(needle)).toList();
     for (final key in keys) {
       await prefs.remove(key);
     }
