@@ -23,10 +23,13 @@ class DashboardCollapsibleToolsSection extends ConsumerStatefulWidget {
     super.key,
     required this.isDark,
     required this.shortcutAspectRatio,
+    this.hideFeaturedTools = false,
   });
 
   final bool isDark;
   final double shortcutAspectRatio;
+  /// Modo foco: só header + expand abre o catálogo (sem grid featured).
+  final bool hideFeaturedTools;
 
   @override
   ConsumerState<DashboardCollapsibleToolsSection> createState() =>
@@ -58,8 +61,13 @@ class DashboardCollapsibleToolsSectionState
     final unlockedCount = totalTools - lockedCount;
     final featuredShortcuts = DashboardToolShortcut.featuredTools;
     final featuredCount = featuredShortcuts.length;
+    final hideFeatured = widget.hideFeaturedTools;
     final collapsedHint =
-        lockedCount > 0
+        hideFeatured
+            ? (lockedCount > 0
+                ? '$totalTools no catálogo · $lockedCount no upgrade'
+                : '$totalTools atalhos · toque para abrir')
+            : lockedCount > 0
             ? '$featuredCount em destaque · $lockedCount no upgrade'
             : '$featuredCount em destaque · $totalTools no catálogo';
     final expandedHint =
@@ -148,7 +156,10 @@ class DashboardCollapsibleToolsSectionState
             ),
           ),
           AnimatedCrossFade(
-            firstChild: Padding(
+            firstChild:
+                hideFeatured
+                    ? const SizedBox.shrink()
+                    : Padding(
               padding: const EdgeInsets.only(top: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -188,7 +199,7 @@ class DashboardCollapsibleToolsSectionState
                                 Text(
                                   DashboardMicrocopy.verCatalogoCompleto,
                                   style: AppTypography.inter(
-                                    fontSize: 12.5,
+                                    fontSize: TokensStrip.fontBodySm,
                                     fontWeight: FontWeight.w800,
                                     color: link,
                                   ),

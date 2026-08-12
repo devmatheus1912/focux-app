@@ -291,11 +291,9 @@ class DashboardFinancialHeroSection extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.28),
                   ),
                 ),
-                child: const Text(
+                child: Text(
                   'SUPERADA',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 9,
+                  style: dashboardHeroEyebrowOnTeal().copyWith(
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.55,
                   ),

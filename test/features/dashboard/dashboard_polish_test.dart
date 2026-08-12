@@ -12,13 +12,17 @@ void main() {
       'lib/core/widgets/fx_horizontal_scroll_peek.dart',
       'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
       'lib/features/dashboard/widgets/dashboard_command_center_section.dart',
-      'lib/features/dashboard/widgets/dashboard_command_center_section_actions.part.dart',
+      'lib/features/dashboard/widgets/command_action_panel.dart',
+      'lib/features/dashboard/widgets/command_action_tile.dart',
+      'lib/features/dashboard/widgets/command_priorities_sheet.dart',
+      'lib/features/dashboard/widgets/command_status_tile.dart',
       'lib/features/dashboard/widgets/dashboard_tools_section.dart',
       'lib/features/dashboard/widgets/dashboard_financial_hero_section.dart',
       'lib/features/dashboard/widgets/dashboard_shimmer_loading.dart',
       'lib/features/dashboard/utils/dashboard_microcopy.dart',
       'lib/features/dashboard/utils/dashboard_next_actions.dart',
       'lib/features/dashboard/utils/dashboard_home_focus.dart',
+      'lib/features/dashboard/utils/dashboard_home_snapshot.dart',
     ];
     final screen = paths.map((p) => File(p).readAsStringSync()).join('\n');
 

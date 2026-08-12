@@ -112,10 +112,8 @@ class DashboardExpandableToolGroupsState
                         ),
                         child: Text(
                           '${group.shortcuts.length}',
-                          style: AppTypography.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: link.withValues(alpha: 0.88),
+                          style: dashboardChipLabelStyle(
+                            link.withValues(alpha: 0.88),
                           ),
                         ),
                       ),
@@ -374,12 +372,8 @@ class DashboardShortcutTile extends StatelessWidget {
                           ),
                           child: Text(
                             tierLabel!,
-                            style: TextStyle(
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.w800,
-                              color: iconAccent.withValues(alpha: 0.95),
-                              height: 1,
-                              letterSpacing: 0.2,
+                            style: dashboardChipLabelStyle(
+                              iconAccent.withValues(alpha: 0.95),
                             ),
                           ),
                         ),

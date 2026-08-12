@@ -1,20 +1,16 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../chat/screens/chat_inbox_screen.dart';
 import '../../financeiro/data/financeiro_repository.dart';
-import '../data/command_center_data.dart';
+import '../data/command_action_item.dart';
 import '../providers/dashboard_provider.dart';
 import '../utils/dashboard_chat_subtitle.dart';
 import '../utils/dashboard_entry_motion.dart';
@@ -23,6 +19,8 @@ import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_next_actions.dart';
 import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_unread.dart';
+import 'command_action_panel.dart';
+import 'command_priorities_sheet.dart';
 import 'dashboard_horizontal_scroll_peek.dart';
 
 export '../data/command_action_item.dart';
@@ -32,8 +30,10 @@ export '../utils/dashboard_next_actions.dart'
         buildDashboardSheetActions,
         dashboardShouldShowPrioritiesLink,
         DashboardRiskStudentRef;
-
-part 'dashboard_command_center_section_actions.part.dart';
+export 'command_action_panel.dart';
+export 'command_action_tile.dart';
+export 'command_priorities_sheet.dart';
+export 'command_status_tile.dart';
 
 class DashboardCommandCenterSection extends ConsumerStatefulWidget {
   final bool isDark;
@@ -58,6 +58,15 @@ class DashboardCommandCenterSection extends ConsumerStatefulWidget {
   final bool hideHeader;
   final bool collapseQuickLinks;
 
+  /// Props da agregação do pai — evitam re-watch de inbox/alunos/command.
+  final int? alunosAtivos;
+  final int? agendaHojeCount;
+  final int? unreadCount;
+  final int? conversationCount;
+  final int? copilotOpenCount;
+  final bool? isCommandPreparing;
+  final bool? commandUnavailable;
+
   const DashboardCommandCenterSection({
     super.key,
     required this.isDark,
@@ -71,6 +80,13 @@ class DashboardCommandCenterSection extends ConsumerStatefulWidget {
     this.contextualSubtitle,
     this.hideHeader = false,
     this.collapseQuickLinks = true,
+    this.alunosAtivos,
+    this.agendaHojeCount,
+    this.unreadCount,
+    this.conversationCount,
+    this.copilotOpenCount,
+    this.isCommandPreparing,
+    this.commandUnavailable,
   });
 
   @override
@@ -112,40 +128,51 @@ class DashboardCommandCenterSectionState
     final actionColor = BrandPalette.sectionAction(primary, dark: isDark);
     final rowAccent = BrandPalette.sectionAccent(primary, dark: isDark);
 
-    // Watches abaixo servem só para os subtítulos dos Atalhos rápidos —
-    // a fila de próximas ações já chega pronta via [widget.nextActions].
-    final chatAsync = ref.watch(chatInboxProvider);
-    final commandAsync = ref.watch(commandCenterProvider);
-    final isCommandPreparing = commandAsync.isLoading;
-    final commandUnavailable = commandAsync.hasError;
-    final unreadFromInbox = chatAsync.maybeWhen(
-      data: (items) => items.fold<int>(0, (sum, i) => sum + i.naoLidas),
-      orElse: () => 0,
-    );
-    final unreadCount = dashboardResolveUnreadCount(
-      pulseUnread: widget.mensagensNaoLidas,
-      inboxReady: chatAsync.hasValue,
-      inboxUnread: unreadFromInbox,
-    );
-    final totalConversas = chatAsync.maybeWhen(
-      data: (items) => items.length,
-      orElse: () => 0,
-    );
+    // Prefer props do pai (snapshot). Fallback a watches só se omitidos.
+    final useParentPulse = widget.alunosAtivos != null;
+    final chatAsync = useParentPulse ? null : ref.watch(chatInboxProvider);
+    final commandAsync =
+        useParentPulse ? null : ref.watch(commandCenterProvider);
+    final isCommandPreparing =
+        widget.isCommandPreparing ?? commandAsync?.isLoading ?? false;
+    final commandUnavailable =
+        widget.commandUnavailable ?? commandAsync?.hasError ?? false;
+    final unreadFromInbox =
+        chatAsync?.maybeWhen(
+          data: (items) => items.fold<int>(0, (sum, i) => sum + i.naoLidas),
+          orElse: () => 0,
+        ) ??
+        0;
+    final unreadCount =
+        widget.unreadCount ??
+        dashboardResolveUnreadCount(
+          pulseUnread: widget.mensagensNaoLidas,
+          inboxReady: chatAsync?.hasValue ?? false,
+          inboxUnread: unreadFromInbox,
+        );
+    final totalConversas =
+        widget.conversationCount ??
+        chatAsync?.maybeWhen(data: (items) => items.length, orElse: () => 0) ??
+        0;
     final chatSubtitle = dashboardChatShortcutSubtitle(
       unreadCount: unreadCount,
       conversationCount: totalConversas,
     );
 
-    final alunosAsync = ref.watch(alunosProvider);
-    final alunosAtivos = alunosAsync.maybeWhen(
-      data: (alunos) => alunos.where((a) => a.status == 'ATIVO').length,
-      orElse: () => 0,
-    );
+    final alunosAtivos =
+        widget.alunosAtivos ??
+        ref.watch(alunosProvider).maybeWhen(
+          data: (alunos) => alunos.where((a) => a.status == 'ATIVO').length,
+          orElse: () => 0,
+        );
 
-    final agendaHoje = commandAsync.maybeWhen(
-      data: (cc) => cc.agendaHoje.length,
-      orElse: () => 0,
-    );
+    final agendaHoje =
+        widget.agendaHojeCount ??
+        commandAsync?.maybeWhen(
+          data: (cc) => cc.agendaHoje.length,
+          orElse: () => 0,
+        ) ??
+        0;
     final agendaSubtitle = agendaHoje > 0 ? '$agendaHoje hoje' : 'Sem agenda';
 
     final receitaMes = finData?.receitaMes ?? 0;
@@ -154,11 +181,15 @@ class DashboardCommandCenterSectionState
             ? 'R\$ ${receitaMes.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}'
             : 'Ver finanças';
 
-    final copilotAcoes = commandAsync.maybeWhen(
-      data:
-          (cc) => cc.filaAcoes.where((a) => a.tipo == 'IA_COPILOTO').toList(),
-      orElse: () => const <FilaAcaoResumo>[],
-    );
+    final copilotOpen =
+        widget.copilotOpenCount ??
+        commandAsync?.maybeWhen(
+          data:
+              (cc) =>
+                  cc.filaAcoes.where((a) => a.tipo == 'IA_COPILOTO').length,
+          orElse: () => 0,
+        ) ??
+        0;
 
     Widget card({
       required double width,
@@ -366,7 +397,7 @@ class DashboardCommandCenterSectionState
                     Text(
                       'Atalhos rápidos',
                       style: AppTypography.inter(
-                        fontSize: 12,
+                        fontSize: TokensStrip.fontBodySm,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.2,
                         color: heading,
@@ -384,11 +415,7 @@ class DashboardCommandCenterSectionState
                       ),
                       child: Text(
                         '5',
-                        style: TextStyle(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w800,
-                          color: actionColor,
-                        ),
+                        style: dashboardChipLabelStyle(actionColor),
                       ),
                     ),
                     const Spacer(),
@@ -432,9 +459,9 @@ class DashboardCommandCenterSectionState
                           icon: 'zap',
                           title: 'Copiloto',
                           subtitle:
-                              copilotAcoes.isEmpty
+                              copilotOpen == 0
                                   ? 'Abrir Copiloto'
-                                  : '${copilotAcoes.length} aberta${copilotAcoes.length == 1 ? '' : 's'}',
+                                  : '$copilotOpen aberta${copilotOpen == 1 ? '' : 's'}',
                           onTap:
                               () => context.push(
                                 '/dashboard/command-center/copiloto',
@@ -509,12 +536,4 @@ void showCommandActionsSheet(
       );
     },
   );
-}
-
-Color commandToneAccent(CommandActionTone tone, Color primary) {
-  return switch (tone) {
-    CommandActionTone.hot => Color.lerp(EagleTokens.warn, primary, 0.34)!,
-    CommandActionTone.money => EagleTokens.moneyGreen,
-    CommandActionTone.primary => primary,
-  };
 }

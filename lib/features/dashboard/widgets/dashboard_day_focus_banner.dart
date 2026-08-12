@@ -25,7 +25,6 @@ class DashboardDayFocusBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final accent = BrandPalette.sectionAccent(primary, dark: isDark);
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = dashboardReadableMuted(context, isDark: isDark);
     final reduceMotion = TokensStrip.prefersReducedMotion(context);
 
     return Semantics(
@@ -81,18 +80,19 @@ class DashboardDayFocusBanner extends StatelessWidget {
                     children: [
                       Text(
                         'Foco do dia',
-                        style: AppTypography.inter(
-                          fontSize: 11,
+                        style: dashboardMicroLabelStyle(
+                          context,
+                          isDark: isDark,
+                          color: accent,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.4,
-                          color: accent,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         focus.headline,
                         style: AppTypography.inter(
-                          fontSize: 15,
+                          fontSize: TokensStrip.fontH2,
                           fontWeight: FontWeight.w800,
                           color: ink,
                           height: 1.2,
@@ -101,11 +101,9 @@ class DashboardDayFocusBanner extends StatelessWidget {
                       const SizedBox(height: 3),
                       Text(
                         focus.detail,
-                        style: AppTypography.inter(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w500,
-                          color: mute,
-                          height: 1.35,
+                        style: dashboardCardSubtitleStyle(
+                          context,
+                          isDark: isDark,
                         ),
                       ),
                     ],

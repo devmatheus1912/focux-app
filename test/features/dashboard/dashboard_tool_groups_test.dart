@@ -62,7 +62,7 @@ void main() {
     test('curates a slim, high-value subset for the default grid', () {
       final featured = DashboardToolShortcut.featuredTools;
       expect(featured, isNotEmpty);
-      expect(featured.length, lessThanOrEqualTo(10));
+      expect(featured.length, lessThanOrEqualTo(4));
       expect(featured.every((s) => s.featured), isTrue);
       expect(
         featured.toSet().length,

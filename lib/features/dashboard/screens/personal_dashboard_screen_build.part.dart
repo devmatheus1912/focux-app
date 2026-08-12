@@ -39,77 +39,54 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                 final isCompactPhone = screenWidth < 390;
                 final shortcutAspectRatio = isCompactPhone ? 2.75 : 3.05;
 
-                // Computed values for hero card
-                final monthNames = [
-                  'janeiro',
-                  'fevereiro',
-                  'março',
-                  'abril',
-                  'maio',
-                  'junho',
-                  'julho',
-                  'agosto',
-                  'setembro',
-                  'outubro',
-                  'novembro',
-                  'dezembro',
-                ];
-                final mes = monthNames[DateTime.now().month - 1];
-                final pendente = ((_finData?.previsaoReceita ?? 0) -
-                        (_finData?.receitaMes ?? 0))
-                    .clamp(0.0, double.infinity);
-                final metaReceita = _finData?.previsaoReceita ?? 0;
-                final receitaAtual = _finData?.receitaMes ?? 0;
-                final progressRaw =
-                    metaReceita > 0 ? receitaAtual / metaReceita : 0.0;
-                final metaSuperada =
-                    metaReceita > 0 && receitaAtual >= metaReceita;
-
-                final alunosAtivos = alunosAsync.maybeWhen(
+                final chatAsync = ref.watch(chatInboxProvider);
+                final unreadFromInbox = chatAsync.maybeWhen(
                   data:
-                      (alunos) =>
-                          alunos.where((a) => a.status == 'ATIVO').length,
-                  orElse: () => data.alunosAtivos,
-                );
-                final riscoAlto = alunosAsync.maybeWhen(
-                  data: (alunos) => alunos.where((a) => a.emRisco).length,
+                      (items) => items.fold<int>(
+                        0,
+                        (sum, item) => sum + item.naoLidas,
+                      ),
                   orElse: () => 0,
                 );
-                final alunosEmRisco = alunosAsync.maybeWhen(
-                  data: (alunos) => alunos.where((a) => a.emRisco).toList(),
-                  orElse: () => const <Aluno>[],
+                final snap = DashboardHomeSnapshot.build(
+                  home: home,
+                  finData: _finData,
+                  alunos: alunosAsync.asData?.value,
+                  historicoCheckins: historicoCheckinsAsync.asData?.value,
+                  commandCenter: commandAsync.asData?.value,
+                  inboxUnread: unreadFromInbox,
+                  inboxReady: chatAsync.hasValue,
+                  focusMode: _focusMode,
+                  isCommandPreparing: commandAsync.isLoading,
                 );
+                final mes = snap.mesLabel;
+                final pendente = snap.pendente;
+                final receitaAtual = snap.receitaAtual;
+                final progressRaw = snap.progressRaw;
+                final metaSuperada = snap.metaSuperada;
+                final alunosAtivos = snap.alunosAtivos;
+                final riscoAlto = snap.riscoAlto;
+                final alunosEmRisco = snap.alunosEmRisco;
+                final checkinsHoje = snap.checkinsHoje;
+                final checkinsTrend = snap.checkinsTrend;
+                final receitaTrend = snap.receitaTrend;
+                final agendaHoje = snap.agendaHoje;
+                final riskDominante = snap.riskDominante;
+                final dayFocus = snap.dayFocus;
+                final focusRules = snap.focusRules;
+                final dayFocusCoversRetention =
+                    focusRules.dayFocusCoversRetention;
+                final attentionRiskItems = snap.attentionRiskItems;
+                final attentionVencItems = snap.attentionVencItems;
+                final attentionItemCount =
+                    attentionRiskItems.length + attentionVencItems.length;
+                final attentionVisible = snap.attentionVisible;
+                final attentionCollapsedPreview =
+                    snap.attentionCollapsedPreview;
+                final dashboardNextActions = snap.dashboardNextActions;
+                final prioritiesSheetActions = snap.prioritiesSheetActions;
+                final showPrioritiesLink = snap.showPrioritiesLink;
 
-                final hoje = DateTime.now();
-                final checkinsFromHistorico = historicoCheckinsAsync.maybeWhen(
-                  data: (items) {
-                    bool sameDay(DateTime a, DateTime b) =>
-                        a.year == b.year &&
-                        a.month == b.month &&
-                        a.day == b.day;
-                    return items.where((e) {
-                      final concluded = DateTime.tryParse(e.concluidoEm ?? '');
-                      if (concluded == null) return false;
-                      return sameDay(concluded.toLocal(), hoje);
-                    }).length;
-                  },
-                  orElse: () => 0,
-                );
-                // Prefer BFF pulse (single round-trip); fallback to historico.
-                final checkinsHoje =
-                    home.pulse?.checkinsHoje ?? checkinsFromHistorico;
-                final checkinsTrend = historicoCheckinsAsync.maybeWhen(
-                  data:
-                      (items) => dashboardCheckinsSparklineUltimos7Dias(items),
-                  orElse: () => List<double>.filled(7, 0),
-                );
-                final receitaTrend = dashboardReceitaSparklineMensal(
-                  _finData?.evolucaoMensal ?? const [],
-                );
-                final agendaHoje = commandAsync.maybeWhen(
-                  data: (cc) => cc.agendaHoje.length,
-                  orElse: () => 0,
-                );
                 final onboardingAsync = ref.watch(onboardingStatusProvider);
                 final onboardingIncomplete = onboardingAsync.maybeWhen(
                   data: (s) => !s.ativacaoCompleta,
@@ -118,20 +95,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                 final primeiroTreinoCriado = onboardingAsync.maybeWhen(
                   data: (s) => s.primeiroTreinoCriado,
                   orElse: () => false,
-                );
-                final riskDominante =
-                    alunosAtivos > 0 &&
-                    riscoAlto >= math.max(2, (alunosAtivos * 0.5).ceil());
-                final vencimentosCount =
-                    _finData?.vencimentosProximos.length ?? 0;
-                final dayFocus = DashboardDayFocus.resolve(
-                  riscoAlto: riscoAlto,
-                  alunosAtivos: alunosAtivos,
-                  checkinsHoje: checkinsHoje,
-                  agendaHoje: agendaHoje,
-                  receitaMes: receitaAtual,
-                  vencimentosPendentes: vencimentosCount,
-                  riskDominante: riskDominante,
                 );
                 if (_focusPreferenceLoaded && _persistedFocusMode == null) {
                   final autoFocus = DashboardHomeFocusRules.defaultFocusMode(
@@ -145,40 +108,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                     });
                   }
                 }
-                final focusRules = DashboardHomeFocusRules.resolve(
-                  focusMode: _focusMode,
-                  dayFocus: dayFocus,
-                  riscoAlto: riscoAlto,
-                  receitaAtual: receitaAtual,
-                );
-                final dayFocusCoversRetention =
-                    focusRules.dayFocusCoversRetention;
-
-                final attentionRiskItems =
-                    alunosEmRisco
-                        .take(
-                          DashboardHomeFocusRules.attentionRiskLimit(
-                            dayFocusCoversRetention: dayFocusCoversRetention,
-                            focusMode: focusRules.focusMode,
-                            riskDominante: riskDominante,
-                          ),
-                        )
-                        .toList();
-                final attentionVencItems =
-                    (_finData?.vencimentosProximos ?? const [])
-                        .take(
-                          DashboardHomeFocusRules.attentionVencLimit(
-                            dayFocus: dayFocus,
-                            dayFocusCoversRetention: dayFocusCoversRetention,
-                            focusMode: focusRules.focusMode,
-                          ),
-                        )
-                        .toList();
-                final attentionItemCount =
-                    attentionRiskItems.length + attentionVencItems.length;
-                // Sem vencimentos e sem cards de risco (dono é o Foco do dia)
-                // → a seção some em vez de mostrar um "revisar" vazio.
-                final attentionVisible = attentionItemCount > 0;
                 const commandCenterSubtitle =
                     DashboardMicrocopy.commandCenterSubtitle;
 
@@ -194,52 +123,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                   goPersonalShellTab(context, '/alunos?filtro=risco');
                 }
 
-                final filaAcoes = commandAsync.maybeWhen(
-                  data: (cc) => cc.filaAcoes,
-                  orElse: () => const <FilaAcaoResumo>[],
-                );
-                final chatAsync = ref.watch(chatInboxProvider);
-                final unreadFromInbox = chatAsync.maybeWhen(
-                  data:
-                      (items) => items.fold<int>(
-                        0,
-                        (sum, item) => sum + item.naoLidas,
-                      ),
-                  orElse: () => 0,
-                );
-                final unreadCount = dashboardResolveUnreadCount(
-                  pulseUnread: home.pulse?.mensagensNaoLidas,
-                  inboxReady: chatAsync.hasValue,
-                  inboxUnread: unreadFromInbox,
-                );
-                final cobrancasPendentes = commandAsync.maybeWhen(
-                  data: (cc) => cc.cobrancasPendentes.length,
-                  orElse: () => _finData?.totalInadimplentes ?? 0,
-                );
-                final riskStudentsForSheet = alunosEmRisco
-                    .map((a) => (id: a.id, nome: a.nome))
-                    .toList(growable: false);
-                final dashboardNextActions = buildDashboardNextActions(
-                  filaAcoes: filaAcoes,
-                  unreadCount: unreadCount,
-                  alunosRisco: riscoAlto,
-                  cobrancasPendentes: cobrancasPendentes,
-                  agendaHoje: agendaHoje,
-                  hideRiskSummary: alunosEmRisco.isNotEmpty,
-                  riskOwnedByDayFocus: dayFocusCoversRetention,
-                  isCommandPreparing: commandAsync.isLoading,
-                  maxItems: focusRules.maxVisibleNextActions,
-                );
-                final prioritiesSheetActions = buildDashboardSheetActions(
-                  curated: dashboardNextActions,
-                  filaAcoes: filaAcoes,
-                  riskStudents: riskStudentsForSheet,
-                );
-                final showPrioritiesLink = dashboardShouldShowPrioritiesLink(
-                  visible: dashboardNextActions,
-                  sheet: prioritiesSheetActions,
-                  isPreparing: commandAsync.isLoading,
-                );
                 // Sticky só depois do painel de próximas ações sair da tela
                 // (medido via GlobalKey) — um único CTA no viewport.
                 final showStickyPrioritiesAction =
@@ -260,19 +143,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                     primary: primary,
                     actions: prioritiesSheetActions,
                   );
-                }
-
-                final String? attentionCollapsedPreview;
-                if (attentionRiskItems.isNotEmpty) {
-                  final first = attentionRiskItems.first;
-                  attentionCollapsedPreview =
-                      '${first.nome} · ${attentionSignalLabel(first)}';
-                } else if (attentionVencItems.isNotEmpty) {
-                  final first = attentionVencItems.first;
-                  attentionCollapsedPreview =
-                      '${first.alunoNome} · R\$ ${first.valor.toStringAsFixed(0)} pendente';
-                } else {
-                  attentionCollapsedPreview = null;
                 }
 
                 return RefreshIndicator(
@@ -480,6 +350,15 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                               hideHeader: true,
                               contextualSubtitle: commandCenterSubtitle,
                               collapseQuickLinks: focusRules.collapseQuickLinks,
+                              alunosAtivos: alunosAtivos,
+                              agendaHojeCount: agendaHoje,
+                              unreadCount: snap.unreadCount,
+                              copilotOpenCount:
+                                  snap.filaAcoes
+                                      .where((a) => a.tipo == 'IA_COPILOTO')
+                                      .length,
+                              isCommandPreparing: commandAsync.isLoading,
+                              commandUnavailable: commandAsync.hasError,
                             ),
                           ),
                         ),
@@ -758,6 +637,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                         child: DashboardCollapsibleToolsSection(
                           isDark: themeDark,
                           shortcutAspectRatio: shortcutAspectRatio,
+                          hideFeaturedTools: focusRules.hideFeaturedTools,
                         ),
                       ),
 

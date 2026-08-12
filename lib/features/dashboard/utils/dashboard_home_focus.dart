@@ -13,6 +13,7 @@ class DashboardHomeFocusRules {
     required this.collapseQuickLinks,
     required this.suppressSecondaryEmptyCtas,
     required this.compactCommandSticky,
+    required this.hideFeaturedTools,
     required this.maxVisibleNextActions,
   });
 
@@ -29,6 +30,8 @@ class DashboardHomeFocusRules {
   final bool suppressSecondaryEmptyCtas;
   /// Sticky da Central mais compacto (menos título duplicado).
   final bool compactCommandSticky;
+  /// No modo foco, some o grid “featured” de Mais ferramentas (só header).
+  final bool hideFeaturedTools;
   final int maxVisibleNextActions;
 
   /// Quantos cards de risco "Precisa de atenção" pode mostrar.
@@ -95,6 +98,7 @@ class DashboardHomeFocusRules {
       collapseQuickLinks: focusMode,
       suppressSecondaryEmptyCtas: dense,
       compactCommandSticky: focusMode,
+      hideFeaturedTools: focusMode,
       maxVisibleNextActions: focusMode ? 2 : 3,
     );
   }

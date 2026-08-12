@@ -79,7 +79,6 @@ class DashboardToolShortcut {
       route: '/habitos',
       capability: 'habitCoaching',
       group: DashboardToolGroup.operacao,
-      featured: true,
     ),
     DashboardToolShortcut(
       icon: 'plus',
@@ -88,7 +87,6 @@ class DashboardToolShortcut {
       capability: 'comunidadeGrupos',
       featureName: 'Desafios e ranking',
       group: DashboardToolGroup.operacao,
-      featured: true,
     ),
     DashboardToolShortcut(
       icon: 'trend',
@@ -129,7 +127,6 @@ class DashboardToolShortcut {
       capability: 'landingCompleta',
       featureName: 'Landing page completa',
       group: DashboardToolGroup.crescimento,
-      featured: true,
     ),
     DashboardToolShortcut(
       icon: 'star',
@@ -148,7 +145,6 @@ class DashboardToolShortcut {
       label: 'Pacotes',
       route: '/pacotes',
       group: DashboardToolGroup.receita,
-      featured: true,
     ),
     DashboardToolShortcut(
       icon: 'pix',
@@ -190,7 +186,6 @@ class DashboardToolShortcut {
       capability: 'financeiro',
       featureName: 'Recorrência de alunos',
       group: DashboardToolGroup.receita,
-      featured: true,
     ),
     DashboardToolShortcut(
       icon: 'moon',
@@ -241,7 +236,6 @@ class DashboardToolShortcut {
       label: 'Broadcasts',
       route: '/broadcasts',
       group: DashboardToolGroup.sistema,
-      featured: true,
     ),
   ];
 

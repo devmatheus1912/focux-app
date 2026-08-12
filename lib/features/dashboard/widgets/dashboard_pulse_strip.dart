@@ -397,11 +397,10 @@ class _DashboardTrendEmptyChip extends StatelessWidget {
               const SizedBox(width: 5),
               Text(
                 DashboardMicrocopy.tendenciaVaziaChip,
-                style: AppTypography.inter(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
+                style: dashboardMicroLabelStyle(
+                  context,
+                  isDark: Theme.of(context).brightness == Brightness.dark,
                   color: accent,
-                  height: 1.1,
                 ),
               ),
             ],

@@ -39,6 +39,7 @@ void main() {
       expect(rules.collapseQuickLinks, isTrue);
       expect(rules.suppressSecondaryEmptyCtas, isTrue);
       expect(rules.compactCommandSticky, isTrue);
+      expect(rules.hideFeaturedTools, isTrue);
       expect(rules.maxVisibleNextActions, 2);
     });
 
@@ -73,6 +74,7 @@ void main() {
       );
       expect(rules.collapseQuickLinks, isFalse);
       expect(rules.hidePromoBanners, isFalse);
+      expect(rules.hideFeaturedTools, isFalse);
       expect(rules.maxVisibleNextActions, 3);
     });
   });
