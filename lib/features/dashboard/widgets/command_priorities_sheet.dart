@@ -77,7 +77,7 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
         decoration: fxStripCardDecoration(
           widget.sheetContext,
           radius: 28,
-          glowStrength: isDark ? 0.28 : 0.48,
+          glowStrength: isDark ? 0.10 : 0.16,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

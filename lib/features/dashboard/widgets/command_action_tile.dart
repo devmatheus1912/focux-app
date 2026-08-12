@@ -56,7 +56,7 @@ class CommandActionTile extends StatelessWidget {
             context,
             accent: accent,
             radius: TokensStrip.rCard,
-            glowStrength: isLead ? 0.16 : 0.10,
+            glowStrength: isLead ? 0.08 : 0.05,
           ),
           child: Row(
             children: [

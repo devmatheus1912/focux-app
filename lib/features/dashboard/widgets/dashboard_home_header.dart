@@ -35,7 +35,13 @@ class DashboardHomeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final compact = DashboardLayout.isCompact(MediaQuery.sizeOf(context).width);
+    final width = MediaQuery.sizeOf(context).width;
+    final compact = DashboardLayout.isCompact(width);
+    final showFocusLabel = focusMode && width >= 360;
+    final chromeGap = DashboardLayout.headerChromeGap(
+      focusMode: focusMode,
+      compact: compact,
+    );
     final link = BrandPalette.sectionLink(primary, dark: isDark);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -65,7 +71,7 @@ class DashboardHomeHeader extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(width: DashboardLayout.headerIconGap),
+          SizedBox(width: chromeGap),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -91,7 +97,7 @@ class DashboardHomeHeader extends StatelessWidget {
                           minHeight: DashboardLayout.touchTarget,
                         ),
                         padding: EdgeInsets.symmetric(
-                          horizontal: focusMode ? 10 : 8,
+                          horizontal: showFocusLabel ? 8 : 6,
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
@@ -120,7 +126,7 @@ class DashboardHomeHeader extends StatelessWidget {
                               size: 20,
                               color: link,
                             ),
-                            if (focusMode) ...[
+                            if (showFocusLabel) ...[
                               const SizedBox(width: 4),
                               Text(
                                 'Foco',
@@ -139,11 +145,11 @@ class DashboardHomeHeader extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: DashboardLayout.headerIconGap),
+              SizedBox(width: chromeGap),
               const ShellThemeToggle(size: DashboardLayout.touchTarget),
-              SizedBox(width: DashboardLayout.headerIconGap),
+              SizedBox(width: chromeGap),
               const NotificacaoBadgeButton(size: DashboardLayout.touchTarget),
-              SizedBox(width: DashboardLayout.headerIconGap),
+              SizedBox(width: chromeGap),
               DashboardHeaderProfileAvatar(
                 primary: primary,
                 isDark: isDark,

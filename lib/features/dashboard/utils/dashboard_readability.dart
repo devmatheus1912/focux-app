@@ -10,16 +10,16 @@ export '../../../core/theme/hero_teal.dart';
 /// Em dark, mistura mute→ink para captions não ficarem “apagadas” no grid.
 Color dashboardReadableMuted(BuildContext context, {required bool isDark}) {
   if (isDark) {
-    return Color.lerp(EagleTokens.darkInkMute, EagleTokens.darkInk, 0.42)!;
+    return Color.lerp(EagleTokens.darkInkMute, EagleTokens.darkInk, 0.55)!;
   }
-  return TokensStrip.textPrimary.withValues(alpha: 0.82);
+  return TokensStrip.textPrimary.withValues(alpha: 0.88);
 }
 
 Color dashboardReadableCaption(BuildContext context, {required bool isDark}) {
   if (isDark) {
-    return Color.lerp(EagleTokens.darkInkMute, EagleTokens.darkInk, 0.35)!;
+    return Color.lerp(EagleTokens.darkInkMute, EagleTokens.darkInk, 0.50)!;
   }
-  return TokensStrip.textPrimary.withValues(alpha: 0.80);
+  return TokensStrip.textPrimary.withValues(alpha: 0.88);
 }
 
 /// Texto secundário sobre gradiente teal (hero financeiro) — ≥4.5:1 WCAG AA.

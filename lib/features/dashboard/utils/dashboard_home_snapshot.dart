@@ -129,10 +129,11 @@ class DashboardHomeSnapshot {
                   local.day == clock.day;
             }).length;
     final checkinsHoje = home.pulse?.checkinsHoje ?? checkinsFromHistorico;
+    // Sem histórico ready → lista vazia (não zero-fill falso).
     final checkinsTrend =
         historicoCheckins != null
             ? dashboardCheckinsSparklineUltimos7Dias(historicoCheckins)
-            : List<double>.filled(7, 0);
+            : const <double>[];
     final receitaTrend = dashboardReceitaSparklineMensal(
       finData?.evolucaoMensal ?? const [],
     );

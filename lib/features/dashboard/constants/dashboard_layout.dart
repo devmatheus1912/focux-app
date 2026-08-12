@@ -21,9 +21,15 @@ abstract final class DashboardLayout {
   static const double sliverSectionGap = TokensStrip.s2;
   static const double sliverTightGap = TokensStrip.s1;
   static const double headerIconGap = TokensStrip.s2;
+  static const double headerIconGapDense = 4;
   static const double maxContentWidth = FocuxPlatform.desktopMaxContent;
 
   static bool isCompact(double width) => width < compactWidth;
+
+  static double headerChromeGap({required bool focusMode, required bool compact}) {
+    if (focusMode || compact) return headerIconGapDense;
+    return headerIconGap;
+  }
 
   static const EdgeInsets sectionPadding = EdgeInsets.fromLTRB(
     TokensStrip.s4,

@@ -55,7 +55,7 @@ class DashboardDayFocusBanner extends StatelessWidget {
             context,
             accent: primary,
             radius: TokensStrip.rCard,
-            glowStrength: 0.12,
+            glowStrength: 0.06,
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),

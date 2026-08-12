@@ -159,15 +159,15 @@ class DashboardFinancialHeroSection extends StatelessWidget {
                   boxShadow: [
                     ...TokensStrip.coloredDepthGlow(
                       heroPrimary,
-                      strength: themeDark ? 0.28 : 0.34,
+                      strength: themeDark ? 0.14 : 0.18,
                     ),
                     BoxShadow(
                       color: heroPrimary.withValues(
-                        alpha: themeDark ? 0.22 : 0.16,
+                        alpha: themeDark ? 0.14 : 0.10,
                       ),
-                      blurRadius: themeDark ? 32 : 26,
-                      offset: const Offset(0, 14),
-                      spreadRadius: themeDark ? -12 : -16,
+                      blurRadius: themeDark ? 16 : 14,
+                      offset: const Offset(0, 8),
+                      spreadRadius: -8,
                     ),
                   ],
                 ),

@@ -182,10 +182,6 @@ class DashboardAttentionCard extends StatelessWidget {
                     border: Border.all(
                       color: primary.withValues(alpha: isDark ? 0.45 : 0.28),
                     ),
-                    boxShadow: TokensStrip.coloredDepthGlow(
-                      primary,
-                      strength: 0.1,
-                    ),
                   ),
                   alignment: Alignment.center,
                   child: Text(

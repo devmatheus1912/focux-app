@@ -146,18 +146,22 @@ class DashboardDayPulseStrip extends StatelessWidget {
               ),
             ],
           ),
-          if (!collapseBody) ...[
           const SizedBox(height: 8),
           Builder(
             builder: (context) {
-              final hasTrend = checkinsTrend.any((v) => v > 0);
+              final trendReady = checkinsTrend.length >= 7;
+              final hasTrend = trendReady && checkinsTrend.any((v) => v > 0);
               final emptyDetail =
                   alunosAtivos > 0
                       ? DashboardMicrocopy.tendenciaVaziaBase
                       : DashboardMicrocopy.tendenciaVaziaGeral;
+              final sparkW = collapseBody ? 72.0 : 88.0;
+              final sparkH = collapseBody ? 20.0 : 24.0;
               return Semantics(
                 label:
-                    hasTrend
+                    !trendReady
+                        ? 'Tendência de check-ins carregando'
+                        : hasTrend
                         ? 'Tendência de check-ins nos últimos 7 dias'
                         : emptyDetail,
                 child: InkWell(
@@ -167,30 +171,33 @@ class DashboardDayPulseStrip extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Row(
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                DashboardMicrocopy.tendencia7Dias,
-                                style: dashboardSectionKickerStyle(
-                                  context,
-                                  isDark: isDark,
-                                ),
-                              ),
-                              if (!hasTrend) ...[
-                                const SizedBox(height: 2),
+                        if (!collapseBody)
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 Text(
-                                  emptyDetail,
-                                  style: dashboardCardSubtitleStyle(
+                                  DashboardMicrocopy.tendencia7Dias,
+                                  style: dashboardSectionKickerStyle(
                                     context,
                                     isDark: isDark,
                                   ),
                                 ),
+                                if (trendReady && !hasTrend) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    emptyDetail,
+                                    style: dashboardCardSubtitleStyle(
+                                      context,
+                                      isDark: isDark,
+                                    ),
+                                  ),
+                                ],
                               ],
-                            ],
-                          ),
-                        ),
+                            ),
+                          )
+                        else
+                          const Spacer(),
                         if (hasTrend)
                           FxSparkline(
                             data: checkinsTrend,
@@ -199,12 +206,12 @@ class DashboardDayPulseStrip extends StatelessWidget {
                               neutralAccent: caption,
                               emptyAccent: primary,
                             ),
-                            width: 88,
-                            height: 24,
+                            width: sparkW,
+                            height: sparkH,
                             strokeWidth: 2.0,
                             fill: true,
                           )
-                        else
+                        else if (trendReady)
                           _DashboardTrendEmptyChip(
                             isDark: isDark,
                             accent: mute,
@@ -216,7 +223,8 @@ class DashboardDayPulseStrip extends StatelessWidget {
               );
             },
           ),
-          if (showEmptyTrendCta &&
+          if (!collapseBody &&
+              showEmptyTrendCta &&
               emptyTrendCtaLabel != null &&
               onEmptyTrendCta != null) ...[
             const SizedBox(height: 6),
@@ -252,7 +260,6 @@ class DashboardDayPulseStrip extends StatelessWidget {
                 ),
               ),
             ),
-          ],
           ],
         ],
       ),
@@ -333,7 +340,7 @@ class DashboardPulseChip extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: '$value $label',
+      label: empty ? '$value $label, sem movimento hoje' : '$value $label',
       child: Material(
         color: Colors.transparent,
         child: InkWell(

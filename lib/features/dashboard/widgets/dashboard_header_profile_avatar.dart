@@ -26,29 +26,27 @@ class DashboardHeaderProfileAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final neon = BrandPalette.accent(primary);
     final avatarRadius = (_outer - _ring * 2 - _gap * 2) / 2;
-    const glowPad = 5.0;
-
     return Semantics(
       button: true,
       label: 'Abrir perfil',
       child: SizedBox(
-        width: _outer + glowPad * 2,
-        height: _outer + glowPad * 2,
+        width: _outer,
+        height: _outer,
         child: Stack(
           clipBehavior: Clip.none,
           alignment: Alignment.center,
           children: [
-            Container(
-              width: _outer,
-              height: _outer,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: neon.withValues(alpha: isDark ? 0.34 : 0.24),
-                    blurRadius: isDark ? 12 : 10,
-                  ),
-                ],
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: neon.withValues(alpha: isDark ? 0.16 : 0.12),
+                      blurRadius: isDark ? 8 : 6,
+                    ),
+                  ],
+                ),
               ),
             ),
             Material(

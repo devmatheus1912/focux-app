@@ -18,6 +18,8 @@ void main() {
       'lib/features/dashboard/widgets/command_status_tile.dart',
       'lib/features/dashboard/widgets/dashboard_tools_section.dart',
       'lib/features/dashboard/widgets/dashboard_financial_hero_section.dart',
+      'lib/features/dashboard/widgets/dashboard_home_secondary_block.dart',
+      'lib/features/dashboard/widgets/dashboard_home_primary_slivers.dart',
       'lib/features/dashboard/widgets/dashboard_shimmer_loading.dart',
       'lib/features/dashboard/utils/dashboard_microcopy.dart',
       'lib/features/dashboard/utils/dashboard_next_actions.dart',

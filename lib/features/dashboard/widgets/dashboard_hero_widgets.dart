@@ -35,10 +35,7 @@ class DashboardHeroProgressRail extends StatelessWidget {
               percentLabel!,
               style: dashboardHeroCaptionOnTealStyle(
                 fontWeight: FontWeight.w800,
-              ).copyWith(
-                color: Colors.white.withValues(alpha: 0.78),
-                letterSpacing: 0.2,
-              ),
+              ).copyWith(letterSpacing: 0.2),
             ),
           ),
         if (percentLabel != null) const SizedBox(height: 5),
@@ -90,18 +87,11 @@ class DashboardHeroProgressRail extends StatelessWidget {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.white.withValues(
-                                alpha: exceeded ? 0.48 : 0.36,
-                              ),
-                              blurRadius: exceeded ? 16 : 12,
-                              spreadRadius: exceeded ? 1 : 0,
-                            ),
-                            BoxShadow(
                               color: glow.withValues(
-                                alpha: exceeded ? 0.72 : 0.58,
+                                alpha: exceeded ? 0.28 : 0.22,
                               ),
-                              blurRadius: exceeded ? 22 : 18,
-                              spreadRadius: exceeded ? 2 : 1,
+                              blurRadius: exceeded ? 10 : 8,
+                              spreadRadius: 0,
                             ),
                           ],
                         ),
@@ -124,12 +114,7 @@ class DashboardHeroProgressRail extends StatelessWidget {
                                 color: Colors.white.withValues(
                                   alpha: 0.92 - (i * 0.22),
                                 ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: glow.withValues(alpha: 0.55),
-                                    blurRadius: 8,
-                                  ),
-                                ],
+                                boxShadow: const [],
                               ),
                             ),
                         ],

@@ -64,23 +64,12 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                 final receitaAtual = snap.receitaAtual;
                 final progressRaw = snap.progressRaw;
                 final metaSuperada = snap.metaSuperada;
-                final alunosAtivos = snap.alunosAtivos;
-                final riscoAlto = snap.riscoAlto;
-                final alunosEmRisco = snap.alunosEmRisco;
-                final checkinsHoje = snap.checkinsHoje;
-                final checkinsTrend = snap.checkinsTrend;
                 final receitaTrend = snap.receitaTrend;
-                final agendaHoje = snap.agendaHoje;
                 final riskDominante = snap.riskDominante;
                 final dayFocus = snap.dayFocus;
                 final focusRules = snap.focusRules;
-                final dayFocusCoversRetention =
-                    focusRules.dayFocusCoversRetention;
                 final attentionRiskItems = snap.attentionRiskItems;
                 final attentionVencItems = snap.attentionVencItems;
-                final attentionVisible = snap.attentionVisible;
-                final attentionCollapsedPreview =
-                    snap.attentionCollapsedPreview;
                 final dashboardNextActions = snap.dashboardNextActions;
                 final prioritiesSheetActions = snap.prioritiesSheetActions;
                 final showPrioritiesLink = snap.showPrioritiesLink;
@@ -164,275 +153,63 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                     controller: _homeScrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
                     slivers: [
-                      if (!focusRules.hidePromoBanners) ...[
-                        const SliverToBoxAdapter(child: TrialCountdownBanner()),
-                        const SliverToBoxAdapter(child: PlanUsageBanner()),
-                        if (onboardingIncomplete)
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                TokensStrip.s4,
-                                4,
-                                TokensStrip.s4,
-                                0,
-                              ),
-                              child: SetupOnboardingWidget(),
-                            ),
-                          )
-                        else
-                          SliverToBoxAdapter(
-                            child: DashboardActivationCta(
-                              alunosAtivos: alunosAtivos,
-                              temTreinos:
-                                  primeiroTreinoCriado || checkinsHoje > 0,
-                              temFinanceiro:
-                                  _finData != null &&
-                                  (_finData!.receitaMes > 0 ||
-                                      _finData!.vencimentosProximos.isNotEmpty),
-                            ),
-                          ),
-                      ],
-                      SliverToBoxAdapter(
-                        child: DashboardHomeHeader(
-                          nomePersonal: data.nomePersonal,
-                          logoUrl: data.logoUrl,
-                          isDark: themeDark,
-                          primary: primary,
-                          focusMode: _focusMode,
-                          onToggleFocus: _toggleFocusMode,
-                          onProfileTap: () => context.push('/perfil'),
-                        ),
+                      ...buildDashboardHomePrimarySlivers(
+                        context: context,
+                        snap: snap,
+                        focusRules: focusRules,
+                        dayFocus: dayFocus,
+                        isDark: themeDark,
+                        primary: primary,
+                        nomePersonal: data.nomePersonal,
+                        logoUrl: data.logoUrl,
+                        focusMode: _focusMode,
+                        onToggleFocus: _toggleFocusMode,
+                        commandCenterSubtitle: commandCenterSubtitle,
+                        showStickyPrioritiesAction: showStickyPrioritiesAction,
+                        stickyCommandActionsLabel: stickyCommandActionsLabel,
+                        onTrailingAction:
+                            stickyCommandActionsLabel != null
+                                ? openCommandQuickActions
+                                : null,
+                        finData: _finData,
+                        nextActions: dashboardNextActions,
+                        prioritiesSheetActions: prioritiesSheetActions,
+                        showPrioritiesLink: showPrioritiesLink,
+                        commandPanelKey: _commandPanelKey,
+                        mensagensNaoLidas: home.pulse?.mensagensNaoLidas,
+                        commandFade: _commandFade,
+                        kpiFade: _kpiFade,
+                        isCommandPreparing: commandAsync.isLoading,
+                        commandUnavailable: commandAsync.hasError,
+                        attentionSectionResetToken: _attentionSectionResetToken,
+                        onReviewAttention: openAttentionReview,
+                        onboardingIncomplete: onboardingIncomplete,
+                        primeiroTreinoCriado: primeiroTreinoCriado,
                       ),
-                      SliverToBoxAdapter(
-                        child: DashboardDayFocusBanner(
-                          focus: dayFocus,
-                          isDark: themeDark,
-                          primary: primary,
-                        ),
-                      ),
-
-                      // CENTRAL DE COMANDO — protagonista do dia
-                      SliverPersistentHeader(
-                        pinned: true,
-                        delegate: DashboardCommandCenterStickyHeaderDelegate(
-                          isDark: themeDark,
-                          primary: primary,
-                          subtitle: commandCenterSubtitle,
-                          compact: focusRules.compactCommandSticky,
-                          showPrioritiesAction: showStickyPrioritiesAction,
-                          trailingActionLabel: stickyCommandActionsLabel,
-                          onTrailingAction:
-                              stickyCommandActionsLabel != null
-                                  ? openCommandQuickActions
-                                  : null,
-                        ),
-                      ),
-                      SliverToBoxAdapter(
-                        child: dashboardEntryMotion(
-                          context: context,
-                          fade: _commandFade,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              TokensStrip.s4,
-                              0,
-                              TokensStrip.s4,
-                              TokensStrip.s4,
-                            ),
-                            child: DashboardCommandCenterSection(
-                              isDark: themeDark,
-                              primary: primary,
-                              finData: _finData,
-                              nextActions: dashboardNextActions,
-                              prioritiesSheetActions: prioritiesSheetActions,
-                              showPrioritiesLink: showPrioritiesLink,
-                              panelKey: _commandPanelKey,
-                              mensagensNaoLidas: home.pulse?.mensagensNaoLidas,
-                              hideHeader: true,
-                              contextualSubtitle: commandCenterSubtitle,
-                              collapseQuickLinks: focusRules.collapseQuickLinks,
-                              alunosAtivos: alunosAtivos,
-                              agendaHojeCount: agendaHoje,
-                              unreadCount: snap.unreadCount,
-                              copilotOpenCount:
-                                  snap.filaAcoes
-                                      .where((a) => a.tipo == 'IA_COPILOTO')
-                                      .length,
-                              isCommandPreparing: commandAsync.isLoading,
-                              commandUnavailable: commandAsync.hasError,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      if (riscoAlto > 0 &&
-                          !attentionVisible &&
-                          !focusRules.hideSecondaryRiskCtas)
+                      if (!focusRules.omitSecondarySections)
                         SliverToBoxAdapter(
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
-                              onPressed: () => context.push('/retencao'),
-                              child: const Text('Ver saúde da base'),
-                            ),
-                          ),
-                        ),
-
-                      if (attentionVisible) ...[
-                        SliverToBoxAdapter(
-                          child: DashboardAttentionRail(
+                          child: DashboardHomeSecondaryBlock(
+                            focusRules: focusRules,
                             isDark: themeDark,
-                            riskDominante: riskDominante,
-                            riscoAlto: riscoAlto,
-                            alunosAtivos: alunosAtivos,
-                            dayFocusCoversRetention: dayFocusCoversRetention,
-                            collapseAttention: focusRules.collapseAttention,
-                            attentionRiskItems: attentionRiskItems,
-                            attentionVencItems: attentionVencItems,
-                            attentionCollapsedPreview:
-                                attentionCollapsedPreview,
-                            resetToken: _attentionSectionResetToken,
-                            onReview: openAttentionReview,
+                            heroPrimary: heroPrimary,
+                            heroDeep: heroDeep,
+                            mes: mes,
+                            receitaAtual: receitaAtual,
+                            pendente: pendente,
+                            progressRaw: progressRaw,
+                            metaSuperada: metaSuperada,
+                            loadingFin: _loadingFin,
+                            counterAnim: _counterAnim,
+                            finData: _finData,
+                            receitaTrend: receitaTrend,
+                            gradientCtrl: _gradientCtrl,
+                            reduceMotion: reduceMotion,
+                            heroFade: _heroFade,
+                            shortcutAspectRatio: shortcutAspectRatio,
+                            onOpenRelatorio:
+                                () => context.push('/relatorios/global'),
                           ),
                         ),
-                        SliverToBoxAdapter(
-                          child: SizedBox(
-                            height: DashboardLayout.sliverSectionGap,
-                          ),
-                        ),
-                      ],
-
-                      // PULSO DO DIA — operação antes de receita
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            TokensStrip.s4,
-                            TokensStrip.s2,
-                            TokensStrip.s4,
-                            TokensStrip.s4,
-                          ),
-                          child: DashboardDayPulseStrip(
-                            fade: _kpiFade,
-                            isDark: themeDark,
-                            alunosAtivos: alunosAtivos,
-                            checkinsHoje: checkinsHoje,
-                            checkinsTrend: checkinsTrend,
-                            riscoAlto: riscoAlto,
-                            agendaHoje: agendaHoje,
-                            hideRiscoChip: alunosEmRisco.isNotEmpty,
-                            primary: primary,
-                            collapseBody: focusRules.collapsePulseBody,
-                            onAtivos:
-                                () => goPersonalShellTab(
-                                  context,
-                                  '/alunos?filtro=ativos',
-                                ),
-                            onCheckins: () => context.go('/checkin/historico'),
-                            onAgenda:
-                                () => goPersonalShellTab(context, '/agenda'),
-                            onRisco:
-                                riscoAlto > 0
-                                    ? () => goPersonalShellTab(
-                                      context,
-                                      '/alunos?filtro=risco',
-                                    )
-                                    : () =>
-                                        goPersonalShellTab(context, '/alunos'),
-                            showEmptyTrendCta:
-                                !checkinsTrend.any((v) => v > 0) &&
-                                alunosAtivos > 0 &&
-                                checkinsHoje == 0 &&
-                                !focusRules.suppressSecondaryEmptyCtas &&
-                                !focusRules.collapsePulseBody,
-                            emptyTrendCtaLabel:
-                                primeiroTreinoCriado
-                                    ? 'Ver agenda'
-                                    : 'Agendar primeiro treino',
-                            onEmptyTrendCta:
-                                () =>
-                                    primeiroTreinoCriado
-                                        ? goPersonalShellTab(context, '/agenda')
-                                        : context.push('/treinos/novo'),
-                          ),
-                        ),
-                      ),
-
-                      if (!focusRules.omitSecondarySections) ...[
-                      SliverToBoxAdapter(
-                        child: SizedBox(
-                          height: DashboardLayout.sliverSectionGap,
-                        ),
-                      ),
-                      SliverToBoxAdapter(
-                        child: DashboardCollapsibleSection(
-                          title: DashboardMicrocopy.aderenciaDaSemana,
-                          collapsedHint:
-                              dayFocusCoversRetention
-                                  ? 'Ranking semanal · expandir se precisar'
-                                  : 'Treinos e ranking · ${DashboardMicrocopy.toqueParaExpandir}',
-                          isDark: themeDark,
-                          initiallyExpanded: !focusRules.collapseAderencia,
-                          headerActionLabel:
-                              focusRules.focusMode ? null : 'Relatório',
-                          onHeaderAction:
-                              focusRules.focusMode
-                                  ? null
-                                  : () => context.push('/relatorios/global'),
-                          child: DashboardAderenciaSemanaWidget(
-                            isDark: themeDark,
-                            retentionFocus: dayFocusCoversRetention,
-                            suppressEmptyActions:
-                                focusRules.suppressSecondaryEmptyCtas,
-                          ),
-                        ),
-                      ),
-
-                      SliverToBoxAdapter(
-                        child: SizedBox(height: DashboardLayout.sliverTightGap),
-                      ),
-                      SliverToBoxAdapter(
-                        child: DashboardCollapsibleSection(
-                          title: DashboardMicrocopy.panoramaFinanceiro,
-                          collapsedHint:
-                              receitaAtual > 0
-                                  ? 'R\$ ${receitaAtual.toInt()} recebido · ${DashboardMicrocopy.toqueParaExpandir}'
-                                  : 'R\$ 0 recebido · meta do mês',
-                          isDark: themeDark,
-                          initiallyExpanded: !focusRules.collapseFinance,
-                          child: dashboardEntryMotion(
-                            context: context,
-                            fade: _heroFade,
-                            slideBegin: const Offset(0, 0.05),
-                            child: DashboardFinancialHeroSection(
-                              gradientCtrl: _gradientCtrl,
-                              reduceMotion: reduceMotion,
-                              themeDark: themeDark,
-                              heroPrimary: heroPrimary,
-                              heroDeep: heroDeep,
-                              mes: mes,
-                              receitaAtual: receitaAtual,
-                              pendente: pendente,
-                              progressRaw: progressRaw,
-                              metaSuperada: metaSuperada,
-                              loadingFin: _loadingFin,
-                              counterAnim: _counterAnim,
-                              finData: _finData,
-                              receitaTrend: receitaTrend,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      SliverToBoxAdapter(
-                        child: SizedBox(height: TokensStrip.s3),
-                      ),
-                      SliverToBoxAdapter(
-                        child: DashboardCollapsibleToolsSection(
-                          isDark: themeDark,
-                          shortcutAspectRatio: shortcutAspectRatio,
-                          hideFeaturedTools: focusRules.hideFeaturedTools,
-                        ),
-                      ),
-                      ],
 
                       SliverToBoxAdapter(
                         child: SizedBox(
