@@ -111,13 +111,15 @@ class DashboardCommandCenterStickyHeaderDelegate
                                 DashboardMicrocopy.commandCenterTitle,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: AppTypography.inter(
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.titleMedium!.copyWith(
                                   fontSize:
-                                      TokensStrip.fontH2 -
-                                      (2 * progress) -
-                                      (layoutCompact ? 1 : 0),
-                                  fontWeight: TokensStrip.weightH2,
-                                  letterSpacing: TokensStrip.trackingH2,
+                                      15 -
+                                      (1.5 * progress) -
+                                      (layoutCompact ? 0.5 : 0),
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.2,
                                   height: layoutCompact ? 1.05 : 1.12,
                                   color: heading,
                                 ),
@@ -128,12 +130,9 @@ class DashboardCommandCenterStickyHeaderDelegate
                                   subtitle,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: AppTypography.inter(
-                                    fontSize: TokensStrip.fontBodySm,
-                                    fontWeight: FontWeight.w400,
-                                    height: 1.2,
+                                  style: TokensStrip.bodyMuted(
                                     color: mute,
-                                  ),
+                                  ).copyWith(height: 1.2),
                                 ),
                               ],
                             ],
@@ -161,10 +160,7 @@ class DashboardCommandCenterStickyHeaderDelegate
                               chipLabel,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: AppTypography.inter(
-                                fontSize: layoutCompact ? 11 : 11.5,
-                                fontWeight: FontWeight.w800,
-                              ),
+                              style: dashboardActionChipStyle(link),
                             ),
                           ),
                         ),

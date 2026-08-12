@@ -60,10 +60,9 @@ TextStyle dashboardSectionKickerStyle(
   required bool isDark,
 }) {
   final primary = Theme.of(context).colorScheme.primary;
-  return AppTypography.inter(
-    fontSize: 13,
-    fontWeight: FontWeight.w700,
-    letterSpacing: 0.35,
+  return Theme.of(context).textTheme.titleMedium!.copyWith(
+    fontWeight: FontWeight.w800,
+    letterSpacing: -0.2,
     color: BrandPalette.sectionLink(primary, dark: isDark),
   );
 }

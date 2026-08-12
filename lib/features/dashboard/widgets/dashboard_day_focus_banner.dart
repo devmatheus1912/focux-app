@@ -33,7 +33,9 @@ class DashboardDayFocusBanner extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final reduceMotion = TokensStrip.prefersReducedMotion(context);
     final chipLabel =
-        focusMode ? DashboardMicrocopy.modoFocoChipOn : DashboardMicrocopy.modoFocoChipOff;
+        focusMode
+            ? DashboardMicrocopy.modoFocoChipOn
+            : DashboardMicrocopy.modoFocoChipOff;
 
     return Semantics(
       container: true,
@@ -106,8 +108,6 @@ class DashboardDayFocusBanner extends StatelessWidget {
                             context,
                             isDark: isDark,
                             color: accent,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.45,
                           ),
                         ),
                       ),
@@ -133,8 +133,8 @@ class DashboardDayFocusBanner extends StatelessWidget {
                                   minHeight: 36,
                                 ),
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 11,
-                                  vertical: 7,
+                                  horizontal: 10,
+                                  vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
                                   color:
@@ -162,19 +162,13 @@ class DashboardDayFocusBanner extends StatelessWidget {
                                       focusMode
                                           ? Icons.bolt_rounded
                                           : Icons.bolt_outlined,
-                                      size: 15,
+                                      size: 14,
                                       color: link,
                                     ),
-                                    const SizedBox(width: 5),
+                                    const SizedBox(width: 4),
                                     Text(
                                       chipLabel,
-                                      style: AppTypography.inter(
-                                        fontSize: TokensStrip.fontBodySm,
-                                        fontWeight: FontWeight.w800,
-                                        color: link,
-                                        letterSpacing: 0.12,
-                                        height: 1,
-                                      ),
+                                      style: dashboardActionChipStyle(link),
                                     ),
                                   ],
                                 ),
@@ -185,24 +179,18 @@ class DashboardDayFocusBanner extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: TokensStrip.s2),
                   Text(
                     focus.headline,
-                    style: AppTypography.inter(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: ink,
-                      height: 1.18,
-                      letterSpacing: -0.35,
-                    ),
+                    style: dashboardPageTitleStyle(context, color: ink),
                   ),
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 4),
                   Text(
                     focus.detail,
                     style: dashboardCardSubtitleStyle(
                       context,
                       isDark: isDark,
-                    ).copyWith(height: 1.35),
+                    ),
                   ),
                 ],
               ),

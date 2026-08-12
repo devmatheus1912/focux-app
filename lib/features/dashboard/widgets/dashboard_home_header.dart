@@ -6,6 +6,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import '../constants/dashboard_layout.dart';
+import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import 'dashboard_header_profile_avatar.dart';
 
@@ -55,13 +56,7 @@ class DashboardHomeHeader extends StatelessWidget {
                 maxLines: 2,
                 softWrap: true,
                 overflow: TextOverflow.ellipsis,
-                style: AppTypography.inter(
-                  fontSize: compact ? 18 : 20,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.35,
-                  height: 1.15,
-                  color: ink,
-                ),
+                style: dashboardPageTitleStyle(context, color: ink),
               ),
             ),
           ),

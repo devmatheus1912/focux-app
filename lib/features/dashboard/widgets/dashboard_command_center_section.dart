@@ -276,23 +276,17 @@ class DashboardCommandCenterSectionState
                   children: [
                     Text(
                       DashboardMicrocopy.commandCenterTitle,
-                      style: AppTypography.inter(
-                        fontSize: TokensStrip.fontH2,
-                        fontWeight: TokensStrip.weightH2,
-                        letterSpacing: TokensStrip.trackingH2,
-                        height: 1.2,
+                      style: dashboardSectionTitleStyle(
+                        context,
                         color: heading,
-                      ),
+                      ).copyWith(fontSize: 15),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       contextualSubtitle ??
                           'A melhor próxima ação para proteger receita e aderência.',
-                      style: AppTypography.inter(
-                        fontSize: TokensStrip.fontBodySm,
-                        fontWeight: FontWeight.w400,
-                        height: TokensStrip.leadingBody,
-                        color: mute,
+                      style: TokensStrip.bodyMuted(color: mute).copyWith(
+                        height: 1.35,
                       ),
                     ),
                   ],

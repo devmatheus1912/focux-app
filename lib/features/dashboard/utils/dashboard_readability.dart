@@ -88,20 +88,50 @@ Color dashboardPrioritiesChipForeground(
         ? Colors.white.withValues(alpha: 0.96)
         : BrandPalette.sectionAction(primary, dark: false);
 
-/// Eyebrow / micro labels em cards do hub (≥13px, tracking premium).
+/// Título de página / saudação — mesmo peso do nome no hero do Perfil.
+TextStyle dashboardPageTitleStyle(BuildContext context, {required Color color}) {
+  return Theme.of(context).textTheme.titleLarge!.copyWith(
+    color: color,
+    fontWeight: FontWeight.w900,
+    height: 1.05,
+    letterSpacing: 0,
+  );
+}
+
+/// Título de seção (card) — espelha [PerfilCardSection].
+TextStyle dashboardSectionTitleStyle(
+  BuildContext context, {
+  required Color color,
+}) {
+  return Theme.of(context).textTheme.titleMedium!.copyWith(
+    fontWeight: FontWeight.w800,
+    color: color,
+    letterSpacing: -0.2,
+  );
+}
+
+/// Eyebrow / micro labels — titleMedium do tema (Perfil app bar).
 TextStyle dashboardMicroLabelStyle(
   BuildContext context, {
   required bool isDark,
   Color? color,
-  FontWeight fontWeight = FontWeight.w700,
-  double letterSpacing = 0.28,
+  FontWeight fontWeight = FontWeight.w800,
+  double letterSpacing = 0.1,
 }) {
-  return AppTypography.inter(
-    fontSize: TokensStrip.fontBodySm,
+  return Theme.of(context).textTheme.titleMedium!.copyWith(
     fontWeight: fontWeight,
     letterSpacing: letterSpacing,
     height: 1.15,
     color: color ?? dashboardReadableCaption(context, isDark: isDark),
+  );
+}
+
+/// Chip de ação no canto (Perfil trailing).
+TextStyle dashboardActionChipStyle(Color foreground) {
+  return TokensStrip.bodyMuted(color: foreground).copyWith(
+    fontSize: TokensStrip.fontBodySm - 2,
+    fontWeight: FontWeight.w800,
+    height: 1.1,
   );
 }
 
@@ -138,11 +168,12 @@ TextStyle dashboardHeroMutedOnTealStyle({
 }
 
 TextStyle dashboardCardTitleStyle(Color ink) {
+  // Mesmo corpo do título de card do Perfil (titleMedium → w800).
   return AppTypography.inter(
-    fontSize: TokensStrip.fontBodySm,
-    fontWeight: FontWeight.w700,
+    fontSize: 13.5,
+    fontWeight: FontWeight.w800,
     color: ink,
-    letterSpacing: -0.1,
+    letterSpacing: -0.2,
     height: 1.2,
   );
 }
@@ -150,21 +181,12 @@ TextStyle dashboardCardTitleStyle(Color ink) {
 TextStyle dashboardCardSubtitleStyle(
   BuildContext context, {
   required bool isDark,
-  FontWeight fontWeight = FontWeight.w500,
+  FontWeight fontWeight = FontWeight.w400,
 }) {
-  return AppTypography.inter(
-    fontSize: TokensStrip.fontBodySm,
-    fontWeight: fontWeight,
+  return TokensStrip.bodyMuted(
     color: dashboardReadableCaption(context, isDark: isDark),
-    height: 1.25,
-  );
+  ).copyWith(fontWeight: fontWeight, height: 1.35);
 }
 
-TextStyle dashboardChipLabelStyle(Color foreground) {
-  return AppTypography.inter(
-    color: foreground,
-    fontSize: TokensStrip.fontBodySm,
-    fontWeight: FontWeight.w800,
-    height: 1.1,
-  );
-}
+TextStyle dashboardChipLabelStyle(Color foreground) =>
+    dashboardActionChipStyle(foreground);
