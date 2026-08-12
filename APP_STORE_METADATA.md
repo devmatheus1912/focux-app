@@ -1,104 +1,53 @@
-# Focux Personal — App Store Metadata
+# App Store Connect — metadados (sem secrets)
 
-## App Name
-Focux Personal — Gestão de Alunos
+Preencha no App Store Connect. **Senhas e shared secrets só no Railway / vault do time.**
 
-## Subtitle (30 chars)
-Personal Trainer Inteligente
+## URLs obrigatórias
 
-## Promotional Text (170 chars)
-Gerencie seus alunos, treinos e finanças em um só lugar. IA integrada para progressão de carga e copiloto inteligente. O app mais completo para Personal Trainers do Brasil.
+| Campo | Valor |
+|---|---|
+| Privacy Policy URL | `https://focuxpersonal.com/privacidade` |
+| Support URL | `https://focuxpersonal.com/suporte` |
+| Terms of Use (EULA) | `https://focuxpersonal.com/termos` |
+| Marketing URL | `https://focuxpersonal.com` |
 
-## Description
-O Focux Personal é a plataforma completa para Personal Trainers que querem profissionalizar sua gestão e escalar seu negócio.
+## Identidade
 
-**Para o Personal Trainer:**
-• Cadastre alunos ilimitados com perfil completo, anamnese e objetivos
-• Monte treinos personalizados com biblioteca de exercícios e vídeos
-• Acompanhe a evolução de cada aluno com métricas de aderência e check-ins
-• Controle financeiro completo: mensalidades, inadimplência e relatórios
-• IA Copiloto: gere treinos, dietas e insights automáticos baseados no histórico
-• Progressão de carga inteligente com detecção automática de evolução
-• Chat direto com alunos para comunicação rápida
-• Perfil profissional público compartilhável na bio
-• Agenda integrada com horários e compromissos
-• Ranking de personais e gamificação para engajamento
-• White-label: personalize cores e logo do seu negócio
+- **Name:** Focux Personal — Gestão de Alunos
+- **Bundle ID:** `com.focux.focuxApp`
+- **Subtitle / keywords:** conforme copy aprovada (PT-BR)
+- **Categoria:** Health & Fitness / Productivity (escolha a principal no Connect)
 
-**Para o Aluno:**
-• Visualize seus treinos do dia com instruções detalhadas
-• Faça check-in durante o treino e registre séries, cargas e repetições
-• Acompanhe sua evolução com gráficos e recordes pessoais
-• Receba notificações sobre novos treinos e mensagens do personal
-• Conquiste badges e suba no ranking de consistência
+## App Review Information
 
-**Diferenciais:**
-✓ IA brasileira que entende treino
-✓ Detecção automática de evolução de carga
-✓ LGPD compliant com exportação e exclusão de dados
-✓ Funciona offline para check-in
-✓ Design premium e responsivo
+- **Demo account:** usuário de review provisionado no backend (env no Railway). **Não** coloque a senha neste arquivo.
+- **Notas para o reviewer (cole no Connect):**
 
-Baixe agora e transforme sua carreira como Personal Trainer.
+```text
+Focux Personal — app para personal trainers e alunos.
 
-## Keywords (100 chars)
-personal,trainer,treino,alunos,gestão,fitness,academia,exercício,dieta,IA,musculação,saúde,ficha
+Login: use a conta de review informada neste formulário (senha só no campo senha do Review Information).
 
-## Category
-Health & Fitness
+Fluxo sugerido:
+1) Login como personal
+2) Dashboard / alunos / treinos
+3) Perfil → Configurações → caminho de exclusão de conta (LGPD)
+4) Paywall / assinatura: sandbox App Store; botão Restaurar compras
 
-## Secondary Category
-Productivity
+URLs legais (estáticas, sem JS obrigatório):
+- Privacidade: https://focuxpersonal.com/privacidade
+- Termos (IAP auto-renovável / cancelamento Apple): https://focuxpersonal.com/termos
+- Suporte + exclusão: https://focuxpersonal.com/suporte
+- Empresa: https://focuxpersonal.com/empresa
 
-## Privacy Policy URL
-https://focuxpersonal.com/privacidade
+White-label = personalização DENTRO do app Focux Personal (nome/cores/logo). Não publica app separado na App Store em nome do personal.
+HealthKit / Health Connect só com consentimento do usuário.
+```
 
-## Terms of Service URL
-https://focuxpersonal.com/termos
+## Checklist antes de enviar
 
-## Support URL
-https://focux.app/suporte
-
-## Marketing URL
-https://focux.app
-
----
-
-## App Store Review Notes
-
-Demo Account for Review:
-- Email: review@focux.app
-- Password: set via `FOCUX_REVIEW_ACCOUNT_PASSWORD` on the backend (provide only in App Store Connect review notes, not in git).
-- This account has pre-populated data: 3 students, 3 training programs, and 9 exercises.
-- The app requires an internet connection to load data from the API.
-
-In-App Purchases:
-- Subscriptions use Flutter `in_app_purchase` (StoreKit / Google Play Billing).
-- Product IDs (auto-renewing, criar todos no App Store Connect):
-  - `focux_premium_monthly`, `focux_premium_yearly`
-  - `focux_enterprise_monthly`, `focux_enterprise_yearly`
-  - `focux_enterprise_pro_monthly`, `focux_enterprise_pro_yearly`
-- Annual is the default offer in-app (−20% vs 12× monthly).
-- Local StoreKit config for Xcode: `ios/Products.storekit`
-- Server validates receipts via `POST /api/iap/verify`.
-- Free tier includes up to 5 students.
-- Premium and Enterprise unlock more students, AI, finance, white-label, etc.
-- "Restore Purchases" is on the Paywall and Planos screens.
-- No external payment links for digital subscriptions inside the iOS/Android app (Guideline 3.1.1).
-
-Account Deletion:
-- Available in Profile → Settings → "Excluir Conta"
-- Complies with Apple's account deletion requirements
-- Data is anonymized per LGPD regulations
-
-## Screenshots Required
-- iPhone 6.7" (iPhone 15 Pro Max): 1290 x 2796 px
-- iPhone 5.5" (iPhone 8 Plus): 1242 x 2208 px
-
-### Suggested Screenshots (6 screens):
-1. Dashboard — Command Center with metrics
-2. Alunos — Student list with status badges
-3. Treino — Workout builder with exercises
-4. Check-in — Live workout execution with timer
-5. IA Copiloto — AI chat generating insights
-6. Financeiro — Financial dashboard with charts
+- [ ] Privacy / Support / Terms no Connect = URLs acima
+- [ ] Conta review ativa no backend de produção
+- [ ] IAP sandbox + Shared Secret no backend
+- [ ] Screenshots e descrição sem claims de loja “já publicada” se ainda não estiver
+- [ ] Site focuxpersonal.com no ar com as quatro páginas legais HTTP 200

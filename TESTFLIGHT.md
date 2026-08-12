@@ -36,10 +36,10 @@ Tudo no código/CI já está pronto. Siga esta ordem **uma vez** quando a Apple 
 | `focux_enterprise_pro_yearly` | Enterprise Pro anual |
 
 4. Copie o **App-Specific Shared Secret** → configure no Railway: `FOCUX_IAP_APPLE_SHARED_SECRET`
-5. Cole metadados de `APP_STORE_METADATA.md` (descrição, keywords, URLs de privacidade/termos)
+5. Cole metadados de `APP_STORE_METADATA.md` (URLs legais, notas ao reviewer)
 6. Em **App Review Information**:
-   - Demo: `review@focux.app` / senha do env `FOCUX_REVIEW_ACCOUNT_PASSWORD`
-   - Notas: copie a seção "App Store Review Notes" de `APP_STORE_METADATA.md`
+   - Demo: conta de review do backend (senha **somente** no campo do Connect / env do Railway — nunca no git)
+   - Notas: copie o bloco de notas de `APP_STORE_METADATA.md`
 
 ---
 
@@ -89,10 +89,12 @@ Ou manualmente:
 
 ```bash
 flutter build ipa --release \
-  --dart-define=API_URL=https://focux-backend-production.up.railway.app \
-  --dart-define=PUBLIC_WEB_URL=https://focux.app \
+  --dart-define=API_URL=https://SEU_BACKEND \
+  --dart-define=PUBLIC_WEB_URL=https://focuxpersonal.com \
   --export-options-plist=ios/ExportOptions.plist
 ```
+
+> Preferir `./tools/release/build-ios.sh` (exige pins TLS da API).
 
 Saída: `build/ios/ipa/focux_app.ipa`
 
