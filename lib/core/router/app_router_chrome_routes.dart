@@ -8,6 +8,7 @@ import '../../features/alunos/utils/aluno360_operacao_logic.dart';
 import '../../features/alunos/screens/aluno_equipamentos_screen.dart';
 import '../../features/perfil/data/perfil_repository.dart';
 import '../../features/perfil/screens/perfil_screen.dart';
+import '../../features/perfil/screens/perfil_ferramentas_screen.dart';
 import '../../features/perfil/screens/editar_perfil_screen.dart';
 import '../../features/assinatura/screens/assinatura_screen.dart';
 import '../../features/convites/screens/convites_screen.dart';
@@ -481,6 +482,10 @@ RouteBase buildChromeShellRoute() {
           GoRoute(
             path: '/perfil/wallet',
             builder: (context, state) => const WalletScreen(),
+          ),
+          GoRoute(
+            path: '/perfil/ferramentas',
+            builder: (context, state) => const PerfilFerramentasScreen(),
           ),
           GoRoute(
             path: '/identidade-visual',

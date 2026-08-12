@@ -254,7 +254,7 @@ class _WhiteLabelSettingsScreenState
                     _linkTile(
                       title: 'Página completa',
                       hint: 'Configure seu link público no perfil primeiro.',
-                      displayLabel: 'focux.app/p/seu-nome',
+                      displayLabel: 'focuxpersonal.com/p/seu-nome',
                       copyUrl: config.publicLandingUrl,
                     ),
                   ],

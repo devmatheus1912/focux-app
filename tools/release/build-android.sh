@@ -5,7 +5,7 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
 
 API_URL="${API_URL:-https://focux-backend-production.up.railway.app}"
-PUBLIC_WEB_URL="${PUBLIC_WEB_URL:-https://focux.app}"
+PUBLIC_WEB_URL="${PUBLIC_WEB_URL:-https://focuxpersonal.com}"
 
 if [[ -z "${API_CERT_PINS:-}" ]]; then
   echo "ERROR: API_CERT_PINS obrigatório no release (SHA-256 do cert da API)."

@@ -66,6 +66,16 @@
                 <data android:scheme="https" android:host="www.focux.app" android:pathPrefix="/convite"/>
                 <data android:scheme="https" android:host="www.focux.app" android:pathPrefix="/resetar-senha"/>
                 <data android:scheme="https" android:host="www.focux.app" android:pathPrefix="/aluno"/>
+                <data android:scheme="https" android:host="focuxpersonal.com" android:pathPrefix="/p"/>
+                <data android:scheme="https" android:host="focuxpersonal.com" android:pathPrefix="/c"/>
+                <data android:scheme="https" android:host="focuxpersonal.com" android:pathPrefix="/convite"/>
+                <data android:scheme="https" android:host="focuxpersonal.com" android:pathPrefix="/resetar-senha"/>
+                <data android:scheme="https" android:host="focuxpersonal.com" android:pathPrefix="/aluno"/>
+                <data android:scheme="https" android:host="www.focuxpersonal.com" android:pathPrefix="/p"/>
+                <data android:scheme="https" android:host="www.focuxpersonal.com" android:pathPrefix="/c"/>
+                <data android:scheme="https" android:host="www.focuxpersonal.com" android:pathPrefix="/convite"/>
+                <data android:scheme="https" android:host="www.focuxpersonal.com" android:pathPrefix="/resetar-senha"/>
+                <data android:scheme="https" android:host="www.focuxpersonal.com" android:pathPrefix="/aluno"/>
             </intent-filter>
         </activity>
         <meta-data

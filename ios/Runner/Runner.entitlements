@@ -6,6 +6,8 @@
 	<array>
 		<string>applinks:focux.app</string>
 		<string>applinks:www.focux.app</string>
+		<string>applinks:focuxpersonal.com</string>
+		<string>applinks:www.focuxpersonal.com</string>
 	</array>
 	<key>com.apple.developer.healthkit</key>
 	<true/>

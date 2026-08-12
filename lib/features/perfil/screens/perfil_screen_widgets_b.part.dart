@@ -25,9 +25,7 @@ class _HeroMarcaChip extends StatelessWidget {
             ),
             child: Text(
               'Marca $score%',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 11.5,
+              style: TokensStrip.bodyMuted(color: Colors.white).copyWith(
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -59,11 +57,10 @@ class _PlanPill extends StatelessWidget {
           const SizedBox(width: 5),
           Text(
             'PLANO $label',
-            style: const TextStyle(
-              color: EagleTokens.gold,
-              fontSize: 11,
+            style: TokensStrip.bodyMuted(color: EagleTokens.gold).copyWith(
               fontWeight: FontWeight.w900,
               letterSpacing: 0.35,
+              fontSize: TokensStrip.fontBodySm - 2,
             ),
           ),
         ],
@@ -171,7 +168,10 @@ class _Avatar extends StatelessWidget {
                           ? Text(
                             _initials(nome),
                             style: TextStyle(
-                              fontSize: compact ? 22 : 27,
+                              fontSize:
+                                  compact
+                                      ? TokensStrip.fontH2
+                                      : TokensStrip.fontH1 - 5,
                               fontWeight: FontWeight.w900,
                               color: primaryColor,
                             ),
@@ -212,133 +212,6 @@ class _Avatar extends StatelessWidget {
   }
 }
 
-class _CardSection extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-  final String? trailingLabel;
-  final VoidCallback? onTrailingTap;
-  final bool isDark;
-  final Color accent;
-  final Color actionInk;
-  final Widget child;
-
-  const _CardSection({
-    required this.title,
-    required this.isDark,
-    required this.child,
-    this.subtitle,
-    this.trailingLabel,
-    this.onTrailingTap,
-    required this.accent,
-    required this.actionInk,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
-    final ink = chrome.ink;
-    final mute = chrome.mute;
-    final a11yTitle = subtitle == null ? title : '$title. $subtitle';
-
-    return Semantics(
-      container: true,
-      label: a11yTitle,
-      child: Container(
-        decoration: chrome.panel(radius: 16, accent: accent),
-        child: Padding(
-          padding: const EdgeInsets.all(TokensStrip.s4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: ink,
-                            letterSpacing: -0.2,
-                          ),
-                        ),
-                        if (subtitle != null) ...[
-                          const SizedBox(height: TokensStrip.s1),
-                          Text(
-                            subtitle!,
-                            style: TextStyle(
-                              color: mute,
-                              fontSize: 12,
-                              height: 1.35,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  if (trailingLabel != null && onTrailingTap != null)
-                    Semantics(
-                      button: true,
-                      label: '$trailingLabel $title',
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: onTrailingTap,
-                          borderRadius: BorderRadius.circular(999),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: accent.withValues(
-                                alpha: isDark ? 0.16 : 0.10,
-                              ),
-                              borderRadius: BorderRadius.circular(999),
-                              border: Border.all(
-                                color: accent.withValues(alpha: 0.22),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  trailingLabel!,
-                                  style: TextStyle(
-                                    color: actionInk,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                                const SizedBox(width: 2),
-                                Icon(
-                                  Icons.north_east,
-                                  size: 13,
-                                  color: actionInk,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              child,
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _BrandPaletteStrip extends StatelessWidget {
   final Color primary;
   final Color secondary;
@@ -363,9 +236,7 @@ class _BrandPaletteStrip extends StatelessWidget {
             usingDefault
                 ? 'Paleta padrão · toque para personalizar'
                 : 'Paleta ativa · toque para editar',
-            style: TextStyle(
-              color: mute,
-              fontSize: 11.5,
+            style: TokensStrip.bodyMuted(color: mute).copyWith(
               height: 1.25,
               fontWeight: FontWeight.w600,
             ),
@@ -436,21 +307,18 @@ class _PerfilDebugTools extends StatelessWidget {
           collapsedIconColor: mute,
           title: Text(
             'Ferramentas de desenvolvimento',
-            style: TextStyle(
-              color: mute,
-              fontSize: 12.5,
+            style: TokensStrip.bodyMuted(color: mute).copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),
           subtitle: Text(
             'Só em debug — fora do fluxo do personal',
-            style: TextStyle(
+            style: TokensStrip.bodyMuted(
               color: mute.withValues(alpha: 0.85),
-              fontSize: 11,
             ),
           ),
           children: [
-            _ActionTile(
+            PerfilActionTile(
               icon: Icons.palette_outlined,
               label: 'TOKENS STRIP',
               value: 'Design system',
@@ -460,7 +328,7 @@ class _PerfilDebugTools extends StatelessWidget {
               line: line,
               onTap: () => context.go('/qa/tokens-strip'),
             ),
-            _ActionTile(
+            PerfilActionTile(
               icon: Icons.science_outlined,
               label: 'QA Smoke Test',
               value: 'Smoke',

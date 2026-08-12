@@ -173,10 +173,12 @@ class _BrandPreview extends StatelessWidget {
                         profileName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: compact ? 14 : 15,
+                        style: TokensStrip.body(color: Colors.white).copyWith(
                           fontWeight: FontWeight.w900,
+                          fontSize:
+                              compact
+                                  ? TokensStrip.fontBodySm + 1
+                                  : TokensStrip.fontBody,
                         ),
                       ),
                       const SizedBox(height: 3),
@@ -184,11 +186,15 @@ class _BrandPreview extends StatelessWidget {
                         subtitle,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: TokensStrip.bodyMuted(
                           color: Colors.white.withValues(alpha: 0.88),
-                          fontSize: compact ? 11 : 11.5,
+                        ).copyWith(
                           height: 1.28,
                           fontWeight: FontWeight.w600,
+                          fontSize:
+                              compact
+                                  ? TokensStrip.fontBodySm - 2
+                                  : TokensStrip.fontBodySm - 1.5,
                         ),
                       ),
                     ],
@@ -219,11 +225,11 @@ class _BrandPreview extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 5),
-                  const Text(
+                  Text(
                     'LIVE',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 10,
+                      fontSize: TokensStrip.fontBodySm - 3,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0.6,
                     ),
@@ -305,10 +311,9 @@ class _PerfilPublicLinkCard extends StatelessWidget {
                     displayLabel,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: ink,
-                      fontSize: 13.5,
+                    style: TokensStrip.body(color: ink).copyWith(
                       fontWeight: FontWeight.w800,
+                      fontSize: TokensStrip.fontBodySm + 0.5,
                     ),
                   ),
                 ),

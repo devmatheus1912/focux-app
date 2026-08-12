@@ -139,7 +139,6 @@ class _PerfilBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
     final themePrimary = theme.colorScheme.primary;
@@ -188,17 +187,26 @@ class _PerfilBody extends StatelessWidget {
       useMesh: true,
       safeArea: false,
       constrainWidth: true,
-      bottomNavigationBar: _PerfilStickyBar(
-        accent: accent,
-        actionInk: actionInk,
-        isDark: isDark,
+      bottomNavigationBar: FxStaggerItem(
+        index: 0,
+        slideOffset: 16,
+        duration: const Duration(milliseconds: 420),
+        child: _PerfilStickyBar(
+          accent: accent,
+          actionInk: actionInk,
+          isDark: isDark,
+        ),
       ),
       body: SafeArea(
         bottom: false,
         child: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
-              child: Container(
+              child: FxStaggerItem(
+                index: 0,
+                slideOffset: 18,
+                duration: const Duration(milliseconds: 480),
+                child: Container(
                 margin: const EdgeInsets.fromLTRB(0, 0, 0, 8),
                 decoration: BoxDecoration(
                   borderRadius: const BorderRadius.only(
@@ -361,13 +369,11 @@ class _PerfilBody extends StatelessWidget {
                                       _buildSubtitle(perfil),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
+                                      style: TokensStrip.bodyMuted(
                                         color: Colors.white.withValues(
                                           alpha: 0.86,
                                         ),
-                                        fontSize: 12.5,
-                                        height: 1.2,
-                                      ),
+                                      ).copyWith(height: 1.2),
                                     ),
                                     const SizedBox(height: 4),
                                     Semantics(
@@ -383,11 +389,11 @@ class _PerfilBody extends StatelessWidget {
                                         },
                                         child: Text(
                                           alunosLabel,
-                                          style: TextStyle(
+                                          style: TokensStrip.bodyMuted(
                                             color: Colors.white.withValues(
                                               alpha: 0.78,
                                             ),
-                                            fontSize: 11.5,
+                                          ).copyWith(
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
@@ -403,6 +409,7 @@ class _PerfilBody extends StatelessWidget {
                     ),
                   ],
                 ),
+              ),
               ),
             ),
             SliverPadding(
@@ -428,28 +435,19 @@ class _PerfilBody extends StatelessWidget {
                           ),
                           const SizedBox(height: TokensStrip.s3),
                         ],
-                        _CardSection(
-                          title: 'Marca e vitrine',
-                          subtitle:
-                              profileComplete
-                                  ? 'Link e compartilhamento da vitrine.'
-                                  : 'Link para divulgar e preview do aluno.',
-                          trailingLabel: 'Editar',
-                          onTrailingTap: () {
-                            HapticFeedback.selectionClick();
-                            context.push('/identidade-visual');
-                          },
+                        PerfilMarcaVitrineSection(
+                          profileComplete: profileComplete,
                           isDark: isDark,
                           accent: accent,
                           actionInk: actionInk,
-                          child: Semantics(
-                            container: true,
-                            label: 'Marca e vitrine online',
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (!profileComplete) ...[
-                                  Material(
+                          onEditBrand: () {
+                            HapticFeedback.selectionClick();
+                            context.push('/identidade-visual');
+                          },
+                          brandPreview:
+                              profileComplete
+                                  ? null
+                                  : Material(
                                     color: Colors.transparent,
                                     child: InkWell(
                                       onTap: () {
@@ -469,29 +467,26 @@ class _PerfilBody extends StatelessWidget {
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: TokensStrip.s2),
-                                  _BrandPaletteStrip(
+                          brandPalette:
+                              profileComplete
+                                  ? null
+                                  : _BrandPaletteStrip(
                                     primary: primaryColor,
                                     secondary: secondaryColor,
                                     mute: mute,
                                     usingDefault: usingDefaultBrand,
                                   ),
-                                  const SizedBox(height: TokensStrip.s2),
-                                ],
-                                _PerfilPublicLinkCard(
-                                  slug: perfil.slug,
-                                  accent: accent,
-                                  actionInk: actionInk,
-                                  mute: mute,
-                                  isDark: isDark,
-                                  compact: true,
-                                  onOpenEditor: () {
-                                    HapticFeedback.selectionClick();
-                                    onOpenLandingEditor();
-                                  },
-                                ),
-                              ],
-                            ),
+                          publicLink: _PerfilPublicLinkCard(
+                            slug: perfil.slug,
+                            accent: accent,
+                            actionInk: actionInk,
+                            mute: mute,
+                            isDark: isDark,
+                            compact: true,
+                            onOpenEditor: () {
+                              HapticFeedback.selectionClick();
+                              onOpenLandingEditor();
+                            },
                           ),
                         ),
                         const SizedBox(height: TokensStrip.s3),
@@ -504,175 +499,38 @@ class _PerfilBody extends StatelessWidget {
                           onEdit: onEditPerfil,
                         ),
                         const SizedBox(height: TokensStrip.s3),
-                        _CardSection(
-                          title: 'Operação',
-                          subtitle: 'Plano, carteira e crescimento.',
+                        PerfilOperacaoSection(
                           isDark: isDark,
                           accent: accent,
                           actionInk: actionInk,
-                          child: Column(
-                            children: [
-                              _ActionTile(
-                                icon: Icons.workspace_premium_outlined,
-                                label: 'Planos e assinatura',
-                                value: 'Gerenciar',
-                                accent: accent,
-                                actionInk: actionInk,
-                                mute: mute,
-                                line: line,
-                                onTap: () => context.push('/assinatura'),
-                              ),
-                              _ActionTile(
-                                icon: Icons.account_balance_wallet_outlined,
-                                label: 'Carteira e PIX',
-                                value:
-                                    readiness.isPixDone
-                                        ? 'Completa'
-                                        : 'Configurar',
-                                accent: accent,
-                                actionInk: actionInk,
-                                mute: mute,
-                                line: line,
-                                onTap: () => context.push('/perfil/wallet'),
-                              ),
-                              _ActionTile(
-                                icon: Icons.bolt_outlined,
-                                label: 'Migração Focux',
-                                value: 'Importar com IA',
-                                accent: accent,
-                                actionInk: actionInk,
-                                mute: mute,
-                                line: line,
-                                onTap: () => context.push('/migracao-magica'),
-                              ),
-                              Material(
-                                color: Colors.transparent,
-                                child: Theme(
-                                  data: Theme.of(context).copyWith(
-                                    dividerColor: Colors.transparent,
-                                  ),
-                                  child: ExpansionTile(
-                                    tilePadding: EdgeInsets.zero,
-                                    childrenPadding: EdgeInsets.zero,
-                                    initiallyExpanded: false,
-                                    iconColor: mute,
-                                    collapsedIconColor: mute,
-                                    title: Text(
-                                      'Mais ferramentas',
-                                      style: TextStyle(
-                                        color: ink,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                    subtitle: Text(
-                                      'Crescimento, loja, equipe e hábitos',
-                                      style: TextStyle(
-                                        color: mute,
-                                        fontSize: 11.5,
-                                      ),
-                                    ),
-                                    children: [
-                                      GatedProfileShortcuts(
-                                        accent: accent,
-                                        actionInk: actionInk,
-                                        mute: mute,
-                                        line: line,
-                                        tileBuilder:
-                                            ({
-                                              required icon,
-                                              required label,
-                                              required value,
-                                              required onTap,
-                                              required locked,
-                                              upgradeTierLabel,
-                                            }) => _ActionTile(
-                                              icon: icon,
-                                              label: label,
-                                              value: value,
-                                              accent: accent,
-                                              actionInk: actionInk,
-                                              mute: mute,
-                                              line: line,
-                                              locked: locked,
-                                              upgradeTierLabel:
-                                                  upgradeTierLabel,
-                                              onTap: onTap,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                          mute: mute,
+                          line: line,
+                          pixDone: readiness.isPixDone,
                         ),
                         const SizedBox(height: TokensStrip.s3),
-                        _CardSection(
-                          title: 'Conta e segurança',
-                          subtitle:
-                              'Documentos legais, sessão e exclusão LGPD.',
+                        PerfilContaSegurancaSection(
                           isDark: isDark,
                           accent: accent,
                           actionInk: actionInk,
-                          child: Column(
-                            children: [
-                              _ActionTile(
-                                icon: Icons.description_outlined,
-                                label: 'Termos de uso',
-                                value: '',
-                                accent: accent,
-                                actionInk: actionInk,
-                                mute: mute,
-                                line: line,
-                                onTap: () => FocuxLegal.openTerms(),
+                          mute: mute,
+                          line: line,
+                          onLogout: () {
+                            onLogout();
+                          },
+                          onDeleteAccount:
+                              () => _showDeleteAccountDialog(
+                                context,
+                                onSessionCleared: onLogout,
                               ),
-                              _ActionTile(
-                                icon: Icons.privacy_tip_outlined,
-                                label: 'Política de privacidade',
-                                value: '',
-                                accent: accent,
-                                actionInk: actionInk,
-                                mute: mute,
-                                line: line,
-                                onTap: () => FocuxLegal.openPrivacy(),
-                              ),
-                              _ActionTile(
-                                icon: Icons.logout,
-                                label: 'Sair da conta',
-                                value: '',
-                                accent: EagleTokens.bad,
-                                mute: mute,
-                                line: line,
-                                danger: true,
-                                onTap: () {
-                                  onLogout();
-                                },
-                              ),
-                              _ActionTile(
-                                icon: Icons.delete_forever_outlined,
-                                label: 'Excluir minha conta',
-                                value: '',
-                                accent: EagleTokens.bad,
-                                mute: mute,
-                                line: line,
-                                danger: true,
-                                showDivider: kDebugMode,
-                                onTap:
-                                    () => _showDeleteAccountDialog(
-                                      context,
-                                      onSessionCleared: onLogout,
-                                    ),
-                              ),
-                              if (kDebugMode)
-                                _PerfilDebugTools(
-                                  accent: accent,
-                                  actionInk: actionInk,
-                                  mute: mute,
-                                  line: line,
-                                ),
-                            ],
-                          ),
+                          debugTools:
+                              kDebugMode
+                                  ? _PerfilDebugTools(
+                                    accent: accent,
+                                    actionInk: actionInk,
+                                    mute: mute,
+                                    line: line,
+                                  )
+                                  : null,
                         ),
                       ],
                     ),

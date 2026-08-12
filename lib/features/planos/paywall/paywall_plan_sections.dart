@@ -245,7 +245,7 @@ class PaywallPlanSections {
           capability: 'landingCompleta',
         ),
         PaywallPlanFeatureItem(
-          label: 'Formulário Meta e link focux.app/p/seunome',
+          label: 'Formulário Meta e link focuxpersonal.com/p/seunome',
           included: false,
           capability: 'landingCompleta',
         ),
@@ -349,7 +349,7 @@ class PaywallPlanSections {
           highlight: true,
         ),
         PaywallPlanFeatureItem(
-          label: 'focux.app/p/seunome 100% personalizada',
+          label: 'focuxpersonal.com/p/seunome 100% personalizada',
           included: plano.temLandingCompleta,
         ),
         const PaywallPlanFeatureItem(label: 'Domínio customizado + SEO'),

@@ -39,15 +39,13 @@ class Env {
     defaultValue: true,
   );
 
-  /// Public URL used for shareable landing links.
+  /// Public URL used for shareable landing links (`/p/{slug}`, `/c/{slug}`).
   ///
-  /// Today the canonical `focux.app` domain points to another web project, so
-  /// the default uses the Railway backend HTML fallback. Override with
-  /// `--dart-define=PUBLIC_WEB_URL=https://focux.app` after DNS/Vercel is wired
-  /// to the Focux Personal web surface.
+  /// Canonical brand host is [publicWebDisplayHost] (`focuxpersonal.com`).
+  /// Vercel rewrites `/p` and `/c` to the Railway HTML fallback when needed.
   static const String publicWebUrl = String.fromEnvironment(
     'PUBLIC_WEB_URL',
-    defaultValue: 'https://focux-backend-production.up.railway.app',
+    defaultValue: 'https://focuxpersonal.com',
   );
 
   /// WebSocket base URL. Derived from [apiUrl] but overridable via `WS_URL`.
@@ -100,7 +98,7 @@ class Env {
     return '${uri.host}/p/$slug';
   }
 
-  static const String _brandWebHost = 'focux.app';
+  static const String _brandWebHost = 'focuxpersonal.com';
 
   /// Host amigável para exibir links públicos (marca quando infra é Railway etc.).
   static String get publicWebDisplayHost {
@@ -109,7 +107,9 @@ class Env {
         host.contains('onrender.com') ||
         host.contains('vercel.app') ||
         host == 'localhost' ||
-        host.startsWith('127.0.0.1')) {
+        host.startsWith('127.0.0.1') ||
+        host == 'focux.app' ||
+        host == 'www.focux.app') {
       return _brandWebHost;
     }
     return host;

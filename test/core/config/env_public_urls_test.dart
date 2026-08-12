@@ -7,7 +7,7 @@ void main() {
     expect(Env.landingPageUrl('joao'), contains('/p/joao'));
     expect(Env.capturaPageUrl('joao'), contains('/c/joao'));
     expect(Env.landingPageLabel('joao'), isNot(contains('focux.app/p/')));
-    expect(Env.landingPageDisplayLabel('joao'), 'focux.app/p/joao');
-    expect(Env.publicWebDisplayHost, 'focux.app');
+    expect(Env.landingPageDisplayLabel('joao'), 'focuxpersonal.com/p/joao');
+    expect(Env.publicWebDisplayHost, 'focuxpersonal.com');
   });
 }

@@ -18,7 +18,8 @@ class PlanEntitlements {
         lower.contains('landing') ||
         lower.contains('depoimentos') && lower.contains('faq') ||
         lower.contains('formulário meta') ||
-        lower.contains('focux.app/p/')) {
+        lower.contains('focux.app/p/') ||
+        lower.contains('focuxpersonal.com/p/')) {
       return 'landingCompleta';
     }
     if (lower.contains('loja') ||
