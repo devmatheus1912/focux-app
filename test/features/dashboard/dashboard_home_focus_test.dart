@@ -59,10 +59,11 @@ void main() {
       );
       expect(rules.hidePromoBanners, isTrue);
       expect(rules.suppressSecondaryEmptyCtas, isTrue);
-      expect(rules.compactCommandSticky, isTrue);
-      expect(rules.omitSecondarySections, isTrue);
-      expect(rules.hideFeaturedTools, isTrue);
-      expect(rules.collapsePulseBody, isTrue);
+      // Toggle do usuário: Foco OFF revela secundário mesmo em retenção.
+      expect(rules.compactCommandSticky, isFalse);
+      expect(rules.omitSecondarySections, isFalse);
+      expect(rules.hideFeaturedTools, isFalse);
+      expect(rules.collapsePulseBody, isFalse);
     });
 
     test('focus off keeps quick links collapsed by default', () {

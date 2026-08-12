@@ -17,6 +17,7 @@ class _PersonalDashboardScreenState
   bool? _persistedFocusMode;
   bool _focusMode = true;
   bool _focusPreferenceLoaded = false;
+  bool _autoFocusApplied = false;
 
   late AnimationController _gradientCtrl;
   late AnimationController _counterCtrl;
@@ -71,10 +72,14 @@ class _PersonalDashboardScreenState
     final persisted = await DashboardHomeFocusStore.load();
     if (!mounted) return;
     setState(() {
-      _persistedFocusMode = persisted;
       _focusPreferenceLoaded = true;
-      if (persisted != null) {
+      // Não sobrescreve toggle feito enquanto o load estava em voo.
+      if (persisted != null && _persistedFocusMode == null) {
+        _persistedFocusMode = persisted;
         _focusMode = persisted;
+        _autoFocusApplied = true;
+      } else if (_persistedFocusMode != null) {
+        _autoFocusApplied = true;
       }
     });
   }

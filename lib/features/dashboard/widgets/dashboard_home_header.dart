@@ -92,14 +92,15 @@ class DashboardHomeHeader extends StatelessWidget {
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 220),
                         curve: Curves.easeOutCubic,
-                        constraints: const BoxConstraints(
+                        constraints: BoxConstraints(
                           minWidth: DashboardLayout.touchTarget,
                           minHeight: DashboardLayout.touchTarget,
+                          maxHeight: DashboardLayout.touchTarget,
                         ),
                         padding: EdgeInsets.symmetric(
-                          horizontal: showFocusLabel ? 8 : 6,
-                          vertical: 6,
+                          horizontal: showFocusLabel ? 10 : 0,
                         ),
+                        alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color:
                               focusMode
@@ -107,23 +108,28 @@ class DashboardHomeHeader extends StatelessWidget {
                                     primary,
                                     dark: isDark,
                                   ).withValues(alpha: isDark ? 0.55 : 0.9)
-                                  : Colors.transparent,
+                                  : (isDark
+                                      ? Colors.white.withValues(alpha: 0.06)
+                                      : Colors.black.withValues(alpha: 0.04)),
                           borderRadius: BorderRadius.circular(999),
-                          border:
-                              focusMode
-                                  ? Border.all(
-                                    color: primary.withValues(alpha: 0.45),
-                                  )
-                                  : null,
+                          border: Border.all(
+                            color:
+                                focusMode
+                                    ? primary.withValues(alpha: 0.55)
+                                    : (isDark
+                                        ? Colors.white.withValues(alpha: 0.14)
+                                        : Colors.black.withValues(alpha: 0.08)),
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
                               focusMode
                                   ? Icons.bolt_rounded
                                   : Icons.bolt_outlined,
-                              size: 20,
+                              size: 22,
                               color: link,
                             ),
                             if (showFocusLabel) ...[

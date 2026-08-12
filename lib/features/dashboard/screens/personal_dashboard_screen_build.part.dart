@@ -83,17 +83,24 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                   data: (s) => s.primeiroTreinoCriado,
                   orElse: () => false,
                 );
-                if (_focusPreferenceLoaded && _persistedFocusMode == null) {
+                if (_focusPreferenceLoaded &&
+                    !_autoFocusApplied &&
+                    _persistedFocusMode == null) {
                   final autoFocus = DashboardHomeFocusRules.defaultFocusMode(
                     dayFocus: dayFocus,
                     riskDominante: riskDominante,
                   );
-                  if (_focusMode != autoFocus) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (!mounted) return;
-                      setState(() => _focusMode = autoFocus);
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted ||
+                        _autoFocusApplied ||
+                        _persistedFocusMode != null) {
+                      return;
+                    }
+                    setState(() {
+                      _autoFocusApplied = true;
+                      _focusMode = autoFocus;
                     });
-                  }
+                  });
                 }
                 const commandCenterSubtitle =
                     DashboardMicrocopy.commandCenterSubtitle;

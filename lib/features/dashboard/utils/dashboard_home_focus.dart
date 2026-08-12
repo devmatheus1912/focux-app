@@ -91,22 +91,23 @@ class DashboardHomeFocusRules {
     required double receitaAtual,
   }) {
     final covers = coversRetention(dayFocus);
-    final dense = focusMode || covers;
+    // Retenção ainda esconde promo/empty CTAs; o toggle do usuário controla
+    // omit/tools/pulso — senão Foco OFF parece “morto” em dia de retomada.
+    final retentionGuard = covers;
     return DashboardHomeFocusRules(
       focusMode: focusMode,
       dayFocusCoversRetention: covers,
-      collapseAttention: dense || riscoAlto > 3,
+      collapseAttention: focusMode || covers || riscoAlto > 3,
       collapseAderencia: true,
-      collapseFinance: dense || receitaAtual <= 0,
-      hideSecondaryRiskCtas: dense,
-      // Promo/ativação nunca compete com retomada — mesmo com foco desligado.
-      hidePromoBanners: dense,
+      collapseFinance: focusMode || covers || receitaAtual <= 0,
+      hideSecondaryRiskCtas: focusMode || covers,
+      hidePromoBanners: retentionGuard || focusMode,
       collapseQuickLinks: true,
-      suppressSecondaryEmptyCtas: dense,
-      compactCommandSticky: dense,
-      hideFeaturedTools: dense,
-      omitSecondarySections: dense,
-      collapsePulseBody: dense,
+      suppressSecondaryEmptyCtas: focusMode || covers,
+      compactCommandSticky: focusMode,
+      hideFeaturedTools: focusMode,
+      omitSecondarySections: focusMode,
+      collapsePulseBody: focusMode,
       maxVisibleNextActions: focusMode ? 2 : 3,
     );
   }
