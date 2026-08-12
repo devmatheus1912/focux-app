@@ -129,7 +129,7 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
                             'Verifique sua conexão e puxe para atualizar.',
                             style: TextStyle(
                               color: mute,
-                              fontSize: 12,
+                              fontSize: TokensStrip.fontBodySm,
                               height: 1.25,
                             ),
                           ),
@@ -255,7 +255,10 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
                                 const SizedBox(height: 2),
                                 Text(
                                   '${a.objetivo ?? 'Objetivo'} · ${a.totalCheckinsSemana} check-ins',
-                                  style: TextStyle(fontSize: 12, color: mute),
+                                  style: TextStyle(
+                                    fontSize: TokensStrip.fontBodySm,
+                                    color: mute,
+                                  ),
                                 ),
                               ],
                             ),
@@ -368,7 +371,7 @@ class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
                       style: TextStyle(
                         color: mute,
                         height: 1.35,
-                        fontSize: 12.5,
+                        fontSize: TokensStrip.fontBodySm,
                       ),
                     ),
                   ],
@@ -417,7 +420,7 @@ class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
                               secondaryAction!,
                               textAlign: TextAlign.center,
                               style: const TextStyle(
-                                fontSize: 12.5,
+                                fontSize: TokensStrip.fontBodySm,
                                 height: 1.1,
                               ),
                             ),

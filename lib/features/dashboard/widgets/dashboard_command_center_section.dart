@@ -383,7 +383,7 @@ class DashboardCommandCenterSectionState
             label:
                 _quickLinksExpanded
                     ? 'Atalhos rápidos, expandido. Toque para recolher'
-                    : 'Atalhos rápidos, recolhido. Copiloto, mensagens e mais. Toque para expandir',
+                    : 'Atalhos rápidos, recolhido. Copiloto e mensagens. Toque para expandir',
             child: InkWell(
               onTap: () {
                 dashboardHapticCollapseToggle();
@@ -414,7 +414,7 @@ class DashboardCommandCenterSectionState
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
-                        '5',
+                        '2',
                         style: dashboardChipLabelStyle(actionColor),
                       ),
                     ),
@@ -474,27 +474,6 @@ class DashboardCommandCenterSectionState
                           subtitle: chatSubtitle,
                           onTap: () => context.go('/chat/inbox'),
                         ),
-                        card(
-                          width: moduleWidth,
-                          icon: 'users',
-                          title: 'Alunos',
-                          subtitle: '$alunosAtivos ativos',
-                          onTap: () => context.go('/alunos'),
-                        ),
-                        card(
-                          width: moduleWidth,
-                          icon: 'calendar',
-                          title: 'Agenda',
-                          subtitle: agendaSubtitle,
-                          onTap: () => context.go('/agenda'),
-                        ),
-                        card(
-                          width: moduleWidth,
-                          icon: 'dollar-sign',
-                          title: 'Financeiro',
-                          subtitle: finSubtitle,
-                          onTap: () => context.go('/financeiro'),
-                        ),
                       ],
                     ),
                   ),
@@ -506,7 +485,7 @@ class DashboardCommandCenterSectionState
               _quickLinksExpanded
                   ? CrossFadeState.showSecond
                   : CrossFadeState.showFirst,
-          duration: const Duration(milliseconds: 220),
+          duration: dashboardMotionDuration(context),
           sizeCurve: Curves.easeOutCubic,
         ),
       ],

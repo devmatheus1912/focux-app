@@ -5,6 +5,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../constants/dashboard_layout.dart';
 import '../utils/dashboard_a11y.dart';
 import '../utils/dashboard_readability.dart';
 
@@ -67,7 +68,7 @@ class DashboardAttentionCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(TokensStrip.rCard),
           child: Container(
-            width: 268,
+            width: DashboardLayout.attentionCardWidth,
             padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
             decoration: fxStripCardDecoration(
               context,
@@ -87,7 +88,7 @@ class DashboardAttentionCard extends StatelessWidget {
                         fxInitials(nome),
                         style: AppTypography.inter(
                           color: Colors.white,
-                          fontSize: 12,
+                          fontSize: TokensStrip.fontBodySm,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -190,7 +191,7 @@ class DashboardAttentionCard extends StatelessWidget {
                   child: Text(
                     acao,
                     style: AppTypography.inter(
-                      fontSize: 12,
+                      fontSize: TokensStrip.fontBodySm,
                       fontWeight: FontWeight.w700,
                       color: BrandPalette.sectionAction(primary, dark: isDark),
                       letterSpacing: 0.2,

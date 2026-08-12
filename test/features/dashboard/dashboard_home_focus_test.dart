@@ -40,6 +40,8 @@ void main() {
       expect(rules.suppressSecondaryEmptyCtas, isTrue);
       expect(rules.compactCommandSticky, isTrue);
       expect(rules.hideFeaturedTools, isTrue);
+      expect(rules.omitSecondarySections, isTrue);
+      expect(rules.collapsePulseBody, isTrue);
       expect(rules.maxVisibleNextActions, 2);
     });
 
@@ -60,7 +62,7 @@ void main() {
       expect(rules.compactCommandSticky, isFalse);
     });
 
-    test('focus off keeps quick links available by default expanded', () {
+    test('focus off keeps quick links collapsed by default', () {
       const focus = DashboardDayFocus(
         headline: 'Rotina estável',
         detail: 'x',
@@ -72,9 +74,10 @@ void main() {
         riscoAlto: 0,
         receitaAtual: 1000,
       );
-      expect(rules.collapseQuickLinks, isFalse);
+      expect(rules.collapseQuickLinks, isTrue);
       expect(rules.hidePromoBanners, isFalse);
       expect(rules.hideFeaturedTools, isFalse);
+      expect(rules.omitSecondarySections, isFalse);
       expect(rules.maxVisibleNextActions, 3);
     });
   });

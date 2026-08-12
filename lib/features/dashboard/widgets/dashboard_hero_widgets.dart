@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/theme/tokens_strip.dart';
 
 import '../utils/dashboard_readability.dart';
 
@@ -163,7 +164,6 @@ class DashboardHeroMiniStat extends StatelessWidget {
         Text(
           label,
           style: dashboardHeroEyebrowOnTeal().copyWith(
-            fontSize: 12,
             letterSpacing: 0.08,
           ),
         ),
@@ -176,7 +176,7 @@ class DashboardHeroMiniStat extends StatelessWidget {
                 TextSpan(
                   text: suffix,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: TokensStrip.fontBodySm,
                     color: dashboardHeroCaptionOnTeal(),
                     fontWeight: FontWeight.w500,
                   ),

@@ -155,14 +155,6 @@ class DashboardToolShortcut {
       group: DashboardToolGroup.receita,
     ),
     DashboardToolShortcut(
-      icon: 'dollar-sign',
-      label: 'Preços',
-      route: '/financeiro',
-      capability: 'financeiro',
-      featureName: 'Financeiro e preços',
-      group: DashboardToolGroup.receita,
-    ),
-    DashboardToolShortcut(
       icon: 'trend',
       label: 'Receita recorrente',
       route: '/relatorio/business',

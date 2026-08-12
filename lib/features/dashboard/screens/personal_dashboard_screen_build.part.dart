@@ -36,7 +36,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
               data: (home) {
                 final data = home.personal;
                 final screenWidth = MediaQuery.sizeOf(context).width;
-                final isCompactPhone = screenWidth < 390;
+                final isCompactPhone = DashboardLayout.isCompact(screenWidth);
                 final shortcutAspectRatio = isCompactPhone ? 2.75 : 3.05;
 
                 final chatAsync = ref.watch(chatInboxProvider);
@@ -78,8 +78,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                     focusRules.dayFocusCoversRetention;
                 final attentionRiskItems = snap.attentionRiskItems;
                 final attentionVencItems = snap.attentionVencItems;
-                final attentionItemCount =
-                    attentionRiskItems.length + attentionVencItems.length;
                 final attentionVisible = snap.attentionVisible;
                 final attentionCollapsedPreview =
                     snap.attentionCollapsedPreview;
@@ -195,112 +193,14 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                           ),
                       ],
                       SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            TokensStrip.s4,
-                            4,
-                            TokensStrip.s4,
-                            TokensStrip.s3,
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      dashboardGreeting(data.nomePersonal),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: AppTypography.inter(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: -0.35,
-                                        height: 1.15,
-                                        color:
-                                            themeDark
-                                                ? EagleTokens.darkInk
-                                                : TokensStrip.textPrimary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(width: DashboardLayout.headerIconGap),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Semantics(
-                                    button: true,
-                                    toggled: _focusMode,
-                                    label:
-                                        _focusMode
-                                            ? DashboardMicrocopy.modoFocoOn
-                                            : DashboardMicrocopy.modoFocoOff,
-                                    child: IconButton(
-                                      tooltip: DashboardMicrocopy.modoFoco,
-                                      visualDensity: VisualDensity.compact,
-                                      constraints: const BoxConstraints(
-                                        minWidth: 36,
-                                        minHeight: 36,
-                                      ),
-                                      padding: EdgeInsets.zero,
-                                      onPressed: _toggleFocusMode,
-                                      icon: AnimatedSwitcher(
-                                        duration: const Duration(
-                                          milliseconds: 220,
-                                        ),
-                                        switchInCurve: Curves.easeOutCubic,
-                                        switchOutCurve: Curves.easeInCubic,
-                                        transitionBuilder: (child, anim) {
-                                          return ScaleTransition(
-                                            scale: anim,
-                                            child: FadeTransition(
-                                              opacity: anim,
-                                              child: child,
-                                            ),
-                                          );
-                                        },
-                                        child: Icon(
-                                          _focusMode
-                                              ? Icons.bolt_rounded
-                                              : Icons.bolt_outlined,
-                                          key: ValueKey(_focusMode),
-                                          size: 22,
-                                          color: BrandPalette.sectionLink(
-                                            primary,
-                                            dark: themeDark,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: DashboardLayout.headerIconGap,
-                                  ),
-                                  const ShellThemeToggle(size: 36),
-                                  SizedBox(
-                                    width: DashboardLayout.headerIconGap,
-                                  ),
-                                  const NotificacaoBadgeButton(size: 36),
-                                  SizedBox(
-                                    width: DashboardLayout.headerIconGap,
-                                  ),
-                                  DashboardHeaderProfileAvatar(
-                                    primary: primary,
-                                    isDark: themeDark,
-                                    photoUrl: data.logoUrl,
-                                    initials: fxInitials(
-                                      data.nomePersonal ?? 'F',
-                                    ),
-                                    onTap: () => context.push('/perfil'),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                        child: DashboardHomeHeader(
+                          nomePersonal: data.nomePersonal,
+                          logoUrl: data.logoUrl,
+                          isDark: themeDark,
+                          primary: primary,
+                          focusMode: _focusMode,
+                          onToggleFocus: _toggleFocusMode,
+                          onProfileTap: () => context.push('/perfil'),
                         ),
                       ),
                       SliverToBoxAdapter(
@@ -377,132 +277,21 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                           ),
                         ),
 
-                      // PRECISA DE ATENÇÃO — colapsável quando muitos sinais
                       if (attentionVisible) ...[
                         SliverToBoxAdapter(
-                          child: DashboardCollapsibleSection(
-                            title: DashboardMicrocopy.precisaDeAtencao,
-                            collapsedHint:
-                                attentionRiskItems.isEmpty &&
-                                        attentionVencItems.isNotEmpty
-                                    ? '${attentionVencItems.length} vencimento${attentionVencItems.length == 1 ? '' : 's'} pendente${attentionVencItems.length == 1 ? '' : 's'} · Revisar'
-                                    : riskDominante
-                                    ? '$riscoAlto de $alunosAtivos · Revisar'
-                                    : riscoAlto > 0
-                                    ? '$riscoAlto no radar · Revisar'
-                                    : 'Cobranças pendentes · Revisar',
-                            collapsedActionLabel: 'Revisar',
-                            onCollapsedAction: openAttentionReview,
-                            collapsedPreview: attentionCollapsedPreview,
+                          child: DashboardAttentionRail(
                             isDark: themeDark,
-                            initiallyExpanded: !focusRules.collapseAttention,
+                            riskDominante: riskDominante,
+                            riscoAlto: riscoAlto,
+                            alunosAtivos: alunosAtivos,
+                            dayFocusCoversRetention: dayFocusCoversRetention,
+                            collapseAttention: focusRules.collapseAttention,
+                            attentionRiskItems: attentionRiskItems,
+                            attentionVencItems: attentionVencItems,
+                            attentionCollapsedPreview:
+                                attentionCollapsedPreview,
                             resetToken: _attentionSectionResetToken,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                if (!dayFocusCoversRetention)
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: TextButton(
-                                      onPressed:
-                                          () => context.push('/retencao'),
-                                      child: const Text('Saúde da base'),
-                                    ),
-                                  ),
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: TextButton(
-                                    onPressed:
-                                        () => goPersonalShellTab(
-                                          context,
-                                          '/alunos?filtro=risco',
-                                        ),
-                                    child: Text(
-                                      riscoAlto > 1
-                                          ? 'Ver tudo · +${riscoAlto - 1}'
-                                          : 'Ver tudo',
-                                    ),
-                                  ),
-                                ),
-                                Semantics(
-                                  container: true,
-                                  explicitChildNodes: true,
-                                  label: dashboardAttentionCarouselSemantics(
-                                    attentionItemCount,
-                                  ),
-                                  child: DashboardHorizontalScrollPeek(
-                                    showPeek: attentionItemCount > 1,
-                                    child: SizedBox(
-                                      height: 184,
-                                      child: ListView.separated(
-                                        // ignore: deprecated_member_use
-                                        cacheExtent: 280,
-                                        key: const PageStorageKey(
-                                          'personal-attention-rail',
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: TokensStrip.s4,
-                                        ),
-                                        scrollDirection: Axis.horizontal,
-                                        itemCount: attentionItemCount,
-                                        separatorBuilder:
-                                            (_, __) =>
-                                                SizedBox(width: TokensStrip.s3),
-                                        itemBuilder: (context, index) {
-                                          if (index <
-                                              attentionRiskItems.length) {
-                                            final aluno =
-                                                attentionRiskItems[index];
-                                            return RepaintBoundary(
-                                              child: DashboardAttentionCard(
-                                                listIndex: index + 1,
-                                                listTotal: attentionItemCount,
-                                                nome: aluno.nome,
-                                                objetivo: aluno.objetivo,
-                                                titulo: attentionSignalLabel(
-                                                  aluno,
-                                                ),
-                                                subt: attentionSignalSub(aluno),
-                                                acao: 'Revisar',
-                                                isDark: themeDark,
-                                                showStatusBadge:
-                                                    !riskDominante ||
-                                                    aluno.inadimplente ||
-                                                    aluno.statusFinanceiro ==
-                                                        'INADIMPLENTE',
-                                                statusAccent: EagleTokens.warn,
-                                                onTap:
-                                                    () => context.push(
-                                                      '/alunos/${aluno.id}',
-                                                    ),
-                                              ),
-                                            );
-                                          }
-                                          final v =
-                                              attentionVencItems[index -
-                                                  attentionRiskItems.length];
-                                          return RepaintBoundary(
-                                            child: DashboardAttentionCard(
-                                              listIndex: index + 1,
-                                              listTotal: attentionItemCount,
-                                              nome: v.alunoNome,
-                                              titulo: 'Inadimplente',
-                                              subt:
-                                                  'R\$ ${v.valor.toStringAsFixed(0)} pendente',
-                                              acao: 'Cobrar',
-                                              isDark: themeDark,
-                                              onTap:
-                                                  () =>
-                                                      context.go('/financeiro'),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                            onReview: openAttentionReview,
                           ),
                         ),
                         SliverToBoxAdapter(
@@ -531,6 +320,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                             agendaHoje: agendaHoje,
                             hideRiscoChip: alunosEmRisco.isNotEmpty,
                             primary: primary,
+                            collapseBody: focusRules.collapsePulseBody,
                             onAtivos:
                                 () => goPersonalShellTab(
                                   context,
@@ -551,7 +341,8 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                 !checkinsTrend.any((v) => v > 0) &&
                                 alunosAtivos > 0 &&
                                 checkinsHoje == 0 &&
-                                !focusRules.suppressSecondaryEmptyCtas,
+                                !focusRules.suppressSecondaryEmptyCtas &&
+                                !focusRules.collapsePulseBody,
                             emptyTrendCtaLabel:
                                 primeiroTreinoCriado
                                     ? 'Ver agenda'
@@ -565,6 +356,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                         ),
                       ),
 
+                      if (!focusRules.omitSecondarySections) ...[
                       SliverToBoxAdapter(
                         child: SizedBox(
                           height: DashboardLayout.sliverSectionGap,
@@ -640,10 +432,13 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                           hideFeaturedTools: focusRules.hideFeaturedTools,
                         ),
                       ),
+                      ],
 
                       SliverToBoxAdapter(
                         child: SizedBox(
-                          height: MediaQuery.of(context).padding.bottom + 88,
+                          height:
+                              MediaQuery.of(context).padding.bottom +
+                              DashboardLayout.bottomDockClearance,
                         ),
                       ),
                     ],

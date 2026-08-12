@@ -14,6 +14,8 @@ class DashboardHomeFocusRules {
     required this.suppressSecondaryEmptyCtas,
     required this.compactCommandSticky,
     required this.hideFeaturedTools,
+    required this.omitSecondarySections,
+    required this.collapsePulseBody,
     required this.maxVisibleNextActions,
   });
 
@@ -24,7 +26,7 @@ class DashboardHomeFocusRules {
   final bool collapseFinance;
   final bool hideSecondaryRiskCtas;
   final bool hidePromoBanners;
-  /// Com foco ligado, atalhos rápidos começam recolhidos.
+  /// Atalhos rápidos começam recolhidos (sempre — dock já cobre nav).
   final bool collapseQuickLinks;
   /// Esconde CTAs de empty (aderência/pulso) que competem com o P1.
   final bool suppressSecondaryEmptyCtas;
@@ -32,6 +34,10 @@ class DashboardHomeFocusRules {
   final bool compactCommandSticky;
   /// No modo foco, some o grid “featured” de Mais ferramentas (só header).
   final bool hideFeaturedTools;
+  /// No foco/dense: não monta Aderência / Financeiro / Mais ferramentas.
+  final bool omitSecondarySections;
+  /// No foco: Pulso só header (sparkline/tendência recolhidos).
+  final bool collapsePulseBody;
   final int maxVisibleNextActions;
 
   /// Quantos cards de risco "Precisa de atenção" pode mostrar.
@@ -95,10 +101,12 @@ class DashboardHomeFocusRules {
       hideSecondaryRiskCtas: dense,
       // Promo/ativação nunca compete com retomada — mesmo com foco desligado.
       hidePromoBanners: dense,
-      collapseQuickLinks: focusMode,
+      collapseQuickLinks: true,
       suppressSecondaryEmptyCtas: dense,
       compactCommandSticky: focusMode,
       hideFeaturedTools: focusMode,
+      omitSecondarySections: focusMode,
+      collapsePulseBody: focusMode,
       maxVisibleNextActions: focusMode ? 2 : 3,
     );
   }

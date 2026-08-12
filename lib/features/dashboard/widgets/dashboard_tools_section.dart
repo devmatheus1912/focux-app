@@ -9,6 +9,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../planos/utils/effective_plano_features.dart';
 import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_a11y.dart';
+import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_haptic.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
@@ -141,7 +142,7 @@ class DashboardCollapsibleToolsSectionState
                       ),
                       AnimatedRotation(
                         turns: _expanded ? 0.25 : 0,
-                        duration: const Duration(milliseconds: 220),
+                        duration: dashboardMotionDuration(context),
                         curve: Curves.easeOutCubic,
                         child: Icon(
                           Icons.chevron_right_rounded,

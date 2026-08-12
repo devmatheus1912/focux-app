@@ -5,6 +5,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
+import '../constants/dashboard_layout.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
@@ -31,6 +32,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
     this.showEmptyTrendCta = false,
     this.emptyTrendCtaLabel,
     this.onEmptyTrendCta,
+    this.collapseBody = false,
   });
 
   final Animation<double> fade;
@@ -49,12 +51,14 @@ class DashboardDayPulseStrip extends StatelessWidget {
   final bool showEmptyTrendCta;
   final String? emptyTrendCtaLabel;
   final VoidCallback? onEmptyTrendCta;
+  /// Modo foco: esconde tendência/sparkline (só chips).
+  final bool collapseBody;
 
   @override
   Widget build(BuildContext context) {
     final riscoAccent =
         riscoAlto > 0 ? EagleTokens.warn : TokensStrip.badgeSuccess;
-    final tight = MediaQuery.sizeOf(context).width < 400;
+    final tight = DashboardLayout.isCompact(MediaQuery.sizeOf(context).width);
     final gap = tight ? 6.0 : TokensStrip.s2;
     final mute = dashboardReadableMuted(context, isDark: isDark);
     final caption = dashboardReadableCaption(context, isDark: isDark);
@@ -81,7 +85,9 @@ class DashboardDayPulseStrip extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: DashboardPulseChip(
+                child: _PulseChipEntrance(
+                  index: 0,
+                  child: DashboardPulseChip(
                   icon: 'users',
                   value: alunosAtivos.toString(),
                   label: 'Ativos',
@@ -91,10 +97,13 @@ class DashboardDayPulseStrip extends StatelessWidget {
                   empty: alunosAtivos == 0,
                   onTap: onAtivos,
                 ),
+                ),
               ),
               SizedBox(width: gap),
               Expanded(
-                child: DashboardPulseChip(
+                child: _PulseChipEntrance(
+                  index: 1,
+                  child: DashboardPulseChip(
                   icon: 'circle-check',
                   value: checkinsHoje.toString(),
                   label: tight ? 'Checks' : 'Check-ins',
@@ -104,10 +113,13 @@ class DashboardDayPulseStrip extends StatelessWidget {
                   empty: checkinsHoje == 0,
                   onTap: onCheckins,
                 ),
+                ),
               ),
               SizedBox(width: gap),
               Expanded(
-                child:
+                child: _PulseChipEntrance(
+                  index: 2,
+                  child:
                     hideRiscoChip
                         ? DashboardPulseChip(
                           icon: 'calendar',
@@ -130,9 +142,11 @@ class DashboardDayPulseStrip extends StatelessWidget {
                           empty: riscoAlto == 0,
                           onTap: onRisco,
                         ),
+                ),
               ),
             ],
           ),
+          if (!collapseBody) ...[
           const SizedBox(height: 8),
           Builder(
             builder: (context) {
@@ -168,11 +182,9 @@ class DashboardDayPulseStrip extends StatelessWidget {
                                 const SizedBox(height: 2),
                                 Text(
                                   emptyDetail,
-                                  style: AppTypography.inter(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: mute,
-                                    height: 1.25,
+                                  style: dashboardCardSubtitleStyle(
+                                    context,
+                                    isDark: isDark,
                                   ),
                                 ),
                               ],
@@ -233,7 +245,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
                   label: Text(
                     emptyTrendCtaLabel!,
                     style: AppTypography.inter(
-                      fontSize: 12,
+                      fontSize: TokensStrip.fontBodySm,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -241,8 +253,45 @@ class DashboardDayPulseStrip extends StatelessWidget {
               ),
             ),
           ],
+          ],
         ],
       ),
+    );
+  }
+}
+
+class _PulseChipEntrance extends StatelessWidget {
+  const _PulseChipEntrance({required this.index, required this.child});
+
+  final int index;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (TokensStrip.prefersReducedMotion(context)) return child;
+    final delay = dashboardStaggerDelay(context, index);
+    final base = dashboardMotionDuration(
+      context,
+      normal: const Duration(milliseconds: 280),
+    );
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: base + delay,
+      curve: Interval(
+        delay.inMilliseconds / (base + delay).inMilliseconds,
+        1,
+        curve: Curves.easeOutCubic,
+      ),
+      builder: (context, t, child) {
+        return Opacity(
+          opacity: t,
+          child: Transform.translate(
+            offset: Offset(0, (1 - t) * 6),
+            child: child,
+          ),
+        );
+      },
+      child: child,
     );
   }
 }
@@ -274,8 +323,8 @@ class DashboardPulseChip extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final iconSize = compact ? 22.0 : 24.0;
     final iconGlyph = compact ? 11.0 : 12.0;
-    final valueSize = compact ? 14.0 : 15.0;
-    final labelSize = compact ? 9.5 : 10.0;
+    final valueSize = compact ? TokensStrip.fontBodySm : 15.0;
+    final labelSize = TokensStrip.fontBodySm;
     final hPad = compact ? 7.0 : 9.0;
     final emphasis =
         empty

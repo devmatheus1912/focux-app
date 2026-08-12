@@ -4,6 +4,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../alunos/data/aluno_repository.dart';
+import '../constants/dashboard_layout.dart';
 
 String dashboardGreeting(String? nome) {
   final hour = DateTime.now().hour;
@@ -66,7 +67,7 @@ TextStyle dashboardSectionKickerStyle(
 }
 
 String financeInadimplLabel(double width) =>
-    width < 360 ? 'Inadimpl.' : 'Inadimplentes';
+    DashboardLayout.isCompact(width) || width < 360 ? 'Inadimpl.' : 'Inadimplentes';
 
 String financePercentLabel(double progressRaw, {required bool exceeded}) {
   if (exceeded) {

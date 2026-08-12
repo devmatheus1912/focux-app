@@ -23,6 +23,8 @@ void main() {
       'lib/features/dashboard/utils/dashboard_microcopy.dart',
       'lib/features/dashboard/utils/dashboard_next_actions.dart',
       'lib/features/dashboard/utils/dashboard_home_focus.dart',
+      'lib/features/dashboard/widgets/dashboard_home_header.dart',
+      'lib/features/dashboard/widgets/dashboard_attention_rail.dart',
       'lib/features/dashboard/utils/dashboard_home_snapshot.dart',
       'lib/features/dashboard/data/dashboard_repository.dart',
       'lib/features/dashboard/data/dashboard_tool_shortcuts.dart',

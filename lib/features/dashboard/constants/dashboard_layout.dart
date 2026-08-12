@@ -7,12 +7,23 @@ import '../../../core/theme/tokens_strip.dart';
 abstract final class DashboardLayout {
   DashboardLayout._();
 
+  static const double compactWidth = 390;
+  static const double attentionRailHeight = 184;
+  static const double attentionCardWidth = 268;
+  static const double attentionCardWidthCompact = 240;
+  static const double bottomDockClearance = 88;
+  static const double touchTarget = 48;
+  static const double commandCardPad = TokensStrip.s3; // 12
+  static const double commandModuleGap = TokensStrip.s3;
+
   static const double screenPadding = TokensStrip.s4;
   static const double sectionGap = TokensStrip.s4;
   static const double sliverSectionGap = TokensStrip.s2;
   static const double sliverTightGap = TokensStrip.s1;
   static const double headerIconGap = TokensStrip.s2;
   static const double maxContentWidth = FocuxPlatform.desktopMaxContent;
+
+  static bool isCompact(double width) => width < compactWidth;
 
   static const EdgeInsets sectionPadding = EdgeInsets.fromLTRB(
     TokensStrip.s4,

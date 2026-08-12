@@ -94,7 +94,7 @@ class DashboardExpandableToolGroupsState
                       Text(
                         group.title,
                         style: AppTypography.inter(
-                          fontSize: 12,
+                          fontSize: TokensStrip.fontBodySm,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.3,
                           color: link,
@@ -350,11 +350,8 @@ class DashboardShortcutTile extends StatelessWidget {
                     children: [
                       Text(
                         label,
-                        style: TextStyle(
-                          fontSize: 12.2,
+                        style: dashboardCardTitleStyle(labelColor).copyWith(
                           fontWeight: FontWeight.w800,
-                          color: labelColor,
-                          height: 1.2,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,

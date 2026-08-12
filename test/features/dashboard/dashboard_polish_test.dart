@@ -22,6 +22,8 @@ void main() {
       'lib/features/dashboard/utils/dashboard_microcopy.dart',
       'lib/features/dashboard/utils/dashboard_next_actions.dart',
       'lib/features/dashboard/utils/dashboard_home_focus.dart',
+      'lib/features/dashboard/widgets/dashboard_home_header.dart',
+      'lib/features/dashboard/widgets/dashboard_attention_rail.dart',
       'lib/features/dashboard/utils/dashboard_home_snapshot.dart',
     ];
     final screen = paths.map((p) => File(p).readAsStringSync()).join('\n');
@@ -66,13 +68,16 @@ void main() {
       'lib/features/dashboard/data/dashboard_tool_shortcuts.dart',
     ).readAsStringSync();
     expect(shortcutsFile, isNot(contains('roiQuickLinks')));
-    expect(shortcutsFile, contains("label: 'Preços'"));
+    expect(shortcutsFile, isNot(contains("label: 'Preços'")));
     expect(shortcutsFile, contains("label: 'Marca própria'"));
     expect(screen, isNot(contains('retornoRapido')));
     expect(screen, isNot(contains('DashboardRoiQuickLinksRow')));
     expect(screen, contains('DashboardMicrocopy.commandCenterTitle'));
     expect(screen, contains('featuredTools'));
     expect(screen, contains('verCatalogoCompleto'));
+    expect(screen, contains('omitSecondarySections'));
+    expect(screen, contains('DashboardHomeHeader'));
+    expect(screen, contains('DashboardAttentionRail'));
 
     final semanticsCount = 'Semantics('.allMatches(screen).length;
     expect(semanticsCount, greaterThanOrEqualTo(10));

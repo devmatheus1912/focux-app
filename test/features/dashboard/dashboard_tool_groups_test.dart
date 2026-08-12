@@ -20,7 +20,6 @@ void main() {
       expect(
         groups['Receita'],
         containsAll([
-          'Preços',
           'Receita recorrente',
           'Cobrança auto',
           'Recorrência',
@@ -28,6 +27,7 @@ void main() {
           'Ofertas',
         ]),
       );
+      expect(groups['Receita'], isNot(contains('Preços')));
 
       expect(
         groups['Crescimento'],
@@ -92,14 +92,14 @@ void main() {
       expect(pacotes.icon, isNot(loja.icon));
     });
 
-    test('Preços and Receita recorrente use distinct icons', () {
-      final precos = DashboardToolShortcut.moreTools.firstWhere(
-        (s) => s.label == 'Preços',
+    test('Cobrança auto and Receita recorrente use distinct icons', () {
+      final cobranca = DashboardToolShortcut.moreTools.firstWhere(
+        (s) => s.label == 'Cobrança auto',
       );
       final receitaRecorrente = DashboardToolShortcut.moreTools.firstWhere(
         (s) => s.label == 'Receita recorrente',
       );
-      expect(precos.icon, isNot(receitaRecorrente.icon));
+      expect(cobranca.icon, isNot(receitaRecorrente.icon));
     });
   });
 }
