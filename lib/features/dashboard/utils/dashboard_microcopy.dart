@@ -29,6 +29,10 @@ abstract final class DashboardMicrocopy {
   static const modoFoco = 'Modo foco';
   static const modoFocoOn = 'Modo foco ligado';
   static const modoFocoOff = 'Modo foco desligado';
+  /// Chip no banner: estado ativo.
+  static const modoFocoChipOn = 'Foco';
+  /// Chip no banner: ação para entrar no modo foco.
+  static const modoFocoChipOff = 'Focar';
   static const toqueParaExpandir = 'toque para expandir';
   static const abrirFinanceiro = 'Abrir financeiro';
 }

@@ -40,9 +40,9 @@ class DashboardHomeHeader extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         TokensStrip.s4,
-        4,
+        6,
         TokensStrip.s4,
-        TokensStrip.s3,
+        TokensStrip.s2,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
