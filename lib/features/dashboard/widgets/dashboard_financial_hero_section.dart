@@ -196,52 +196,14 @@ class DashboardFinancialHeroSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Receita recebida · $mes', style: dashboardHeroEyebrowOnTeal()),
-        const SizedBox(height: 4),
+        Text('Receita · $mes', style: dashboardHeroEyebrowOnTeal()),
+        const SizedBox(height: 6),
         Text(
-          'Nenhuma receita lançada em $mes. Registre cobranças para acompanhar a meta.',
+          'Sem receita em $mes. Abra o financeiro para lançar cobranças.',
           style: dashboardHeroCaptionOnTealStyle(),
         ),
-        const SizedBox(height: 8),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            _receitaAmount(context),
-            Padding(
-              padding: const EdgeInsets.only(left: 8, bottom: 5),
-              child: Text(
-                'recebido',
-                style: dashboardHeroEyebrowOnTeal().copyWith(
-                  letterSpacing: 0.1,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Text(_metaLine(), style: dashboardHeroMutedOnTealStyle()),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         _financeHeroCta(context),
-        const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            DashboardHeroMiniStat(
-              label: 'Pendente',
-              value: 'R\$ ${pendente.toInt()}',
-            ),
-            Container(
-              width: 1,
-              height: 26,
-              color: Colors.white.withValues(alpha: 0.15),
-            ),
-            DashboardHeroMiniStat(
-              label: financeInadimplLabel(MediaQuery.sizeOf(context).width),
-              value: '${finData?.totalInadimplentes ?? 0}',
-              suffix: ' alunos',
-            ),
-          ],
-        ),
       ],
     );
   }

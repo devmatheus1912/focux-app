@@ -106,7 +106,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
                   child: DashboardPulseChip(
                   icon: 'circle-check',
                   value: checkinsHoje.toString(),
-                  label: tight ? 'Checks' : 'Check-ins',
+                  label: 'Checks',
                   accent: checkinsAccent,
                   isDark: isDark,
                   compact: tight,
@@ -124,7 +124,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
                         ? DashboardPulseChip(
                           icon: 'calendar',
                           value: agendaHoje.toString(),
-                          label: tight ? 'Agenda' : 'Agenda hoje',
+                          label: 'Agenda',
                           accent: agendaAccent,
                           isDark: isDark,
                           compact: tight,

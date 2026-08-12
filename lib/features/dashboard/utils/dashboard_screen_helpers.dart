@@ -6,7 +6,7 @@ import '../../../core/utils/fx_utils.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../constants/dashboard_layout.dart';
 
-String dashboardGreeting(String? nome) {
+String dashboardGreeting(String? nome, {bool compact = false}) {
   final hour = DateTime.now().hour;
   final prefix =
       hour < 12
@@ -15,10 +15,12 @@ String dashboardGreeting(String? nome) {
           ? 'Boa tarde'
           : 'Boa noite';
   final first = nome?.split(' ').first.trim();
-  if (first != null && first.isNotEmpty) {
-    return '$prefix, ${fxTitleCaseName(first)}';
+  if (first == null || first.isEmpty) return prefix;
+  final display = fxTitleCaseName(first);
+  if (compact && display.length > 10) {
+    return '$prefix, ${display.substring(0, 9)}…';
   }
-  return prefix;
+  return '$prefix, $display';
 }
 
 bool isRiskEchoCopy(String text) {

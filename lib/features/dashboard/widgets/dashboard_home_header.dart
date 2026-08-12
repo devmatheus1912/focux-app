@@ -35,6 +35,8 @@ class DashboardHomeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final compact = DashboardLayout.isCompact(MediaQuery.sizeOf(context).width);
+    final link = BrandPalette.sectionLink(primary, dark: isDark);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         TokensStrip.s4,
@@ -49,11 +51,12 @@ class DashboardHomeHeader extends StatelessWidget {
             child: Semantics(
               header: true,
               child: Text(
-                dashboardGreeting(nomePersonal),
-                maxLines: 1,
+                dashboardGreeting(nomePersonal, compact: compact),
+                maxLines: 2,
+                softWrap: true,
                 overflow: TextOverflow.ellipsis,
                 style: AppTypography.inter(
-                  fontSize: 20,
+                  fontSize: compact ? 18 : 20,
                   fontWeight: FontWeight.w700,
                   letterSpacing: -0.35,
                   height: 1.15,
@@ -73,30 +76,65 @@ class DashboardHomeHeader extends StatelessWidget {
                     focusMode
                         ? DashboardMicrocopy.modoFocoOn
                         : DashboardMicrocopy.modoFocoOff,
-                child: IconButton(
-                  tooltip: DashboardMicrocopy.modoFoco,
-                  visualDensity: VisualDensity.compact,
-                  constraints: const BoxConstraints(
-                    minWidth: DashboardLayout.touchTarget,
-                    minHeight: DashboardLayout.touchTarget,
-                  ),
-                  padding: EdgeInsets.zero,
-                  onPressed: onToggleFocus,
-                  icon: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 220),
-                    switchInCurve: Curves.easeOutCubic,
-                    switchOutCurve: Curves.easeInCubic,
-                    transitionBuilder: (child, anim) {
-                      return ScaleTransition(
-                        scale: anim,
-                        child: FadeTransition(opacity: anim, child: child),
-                      );
-                    },
-                    child: Icon(
-                      focusMode ? Icons.bolt_rounded : Icons.bolt_outlined,
-                      key: ValueKey(focusMode),
-                      size: 22,
-                      color: BrandPalette.sectionLink(primary, dark: isDark),
+                child: Tooltip(
+                  message: DashboardMicrocopy.modoFoco,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: onToggleFocus,
+                      borderRadius: BorderRadius.circular(999),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 220),
+                        curve: Curves.easeOutCubic,
+                        constraints: const BoxConstraints(
+                          minWidth: DashboardLayout.touchTarget,
+                          minHeight: DashboardLayout.touchTarget,
+                        ),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: focusMode ? 10 : 8,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color:
+                              focusMode
+                                  ? BrandPalette.soft(
+                                    primary,
+                                    dark: isDark,
+                                  ).withValues(alpha: isDark ? 0.55 : 0.9)
+                                  : Colors.transparent,
+                          borderRadius: BorderRadius.circular(999),
+                          border:
+                              focusMode
+                                  ? Border.all(
+                                    color: primary.withValues(alpha: 0.45),
+                                  )
+                                  : null,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              focusMode
+                                  ? Icons.bolt_rounded
+                                  : Icons.bolt_outlined,
+                              size: 20,
+                              color: link,
+                            ),
+                            if (focusMode) ...[
+                              const SizedBox(width: 4),
+                              Text(
+                                'Foco',
+                                style: AppTypography.inter(
+                                  fontSize: TokensStrip.fontBodySm,
+                                  fontWeight: FontWeight.w800,
+                                  color: link,
+                                  letterSpacing: 0.2,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),

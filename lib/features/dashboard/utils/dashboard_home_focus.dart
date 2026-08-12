@@ -103,10 +103,10 @@ class DashboardHomeFocusRules {
       hidePromoBanners: dense,
       collapseQuickLinks: true,
       suppressSecondaryEmptyCtas: dense,
-      compactCommandSticky: focusMode,
-      hideFeaturedTools: focusMode,
-      omitSecondarySections: focusMode,
-      collapsePulseBody: focusMode,
+      compactCommandSticky: dense,
+      hideFeaturedTools: dense,
+      omitSecondarySections: dense,
+      collapsePulseBody: dense,
       maxVisibleNextActions: focusMode ? 2 : 3,
     );
   }

@@ -59,7 +59,10 @@ void main() {
       );
       expect(rules.hidePromoBanners, isTrue);
       expect(rules.suppressSecondaryEmptyCtas, isTrue);
-      expect(rules.compactCommandSticky, isFalse);
+      expect(rules.compactCommandSticky, isTrue);
+      expect(rules.omitSecondarySections, isTrue);
+      expect(rules.hideFeaturedTools, isTrue);
+      expect(rules.collapsePulseBody, isTrue);
     });
 
     test('focus off keeps quick links collapsed by default', () {
