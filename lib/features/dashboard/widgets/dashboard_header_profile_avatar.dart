@@ -10,6 +10,7 @@ class DashboardHeaderProfileAvatar extends StatelessWidget {
     required this.initials,
     required this.onTap,
     this.photoUrl,
+    this.size = 40,
   });
 
   final Color primary;
@@ -17,21 +18,22 @@ class DashboardHeaderProfileAvatar extends StatelessWidget {
   final String initials;
   final VoidCallback onTap;
   final String? photoUrl;
+  final double size;
 
-  static const double _outer = 40;
   static const double _ring = 2;
   static const double _gap = 2;
 
   @override
   Widget build(BuildContext context) {
     final neon = BrandPalette.accent(primary);
-    final avatarRadius = (_outer - _ring * 2 - _gap * 2) / 2;
+    final outer = size;
+    final avatarRadius = (outer - _ring * 2 - _gap * 2) / 2;
     return Semantics(
       button: true,
       label: 'Abrir perfil',
       child: SizedBox(
-        width: _outer,
-        height: _outer,
+        width: outer,
+        height: outer,
         child: Stack(
           clipBehavior: Clip.none,
           alignment: Alignment.center,
@@ -58,8 +60,8 @@ class DashboardHeaderProfileAvatar extends StatelessWidget {
                 splashColor: neon.withValues(alpha: 0.12),
                 highlightColor: neon.withValues(alpha: 0.06),
                 child: Container(
-                  width: _outer,
-                  height: _outer,
+                  width: outer,
+                  height: outer,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(

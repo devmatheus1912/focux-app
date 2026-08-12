@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import '../constants/dashboard_layout.dart';
-import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import 'dashboard_header_profile_avatar.dart';
 
-/// Saudação + modo foco + chrome (tema, notificações, avatar).
+/// Saudação + chrome (tema, notificações, avatar).
+/// Modo foco fica no banner “Foco do dia” — header sem crowding.
 class DashboardHomeHeader extends StatelessWidget {
   const DashboardHomeHeader({
     super.key,
@@ -19,8 +18,6 @@ class DashboardHomeHeader extends StatelessWidget {
     required this.logoUrl,
     required this.isDark,
     required this.primary,
-    required this.focusMode,
-    required this.onToggleFocus,
     required this.onProfileTap,
   });
 
@@ -28,8 +25,6 @@ class DashboardHomeHeader extends StatelessWidget {
   final String? logoUrl;
   final bool isDark;
   final Color primary;
-  final bool focusMode;
-  final VoidCallback onToggleFocus;
   final VoidCallback onProfileTap;
 
   @override
@@ -37,12 +32,11 @@ class DashboardHomeHeader extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final width = MediaQuery.sizeOf(context).width;
     final compact = DashboardLayout.isCompact(width);
-    final showFocusLabel = focusMode && width >= 360;
+    final chromeSize = DashboardLayout.headerActionSize(width);
     final chromeGap = DashboardLayout.headerChromeGap(
-      focusMode: focusMode,
+      focusMode: compact,
       compact: compact,
     );
-    final link = BrandPalette.sectionLink(primary, dark: isDark);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         TokensStrip.s4,
@@ -75,92 +69,16 @@ class DashboardHomeHeader extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Semantics(
-                button: true,
-                toggled: focusMode,
-                label:
-                    focusMode
-                        ? DashboardMicrocopy.modoFocoOn
-                        : DashboardMicrocopy.modoFocoOff,
-                child: Tooltip(
-                  message: DashboardMicrocopy.modoFoco,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: onToggleFocus,
-                      borderRadius: BorderRadius.circular(999),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 220),
-                        curve: Curves.easeOutCubic,
-                        constraints: BoxConstraints(
-                          minWidth: DashboardLayout.touchTarget,
-                          minHeight: DashboardLayout.touchTarget,
-                          maxHeight: DashboardLayout.touchTarget,
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: showFocusLabel ? 10 : 0,
-                        ),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color:
-                              focusMode
-                                  ? BrandPalette.soft(
-                                    primary,
-                                    dark: isDark,
-                                  ).withValues(alpha: isDark ? 0.55 : 0.9)
-                                  : (isDark
-                                      ? Colors.white.withValues(alpha: 0.06)
-                                      : Colors.black.withValues(alpha: 0.04)),
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(
-                            color:
-                                focusMode
-                                    ? primary.withValues(alpha: 0.55)
-                                    : (isDark
-                                        ? Colors.white.withValues(alpha: 0.14)
-                                        : Colors.black.withValues(alpha: 0.08)),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              focusMode
-                                  ? Icons.bolt_rounded
-                                  : Icons.bolt_outlined,
-                              size: 22,
-                              color: link,
-                            ),
-                            if (showFocusLabel) ...[
-                              const SizedBox(width: 4),
-                              Text(
-                                'Foco',
-                                style: AppTypography.inter(
-                                  fontSize: TokensStrip.fontBodySm,
-                                  fontWeight: FontWeight.w800,
-                                  color: link,
-                                  letterSpacing: 0.2,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              ShellThemeToggle(size: chromeSize),
               SizedBox(width: chromeGap),
-              const ShellThemeToggle(size: DashboardLayout.touchTarget),
-              SizedBox(width: chromeGap),
-              const NotificacaoBadgeButton(size: DashboardLayout.touchTarget),
+              NotificacaoBadgeButton(size: chromeSize),
               SizedBox(width: chromeGap),
               DashboardHeaderProfileAvatar(
                 primary: primary,
                 isDark: isDark,
                 photoUrl: logoUrl,
                 initials: fxInitials(nomePersonal ?? 'F'),
+                size: chromeSize,
                 onTap: onProfileTap,
               ),
             ],

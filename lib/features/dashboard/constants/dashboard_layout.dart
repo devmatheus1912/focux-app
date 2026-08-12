@@ -22,12 +22,17 @@ abstract final class DashboardLayout {
   static const double sliverTightGap = TokensStrip.s1;
   static const double headerIconGap = TokensStrip.s2;
   static const double headerIconGapDense = 4;
+  static const double headerActionCompact = 40;
+  static const double headerActionComfort = 44;
   static const double maxContentWidth = FocuxPlatform.desktopMaxContent;
 
   static bool isCompact(double width) => width < compactWidth;
 
+  static double headerActionSize(double width) =>
+      width < 430 ? headerActionCompact : headerActionComfort;
+
   static double headerChromeGap({required bool focusMode, required bool compact}) {
-    if (focusMode || compact) return headerIconGapDense;
+    if (compact) return headerIconGapDense;
     return headerIconGap;
   }
 

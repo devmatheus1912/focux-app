@@ -91,8 +91,6 @@ List<Widget> buildDashboardHomePrimarySlivers({
         logoUrl: logoUrl,
         isDark: isDark,
         primary: primary,
-        focusMode: focusMode,
-        onToggleFocus: onToggleFocus,
         onProfileTap: () => context.push('/perfil'),
       ),
     ),
@@ -101,6 +99,8 @@ List<Widget> buildDashboardHomePrimarySlivers({
         focus: dayFocus,
         isDark: isDark,
         primary: primary,
+        focusMode: focusMode,
+        onToggleFocus: onToggleFocus,
       ),
     ),
     SliverPersistentHeader(
