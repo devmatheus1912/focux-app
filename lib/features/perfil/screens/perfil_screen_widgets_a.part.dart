@@ -1,117 +1,5 @@
 part of 'perfil_screen.dart';
 
-class _PerfilLoadingScaffold extends StatelessWidget {
-  const _PerfilLoadingScaffold();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final surface = isDark ? EagleTokens.darkCard : TokensStrip.cardBg;
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-
-    final primary = theme.colorScheme.primary;
-
-    return FxShellScaffold(
-      useMesh: true,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(TokensStrip.s4),
-        child: Column(
-          children: [
-            Container(
-              height: 286,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(26),
-                gradient: LinearGradient(
-                  colors: [primary, BrandPalette.deep(primary)],
-                ),
-              ),
-            ),
-            const SizedBox(height: 14),
-            for (final height in [132.0, 178.0, 228.0])
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Container(
-                  height: height,
-                  decoration: BoxDecoration(
-                    color: surface,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: line),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PerfilErrorScaffold extends StatelessWidget {
-  final Object error;
-  final VoidCallback onRetry;
-
-  const _PerfilErrorScaffold({required this.error, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-
-    return FxShellScaffold(
-      useMesh: true,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(TokensStrip.s5),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 58,
-                height: 58,
-                decoration: BoxDecoration(
-                  color: EagleTokens.badSoft,
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: const Icon(
-                  Icons.cloud_off_outlined,
-                  color: EagleTokens.bad,
-                  size: 28,
-                ),
-              ),
-              const SizedBox(height: TokensStrip.s4),
-              Text(
-                'Perfil indisponível',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  color: ink,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                friendlyError(
-                  error,
-                  fallback: 'Não foi possível carregar seus dados agora.',
-                ),
-                textAlign: TextAlign.center,
-                style: TextStyle(color: mute, height: 1.35),
-              ),
-              const SizedBox(height: 18),
-              FxLiquidPrimaryButton(
-                icon: Icons.refresh_rounded,
-                label: 'Tentar novamente',
-                onPressed: onRetry,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _PerfilBody extends StatelessWidget {
   final PerfilPersonal perfil;
   final DashboardData dashboard;
@@ -191,7 +79,7 @@ class _PerfilBody extends StatelessWidget {
         index: 0,
         slideOffset: 16,
         duration: const Duration(milliseconds: 420),
-        child: _PerfilStickyBar(
+        child: PerfilStickyBar(
           accent: accent,
           actionInk: actionInk,
           isDark: isDark,

@@ -32,6 +32,9 @@ import '../widgets/perfil_card_section.dart';
 import '../widgets/perfil_conta_seguranca_section.dart';
 import '../widgets/perfil_marca_vitrine_section.dart';
 import '../widgets/perfil_operacao_section.dart';
+import '../widgets/perfil_sticky_bar.dart';
+import '../widgets/perfil_loading_scaffold.dart';
+import '../widgets/perfil_error_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
@@ -160,9 +163,9 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
     return fxScreenA11yScope(
       label: 'Perfil',
       child: perfilAsync.when(
-        loading: () => const _PerfilLoadingScaffold(),
+        loading: () => const PerfilLoadingScaffold(),
         error:
-            (error, _) => _PerfilErrorScaffold(
+            (error, _) => PerfilErrorScaffold(
               error: error,
               onRetry: () => ref.invalidate(perfilProvider),
             ),
