@@ -453,10 +453,15 @@ Future<void> copyLandingLink(
   BuildContext context, {
   required String url,
   required String successMessage,
+  double reserveBottom = 0,
 }) async {
   await Clipboard.setData(ClipboardData(text: url));
   if (!context.mounted) return;
-  FeedbackHelper.showSuccess(context, successMessage);
+  FeedbackHelper.showSuccess(
+    context,
+    successMessage,
+    reserveBottom: reserveBottom,
+  );
 }
 
 Future<void> openLandingLink(

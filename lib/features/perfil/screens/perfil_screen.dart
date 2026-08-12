@@ -100,14 +100,38 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
       ref.invalidate(perfilProvider);
       ref.invalidate(dashboardHomeProvider);
       ref.invalidate(dashboardProvider);
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(
+        context,
+        'Perfil atualizado.',
+        reserveBottom: 96,
+      );
     }
   }
 
   Future<void> _logout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Sair da conta'),
+            content: const Text('Deseja encerrar esta sessão neste aparelho?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(ctx).pop(true),
+                child: const Text('Sair'),
+              ),
+            ],
+          ),
+    );
+    if (confirmed != true || !mounted) return;
     await ref.read(authProvider.notifier).logout();
-    if (mounted) {
-      context.go('/login');
-    }
+    if (!mounted) return;
+    context.go('/login');
   }
 
   Future<void> _handleChecklistAction(

@@ -48,7 +48,7 @@ class PerfilActionTile extends StatelessWidget {
     final link = actionInk ?? accent;
     final a11y =
         danger
-            ? label
+            ? '$label. Ação destrutiva'
             : locked
             ? '$label trancado. Plano ${upgradeTierLabel ?? 'upgrade'}'
             : (value.isEmpty ? label : '$label. $value');
@@ -56,6 +56,7 @@ class PerfilActionTile extends StatelessWidget {
     return Semantics(
       button: true,
       label: a11y,
+      hint: danger ? 'Confirmação será solicitada' : null,
       child: InkWell(
         onTap: () {
           HapticFeedback.selectionClick();

@@ -72,8 +72,15 @@ class _CompletenessCard extends StatelessWidget {
             ),
             const SizedBox(height: TokensStrip.s2),
             TweenAnimationBuilder<double>(
-              tween: Tween<double>(begin: 0, end: score / 100),
-              duration: const Duration(milliseconds: 700),
+              tween: Tween<double>(
+                begin:
+                    TokensStrip.prefersReducedMotion(context) ? score / 100 : 0,
+                end: score / 100,
+              ),
+              duration:
+                  TokensStrip.prefersReducedMotion(context)
+                      ? Duration.zero
+                      : const Duration(milliseconds: 700),
               curve: Curves.easeOutCubic,
               builder: (context, value, _) {
                 return ClipRRect(
@@ -216,7 +223,7 @@ class _ReadyFocusStrip extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Tudo pronto — compartilhe a vitrine ou abra o Copiloto IA.',
+              'Tudo pronto — compartilhe a vitrine ou abra Meus alunos.',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TokensStrip.bodyMuted(color: mute).copyWith(
@@ -398,91 +405,6 @@ class _ProfessionalDataPanel extends StatelessWidget {
   }
 }
 
-class _InfoTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color accent;
-  final Color mute;
-  final Color line;
-  final bool showDivider;
-  final VoidCallback? onTap;
-
-  const _InfoTile({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.accent,
-    required this.mute,
-    required this.line,
-    this.showDivider = true,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final content = Container(
-      padding: const EdgeInsets.symmetric(vertical: 15),
-      decoration: BoxDecoration(
-        border:
-            showDivider
-                ? Border(bottom: BorderSide(color: line, width: 0.5))
-                : null,
-      ),
-      child: Row(
-        children: [
-          _LeadingIcon(
-            icon: icon,
-            background:
-                isDark
-                    ? accent.withValues(alpha: 0.14)
-                    : BrandPalette.soft(accent),
-            color: accent,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TokensStrip.bodyMuted(color: mute).copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: TokensStrip.body(color: ink).copyWith(
-                    fontWeight: FontWeight.w500,
-                    fontSize: TokensStrip.fontBodySm + 1,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (onTap != null) Icon(Icons.chevron_right, size: 18, color: mute),
-        ],
-      ),
-    );
-
-    if (onTap == null) {
-      return Semantics(label: '$label. $value', child: content);
-    }
-
-    return Semantics(
-      button: true,
-      label: '$label. $value',
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(onTap: onTap, child: content),
-      ),
-    );
-  }
-}
-
 class _ProfileTexturePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -539,12 +461,8 @@ void _showDeleteAccountDialog(
                             await dio.delete('/api/lgpd/me/delete');
                             if (!ctx.mounted) return;
                             Navigator.of(ctx).pop();
-                            if (!context.mounted) return;
-                            FeedbackHelper.showSuccess(
-                              context,
-                              'Conta excluída com sucesso.',
-                            );
                             await onSessionCleared();
+                            // Toast no shell de login — o hub Perfil já foi desmontado.
                           } catch (e) {
                             if (!ctx.mounted) return;
                             setDialogState(() => loading = false);
@@ -572,14 +490,6 @@ String _buildSubtitle(PerfilPersonal perfil) {
     return '$specialty  |  @${ig.replaceFirst('@', '')}';
   }
   return specialty;
-}
-
-String _formatInstagram(String? value) {
-  if (value == null || value.trim().isEmpty) {
-    return 'Não informado';
-  }
-  final normalized = value.trim();
-  return normalized.startsWith('@') ? normalized : '@$normalized';
 }
 
 String _initials(String nome) {

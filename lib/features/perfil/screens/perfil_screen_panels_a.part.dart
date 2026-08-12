@@ -5,11 +5,13 @@ class _PerfilStickyBar extends StatelessWidget {
     required this.accent,
     required this.actionInk,
     required this.isDark,
+    required this.profileComplete,
   });
 
   final Color accent;
   final Color actionInk;
   final bool isDark;
+  final bool profileComplete;
 
   @override
   Widget build(BuildContext context) {
@@ -64,14 +66,25 @@ class _PerfilStickyBar extends StatelessWidget {
                   Expanded(
                     child: Semantics(
                       button: true,
-                      label: 'Copiloto IA',
+                      label:
+                          profileComplete
+                              ? 'Copiloto IA'
+                              : 'Completar perfil',
                       child: FxLiquidPrimaryButton(
                         expand: true,
-                        icon: Icons.auto_awesome_outlined,
-                        label: 'Copiloto IA',
+                        icon:
+                            profileComplete
+                                ? Icons.auto_awesome_outlined
+                                : Icons.checklist_rtl_rounded,
+                        label:
+                            profileComplete ? 'Copiloto IA' : 'Completar perfil',
                         onPressed: () {
                           HapticFeedback.selectionClick();
-                          goPersonalShellTab(context, '/ia/copiloto');
+                          if (profileComplete) {
+                            goPersonalShellTab(context, '/ia/copiloto');
+                          } else {
+                            context.push('/identidade-visual');
+                          }
                         },
                       ),
                     ),
@@ -272,13 +285,17 @@ class _PerfilPublicLinkCard extends StatelessWidget {
     final hasSlug = normalizedSlug != null && normalizedSlug.isNotEmpty;
 
     if (!hasSlug) {
-      return TextButton.icon(
-        onPressed: () {
-          HapticFeedback.selectionClick();
-          onOpenEditor();
-        },
-        icon: const Icon(Icons.add_link_rounded, size: 18),
-        label: const Text('Criar link público'),
+      return Semantics(
+        button: true,
+        label: 'Criar link público da vitrine',
+        child: TextButton.icon(
+          onPressed: () {
+            HapticFeedback.selectionClick();
+            onOpenEditor();
+          },
+          icon: const Icon(Icons.add_link_rounded, size: 18),
+          label: const Text('Criar link público'),
+        ),
       );
     }
 
@@ -328,6 +345,7 @@ class _PerfilPublicLinkCard extends StatelessWidget {
                         url: copyUrl,
                         successMessage:
                             'Link copiado. Cole no Instagram ou WhatsApp.',
+                        reserveBottom: 96,
                       );
                     },
                     style: TextButton.styleFrom(
@@ -346,7 +364,10 @@ class _PerfilPublicLinkCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
+                child: Semantics(
+                  button: true,
+                  label: 'Ver vitrine ao vivo',
+                  child: OutlinedButton.icon(
                   onPressed: () {
                     HapticFeedback.selectionClick();
                     openLandingLink(context, url: copyUrl);
@@ -360,10 +381,14 @@ class _PerfilPublicLinkCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                 ),
+                ),
               ),
               const SizedBox(width: TokensStrip.s2),
               Expanded(
-                child: FilledButton.icon(
+                child: Semantics(
+                  button: true,
+                  label: 'Compartilhar link da vitrine',
+                  child: FilledButton.icon(
                   onPressed: () {
                     HapticFeedback.selectionClick();
                     copyLandingLink(
@@ -371,6 +396,7 @@ class _PerfilPublicLinkCard extends StatelessWidget {
                       url: copyUrl,
                       successMessage:
                           'Link pronto para compartilhar no Instagram ou WhatsApp.',
+                      reserveBottom: 96,
                     );
                   },
                   icon: const Icon(Icons.ios_share_rounded, size: 16),
@@ -382,13 +408,17 @@ class _PerfilPublicLinkCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                 ),
+                ),
               ),
             ],
           ),
           if (!compact) ...[
             Align(
               alignment: Alignment.centerRight,
-              child: TextButton(
+              child: Semantics(
+                button: true,
+                label: 'Personalizar página da vitrine',
+                child: TextButton(
                 onPressed: () {
                   HapticFeedback.selectionClick();
                   onOpenEditor();
@@ -399,11 +429,15 @@ class _PerfilPublicLinkCard extends StatelessWidget {
                 ),
                 child: const Text('Personalizar página'),
               ),
+              ),
             ),
           ] else
             Align(
               alignment: Alignment.centerRight,
-              child: TextButton(
+              child: Semantics(
+                button: true,
+                label: 'Personalizar página da vitrine',
+                child: TextButton(
                 onPressed: () {
                   HapticFeedback.selectionClick();
                   onOpenEditor();
@@ -415,6 +449,7 @@ class _PerfilPublicLinkCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                 ),
                 child: const Text('Personalizar página'),
+              ),
               ),
             ),
         ],

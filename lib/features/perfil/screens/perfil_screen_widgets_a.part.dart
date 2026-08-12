@@ -195,6 +195,7 @@ class _PerfilBody extends StatelessWidget {
           accent: accent,
           actionInk: actionInk,
           isDark: isDark,
+          profileComplete: profileComplete,
         ),
       ),
       body: SafeArea(
@@ -203,7 +204,7 @@ class _PerfilBody extends StatelessWidget {
           slivers: [
             SliverToBoxAdapter(
               child: FxStaggerItem(
-                index: 0,
+                index: 1,
                 slideOffset: 18,
                 duration: const Duration(milliseconds: 480),
                 child: Container(
@@ -425,17 +426,22 @@ class _PerfilBody extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         if (!profileComplete) ...[
-                          _CompletenessCard(
-                            score: profileScore,
-                            accent: accent,
-                            isDark: isDark,
-                            items: readiness.items,
-                            nextStep: readiness.nextStep,
-                            onChecklistAction: onChecklistAction,
+                          FxStaggerItem(
+                            index: 2,
+                            child: _CompletenessCard(
+                              score: profileScore,
+                              accent: accent,
+                              isDark: isDark,
+                              items: readiness.items,
+                              nextStep: readiness.nextStep,
+                              onChecklistAction: onChecklistAction,
+                            ),
                           ),
                           const SizedBox(height: TokensStrip.s3),
                         ],
-                        PerfilMarcaVitrineSection(
+                        FxStaggerItem(
+                          index: 3,
+                          child: PerfilMarcaVitrineSection(
                           profileComplete: profileComplete,
                           isDark: isDark,
                           accent: accent,
@@ -489,8 +495,11 @@ class _PerfilBody extends StatelessWidget {
                             },
                           ),
                         ),
+                        ),
                         const SizedBox(height: TokensStrip.s3),
-                        _ProfessionalDataPanel(
+                        FxStaggerItem(
+                          index: 4,
+                          child: _ProfessionalDataPanel(
                           summary: professionalSummary,
                           accent: accent,
                           actionInk: actionInk,
@@ -498,8 +507,11 @@ class _PerfilBody extends StatelessWidget {
                           isDark: isDark,
                           onEdit: onEditPerfil,
                         ),
+                        ),
                         const SizedBox(height: TokensStrip.s3),
-                        PerfilOperacaoSection(
+                        FxStaggerItem(
+                          index: 5,
+                          child: PerfilOperacaoSection(
                           isDark: isDark,
                           accent: accent,
                           actionInk: actionInk,
@@ -507,8 +519,11 @@ class _PerfilBody extends StatelessWidget {
                           line: line,
                           pixDone: readiness.isPixDone,
                         ),
+                        ),
                         const SizedBox(height: TokensStrip.s3),
-                        PerfilContaSegurancaSection(
+                        FxStaggerItem(
+                          index: 6,
+                          child: PerfilContaSegurancaSection(
                           isDark: isDark,
                           accent: accent,
                           actionInk: actionInk,
@@ -531,6 +546,7 @@ class _PerfilBody extends StatelessWidget {
                                     line: line,
                                   )
                                   : null,
+                        ),
                         ),
                       ],
                     ),

@@ -32,7 +32,7 @@ abstract class EagleTokens {
   static const Color darkCardHi = Color(0xFF1A2330);
   static const Color darkLine = Color(0xFF1E2830);
   static const Color darkInk = Color(0xFFE8EDF2);
-  static const Color darkInkMute = Color(0xFF7A8A96);
+  static const Color darkInkMute = Color(0xFF9AA8B3);
 
   // ── Semânticos ──────────────────────────────────────────────────────
   static const Color good = Color(0xFF1B8C54);
