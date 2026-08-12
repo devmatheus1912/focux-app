@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../core/theme/brand_palette.dart';
@@ -64,24 +65,16 @@ class CommandActionPanel extends StatelessWidget {
                   ),
                   child: Text(
                     prioritiesActionLabel!,
-                    style: AppTypography.inter(
-                      fontSize: TokensStrip.fontBodySm,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.2,
-                      color: link,
-                    ),
+                    style: FocuxHubTypography.chip(link)
+                        .copyWith(letterSpacing: 0.2),
                   ),
                 ),
               )
             else
               Text(
                 DashboardMicrocopy.impactoHoje,
-                style: AppTypography.inter(
-                  color: link,
-                  fontSize: TokensStrip.fontBodySm,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.2,
-                ),
+                style: FocuxHubTypography.chip(link)
+                    .copyWith(letterSpacing: 0.2),
               ),
           ],
         ),

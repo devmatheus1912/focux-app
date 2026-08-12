@@ -19,6 +19,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 part 'perfil_aluno_screen_state.part.dart';

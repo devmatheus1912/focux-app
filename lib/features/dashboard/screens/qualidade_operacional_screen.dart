@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -166,11 +167,11 @@ class _QualidadeBody extends StatelessWidget {
                           const SizedBox(width: 5),
                           Text(
                             'Índice Focux',
-                            style: AppTypography.inter(
+                            style: FocuxHubTypography.bodyMuted(
                               color: Colors.white.withValues(alpha: 0.8),
-                              fontSize: 12,
                               fontWeight: FontWeight.w600,
-                            ),
+                              height: 1.2,
+                            ).copyWith(fontSize: 12),
                           ),
                         ],
                       ),
@@ -180,7 +181,7 @@ class _QualidadeBody extends StatelessWidget {
                 const SizedBox(height: TokensStrip.s4),
                 Text(
                   '${data.score}',
-                  style: AppTypography.mono(
+                  style: FocuxHubTypography.metric(
                     fontSize: 64,
                     fontWeight: FontWeight.w800,
                     color: Colors.white,
@@ -190,8 +191,8 @@ class _QualidadeBody extends StatelessWidget {
                 ),
                 Text(
                   '/100',
-                  style: AppTypography.mono(
-                    fontSize: 18,
+                  style: FocuxHubTypography.metric(
+                    fontSize: FocuxHubTypography.metricEm,
                     fontWeight: FontWeight.w500,
                     color: Colors.white.withValues(alpha: 0.5),
                     height: 1.4,
@@ -224,12 +225,11 @@ class _QualidadeBody extends StatelessWidget {
                   ),
                   child: Text(
                     data.recomendacao,
-                    style: AppTypography.inter(
+                    style: FocuxHubTypography.bodyMuted(
                       color: Colors.white.withValues(alpha: 0.9),
-                      fontSize: 12.5,
                       fontWeight: FontWeight.w500,
                       height: 1.35,
-                    ),
+                    ).copyWith(fontSize: 12.5),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -264,9 +264,8 @@ class _QualidadeBody extends StatelessWidget {
                     const SizedBox(width: 10),
                     Text(
                       'Diagnóstico',
-                      style: AppTypography.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                      style: FocuxHubTypography.sectionTitle(
+                        context,
                         color: ink,
                       ),
                     ),
@@ -453,7 +452,7 @@ class _ScoreRow extends StatelessWidget {
           width: 32,
           child: Text(
             '$value',
-            style: AppTypography.mono(
+            style: FocuxHubTypography.metric(
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: ink,
@@ -520,9 +519,8 @@ class _MetricCompareCard extends StatelessWidget {
               const SizedBox(width: 10),
               Text(
                 title,
-                style: AppTypography.inter(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
+                style: FocuxHubTypography.sectionTitle(
+                  context,
                   color: ink,
                 ),
               ),
@@ -600,8 +598,8 @@ class _MetricCompareCard extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       yourValue,
-                      style: AppTypography.mono(
-                        fontSize: 22,
+                      style: FocuxHubTypography.metric(
+                        fontSize: FocuxHubTypography.metricLg,
                         fontWeight: FontWeight.w700,
                         color: ink,
                         letterSpacing: -0.5,
@@ -627,8 +625,8 @@ class _MetricCompareCard extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       marketValue,
-                      style: AppTypography.mono(
-                        fontSize: 22,
+                      style: FocuxHubTypography.metric(
+                        fontSize: FocuxHubTypography.metricLg,
                         fontWeight: FontWeight.w500,
                         color: mute,
                         letterSpacing: -0.5,

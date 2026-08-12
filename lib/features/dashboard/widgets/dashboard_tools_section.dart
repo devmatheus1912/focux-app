@@ -13,6 +13,7 @@ import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_haptic.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
 import '../utils/dashboard_tool_groups.dart';
 import 'dashboard_tool_grid.dart';
@@ -120,21 +121,17 @@ class DashboardCollapsibleToolsSectionState
                           children: [
                             Text(
                               DashboardMicrocopy.maisFerramentas,
-                              style: AppTypography.inter(
-                                fontSize: TokensStrip.fontH2,
-                                fontWeight: TokensStrip.weightH2,
-                                letterSpacing: TokensStrip.trackingH2,
+                              style: FocuxHubTypography.sectionTitle(
+                                context,
                                 color: heading,
-                                height: 1.2,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               _expanded ? expandedHint : collapsedHint,
-                              style: AppTypography.inter(
-                                fontSize: TokensStrip.fontBodySm,
-                                fontWeight: FontWeight.w500,
+                              style: FocuxHubTypography.bodyMuted(
                                 color: mute,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
@@ -199,11 +196,7 @@ class DashboardCollapsibleToolsSectionState
                               children: [
                                 Text(
                                   DashboardMicrocopy.verCatalogoCompleto,
-                                  style: AppTypography.inter(
-                                    fontSize: TokensStrip.fontBodySm,
-                                    fontWeight: FontWeight.w800,
-                                    color: link,
-                                  ),
+                                  style: FocuxHubTypography.chip(link),
                                 ),
                                 const SizedBox(width: 4),
                                 Icon(
@@ -235,13 +228,12 @@ class DashboardCollapsibleToolsSectionState
                       label: DashboardMicrocopy.buscarFerramenta,
                       child: TextField(
                         onChanged: (v) => setState(() => _searchQuery = v),
-                        style: AppTypography.inter(
-                          fontSize: 14,
+                        style: FocuxHubTypography.body(
                           color:
                               widget.isDark
                                   ? EagleTokens.darkInk
                                   : TokensStrip.textPrimary,
-                        ),
+                        ).copyWith(fontSize: TokensStrip.fontBodySm + 1),
                         decoration: InputDecoration(
                           hintText: DashboardMicrocopy.buscarFerramenta,
                           hintStyle: TextStyle(color: mute),
@@ -275,7 +267,7 @@ class DashboardCollapsibleToolsSectionState
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Text(
                           'Nenhum atalho para "$_searchQuery".',
-                          style: AppTypography.inter(fontSize: 13, color: mute),
+                          style: FocuxHubTypography.bodyMuted(color: mute),
                         ),
                       )
                     else

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
@@ -275,7 +276,7 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
                             child: Text(
                               '${a.aderenciaPercent}%',
                               textAlign: TextAlign.right,
-                              style: AppTypography.mono(
+                              style: FocuxHubTypography.metric(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                                 color: ink,

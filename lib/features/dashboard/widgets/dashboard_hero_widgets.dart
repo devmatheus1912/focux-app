@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_typography.dart';
+
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 
 import '../utils/dashboard_readability.dart';
@@ -168,7 +169,7 @@ class DashboardHeroMiniStat extends StatelessWidget {
                 ),
             ],
           ),
-          style: AppTypography.mono(
+          style: FocuxHubTypography.metric(
             color: Colors.white,
             fontSize: 17,
             fontWeight: FontWeight.w600,

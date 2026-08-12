@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 
@@ -53,21 +54,16 @@ class PerfilCardSection extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: Theme.of(
+                          style: FocuxHubTypography.sectionTitle(
                             context,
-                          ).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
                             color: ink,
-                            letterSpacing: -0.2,
                           ),
                         ),
                         if (subtitle != null) ...[
                           const SizedBox(height: TokensStrip.s1),
                           Text(
                             subtitle!,
-                            style: TokensStrip.bodyMuted(color: mute).copyWith(
-                              height: 1.35,
-                            ),
+                            style: FocuxHubTypography.bodyMuted(color: mute),
                           ),
                         ],
                       ],
@@ -104,12 +100,7 @@ class PerfilCardSection extends StatelessWidget {
                               children: [
                                 Text(
                                   trailingLabel!,
-                                  style: TokensStrip.bodyMuted(
-                                    color: actionInk,
-                                  ).copyWith(
-                                    fontSize: TokensStrip.fontBodySm - 2,
-                                    fontWeight: FontWeight.w800,
-                                  ),
+                                  style: FocuxHubTypography.chip(actionInk),
                                 ),
                                 const SizedBox(width: 2),
                                 Icon(

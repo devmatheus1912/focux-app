@@ -277,11 +277,9 @@ void _showAlunoPlanSheet(
                       children: [
                         Text(
                           'Plano do aluno',
-                          style: TextStyle(
+                          style: FocuxHubTypography.pageTitle(
+                            context,
                             color: ink,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.45,
                           ),
                         ),
                         const SizedBox(height: 2),

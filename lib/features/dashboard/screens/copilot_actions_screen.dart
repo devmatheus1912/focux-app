@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_dock.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -786,28 +787,24 @@ class _IaActionsEmptyCard extends StatelessWidget {
           Text(
             'Tudo em ordem',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: FocuxHubTypography.eyebrow(
+              context,
               color: brand,
-              fontSize: 11,
               fontWeight: FontWeight.w900,
               letterSpacing: 0.7,
-            ),
+            ).copyWith(fontSize: 11),
           ),
           const SizedBox(height: 6),
           Text(
             title,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: ink,
-              fontSize: 16,
-              fontWeight: FontWeight.w900,
-            ),
+            style: FocuxHubTypography.pageTitle(context, color: ink),
           ),
           const SizedBox(height: 6),
           Text(
             subtitle,
             textAlign: TextAlign.center,
-            style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
+            style: FocuxHubTypography.bodyMuted(color: mute),
           ),
           const SizedBox(height: 14),
           OutlinedButton.icon(

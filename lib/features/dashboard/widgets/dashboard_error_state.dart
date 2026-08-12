@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 
 class DashboardErrorState extends StatelessWidget {
@@ -47,18 +48,13 @@ class DashboardErrorState extends StatelessWidget {
             const SizedBox(height: 18),
             Text(
               FocuxMicrocopy.algoSaiuDoAr,
-              style: AppTypography.inter(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: ink,
-                letterSpacing: -0.3,
-              ),
+              style: FocuxHubTypography.pageTitle(context, color: ink),
             ),
             const SizedBox(height: 6),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(color: mute, fontSize: 13, height: 1.35),
+              style: FocuxHubTypography.bodyMuted(color: mute),
             ),
             const SizedBox(height: 20),
             OutlinedButton.icon(

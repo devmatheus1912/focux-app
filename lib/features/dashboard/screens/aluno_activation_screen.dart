@@ -16,6 +16,7 @@ import '../../checkin/providers/checkin_provider.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import 'aluno_dashboard_screen.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -249,10 +250,9 @@ class AlunoActivationScreen extends ConsumerWidget {
                                     const SizedBox(height: 4),
                                     Text(
                                       '$doneCount de ${steps.length} marcos concluidos',
-                                      style: const TextStyle(
+                                      style: FocuxHubTypography.pageTitle(
+                                        context,
                                         color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w800,
                                       ),
                                     ),
                                   ],
@@ -309,13 +309,12 @@ class AlunoActivationScreen extends ConsumerWidget {
                           doneCount == steps.length
                               ? FocuxBrandCopy.alunoActivationReadyBody
                               : nextStep.title,
-                          style: TextStyle(
+                          style: FocuxHubTypography.pageTitle(
+                            context,
                             color:
                                 isDark
                                     ? EagleTokens.darkInk
                                     : TokensStrip.textPrimary,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
                           ),
                         ),
                         const SizedBox(height: 8),

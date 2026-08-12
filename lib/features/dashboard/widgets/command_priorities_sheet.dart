@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/command_action_item.dart';
 import '../utils/dashboard_haptic.dart';
 import '../utils/dashboard_readability.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import 'command_action_tile.dart';
 
 class CommandPrioritiesSheet extends StatefulWidget {
@@ -193,9 +194,8 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
                                 Expanded(
                                   child: Text(
                                     'Ações por aluno (${radarActions.length})',
-                                    style: AppTypography.inter(
-                                      fontSize: TokensStrip.fontBodySm,
-                                      fontWeight: FontWeight.w800,
+                                    style: FocuxHubTypography.eyebrow(
+                                      context,
                                       color: heading,
                                     ),
                                   ),

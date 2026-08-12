@@ -7,6 +7,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/providers/personal_brand_provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../alunos/data/aluno_repository.dart';

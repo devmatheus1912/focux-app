@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../core/theme/app_typography.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -104,7 +104,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
     if (reduceMotion) {
       return Text(
         'R\$ ${receitaAtual.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}',
-        style: AppTypography.mono(
+        style: FocuxHubTypography.metric(
           color: Colors.white,
           fontSize: 34,
           fontWeight: FontWeight.w600,
@@ -118,7 +118,7 @@ class DashboardFinancialHeroSection extends StatelessWidget {
       builder:
           (ctx, _) => Text(
             'R\$ ${counterAnim.value.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}',
-            style: AppTypography.mono(
+            style: FocuxHubTypography.metric(
               color: Colors.white,
               fontSize: 34,
               fontWeight: FontWeight.w600,

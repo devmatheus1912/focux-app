@@ -11,6 +11,7 @@ import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_a11y.dart';
 import '../utils/dashboard_haptic.dart';
 import '../utils/dashboard_readability.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../utils/dashboard_tool_groups.dart';
 
 class DashboardExpandableToolGroups extends ConsumerStatefulWidget {
@@ -93,11 +94,10 @@ class DashboardExpandableToolGroupsState
                     children: [
                       Text(
                         group.title,
-                        style: AppTypography.inter(
-                          fontSize: TokensStrip.fontBodySm,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.3,
+                        style: FocuxHubTypography.eyebrow(
+                          context,
                           color: link,
+                          letterSpacing: 0.3,
                         ),
                       ),
                       const SizedBox(width: 8),

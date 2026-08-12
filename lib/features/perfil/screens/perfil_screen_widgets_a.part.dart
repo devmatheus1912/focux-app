@@ -150,10 +150,9 @@ class _PerfilBody extends StatelessWidget {
                                 label: 'Perfil',
                                 child: Text(
                                   'Perfil',
-                                  style: theme.textTheme.titleMedium?.copyWith(
+                                  style: FocuxHubTypography.eyebrow(
+                                    context,
                                     color: Colors.white,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 0.1,
                                   ),
                                 ),
                               ),
@@ -246,23 +245,22 @@ class _PerfilBody extends StatelessWidget {
                                       perfil.nome,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: theme.textTheme.titleLarge
-                                          ?.copyWith(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w900,
-                                            height: 1.05,
-                                          ),
+                                      style: FocuxHubTypography.pageTitle(
+                                        context,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                     const SizedBox(height: 3),
                                     Text(
                                       _buildSubtitle(perfil),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TokensStrip.bodyMuted(
+                                      style: FocuxHubTypography.bodyMuted(
                                         color: Colors.white.withValues(
                                           alpha: 0.86,
                                         ),
-                                      ).copyWith(height: 1.2),
+                                        height: 1.2,
+                                      ),
                                     ),
                                     const SizedBox(height: 4),
                                     Semantics(

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../utils/dashboard_a11y.dart';
@@ -135,25 +135,21 @@ class _DashboardCollapsibleSectionState
                           children: [
                             Text(
                               widget.title,
-                              style: AppTypography.inter(
-                                fontSize: TokensStrip.fontH2,
-                                fontWeight: TokensStrip.weightH2,
-                                letterSpacing: TokensStrip.trackingH2,
+                              style: FocuxHubTypography.sectionTitle(
+                                context,
                                 color: heading,
-                                height: 1.2,
-                              ),
+                              ).copyWith(fontSize: 15),
                             ),
                             if (!_expanded) ...[
                               const SizedBox(height: 2),
                               Text(
                                 widget.collapsedHint,
-                                style: AppTypography.inter(
-                                  fontSize: TokensStrip.fontBodySm,
-                                  fontWeight: FontWeight.w500,
+                                style: FocuxHubTypography.bodyMuted(
                                   color: dashboardReadableCaption(
                                     context,
                                     isDark: widget.isDark,
                                   ),
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                               if (widget.collapsedPreview != null &&
@@ -165,10 +161,9 @@ class _DashboardCollapsibleSectionState
                                   widget.collapsedPreview!,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: AppTypography.inter(
-                                    fontSize: TokensStrip.fontBodySm,
-                                    fontWeight: FontWeight.w700,
+                                  style: FocuxHubTypography.bodyMuted(
                                     color: heading,
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
                               ],

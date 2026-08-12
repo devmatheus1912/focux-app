@@ -100,11 +100,9 @@ class _StudentToolsSection extends StatelessWidget {
                   children: [
                     Text(
                       'Ferramentas',
-                      style: TextStyle(
+                      style: FocuxHubTypography.pageTitle(
+                        context,
                         color: ink,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.35,
                       ),
                     ),
                     const SizedBox(height: 3),
@@ -362,10 +360,10 @@ class _AlunoProfileCard extends StatelessWidget {
                         ? null
                         : Text(
                           _initials(aluno.nome),
-                          style: TextStyle(
+                          style: FocuxHubTypography.metric(
                             color: primary,
+                            fontSize: FocuxHubTypography.metricEm,
                             fontWeight: FontWeight.w700,
-                            fontSize: 18,
                           ),
                         ),
               ),

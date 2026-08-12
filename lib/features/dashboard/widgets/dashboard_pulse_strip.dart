@@ -9,6 +9,7 @@ import '../constants/dashboard_layout.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../utils/dashboard_screen_helpers.dart';
 
 /// Tappable pulse chips reuse [operationalMetricDecoration] from `OperationalMetricTile`
@@ -252,10 +253,8 @@ class DashboardDayPulseStrip extends StatelessWidget {
                   ),
                   label: Text(
                     emptyTrendCtaLabel!,
-                    style: AppTypography.inter(
-                      fontSize: TokensStrip.fontBodySm,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: FocuxHubTypography.chip(primary)
+                        .copyWith(fontWeight: FontWeight.w700),
                   ),
                 ),
               ),
@@ -387,7 +386,7 @@ class DashboardPulseChip extends StatelessWidget {
                           value,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTypography.mono(
+                          style: FocuxHubTypography.metric(
                             fontSize: valueSize,
                             fontWeight: FontWeight.w700,
                             color: ink,

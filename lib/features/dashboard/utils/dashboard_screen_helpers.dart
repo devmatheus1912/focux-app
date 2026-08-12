@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../constants/dashboard_layout.dart';
@@ -60,9 +61,8 @@ TextStyle dashboardSectionKickerStyle(
   required bool isDark,
 }) {
   final primary = Theme.of(context).colorScheme.primary;
-  return Theme.of(context).textTheme.titleMedium!.copyWith(
-    fontWeight: FontWeight.w800,
-    letterSpacing: -0.2,
+  return FocuxHubTypography.sectionTitle(
+    context,
     color: BrandPalette.sectionLink(primary, dark: isDark),
   );
 }

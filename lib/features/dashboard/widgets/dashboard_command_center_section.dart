@@ -390,11 +390,10 @@ class DashboardCommandCenterSectionState
                   children: [
                     Text(
                       'Atalhos rápidos',
-                      style: AppTypography.inter(
-                        fontSize: TokensStrip.fontBodySm,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.2,
+                      style: FocuxHubTypography.eyebrow(
+                        context,
                         color: heading,
+                        letterSpacing: 0.2,
                       ),
                     ),
                     const SizedBox(width: 8),

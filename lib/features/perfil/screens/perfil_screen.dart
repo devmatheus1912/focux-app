@@ -14,6 +14,7 @@ import '../../../core/api/media_upload_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../auth/providers/auth_provider.dart';

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/brand_palette.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../checkin/providers/checkin_provider.dart';
 
 class ProgressoSemanalWidget extends ConsumerWidget {
@@ -42,12 +44,11 @@ class ProgressoSemanalWidget extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Consistência',
-                    style: TextStyle(
+                    style: FocuxHubTypography.sectionTitle(
+                      context,
                       color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   Container(

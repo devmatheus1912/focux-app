@@ -3,6 +3,41 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('dashboard feature não usa fontSize 18/19/20/22 soltos', () {
+    final root = Directory('lib/features/dashboard');
+    final forbidden = RegExp(r'fontSize:\s*(18|19|20|22)\b');
+    final offenders = <String>[];
+    for (final entity in root.listSync(recursive: true)) {
+      if (entity is! File || !entity.path.endsWith('.dart')) continue;
+      final lines = entity.readAsStringSync().split('\n');
+      for (var i = 0; i < lines.length; i++) {
+        if (forbidden.hasMatch(lines[i])) {
+          offenders.add('${entity.path}:${i + 1}:${lines[i].trim()}');
+        }
+      }
+    }
+    expect(
+      offenders,
+      isEmpty,
+      reason:
+          'Use FocuxHubTypography (pageTitle/sectionTitle/metricEm/metricLg). '
+          'Offenders:\n${offenders.join('\n')}',
+    );
+  });
+
+  test('dashboard feature não usa AppTypography.inter ad-hoc', () {
+    final root = Directory('lib/features/dashboard');
+    final offenders = <String>[];
+    for (final entity in root.listSync(recursive: true)) {
+      if (entity is! File || !entity.path.endsWith('.dart')) continue;
+      final text = entity.readAsStringSync();
+      if (text.contains('AppTypography.inter')) {
+        offenders.add(entity.path);
+      }
+    }
+    expect(offenders, isEmpty, reason: offenders.join('\n'));
+  });
+
   test('dashboard hoje usa microcopy, contraste e a11y', () {
     const paths = [
       'lib/features/dashboard/screens/personal_dashboard_screen.dart',
@@ -80,6 +115,8 @@ void main() {
     expect(screen, contains('omitSecondarySections'));
     expect(screen, contains('DashboardHomeHeader'));
     expect(screen, contains('DashboardAttentionRail'));
+    expect(screen, contains('FocuxHubTypography'));
+    expect(screen, contains('dashboardPageTitleStyle'));
 
     final semanticsCount = 'Semantics('.allMatches(screen).length;
     expect(semanticsCount, greaterThanOrEqualTo(10));

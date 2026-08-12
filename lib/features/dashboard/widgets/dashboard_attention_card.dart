@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/dashboard_layout.dart';
 import '../utils/dashboard_a11y.dart';
 import '../utils/dashboard_readability.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 
 class DashboardAttentionCard extends StatelessWidget {
   const DashboardAttentionCard({
@@ -86,11 +87,8 @@ class DashboardAttentionCard extends StatelessWidget {
                       backgroundColor: primary,
                       child: Text(
                         fxInitials(nome),
-                        style: AppTypography.inter(
-                          color: Colors.white,
-                          fontSize: TokensStrip.fontBodySm,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: FocuxHubTypography.chip(Colors.white)
+                            .copyWith(fontWeight: FontWeight.w700),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -186,12 +184,9 @@ class DashboardAttentionCard extends StatelessWidget {
                   alignment: Alignment.center,
                   child: Text(
                     acao,
-                    style: AppTypography.inter(
-                      fontSize: TokensStrip.fontBodySm,
-                      fontWeight: FontWeight.w700,
-                      color: BrandPalette.sectionAction(primary, dark: isDark),
-                      letterSpacing: 0.2,
-                    ),
+                    style: FocuxHubTypography.chip(
+                      BrandPalette.sectionAction(primary, dark: isDark),
+                    ).copyWith(letterSpacing: 0.2),
                   ),
                 ),
               ],

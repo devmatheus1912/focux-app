@@ -661,10 +661,9 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                                   children: [
                                     Text(
                                       aluno.nome,
-                                      style: TextStyle(
+                                      style: FocuxHubTypography.pageTitle(
+                                        context,
                                         color: ink,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w800,
                                       ),
                                     ),
                                     const SizedBox(height: 4),
