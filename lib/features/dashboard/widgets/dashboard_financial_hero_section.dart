@@ -59,11 +59,11 @@ class DashboardFinancialHeroSection extends StatelessWidget {
         style: FilledButton.styleFrom(
           minimumSize: const Size(48, 48),
           backgroundColor:
-              ghost ? Colors.white.withValues(alpha: 0.14) : Colors.white,
+              ghost ? Colors.white.withValues(alpha: 0.22) : Colors.white,
           foregroundColor: ghost ? Colors.white : BrandPalette.deep(heroDeep),
           side:
               ghost
-                  ? BorderSide(color: Colors.white.withValues(alpha: 0.42))
+                  ? BorderSide(color: Colors.white.withValues(alpha: 0.62))
                   : BorderSide.none,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(TokensStrip.rButton),
@@ -158,7 +158,13 @@ class DashboardFinancialHeroSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
                   gradient: LinearGradient(
-                    colors: [heroPrimary, heroDeep],
+                    colors:
+                        _compactZeroRevenue
+                            ? [
+                              Color.lerp(heroDeep, EagleTokens.darkCard, 0.45)!,
+                              heroDeep,
+                            ]
+                            : [heroPrimary, heroDeep],
                     begin: begin,
                     end: end,
                   ),
@@ -187,7 +193,8 @@ class DashboardFinancialHeroSection extends StatelessWidget {
                   _compactZeroRevenue ? 14 : 16,
                 ),
                 child: CustomPaint(
-                  foregroundPainter: DashboardHeroGridPainter(),
+                  foregroundPainter:
+                      _compactZeroRevenue ? null : DashboardHeroGridPainter(),
                   child:
                       _compactZeroRevenue
                           ? _buildCompactContent(context)

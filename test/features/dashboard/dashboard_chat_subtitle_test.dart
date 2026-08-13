@@ -20,7 +20,7 @@ void main() {
     );
     expect(
       dashboardChatShortcutSubtitle(unreadCount: 0, conversationCount: 0),
-      'Inbox',
+      'Abrir conversas',
     );
   });
 }

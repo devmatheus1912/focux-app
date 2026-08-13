@@ -35,6 +35,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
     this.emptyTrendCtaLabel,
     this.onEmptyTrendCta,
     this.collapseBody = false,
+    this.trailingReserve = 0,
   });
 
   final Animation<double> fade;
@@ -57,6 +58,8 @@ class DashboardDayPulseStrip extends StatelessWidget {
   final VoidCallback? onEmptyTrendCta;
   /// Modo foco: esconde tendência/sparkline (só chips).
   final bool collapseBody;
+  /// Folga à direita quando o chip Ver prioridades está no overlay.
+  final double trailingReserve;
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +77,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
       neutralAccent: caption,
       emptyAccent: alunosAtivos > 0 ? EagleTokens.warn : caption,
     );
-    final agendaAccent = agendaHoje > 0 ? primary : caption;
+    final agendaAccent = agendaHoje > 0 ? primary : mute;
     final trendReady = checkinsTrend.length >= 7;
     final hasTrend = trendReady && checkinsTrend.any((v) => v > 0);
     final showTrendRow =
@@ -181,7 +184,11 @@ class DashboardDayPulseStrip extends StatelessWidget {
                   onTap: onCheckins,
                   borderRadius: BorderRadius.circular(TokensStrip.rInput),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    padding: EdgeInsets.only(
+                      right: trailingReserve,
+                      top: 4,
+                      bottom: 4,
+                    ),
                     child: Row(
                       children: [
                         if (!collapseBody)

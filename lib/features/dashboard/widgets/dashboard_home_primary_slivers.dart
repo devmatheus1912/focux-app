@@ -46,6 +46,7 @@ List<Widget> buildDashboardHomePrimarySlivers({
   required VoidCallback onReviewAttention,
   required bool onboardingIncomplete,
   required bool primeiroTreinoCriado,
+  bool prioritiesChipVisible = false,
 }) {
   final alunosAtivos = snap.alunosAtivos;
   final riscoAlto = snap.riscoAlto;
@@ -182,6 +183,10 @@ List<Widget> buildDashboardHomePrimarySlivers({
           hideRiscoChip: snap.alunosEmRisco.isNotEmpty,
           primary: primary,
           collapseBody: focusRules.collapsePulseBody,
+          trailingReserve:
+              prioritiesChipVisible
+                  ? DashboardLayout.prioritiesOverlayReserve
+                  : 0,
           onAtivos:
               () => goPersonalShellTab(context, '/alunos?filtro=ativos'),
           onCheckins: () => goPersonalShellTab(context, '/checkin/historico'),

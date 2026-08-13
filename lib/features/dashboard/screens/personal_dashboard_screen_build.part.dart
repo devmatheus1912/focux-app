@@ -180,6 +180,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                             onReviewAttention: openAttentionReview,
                             onboardingIncomplete: onboardingIncomplete,
                             primeiroTreinoCriado: primeiroTreinoCriado,
+                            prioritiesChipVisible: showStickyPrioritiesAction,
                           ),
                           if (!focusRules.omitSecondarySections)
                             SliverToBoxAdapter(

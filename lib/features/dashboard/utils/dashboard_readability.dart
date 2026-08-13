@@ -11,14 +11,14 @@ export '../../../core/theme/hero_teal.dart';
 /// Texto secundário do dashboard com contraste ≥ 4.5:1 (WCAG AA).
 Color dashboardReadableMuted(BuildContext context, {required bool isDark}) {
   if (isDark) {
-    return Color.lerp(EagleTokens.darkInkMute, EagleTokens.darkInk, 0.55)!;
+    return Color.lerp(EagleTokens.darkInkMute, EagleTokens.darkInk, 0.62)!;
   }
   return TokensStrip.textPrimary.withValues(alpha: 0.88);
 }
 
 Color dashboardReadableCaption(BuildContext context, {required bool isDark}) {
   if (isDark) {
-    return Color.lerp(EagleTokens.darkInkMute, EagleTokens.darkInk, 0.50)!;
+    return Color.lerp(EagleTokens.darkInkMute, EagleTokens.darkInk, 0.68)!;
   }
   return TokensStrip.textPrimary.withValues(alpha: 0.88);
 }
@@ -51,8 +51,8 @@ Color dashboardHeroMutedOnTeal() => Colors.white.withValues(alpha: 0.90);
   if (normalized == 'P1') {
     if (isDark) {
       return (
-        background: accent.withValues(alpha: 0.40),
-        foreground: Colors.white.withValues(alpha: 0.96),
+        background: accent.withValues(alpha: 0.58),
+        foreground: Colors.white,
       );
     }
     return (

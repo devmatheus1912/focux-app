@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -25,16 +24,16 @@ Future<void> showDashboardToolsCatalogSheet(
     useSafeArea: false,
     useRootNavigator: true,
     backgroundColor: Colors.transparent,
-    barrierColor: Colors.black.withValues(alpha: isDark ? 0.56 : 0.32),
+    barrierColor: Colors.black.withValues(alpha: isDark ? 0.72 : 0.40),
     builder: (sheetContext) {
       return Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
         ),
         child: DraggableScrollableSheet(
-          initialChildSize: 0.88,
-          minChildSize: 0.52,
-          maxChildSize: 0.96,
+          initialChildSize: 0.94,
+          minChildSize: 0.56,
+          maxChildSize: 0.98,
           builder:
               (_, scrollController) => DashboardToolsCatalogSheet(
                 parentContext: context,
@@ -75,12 +74,10 @@ class _DashboardToolsCatalogSheetState extends State<DashboardToolsCatalogSheet>
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final heading = BrandPalette.sectionHeading(primary, dark: widget.isDark);
     final mute = dashboardReadableMuted(context, isDark: widget.isDark);
     final ink =
         widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final hint = ink.withValues(alpha: widget.isDark ? 0.72 : 0.58);
+    final hint = ink.withValues(alpha: widget.isDark ? 0.78 : 0.62);
     final shortcuts = filterDashboardToolShortcuts(
       DashboardToolShortcut.moreTools,
       _searchQuery,
@@ -120,7 +117,7 @@ class _DashboardToolsCatalogSheetState extends State<DashboardToolsCatalogSheet>
                     DashboardMicrocopy.catalogoCompleto,
                     style: FocuxHubTypography.sectionTitle(
                       context,
-                      color: heading,
+                      color: ink,
                     ),
                   ),
                 ),

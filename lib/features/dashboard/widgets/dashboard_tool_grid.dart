@@ -9,6 +9,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../planos/utils/effective_plano_features.dart';
 import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_a11y.dart';
+import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_haptic.dart';
 import '../utils/dashboard_readability.dart';
 import '../../../core/theme/focux_hub_typography.dart';
@@ -146,13 +147,20 @@ class DashboardExpandableToolGroupsState
               ),
             ),
           ),
-          if (_openGroups.contains(group.title))
-            DashboardShortcutGrid(
-              shortcuts: group.shortcuts,
-              isDark: widget.isDark,
-              aspectRatio: widget.shortcutAspectRatio,
-              onShortcut: widget.onShortcut,
-            ),
+          AnimatedSize(
+            duration: dashboardMotionDuration(context),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child:
+                _openGroups.contains(group.title)
+                    ? DashboardShortcutGrid(
+                      shortcuts: group.shortcuts,
+                      isDark: widget.isDark,
+                      aspectRatio: widget.shortcutAspectRatio,
+                      onShortcut: widget.onShortcut,
+                    )
+                    : const SizedBox(width: double.infinity),
+          ),
           const SizedBox(height: 8),
         ],
       ],
