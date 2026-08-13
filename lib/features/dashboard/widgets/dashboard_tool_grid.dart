@@ -38,21 +38,30 @@ class DashboardExpandableToolGroups extends ConsumerStatefulWidget {
 class DashboardExpandableToolGroupsState
     extends ConsumerState<DashboardExpandableToolGroups> {
   late Set<String> _openGroups;
+  bool _didApplyDefaultOpen = false;
 
   static Set<String> _firstGroupOpen(List<DashboardToolGroupSection> groups) {
     if (groups.isEmpty) return <String>{};
     return {groups.first.title};
   }
 
+  void _ensureDefaultOpen() {
+    if (_didApplyDefaultOpen || widget.groups.isEmpty) return;
+    _openGroups = _firstGroupOpen(widget.groups);
+    _didApplyDefaultOpen = true;
+  }
+
   @override
   void initState() {
     super.initState();
-    _openGroups = _firstGroupOpen(widget.groups);
+    _openGroups = <String>{};
+    _ensureDefaultOpen();
   }
 
   @override
   void didUpdateWidget(covariant DashboardExpandableToolGroups oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _ensureDefaultOpen();
     final q = widget.searchQuery.trim();
     final oldQ = oldWidget.searchQuery.trim();
     if (q.isNotEmpty && q != oldQ) {
@@ -64,6 +73,7 @@ class DashboardExpandableToolGroupsState
 
   @override
   Widget build(BuildContext context) {
+    final mute = dashboardReadableMuted(context, isDark: widget.isDark);
     final primary = Theme.of(context).colorScheme.primary;
     final link = BrandPalette.sectionLink(primary, dark: widget.isDark);
     final badgeBg = BrandPalette.soft(primary, dark: widget.isDark);
@@ -105,7 +115,7 @@ class DashboardExpandableToolGroupsState
                           letterSpacing: 0.3,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 10),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
@@ -128,7 +138,7 @@ class DashboardExpandableToolGroupsState
                             ? Icons.expand_less_rounded
                             : Icons.expand_more_rounded,
                         size: 20,
-                        color: link,
+                        color: mute,
                       ),
                     ],
                   ),

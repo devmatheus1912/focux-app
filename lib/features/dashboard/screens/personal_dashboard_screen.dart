@@ -28,6 +28,7 @@ import '../widgets/dashboard_command_center_section.dart';
 import '../widgets/dashboard_error_state.dart';
 import '../widgets/dashboard_home_primary_slivers.dart';
 import '../widgets/dashboard_home_secondary_block.dart';
+import '../widgets/dashboard_command_center_sticky_header.dart';
 
 part 'personal_dashboard_screen_state.part.dart';
 part 'personal_dashboard_screen_build.part.dart';

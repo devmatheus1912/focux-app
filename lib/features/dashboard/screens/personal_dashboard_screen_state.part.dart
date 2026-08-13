@@ -130,7 +130,11 @@ class _PersonalDashboardScreenState
     if (box == null || !box.attached || !box.hasSize) return;
     final panelBottom = box.localToGlobal(Offset.zero).dy + box.size.height;
     final headerReserve = MediaQuery.of(context).padding.top + 48;
-    final offscreen = panelBottom <= headerReserve;
+    final offscreen = dashboardPanelIsOffscreen(
+      panelBottom: panelBottom,
+      headerReserve: headerReserve,
+      currentlyOffscreen: _prioritiesPanelOffscreen,
+    );
     if (dashboardScrollVisualStateChanged(
       previousPanelOffscreen: _prioritiesPanelOffscreen,
       newPanelOffscreen: offscreen,

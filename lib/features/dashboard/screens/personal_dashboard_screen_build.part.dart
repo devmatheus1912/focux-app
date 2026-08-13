@@ -147,76 +147,84 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                       );
                     }
                   },
-                  child: CustomScrollView(
-                    controller: _homeScrollController,
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    slivers: [
-                      ...buildDashboardHomePrimarySlivers(
-                        context: context,
-                        snap: snap,
-                        focusRules: focusRules,
-                        dayFocus: dayFocus,
-                        isDark: themeDark,
-                        primary: primary,
-                        nomePersonal: data.nomePersonal,
-                        logoUrl: data.logoUrl,
-                        focusMode: _focusMode,
-                        onToggleFocus: _toggleFocusMode,
-                        commandCenterSubtitle: commandCenterSubtitle,
-                        showStickyPrioritiesAction: showStickyPrioritiesAction,
-                        stickyCommandActionsLabel: stickyCommandActionsLabel,
-                        onTrailingAction:
-                            stickyCommandActionsLabel != null
-                                ? openCommandQuickActions
-                                : null,
-                        finData: home.financeiro,
-                        nextActions: dashboardNextActions,
-                        prioritiesSheetActions: prioritiesSheetActions,
-                        showPrioritiesLink: showPrioritiesLink,
-                        commandPanelKey: _commandPanelKey,
-                        mensagensNaoLidas: home.pulse?.mensagensNaoLidas,
-                        commandFade: _commandFade,
-                        kpiFade: _kpiFade,
-                        isCommandPreparing: false,
-                        commandUnavailable: false,
-                        attentionSectionResetToken: _attentionSectionResetToken,
-                        onReviewAttention: openAttentionReview,
-                        onboardingIncomplete: onboardingIncomplete,
-                        primeiroTreinoCriado: primeiroTreinoCriado,
-                      ),
-                      if (!focusRules.omitSecondarySections)
-                        SliverToBoxAdapter(
-                          child: DashboardHomeSecondaryBlock(
+                  child: Stack(
+                    children: [
+                      CustomScrollView(
+                        controller: _homeScrollController,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        slivers: [
+                          ...buildDashboardHomePrimarySlivers(
+                            context: context,
+                            snap: snap,
                             focusRules: focusRules,
+                            dayFocus: dayFocus,
                             isDark: themeDark,
-                            heroPrimary: heroPrimary,
-                            heroDeep: heroDeep,
-                            mes: mes,
-                            receitaAtual: receitaAtual,
-                            pendente: pendente,
-                            progressRaw: progressRaw,
-                            metaSuperada: metaSuperada,
-                            loadingFin: false,
-                            counterAnim: _counterAnim,
+                            primary: primary,
+                            nomePersonal: data.nomePersonal,
+                            logoUrl: data.logoUrl,
+                            focusMode: _focusMode,
+                            onToggleFocus: _toggleFocusMode,
+                            commandCenterSubtitle: commandCenterSubtitle,
                             finData: home.financeiro,
-                            receitaTrend: receitaTrend,
-                            gradientCtrl: _gradientCtrl,
-                            reduceMotion: reduceMotion,
-                            heroFade: _heroFade,
-                            shortcutAspectRatio: shortcutAspectRatio,
-                            topAderencia: home.topAderencia,
-                            onOpenRelatorio:
-                                () => context.push('/relatorios/global'),
+                            nextActions: dashboardNextActions,
+                            prioritiesSheetActions: prioritiesSheetActions,
+                            showPrioritiesLink: showPrioritiesLink,
+                            commandPanelKey: _commandPanelKey,
+                            mensagensNaoLidas: home.pulse?.mensagensNaoLidas,
+                            commandFade: _commandFade,
+                            kpiFade: _kpiFade,
+                            isCommandPreparing: false,
+                            commandUnavailable: false,
+                            attentionSectionResetToken:
+                                _attentionSectionResetToken,
+                            onReviewAttention: openAttentionReview,
+                            onboardingIncomplete: onboardingIncomplete,
+                            primeiroTreinoCriado: primeiroTreinoCriado,
                           ),
-                        ),
-
-                      SliverToBoxAdapter(
-                        child: SizedBox(
-                          height:
-                              MediaQuery.of(context).padding.bottom +
-                              DashboardLayout.bottomDockClearance,
-                        ),
+                          if (!focusRules.omitSecondarySections)
+                            SliverToBoxAdapter(
+                              child: DashboardHomeSecondaryBlock(
+                                focusRules: focusRules,
+                                isDark: themeDark,
+                                heroPrimary: heroPrimary,
+                                heroDeep: heroDeep,
+                                mes: mes,
+                                receitaAtual: receitaAtual,
+                                pendente: pendente,
+                                progressRaw: progressRaw,
+                                metaSuperada: metaSuperada,
+                                loadingFin: false,
+                                counterAnim: _counterAnim,
+                                finData: home.financeiro,
+                                receitaTrend: receitaTrend,
+                                gradientCtrl: _gradientCtrl,
+                                reduceMotion: reduceMotion,
+                                heroFade: _heroFade,
+                                shortcutAspectRatio: shortcutAspectRatio,
+                                topAderencia: home.topAderencia,
+                                onOpenRelatorio:
+                                    () =>
+                                        context.push('/relatorios/global'),
+                              ),
+                            ),
+                          SliverToBoxAdapter(
+                            child: SizedBox(
+                              height:
+                                  MediaQuery.of(context).padding.bottom +
+                                  DashboardLayout.bottomDockClearance,
+                            ),
+                          ),
+                        ],
                       ),
+                      if (showStickyPrioritiesAction)
+                        DashboardPrioritiesOverlay(
+                          isDark: themeDark,
+                          primary: primary,
+                          label:
+                              stickyCommandActionsLabel ??
+                              DashboardMicrocopy.verPrioridades,
+                          onTap: openCommandQuickActions,
+                        ),
                     ],
                   ),
                 );

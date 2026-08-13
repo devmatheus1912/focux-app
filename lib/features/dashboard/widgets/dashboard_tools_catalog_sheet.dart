@@ -32,9 +32,9 @@ Future<void> showDashboardToolsCatalogSheet(
           bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
         ),
         child: DraggableScrollableSheet(
-          initialChildSize: 0.78,
-          minChildSize: 0.5,
-          maxChildSize: 0.94,
+          initialChildSize: 0.88,
+          minChildSize: 0.52,
+          maxChildSize: 0.96,
           builder:
               (_, scrollController) => DashboardToolsCatalogSheet(
                 parentContext: context,
@@ -80,7 +80,7 @@ class _DashboardToolsCatalogSheetState extends State<DashboardToolsCatalogSheet>
     final mute = dashboardReadableMuted(context, isDark: widget.isDark);
     final ink =
         widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final hint = ink.withValues(alpha: widget.isDark ? 0.58 : 0.52);
+    final hint = ink.withValues(alpha: widget.isDark ? 0.72 : 0.58);
     final shortcuts = filterDashboardToolShortcuts(
       DashboardToolShortcut.moreTools,
       _searchQuery,
@@ -153,7 +153,7 @@ class _DashboardToolsCatalogSheetState extends State<DashboardToolsCatalogSheet>
                     ),
                     borderSide: BorderSide(
                       color: TokensStrip.borderDefault.withValues(
-                        alpha: widget.isDark ? 0.55 : 0.9,
+                        alpha: widget.isDark ? 0.85 : 0.9,
                       ),
                     ),
                   ),

@@ -55,12 +55,9 @@ void main() {
     expect(widget, contains('BoxConstraints(minHeight: 48)'));
     expect(widget, contains('hideRiscoChip'));
     expect(widget, contains("collapsedActionLabel: 'Revisar'"));
-    expect(widget, contains('trailingActionLabel: stickyCommandActionsLabel'));
+    expect(widget, contains('class DashboardPrioritiesOverlay'));
+    expect(widget, contains('dashboardPanelIsOffscreen'));
     expect(widget, contains('verPrioridades'));
-    expect(
-      widget,
-      contains('showPrioritiesAction: showStickyPrioritiesAction'),
-    );
     expect(widget, contains('dashboardShowsStickyPrioritiesAction'));
     expect(widget, contains('panelOffscreen'));
     expect(widget, contains('_commandPanelKey'));

@@ -15,6 +15,19 @@ bool dashboardShowsStickyPrioritiesAction({
   required bool showPrioritiesLink,
 }) => panelOffscreen && showPrioritiesLink;
 
+/// Histerese: evita ligar/desligar o overlay a cada pixel na borda.
+bool dashboardPanelIsOffscreen({
+  required double panelBottom,
+  required double headerReserve,
+  required bool currentlyOffscreen,
+  double hysteresis = 24,
+}) {
+  if (currentlyOffscreen) {
+    return panelBottom <= headerReserve + hysteresis;
+  }
+  return panelBottom <= headerReserve;
+}
+
 bool dashboardScrollOffsetMeaningfullyChanged(
   double previousOffset,
   double newOffset,

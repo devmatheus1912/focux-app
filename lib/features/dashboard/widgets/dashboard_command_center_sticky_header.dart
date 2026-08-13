@@ -201,3 +201,63 @@ class DashboardCommandCenterStickyHeaderDelegate
         oldDelegate.trailingActionLabel != trailingActionLabel;
   }
 }
+
+/// Chip flutuante — fora do CustomScrollView para não deslocar o extent.
+class DashboardPrioritiesOverlay extends StatelessWidget {
+  const DashboardPrioritiesOverlay({
+    super.key,
+    required this.isDark,
+    required this.primary,
+    required this.label,
+    required this.onTap,
+  });
+
+  final bool isDark;
+  final Color primary;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final chipFg = dashboardPrioritiesChipForeground(primary, isDark: isDark);
+    final chipBg = dashboardPrioritiesChipBackground(primary, isDark: isDark);
+    return Positioned(
+      top: 0,
+      right: 0,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(0, 4, TokensStrip.s4, 4),
+          child: Semantics(
+            button: true,
+            label: label,
+            child: Material(
+              color: chipBg,
+              elevation: isDark ? 2 : 1,
+              shadowColor: Colors.black.withValues(alpha: isDark ? 0.32 : 0.12),
+              shape: const StadiumBorder(),
+              child: InkWell(
+                onTap: onTap,
+                customBorder: const StadiumBorder(),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    child: Center(
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: dashboardChipLabelStyle(chipFg),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

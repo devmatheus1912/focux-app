@@ -15,7 +15,6 @@ import '../utils/dashboard_home_focus.dart';
 import '../utils/dashboard_home_snapshot.dart';
 import 'dashboard_attention_rail.dart';
 import 'dashboard_command_center_section.dart';
-import 'dashboard_command_center_sticky_header.dart';
 import 'dashboard_day_focus_banner.dart';
 import 'dashboard_home_header.dart';
 import 'dashboard_pulse_strip.dart';
@@ -33,9 +32,6 @@ List<Widget> buildDashboardHomePrimarySlivers({
   required bool focusMode,
   required VoidCallback onToggleFocus,
   required String commandCenterSubtitle,
-  required bool showStickyPrioritiesAction,
-  required String? stickyCommandActionsLabel,
-  required VoidCallback? onTrailingAction,
   required FinanceiroDashboard? finData,
   required List<CommandActionItem> nextActions,
   required List<CommandActionItem> prioritiesSheetActions,
@@ -103,20 +99,6 @@ List<Widget> buildDashboardHomePrimarySlivers({
         onToggleFocus: onToggleFocus,
       ),
     ),
-    if (showStickyPrioritiesAction)
-      SliverPersistentHeader(
-        pinned: true,
-        delegate: DashboardCommandCenterStickyHeaderDelegate(
-          isDark: isDark,
-          primary: primary,
-          subtitle: commandCenterSubtitle,
-          compact: true,
-          utilityOnly: true,
-          showPrioritiesAction: showStickyPrioritiesAction,
-          trailingActionLabel: stickyCommandActionsLabel,
-          onTrailingAction: onTrailingAction,
-        ),
-      ),
     SliverToBoxAdapter(
       child: dashboardEntryMotion(
         context: context,

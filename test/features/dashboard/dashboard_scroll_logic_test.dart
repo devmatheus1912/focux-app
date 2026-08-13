@@ -56,4 +56,41 @@ void main() {
       );
     });
   });
+
+  group('dashboardPanelIsOffscreen', () {
+    test('uses hysteresis so the overlay does not flicker at the edge', () {
+      expect(
+        dashboardPanelIsOffscreen(
+          panelBottom: 80,
+          headerReserve: 80,
+          currentlyOffscreen: false,
+        ),
+        isTrue,
+      );
+      expect(
+        dashboardPanelIsOffscreen(
+          panelBottom: 90,
+          headerReserve: 80,
+          currentlyOffscreen: false,
+        ),
+        isFalse,
+      );
+      expect(
+        dashboardPanelIsOffscreen(
+          panelBottom: 90,
+          headerReserve: 80,
+          currentlyOffscreen: true,
+        ),
+        isTrue,
+      );
+      expect(
+        dashboardPanelIsOffscreen(
+          panelBottom: 105,
+          headerReserve: 80,
+          currentlyOffscreen: true,
+        ),
+        isFalse,
+      );
+    });
+  });
 }
