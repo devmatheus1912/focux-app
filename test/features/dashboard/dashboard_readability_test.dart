@@ -25,24 +25,21 @@ void main() {
     expect(colors.foreground.computeLuminance() < 0.4, isTrue);
   });
 
-  test('agenda empty with active base uses warn, never mute', () {
+  test('agenda empty stays caption so check-ins keep the only warn', () {
+    const caption = Color(0xFFAABBCC);
     expect(
       pulseAgendaAccent(
         agendaHoje: 0,
-        alunosAtivos: 8,
         primary: EagleTokens.brand,
-        caption: const Color(0xFFAABBCC),
-        warn: EagleTokens.warn,
+        caption: caption,
       ),
-      EagleTokens.warn,
+      caption,
     );
     expect(
       pulseAgendaAccent(
         agendaHoje: 3,
-        alunosAtivos: 8,
         primary: EagleTokens.brand,
-        caption: const Color(0xFFAABBCC),
-        warn: EagleTokens.warn,
+        caption: caption,
       ),
       EagleTokens.brand,
     );

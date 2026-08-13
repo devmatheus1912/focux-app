@@ -45,6 +45,9 @@ void main() {
     expect(widget, contains('class CommandActionTile'));
     expect(widget, contains('showCommandActionsSheet'));
     expect(widget, contains('_MessagesShortcutRow'));
+    expect(widget, contains('atalhoKicker'));
+    expect(widget, contains('if (hasTrend)'));
+    expect(widget, contains('snapSizes'));
     expect(widget, contains('scrollDirection: Axis.horizontal'));
     expect(widget, contains('Shimmer.fromColors'));
     expect(widget, contains('maxLines: 2'));

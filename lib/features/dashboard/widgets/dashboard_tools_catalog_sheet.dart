@@ -31,9 +31,11 @@ Future<void> showDashboardToolsCatalogSheet(
           bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
         ),
         child: DraggableScrollableSheet(
-          initialChildSize: 0.94,
-          minChildSize: 0.56,
+          initialChildSize: 0.72,
+          minChildSize: 0.42,
           maxChildSize: 0.98,
+          snap: true,
+          snapSizes: const [0.42, 0.72, 0.98],
           builder:
               (_, scrollController) => DashboardToolsCatalogSheet(
                 parentContext: context,

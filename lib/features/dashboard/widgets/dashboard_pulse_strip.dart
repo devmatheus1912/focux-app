@@ -72,7 +72,6 @@ class DashboardDayPulseStrip extends StatelessWidget {
     final tight = DashboardLayout.isCompact(width);
     final comfortable = DashboardLayout.isComfortable(width);
     final gap = tight ? 6.0 : comfortable ? TokensStrip.s3 : TokensStrip.s2;
-    final mute = dashboardReadableMuted(context, isDark: isDark);
     final caption = dashboardReadableCaption(context, isDark: isDark);
     final ativosAccent = alunosAtivos > 0 ? primary : caption;
     final checkinsAccent = pulseCheckinsAccent(
@@ -82,10 +81,8 @@ class DashboardDayPulseStrip extends StatelessWidget {
     );
     final agendaAccent = pulseAgendaAccent(
       agendaHoje: agendaHoje,
-      alunosAtivos: alunosAtivos,
       primary: primary,
       caption: caption,
-      warn: EagleTokens.warn,
     );
     final trendReady = checkinsTrend.length >= 7;
     final hasTrend = trendReady && checkinsTrend.any((v) => v > 0);
@@ -232,18 +229,18 @@ class DashboardDayPulseStrip extends StatelessWidget {
                           )
                         else
                           const Spacer(),
-                        if (trendReady)
+                        if (hasTrend)
                           FxSparkline(
                             data: checkinsTrend,
                             color: pulseCheckinsAccent(
                               checkinsHoje: checkinsHoje,
                               neutralAccent: caption,
-                              emptyAccent: hasTrend ? primary : mute,
+                              emptyAccent: primary,
                             ),
                             width: sparkW,
                             height: sparkH,
                             strokeWidth: 2.0,
-                            fill: hasTrend,
+                            fill: true,
                           ),
                       ],
                     ),

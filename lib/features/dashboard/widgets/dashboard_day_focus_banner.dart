@@ -136,27 +136,36 @@ class DashboardDayFocusBanner extends StatelessWidget {
                                   minHeight: 36,
                                 ),
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 6,
+                                  horizontal: 12,
+                                  vertical: 7,
                                 ),
                                 decoration: BoxDecoration(
                                   color:
                                       focusMode
-                                          ? BrandPalette.soft(
+                                          ? primary
+                                          : BrandPalette.soft(
                                             primary,
                                             dark: isDark,
                                           ).withValues(
-                                            alpha: isDark ? 0.62 : 0.95,
-                                          )
-                                          : Colors.transparent,
+                                            alpha: isDark ? 0.28 : 0.55,
+                                          ),
                                   borderRadius: BorderRadius.circular(999),
                                   border: Border.all(
-                                    width: focusMode ? 1.4 : 1,
-                                    color:
-                                        focusMode
-                                            ? primary.withValues(alpha: 0.65)
-                                            : accent.withValues(alpha: 0.42),
+                                    width: focusMode ? 0 : 1.4,
+                                    color: accent.withValues(alpha: 0.72),
                                   ),
+                                  boxShadow:
+                                      focusMode
+                                          ? [
+                                            BoxShadow(
+                                              color: primary.withValues(
+                                                alpha: isDark ? 0.45 : 0.28,
+                                              ),
+                                              blurRadius: 10,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ]
+                                          : null,
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -165,14 +174,38 @@ class DashboardDayFocusBanner extends StatelessWidget {
                                       focusMode
                                           ? Icons.bolt_rounded
                                           : Icons.bolt_outlined,
-                                      size: 14,
-                                      color: link,
+                                      size: 15,
+                                      color:
+                                          focusMode
+                                              ? (isDark
+                                                  ? EagleTokens.brandDeep
+                                                  : Colors.white)
+                                              : link,
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
                                       chipLabel,
-                                      style: dashboardActionChipStyle(link),
+                                      style: dashboardActionChipStyle(
+                                        focusMode
+                                            ? (isDark
+                                                ? EagleTokens.brandDeep
+                                                : Colors.white)
+                                            : link,
+                                      ).copyWith(
+                                        fontWeight: FontWeight.w800,
+                                      ),
                                     ),
+                                    if (focusMode) ...[
+                                      const SizedBox(width: 4),
+                                      Icon(
+                                        Icons.check_rounded,
+                                        size: 14,
+                                        color:
+                                            isDark
+                                                ? EagleTokens.brandDeep
+                                                : Colors.white,
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),

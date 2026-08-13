@@ -31,7 +31,7 @@ class DashboardFinanceEmptyState extends StatelessWidget {
           'Sem receita em $mes. Abra o financeiro para lançar cobranças.',
           style: dashboardHeroCaptionOnTealStyle(),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 22),
         SizedBox(
           width: double.infinity,
           child: FilledButton(

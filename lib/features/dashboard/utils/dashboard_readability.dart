@@ -64,15 +64,12 @@ Color dashboardPrioritiesChipBackground(
 }) => BrandPalette.soft(
   primary,
   dark: isDark,
-).withValues(alpha: isDark ? 0.55 : 1);
+).withValues(alpha: isDark ? 0.78 : 1);
 
 Color dashboardPrioritiesChipForeground(
   Color primary, {
   required bool isDark,
-}) =>
-    isDark
-        ? Colors.white.withValues(alpha: 0.96)
-        : BrandPalette.sectionAction(primary, dark: false);
+}) => BrandPalette.sectionAction(primary, dark: isDark);
 
 TextStyle dashboardPageTitleStyle(BuildContext context, {required Color color}) =>
     FocuxHubTypography.pageTitle(context, color: color);

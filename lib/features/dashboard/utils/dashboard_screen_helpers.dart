@@ -105,17 +105,13 @@ Color pulseCheckinsAccent({
         ? EagleTokens.good
         : (emptyAccent ?? neutralAccent);
 
-/// Agenda vazia usa o mesmo critério do check-in (caption/warn), nunca mute.
+/// Agenda vazia fica em caption — Check-ins 0 leva o warn (um alarme só).
 Color pulseAgendaAccent({
   required int agendaHoje,
-  required int alunosAtivos,
   required Color primary,
   required Color caption,
-  required Color warn,
 }) =>
-    agendaHoje > 0
-        ? primary
-        : (alunosAtivos > 0 ? warn : caption);
+    agendaHoje > 0 ? primary : caption;
 
 /// Copy de empty do pulso — BFF manda `emptyHint`; FE replica se o payload for legado.
 String? dashboardPulseEmptyHint({

@@ -13,7 +13,7 @@ abstract final class DashboardLayout {
   static const double attentionCardWidth = 268;
   static const double attentionCardWidthCompact = 240;
   /// Folga só no último sliver (dock + 24). Não inflar o meio do scroll.
-  static const double bottomDockClearance = 88;
+  static const double bottomDockClearance = 104;
   static const double prioritiesOverlayReserve = 136;
   static const double touchTarget = 48;
   static const double commandCardPad = TokensStrip.s3; // 12

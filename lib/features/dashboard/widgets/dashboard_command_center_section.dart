@@ -6,7 +6,6 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../chat/screens/chat_inbox_screen.dart';
 import '../data/command_action_item.dart';
 import '../providers/dashboard_provider.dart';
@@ -167,7 +166,7 @@ class DashboardCommandCenterSectionState
                   )
                   : null,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         _MessagesShortcutRow(
           isDark: isDark,
           primary: primary,
@@ -198,71 +197,64 @@ class _MessagesShortcutRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final primarySoft = BrandPalette.soft(primary, dark: isDark);
-    final rowAccent = BrandPalette.sectionAccent(primary, dark: isDark);
     final actionColor = BrandPalette.sectionAction(primary, dark: isDark);
-    return Semantics(
-      button: true,
-      label: '$title. $subtitle',
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(TokensStrip.rCard),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
-          decoration: fxStripCardDecoration(
-            context,
-            accent: primary,
-            radius: TokensStrip.rCard,
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: primarySoft,
-                  borderRadius: BorderRadius.circular(13),
-                ),
-                child: Center(
-                  child: FxIcon(
+    final kicker = dashboardMicroLabelStyle(
+      context,
+      isDark: isDark,
+      color: actionColor,
+      fontWeight: FontWeight.w700,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(DashboardMicrocopy.atalhoKicker, style: kicker),
+        const SizedBox(height: 4),
+        Semantics(
+          button: true,
+          label: '$title. $subtitle',
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(TokensStrip.rInput),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+              child: Row(
+                children: [
+                  FxIcon(
                     name: 'message-circle',
-                    size: 17,
-                    color: rowAccent,
+                    size: 18,
+                    color: actionColor,
                   ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: dashboardCardTitleStyle(
-                        ink,
-                      ).copyWith(fontWeight: FontWeight.w800),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      subtitle,
-                      style: dashboardCardSubtitleStyle(
-                        context,
-                        isDark: isDark,
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: title,
+                            style: dashboardCardTitleStyle(ink).copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          TextSpan(
+                            text: ' · $subtitle',
+                            style: dashboardCardSubtitleStyle(
+                              context,
+                              isDark: isDark,
+                            ),
+                          ),
+                        ],
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-                ),
+                  ),
+                  FxIcon(name: 'chevron-right', color: actionColor, size: 16),
+                ],
               ),
-              FxIcon(name: 'chevron-right', color: actionColor, size: 18),
-            ],
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 }
