@@ -36,28 +36,17 @@ Color dashboardHeroMutedOnTeal() => Colors.white.withValues(alpha: 0.90);
 }) {
   final normalized = badge?.trim().toUpperCase();
   if (normalized == 'P0') {
-    final warn = EagleTokens.warn;
-    if (isDark) {
-      return (
-        background: warn.withValues(alpha: 0.42),
-        foreground: Colors.white,
-      );
-    }
+    final warn = isDark ? EagleTokens.warnDark : EagleTokens.warn;
     return (
-      background: warn.withValues(alpha: 0.26),
-      foreground: Color.lerp(warn, Colors.black, 0.55)!,
+      background: warn,
+      foreground: Color.lerp(warn, Colors.black, isDark ? 0.78 : 0.62)!,
     );
   }
   if (normalized == 'P1') {
-    if (isDark) {
-      return (
-        background: accent.withValues(alpha: 0.58),
-        foreground: Colors.white,
-      );
-    }
+    final fill = isDark ? EagleTokens.goodDark : accent;
     return (
-      background: accent.withValues(alpha: 0.18),
-      foreground: Color.lerp(accent, Colors.black, 0.28)!,
+      background: fill,
+      foreground: Color.lerp(fill, Colors.black, isDark ? 0.72 : 0.55)!,
     );
   }
   if (isDark) {

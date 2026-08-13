@@ -54,6 +54,8 @@ void main() {
       'lib/features/dashboard/widgets/dashboard_tools_section.dart',
       'lib/features/dashboard/widgets/dashboard_tools_catalog_sheet.dart',
       'lib/features/dashboard/widgets/dashboard_financial_hero_section.dart',
+      'lib/features/dashboard/widgets/dashboard_finance_empty.dart',
+      'lib/features/dashboard/utils/dashboard_scroll_logic.dart',
       'lib/features/dashboard/widgets/dashboard_home_secondary_block.dart',
       'lib/features/dashboard/widgets/dashboard_home_primary_slivers.dart',
       'lib/features/dashboard/widgets/dashboard_shimmer_loading.dart',
@@ -100,9 +102,8 @@ void main() {
     expect(screen, contains('dashboardPriorityBadgeColors'));
     expect(screen, contains('dashboardPrioritiesChipForeground'));
     expect(screen, contains('RISK_STUDENTS'));
-    expect(screen, contains('Abrir financeiro'));
-    expect(screen, contains('_compactZeroRevenue'));
-    expect(screen, contains('ghost ? Colors.white'));
+    expect(screen, contains('DashboardFinanceEmptyState'));
+    expect(screen, contains('0.42'));
     expect(screen, contains('maxVisibleNextActions'));
     expect(screen, contains('modoFoco'));
     final shortcutsFile = File(

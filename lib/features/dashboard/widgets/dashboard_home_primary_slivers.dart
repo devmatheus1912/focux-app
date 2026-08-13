@@ -13,6 +13,8 @@ import '../utils/dashboard_day_focus.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_home_focus.dart';
 import '../utils/dashboard_home_snapshot.dart';
+import '../utils/dashboard_scroll_logic.dart';
+import '../utils/dashboard_screen_helpers.dart';
 import 'dashboard_attention_rail.dart';
 import 'dashboard_command_center_section.dart';
 import 'dashboard_day_focus_banner.dart';
@@ -47,6 +49,7 @@ List<Widget> buildDashboardHomePrimarySlivers({
   required bool onboardingIncomplete,
   required bool primeiroTreinoCriado,
   bool prioritiesChipVisible = false,
+  String? pulseEmptyHint,
 }) {
   final alunosAtivos = snap.alunosAtivos;
   final riscoAlto = snap.riscoAlto;
@@ -114,15 +117,16 @@ List<Widget> buildDashboardHomePrimarySlivers({
           child: DashboardCommandCenterSection(
             isDark: isDark,
             primary: primary,
-            finData: finData,
             nextActions: nextActions,
             prioritiesSheetActions: prioritiesSheetActions,
-            showPrioritiesLink: showPrioritiesLink,
+            showPrioritiesLink: dashboardShowsInlinePrioritiesLink(
+              showPrioritiesLink: showPrioritiesLink,
+              stickyVisible: prioritiesChipVisible,
+            ),
             panelKey: commandPanelKey,
             mensagensNaoLidas: mensagensNaoLidas,
             hideHeader: true,
             contextualSubtitle: commandCenterSubtitle,
-            collapseQuickLinks: focusRules.collapseQuickLinks,
             alunosAtivos: alunosAtivos,
             agendaHojeCount: agendaHoje,
             unreadCount: snap.unreadCount,
@@ -187,6 +191,11 @@ List<Widget> buildDashboardHomePrimarySlivers({
               prioritiesChipVisible
                   ? DashboardLayout.prioritiesOverlayReserve
                   : 0,
+          emptyHint: dashboardPulseEmptyHint(
+            checkinsHoje: checkinsHoje,
+            checkinsTrend: checkinsTrend,
+            fromApi: pulseEmptyHint,
+          ),
           onAtivos:
               () => goPersonalShellTab(context, '/alunos?filtro=ativos'),
           onCheckins: () => goPersonalShellTab(context, '/checkin/historico'),

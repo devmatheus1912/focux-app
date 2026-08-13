@@ -231,18 +231,17 @@ class _DashboardCollapsibleSectionState
               ),
             ),
           ),
-          AnimatedCrossFade(
-            firstChild: const SizedBox.shrink(),
-            secondChild: Padding(
-              padding: const EdgeInsets.only(top: 10),
-              child: widget.child,
-            ),
-            crossFadeState:
-                _expanded
-                    ? CrossFadeState.showSecond
-                    : CrossFadeState.showFirst,
+          AnimatedSize(
             duration: motionDuration,
-            sizeCurve: Curves.easeOutCubic,
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child:
+                _expanded
+                    ? Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: widget.child,
+                    )
+                    : const SizedBox(width: double.infinity),
           ),
         ],
       ),

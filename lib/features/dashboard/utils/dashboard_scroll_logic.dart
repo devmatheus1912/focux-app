@@ -15,6 +15,12 @@ bool dashboardShowsStickyPrioritiesAction({
   required bool showPrioritiesLink,
 }) => panelOffscreen && showPrioritiesLink;
 
+/// Inline «Mais prioridades» some quando o overlay sticky já cobre o CTA.
+bool dashboardShowsInlinePrioritiesLink({
+  required bool showPrioritiesLink,
+  required bool stickyVisible,
+}) => showPrioritiesLink && !stickyVisible;
+
 /// Histerese: evita ligar/desligar o overlay a cada pixel na borda.
 bool dashboardPanelIsOffscreen({
   required double panelBottom,

@@ -105,7 +105,7 @@ class DashboardExpandableToolGroupsState
                     }),
                 borderRadius: BorderRadius.circular(TokensStrip.rInput),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                   child: Row(
                     children: [
                       Text(
@@ -161,7 +161,7 @@ class DashboardExpandableToolGroupsState
                     )
                     : const SizedBox(width: double.infinity),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 14),
         ],
       ],
     );
@@ -301,13 +301,10 @@ class DashboardShortcutTile extends StatelessWidget {
               radius: TokensStrip.rCard,
               glowStrength: locked ? 0.06 : 0.12,
             ).copyWith(
-              border:
-                  locked
-                      ? Border.all(
-                        color: mute.withValues(alpha: 0.22),
-                        width: 1,
-                      )
-                      : null,
+              border: Border.all(
+                color: mute.withValues(alpha: isDark ? 0.22 : 0.18),
+                width: 1,
+              ),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,

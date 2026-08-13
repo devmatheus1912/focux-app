@@ -104,3 +104,30 @@ Color pulseCheckinsAccent({
     checkinsHoje > 0
         ? EagleTokens.good
         : (emptyAccent ?? neutralAccent);
+
+/// Agenda vazia usa o mesmo critério do check-in (caption/warn), nunca mute.
+Color pulseAgendaAccent({
+  required int agendaHoje,
+  required int alunosAtivos,
+  required Color primary,
+  required Color caption,
+  required Color warn,
+}) =>
+    agendaHoje > 0
+        ? primary
+        : (alunosAtivos > 0 ? warn : caption);
+
+/// Copy de empty do pulso — BFF manda `emptyHint`; FE replica se o payload for legado.
+String? dashboardPulseEmptyHint({
+  required int checkinsHoje,
+  required List<double> checkinsTrend,
+  String? fromApi,
+}) {
+  final api = fromApi?.trim();
+  if (api != null && api.isNotEmpty) return api;
+  if (checkinsHoje > 0) return null;
+  final weekEmpty =
+      checkinsTrend.isEmpty || checkinsTrend.every((v) => v <= 0);
+  if (weekEmpty) return 'Sem treinos';
+  return 'Nenhum check-in hoje';
+}

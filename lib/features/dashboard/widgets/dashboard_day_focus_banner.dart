@@ -119,7 +119,10 @@ class DashboardDayFocusBanner extends StatelessWidget {
                                 ? DashboardMicrocopy.modoFocoOn
                                 : DashboardMicrocopy.modoFocoOff,
                         child: Tooltip(
-                          message: DashboardMicrocopy.modoFoco,
+                          message:
+                              focusMode
+                                  ? DashboardMicrocopy.modoFocoChipOnHint
+                                  : DashboardMicrocopy.modoFocoChipOffHint,
                           child: Material(
                             color: Colors.transparent,
                             child: InkWell(

@@ -12,6 +12,7 @@ import '../../../core/widgets/fx_sparkline.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_screen_helpers.dart';
+import 'dashboard_finance_empty.dart';
 import 'dashboard_hero_widgets.dart';
 
 class DashboardFinancialHeroSection extends StatelessWidget {
@@ -49,30 +50,6 @@ class DashboardFinancialHeroSection extends StatelessWidget {
   final List<double> receitaTrend;
 
   bool get _compactZeroRevenue => receitaAtual <= 0 && !loadingFin;
-
-  Widget _financeHeroCta(BuildContext context) {
-    final ghost = _compactZeroRevenue;
-    return SizedBox(
-      width: double.infinity,
-      child: FilledButton(
-        onPressed: () => context.go('/financeiro'),
-        style: FilledButton.styleFrom(
-          minimumSize: const Size(48, 48),
-          backgroundColor:
-              ghost ? Colors.white.withValues(alpha: 0.22) : Colors.white,
-          foregroundColor: ghost ? Colors.white : BrandPalette.deep(heroDeep),
-          side:
-              ghost
-                  ? BorderSide(color: Colors.white.withValues(alpha: 0.62))
-                  : BorderSide.none,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(TokensStrip.rButton),
-          ),
-        ),
-        child: const Text('Abrir financeiro'),
-      ),
-    );
-  }
 
   String _metaLine() {
     final meta = finData?.previsaoReceita ?? 0;
@@ -209,18 +186,10 @@ class DashboardFinancialHeroSection extends StatelessWidget {
   }
 
   Widget _buildCompactContent(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Receita · $mes', style: dashboardHeroEyebrowOnTeal()),
-        const SizedBox(height: 6),
-        Text(
-          'Sem receita em $mes. Abra o financeiro para lançar cobranças.',
-          style: dashboardHeroCaptionOnTealStyle(),
-        ),
-        const SizedBox(height: 14),
-        _financeHeroCta(context),
-      ],
+    return DashboardFinanceEmptyState(
+      mes: mes,
+      ctaLabel: finData?.zeroCta,
+      onOpen: () => context.go('/financeiro'),
     );
   }
 

@@ -116,6 +116,7 @@ class FinanceiroDashboard {
   final List<VencimentoItem> vencimentosProximos;
   final List<TopAlunoItem> topAlunos;
   final List<EvolucaoMensalItem> evolucaoMensal;
+  final String? zeroCta;
 
   FinanceiroDashboard({
     required this.receitaMes,
@@ -126,6 +127,7 @@ class FinanceiroDashboard {
     required this.vencimentosProximos,
     required this.topAlunos,
     required this.evolucaoMensal,
+    this.zeroCta,
   });
 
   factory FinanceiroDashboard.fromJson(Map<String, dynamic> j) =>
@@ -135,6 +137,7 @@ class FinanceiroDashboard {
         ticketMedio: (j['ticketMedio'] as num).toDouble(),
         totalInadimplentes: j['totalInadimplentes'] as int,
         previsaoReceita: (j['previsaoReceita'] as num).toDouble(),
+        zeroCta: j['zeroCta'] as String?,
         vencimentosProximos:
             (j['vencimentosProximos'] as List)
                 .map((e) => VencimentoItem.fromJson(e as Map<String, dynamic>))

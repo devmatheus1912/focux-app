@@ -174,9 +174,9 @@ class _DashboardToolsCatalogSheetState extends State<DashboardToolsCatalogSheet>
               children: [
                 if (groups.isEmpty)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 28),
                     child: Text(
-                      'Nenhum atalho para "$_searchQuery".',
+                      DashboardMicrocopy.nenhumaFerramenta,
                       style: FocuxHubTypography.bodyMuted(color: mute),
                     ),
                   )

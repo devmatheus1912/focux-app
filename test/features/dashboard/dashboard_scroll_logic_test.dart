@@ -33,6 +33,30 @@ void main() {
     });
   });
 
+  test('inline Mais prioridades some when sticky overlay is visible', () {
+    expect(
+      dashboardShowsInlinePrioritiesLink(
+        showPrioritiesLink: true,
+        stickyVisible: false,
+      ),
+      isTrue,
+    );
+    expect(
+      dashboardShowsInlinePrioritiesLink(
+        showPrioritiesLink: true,
+        stickyVisible: true,
+      ),
+      isFalse,
+    );
+    expect(
+      dashboardShowsInlinePrioritiesLink(
+        showPrioritiesLink: false,
+        stickyVisible: false,
+      ),
+      isFalse,
+    );
+  });
+
   test('scroll offset epsilon avoids rebuild noise', () {
     expect(dashboardScrollOffsetMeaningfullyChanged(50, 51), isFalse);
     expect(dashboardScrollOffsetMeaningfullyChanged(50, 53), isTrue);

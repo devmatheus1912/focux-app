@@ -69,7 +69,7 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
         TokensStrip.s4,
         0,
         TokensStrip.s4,
-        TokensStrip.s3,
+        TokensStrip.s2,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

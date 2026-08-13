@@ -181,6 +181,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                             onboardingIncomplete: onboardingIncomplete,
                             primeiroTreinoCriado: primeiroTreinoCriado,
                             prioritiesChipVisible: showStickyPrioritiesAction,
+                            pulseEmptyHint: home.pulse?.emptyHint,
                           ),
                           if (!focusRules.omitSecondarySections)
                             SliverToBoxAdapter(

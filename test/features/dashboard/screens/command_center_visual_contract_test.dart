@@ -44,7 +44,7 @@ void main() {
     expect(widget, contains('class CommandActionPanel'));
     expect(widget, contains('class CommandActionTile'));
     expect(widget, contains('showCommandActionsSheet'));
-    expect(widget, contains("PageStorageKey('personal-command-modules')"));
+    expect(widget, contains('_MessagesShortcutRow'));
     expect(widget, contains('scrollDirection: Axis.horizontal'));
     expect(widget, contains('Shimmer.fromColors'));
     expect(widget, contains('maxLines: 2'));
@@ -70,7 +70,9 @@ void main() {
     expect(widget, contains('dashboardChatShortcutSubtitle'));
     expect(widget, contains('dashboardResolveUnreadCount'));
     expect(widget, contains('tendenciaVaziaChip'));
-    expect(widget, contains('_DashboardTrendEmptyChip'));
+    expect(widget, contains('dashboardPulseEmptyHint'));
+    expect(widget, contains('pulseAgendaAccent'));
+    expect(widget, contains('dashboardShowsInlinePrioritiesLink'));
     expect(widget, contains('mensagensNaoLidas'));
     expect(widget, contains('dashboardScrollOffsetMeaningfullyChanged'));
     expect(widget, contains('dashboardScrollVisualStateChanged'));

@@ -39,11 +39,13 @@ class DashboardPulseSnapshot {
   final int? checkinsHoje;
   final int? mensagensNaoLidas;
   final List<int> checkinsTrend;
+  final String? emptyHint;
 
   const DashboardPulseSnapshot({
     this.checkinsHoje,
     this.mensagensNaoLidas,
     this.checkinsTrend = const [],
+    this.emptyHint,
   });
 
   factory DashboardPulseSnapshot.fromJson(Map<String, dynamic> json) {
@@ -55,6 +57,7 @@ class DashboardPulseSnapshot {
           trendRaw
               .map((e) => (e as num?)?.toInt() ?? 0)
               .toList(growable: false),
+      emptyHint: json['emptyHint'] as String?,
     );
   }
 }
