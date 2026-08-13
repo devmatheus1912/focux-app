@@ -79,15 +79,16 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                 );
                 if (_focusPreferenceLoaded &&
                     !_autoFocusApplied &&
-                    _persistedFocusMode == null) {
+                    !_sessionFocusTouched) {
                   final autoFocus = DashboardHomeFocusRules.defaultFocusMode(
                     dayFocus: dayFocus,
                     riskDominante: riskDominante,
+                    persisted: _persistedFocusMode,
                   );
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (!mounted ||
                         _autoFocusApplied ||
-                        _persistedFocusMode != null) {
+                        _sessionFocusTouched) {
                       return;
                     }
                     setState(() {

@@ -53,7 +53,7 @@ List<CommandActionItem> buildDashboardNextActions({
               : CommandActionItem(
                 icon: 'zap',
                 title: 'Executar próxima ação',
-                subtitle: dashboardFormatActionCopy(
+                subtitle: dashboardClampActionCopy(
                   queueCandidates.first.descricao,
                 ),
                 route:
@@ -80,7 +80,7 @@ List<CommandActionItem> buildDashboardNextActions({
                 : 'Contato hoje',
         subtitle:
             riskOwnedByDayFocus
-                ? 'Trabalhar o P0 agora'
+                ? 'Começar agora'
                 : hideRiskSummary
                 ? '$alunosRisco aluno${alunosRisco == 1 ? '' : 's'} com risco de abandono'
                 : '$alunosRisco no radar · risco, inadimplência ou pausa no treino',
@@ -119,7 +119,7 @@ List<CommandActionItem> buildDashboardNextActions({
               ? copilotAcoes.first.titulo
               : 'Revisar tarefa IA',
         ),
-        subtitle: dashboardFormatActionCopy(copilotAcoes.first.descricao),
+        subtitle: dashboardClampActionCopy(copilotAcoes.first.descricao),
         route: '/dashboard/command-center/copiloto',
         tone: CommandActionTone.primary,
       ),
@@ -162,7 +162,7 @@ CommandActionItem sheetItemFromFila(FilaAcaoResumo action) {
   return CommandActionItem(
     icon: 'zap',
     title: radarName ?? dashboardFormatActionCopy(rawTitle),
-    subtitle: dashboardFormatCountCopy(action.descricao),
+    subtitle: dashboardClampActionCopy(action.descricao),
     route:
         action.acaoUrl.startsWith('/') ? action.acaoUrl : '/dashboard/personal',
     tone: CommandActionTone.primary,

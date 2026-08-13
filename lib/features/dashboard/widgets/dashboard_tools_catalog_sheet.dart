@@ -22,15 +22,30 @@ Future<void> showDashboardToolsCatalogSheet(
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    useSafeArea: true,
+    useSafeArea: false,
+    useRootNavigator: true,
     backgroundColor: Colors.transparent,
-    builder:
-        (sheetContext) => DashboardToolsCatalogSheet(
-          parentContext: context,
-          parentRef: ref,
-          isDark: isDark,
-          shortcutAspectRatio: shortcutAspectRatio,
+    barrierColor: Colors.black.withValues(alpha: isDark ? 0.56 : 0.32),
+    builder: (sheetContext) {
+      return Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
         ),
+        child: DraggableScrollableSheet(
+          initialChildSize: 0.78,
+          minChildSize: 0.5,
+          maxChildSize: 0.94,
+          builder:
+              (_, scrollController) => DashboardToolsCatalogSheet(
+                parentContext: context,
+                parentRef: ref,
+                isDark: isDark,
+                shortcutAspectRatio: shortcutAspectRatio,
+                scrollController: scrollController,
+              ),
+        ),
+      );
+    },
   );
 }
 
@@ -41,12 +56,14 @@ class DashboardToolsCatalogSheet extends StatefulWidget {
     required this.parentRef,
     required this.isDark,
     required this.shortcutAspectRatio,
+    this.scrollController,
   });
 
   final BuildContext parentContext;
   final WidgetRef parentRef;
   final bool isDark;
   final double shortcutAspectRatio;
+  final ScrollController? scrollController;
 
   @override
   State<DashboardToolsCatalogSheet> createState() =>
@@ -63,6 +80,7 @@ class _DashboardToolsCatalogSheetState extends State<DashboardToolsCatalogSheet>
     final mute = dashboardReadableMuted(context, isDark: widget.isDark);
     final ink =
         widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final hint = ink.withValues(alpha: widget.isDark ? 0.58 : 0.52);
     final shortcuts = filterDashboardToolShortcuts(
       DashboardToolShortcut.moreTools,
       _searchQuery,
@@ -71,123 +89,119 @@ class _DashboardToolsCatalogSheetState extends State<DashboardToolsCatalogSheet>
     final media = MediaQuery.of(context);
     final sheetColor =
         widget.isDark ? EagleTokens.darkCard : Theme.of(context).colorScheme.surface;
+    final searchFill =
+        widget.isDark ? EagleTokens.darkCardHi : TokensStrip.pageBg;
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
-      child: Container(
-        constraints: BoxConstraints(maxHeight: media.size.height * 0.86),
-        decoration: BoxDecoration(
-          color: sheetColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 10),
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: mute.withValues(alpha: 0.35),
-                  borderRadius: BorderRadius.circular(99),
+    return Container(
+      decoration: BoxDecoration(
+        color: sheetColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 10),
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: mute.withValues(alpha: 0.35),
+                borderRadius: BorderRadius.circular(99),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 14, 8, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    DashboardMicrocopy.catalogoCompleto,
+                    style: FocuxHubTypography.sectionTitle(
+                      context,
+                      color: heading,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Fechar',
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: Icon(Icons.close_rounded, color: mute),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: Semantics(
+              textField: true,
+              label: DashboardMicrocopy.buscarFerramenta,
+              child: TextField(
+                onChanged: (v) => setState(() => _searchQuery = v),
+                style: FocuxHubTypography.body(color: ink),
+                decoration: InputDecoration(
+                  hintText: DashboardMicrocopy.buscarFerramenta,
+                  hintStyle: FocuxHubTypography.bodyMuted(color: hint),
+                  prefixIcon: Icon(Icons.search_rounded, color: hint),
+                  isDense: true,
+                  filled: true,
+                  fillColor: searchFill,
+                  border: FxInputDeco.outlineBorder(
+                    borderRadius: BorderRadius.circular(
+                      TokensStrip.rInput,
+                    ),
+                    borderSide: BorderSide(
+                      color: TokensStrip.borderDefault.withValues(
+                        alpha: widget.isDark ? 0.55 : 0.9,
+                      ),
+                    ),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 14, 8, 8),
-              child: Row(
-                children: [
-                  Expanded(
+          ),
+          Expanded(
+            child: ListView(
+              controller: widget.scrollController,
+              padding: EdgeInsets.fromLTRB(
+                16,
+                0,
+                16,
+                16 + media.viewPadding.bottom,
+              ),
+              children: [
+                if (groups.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     child: Text(
-                      DashboardMicrocopy.catalogoCompleto,
-                      style: FocuxHubTypography.sectionTitle(
-                        context,
-                        color: heading,
-                      ),
+                      'Nenhum atalho para "$_searchQuery".',
+                      style: FocuxHubTypography.bodyMuted(color: mute),
                     ),
+                  )
+                else
+                  DashboardExpandableToolGroups(
+                    groups: groups,
+                    isDark: widget.isDark,
+                    shortcutAspectRatio: widget.shortcutAspectRatio,
+                    searchQuery: _searchQuery,
+                    onShortcut: (shortcut) {
+                      Navigator.of(context).pop();
+                      openDashboardShortcut(
+                        widget.parentContext,
+                        widget.parentRef,
+                        shortcut,
+                      );
+                    },
                   ),
-                  IconButton(
-                    tooltip: 'Fechar',
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: Icon(Icons.close_rounded, color: mute),
-                  ),
-                ],
-              ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: Semantics(
-                textField: true,
-                label: DashboardMicrocopy.buscarFerramenta,
-                child: TextField(
-                  onChanged: (v) => setState(() => _searchQuery = v),
-                  style: FocuxHubTypography.body(color: ink),
-                  decoration: InputDecoration(
-                    hintText: DashboardMicrocopy.buscarFerramenta,
-                    hintStyle: FocuxHubTypography.bodyMuted(color: mute),
-                    prefixIcon: Icon(Icons.search_rounded, color: mute),
-                    isDense: true,
-                    filled: true,
-                    fillColor:
-                        widget.isDark
-                            ? EagleTokens.darkBg
-                            : Colors.white,
-                    border: FxInputDeco.outlineBorder(
-                      borderRadius: BorderRadius.circular(
-                        TokensStrip.rInput,
-                      ),
-                      borderSide: BorderSide(
-                        color: TokensStrip.borderDefault.withValues(
-                          alpha: 0.9,
-                        ),
-                      ),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: ListView(
-                padding: EdgeInsets.fromLTRB(
-                  16,
-                  0,
-                  16,
-                  16 + media.viewPadding.bottom,
-                ),
-                children: [
-                  if (groups.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Text(
-                        'Nenhum atalho para "$_searchQuery".',
-                        style: FocuxHubTypography.bodyMuted(color: mute),
-                      ),
-                    )
-                  else
-                    DashboardExpandableToolGroups(
-                      groups: groups,
-                      isDark: widget.isDark,
-                      shortcutAspectRatio: widget.shortcutAspectRatio,
-                      searchQuery: _searchQuery,
-                      onShortcut: (shortcut) {
-                        Navigator.of(context).pop();
-                        openDashboardShortcut(
-                          widget.parentContext,
-                          widget.parentRef,
-                          shortcut,
-                        );
-                      },
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

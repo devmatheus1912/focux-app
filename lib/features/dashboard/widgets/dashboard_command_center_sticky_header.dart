@@ -55,7 +55,8 @@ class DashboardCommandCenterStickyHeaderDelegate
     final range = (maxExtent - minExtent).clamp(1.0, 100.0);
     final progress = (shrinkOffset / range).clamp(0.0, 1.0);
     final showSubtitle = !utilityOnly && !compact && progress < 0.55;
-    final link = BrandPalette.sectionLink(primary, dark: isDark);
+    final chipFg = dashboardPrioritiesChipForeground(primary, isDark: isDark);
+    final chipBg = dashboardPrioritiesChipBackground(primary, isDark: isDark);
     final hasTrailing =
         trailingActionLabel != null &&
         onTrailingAction != null &&
@@ -161,15 +162,18 @@ class DashboardCommandCenterStickyHeaderDelegate
                               minimumSize: const Size(48, 48),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 10,
+                                vertical: 7,
                               ),
-                              foregroundColor: link,
+                              foregroundColor: chipFg,
+                              backgroundColor: chipBg,
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              shape: const StadiumBorder(),
                             ),
                             child: Text(
                               chipLabel,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: dashboardActionChipStyle(link),
+                              style: dashboardChipLabelStyle(chipFg),
                             ),
                           ),
                         ),

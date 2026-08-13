@@ -74,14 +74,15 @@ class DashboardHomeFocusRules {
         focus.headline == 'Acompanhar alunos em risco';
   }
 
-  /// Default: foco ligado quando a narrativa do dia é retenção/risco.
+  /// Default: crise (retenção/risco) sempre liga o Foco no arranque —
+  /// o persistido só vale em dia normal. Toggle da sessão continua livre.
   static bool defaultFocusMode({
     required DashboardDayFocus dayFocus,
     required bool riskDominante,
     bool? persisted,
   }) {
-    if (persisted != null) return persisted;
-    return riskDominante || coversRetention(dayFocus);
+    if (riskDominante || coversRetention(dayFocus)) return true;
+    return persisted ?? false;
   }
 
   static DashboardHomeFocusRules resolve({
@@ -108,7 +109,7 @@ class DashboardHomeFocusRules {
       hideFeaturedTools: focusMode,
       omitSecondarySections: focusMode,
       collapsePulseBody: focusMode,
-      maxVisibleNextActions: focusMode ? 2 : 3,
+      maxVisibleNextActions: (focusMode || covers) ? 2 : 3,
     );
   }
 }
@@ -130,4 +131,14 @@ abstract final class DashboardAderenciaCopy {
     }
     return 'Acione alunos sem treino esta semana pela agenda ou pela base.';
   }
+}
+
+/// CTA "Relatório" só quando o ranking tem dado real — some no empty/retenção.
+bool dashboardShowAderenciaRelatorio({
+  required bool focusMode,
+  required bool coversRetention,
+  required Iterable<int> weeklyCheckins,
+}) {
+  if (focusMode || coversRetention) return false;
+  return weeklyCheckins.any((n) => n > 0);
 }

@@ -17,6 +17,14 @@ void main() {
         ),
         isTrue,
       );
+      expect(
+        DashboardHomeFocusRules.defaultFocusMode(
+          dayFocus: focus,
+          riskDominante: true,
+          persisted: false,
+        ),
+        isTrue,
+      );
     });
 
     test('focus mode collapses attention/finance and caps actions', () {
@@ -66,6 +74,7 @@ void main() {
       expect(rules.hideFeaturedTools, isFalse);
       expect(rules.collapsePulseBody, isFalse);
       expect(rules.collapseAderencia, isFalse);
+      expect(rules.maxVisibleNextActions, 2);
     });
 
     test('focus off keeps quick links collapsed by default', () {
@@ -85,6 +94,49 @@ void main() {
       expect(rules.hideFeaturedTools, isFalse);
       expect(rules.omitSecondarySections, isFalse);
       expect(rules.maxVisibleNextActions, 3);
+    });
+
+    test('calm day respects persisted focus off', () {
+      const focus = DashboardDayFocus(
+        headline: 'Rotina estável',
+        detail: 'x',
+        semanticLabel: 'foco',
+      );
+      expect(
+        DashboardHomeFocusRules.defaultFocusMode(
+          dayFocus: focus,
+          riskDominante: false,
+          persisted: false,
+        ),
+        isFalse,
+      );
+    });
+
+    test('hides aderencia relatorio without ranking data', () {
+      expect(
+        dashboardShowAderenciaRelatorio(
+          focusMode: false,
+          coversRetention: false,
+          weeklyCheckins: const [0, 0],
+        ),
+        isFalse,
+      );
+      expect(
+        dashboardShowAderenciaRelatorio(
+          focusMode: false,
+          coversRetention: false,
+          weeklyCheckins: const [2],
+        ),
+        isTrue,
+      );
+      expect(
+        dashboardShowAderenciaRelatorio(
+          focusMode: false,
+          coversRetention: true,
+          weeklyCheckins: const [4],
+        ),
+        isFalse,
+      );
     });
   });
 

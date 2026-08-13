@@ -109,3 +109,17 @@ String dashboardFormatCountCopy(String raw) {
   }
   return text;
 }
+
+const kDashboardActionCopyMaxChars = 72;
+
+/// Subtítulo da fila: corta narrativa longa sem estourar o tile.
+String dashboardClampActionCopy(
+  String raw, {
+  int maxChars = kDashboardActionCopyMaxChars,
+}) {
+  final text = dashboardFormatCountCopy(raw).trim();
+  if (text.length <= maxChars) return text;
+  var cut = text.lastIndexOf(' ', maxChars);
+  if (cut < (maxChars / 2)) cut = maxChars;
+  return '${text.substring(0, cut).trimRight()}…';
+}

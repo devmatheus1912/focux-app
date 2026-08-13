@@ -39,10 +39,15 @@ class DashboardExpandableToolGroupsState
     extends ConsumerState<DashboardExpandableToolGroups> {
   late Set<String> _openGroups;
 
+  static Set<String> _firstGroupOpen(List<DashboardToolGroupSection> groups) {
+    if (groups.isEmpty) return <String>{};
+    return {groups.first.title};
+  }
+
   @override
   void initState() {
     super.initState();
-    _openGroups = <String>{};
+    _openGroups = _firstGroupOpen(widget.groups);
   }
 
   @override
@@ -53,7 +58,7 @@ class DashboardExpandableToolGroupsState
     if (q.isNotEmpty && q != oldQ) {
       _openGroups = widget.groups.map((g) => g.title).toSet();
     } else if (q.isEmpty && oldQ.isNotEmpty) {
-      _openGroups = <String>{};
+      _openGroups = _firstGroupOpen(widget.groups);
     }
   }
 

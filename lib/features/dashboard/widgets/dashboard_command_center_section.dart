@@ -62,7 +62,6 @@ class DashboardCommandCenterSection extends ConsumerStatefulWidget {
   final int? agendaHojeCount;
   final int? unreadCount;
   final int? conversationCount;
-  final int? copilotOpenCount;
   final bool? isCommandPreparing;
   final bool? commandUnavailable;
 
@@ -83,7 +82,6 @@ class DashboardCommandCenterSection extends ConsumerStatefulWidget {
     this.agendaHojeCount,
     this.unreadCount,
     this.conversationCount,
-    this.copilotOpenCount,
     this.isCommandPreparing,
     this.commandUnavailable,
   });
@@ -157,16 +155,6 @@ class DashboardCommandCenterSectionState
       unreadCount: unreadCount,
       conversationCount: totalConversas,
     );
-
-    final copilotOpen =
-        widget.copilotOpenCount ??
-        commandAsync?.maybeWhen(
-          data:
-              (cc) =>
-                  cc.filaAcoes.where((a) => a.tipo == 'IA_COPILOTO').length,
-          orElse: () => 0,
-        ) ??
-        0;
 
     Widget card({
       required double width,
@@ -244,88 +232,24 @@ class DashboardCommandCenterSectionState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (!widget.hideHeader)
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      DashboardMicrocopy.commandCenterTitle,
-                      style: dashboardSectionTitleStyle(
-                        context,
-                        color: heading,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      contextualSubtitle ??
-                          'A melhor próxima ação para proteger receita e aderência.',
-                      style: TokensStrip.bodyMuted(color: mute).copyWith(
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (showPrioritiesLink)
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap:
-                        () => showCommandActionsSheet(
-                          context,
-                          isDark: isDark,
-                          primary: primary,
-                          actions: prioritiesSheetActions,
-                        ),
-                    borderRadius: BorderRadius.circular(999),
-                    child: Ink(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 7,
-                      ),
-                      decoration: BoxDecoration(
-                        color: dashboardPrioritiesChipBackground(
-                          primary,
-                          isDark: isDark,
-                        ),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            isCommandPreparing
-                                ? DashboardMicrocopy.lendoSinais
-                                : DashboardMicrocopy.verPrioridades,
-                            style: dashboardChipLabelStyle(
-                              dashboardPrioritiesChipForeground(
-                                primary,
-                                isDark: isDark,
-                              ),
-                            ),
-                          ),
-                          if (!isCommandPreparing) ...[
-                            const SizedBox(width: 4),
-                            FxIcon(
-                              name: 'chevron-right',
-                              size: 13,
-                              color: dashboardPrioritiesChipForeground(
-                                primary,
-                                isDark: isDark,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-            ],
+        if (!widget.hideHeader) ...[
+          Text(
+            DashboardMicrocopy.commandCenterTitle,
+            style: dashboardSectionTitleStyle(
+              context,
+              color: heading,
+            ),
           ),
-        if (!widget.hideHeader) const SizedBox(height: 20),
+          const SizedBox(height: 4),
+          Text(
+            contextualSubtitle ??
+                'A melhor próxima ação para proteger receita e aderência.',
+            style: TokensStrip.bodyMuted(color: mute).copyWith(
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
         CommandActionPanel(
           key: widget.panelKey,
           isDark: isDark,
@@ -334,7 +258,7 @@ class DashboardCommandCenterSectionState
           unavailable: commandUnavailable,
           actions: nextActions,
           prioritiesActionLabel:
-              showPrioritiesLink ? DashboardMicrocopy.verPrioridades : null,
+              showPrioritiesLink ? DashboardMicrocopy.maisPrioridades : null,
           onPrioritiesTap:
               showPrioritiesLink
                   ? () => showCommandActionsSheet(
@@ -354,7 +278,7 @@ class DashboardCommandCenterSectionState
             label:
                 _quickLinksExpanded
                     ? 'Atalhos rápidos, expandido. Toque para recolher'
-                    : 'Atalhos rápidos, recolhido. Copiloto e mensagens. Toque para expandir',
+                    : 'Atalhos rápidos, recolhido. Mensagens. Toque para expandir',
             child: InkWell(
               onTap: () {
                 dashboardHapticCollapseToggle();
@@ -384,7 +308,7 @@ class DashboardCommandCenterSectionState
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
-                        '2',
+                        '1',
                         style: dashboardChipLabelStyle(actionColor),
                       ),
                     ),
@@ -421,19 +345,6 @@ class DashboardCommandCenterSectionState
                       scrollDirection: Axis.horizontal,
                       physics: const BouncingScrollPhysics(),
                       children: [
-                        card(
-                          width: moduleWidth,
-                          icon: 'zap',
-                          title: 'Copiloto',
-                          subtitle:
-                              copilotOpen == 0
-                                  ? 'Abrir Copiloto'
-                                  : '$copilotOpen aberta${copilotOpen == 1 ? '' : 's'}',
-                          onTap:
-                              () => context.push(
-                                '/dashboard/command-center/copiloto',
-                              ),
-                        ),
                         card(
                           width: moduleWidth,
                           icon: 'message-circle',

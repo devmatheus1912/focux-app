@@ -18,6 +18,7 @@ class _PersonalDashboardScreenState
   bool _focusMode = true;
   bool _focusPreferenceLoaded = false;
   bool _autoFocusApplied = false;
+  bool _sessionFocusTouched = false;
 
   late AnimationController _gradientCtrl;
   late AnimationController _counterCtrl;
@@ -74,12 +75,12 @@ class _PersonalDashboardScreenState
     setState(() {
       _focusPreferenceLoaded = true;
       // Não sobrescreve toggle feito enquanto o load estava em voo.
-      if (persisted != null && _persistedFocusMode == null) {
+      if (_persistedFocusMode == null) {
         _persistedFocusMode = persisted;
-        _focusMode = persisted;
-        _autoFocusApplied = true;
-      } else if (_persistedFocusMode != null) {
-        _autoFocusApplied = true;
+      }
+      // Persistido ON aplica já; OFF espera o dia (crise ignora OFF).
+      if (persisted == true && !_sessionFocusTouched) {
+        _focusMode = true;
       }
     });
   }
@@ -90,6 +91,8 @@ class _PersonalDashboardScreenState
     setState(() {
       _focusMode = next;
       _persistedFocusMode = next;
+      _sessionFocusTouched = true;
+      _autoFocusApplied = true;
       _attentionSectionResetToken++;
     });
     await DashboardHomeFocusStore.save(next);

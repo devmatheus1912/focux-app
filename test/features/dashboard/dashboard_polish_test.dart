@@ -61,6 +61,7 @@ void main() {
       'lib/features/dashboard/utils/dashboard_next_actions.dart',
       'lib/features/dashboard/utils/dashboard_home_focus.dart',
       'lib/features/dashboard/widgets/dashboard_home_header.dart',
+      'lib/features/dashboard/widgets/dashboard_command_center_sticky_header.dart',
       'lib/features/dashboard/widgets/dashboard_attention_rail.dart',
       'lib/features/dashboard/widgets/dashboard_collapsible_section.dart',
       'lib/features/dashboard/utils/dashboard_a11y.dart',

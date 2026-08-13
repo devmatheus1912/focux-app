@@ -60,6 +60,11 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final showRelatorio = dashboardShowAderenciaRelatorio(
+      focusMode: focusRules.focusMode,
+      coversRetention: focusRules.dayFocusCoversRetention,
+      weeklyCheckins: topAderencia.map((e) => e.totalCheckinsSemana),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -72,8 +77,8 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
                   : DashboardMicrocopy.treinosRankingHint,
           isDark: isDark,
           initiallyExpanded: !focusRules.collapseAderencia,
-          headerActionLabel: focusRules.focusMode ? null : 'Relatório',
-          onHeaderAction: focusRules.focusMode ? null : onOpenRelatorio,
+          headerActionLabel: showRelatorio ? 'Relatório' : null,
+          onHeaderAction: showRelatorio ? onOpenRelatorio : null,
           child: DashboardAderenciaSemanaWidget(
             isDark: isDark,
             items:

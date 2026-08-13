@@ -143,8 +143,6 @@ List<Widget> buildDashboardHomePrimarySlivers({
             alunosAtivos: alunosAtivos,
             agendaHojeCount: agendaHoje,
             unreadCount: snap.unreadCount,
-            copilotOpenCount:
-                snap.filaAcoes.where((a) => a.tipo == 'IA_COPILOTO').length,
             isCommandPreparing: isCommandPreparing,
             commandUnavailable: commandUnavailable,
           ),
@@ -210,10 +208,7 @@ List<Widget> buildDashboardHomePrimarySlivers({
               riscoAlto > 0
                   ? () => goPersonalShellTab(context, '/alunos?filtro=risco')
                   : () => goPersonalShellTab(context, '/alunos'),
-          hideEmptyTrend:
-              focusRules.collapsePulseBody ||
-              focusRules.dayFocusCoversRetention ||
-              focusRules.suppressSecondaryEmptyCtas,
+          hideEmptyTrend: focusRules.collapsePulseBody,
           showEmptyTrendCta:
               checkinsTrend.length >= 7 &&
               !checkinsTrend.any((v) => v > 0) &&

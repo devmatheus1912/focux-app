@@ -6,6 +6,7 @@ abstract final class DashboardMicrocopy {
   static const pulsoOperacional = 'Pulso operacional';
   static const impactoHoje = 'Impacto hoje';
   static const verPrioridades = 'Ver prioridades';
+  static const maisPrioridades = 'Mais prioridades';
   static const lendoSinais = 'lendo sinais';
   static const verTudo = 'Ver tudo';
   static const painelAtualizado = 'Painel atualizado';

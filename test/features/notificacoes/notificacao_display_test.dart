@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/notificacoes/notificacao_display.dart';
+import 'package:focux_app/features/notificacoes/widgets/notificacao_badge_button.dart';
 
 void main() {
   test('formatDisplayName title-cases single and multi-word names', () {
@@ -20,5 +21,13 @@ void main() {
       route: '/alunos/1',
     );
     expect(a, b);
+  });
+
+  test('tooltip da badge descreve a contagem', () {
+    expect(notificacaoBadgeTooltip(0), 'Notificações');
+    expect(notificacaoBadgeTooltip(1), '1 notificação');
+    expect(notificacaoBadgeTooltip(3), '3 notificações');
+    expect(notificacaoBadgeTooltip(9), '9 notificações');
+    expect(notificacaoBadgeTooltip(12), '9 ou mais notificações');
   });
 }

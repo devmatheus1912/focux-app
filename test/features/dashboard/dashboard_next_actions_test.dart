@@ -60,7 +60,7 @@ void main() {
       );
 
       expect(actions.first.title, 'Abrir fila de retenção');
-      expect(actions.first.subtitle, 'Trabalhar o P0 agora');
+      expect(actions.first.subtitle, 'Começar agora');
       expect(actions.first.subtitle, isNot(contains('5')));
       expect(actions.first.route, '/retencao');
       expect(actions.first.priorityBadge, 'P0');

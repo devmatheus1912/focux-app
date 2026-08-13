@@ -24,6 +24,7 @@ void main() {
       'lib/features/dashboard/utils/dashboard_scroll_logic.dart',
       'lib/features/dashboard/utils/dashboard_microcopy.dart',
       'lib/features/dashboard/utils/dashboard_next_actions.dart',
+      'lib/features/dashboard/utils/dashboard_command_copy.dart',
       'lib/features/dashboard/utils/dashboard_home_focus.dart',
       'lib/features/dashboard/widgets/dashboard_home_header.dart',
       'lib/features/dashboard/widgets/dashboard_attention_rail.dart',
@@ -91,6 +92,10 @@ void main() {
     expect(widget, contains('priorityBadge'));
     expect(widget, contains('BILLING_PENDING'));
     expect(widget, contains('dashboardFormatCountCopy'));
+    expect(widget, contains('dashboardClampActionCopy'));
+    expect(widget, contains('useRootNavigator: true'));
+    expect(widget, contains('DraggableScrollableSheet'));
+    expect(widget, contains('maisPrioridades'));
     expect(widget, contains('hasRiskCurated'));
     expect(widget, contains('dashboardPriorityBadgeColors'));
     expect(widget, contains('DashboardCommandCenterStickyHeaderDelegate'));

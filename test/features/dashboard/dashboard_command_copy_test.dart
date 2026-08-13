@@ -32,5 +32,15 @@ void main() {
       dashboardFormatCountCopy('3 cobrancas pendentes'),
       '3 cobranças pendentes',
     );
+    final clamped = dashboardClampActionCopy(
+      'Nathalia ainda não completou o mapa corporal — vale lembrar hoje. Próxima ação: Completar mapa corporal.',
+    );
+    expect(clamped.endsWith('…'), isTrue);
+    expect(clamped.length, lessThanOrEqualTo(73));
+    expect(clamped, isNot(contains('Próxima ação')));
+    expect(
+      dashboardClampActionCopy('Nathalia · mapa corporal'),
+      'Nathalia · mapa corporal',
+    );
   });
 }
