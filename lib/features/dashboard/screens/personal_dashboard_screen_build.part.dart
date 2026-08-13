@@ -33,7 +33,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                 final data = home.personal;
                 final screenWidth = MediaQuery.sizeOf(context).width;
                 final isCompactPhone = DashboardLayout.isCompact(screenWidth);
-                final shortcutAspectRatio = isCompactPhone ? 2.75 : 3.05;
+                final shortcutAspectRatio = isCompactPhone ? 2.55 : 2.85;
 
                 final snap = DashboardHomeSnapshot.build(
                   home: home,

@@ -270,7 +270,8 @@ class DashboardShortcutTile extends StatelessWidget {
         child: Opacity(
           opacity: locked ? 0.92 : 1,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
+            padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+            clipBehavior: Clip.hardEdge,
             decoration: fxStripCardDecoration(
               context,
               accent: primary,
@@ -343,35 +344,32 @@ class DashboardShortcutTile extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        label,
-                        style: dashboardCardTitleStyle(labelColor).copyWith(
-                          fontWeight: FontWeight.w800,
+                      Flexible(
+                        child: Text(
+                          label,
+                          style: dashboardCardTitleStyle(labelColor).copyWith(
+                            fontWeight: FontWeight.w800,
+                            height: 1.15,
+                          ),
+                          maxLines: locked ? 1 : 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                      if (locked && tierLabel != null) ...[
-                        const SizedBox(height: 3),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: iconAccent.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
+                      if (locked && tierLabel != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
                           child: Text(
                             tierLabel!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: dashboardChipLabelStyle(
                               iconAccent.withValues(alpha: 0.95),
                             ),
                           ),
                         ),
-                      ],
                     ],
                   ),
                 ),
