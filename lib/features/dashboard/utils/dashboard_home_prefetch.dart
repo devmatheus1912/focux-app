@@ -2,15 +2,11 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../alunos/providers/alunos_provider.dart';
-import '../../chat/screens/chat_inbox_screen.dart';
 import '../providers/dashboard_provider.dart';
 
-/// Warms Home BFF + inbox before navigation so the dashboard paints faster.
+/// Warms the Home BFF before navigation so Hoje paints from a single round-trip.
 void prefetchPersonalDashboardHome(WidgetRef ref) {
   unawaited(_ignoreErrors(ref.read(dashboardHomeProvider.future)));
-  unawaited(_ignoreErrors(ref.read(alunosProvider.future)));
-  unawaited(_ignoreErrors(ref.read(chatInboxProvider.future)));
 }
 
 Future<void> _ignoreErrors(Future<dynamic> future) async {

@@ -6,6 +6,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../constants/dashboard_layout.dart';
+import '../data/command_center_data.dart';
 
 String dashboardGreeting(String? nome, {bool compact = false}) {
   final hour = DateTime.now().hour;
@@ -30,6 +31,19 @@ bool isRiskEchoCopy(String text) {
       lower.contains('abandono') ||
       lower.contains('aderência') ||
       lower.contains('aderencia');
+}
+
+/// Stub mínimo para o rail de atenção a partir do BFF (sem sidecar `/alunos`).
+Aluno alunoFromAlertaResumo(AlertaResumo alerta) {
+  return Aluno(
+    id: alerta.id,
+    nome: alerta.nomeAluno,
+    email: '',
+    status: 'ATIVO',
+    emRisco: true,
+    objetivo: alerta.motivo.isEmpty ? null : alerta.motivo,
+    riscoNivel: alerta.nivelRisco,
+  );
 }
 
 String attentionSignalLabel(Aluno aluno) {

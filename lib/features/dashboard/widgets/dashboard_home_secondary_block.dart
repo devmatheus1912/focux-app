@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../constants/dashboard_layout.dart';
+import '../data/dashboard_repository.dart';
+import '../providers/aderencia_provider.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_home_focus.dart';
 import '../utils/dashboard_microcopy.dart';
@@ -33,6 +35,7 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
     required this.heroFade,
     required this.shortcutAspectRatio,
     required this.onOpenRelatorio,
+    this.topAderencia = const [],
   });
 
   final DashboardHomeFocusRules focusRules;
@@ -53,6 +56,7 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
   final Animation<double> heroFade;
   final double shortcutAspectRatio;
   final VoidCallback onOpenRelatorio;
+  final List<DashboardAderenciaTopItem> topAderencia;
 
   @override
   Widget build(BuildContext context) {
@@ -64,14 +68,18 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
           title: DashboardMicrocopy.aderenciaDaSemana,
           collapsedHint:
               focusRules.dayFocusCoversRetention
-                  ? 'Ranking semanal · expandir se precisar'
-                  : 'Treinos e ranking · ${DashboardMicrocopy.toqueParaExpandir}',
+                  ? DashboardMicrocopy.rankingSemanalHint
+                  : DashboardMicrocopy.treinosRankingHint,
           isDark: isDark,
           initiallyExpanded: !focusRules.collapseAderencia,
           headerActionLabel: focusRules.focusMode ? null : 'Relatório',
           onHeaderAction: focusRules.focusMode ? null : onOpenRelatorio,
           child: DashboardAderenciaSemanaWidget(
             isDark: isDark,
+            items:
+                topAderencia
+                    .map(AderenciaAlunoResumo.fromHomeItem)
+                    .toList(growable: false),
             retentionFocus: focusRules.dayFocusCoversRetention,
             suppressEmptyActions: focusRules.suppressSecondaryEmptyCtas,
           ),

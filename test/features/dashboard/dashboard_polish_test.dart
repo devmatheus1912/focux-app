@@ -52,6 +52,7 @@ void main() {
       'lib/features/dashboard/widgets/command_priorities_sheet.dart',
       'lib/features/dashboard/widgets/command_status_tile.dart',
       'lib/features/dashboard/widgets/dashboard_tools_section.dart',
+      'lib/features/dashboard/widgets/dashboard_tools_catalog_sheet.dart',
       'lib/features/dashboard/widgets/dashboard_financial_hero_section.dart',
       'lib/features/dashboard/widgets/dashboard_home_secondary_block.dart',
       'lib/features/dashboard/widgets/dashboard_home_primary_slivers.dart',
@@ -61,6 +62,8 @@ void main() {
       'lib/features/dashboard/utils/dashboard_home_focus.dart',
       'lib/features/dashboard/widgets/dashboard_home_header.dart',
       'lib/features/dashboard/widgets/dashboard_attention_rail.dart',
+      'lib/features/dashboard/widgets/dashboard_collapsible_section.dart',
+      'lib/features/dashboard/utils/dashboard_a11y.dart',
       'lib/features/dashboard/utils/dashboard_home_snapshot.dart',
     ];
     final screen = paths.map((p) => File(p).readAsStringSync()).join('\n');
@@ -119,6 +122,9 @@ void main() {
     expect(screen, contains('utilityOnly'));
     expect(screen, contains('hideEmptyTrend'));
     expect(screen, contains('FocuxHubTypography.sectionTitle'));
+    expect(screen, contains('checkinsTrend'));
+    expect(screen, contains('showDashboardToolsCatalogSheet'));
+    expect(screen, contains('alunoFromAlertaResumo'));
 
     final semanticsCount = 'Semantics('.allMatches(screen).length;
     expect(semanticsCount, greaterThanOrEqualTo(10));

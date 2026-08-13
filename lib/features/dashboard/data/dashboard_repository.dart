@@ -38,17 +38,25 @@ class DashboardAderenciaTopItem {
 class DashboardPulseSnapshot {
   final int? checkinsHoje;
   final int? mensagensNaoLidas;
+  final List<int> checkinsTrend;
 
   const DashboardPulseSnapshot({
     this.checkinsHoje,
     this.mensagensNaoLidas,
+    this.checkinsTrend = const [],
   });
 
-  factory DashboardPulseSnapshot.fromJson(Map<String, dynamic> json) =>
-      DashboardPulseSnapshot(
-        checkinsHoje: (json['checkinsHoje'] as num?)?.toInt(),
-        mensagensNaoLidas: (json['mensagensNaoLidas'] as num?)?.toInt(),
-      );
+  factory DashboardPulseSnapshot.fromJson(Map<String, dynamic> json) {
+    final trendRaw = json['checkinsTrend'] as List<dynamic>? ?? const [];
+    return DashboardPulseSnapshot(
+      checkinsHoje: (json['checkinsHoje'] as num?)?.toInt(),
+      mensagensNaoLidas: (json['mensagensNaoLidas'] as num?)?.toInt(),
+      checkinsTrend:
+          trendRaw
+              .map((e) => (e as num?)?.toInt() ?? 0)
+              .toList(growable: false),
+    );
+  }
 }
 
 class DashboardHomeBundle {

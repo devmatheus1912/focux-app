@@ -62,8 +62,10 @@ class DashboardDayPulseStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final riscoAccent =
         riscoAlto > 0 ? EagleTokens.warn : TokensStrip.badgeSuccess;
-    final tight = DashboardLayout.isCompact(MediaQuery.sizeOf(context).width);
-    final gap = tight ? 6.0 : TokensStrip.s2;
+    final width = MediaQuery.sizeOf(context).width;
+    final tight = DashboardLayout.isCompact(width);
+    final comfortable = DashboardLayout.isComfortable(width);
+    final gap = tight ? 6.0 : comfortable ? TokensStrip.s3 : TokensStrip.s2;
     final mute = dashboardReadableMuted(context, isDark: isDark);
     final caption = dashboardReadableCaption(context, isDark: isDark);
     final ativosAccent = alunosAtivos > 0 ? primary : caption;
@@ -73,6 +75,10 @@ class DashboardDayPulseStrip extends StatelessWidget {
       emptyAccent: alunosAtivos > 0 ? EagleTokens.warn : caption,
     );
     final agendaAccent = agendaHoje > 0 ? primary : caption;
+    final trendReady = checkinsTrend.length >= 7;
+    final hasTrend = trendReady && checkinsTrend.any((v) => v > 0);
+    final showTrendRow =
+        hasTrend || showEmptyTrendCta || (trendReady && !hideEmptyTrend);
 
     return dashboardEntryMotion(
       context: context,
@@ -150,20 +156,20 @@ class DashboardDayPulseStrip extends StatelessWidget {
               ),
             ],
           ),
-          if (hasTrend ||
-              showEmptyTrendCta ||
-              (trendReady && !hideEmptyTrend)) ...[
+          if (showTrendRow) ...[
           const SizedBox(height: 8),
           Builder(
             builder: (context) {
-              final trendReady = checkinsTrend.length >= 7;
-              final hasTrend = trendReady && checkinsTrend.any((v) => v > 0);
               final emptyDetail =
                   alunosAtivos > 0
                       ? DashboardMicrocopy.tendenciaVaziaBase
                       : DashboardMicrocopy.tendenciaVaziaGeral;
-              final sparkW = collapseBody ? 72.0 : 88.0;
-              final sparkH = collapseBody ? 20.0 : 24.0;
+              final sparkW = collapseBody
+                  ? (comfortable ? 88.0 : 72.0)
+                  : (comfortable ? 112.0 : 88.0);
+              final sparkH = collapseBody
+                  ? (comfortable ? 24.0 : 20.0)
+                  : (comfortable ? 28.0 : 24.0);
               return Semantics(
                 label:
                     !trendReady
@@ -334,11 +340,20 @@ class DashboardPulseChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final iconSize = compact ? 22.0 : 24.0;
-    final iconGlyph = compact ? 11.0 : 12.0;
-    final valueSize = compact ? TokensStrip.fontBodySm : 15.0;
+    final comfortable =
+        !compact &&
+        DashboardLayout.isComfortable(MediaQuery.sizeOf(context).width);
+    final iconSize = compact ? 22.0 : comfortable ? 26.0 : 24.0;
+    final iconGlyph = compact ? 11.0 : comfortable ? 13.0 : 12.0;
+    final valueSize =
+        compact
+            ? TokensStrip.fontBodySm
+            : comfortable
+            ? 16.0
+            : 15.0;
     final labelSize = TokensStrip.fontBodySm;
-    final hPad = compact ? 7.0 : 9.0;
+    final hPad = compact ? 7.0 : comfortable ? 12.0 : 9.0;
+    final vPad = compact ? 9.0 : comfortable ? 12.0 : 9.0;
     final emphasis =
         empty
             ? OperationalMetricEmphasis.muted
@@ -353,7 +368,7 @@ class DashboardPulseChip extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(TokensStrip.rCard),
           child: Ink(
-            padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 9),
+            padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
             decoration: operationalMetricDecoration(
               accent: accent,
               isDark: isDark,

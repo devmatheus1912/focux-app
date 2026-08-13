@@ -35,5 +35,9 @@ abstract final class DashboardMicrocopy {
   /// Chip no banner: ação para entrar no modo foco.
   static const modoFocoChipOff = 'Focar';
   static const toqueParaExpandir = 'toque para expandir';
+  static const toqueParaVer = 'toque para ver';
   static const abrirFinanceiro = 'Abrir financeiro';
+  static const rankingSemanalHint = 'Ranking semanal · toque para ver';
+  static const treinosRankingHint = 'Treinos e ranking · toque para ver';
+  static const abrirCatalogo = 'Abrir catálogo';
 }

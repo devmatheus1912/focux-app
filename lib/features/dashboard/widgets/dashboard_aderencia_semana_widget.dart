@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/focux_hub_typography.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -17,12 +15,14 @@ import '../utils/dashboard_readability.dart';
 
 class DashboardAderenciaSemanaWidget extends StatelessWidget {
   final bool isDark;
+  final List<AderenciaAlunoResumo> items;
   final bool retentionFocus;
   final bool suppressEmptyActions;
 
   const DashboardAderenciaSemanaWidget({
     super.key,
     required this.isDark,
+    this.items = const [],
     this.retentionFocus = false,
     this.suppressEmptyActions = false,
   });
@@ -33,266 +33,141 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final rowAccent = BrandPalette.sectionAccent(primary, dark: isDark);
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    return Consumer(
-      builder: (context, ref, _) {
-        final mute = dashboardReadableMuted(context, isDark: isDark);
-        final async = ref.watch(aderenciaTop3Provider);
-        return async.when(
-          loading:
-              () => Container(
-                height: 184,
-                padding: const EdgeInsets.all(14),
-                decoration: fxStripCardDecoration(
-                  context,
-                  radius: TokensStrip.rCard,
-                ),
-                child: Column(
-                  children: List.generate(3, (index) {
-                    return Expanded(
-                      child: Shimmer.fromColors(
-                        baseColor: primary.withValues(alpha: 0.08),
-                        highlightColor: primary.withValues(alpha: 0.18),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Container(
-                                height: 16,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(999),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Container(
-                              width: 54,
-                              height: 18,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-          error:
-              (e, _) => Container(
-                padding: const EdgeInsets.all(TokensStrip.s4),
-                decoration: fxStripCardDecoration(
-                  context,
-                  radius: TokensStrip.rCard,
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 42,
-                      height: 42,
-                      decoration: BoxDecoration(
-                        color: EagleTokens.bad.withValues(
-                          alpha: isDark ? 0.18 : 0.08,
-                        ),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const Icon(
-                        Icons.wifi_off_rounded,
-                        color: EagleTokens.bad,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Falha ao carregar aderência',
-                            style: TextStyle(
-                              color: ink,
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Verifique sua conexão e puxe para atualizar.',
-                            style: TextStyle(
-                              color: mute,
-                              fontSize: TokensStrip.fontBodySm,
-                              height: 1.25,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          data: (items) {
-            if (items.isEmpty) {
-              return DashboardAderenciaSemanaEmptyCard(
-                isDark: isDark,
-                primary: primary,
-                mute: mute,
-                title: 'Sem check-ins nesta semana',
-                body: DashboardAderenciaCopy.emptyBody(
-                  retentionFocus: retentionFocus,
-                ),
-                primaryAction:
-                    suppressEmptyActions
-                        ? null
-                        : (retentionFocus
-                            ? 'Ver alunos em risco'
-                            : 'Ver agenda'),
-                onPrimary:
-                    suppressEmptyActions
-                        ? null
-                        : (retentionFocus
-                            ? () => context.go('/alunos?filtro=risco')
-                            : () => context.go('/agenda')),
-              );
-            }
+    final mute = dashboardReadableMuted(context, isDark: isDark);
 
-            final semanaParada = items.every((a) => a.totalCheckinsSemana == 0);
-            if (semanaParada) {
-              return DashboardAderenciaSemanaEmptyCard(
-                isDark: isDark,
-                primary: primary,
-                mute: mute,
-                title: 'Treinos parados na semana',
-                body: DashboardAderenciaCopy.stoppedBody(
-                  retentionFocus: retentionFocus,
-                ),
-                primaryAction:
-                    suppressEmptyActions
-                        ? null
-                        : (retentionFocus ? 'Revisar base' : 'Ver agenda'),
-                secondaryAction:
-                    suppressEmptyActions || retentionFocus
-                        ? null
-                        : 'Plano retomada',
-                onPrimary:
-                    suppressEmptyActions
-                        ? null
-                        : (retentionFocus
-                            ? () => context.push('/retencao')
-                            : () => context.go('/agenda')),
-                onSecondary:
-                    suppressEmptyActions || retentionFocus
-                        ? null
-                        : () => context.push('/dashboard/qualidade'),
-              );
-            }
+    if (items.isEmpty) {
+      return DashboardAderenciaSemanaEmptyCard(
+        isDark: isDark,
+        primary: primary,
+        mute: mute,
+        title: 'Sem check-ins nesta semana',
+        body: DashboardAderenciaCopy.emptyBody(
+          retentionFocus: retentionFocus,
+        ),
+        primaryAction:
+            suppressEmptyActions
+                ? null
+                : (retentionFocus ? 'Ver alunos em risco' : 'Ver agenda'),
+        onPrimary:
+            suppressEmptyActions
+                ? null
+                : (retentionFocus
+                    ? () => context.go('/alunos?filtro=risco')
+                    : () => context.go('/agenda')),
+      );
+    }
 
-            return Container(
-              decoration: fxStripCardDecoration(
-                context,
-                accent: primary,
-                radius: TokensStrip.rCard,
+    final semanaParada = items.every((a) => a.totalCheckinsSemana == 0);
+    if (semanaParada) {
+      return DashboardAderenciaSemanaEmptyCard(
+        isDark: isDark,
+        primary: primary,
+        mute: mute,
+        title: 'Treinos parados na semana',
+        body: DashboardAderenciaCopy.stoppedBody(
+          retentionFocus: retentionFocus,
+        ),
+        primaryAction:
+            suppressEmptyActions
+                ? null
+                : (retentionFocus ? 'Revisar base' : 'Ver agenda'),
+        secondaryAction:
+            suppressEmptyActions || retentionFocus ? null : 'Plano retomada',
+        onPrimary:
+            suppressEmptyActions
+                ? null
+                : (retentionFocus
+                    ? () => context.push('/retencao')
+                    : () => context.go('/agenda')),
+        onSecondary:
+            suppressEmptyActions || retentionFocus
+                ? null
+                : () => context.push('/dashboard/qualidade'),
+      );
+    }
+
+    return Container(
+      decoration: fxStripCardDecoration(
+        context,
+        accent: primary,
+        radius: TokensStrip.rCard,
+      ),
+      child: Column(
+        children: List.generate(items.length, (index) {
+          final a = items[index];
+          return InkWell(
+            onTap: () => context.push('/alunos/${a.alunoId}'),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
               ),
-              child: Column(
-                children: List.generate(items.length, (index) {
-                  final a = items[index];
-                  return InkWell(
-                    onTap: () => context.push('/alunos/${a.alunoId}'),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        border:
-                            index < items.length - 1
-                                ? Border(
-                                  bottom: BorderSide(
-                                    color:
-                                        isDark
-                                            ? EagleTokens.darkLine
-                                            : TokensStrip.borderDefault,
-                                    width: 0.5,
-                                  ),
-                                )
-                                : null,
-                      ),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundColor: primarySoft,
-                            child: Text(
-                              fxInitials(a.nome),
-                              style: TextStyle(
-                                color: rowAccent,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
+              decoration: BoxDecoration(
+                border:
+                    index < items.length - 1
+                        ? Border(
+                          bottom: BorderSide(
+                            color:
+                                isDark
+                                    ? EagleTokens.darkLine
+                                    : TokensStrip.borderDefault,
+                            width: 0.5,
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  fxTitleCaseName(a.nome),
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: ink,
-                                    letterSpacing: -0.1,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  '${a.objetivo ?? 'Objetivo'} · ${a.totalCheckinsSemana} check-ins',
-                                  style: TextStyle(
-                                    fontSize: TokensStrip.fontBodySm,
-                                    color: mute,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          FxSparkline(
-                            data: a.sparkline,
-                            width: 56,
-                            height: 22,
-                            color: rowAccent,
-                          ),
-                          const SizedBox(width: 14),
-                          SizedBox(
-                            width: 40,
-                            child: Text(
-                              '${a.aderenciaPercent}%',
-                              textAlign: TextAlign.right,
-                              style: FocuxHubTypography.metric(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: ink,
-                              ),
-                            ),
-                          ),
-                        ],
+                        )
+                        : null,
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: primarySoft,
+                    child: Text(
+                      fxInitials(a.nome),
+                      style: FocuxHubTypography.chip(rowAccent),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          fxTitleCaseName(a.nome),
+                          style: FocuxHubTypography.cardTitle(color: ink),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${a.objetivo ?? 'Objetivo'} · ${a.totalCheckinsSemana} check-ins',
+                          style: FocuxHubTypography.bodyMuted(color: mute),
+                        ),
+                      ],
+                    ),
+                  ),
+                  FxSparkline(
+                    data: a.sparkline,
+                    width: 56,
+                    height: 22,
+                    color: rowAccent,
+                  ),
+                  const SizedBox(width: 14),
+                  SizedBox(
+                    width: 40,
+                    child: Text(
+                      '${a.aderenciaPercent}%',
+                      textAlign: TextAlign.right,
+                      style: FocuxHubTypography.metric(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: ink,
                       ),
                     ),
-                  );
-                }),
+                  ),
+                ],
               ),
-            );
-          },
-        );
-      },
+            ),
+          );
+        }),
+      ),
     );
   }
 }
@@ -360,19 +235,14 @@ class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        color: ink,
-                      ),
+                      style: FocuxHubTypography.cardTitle(color: ink),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       body,
-                      style: TextStyle(
+                      style: FocuxHubTypography.bodyMuted(
                         color: mute,
                         height: 1.35,
-                        fontSize: TokensStrip.fontBodySm,
                       ),
                     ),
                   ],
@@ -420,8 +290,9 @@ class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
                             child: Text(
                               secondaryAction!,
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: TokensStrip.fontBodySm,
+                              style: FocuxHubTypography.bodyMuted(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.w700,
                                 height: 1.1,
                               ),
                             ),

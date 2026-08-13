@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 
 class DashboardHeaderProfileAvatar extends StatelessWidget {
   const DashboardHeaderProfileAvatar({
@@ -84,10 +85,12 @@ class DashboardHeaderProfileAvatar extends StatelessWidget {
                                     child: Center(
                                       child: Text(
                                         initials,
-                                        style: TextStyle(
+                                        style: FocuxHubTypography.chip(
+                                          Colors.white,
+                                        ).copyWith(
+                                          fontSize: avatarRadius * 0.72,
                                           color: Colors.white,
                                           fontWeight: FontWeight.w700,
-                                          fontSize: avatarRadius * 0.72,
                                         ),
                                       ),
                                     ),
@@ -98,10 +101,12 @@ class DashboardHeaderProfileAvatar extends StatelessWidget {
                               child: Center(
                                 child: Text(
                                   initials,
-                                  style: TextStyle(
+                                  style: FocuxHubTypography.chip(
+                                    Colors.white,
+                                  ).copyWith(
+                                    fontSize: avatarRadius * 0.72,
                                     color: Colors.white,
                                     fontWeight: FontWeight.w700,
-                                    fontSize: avatarRadius * 0.72,
                                   ),
                                 ),
                               ),

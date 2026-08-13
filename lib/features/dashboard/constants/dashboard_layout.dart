@@ -8,6 +8,7 @@ abstract final class DashboardLayout {
   DashboardLayout._();
 
   static const double compactWidth = 390;
+  static const double comfortableWidth = 600;
   static const double attentionRailHeight = 184;
   static const double attentionCardWidth = 268;
   static const double attentionCardWidthCompact = 240;
@@ -27,6 +28,8 @@ abstract final class DashboardLayout {
   static const double maxContentWidth = FocuxPlatform.desktopMaxContent;
 
   static bool isCompact(double width) => width < compactWidth;
+
+  static bool isComfortable(double width) => width >= comfortableWidth;
 
   static double headerActionSize(double width) =>
       width < 430 ? headerActionCompact : headerActionComfort;

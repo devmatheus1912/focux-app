@@ -19,6 +19,7 @@ void main() {
       'lib/features/dashboard/widgets/dashboard_aderencia_semana_widget.dart',
       'lib/features/dashboard/utils/dashboard_screen_helpers.dart',
       'lib/features/dashboard/widgets/dashboard_tools_section.dart',
+      'lib/features/dashboard/widgets/dashboard_tools_catalog_sheet.dart',
       'lib/features/dashboard/utils/dashboard_tool_recent_store.dart',
       'lib/features/dashboard/utils/dashboard_scroll_logic.dart',
       'lib/features/dashboard/utils/dashboard_microcopy.dart',
@@ -65,6 +66,8 @@ void main() {
     expect(widget, contains('DashboardPulseSnapshot'));
     expect(widget, contains('riskOwnedByDayFocus'));
     expect(widget, contains('featuredTools'));
+    expect(widget, contains('showDashboardToolsCatalogSheet'));
+    expect(widget, contains('checkinsTrend'));
     expect(widget, contains('attentionRiskLimit'));
     expect(widget, contains('dashboardChatShortcutSubtitle'));
     expect(widget, contains('dashboardResolveUnreadCount'));

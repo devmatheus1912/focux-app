@@ -138,7 +138,7 @@ class _DashboardCollapsibleSectionState
                               style: FocuxHubTypography.sectionTitle(
                                 context,
                                 color: heading,
-                              ).copyWith(fontSize: 15),
+                              ),
                             ),
                             if (!_expanded) ...[
                               const SizedBox(height: 2),

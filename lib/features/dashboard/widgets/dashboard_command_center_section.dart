@@ -7,7 +7,6 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../alunos/providers/alunos_provider.dart';
 import '../../chat/screens/chat_inbox_screen.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../data/command_action_item.dart';
@@ -257,7 +256,7 @@ class DashboardCommandCenterSectionState
                       style: dashboardSectionTitleStyle(
                         context,
                         color: heading,
-                      ).copyWith(fontSize: 15),
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(

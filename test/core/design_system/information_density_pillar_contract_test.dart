@@ -82,9 +82,20 @@ void main() {
   });
 
   test('dashboard uses collapsible sections for progressive disclosure', () {
-    final dashboard = readScreenSourceBundle(
-      'lib/features/dashboard/screens/personal_dashboard_screen.dart',
-    );
+    final dashboard = [
+      readScreenSourceBundle(
+        'lib/features/dashboard/screens/personal_dashboard_screen.dart',
+      ),
+      File(
+        'lib/features/dashboard/widgets/dashboard_home_secondary_block.dart',
+      ).readAsStringSync(),
+      File(
+        'lib/features/dashboard/widgets/dashboard_attention_rail.dart',
+      ).readAsStringSync(),
+      File(
+        'lib/features/dashboard/widgets/dashboard_collapsible_section.dart',
+      ).readAsStringSync(),
+    ].join('\n');
     expect(dashboard, contains('DashboardCollapsibleSection'));
     expect(dashboard, contains('collapsedHint'));
     expect(dashboard, contains('maxLines'));

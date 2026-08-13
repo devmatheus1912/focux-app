@@ -6,11 +6,8 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
     final heroPrimary = BrandPalette.softened(primary, amount: 0.06);
     final heroDeep = BrandPalette.deep(heroPrimary);
     final homeAsync = ref.watch(dashboardHomeProvider);
-    final commandAsync = ref.watch(commandCenterProvider);
     final reduceMotion = TokensStrip.prefersReducedMotion(context);
     final themeDark = Theme.of(context).brightness == Brightness.dark;
-    final alunosAsync = ref.watch(alunosProvider);
-    final historicoCheckinsAsync = ref.watch(historicoCheckinProvider);
     final chromeOnDark = themeDark;
 
     return fxScreenA11yScope(
@@ -29,7 +26,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                     message: friendlyError(e),
                     onRetry: () {
                       ref.invalidate(dashboardHomeProvider);
-                      ref.invalidate(alunosProvider);
                       _loadFinFromHome();
                     },
                   ),
@@ -39,25 +35,16 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                 final isCompactPhone = DashboardLayout.isCompact(screenWidth);
                 final shortcutAspectRatio = isCompactPhone ? 2.75 : 3.05;
 
-                final chatAsync = ref.watch(chatInboxProvider);
-                final unreadFromInbox = chatAsync.maybeWhen(
-                  data:
-                      (items) => items.fold<int>(
-                        0,
-                        (sum, item) => sum + item.naoLidas,
-                      ),
-                  orElse: () => 0,
-                );
                 final snap = DashboardHomeSnapshot.build(
                   home: home,
-                  finData: _finData,
-                  alunos: alunosAsync.asData?.value,
-                  historicoCheckins: historicoCheckinsAsync.asData?.value,
-                  commandCenter: commandAsync.asData?.value,
-                  inboxUnread: unreadFromInbox,
-                  inboxReady: chatAsync.hasValue,
+                  finData: home.financeiro,
+                  alunos: null,
+                  historicoCheckins: null,
+                  commandCenter: home.commandCenter,
+                  inboxUnread: 0,
+                  inboxReady: false,
                   focusMode: _focusMode,
-                  isCommandPreparing: commandAsync.isLoading,
+                  isCommandPreparing: false,
                 );
                 final mes = snap.mesLabel;
                 final pendente = snap.pendente;
@@ -73,6 +60,13 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                 final dashboardNextActions = snap.dashboardNextActions;
                 final prioritiesSheetActions = snap.prioritiesSheetActions;
                 final showPrioritiesLink = snap.showPrioritiesLink;
+
+                if (_finData == null) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted || _finData != null) return;
+                    _applyFinanceData(home.financeiro);
+                  });
+                }
 
                 final onboardingAsync = ref.watch(onboardingStatusProvider);
                 final onboardingIncomplete = onboardingAsync.maybeWhen(
@@ -174,7 +168,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                             stickyCommandActionsLabel != null
                                 ? openCommandQuickActions
                                 : null,
-                        finData: _finData,
+                        finData: home.financeiro,
                         nextActions: dashboardNextActions,
                         prioritiesSheetActions: prioritiesSheetActions,
                         showPrioritiesLink: showPrioritiesLink,
@@ -182,8 +176,8 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                         mensagensNaoLidas: home.pulse?.mensagensNaoLidas,
                         commandFade: _commandFade,
                         kpiFade: _kpiFade,
-                        isCommandPreparing: commandAsync.isLoading,
-                        commandUnavailable: commandAsync.hasError,
+                        isCommandPreparing: false,
+                        commandUnavailable: false,
                         attentionSectionResetToken: _attentionSectionResetToken,
                         onReviewAttention: openAttentionReview,
                         onboardingIncomplete: onboardingIncomplete,
@@ -201,14 +195,15 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                             pendente: pendente,
                             progressRaw: progressRaw,
                             metaSuperada: metaSuperada,
-                            loadingFin: _loadingFin,
+                            loadingFin: false,
                             counterAnim: _counterAnim,
-                            finData: _finData,
+                            finData: home.financeiro,
                             receitaTrend: receitaTrend,
                             gradientCtrl: _gradientCtrl,
                             reduceMotion: reduceMotion,
                             heroFade: _heroFade,
                             shortcutAspectRatio: shortcutAspectRatio,
+                            topAderencia: home.topAderencia,
                             onOpenRelatorio:
                                 () => context.push('/relatorios/global'),
                           ),

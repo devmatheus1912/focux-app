@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/tokens_strip.dart';
 
 import '../utils/dashboard_readability.dart';
 
@@ -161,8 +160,7 @@ class DashboardHeroMiniStat extends StatelessWidget {
               if (suffix != null)
                 TextSpan(
                   text: suffix,
-                  style: TextStyle(
-                    fontSize: TokensStrip.fontBodySm,
+                  style: FocuxHubTypography.bodyMuted(
                     color: dashboardHeroCaptionOnTeal(),
                     fontWeight: FontWeight.w500,
                   ),

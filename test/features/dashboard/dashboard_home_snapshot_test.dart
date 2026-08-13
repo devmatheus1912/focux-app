@@ -63,6 +63,7 @@ void main() {
         pulse: const DashboardPulseSnapshot(
           checkinsHoje: 0,
           mensagensNaoLidas: 3,
+          checkinsTrend: [0, 0, 1, 0, 2, 0, 0],
         ),
       );
 
@@ -81,7 +82,10 @@ void main() {
 
       expect(snap.mesLabel, 'agosto');
       expect(snap.checkinsHoje, 0);
+      expect(snap.checkinsTrend, [0.0, 0.0, 1.0, 0.0, 2.0, 0.0, 0.0]);
       expect(snap.unreadCount, 3);
+      expect(snap.alunosEmRisco, isNotEmpty);
+      expect(snap.alunosEmRisco.first.nome, 'Ana');
       expect(snap.focusRules.hideFeaturedTools, isTrue);
       expect(snap.focusRules.collapseQuickLinks, isTrue);
       expect(snap.riscoAlto, 1);

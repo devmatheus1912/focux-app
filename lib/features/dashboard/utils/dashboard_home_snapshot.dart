@@ -114,7 +114,9 @@ class DashboardHomeSnapshot {
     final alunosEmRisco =
         alunos != null
             ? alunos.where((a) => a.emRisco).toList(growable: false)
-            : const <Aluno>[];
+            : (commandCenter?.alunosEmRisco ?? const <AlertaResumo>[])
+                .map(alunoFromAlertaResumo)
+                .toList(growable: false);
     final bffRisco = commandCenter?.alunosEmRisco.length ?? 0;
     // Contagem: BFF no first paint; max com lista local quando já carregou.
     final riscoAlto =
@@ -134,9 +136,13 @@ class DashboardHomeSnapshot {
                   local.day == clock.day;
             }).length;
     final checkinsHoje = home.pulse?.checkinsHoje ?? checkinsFromHistorico;
-    // Sem histórico ready → lista vazia (não zero-fill falso).
+    final fromPulse = dashboardCheckinsTrendFromPulse(
+      home.pulse?.checkinsTrend,
+    );
     final checkinsTrend =
-        historicoCheckins != null
+        fromPulse.isNotEmpty
+            ? fromPulse
+            : historicoCheckins != null
             ? dashboardCheckinsSparklineUltimos7Dias(historicoCheckins)
             : const <double>[];
     final receitaTrend = dashboardReceitaSparklineMensal(
