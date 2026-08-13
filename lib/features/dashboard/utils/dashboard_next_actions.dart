@@ -1,3 +1,4 @@
+import '../../../core/utils/fx_utils.dart';
 import '../data/command_action_item.dart';
 import '../data/command_center_data.dart';
 import 'dashboard_command_copy.dart';
@@ -6,7 +7,14 @@ import 'dashboard_screen_helpers.dart';
 export '../data/command_action_item.dart';
 
 /// Aluno em risco para enriquecer o sheet (ações por aluno).
-typedef DashboardRiskStudentRef = ({int id, String nome});
+typedef DashboardRiskStudentRef =
+    ({
+      int id,
+      String nome,
+      String? motivo,
+      String? nivelRisco,
+      String? proximaAcao,
+    });
 
 /// Monta a fila curada de próximas ações da Home / Central de Comando.
 ///
@@ -261,24 +269,42 @@ List<CommandActionItem> buildDashboardSheetActions({
   });
 
   final radar = <CommandActionItem>[];
+  final filaByAluno = <int, FilaAcaoResumo>{};
+  for (final action in filaAcoes) {
+    final id = action.alunoId;
+    if (id == null || filaByAluno.containsKey(id)) continue;
+    filaByAluno[id] = action;
+  }
+
+  var radarIndex = 0;
   for (final student in riskStudents.take(8)) {
+    final displayName = fxTitleCaseName(student.nome);
     final route = '/alunos/${student.id}';
-    final key = '${student.nome}|$route';
+    final key = '$displayName|$route';
     if (seenKeys.contains(key)) continue;
     seenKeys.add(key);
+    final fila = filaByAluno[student.id];
+    final isLead = radarIndex == 0;
     radar.add(
       CommandActionItem(
         icon: 'users',
-        title: student.nome,
-        subtitle: 'Contato e retenção',
+        title: displayName,
+        subtitle: dashboardRiskStudentSheetSubtitle(
+          isLead: isLead,
+          motivo: student.motivo,
+          nivelRisco: student.nivelRisco,
+          proximaAcao: student.proximaAcao,
+          filaHint: fila?.descricao,
+        ),
         route: route,
         tone: CommandActionTone.hot,
         isRadarStudent: true,
         priorityBadge: 'P0',
       ),
     );
+    radarIndex++;
   }
-  radar.sort((a, b) => a.title.compareTo(b.title));
+  // Mantém ordem de risco do BFF (1º = lead). Não ordenar A–Z.
 
   return [...impact.take(6), ...radar];
 }

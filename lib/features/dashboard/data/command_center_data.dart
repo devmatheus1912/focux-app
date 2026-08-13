@@ -270,19 +270,22 @@ class AlertaResumo {
   final String nomeAluno;
   final String motivo;
   final String nivelRisco;
+  final String? proximaAcao;
 
   AlertaResumo({
     required this.id,
     required this.nomeAluno,
     required this.motivo,
     required this.nivelRisco,
+    this.proximaAcao,
   });
 
   factory AlertaResumo.fromJson(Map<String, dynamic> json) => AlertaResumo(
     id: json['id'] as int,
     nomeAluno: json['nomeAluno'] as String,
-    motivo: json['motivo'] as String,
-    nivelRisco: json['nivelRisco'] as String,
+    motivo: json['motivo'] as String? ?? '',
+    nivelRisco: json['nivelRisco'] as String? ?? '',
+    proximaAcao: json['proximaAcao'] as String?,
   );
 }
 

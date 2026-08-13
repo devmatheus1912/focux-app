@@ -103,7 +103,7 @@ void main() {
     expect(screen, contains('dashboardPrioritiesChipForeground'));
     expect(screen, contains('RISK_STUDENTS'));
     expect(screen, contains('DashboardFinanceEmptyState'));
-    expect(screen, contains('0.42'));
+    expect(screen, contains('0.40'));
     expect(screen, contains('maxVisibleNextActions'));
     expect(screen, contains('modoFoco'));
     final shortcutsFile = File(

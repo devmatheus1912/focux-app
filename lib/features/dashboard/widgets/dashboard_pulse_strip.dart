@@ -241,6 +241,22 @@ class DashboardDayPulseStrip extends StatelessWidget {
                             height: sparkH,
                             strokeWidth: 2.0,
                             fill: true,
+                          )
+                        else if (trendReady &&
+                            !hideEmptyTrend &&
+                            trailingReserve <= 0)
+                          Text(
+                            '—',
+                            style: FocuxHubTypography.metric(
+                              color: dashboardReadableCaption(
+                                context,
+                                isDark: isDark,
+                              ),
+                              fontSize: FocuxHubTypography.metricEm,
+                            ).copyWith(
+                              fontWeight: FontWeight.w600,
+                              height: 1,
+                            ),
                           ),
                       ],
                     ),

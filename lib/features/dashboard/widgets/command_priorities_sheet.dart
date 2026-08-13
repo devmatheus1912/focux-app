@@ -225,6 +225,7 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
                           item: radarActions[index],
                           isDark: isDark,
                           primary: primary,
+                          entranceIndex: index,
                           onTap: () => _openAction(radarActions[index]),
                         ),
                       ],

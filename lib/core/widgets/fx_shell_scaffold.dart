@@ -357,11 +357,27 @@ BoxDecoration fxStripCardDecoration(
   Color? accent,
   double radius = TokensStrip.rCard,
   double glowStrength = 0.44,
+  /// Lead P0 — borda e glow mais fortes (Home / sheet).
+  bool emphasize = false,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
   final primary = accent ?? Theme.of(context).colorScheme.primary;
 
   if (isDark) {
+    if (emphasize) {
+      return BoxDecoration(
+        color: TokensStrip.glassFill(dark: true, opacity: 0.97),
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(
+          color: primary.withValues(alpha: 0.58),
+          width: 1.7,
+        ),
+        boxShadow: [
+          ...TokensStrip.elevation(12, dark: true, accent: primary),
+          ...TokensStrip.coloredDepthGlow(primary, strength: 0.72),
+        ],
+      );
+    }
     return ShellChrome.of(context).panel(
       radius: radius,
       accent: primary,
@@ -372,10 +388,16 @@ BoxDecoration fxStripCardDecoration(
   return BoxDecoration(
     color: TokensStrip.cardBg,
     borderRadius: BorderRadius.circular(radius),
-    border: Border.all(color: primary.withValues(alpha: 0.16), width: 1),
+    border: Border.all(
+      color: primary.withValues(alpha: emphasize ? 0.42 : 0.16),
+      width: emphasize ? 1.6 : 1,
+    ),
     boxShadow: [
       ...TokensStrip.cardShadow(),
-      ...TokensStrip.coloredDepthGlow(primary, strength: glowStrength),
+      ...TokensStrip.coloredDepthGlow(
+        primary,
+        strength: emphasize ? 0.62 : glowStrength,
+      ),
     ],
   );
 }

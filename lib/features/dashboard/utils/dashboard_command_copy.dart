@@ -123,3 +123,63 @@ String dashboardClampActionCopy(
   if (cut < (maxChars / 2)) cut = maxChars;
   return '${text.substring(0, cut).trimRight()}…';
 }
+
+/// Ação curta a partir de motivo / proximaAcao (espelha BE `acaoCurta`).
+String dashboardRiskActionHint(String? raw) {
+  final text = (raw ?? '').trim();
+  if (text.isEmpty) return 'contato hoje';
+  final lower = text.toLowerCase();
+  if (lower.contains('mapa') || lower.contains('corporal')) {
+    return 'mapa corporal';
+  }
+  if (lower.contains('financeir') || lower.contains('mensalidade')) {
+    return 'pendência financeira';
+  }
+  if (lower.contains('treino') ||
+      lower.contains('check-in') ||
+      lower.contains('check in')) {
+    return 'retomar treino';
+  }
+  if (lower.contains('feedback')) return 'pedir feedback';
+  if (lower.contains('medida')) return 'solicitar medida';
+  if (lower.contains('abandono') || lower.contains('risco')) {
+    return 'contato hoje';
+  }
+  return dashboardClampActionCopy(text, maxChars: 36).toLowerCase();
+}
+
+/// Subtítulo do sheet «Ações por aluno» — lead + copy distinto por aluno.
+String dashboardRiskStudentSheetSubtitle({
+  required bool isLead,
+  String? motivo,
+  String? nivelRisco,
+  String? proximaAcao,
+  String? filaHint,
+}) {
+  final hint =
+      (filaHint != null && filaHint.trim().isNotEmpty)
+          ? dashboardClampActionCopy(filaHint, maxChars: 40)
+          : (proximaAcao != null && proximaAcao.trim().isNotEmpty)
+          ? dashboardRiskActionHint(proximaAcao)
+          : (motivo != null && motivo.trim().isNotEmpty)
+          ? dashboardRiskActionHint(motivo)
+          : _riskLevelHint(nivelRisco);
+
+  if (isLead) {
+    return hint == null || hint.isEmpty
+        ? 'Comece por aqui'
+        : 'Comece por aqui · $hint';
+  }
+  return hint == null || hint.isEmpty ? 'Contato e retenção' : hint;
+}
+
+String? _riskLevelHint(String? nivelRisco) {
+  final n = (nivelRisco ?? '').trim().toUpperCase();
+  if (n.isEmpty) return null;
+  if (n.contains('ALTO') || n == 'ALTA') return 'risco alto · contato hoje';
+  if (n.contains('MEDIO') || n.contains('MÉDIO') || n == 'MEDIA') {
+    return 'risco médio · acompanhar';
+  }
+  if (n.contains('BAIXO') || n == 'BAIXA') return 'acompanhar retenção';
+  return null;
+}

@@ -173,7 +173,9 @@ class DashboardCommandCenterStickyHeaderDelegate
                               chipLabel,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: dashboardChipLabelStyle(chipFg),
+                              style: dashboardChipLabelStyle(chipFg).copyWith(
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                           ),
                         ),
@@ -233,8 +235,8 @@ class DashboardPrioritiesOverlay extends StatelessWidget {
             label: label,
             child: Material(
               color: chipBg,
-              elevation: isDark ? 2 : 1,
-              shadowColor: Colors.black.withValues(alpha: isDark ? 0.32 : 0.12),
+              elevation: isDark ? 4 : 2,
+              shadowColor: primary.withValues(alpha: isDark ? 0.55 : 0.28),
               shape: const StadiumBorder(),
               child: InkWell(
                 onTap: onTap,
@@ -248,7 +250,9 @@ class DashboardPrioritiesOverlay extends StatelessWidget {
                         label,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: dashboardChipLabelStyle(chipFg),
+                        style: dashboardChipLabelStyle(chipFg).copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                   ),

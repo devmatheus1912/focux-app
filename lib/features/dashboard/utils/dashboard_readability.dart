@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -61,15 +60,15 @@ Color dashboardHeroMutedOnTeal() => Colors.white.withValues(alpha: 0.90);
 Color dashboardPrioritiesChipBackground(
   Color primary, {
   required bool isDark,
-}) => BrandPalette.soft(
-  primary,
-  dark: isDark,
-).withValues(alpha: isDark ? 0.78 : 1);
+}) =>
+    // Mesmo peso visual do chip Foco ON — teal sólido + contraste no scroll.
+    isDark ? primary.withValues(alpha: 0.94) : primary;
 
 Color dashboardPrioritiesChipForeground(
   Color primary, {
   required bool isDark,
-}) => BrandPalette.sectionAction(primary, dark: isDark);
+}) =>
+    isDark ? EagleTokens.brandDeep : Colors.white;
 
 TextStyle dashboardPageTitleStyle(BuildContext context, {required Color color}) =>
     FocuxHubTypography.pageTitle(context, color: color);

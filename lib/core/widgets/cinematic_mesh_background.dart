@@ -123,7 +123,7 @@ class _CinematicMeshBackgroundState extends State<CinematicMeshBackground>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      cornerGlow.withValues(alpha: isLight ? 0.10 : 0.16),
+                      cornerGlow.withValues(alpha: isLight ? 0.14 : 0.16),
                       Colors.transparent,
                     ],
                     stops: const [0.0, 0.72],
@@ -143,7 +143,7 @@ class _CinematicMeshBackgroundState extends State<CinematicMeshBackground>
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      primary.withValues(alpha: isLight ? 0.05 : 0.10),
+                      primary.withValues(alpha: isLight ? 0.08 : 0.10),
                       Colors.transparent,
                     ],
                   ),
@@ -192,7 +192,7 @@ class _CinematicGridPainter extends CustomPainter {
         Paint()
           ..color =
               light
-                  ? TokensStrip.neonGlow.withValues(alpha: 0.05)
+                  ? TokensStrip.neonGlow.withValues(alpha: 0.09)
                   : TokensStrip.neonGlow.withValues(alpha: 0.07)
           ..strokeWidth = 0.5
           ..style = PaintingStyle.stroke;

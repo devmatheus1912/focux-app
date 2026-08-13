@@ -42,7 +42,9 @@ class CommandActionTile extends StatelessWidget {
     final badge = item.priorityBadge;
     final reduceMotion = TokensStrip.prefersReducedMotion(context);
     final isLead = entranceIndex == 0 &&
-        (badge?.toUpperCase() == 'P0' || item.tone == CommandActionTone.hot);
+        (badge?.toUpperCase() == 'P0' ||
+            item.tone == CommandActionTone.hot ||
+            item.isRadarStudent);
 
     Widget tile = Semantics(
       label: '${item.title}. ${item.subtitle}',
@@ -56,7 +58,8 @@ class CommandActionTile extends StatelessWidget {
             context,
             accent: accent,
             radius: TokensStrip.rCard,
-            glowStrength: isLead ? 0.08 : 0.05,
+            glowStrength: isLead ? 0.22 : 0.05,
+            emphasize: isLead,
           ),
           child: Row(
             children: [

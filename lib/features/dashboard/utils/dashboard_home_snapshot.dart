@@ -214,13 +214,37 @@ class DashboardHomeSnapshot {
         commandCenter?.cobrancasPendentes.length ??
         finData?.totalInadimplentes ??
         0;
+    final alertaById = {
+      for (final a in commandCenter?.alunosEmRisco ?? const <AlertaResumo>[])
+        a.id: a,
+    };
     final riskStudentsForSheet =
         alunosEmRisco.isNotEmpty
             ? alunosEmRisco
-                .map((a) => (id: a.id, nome: a.nome))
+                .map((a) {
+                  final alerta = alertaById[a.id];
+                  return (
+                    id: a.id,
+                    nome: a.nome,
+                    motivo: a.objetivo ??
+                        (alerta?.motivo.isEmpty == false
+                            ? alerta!.motivo
+                            : null),
+                    nivelRisco: a.riscoNivel ?? alerta?.nivelRisco,
+                    proximaAcao: alerta?.proximaAcao,
+                  );
+                })
                 .toList(growable: false)
             : (commandCenter?.alunosEmRisco ?? const <AlertaResumo>[])
-                .map((a) => (id: a.id, nome: a.nomeAluno))
+                .map(
+                  (a) => (
+                    id: a.id,
+                    nome: a.nomeAluno,
+                    motivo: a.motivo.isEmpty ? null : a.motivo,
+                    nivelRisco: a.nivelRisco,
+                    proximaAcao: a.proximaAcao,
+                  ),
+                )
                 .toList(growable: false);
     final dashboardNextActions = buildDashboardNextActions(
       filaAcoes: filaAcoes,

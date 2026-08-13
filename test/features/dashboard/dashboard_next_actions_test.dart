@@ -165,13 +165,16 @@ void main() {
         curated: curated,
         filaAcoes: const [],
         riskStudents: [
-          (id: 1, nome: 'Ana'),
-          (id: 2, nome: 'Bruno'),
+          (id: 1, nome: 'Ana', motivo: null, nivelRisco: 'ALTO', proximaAcao: null),
+          (id: 2, nome: 'Bruno', motivo: null, nivelRisco: 'MEDIO', proximaAcao: null),
         ],
       );
 
       expect(sheet.where((a) => a.isRadarStudent).length, 2);
       expect(sheet.every((a) => a.isRadarStudent), isTrue);
+      expect(sheet.first.title, 'Ana');
+      expect(sheet.first.subtitle, contains('Comece por aqui'));
+      expect(sheet[1].subtitle, isNot(equals(sheet.first.subtitle)));
       expect(
         dashboardShouldShowPrioritiesLink(
           visible: curated,
@@ -180,6 +183,33 @@ void main() {
         ),
         isTrue,
       );
+    });
+
+    test('title-cases radar names and keeps risk order', () {
+      final sheet = buildDashboardSheetActions(
+        curated: const [],
+        filaAcoes: const [],
+        riskStudents: [
+          (
+            id: 9,
+            nome: 'thales silva',
+            motivo: 'Sem treino ha 10 dias',
+            nivelRisco: 'ALTO',
+            proximaAcao: 'Retomar treino com mensagem curta',
+          ),
+          (
+            id: 2,
+            nome: 'ana',
+            motivo: 'Inadimplente',
+            nivelRisco: 'MEDIO',
+            proximaAcao: 'Regularizar financeiro',
+          ),
+        ],
+      );
+
+      expect(sheet.map((a) => a.title).toList(), ['Thales Silva', 'Ana']);
+      expect(sheet.first.subtitle, contains('Comece por aqui'));
+      expect(sheet[1].subtitle.toLowerCase(), contains('financeir'));
     });
 
     test('omits curated P0/P1 and keeps only extras plus students', () {
@@ -205,7 +235,9 @@ void main() {
             prioridade: 'P2',
           ),
         ],
-        riskStudents: [(id: 1, nome: 'Ana')],
+        riskStudents: [
+          (id: 1, nome: 'Ana', motivo: null, nivelRisco: null, proximaAcao: null),
+        ],
       );
 
       final curatedKeys = {

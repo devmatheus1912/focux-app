@@ -31,11 +31,11 @@ Future<void> showDashboardToolsCatalogSheet(
           bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
         ),
         child: DraggableScrollableSheet(
-          initialChildSize: 0.72,
-          minChildSize: 0.42,
-          maxChildSize: 0.98,
+          initialChildSize: 0.58,
+          minChildSize: 0.40,
+          maxChildSize: 0.96,
           snap: true,
-          snapSizes: const [0.42, 0.72, 0.98],
+          snapSizes: const [0.40, 0.58, 0.96],
           builder:
               (_, scrollController) => DashboardToolsCatalogSheet(
                 parentContext: context,
@@ -87,7 +87,9 @@ class _DashboardToolsCatalogSheetState extends State<DashboardToolsCatalogSheet>
     final groups = groupDashboardToolShortcuts(shortcuts);
     final media = MediaQuery.of(context);
     final sheetColor =
-        widget.isDark ? EagleTokens.darkCard : Theme.of(context).colorScheme.surface;
+        widget.isDark
+            ? Color.lerp(EagleTokens.darkCard, EagleTokens.darkCardHi, 0.35)!
+            : Theme.of(context).colorScheme.surface;
     final searchFill =
         widget.isDark ? EagleTokens.darkCardHi : TokensStrip.pageBg;
 
