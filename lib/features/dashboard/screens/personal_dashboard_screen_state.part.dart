@@ -126,7 +126,7 @@ class _PersonalDashboardScreenState
         _commandPanelKey.currentContext?.findRenderObject() as RenderBox?;
     if (box == null || !box.attached || !box.hasSize) return;
     final panelBottom = box.localToGlobal(Offset.zero).dy + box.size.height;
-    final headerReserve = MediaQuery.of(context).padding.top + 56;
+    final headerReserve = MediaQuery.of(context).padding.top + 48;
     final offscreen = panelBottom <= headerReserve;
     if (dashboardScrollVisualStateChanged(
       previousPanelOffscreen: _prioritiesPanelOffscreen,

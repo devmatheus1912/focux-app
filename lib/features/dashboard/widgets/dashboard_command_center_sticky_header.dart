@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
@@ -13,6 +14,7 @@ class DashboardCommandCenterStickyHeaderDelegate
     required this.primary,
     required this.subtitle,
     this.compact = false,
+    this.utilityOnly = false,
     this.showPrioritiesAction = false,
     this.trailingActionLabel,
     this.onTrailingAction,
@@ -23,6 +25,8 @@ class DashboardCommandCenterStickyHeaderDelegate
   final String subtitle;
   /// Modo foco: sticky curto, sem subtítulo — evita título duplicado.
   final bool compact;
+  /// Barra só com Prioridades — não rotula Pulso/financeiro como Central.
+  final bool utilityOnly;
   final bool showPrioritiesAction;
   final String? trailingActionLabel;
   final VoidCallback? onTrailingAction;
@@ -30,12 +34,15 @@ class DashboardCommandCenterStickyHeaderDelegate
   static const double _maxExtent = 72;
   static const double _minExtent = 48;
   static const double _compactExtent = 44;
+  static const double _utilityExtent = 48;
 
   @override
-  double get minExtent => compact ? _compactExtent : _minExtent;
+  double get minExtent =>
+      utilityOnly ? _utilityExtent : (compact ? _compactExtent : _minExtent);
 
   @override
-  double get maxExtent => compact ? _compactExtent : _maxExtent;
+  double get maxExtent =>
+      utilityOnly ? _utilityExtent : (compact ? _compactExtent : _maxExtent);
 
   @override
   Widget build(
@@ -47,7 +54,7 @@ class DashboardCommandCenterStickyHeaderDelegate
     final mute = dashboardReadableCaption(context, isDark: isDark);
     final range = (maxExtent - minExtent).clamp(1.0, 100.0);
     final progress = (shrinkOffset / range).clamp(0.0, 1.0);
-    final showSubtitle = !compact && progress < 0.55;
+    final showSubtitle = !utilityOnly && !compact && progress < 0.55;
     final link = BrandPalette.sectionLink(primary, dark: isDark);
     final hasTrailing =
         trailingActionLabel != null &&
@@ -55,13 +62,18 @@ class DashboardCommandCenterStickyHeaderDelegate
         trailingActionLabel!.trim().isNotEmpty;
 
     final showTrailingChip = hasTrailing && showPrioritiesAction;
+    final semanticsLabel =
+        utilityOnly
+            ? (trailingActionLabel?.trim().isNotEmpty == true
+                ? trailingActionLabel!
+                : 'Prioridades')
+            : showSubtitle
+            ? '${DashboardMicrocopy.commandCenterTitle}. $subtitle'
+            : DashboardMicrocopy.commandCenterTitle;
 
     return Semantics(
-      header: true,
-      label:
-          showSubtitle
-              ? '${DashboardMicrocopy.commandCenterTitle}. $subtitle'
-              : DashboardMicrocopy.commandCenterTitle,
+      header: !utilityOnly,
+      label: semanticsLabel,
       child: Material(
         color:
             isDark ? EagleTokens.darkBg : Theme.of(context).colorScheme.surface,
@@ -79,11 +91,12 @@ class DashboardCommandCenterStickyHeaderDelegate
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final layoutCompact = compact || constraints.maxHeight < 52;
+              final layoutCompact =
+                  utilityOnly || compact || constraints.maxHeight < 52;
               final showSubtitleLine =
                   showSubtitle && !layoutCompact && !showPrioritiesAction;
               final chipLabel =
-                  layoutCompact && hasTrailing
+                  (utilityOnly || layoutCompact) && hasTrailing
                       ? 'Prioridades'
                       : trailingActionLabel;
               final topPad = layoutCompact ? 4.0 : (8 - (4 * progress));
@@ -99,47 +112,43 @@ class DashboardCommandCenterStickyHeaderDelegate
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: ClipRect(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                DashboardMicrocopy.commandCenterTitle,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.titleMedium!.copyWith(
-                                  fontSize:
-                                      15 -
-                                      (1.5 * progress) -
-                                      (layoutCompact ? 0.5 : 0),
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.2,
-                                  height: layoutCompact ? 1.05 : 1.12,
-                                  color: heading,
-                                ),
-                              ),
-                              if (showSubtitleLine) ...[
-                                const SizedBox(height: 1),
+                    if (!utilityOnly)
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: ClipRect(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 Text(
-                                  subtitle,
+                                  DashboardMicrocopy.commandCenterTitle,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TokensStrip.bodyMuted(
-                                    color: mute,
-                                  ).copyWith(height: 1.2),
+                                  style: FocuxHubTypography.sectionTitle(
+                                    context,
+                                    color: heading,
+                                  ),
                                 ),
+                                if (showSubtitleLine) ...[
+                                  const SizedBox(height: 1),
+                                  Text(
+                                    subtitle,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: FocuxHubTypography.bodyMuted(
+                                      color: mute,
+                                      height: 1.2,
+                                    ),
+                                  ),
+                                ],
                               ],
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    ),
+                      )
+                    else
+                      const Spacer(),
                     if (showTrailingChip && chipLabel != null)
                       Padding(
                         padding: const EdgeInsets.only(left: 6),
@@ -149,7 +158,7 @@ class DashboardCommandCenterStickyHeaderDelegate
                           child: TextButton(
                             onPressed: onTrailingAction,
                             style: TextButton.styleFrom(
-                              minimumSize: Size(48, layoutCompact ? 36 : 40),
+                              minimumSize: const Size(48, 48),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 10,
                               ),
@@ -183,6 +192,7 @@ class DashboardCommandCenterStickyHeaderDelegate
         oldDelegate.primary != primary ||
         oldDelegate.subtitle != subtitle ||
         oldDelegate.compact != compact ||
+        oldDelegate.utilityOnly != utilityOnly ||
         oldDelegate.showPrioritiesAction != showPrioritiesAction ||
         oldDelegate.trailingActionLabel != trailingActionLabel;
   }

@@ -45,10 +45,10 @@ class CommandActionPanel extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               DashboardMicrocopy.proximasAcoes,
-              style: TokensStrip.h2(
+              style: FocuxHubTypography.sectionTitle(
+                context,
                 color: heading,
-                fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
-              ).copyWith(fontSize: TokensStrip.fontH2),
+              ),
             ),
             const Spacer(),
             if (prioritiesActionLabel != null && onPrioritiesTap != null)

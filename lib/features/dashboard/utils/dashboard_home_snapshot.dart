@@ -115,7 +115,12 @@ class DashboardHomeSnapshot {
         alunos != null
             ? alunos.where((a) => a.emRisco).toList(growable: false)
             : const <Aluno>[];
-    final riscoAlto = alunosEmRisco.length;
+    final bffRisco = commandCenter?.alunosEmRisco.length ?? 0;
+    // Contagem: BFF no first paint; max com lista local quando já carregou.
+    final riscoAlto =
+        alunos != null
+            ? math.max(alunosEmRisco.length, bffRisco)
+            : bffRisco;
 
     final checkinsFromHistorico =
         historicoCheckins == null
@@ -204,9 +209,13 @@ class DashboardHomeSnapshot {
         finData?.totalInadimplentes ??
         0;
     final riskStudentsForSheet =
-        alunosEmRisco
-            .map((a) => (id: a.id, nome: a.nome))
-            .toList(growable: false);
+        alunosEmRisco.isNotEmpty
+            ? alunosEmRisco
+                .map((a) => (id: a.id, nome: a.nome))
+                .toList(growable: false)
+            : (commandCenter?.alunosEmRisco ?? const <AlertaResumo>[])
+                .map((a) => (id: a.id, nome: a.nomeAluno))
+                .toList(growable: false);
     final dashboardNextActions = buildDashboardNextActions(
       filaAcoes: filaAcoes,
       unreadCount: unreadCount,

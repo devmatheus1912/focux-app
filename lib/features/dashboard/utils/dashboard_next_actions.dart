@@ -31,29 +31,40 @@ List<CommandActionItem> buildDashboardNextActions({
   final copilotAcoes = filaAcoes.where((a) => a.tipo == 'IA_COPILOTO').toList();
   final filaNaoCopilot =
       filaAcoes.where((a) => a.tipo != 'IA_COPILOTO').toList();
+  final hasRiskInFila = filaAcoes.any(_isFilaRisk);
+  final showRiskP0 = alunosRisco > 0 || hasRiskInFila;
+  final queueCandidates =
+      filaNaoCopilot.where((a) {
+        if (showRiskP0 && _isFilaRisk(a)) return false;
+        if (cobrancasPendentes > 0 &&
+            (a.actionKey == 'BILLING_PENDING' || a.tipo == 'COBRANCA')) {
+          return false;
+        }
+        return true;
+      }).toList();
   final queueAction =
-      filaNaoCopilot.isEmpty
+      queueCandidates.isEmpty
           ? null
           : (hideRiskSummary &&
                   isRiskEchoCopy(
-                    '${filaNaoCopilot.first.titulo} ${filaNaoCopilot.first.descricao}',
+                    '${queueCandidates.first.titulo} ${queueCandidates.first.descricao}',
                   )
               ? null
               : CommandActionItem(
                 icon: 'zap',
                 title: 'Executar próxima ação',
                 subtitle: dashboardFormatActionCopy(
-                  filaNaoCopilot.first.descricao,
+                  queueCandidates.first.descricao,
                 ),
                 route:
-                    filaNaoCopilot.first.acaoUrl.startsWith('/')
-                        ? filaNaoCopilot.first.acaoUrl
+                    queueCandidates.first.acaoUrl.startsWith('/')
+                        ? queueCandidates.first.acaoUrl
                         : '/dashboard/personal',
                 tone: CommandActionTone.primary,
               ));
 
   final nextActions = <CommandActionItem>[
-    if (alunosRisco > 0)
+    if (showRiskP0)
       CommandActionItem(
         icon:
             riskOwnedByDayFocus
@@ -158,6 +169,10 @@ CommandActionItem sheetItemFromFila(FilaAcaoResumo action) {
     isRadarStudent: isRadar,
     priorityBadge: badge,
   );
+}
+
+bool _isFilaRisk(FilaAcaoResumo action) {
+  return action.actionKey == 'RISK_STUDENTS' || action.tipo == 'RISCO';
 }
 
 int dashboardActionPriorityRank(CommandActionItem item) {

@@ -215,16 +215,13 @@ class _DashboardCollapsibleSectionState
                           customBorder: const CircleBorder(),
                           child: Padding(
                             padding: const EdgeInsets.all(6),
-                            child: AnimatedRotation(
-                              turns: _expanded ? 0.25 : 0,
-                              duration: motionDuration,
-                              curve: Curves.easeOutCubic,
-                              child: Icon(
-                                Icons.chevron_right_rounded,
+                            child: Icon(
+                                _expanded
+                                    ? Icons.expand_less_rounded
+                                    : Icons.expand_more_rounded,
                                 size: 22,
                                 color: link,
                               ),
-                            ),
                           ),
                         ),
                       ),

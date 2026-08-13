@@ -98,7 +98,7 @@ void main() {
     expect(screen, contains('RISK_STUDENTS'));
     expect(screen, contains('Abrir financeiro'));
     expect(screen, contains('_compactZeroRevenue'));
-    expect(screen, contains('backgroundColor: Colors.white'));
+    expect(screen, contains('ghost ? Colors.white'));
     expect(screen, contains('maxVisibleNextActions'));
     expect(screen, contains('modoFoco'));
     final shortcutsFile = File(
@@ -115,8 +115,10 @@ void main() {
     expect(screen, contains('omitSecondarySections'));
     expect(screen, contains('DashboardHomeHeader'));
     expect(screen, contains('DashboardAttentionRail'));
-    expect(screen, contains('FocuxHubTypography'));
-    expect(screen, contains('dashboardPageTitleStyle'));
+    expect(screen, contains('checkinsPulseLabel'));
+    expect(screen, contains('utilityOnly'));
+    expect(screen, contains('hideEmptyTrend'));
+    expect(screen, contains('FocuxHubTypography.sectionTitle'));
 
     final semanticsCount = 'Semantics('.allMatches(screen).length;
     expect(semanticsCount, greaterThanOrEqualTo(10));

@@ -142,12 +142,8 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                 return RefreshIndicator(
                   onRefresh: () async {
                     ref.invalidate(dashboardHomeProvider);
-                    ref.invalidate(alunosProvider);
-                    ref.invalidate(historicoCheckinProvider);
-                    ref.invalidate(aderenciaTop3Provider);
                     ref.invalidate(notificacoesProvider);
                     ref.invalidate(notificacoesNaoLidasProvider);
-                    ref.invalidate(onboardingStatusProvider);
                     await _loadFinFromHome();
                     if (context.mounted) {
                       FeedbackHelper.showSuccess(

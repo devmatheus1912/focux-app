@@ -200,15 +200,12 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
                                     ),
                                   ),
                                 ),
-                                AnimatedRotation(
-                                  turns: _radarExpanded ? 0.25 : 0,
-                                  duration: const Duration(milliseconds: 220),
-                                  curve: Curves.easeOutCubic,
-                                  child: Icon(
-                                    Icons.chevron_right_rounded,
-                                    size: 22,
-                                    color: link,
-                                  ),
+                                Icon(
+                                  _radarExpanded
+                                      ? Icons.expand_less_rounded
+                                      : Icons.expand_more_rounded,
+                                  size: 22,
+                                  color: link,
                                 ),
                               ],
                             ),

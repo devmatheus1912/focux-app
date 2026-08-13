@@ -31,6 +31,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
     required this.onAgenda,
     required this.onRisco,
     this.showEmptyTrendCta = false,
+    this.hideEmptyTrend = false,
     this.emptyTrendCtaLabel,
     this.onEmptyTrendCta,
     this.collapseBody = false,
@@ -50,6 +51,8 @@ class DashboardDayPulseStrip extends StatelessWidget {
   final VoidCallback onAgenda;
   final VoidCallback onRisco;
   final bool showEmptyTrendCta;
+  /// Esconde “Tendência 7 dias” vazia quando Foco/aderência já narram o zero.
+  final bool hideEmptyTrend;
   final String? emptyTrendCtaLabel;
   final VoidCallback? onEmptyTrendCta;
   /// Modo foco: esconde tendência/sparkline (só chips).
@@ -107,7 +110,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
                   child: DashboardPulseChip(
                   icon: 'circle-check',
                   value: checkinsHoje.toString(),
-                  label: 'Checks',
+                  label: DashboardMicrocopy.checkinsPulseLabel,
                   accent: checkinsAccent,
                   isDark: isDark,
                   compact: tight,
@@ -147,6 +150,9 @@ class DashboardDayPulseStrip extends StatelessWidget {
               ),
             ],
           ),
+          if (hasTrend ||
+              showEmptyTrendCta ||
+              (trendReady && !hideEmptyTrend)) ...[
           const SizedBox(height: 8),
           Builder(
             builder: (context) {
@@ -184,7 +190,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
                                     isDark: isDark,
                                   ),
                                 ),
-                                if (trendReady && !hasTrend) ...[
+                                if (trendReady && !hasTrend && !hideEmptyTrend) ...[
                                   const SizedBox(height: 2),
                                   Text(
                                     emptyDetail,
@@ -212,7 +218,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
                             strokeWidth: 2.0,
                             fill: true,
                           )
-                        else if (trendReady)
+                        else if (trendReady && !hideEmptyTrend)
                           _DashboardTrendEmptyChip(
                             isDark: isDark,
                             accent: mute,
@@ -259,6 +265,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
                 ),
               ),
             ),
+          ],
           ],
         ],
       ),
@@ -405,10 +412,8 @@ class DashboardPulseChip extends StatelessWidget {
                       label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: FocuxHubTypography.chip(accent).copyWith(
                         fontSize: labelSize,
-                        fontWeight: FontWeight.w700,
-                        color: accent,
                         height: 1.1,
                       ),
                     ),

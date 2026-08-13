@@ -118,15 +118,12 @@ class DashboardExpandableToolGroupsState
                         ),
                       ),
                       const Spacer(),
-                      AnimatedRotation(
-                        turns: _openGroups.contains(group.title) ? 0.25 : 0,
-                        duration: const Duration(milliseconds: 220),
-                        curve: Curves.easeOutCubic,
-                        child: Icon(
-                          Icons.chevron_right_rounded,
-                          size: 20,
-                          color: link,
-                        ),
+                      Icon(
+                        _openGroups.contains(group.title)
+                            ? Icons.expand_less_rounded
+                            : Icons.expand_more_rounded,
+                        size: 20,
+                        color: link,
                       ),
                     ],
                   ),

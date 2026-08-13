@@ -10,7 +10,7 @@ FilaAcaoResumo _fila() {
     actionKey: 'RISK_STUDENTS',
     titulo: 'Recuperar alunos em risco',
     descricao: '8 alunos',
-    acaoUrl: '/alertas',
+    acaoUrl: '/retencao',
     prioridade: 'P0',
     severidade: 'ALTA',
     responsavel: 'Personal',
@@ -26,7 +26,14 @@ void main() {
     test('aggregates focus, attention limits and next actions', () {
       final commandCenter = CommandCenterData(
         agendaHoje: const [],
-        alunosEmRisco: const [],
+        alunosEmRisco: [
+          AlertaResumo(
+            id: 42,
+            nomeAluno: 'Ana',
+            motivo: 'Sem treino',
+            nivelRisco: 'ALTO',
+          ),
+        ],
         alunosScore: const [],
         cobrancasPendentes: const [],
         autonomiaGargalos: const [],
@@ -77,8 +84,9 @@ void main() {
       expect(snap.unreadCount, 3);
       expect(snap.focusRules.hideFeaturedTools, isTrue);
       expect(snap.focusRules.collapseQuickLinks, isTrue);
-      expect(snap.dashboardNextActions, isNotEmpty);
-      expect(snap.dashboardNextActions.length, lessThanOrEqualTo(2));
+      expect(snap.riscoAlto, 1);
+      expect(snap.dashboardNextActions.first.priorityBadge, 'P0');
+      expect(snap.dashboardNextActions.first.route, '/retencao');
     });
   });
 }

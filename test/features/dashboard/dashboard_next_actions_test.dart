@@ -82,6 +82,33 @@ void main() {
       expect(actions.first.title, 'Cobrar pendências');
     });
 
+    test('does not duplicate P0 when RISK_STUDENTS is already in the queue', () {
+      final actions = buildDashboardNextActions(
+        filaAcoes: [
+          _fila(
+            actionKey: 'RISK_STUDENTS',
+            tipo: 'RISCO',
+            titulo: 'Recuperar alunos em risco',
+            descricao: '8 alunos com risco de abandono',
+            acaoUrl: '/retencao',
+            prioridade: 'P0',
+          ),
+        ],
+        unreadCount: 0,
+        alunosRisco: 8,
+        cobrancasPendentes: 0,
+        agendaHoje: 0,
+        hideRiskSummary: true,
+        riskOwnedByDayFocus: true,
+        isCommandPreparing: false,
+        maxItems: 3,
+      );
+
+      expect(actions.where((a) => a.priorityBadge == 'P0'), hasLength(1));
+      expect(actions.first.title, 'Abrir fila de retenção');
+      expect(actions.any((a) => a.title == 'Executar próxima ação'), isFalse);
+    });
+
     test('falls back to create opportunity when empty', () {
       final actions = buildDashboardNextActions(
         filaAcoes: const [],

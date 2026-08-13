@@ -19,6 +19,7 @@ abstract final class DashboardMicrocopy {
   static const buscarFerramenta = 'Buscar ferramenta...';
   static const tendencia7Dias = 'Tendência 7 dias';
   static const tendenciaVaziaChip = 'Sem treinos';
+  static const checkinsPulseLabel = 'Check-ins';
   static const tendenciaVaziaBase =
       'Base ativa · nenhum treino nos últimos 7 dias';
   static const tendenciaVaziaGeral = 'Sem check-ins nos últimos 7 dias';

@@ -42,6 +42,7 @@ void main() {
       expect(rules.hideFeaturedTools, isTrue);
       expect(rules.omitSecondarySections, isTrue);
       expect(rules.collapsePulseBody, isTrue);
+      expect(rules.collapseAderencia, isTrue);
       expect(rules.maxVisibleNextActions, 2);
     });
 
@@ -64,6 +65,7 @@ void main() {
       expect(rules.omitSecondarySections, isFalse);
       expect(rules.hideFeaturedTools, isFalse);
       expect(rules.collapsePulseBody, isFalse);
+      expect(rules.collapseAderencia, isFalse);
     });
 
     test('focus off keeps quick links collapsed by default', () {

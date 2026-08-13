@@ -51,14 +51,20 @@ class DashboardFinancialHeroSection extends StatelessWidget {
   bool get _compactZeroRevenue => receitaAtual <= 0 && !loadingFin;
 
   Widget _financeHeroCta(BuildContext context) {
+    final ghost = _compactZeroRevenue;
     return SizedBox(
       width: double.infinity,
       child: FilledButton(
         onPressed: () => context.go('/financeiro'),
         style: FilledButton.styleFrom(
-          minimumSize: const Size.fromHeight(44),
-          backgroundColor: Colors.white,
-          foregroundColor: BrandPalette.deep(heroDeep),
+          minimumSize: const Size(48, 48),
+          backgroundColor:
+              ghost ? Colors.white.withValues(alpha: 0.14) : Colors.white,
+          foregroundColor: ghost ? Colors.white : BrandPalette.deep(heroDeep),
+          side:
+              ghost
+                  ? BorderSide(color: Colors.white.withValues(alpha: 0.42))
+                  : BorderSide.none,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(TokensStrip.rButton),
           ),
@@ -159,7 +165,10 @@ class DashboardFinancialHeroSection extends StatelessWidget {
                   boxShadow: [
                     ...TokensStrip.coloredDepthGlow(
                       heroPrimary,
-                      strength: themeDark ? 0.14 : 0.18,
+                      strength:
+                          themeDark
+                              ? (_compactZeroRevenue ? 0.06 : 0.14)
+                              : 0.18,
                     ),
                     BoxShadow(
                       color: heroPrimary.withValues(

@@ -159,28 +159,6 @@ class DashboardCommandCenterSectionState
       conversationCount: totalConversas,
     );
 
-    final alunosAtivos =
-        widget.alunosAtivos ??
-        ref.watch(alunosProvider).maybeWhen(
-          data: (alunos) => alunos.where((a) => a.status == 'ATIVO').length,
-          orElse: () => 0,
-        );
-
-    final agendaHoje =
-        widget.agendaHojeCount ??
-        commandAsync?.maybeWhen(
-          data: (cc) => cc.agendaHoje.length,
-          orElse: () => 0,
-        ) ??
-        0;
-    final agendaSubtitle = agendaHoje > 0 ? '$agendaHoje hoje' : 'Sem agenda';
-
-    final receitaMes = finData?.receitaMes ?? 0;
-    final finSubtitle =
-        receitaMes > 0
-            ? 'R\$ ${receitaMes.toInt().toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => '.')}'
-            : 'Ver finanças';
-
     final copilotOpen =
         widget.copilotOpenCount ??
         commandAsync?.maybeWhen(
@@ -412,15 +390,12 @@ class DashboardCommandCenterSectionState
                       ),
                     ),
                     const Spacer(),
-                    AnimatedRotation(
-                      turns: _quickLinksExpanded ? 0.25 : 0,
-                      duration: dashboardMotionDuration(context),
-                      curve: Curves.easeOutCubic,
-                      child: FxIcon(
-                        name: 'chevron-right',
-                        size: 16,
-                        color: actionColor,
-                      ),
+                    Icon(
+                      _quickLinksExpanded
+                          ? Icons.expand_less_rounded
+                          : Icons.expand_more_rounded,
+                      size: 16,
+                      color: actionColor,
                     ),
                   ],
                 ),

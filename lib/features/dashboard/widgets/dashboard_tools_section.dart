@@ -137,15 +137,12 @@ class DashboardCollapsibleToolsSectionState
                           ],
                         ),
                       ),
-                      AnimatedRotation(
-                        turns: _expanded ? 0.25 : 0,
-                        duration: dashboardMotionDuration(context),
-                        curve: Curves.easeOutCubic,
-                        child: Icon(
-                          Icons.chevron_right_rounded,
-                          size: 22,
-                          color: link,
-                        ),
+                      Icon(
+                        _expanded
+                            ? Icons.expand_less_rounded
+                            : Icons.expand_more_rounded,
+                        size: 22,
+                        color: link,
                       ),
                     ],
                   ),

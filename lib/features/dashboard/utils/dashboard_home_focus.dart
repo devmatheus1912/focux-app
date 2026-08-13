@@ -98,7 +98,7 @@ class DashboardHomeFocusRules {
       focusMode: focusMode,
       dayFocusCoversRetention: covers,
       collapseAttention: focusMode || covers || riscoAlto > 3,
-      collapseAderencia: true,
+      collapseAderencia: focusMode,
       collapseFinance: focusMode || covers || receitaAtual <= 0,
       hideSecondaryRiskCtas: focusMode || covers,
       hidePromoBanners: retentionGuard || focusMode,

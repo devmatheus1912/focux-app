@@ -9,6 +9,7 @@ void main() {
       'lib/features/dashboard/screens/personal_dashboard_screen_build.part.dart',
       'lib/features/dashboard/screens/personal_dashboard_screen_state.part.dart',
       'lib/features/dashboard/widgets/dashboard_command_center_section.dart',
+      'lib/features/dashboard/widgets/dashboard_home_primary_slivers.dart',
       'lib/features/dashboard/widgets/dashboard_command_center_sticky_header.dart',
       'lib/features/dashboard/widgets/command_action_panel.dart',
       'lib/features/dashboard/widgets/command_action_tile.dart',

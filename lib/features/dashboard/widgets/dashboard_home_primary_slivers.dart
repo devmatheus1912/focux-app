@@ -103,18 +103,20 @@ List<Widget> buildDashboardHomePrimarySlivers({
         onToggleFocus: onToggleFocus,
       ),
     ),
-    SliverPersistentHeader(
-      pinned: true,
-      delegate: DashboardCommandCenterStickyHeaderDelegate(
-        isDark: isDark,
-        primary: primary,
-        subtitle: commandCenterSubtitle,
-        compact: focusRules.compactCommandSticky,
-        showPrioritiesAction: showStickyPrioritiesAction,
-        trailingActionLabel: stickyCommandActionsLabel,
-        onTrailingAction: onTrailingAction,
+    if (showStickyPrioritiesAction)
+      SliverPersistentHeader(
+        pinned: true,
+        delegate: DashboardCommandCenterStickyHeaderDelegate(
+          isDark: isDark,
+          primary: primary,
+          subtitle: commandCenterSubtitle,
+          compact: true,
+          utilityOnly: true,
+          showPrioritiesAction: showStickyPrioritiesAction,
+          trailingActionLabel: stickyCommandActionsLabel,
+          onTrailingAction: onTrailingAction,
+        ),
       ),
-    ),
     SliverToBoxAdapter(
       child: dashboardEntryMotion(
         context: context,
@@ -202,19 +204,24 @@ List<Widget> buildDashboardHomePrimarySlivers({
           collapseBody: focusRules.collapsePulseBody,
           onAtivos:
               () => goPersonalShellTab(context, '/alunos?filtro=ativos'),
-          onCheckins: () => context.go('/checkin/historico'),
+          onCheckins: () => goPersonalShellTab(context, '/checkin/historico'),
           onAgenda: () => goPersonalShellTab(context, '/agenda'),
           onRisco:
               riscoAlto > 0
                   ? () => goPersonalShellTab(context, '/alunos?filtro=risco')
                   : () => goPersonalShellTab(context, '/alunos'),
+          hideEmptyTrend:
+              focusRules.collapsePulseBody ||
+              focusRules.dayFocusCoversRetention ||
+              focusRules.suppressSecondaryEmptyCtas,
           showEmptyTrendCta:
               checkinsTrend.length >= 7 &&
               !checkinsTrend.any((v) => v > 0) &&
               alunosAtivos > 0 &&
               checkinsHoje == 0 &&
               !focusRules.suppressSecondaryEmptyCtas &&
-              !focusRules.collapsePulseBody,
+              !focusRules.collapsePulseBody &&
+              !focusRules.dayFocusCoversRetention,
           emptyTrendCtaLabel:
               primeiroTreinoCriado ? 'Ver agenda' : 'Agendar primeiro treino',
           onEmptyTrendCta:
