@@ -1,8 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:http/http.dart' as http;
+import '../../../core/api/media_upload_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/galeria_repository.dart';
@@ -59,21 +58,17 @@ class _State extends ConsumerState<GaleriaScreen> {
     if (file == null || !mounted) return;
     setState(() => _uploading = true);
     try {
-      final request =
-          http.MultipartRequest(
-              'POST',
-              Uri.parse('https://api.cloudinary.com/v1_1/focux/image/upload'),
-            )
-            ..fields['upload_preset'] = 'focux_unsigned'
-            ..files.add(await http.MultipartFile.fromPath('file', file.path));
-      final streamed = await request.send();
-      final body = await streamed.stream.bytesToString();
-      if (streamed.statusCode != 200) throw Exception('Upload failed');
-      final url =
-          (jsonDecode(body) as Map<String, dynamic>)['secure_url'] as String;
-      await GaleriaRepository(
-        ref.read(apiClientProvider),
-      ).adicionar(fotoUrl: url, ordem: _fotos.length);
+      final client = ref.read(apiClientProvider);
+      final url = await MediaUploadService(client).uploadBytes(
+        bytes: await file.readAsBytes(),
+        filename: file.name,
+        folder: 'galeria',
+        resourceType: 'image',
+      );
+      await GaleriaRepository(client).adicionar(
+        fotoUrl: url,
+        ordem: _fotos.length,
+      );
       await _load();
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
