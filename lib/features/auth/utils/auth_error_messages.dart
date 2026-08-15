@@ -18,6 +18,13 @@ String? _backendMessage(Object error) {
     final msg = (body['message'] as String).trim();
     if (msg.isNotEmpty) return msg;
   }
+  if (body is String) {
+    final raw = body.trim();
+    if (raw.toLowerCase().contains('failed to respond') ||
+        raw.toLowerCase().contains('application failed')) {
+      return 'Servidor indisponível no momento. Tente de novo em instantes.';
+    }
+  }
   return null;
 }
 
@@ -27,6 +34,9 @@ String mapRegisterError(Object error) {
     final statusCode = error.response?.statusCode;
     if (statusCode == null) return 'Sem conexão com o servidor.';
     if (statusCode == 409) return 'Este e-mail já está em uso.';
+    if (statusCode == 502 || statusCode == 503 || statusCode == 504) {
+      return 'Servidor indisponível no momento. Tente de novo em instantes.';
+    }
     if (statusCode == 429) {
       return _backendMessage(error) ??
           'Muitas tentativas. Aguarde um pouco e tente de novo.';
@@ -46,6 +56,9 @@ String mapSignupCodeError(Object error) {
   if (error is DioException) {
     final statusCode = error.response?.statusCode;
     if (statusCode == null) return 'Sem conexão com o servidor.';
+    if (statusCode == 502 || statusCode == 503 || statusCode == 504) {
+      return 'Servidor indisponível no momento. Tente de novo em instantes.';
+    }
     if (statusCode == 429) {
       return _backendMessage(error) ??
           'Aguarde um minuto antes de pedir outro código.';
