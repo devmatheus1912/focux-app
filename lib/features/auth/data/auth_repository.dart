@@ -214,11 +214,16 @@ class AuthRepository {
   Future<void> loginGoogle({
     required String idToken,
     required bool isAluno,
+    String? personalSlug,
   }) async {
-    final response = await _dio.post(
-      '/api/auth/google',
-      data: {'idToken': idToken, 'role': isAluno ? 'ALUNO' : 'PERSONAL'},
-    );
+    final data = <String, dynamic>{
+      'idToken': idToken,
+      'role': isAluno ? 'ALUNO' : 'PERSONAL',
+    };
+    if (isAluno && personalSlug != null && personalSlug.trim().isNotEmpty) {
+      data['personalSlug'] = personalSlug.trim();
+    }
+    final response = await _dio.post('/api/auth/google', data: data);
     final token = response.data['token'] as String;
     final refreshToken = response.data['refreshToken'] as String?;
     final role =

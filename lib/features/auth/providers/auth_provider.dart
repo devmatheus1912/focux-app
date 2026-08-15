@@ -93,8 +93,13 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
   Future<void> loginGoogle({
     required String idToken,
     required bool isAluno,
+    String? personalSlug,
   }) async {
-    await _repo.loginGoogle(idToken: idToken, isAluno: isAluno);
+    await _repo.loginGoogle(
+      idToken: idToken,
+      isAluno: isAluno,
+      personalSlug: personalSlug,
+    );
     _currentRole = isAluno ? UserRole.aluno : UserRole.personal;
     _isAdmin = await SecureStorage.getIsAdmin();
     _requiresPasswordChange = false;

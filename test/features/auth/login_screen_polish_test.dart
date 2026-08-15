@@ -31,6 +31,10 @@ void main() {
     expect(screen, isNot(contains('debugPrint')));
     expect(screen, isNot(contains('idToken.length')));
 
+    // Google aluno exige tenant (?p=slug).
+    expect(screen, contains("_personalSlug"));
+    expect(screen, contains('PERSONAL_SLUG_REQUIRED'));
+
     // Paleta hero teal para textos sobre o mesh cinematográfico.
     expect(screen, anyOf(contains('heroTeal'), contains('AuthLoginBrandHeader')));
   });

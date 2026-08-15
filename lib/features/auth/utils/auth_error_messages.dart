@@ -39,6 +39,9 @@ String mapGoogleSignInError(Object error, {required bool isAluno}) {
         : 'Erro $statusCode no login com Google.';
   }
   if (error is StateError) {
+    if (error.message == 'PERSONAL_SLUG_REQUIRED') {
+      return 'Abra o link do seu personal (?p=slug) para entrar com Google como aluno.';
+    }
     return 'Google não retornou o token de acesso. Verifique a configuração do app.';
   }
   return 'Não foi possível entrar com Google agora.';

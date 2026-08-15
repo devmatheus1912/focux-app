@@ -46,6 +46,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   // BUG-39: role toggle — personal or aluno
   bool _isAluno = false;
   bool _roleFromQueryApplied = false;
+  String? _personalSlug;
 
   @override
   void initState() {
@@ -68,14 +69,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.didChangeDependencies();
     if (_roleFromQueryApplied) return;
     _roleFromQueryApplied = true;
-    final role =
-        GoRouterState.of(
-          context,
-        ).uri.queryParameters['role']?.trim().toLowerCase();
+    final params = GoRouterState.of(context).uri.queryParameters;
+    final role = params['role']?.trim().toLowerCase();
     if (role == 'aluno') {
       _isAluno = true;
     } else if (role == 'personal') {
       _isAluno = false;
+    }
+    final slug = params['p']?.trim();
+    if (slug != null && slug.isNotEmpty) {
+      _personalSlug = slug;
     }
   }
 
@@ -202,9 +205,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (idToken == null || idToken.isEmpty) {
         throw StateError('Google nao retornou idToken.');
       }
-      await ref
-          .read(authProvider.notifier)
-          .loginGoogle(idToken: idToken, isAluno: _isAluno);
+      if (_isAluno &&
+          (_personalSlug == null || _personalSlug!.trim().isEmpty)) {
+        throw StateError('PERSONAL_SLUG_REQUIRED');
+      }
+      await ref.read(authProvider.notifier).loginGoogle(
+        idToken: idToken,
+        isAluno: _isAluno,
+        personalSlug: _isAluno ? _personalSlug : null,
+      );
       if (!mounted) return;
       if (_isAluno) {
         context.go(_postLoginRedirect(context, isAluno: true));
