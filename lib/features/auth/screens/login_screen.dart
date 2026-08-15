@@ -147,10 +147,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     try {
       if (_isAluno) {
+        if (_personalSlug == null || _personalSlug!.trim().isEmpty) {
+          setState(() {
+            _error =
+                'Abra o link do seu personal (?p=slug) para entrar como aluno.';
+            _loading = false;
+          });
+          return;
+        }
         // BUG-39: aluno uses dedicated endpoint
-        await ref
-            .read(authProvider.notifier)
-            .loginAluno(_emailController.text.trim(), _passwordController.text);
+        await ref.read(authProvider.notifier).loginAluno(
+          _emailController.text.trim(),
+          _passwordController.text,
+          personalSlug: _personalSlug,
+        );
         if (!mounted) return;
         // BUG-40: redirect based on role + requiresPasswordChange
         final requiresChange =

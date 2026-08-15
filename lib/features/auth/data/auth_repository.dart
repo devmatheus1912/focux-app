@@ -193,11 +193,15 @@ class AuthRepository {
     return token;
   }
 
-  Future<bool> loginAluno(String email, String password) async {
-    final response = await _dio.post(
-      '/api/auth/login/aluno',
-      data: {'email': email, 'senha': password},
-    );
+  Future<bool> loginAluno(String email, String password, {String? personalSlug}) async {
+    final data = <String, dynamic>{
+      'email': email,
+      'senha': password,
+    };
+    if (personalSlug != null && personalSlug.trim().isNotEmpty) {
+      data['personalSlug'] = personalSlug.trim();
+    }
+    final response = await _dio.post('/api/auth/login/aluno', data: data);
     final token = response.data['token'] as String;
     final refreshToken = response.data['refreshToken'] as String?;
     final requiresPasswordChange =

@@ -429,6 +429,8 @@ void _showDeleteAccountDialog(
   BuildContext context, {
   required Future<void> Function() onSessionCleared,
 }) {
+  final passwordCtrl = TextEditingController();
+  final confirmCtrl = TextEditingController();
   showDialog<void>(
     context: context,
     barrierDismissible: false,
@@ -438,15 +440,42 @@ void _showDeleteAccountDialog(
         builder: (ctx, setDialogState) {
           return AlertDialog(
             title: const Text('Excluir conta'),
-            content: const Text(
-              'Esta ação é irreversível. Todos os seus dados pessoais serão anonimizados '
-              'conforme a LGPD (Art. 18). Dados financeiros serão mantidos por 5 anos '
-              'conforme legislação fiscal.\n\n'
-              'Deseja realmente excluir sua conta?',
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Esta ação é irreversível. Todos os seus dados pessoais serão anonimizados '
+                  'conforme a LGPD (Art. 18). Dados financeiros serão mantidos por 5 anos '
+                  'conforme legislação fiscal.\n\n'
+                  'Digite sua senha e EXCLUIR para confirmar.',
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: passwordCtrl,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Senha atual',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: confirmCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Digite EXCLUIR',
+                  ),
+                ),
+              ],
             ),
             actions: [
               TextButton(
-                onPressed: loading ? null : () => Navigator.of(ctx).pop(),
+                onPressed: loading
+                    ? null
+                    : () {
+                      passwordCtrl.dispose();
+                      confirmCtrl.dispose();
+                      Navigator.of(ctx).pop();
+                    },
                 child: const Text('Cancelar'),
               ),
               FilledButton(
@@ -458,11 +487,18 @@ void _showDeleteAccountDialog(
                           setDialogState(() => loading = true);
                           try {
                             final dio = ApiClient().dio;
-                            await dio.delete('/api/lgpd/me/delete');
+                            await dio.delete(
+                              '/api/lgpd/me/delete',
+                              data: {
+                                'senha': passwordCtrl.text,
+                                'confirmacao': confirmCtrl.text.trim(),
+                              },
+                            );
                             if (!ctx.mounted) return;
+                            passwordCtrl.dispose();
+                            confirmCtrl.dispose();
                             Navigator.of(ctx).pop();
                             await onSessionCleared();
-                            // Toast no shell de login — o hub Perfil já foi desmontado.
                           } catch (e) {
                             if (!ctx.mounted) return;
                             setDialogState(() => loading = false);

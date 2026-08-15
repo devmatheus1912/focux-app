@@ -184,34 +184,62 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
   }
 
   Future<void> _confirmDeleteAccount() async {
+    final passwordCtrl = TextEditingController();
+    final confirmCtrl = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Excluir conta'),
-            content: const Text(
-              'Esta acao e irreversivel. Seus dados pessoais serao anonimizados conforme a LGPD. Historico financeiro ou operacional pode ser mantido pelo prazo legal.\n\n'
-              'Deseja realmente excluir sua conta?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(false),
-                child: const Text('Cancelar'),
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Excluir conta'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Esta acao e irreversivel. Seus dados pessoais serao anonimizados conforme a LGPD. Historico financeiro ou operacional pode ser mantido pelo prazo legal.\n\n'
+                'Digite sua senha e EXCLUIR para confirmar.',
               ),
-              FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: EagleTokens.bad),
-                onPressed: () => Navigator.of(ctx).pop(true),
-                child: const Text('Excluir definitivamente'),
+              const SizedBox(height: 12),
+              TextField(
+                controller: passwordCtrl,
+                obscureText: true,
+                decoration: const InputDecoration(labelText: 'Senha atual'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: confirmCtrl,
+                decoration: const InputDecoration(labelText: 'Digite EXCLUIR'),
               ),
             ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: EagleTokens.bad),
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Excluir definitivamente'),
+            ),
+          ],
+        );
+      },
     );
+
+    final senha = passwordCtrl.text;
+    final confirmacao = confirmCtrl.text.trim();
+    passwordCtrl.dispose();
+    confirmCtrl.dispose();
 
     if (confirmed != true || !mounted) return;
 
     setState(() => _deleting = true);
     try {
-      await ref.read(apiClientProvider).dio.delete('/api/lgpd/me/delete');
+      await ref.read(apiClientProvider).dio.delete(
+        '/api/lgpd/me/delete',
+        data: {'senha': senha, 'confirmacao': confirmacao},
+      );
       await ref.read(authProvider.notifier).logout();
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, 'Conta excluida com sucesso.');

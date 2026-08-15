@@ -83,8 +83,16 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     state = AuthStatus.authenticated;
   }
 
-  Future<void> loginAluno(String email, String password) async {
-    _requiresPasswordChange = await _repo.loginAluno(email, password);
+  Future<void> loginAluno(
+    String email,
+    String password, {
+    String? personalSlug,
+  }) async {
+    _requiresPasswordChange = await _repo.loginAluno(
+      email,
+      password,
+      personalSlug: personalSlug,
+    );
     _currentRole = UserRole.aluno;
     _isAdmin = false;
     state = AuthStatus.authenticated;
