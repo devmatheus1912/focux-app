@@ -69,6 +69,7 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     String password, {
     String? referralCodigo,
     String? telefone,
+    String? emailCodigo,
   }) async {
     await _repo.registerPersonal(
       nome,
@@ -76,11 +77,16 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
       password,
       referralCodigo: referralCodigo,
       telefone: telefone,
+      emailCodigo: emailCodigo,
     );
     _currentRole = UserRole.personal;
     _isAdmin = false;
     _requiresPasswordChange = false;
     state = AuthStatus.authenticated;
+  }
+
+  Future<void> enviarCodigoEmail(String email) async {
+    await _repo.enviarCodigoEmail(email);
   }
 
   Future<void> loginAluno(

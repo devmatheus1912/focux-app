@@ -170,6 +170,7 @@ class AuthRepository {
     String password, {
     String? referralCodigo,
     String? telefone,
+    String? emailCodigo,
   }) async {
     final response = await _dio.post(
       '/api/auth/register/personal',
@@ -180,6 +181,8 @@ class AuthRepository {
         if (referralCodigo != null && referralCodigo.isNotEmpty)
           'referralCodigo': referralCodigo,
         if (telefone != null && telefone.isNotEmpty) 'telefone': telefone,
+        if (emailCodigo != null && emailCodigo.isNotEmpty)
+          'emailCodigo': emailCodigo,
       },
     );
     final token = response.data['token'] as String;
@@ -191,6 +194,13 @@ class AuthRepository {
     await SecureStorage.saveRole('PERSONAL');
     await SecureStorage.saveIsAdmin(false);
     return token;
+  }
+
+  Future<void> enviarCodigoEmail(String email) async {
+    await _dio.post(
+      '/api/auth/email/enviar-codigo',
+      data: {'email': email},
+    );
   }
 
   Future<bool> loginAluno(String email, String password, {String? personalSlug}) async {

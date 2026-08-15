@@ -11,6 +11,9 @@ void main() {
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect(screen, contains('BrPhone'));
     expect(screen, contains('telefone:'));
+    expect(screen, contains('emailCodigo:'));
+    expect(screen, contains('Enviar código'));
+    expect(screen, contains('enviarCodigoEmail'));
     expect(screen, contains('heroTeal'));
     // Primário antes do secondary (hierarquia de CTA).
     expect(

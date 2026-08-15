@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:dio/dio.dart';
@@ -37,11 +38,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _codeController = TextEditingController();
   final _passwordFocus = FocusNode();
   bool _loading = false;
   bool _loadingGoogle = false;
+  bool _sendingCode = false;
   bool _showPassword = false;
   bool _passwordFocused = false;
+  int _resendSeconds = 0;
+  Timer? _resendTimer;
   String? _error;
 
   @override
@@ -58,12 +63,61 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   void dispose() {
+    _resendTimer?.cancel();
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _phoneController.dispose();
+    _codeController.dispose();
     _passwordFocus.dispose();
     super.dispose();
+  }
+
+  void _startResendCountdown() {
+    _resendTimer?.cancel();
+    setState(() => _resendSeconds = 60);
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      if (_resendSeconds <= 1) {
+        timer.cancel();
+        setState(() => _resendSeconds = 0);
+      } else {
+        setState(() => _resendSeconds -= 1);
+      }
+    });
+  }
+
+  Future<void> _enviarCodigo() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty || !email.contains('@')) {
+      setState(() => _error = 'Informe um e-mail válido antes de enviar o código.');
+      return;
+    }
+    if (_sendingCode || _resendSeconds > 0) return;
+
+    setState(() {
+      _sendingCode = true;
+      _error = null;
+    });
+    HapticFeedback.selectionClick();
+
+    try {
+      await ref.read(authProvider.notifier).enviarCodigoEmail(email);
+      if (!mounted) return;
+      _startResendCountdown();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Código enviado. Confira seu e-mail.')),
+      );
+    } catch (error) {
+      HapticFeedback.heavyImpact();
+      if (!mounted) return;
+      setState(() => _error = _mapError(error));
+    } finally {
+      if (mounted) setState(() => _sendingCode = false);
+    }
   }
 
   Future<void> _submit() async {
@@ -87,6 +141,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             _passwordController.text,
             referralCodigo: widget.referralCodigo,
             telefone: BrPhone.normalizeOrNull(_phoneController.text),
+            emailCodigo: _codeController.text.trim(),
           );
 
       if (!mounted) {
@@ -273,6 +328,59 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         }
                         return null;
                       },
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: AuthField(
+                            label: 'Código do e-mail',
+                            controller: _codeController,
+                            hintText: '6 dígitos',
+                            icon: Icons.pin_outlined,
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.next,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(6),
+                            ],
+                            validator: (value) {
+                              if (value == null || value.trim().length != 6) {
+                                return 'Informe o código de 6 dígitos.';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 22),
+                          child: SizedBox(
+                            height: 48,
+                            child: TextButton(
+                              onPressed:
+                                  (_sendingCode ||
+                                          _loading ||
+                                          _resendSeconds > 0)
+                                      ? null
+                                      : _enviarCodigo,
+                              child: Text(
+                                _sendingCode
+                                    ? 'Enviando…'
+                                    : _resendSeconds > 0
+                                    ? 'Reenviar (${_resendSeconds}s)'
+                                    : 'Enviar código',
+                                style: AppTypography.inter(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: heroTealInk(),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 10),
                     AuthField(
