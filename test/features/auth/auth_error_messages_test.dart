@@ -1,0 +1,45 @@
+import 'package:dio/dio.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/auth/utils/auth_error_messages.dart';
+
+void main() {
+  DioException dio(int? status, [String? message]) {
+    return DioException(
+      requestOptions: RequestOptions(path: '/api/auth/register/personal'),
+      response:
+          status == null
+              ? null
+              : Response(
+                requestOptions: RequestOptions(path: '/x'),
+                statusCode: status,
+                data: message == null ? null : {'message': message},
+              ),
+      type:
+          status == null
+              ? DioExceptionType.connectionError
+              : DioExceptionType.badResponse,
+    );
+  }
+
+  test('mapRegisterError prioriza message do backend', () {
+    expect(
+      mapRegisterError(dio(400, 'Código inválido. Confira e tente de novo.')),
+      'Código inválido. Confira e tente de novo.',
+    );
+    expect(mapRegisterError(dio(409)), 'Este e-mail já está em uso.');
+    expect(
+      mapRegisterError(dio(429, 'Muitas tentativas. Solicite um novo código.')),
+      'Muitas tentativas. Solicite um novo código.',
+    );
+  });
+
+  test('mapSignupCodeError cobre SMTP e cooldown', () {
+    expect(
+      mapSignupCodeError(
+        dio(400, 'Envio de e-mail indisponível no momento. Tente mais tarde ou cadastre com Google.'),
+      ),
+      contains('indisponível'),
+    );
+    expect(mapSignupCodeError(dio(429)), contains('Aguarde'));
+  });
+}

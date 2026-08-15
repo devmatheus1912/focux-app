@@ -12,8 +12,11 @@ void main() {
     expect(screen, contains('BrPhone'));
     expect(screen, contains('telefone:'));
     expect(screen, contains('emailCodigo:'));
-    expect(screen, contains('Enviar código'));
+    expect(screen, contains('Enviar'));
     expect(screen, contains('enviarCodigoEmail'));
+    expect(screen, contains('mapRegisterError'));
+    expect(screen, contains('mapSignupCodeError'));
+    expect(screen, contains('AutofillHints.oneTimeCode'));
     expect(screen, contains('heroTeal'));
     // Primário antes do secondary (hierarquia de CTA).
     expect(

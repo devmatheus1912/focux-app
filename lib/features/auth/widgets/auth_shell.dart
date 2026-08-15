@@ -390,6 +390,7 @@ class AuthField extends StatelessWidget {
     this.suffix,
     this.focusNode,
     this.inputFormatters,
+    this.autofillHints,
   });
 
   final String label;
@@ -404,6 +405,7 @@ class AuthField extends StatelessWidget {
   final Widget? suffix;
   final FocusNode? focusNode;
   final List<TextInputFormatter>? inputFormatters;
+  final Iterable<String>? autofillHints;
 
   @override
   Widget build(BuildContext context) {
@@ -427,6 +429,7 @@ class AuthField extends StatelessWidget {
           keyboardType: keyboardType,
           textInputAction: textInputAction,
           inputFormatters: inputFormatters,
+          autofillHints: autofillHints,
           validator: validator,
           obscureText: obscureText,
           onFieldSubmitted: onFieldSubmitted,

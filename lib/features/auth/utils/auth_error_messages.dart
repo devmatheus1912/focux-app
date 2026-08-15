@@ -10,6 +10,56 @@ String mapLoginError(Object error) {
   return 'Não foi possível entrar agora.';
 }
 
+/// Extrai `message` do body JSON do backend, quando existir.
+String? _backendMessage(Object error) {
+  if (error is! DioException) return null;
+  final body = error.response?.data;
+  if (body is Map && body['message'] is String) {
+    final msg = (body['message'] as String).trim();
+    if (msg.isNotEmpty) return msg;
+  }
+  return null;
+}
+
+/// Cadastro personal (e-mail/senha + código).
+String mapRegisterError(Object error) {
+  if (error is DioException) {
+    final statusCode = error.response?.statusCode;
+    if (statusCode == null) return 'Sem conexão com o servidor.';
+    if (statusCode == 409) return 'Este e-mail já está em uso.';
+    if (statusCode == 429) {
+      return _backendMessage(error) ??
+          'Muitas tentativas. Aguarde um pouco e tente de novo.';
+    }
+    if (statusCode == 400) {
+      return _backendMessage(error) ??
+          'Código inválido ou dados incompletos. Confira e tente de novo.';
+    }
+    final msg = _backendMessage(error);
+    if (msg != null) return msg;
+  }
+  return 'Não foi possível criar a conta agora.';
+}
+
+/// Envio do código de verificação no cadastro.
+String mapSignupCodeError(Object error) {
+  if (error is DioException) {
+    final statusCode = error.response?.statusCode;
+    if (statusCode == null) return 'Sem conexão com o servidor.';
+    if (statusCode == 429) {
+      return _backendMessage(error) ??
+          'Aguarde um minuto antes de pedir outro código.';
+    }
+    if (statusCode == 400) {
+      return _backendMessage(error) ??
+          'Não foi possível enviar o código. Tente de novo ou use Google.';
+    }
+    final msg = _backendMessage(error);
+    if (msg != null) return msg;
+  }
+  return 'Não foi possível enviar o código agora.';
+}
+
 /// Mapeia erros do fluxo de login/cadastro via Google para mensagens em pt-BR.
 ///
 /// Nunca inclui token, e-mail ou payload bruto do erro na mensagem exibida

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +17,7 @@ import '../../../core/utils/br_phone.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../providers/auth_provider.dart';
+import '../utils/auth_error_messages.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../widgets/password_strength_meter.dart';
@@ -43,6 +43,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   bool _loading = false;
   bool _loadingGoogle = false;
   bool _sendingCode = false;
+  bool _codeSent = false;
   bool _showPassword = false;
   bool _passwordFocused = false;
   int _resendSeconds = 0;
@@ -107,14 +108,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     try {
       await ref.read(authProvider.notifier).enviarCodigoEmail(email);
       if (!mounted) return;
+      setState(() => _codeSent = true);
       _startResendCountdown();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Código enviado. Confira seu e-mail.')),
+        const SnackBar(
+          content: Text(
+            'Código enviado. Confira a caixa de entrada (e o spam).',
+          ),
+        ),
       );
     } catch (error) {
       HapticFeedback.heavyImpact();
       if (!mounted) return;
-      setState(() => _error = _mapError(error));
+      setState(() => _error = mapSignupCodeError(error));
     } finally {
       if (mounted) setState(() => _sendingCode = false);
     }
@@ -122,6 +128,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    if (!_codeSent && _codeController.text.trim().isEmpty) {
+      setState(() {
+        _error = 'Envie o código para o e-mail antes de criar a conta.';
+      });
       return;
     }
 
@@ -153,7 +165,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     } catch (error) {
       HapticFeedback.heavyImpact();
       setState(() {
-        _error = _mapError(error);
+        _error = mapRegisterError(error);
       });
     } finally {
       if (mounted) {
@@ -203,51 +215,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     } catch (error) {
       HapticFeedback.heavyImpact();
       if (!mounted) return;
-      setState(() => _error = _mapGoogleError(error));
+      setState(() => _error = mapGoogleSignInError(error, isAluno: false));
     } finally {
       if (mounted) setState(() => _loadingGoogle = false);
     }
-  }
-
-  String _mapError(Object error) {
-    if (error is DioException) {
-      final statusCode = error.response?.statusCode;
-      if (statusCode == 409) {
-        return 'Este e-mail já está em uso.';
-      }
-      if (statusCode == null) {
-        return 'Sem conexão com o servidor.';
-      }
-    }
-    return 'Não foi possível criar a conta agora.';
-  }
-
-  String _mapGoogleError(Object error) {
-    if (error is DioException) {
-      final statusCode = error.response?.statusCode;
-      final body = error.response?.data;
-      if (statusCode == 401 || statusCode == 404) {
-        return 'Nao foi possivel cadastrar com Google.';
-      }
-      if (statusCode == 409) {
-        return 'Este Google ja esta vinculado a uma conta.';
-      }
-      if (statusCode == 503) {
-        return 'Google ainda nao esta configurado neste ambiente.';
-      }
-      if (statusCode == null) return 'Sem conexao com o servidor.';
-      final msg =
-          (body is Map && body['message'] is String)
-              ? body['message'] as String
-              : null;
-      return msg != null && msg.isNotEmpty
-          ? msg
-          : 'Erro $statusCode no cadastro Google.';
-    }
-    if (error is StateError) {
-      return 'Google nao devolveu idToken. Verifique SHA-1 e google-services.json.';
-    }
-    return 'Nao foi possivel cadastrar com Google: $error';
   }
 
   @override
@@ -330,57 +301,62 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       },
                     ),
                     const SizedBox(height: 10),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: AuthField(
-                            label: 'Código do e-mail',
-                            controller: _codeController,
-                            hintText: '6 dígitos',
-                            icon: Icons.pin_outlined,
-                            keyboardType: TextInputType.number,
-                            textInputAction: TextInputAction.next,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(6),
-                            ],
-                            validator: (value) {
-                              if (value == null || value.trim().length != 6) {
-                                return 'Informe o código de 6 dígitos.';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 22),
-                          child: SizedBox(
-                            height: 48,
-                            child: TextButton(
-                              onPressed:
-                                  (_sendingCode ||
-                                          _loading ||
-                                          _resendSeconds > 0)
-                                      ? null
-                                      : _enviarCodigo,
-                              child: Text(
-                                _sendingCode
-                                    ? 'Enviando…'
-                                    : _resendSeconds > 0
-                                    ? 'Reenviar (${_resendSeconds}s)'
-                                    : 'Enviar código',
-                                style: AppTypography.inter(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: heroTealInk(),
-                                ),
-                              ),
+                    AuthField(
+                      label: 'Código do e-mail',
+                      controller: _codeController,
+                      hintText: '6 dígitos',
+                      icon: Icons.pin_outlined,
+                      keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const [AutofillHints.oneTimeCode],
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(6),
+                      ],
+                      validator: (value) {
+                        if (value == null || value.trim().length != 6) {
+                          return 'Informe o código de 6 dígitos.';
+                        }
+                        return null;
+                      },
+                      suffix: Semantics(
+                        button: true,
+                        label:
+                            _resendSeconds > 0
+                                ? 'Reenviar código em $_resendSeconds segundos'
+                                : 'Enviar código de verificação',
+                        child: TextButton(
+                          onPressed:
+                              (_sendingCode ||
+                                      _loading ||
+                                      _resendSeconds > 0)
+                                  ? null
+                                  : _enviarCodigo,
+                          child: Text(
+                            _sendingCode
+                                ? 'Enviando…'
+                                : _resendSeconds > 0
+                                ? '${_resendSeconds}s'
+                                : 'Enviar',
+                            style: AppTypography.inter(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                              color: heroTealInk(),
                             ),
                           ),
                         ),
-                      ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      _codeSent
+                          ? 'Código enviado. Válido por 10 minutos.'
+                          : 'Toque em Enviar para receber o código no e-mail.',
+                      style: AppTypography.inter(
+                        color: heroTealSurface(0.72),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     AuthField(
@@ -431,11 +407,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                     const SizedBox(height: 22),
                     if (_error != null) ...[
-                      Text(
-                        _error!,
-                        style: TextStyle(
-                          color: EagleTokens.authErrorSoft,
-                          fontSize: 12.5,
+                      Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          _error!,
+                          style: TextStyle(
+                            color: EagleTokens.authErrorSoft,
+                            fontSize: 12.5,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 12),
