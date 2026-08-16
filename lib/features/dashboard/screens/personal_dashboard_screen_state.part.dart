@@ -19,6 +19,10 @@ class _PersonalDashboardScreenState
   bool _focusPreferenceLoaded = false;
   bool _autoFocusApplied = false;
   bool _sessionFocusTouched = false;
+  DateTime? _homeFetchedAt;
+  bool _homeViewTracked = false;
+  bool _coachSeen = true;
+  bool _coachLoaded = false;
 
   late AnimationController _gradientCtrl;
   late AnimationController _counterCtrl;
@@ -63,10 +67,27 @@ class _PersonalDashboardScreenState
     _homeScrollController.addListener(_onHomeScroll);
     _loadFinFromHome();
     _loadFocusPreference();
+    _loadCoachPreference();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _maybeShowOnboardingWizard();
       _bindDashboardReturnListener();
     });
+  }
+
+  Future<void> _loadCoachPreference() async {
+    final seen = await DashboardHomeCoachStore.loadSeen();
+    if (!mounted) return;
+    setState(() {
+      _coachLoaded = true;
+      _coachSeen = seen;
+    });
+  }
+
+  Future<void> _dismissCoach() async {
+    await DashboardHomeCoachStore.markSeen();
+    AnalyticsService.instance.track(ProductEvents.homeCoachDismissed);
+    if (!mounted) return;
+    setState(() => _coachSeen = true);
   }
 
   Future<void> _loadFocusPreference() async {
@@ -95,6 +116,10 @@ class _PersonalDashboardScreenState
       _autoFocusApplied = true;
       _attentionSectionResetToken++;
     });
+    AnalyticsService.instance.track(
+      ProductEvents.homeFocusToggled,
+      props: {'focus_mode': next},
+    );
     await DashboardHomeFocusStore.save(next);
   }
 

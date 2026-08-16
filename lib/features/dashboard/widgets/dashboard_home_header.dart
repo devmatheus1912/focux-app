@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
@@ -23,6 +24,7 @@ class DashboardHomeHeader extends StatelessWidget {
     this.notificacoesCountOverride,
     this.onQuickSearch,
     this.onIaTeaser,
+    this.freshnessLabel,
   });
 
   final String? nomePersonal;
@@ -33,6 +35,7 @@ class DashboardHomeHeader extends StatelessWidget {
   final int? notificacoesCountOverride;
   final VoidCallback? onQuickSearch;
   final VoidCallback? onIaTeaser;
+  final String? freshnessLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -51,60 +54,77 @@ class DashboardHomeHeader extends StatelessWidget {
         TokensStrip.s4,
         TokensStrip.s2,
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: Semantics(
-              header: true,
-              child: Text(
-                dashboardGreeting(nomePersonal, compact: compact),
-                maxLines: 2,
-                softWrap: true,
-                overflow: TextOverflow.ellipsis,
-                style: dashboardPageTitleStyle(context, color: ink),
-              ),
-            ),
-          ),
-          SizedBox(width: chromeGap),
           Row(
-            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              if (onQuickSearch != null) ...[
-                ShellHeaderIconButton(
-                  icon: 'search',
-                  size: chromeSize,
-                  tooltip: DashboardMicrocopy.buscaRapida,
-                  onTap: onQuickSearch!,
+              Expanded(
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    dashboardGreeting(nomePersonal, compact: compact),
+                    maxLines: 2,
+                    softWrap: true,
+                    overflow: TextOverflow.ellipsis,
+                    style: dashboardPageTitleStyle(context, color: ink),
+                  ),
                 ),
-                SizedBox(width: chromeGap),
-              ],
-              if (onIaTeaser != null) ...[
-                ShellHeaderIconButton(
-                  icon: 'spark',
-                  size: chromeSize,
-                  tooltip: DashboardMicrocopy.sugestaoIa,
-                  onTap: onIaTeaser!,
-                ),
-                SizedBox(width: chromeGap),
-              ],
-              ShellThemeToggle(size: chromeSize),
-              SizedBox(width: chromeGap),
-              NotificacaoBadgeButton(
-                size: chromeSize,
-                countOverride: notificacoesCountOverride,
               ),
               SizedBox(width: chromeGap),
-              DashboardHeaderProfileAvatar(
-                primary: primary,
-                isDark: isDark,
-                photoUrl: logoUrl,
-                initials: fxInitials(nomePersonal ?? 'F'),
-                size: chromeSize,
-                onTap: onProfileTap,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (onQuickSearch != null) ...[
+                    ShellHeaderIconButton(
+                      icon: 'search',
+                      size: chromeSize,
+                      tooltip: DashboardMicrocopy.buscaRapida,
+                      onTap: onQuickSearch!,
+                    ),
+                    SizedBox(width: chromeGap),
+                  ],
+                  if (onIaTeaser != null) ...[
+                    ShellHeaderIconButton(
+                      icon: 'spark',
+                      size: chromeSize,
+                      tooltip: DashboardMicrocopy.sugestaoIa,
+                      onTap: onIaTeaser!,
+                    ),
+                    SizedBox(width: chromeGap),
+                  ],
+                  ShellThemeToggle(size: chromeSize),
+                  SizedBox(width: chromeGap),
+                  NotificacaoBadgeButton(
+                    size: chromeSize,
+                    countOverride: notificacoesCountOverride,
+                  ),
+                  SizedBox(width: chromeGap),
+                  DashboardHeaderProfileAvatar(
+                    primary: primary,
+                    isDark: isDark,
+                    photoUrl: logoUrl,
+                    initials: fxInitials(nomePersonal ?? 'F'),
+                    size: chromeSize,
+                    onTap: onProfileTap,
+                  ),
+                ],
               ),
             ],
           ),
+          if (freshnessLabel != null && freshnessLabel!.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Semantics(
+              liveRegion: true,
+              child: Text(
+                freshnessLabel!,
+                style: FocuxHubTypography.bodyMuted(
+                  color: dashboardReadableCaption(context, isDark: isDark),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

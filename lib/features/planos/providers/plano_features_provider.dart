@@ -138,4 +138,9 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
     }
     Error.throwWithStackTrace(lastError!, lastStack!);
   }
+
+  /// Seed imediato a partir do BFF `/home` (mesmo shape de `/planos/me`).
+  void seedFromHome(PlanoFeatures features) {
+    state = AsyncData(features.normalizeForTier());
+  }
 }

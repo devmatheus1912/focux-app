@@ -35,6 +35,39 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                 final isCompactPhone = DashboardLayout.isCompact(screenWidth);
                 final shortcutAspectRatio = isCompactPhone ? 2.55 : 2.85;
 
+                if (_homeFetchedAt == null) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted || _homeFetchedAt != null) return;
+                    setState(() => _homeFetchedAt = DateTime.now());
+                  });
+                }
+                if (!_homeViewTracked) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted || _homeViewTracked) return;
+                    _homeViewTracked = true;
+                    AnalyticsService.instance.track(
+                      ProductEvents.homeViewed,
+                      props: {
+                        'focus_mode': _focusMode,
+                        'day_focus_kind': home.dayFocus?.kind?.name,
+                        'risco_alto':
+                            home.commandCenter.alunosEmRisco.length,
+                        'score_count':
+                            home.commandCenter.alunosScore.length,
+                      },
+                    );
+                  });
+                }
+                final planoFromHome = home.planoFeatures;
+                if (planoFromHome != null) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted) return;
+                    ref
+                        .read(planoFeaturesProvider.notifier)
+                        .seedFromHome(planoFromHome);
+                  });
+                }
+
                 final snap = DashboardHomeSnapshot.build(
                   home: home,
                   finData: home.financeiro,
@@ -146,6 +179,10 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                     ref.invalidate(notificacoesProvider);
                     ref.invalidate(notificacoesNaoLidasProvider);
                     await _loadFinFromHome();
+                    if (mounted) {
+                      setState(() => _homeFetchedAt = DateTime.now());
+                    }
+                    AnalyticsService.instance.track(ProductEvents.homeRefreshed);
                     if (context.mounted) {
                       FeedbackHelper.showSuccess(
                         context,
@@ -185,7 +222,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                 _attentionSectionResetToken,
                             onReviewAttention: openAttentionReview,
                             onboardingIncomplete: onboardingIncomplete,
-                            primeiroTreinoCriado: primeiroTreinoCriado,
+                            primeiroTreinoCriado: primeiroTreinoCriado ?? false,
                             prioritiesChipVisible: showStickyPrioritiesAction,
                             pulseEmptyHint: home.pulse?.emptyHint,
                             notificacoesNaoLidasOverride:
@@ -194,6 +231,18 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                               data.corPrimaria,
                             ),
                             agendaItems: home.commandCenter.agendaHoje,
+                            alunosScore: home.commandCenter.alunosScore,
+                            freshnessLabel:
+                                _homeFetchedAt == null
+                                    ? null
+                                    : DashboardMicrocopy.atualizadoHa(
+                                      DateTime.now().difference(
+                                        _homeFetchedAt!,
+                                      ),
+                                    ),
+                            showCoachBanner:
+                                _coachLoaded && !_coachSeen,
+                            onDismissCoach: _dismissCoach,
                             onQuickSearch:
                                 () => showDashboardQuickSearchSheet(
                                   context,
@@ -224,6 +273,8 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                 heroFade: _heroFade,
                                 shortcutAspectRatio: shortcutAspectRatio,
                                 topAderencia: home.topAderencia,
+                                alunosScore: home.commandCenter.alunosScore,
+                                homePlanoFeatures: home.planoFeatures,
                                 onOpenRelatorio:
                                     () =>
                                         context.push('/relatorios/global'),

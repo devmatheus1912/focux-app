@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../../onboarding/data/onboarding_status_data.dart';
+import '../../planos/data/planos_repository.dart';
+import '../utils/dashboard_day_focus.dart';
 import 'command_center_data.dart';
 
 class DashboardAderenciaTopItem {
@@ -71,7 +73,8 @@ class DashboardHomeBundle {
   final DashboardPulseSnapshot? pulse;
   final int? notificacoesNaoLidas;
   final OnboardingStatusData? onboardingResumo;
-  final Map<String, dynamic>? planoFeatures;
+  final PlanoFeatures? planoFeatures;
+  final DashboardDayFocus? dayFocus;
 
   DashboardHomeBundle({
     required this.personal,
@@ -82,6 +85,7 @@ class DashboardHomeBundle {
     this.notificacoesNaoLidas,
     this.onboardingResumo,
     this.planoFeatures,
+    this.dayFocus,
   });
 
   factory DashboardHomeBundle.fromJson(Map<String, dynamic> json) {
@@ -89,6 +93,7 @@ class DashboardHomeBundle {
     final pulseRaw = json['pulse'];
     final onboardingRaw = json['onboardingResumo'];
     final planoRaw = json['planoFeatures'];
+    final dayFocusRaw = json['dayFocus'];
     return DashboardHomeBundle(
       personal: DashboardData.fromJson(
         json['personal'] as Map<String, dynamic>,
@@ -122,7 +127,15 @@ class DashboardHomeBundle {
               )
               : null,
       planoFeatures:
-          planoRaw is Map ? Map<String, dynamic>.from(planoRaw) : null,
+          planoRaw is Map
+              ? PlanoFeatures.fromJson(Map<String, dynamic>.from(planoRaw))
+              : null,
+      dayFocus:
+          dayFocusRaw is Map
+              ? DashboardDayFocus.fromJson(
+                Map<String, dynamic>.from(dayFocusRaw),
+              )
+              : null,
     );
   }
 }

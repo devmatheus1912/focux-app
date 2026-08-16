@@ -9,9 +9,12 @@ import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_home_focus.dart';
 import '../utils/dashboard_microcopy.dart';
 import 'dashboard_aderencia_semana_widget.dart';
+import 'dashboard_base_radar_strip.dart';
 import 'dashboard_collapsible_section.dart';
 import 'dashboard_financial_hero_section.dart';
 import 'dashboard_tools_section.dart';
+import '../data/command_center_data.dart';
+import '../../planos/data/planos_repository.dart';
 
 /// Aderência + financeiro + tools — só entra quando `omitSecondarySections` é false.
 class DashboardHomeSecondaryBlock extends StatelessWidget {
@@ -36,6 +39,8 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
     required this.shortcutAspectRatio,
     required this.onOpenRelatorio,
     this.topAderencia = const [],
+    this.alunosScore = const [],
+    this.homePlanoFeatures,
   });
 
   final DashboardHomeFocusRules focusRules;
@@ -57,6 +62,8 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
   final double shortcutAspectRatio;
   final VoidCallback onOpenRelatorio;
   final List<DashboardAderenciaTopItem> topAderencia;
+  final List<AlunoScoreResumo> alunosScore;
+  final PlanoFeatures? homePlanoFeatures;
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +75,17 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (alunosScore.isNotEmpty) ...[
+          SizedBox(height: DashboardLayout.sliverSectionGap),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s4),
+            child: DashboardBaseRadarStrip(
+              isDark: isDark,
+              scores: alunosScore,
+              initiallyExpanded: !focusRules.focusMode,
+            ),
+          ),
+        ],
         SizedBox(height: DashboardLayout.sliverSectionGap),
         DashboardCollapsibleSection(
           title: DashboardMicrocopy.aderenciaDaSemana,
@@ -125,6 +143,7 @@ class DashboardHomeSecondaryBlock extends StatelessWidget {
           isDark: isDark,
           shortcutAspectRatio: shortcutAspectRatio,
           hideFeaturedTools: focusRules.hideFeaturedTools,
+          homePlanoFeatures: homePlanoFeatures,
         ),
       ],
     );

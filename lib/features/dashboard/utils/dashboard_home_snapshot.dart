@@ -150,18 +150,21 @@ class DashboardHomeSnapshot {
     );
     final agendaHoje = commandCenter?.agendaHoje.length ?? 0;
     final riskDominante =
-        alunosAtivos > 0 &&
-        riscoAlto >= math.max(2, (alunosAtivos * 0.5).ceil());
+        home.dayFocus?.riskDominante ??
+        (alunosAtivos > 0 &&
+            riscoAlto >= math.max(2, (alunosAtivos * 0.5).ceil()));
     final vencimentosCount = finData?.vencimentosProximos.length ?? 0;
-    final dayFocus = DashboardDayFocus.resolve(
-      riscoAlto: riscoAlto,
-      alunosAtivos: alunosAtivos,
-      checkinsHoje: checkinsHoje,
-      agendaHoje: agendaHoje,
-      receitaMes: receitaAtual,
-      vencimentosPendentes: vencimentosCount,
-      riskDominante: riskDominante,
-    );
+    final dayFocus =
+        home.dayFocus ??
+        DashboardDayFocus.resolve(
+          riscoAlto: riscoAlto,
+          alunosAtivos: alunosAtivos,
+          checkinsHoje: checkinsHoje,
+          agendaHoje: agendaHoje,
+          receitaMes: receitaAtual,
+          vencimentosPendentes: vencimentosCount,
+          riskDominante: riskDominante,
+        );
     final focusRules = DashboardHomeFocusRules.resolve(
       focusMode: focusMode,
       dayFocus: dayFocus,

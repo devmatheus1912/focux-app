@@ -118,4 +118,11 @@ class ProductEvents {
   static const aluno360CopilotExecutarAcao = 'aluno360_copilot_executar_acao';
   static const aluno360OutreachPrepared = 'aluno360_outreach_prepared';
   static const aluno360OutreachChatOpened = 'aluno360_outreach_chat_opened';
+
+  static const homeViewed = 'home_viewed';
+  static const homeRefreshed = 'home_refreshed';
+  static const homeFocusToggled = 'home_focus_toggled';
+  static const homeRadarTap = 'home_radar_tap';
+  static const homeCatalogOpened = 'home_catalog_opened';
+  static const homeCoachDismissed = 'home_coach_dismissed';
 }

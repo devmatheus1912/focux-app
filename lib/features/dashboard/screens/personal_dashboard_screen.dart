@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -15,6 +16,8 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../onboarding/providers/onboarding_provider.dart';
+import '../../planos/providers/plano_features_provider.dart';
+import '../utils/dashboard_home_coach_store.dart';
 import '../utils/dashboard_home_focus.dart';
 import '../utils/dashboard_home_focus_store.dart';
 import '../utils/dashboard_home_snapshot.dart';

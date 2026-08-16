@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../planos/data/planos_repository.dart';
 import '../../planos/utils/effective_plano_features.dart';
 import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_haptic.dart';
@@ -23,12 +25,14 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
     required this.isDark,
     required this.shortcutAspectRatio,
     this.hideFeaturedTools = false,
+    this.homePlanoFeatures,
   });
 
   final bool isDark;
   final double shortcutAspectRatio;
   /// Modo foco: só header que abre o catálogo (sem grid featured).
   final bool hideFeaturedTools;
+  final PlanoFeatures? homePlanoFeatures;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,7 +40,10 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
     final heading = BrandPalette.sectionHeading(primary, dark: isDark);
     final mute = dashboardReadableMuted(context, isDark: isDark);
     final link = BrandPalette.sectionLink(primary, dark: isDark);
-    final features = effectivePlanoFeatures(ref);
+    final features = effectivePlanoFeatures(
+      ref,
+      homeOverride: homePlanoFeatures,
+    );
     final totalTools = DashboardToolShortcut.moreTools.length;
     final lockedCount = countLockedShortcuts(
       DashboardToolShortcut.moreTools,
@@ -56,11 +63,13 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
 
     void openCatalog() {
       dashboardHapticCollapseToggle();
+      AnalyticsService.instance.track(ProductEvents.homeCatalogOpened);
       showDashboardToolsCatalogSheet(
         context,
         ref: ref,
         isDark: isDark,
         shortcutAspectRatio: shortcutAspectRatio,
+        homePlanoFeatures: homePlanoFeatures,
       );
     }
 
@@ -141,7 +150,12 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
                     aspectRatio: shortcutAspectRatio,
                     onShortcut:
                         (shortcut) =>
-                            openDashboardShortcut(context, ref, shortcut),
+                            openDashboardShortcut(
+                              context,
+                              ref,
+                              shortcut,
+                              homeOverride: homePlanoFeatures,
+                            ),
                   ),
                   const SizedBox(height: 6),
                   Align(

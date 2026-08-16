@@ -10,6 +10,17 @@ abstract final class DashboardMicrocopy {
   static const lendoSinais = 'lendo sinais';
   static const verTudo = 'Ver tudo';
   static const painelAtualizado = 'Painel atualizado';
+
+  static String atualizadoHa(Duration age) {
+    final secs = age.inSeconds;
+    if (secs < 15) return 'Atualizado agora';
+    if (secs < 60) return 'Atualizado há ${secs}s';
+    final mins = age.inMinutes;
+    if (mins < 60) return 'Atualizado há ${mins}min';
+    final hours = age.inHours;
+    return 'Atualizado há ${hours}h';
+  }
+
   static const scrollPeekHint = 'Deslize horizontalmente para ver mais';
   static const precisaDeAtencao = 'Precisa de atenção';
   static const aderenciaDaSemana = 'Aderência da semana';
@@ -31,6 +42,10 @@ abstract final class DashboardMicrocopy {
   static const buscaRapida = 'Busca rápida';
   static const buscaRapidaHint = 'Aluno ou ferramenta…';
   static const sugestaoIa = 'Sugestão IA';
+  static const radarDaBase = 'Radar da base';
+  static const coachCatalogHint =
+      'Abra o catálogo em Mais ferramentas para achar qualquer recurso.';
+  static const coachEntendi = 'Entendi';
   /// Legado — preferir [proximasAcoes] na Home.
   static const commandCenterTitle = 'Próximas ações';
   static const commandCenterSubtitle =

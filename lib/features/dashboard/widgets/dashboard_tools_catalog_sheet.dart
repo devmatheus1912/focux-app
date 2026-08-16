@@ -5,6 +5,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_input_deco.dart';
+import '../../planos/data/planos_repository.dart';
 import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
@@ -17,6 +18,7 @@ Future<void> showDashboardToolsCatalogSheet(
   required WidgetRef ref,
   required bool isDark,
   required double shortcutAspectRatio,
+  PlanoFeatures? homePlanoFeatures,
 }) {
   return showModalBottomSheet<void>(
     context: context,
@@ -52,6 +54,7 @@ Future<void> showDashboardToolsCatalogSheet(
                   isDark: isDark,
                   shortcutAspectRatio: shortcutAspectRatio,
                   scrollController: scrollController,
+                  homePlanoFeatures: homePlanoFeatures,
                 ),
               ),
         ),
@@ -68,6 +71,7 @@ class DashboardToolsCatalogSheet extends StatefulWidget {
     required this.isDark,
     required this.shortcutAspectRatio,
     this.scrollController,
+    this.homePlanoFeatures,
   });
 
   final BuildContext parentContext;
@@ -75,6 +79,7 @@ class DashboardToolsCatalogSheet extends StatefulWidget {
   final bool isDark;
   final double shortcutAspectRatio;
   final ScrollController? scrollController;
+  final PlanoFeatures? homePlanoFeatures;
 
   @override
   State<DashboardToolsCatalogSheet> createState() =>
@@ -206,6 +211,7 @@ class _DashboardToolsCatalogSheetState extends State<DashboardToolsCatalogSheet>
                         widget.parentContext,
                         widget.parentRef,
                         shortcut,
+                        homeOverride: widget.homePlanoFeatures,
                       );
                     },
                   ),

@@ -16,10 +16,12 @@ import '../utils/dashboard_home_focus.dart';
 import '../utils/dashboard_home_snapshot.dart';
 import '../utils/dashboard_scroll_logic.dart';
 import '../utils/dashboard_screen_helpers.dart';
-import 'dashboard_attention_rail.dart';
 import 'dashboard_agenda_hoje_strip.dart';
+import 'dashboard_attention_rail.dart';
+import 'dashboard_base_radar_strip.dart';
 import 'dashboard_command_center_section.dart';
 import 'dashboard_day_focus_banner.dart';
+import 'dashboard_home_coach_banner.dart';
 import 'dashboard_home_header.dart';
 import 'dashboard_pulse_strip.dart';
 
@@ -57,12 +59,17 @@ List<Widget> buildDashboardHomePrimarySlivers({
   VoidCallback? onQuickSearch,
   VoidCallback? onIaTeaser,
   List<AgendamentoResumo> agendaItems = const [],
+  String? freshnessLabel,
+  bool showCoachBanner = false,
+  VoidCallback? onDismissCoach,
+  List<AlunoScoreResumo> alunosScore = const [],
 }) {
   final alunosAtivos = snap.alunosAtivos;
   final riscoAlto = snap.riscoAlto;
   final checkinsHoje = snap.checkinsHoje;
   final checkinsTrend = snap.checkinsTrend;
   final agendaHoje = snap.agendaHoje;
+  final dismissCoach = onDismissCoach;
 
   return [
     if (!focusRules.hidePromoBanners) ...[
@@ -102,8 +109,16 @@ List<Widget> buildDashboardHomePrimarySlivers({
         notificacoesCountOverride: notificacoesNaoLidasOverride,
         onQuickSearch: onQuickSearch,
         onIaTeaser: onIaTeaser,
+        freshnessLabel: freshnessLabel,
       ),
     ),
+    if (showCoachBanner && dismissCoach != null)
+      SliverToBoxAdapter(
+        child: DashboardHomeCoachBanner(
+          isDark: isDark,
+          onDismiss: dismissCoach,
+        ),
+      ),
     SliverToBoxAdapter(
       child: DashboardDayFocusBanner(
         focus: dayFocus,
@@ -186,6 +201,18 @@ List<Widget> buildDashboardHomePrimarySlivers({
         child: SizedBox(height: DashboardLayout.sliverSectionGap),
       ),
     ],
+    if (focusRules.omitSecondarySections && alunosScore.isNotEmpty)
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s4),
+          child: DashboardBaseRadarStrip(
+            isDark: isDark,
+            scores: alunosScore,
+            initiallyExpanded: true,
+            limit: 3,
+          ),
+        ),
+      ),
     SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(

@@ -15,9 +15,10 @@ import 'dashboard_tool_recent_store.dart';
 Future<void> openDashboardShortcut(
   BuildContext context,
   WidgetRef ref,
-  DashboardToolShortcut shortcut,
-) async {
-  final features = effectivePlanoFeatures(ref);
+  DashboardToolShortcut shortcut, {
+  PlanoFeatures? homeOverride,
+}) async {
+  final features = effectivePlanoFeatures(ref, homeOverride: homeOverride);
 
   if (!shortcut.isUnlocked(features)) {
     AnalyticsService.instance.track(

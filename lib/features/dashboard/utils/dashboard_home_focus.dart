@@ -38,10 +38,6 @@ class DashboardHomeFocusRules {
   final int maxVisibleNextActions;
 
   /// Quantos cards de risco "Precisa de atenção" pode mostrar.
-  ///
-  /// Quando o Foco do dia já cobre retenção, o risco vira dono único da
-  /// narrativa lá em cima (P0 na Central) — aqui zeramos para não ecoar o
-  /// mesmo sinal duas vezes. Sem esse dono, seguimos a densidade normal.
   static int attentionRiskLimit({
     required bool dayFocusCoversRetention,
     required bool focusMode,
@@ -59,13 +55,21 @@ class DashboardHomeFocusRules {
     required bool focusMode,
   }) {
     if (dayFocusCoversRetention &&
-        dayFocus.headline == 'Cobrança e retenção hoje') {
+        (dayFocus.kind == DashboardDayFocusKind.cobrancaRetencao ||
+            dayFocus.headline == 'Cobrança e retenção hoje')) {
       return 0;
     }
     return focusMode ? 1 : 2;
   }
 
   static bool coversRetention(DashboardDayFocus focus) {
+    if (focus.coversRetention != null) return focus.coversRetention!;
+    final kind = focus.kind;
+    if (kind != null) {
+      return kind == DashboardDayFocusKind.cobrancaRetencao ||
+          kind == DashboardDayFocusKind.retomadaUrgente ||
+          kind == DashboardDayFocusKind.risco;
+    }
     return focus.headline == 'Cobrança e retenção hoje' ||
         focus.headline == 'Retomada urgente da base' ||
         focus.headline == 'Acompanhar alunos em risco';
@@ -89,8 +93,6 @@ class DashboardHomeFocusRules {
     required double receitaAtual,
   }) {
     final covers = coversRetention(dayFocus);
-    // Retenção ainda esconde promo/empty CTAs; o toggle do usuário controla
-    // omit/tools/pulso — senão Foco OFF parece “morto” em dia de retomada.
     final retentionGuard = covers;
     return DashboardHomeFocusRules(
       focusMode: focusMode,

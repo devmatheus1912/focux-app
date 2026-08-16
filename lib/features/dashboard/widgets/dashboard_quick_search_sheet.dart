@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
@@ -26,17 +27,17 @@ Future<void> showDashboardQuickSearchSheet(
   );
 }
 
-class _QuickSearchSheet extends StatefulWidget {
+class _QuickSearchSheet extends ConsumerStatefulWidget {
   const _QuickSearchSheet({required this.isDark, required this.primary});
 
   final bool isDark;
   final Color primary;
 
   @override
-  State<_QuickSearchSheet> createState() => _QuickSearchSheetState();
+  ConsumerState<_QuickSearchSheet> createState() => _QuickSearchSheetState();
 }
 
-class _QuickSearchSheetState extends State<_QuickSearchSheet> {
+class _QuickSearchSheetState extends ConsumerState<_QuickSearchSheet> {
   final _controller = TextEditingController();
   String _query = '';
 
@@ -49,7 +50,7 @@ class _QuickSearchSheetState extends State<_QuickSearchSheet> {
   @override
   Widget build(BuildContext context) {
     final q = _query.trim().toLowerCase();
-    final all = DashboardToolShortcuts.moreTools;
+    final all = DashboardToolShortcut.moreTools;
     final tools =
         q.isEmpty
             ? all.take(8).toList()
@@ -62,6 +63,10 @@ class _QuickSearchSheetState extends State<_QuickSearchSheet> {
       dark: widget.isDark,
     );
     final mute = dashboardReadableCaption(context, isDark: widget.isDark);
+    final ink =
+        widget.isDark
+            ? Theme.of(context).colorScheme.onSurface
+            : TokensStrip.textPrimary;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.62,
@@ -114,7 +119,7 @@ class _QuickSearchSheetState extends State<_QuickSearchSheet> {
                 ),
                 title: Text(
                   q.isEmpty ? 'Ver alunos' : 'Buscar “$_query” em alunos',
-                  style: FocuxHubTypography.cardTitle(),
+                  style: FocuxHubTypography.cardTitle(color: ink),
                 ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
@@ -148,12 +153,12 @@ class _QuickSearchSheetState extends State<_QuickSearchSheet> {
                     ),
                     title: Text(
                       t.label,
-                      style: FocuxHubTypography.cardTitle(),
+                      style: FocuxHubTypography.cardTitle(color: ink),
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
                       Navigator.pop(context);
-                      openDashboardShortcut(context, t);
+                      openDashboardShortcut(context, ref, t);
                     },
                   ),
                 ),
