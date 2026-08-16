@@ -11,7 +11,7 @@ import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import 'dashboard_header_profile_avatar.dart';
 
-/// Identidade operacional: avatar + nome + freshness | chrome (sem IA — tab do dock).
+/// Identidade em faixa própria (nome completo legível) + chrome na linha de baixo.
 class DashboardHomeHeader extends StatelessWidget {
   const DashboardHomeHeader({
     super.key,
@@ -58,80 +58,99 @@ class DashboardHomeHeader extends StatelessWidget {
         TokensStrip.s4,
         TokensStrip.s2,
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          DashboardHeaderProfileAvatar(
-            primary: primary,
-            isDark: isDark,
-            photoUrl: logoUrl,
-            initials: fxInitials(nomePersonal ?? 'F'),
-            size: chromeSize,
-            onTap: onProfileTap,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              DashboardHeaderProfileAvatar(
+                primary: primary,
+                isDark: isDark,
+                photoUrl: logoUrl,
+                initials: fxInitials(nomePersonal ?? 'F'),
+                size: chromeSize,
+                onTap: onProfileTap,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Semantics(
+                      header: true,
+                      button: true,
+                      label: '$a11yName. Abrir perfil',
+                      child: GestureDetector(
+                        onTap: onProfileTap,
+                        behavior: HitTestBehavior.opaque,
+                        child: Text(
+                          displayName,
+                          maxLines: 2,
+                          softWrap: true,
+                          overflow: TextOverflow.ellipsis,
+                          style: dashboardPageTitleStyle(context, color: ink)
+                              .copyWith(
+                                fontSize: compact ? 20 : 22,
+                                height: 1.15,
+                              ),
+                        ),
+                      ),
+                    ),
+                    if (freshnessLabel != null &&
+                        freshnessLabel!.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          freshnessLabel!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: dashboardCardSubtitleStyle(
+                            context,
+                            isDark: isDark,
+                          ).copyWith(color: mute, fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Semantics(
-                  header: true,
-                  button: true,
-                  label: '$a11yName. Abrir perfil',
-                  child: GestureDetector(
-                    onTap: onProfileTap,
-                    behavior: HitTestBehavior.opaque,
-                    child: Text(
-                      displayName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: dashboardPageTitleStyle(context, color: ink)
-                          .copyWith(fontSize: compact ? 20 : 22),
-                    ),
+                if (onQuickSearch != null) ...[
+                  ShellHeaderIconButton(
+                    icon: 'search',
+                    size: chromeSize,
+                    tooltip: DashboardMicrocopy.buscaRapida,
+                    onTap: onQuickSearch!,
                   ),
-                ),
-                if (freshnessLabel != null && freshnessLabel!.isNotEmpty) ...[
-                  const SizedBox(height: 2),
-                  Semantics(
-                    liveRegion: true,
-                    child: Text(
-                      freshnessLabel!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: dashboardCardSubtitleStyle(
-                        context,
-                        isDark: isDark,
-                      ).copyWith(color: mute, fontSize: 12),
-                    ),
-                  ),
+                  SizedBox(width: chromeGap),
                 ],
+                if (onHelp != null) ...[
+                  ShellHeaderIconButton(
+                    icon: 'help',
+                    size: chromeSize,
+                    tooltip: DashboardMicrocopy.helpHomeOpen,
+                    onTap: onHelp!,
+                  ),
+                  SizedBox(width: chromeGap),
+                ],
+                ShellThemeToggle(size: chromeSize),
+                SizedBox(width: chromeGap),
+                NotificacaoBadgeButton(
+                  size: chromeSize,
+                  countOverride: notificacoesCountOverride,
+                ),
               ],
             ),
-          ),
-          if (onQuickSearch != null) ...[
-            ShellHeaderIconButton(
-              icon: 'search',
-              size: chromeSize,
-              tooltip: DashboardMicrocopy.buscaRapida,
-              onTap: onQuickSearch!,
-            ),
-            SizedBox(width: chromeGap),
-          ],
-          if (onHelp != null) ...[
-            ShellHeaderIconButton(
-              icon: 'help',
-              size: chromeSize,
-              tooltip: DashboardMicrocopy.helpHomeOpen,
-              onTap: onHelp!,
-            ),
-            SizedBox(width: chromeGap),
-          ],
-          ShellThemeToggle(size: chromeSize),
-          SizedBox(width: chromeGap),
-          NotificacaoBadgeButton(
-            size: chromeSize,
-            countOverride: notificacoesCountOverride,
           ),
         ],
       ),
