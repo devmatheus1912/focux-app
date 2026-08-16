@@ -6,13 +6,12 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
-import '../constants/dashboard_layout.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import 'dashboard_header_profile_avatar.dart';
 
-/// Header Home — uma superfície, chrome soft (Linear). Modo foco só no Foco do dia.
+/// Header Home 10/10 — identidade limpa + chrome soft; «Foco» só no banner.
 class DashboardHomeHeader extends StatelessWidget {
   const DashboardHomeHeader({
     super.key,
@@ -37,6 +36,9 @@ class DashboardHomeHeader extends StatelessWidget {
   final VoidCallback? onHelp;
   final String? freshnessLabel;
 
+  static const double _chrome = 36;
+  static const double _chromeGap = 3;
+
   @override
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
@@ -47,10 +49,10 @@ class DashboardHomeHeader extends StatelessWidget {
         fullName.isEmpty
             ? dashboardPersonalDisplayName(nomePersonal)
             : fxTitleCaseName(fullName);
-    final width = MediaQuery.sizeOf(context).width;
-    final compact = DashboardLayout.isCompact(width);
-    final chromeSize = DashboardLayout.headerActionSize(width).clamp(36.0, 42.0);
-    final chromeGap = compact ? 4.0 : 6.0;
+    final freshness =
+        (freshnessLabel != null && freshnessLabel!.isNotEmpty)
+            ? freshnessLabel!
+            : DashboardMicrocopy.painelAtualizado;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -67,7 +69,7 @@ class DashboardHomeHeader extends StatelessWidget {
           glowStrength: 0.04,
         ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 12, 10, 12),
+          padding: const EdgeInsets.fromLTRB(12, 11, 10, 11),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -82,15 +84,15 @@ class DashboardHomeHeader extends StatelessWidget {
                       isDark: isDark,
                       photoUrl: logoUrl,
                       initials: fxInitials(nomePersonal ?? 'F'),
-                      size: 46,
+                      size: 44,
                       onTap: onProfileTap,
                     ),
                     Positioned(
                       right: 0,
                       bottom: 0,
                       child: Container(
-                        width: 11,
-                        height: 11,
+                        width: 10,
+                        height: 10,
                         decoration: BoxDecoration(
                           color: primary,
                           shape: BoxShape.circle,
@@ -99,21 +101,15 @@ class DashboardHomeHeader extends StatelessWidget {
                                 isDark
                                     ? EagleTokens.darkCard
                                     : TokensStrip.cardBg,
-                            width: 2,
+                            width: 1.75,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: primary.withValues(alpha: 0.35),
-                              blurRadius: 6,
-                            ),
-                          ],
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 11),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,61 +124,30 @@ class DashboardHomeHeader extends StatelessWidget {
                         color: ink,
                       ).copyWith(
                         fontWeight: FontWeight.w800,
-                        height: 1.1,
+                        height: 1.12,
                       ),
                     ),
-                    const SizedBox(height: 3),
-                    Text.rich(
-                      TextSpan(
+                    const SizedBox(height: 2),
+                    Semantics(
+                      liveRegion: true,
+                      child: Text(
+                        freshness,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: dashboardCardSubtitleStyle(
                           context,
                           isDark: isDark,
-                        ).copyWith(color: mute, height: 1.25),
-                        children: [
-                          const TextSpan(
-                            text: DashboardMicrocopy.headerTaglineLead,
-                          ),
-                          TextSpan(
-                            text: DashboardMicrocopy.headerTaglineAccent,
-                            style: TextStyle(
-                              color: primary,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const TextSpan(
-                            text: DashboardMicrocopy.headerTaglineTail,
-                          ),
-                        ],
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (freshnessLabel != null &&
-                        freshnessLabel!.isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      Semantics(
-                        liveRegion: true,
-                        child: Text(
-                          freshnessLabel!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: dashboardCardSubtitleStyle(
-                            context,
-                            isDark: isDark,
-                          ).copyWith(
-                            color: mute.withValues(alpha: 0.78),
-                            height: 1.15,
-                          ),
+                        ).copyWith(
+                          color: mute,
+                          height: 1.2,
                         ),
                       ),
-                    ],
+                    ),
                   ],
                 ),
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 4),
               _HeaderChromeCluster(
-                chromeSize: chromeSize,
-                chromeGap: chromeGap,
                 onQuickSearch: onQuickSearch,
                 onHelp: onHelp,
                 notificacoesCountOverride: notificacoesCountOverride,
@@ -195,49 +160,46 @@ class DashboardHomeHeader extends StatelessWidget {
   }
 }
 
-/// Chrome do shell — mesma linguagem dos cards (sem rail escuro).
 class _HeaderChromeCluster extends StatelessWidget {
   const _HeaderChromeCluster({
-    required this.chromeSize,
-    required this.chromeGap,
     this.onQuickSearch,
     this.onHelp,
     this.notificacoesCountOverride,
   });
 
-  final double chromeSize;
-  final double chromeGap;
   final VoidCallback? onQuickSearch;
   final VoidCallback? onHelp;
   final int? notificacoesCountOverride;
 
   @override
   Widget build(BuildContext context) {
+    const size = DashboardHomeHeader._chrome;
+    const gap = DashboardHomeHeader._chromeGap;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         if (onQuickSearch != null) ...[
           ShellHeaderIconButton(
             icon: 'search',
-            size: chromeSize,
+            size: size,
             tooltip: DashboardMicrocopy.buscaRapida,
             onTap: onQuickSearch!,
           ),
-          SizedBox(width: chromeGap),
+          const SizedBox(width: gap),
         ],
         if (onHelp != null) ...[
           ShellHeaderIconButton(
             icon: 'help',
-            size: chromeSize,
+            size: size,
             tooltip: DashboardMicrocopy.helpHomeOpen,
             onTap: onHelp!,
           ),
-          SizedBox(width: chromeGap),
+          const SizedBox(width: gap),
         ],
-        ShellThemeToggle(size: chromeSize),
-        SizedBox(width: chromeGap),
+        const ShellThemeToggle(size: size),
+        const SizedBox(width: gap),
         NotificacaoBadgeButton(
-          size: chromeSize,
+          size: size,
           countOverride: notificacoesCountOverride,
         ),
       ],

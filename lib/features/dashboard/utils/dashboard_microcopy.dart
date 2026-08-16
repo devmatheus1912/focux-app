@@ -48,9 +48,10 @@ abstract final class DashboardMicrocopy {
   static const headerRailFocoHint = 'Menos distrações';
   static const headerRailNotif = 'Notificações';
   static const headerRailNotifHint = 'Novidades e alertas';
-  static const headerTaglineLead = 'Foco hoje, ';
-  static const headerTaglineAccent = 'resultado';
-  static const headerTaglineTail = ' amanhã.';
+  /// Personalidade da marca — fora do header (evita eco com «Foco do dia»).
+  static const headerTaglineLead = '';
+  static const headerTaglineAccent = 'Resultado';
+  static const headerTaglineTail = ' começa hoje.';
   static const sugestaoIa = 'Sugestão IA';
   static const sugestaoIaDisclaimer =
       'Sugestão opcional — você decide se aplica.';
