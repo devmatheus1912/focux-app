@@ -47,7 +47,9 @@ class DashboardHomeHeader extends StatelessWidget {
       compact: compact,
     );
     final mute = dashboardReadableCaption(context, isDark: isDark);
-    final displayName = dashboardPersonalFirstName(nomePersonal);
+    final displayName = dashboardPersonalDisplayName(nomePersonal);
+    final fullName = (nomePersonal ?? '').trim();
+    final a11yName = fullName.isEmpty ? displayName : fxTitleCaseName(fullName);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -76,7 +78,7 @@ class DashboardHomeHeader extends StatelessWidget {
                 Semantics(
                   header: true,
                   button: true,
-                  label: '$displayName. Abrir perfil',
+                  label: '$a11yName. Abrir perfil',
                   child: GestureDetector(
                     onTap: onProfileTap,
                     behavior: HitTestBehavior.opaque,

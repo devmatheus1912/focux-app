@@ -8,13 +8,28 @@ import '../../alunos/data/aluno_repository.dart';
 import '../constants/dashboard_layout.dart';
 import '../data/command_center_data.dart';
 
-String dashboardPersonalFirstName(String? nome) {
-  final first = nome?.split(' ').first.trim();
-  if (first == null || first.isEmpty) return 'Personal';
-  return fxTitleCaseName(first);
+/// Nome do personal na Home — mesmo valor do BFF/`perfil` (title-case).
+/// Compostos e nomes longos: UI usa `maxLines: 1` + ellipsis; não corta no 1º token.
+String dashboardPersonalDisplayName(String? nome) {
+  final trimmed = nome?.trim();
+  if (trimmed == null || trimmed.isEmpty) return 'Personal';
+  return fxTitleCaseName(trimmed);
 }
 
-/// @Deprecated — Home operacional usa [dashboardPersonalFirstName] (sem saudação).
+/// @Deprecated — preferir [dashboardPersonalDisplayName] (nome completo SSOT).
+String dashboardPersonalFirstName(String? nome) {
+  final parts =
+      nome
+          ?.trim()
+          .split(RegExp(r'\s+'))
+          .where((p) => p.isNotEmpty)
+          .toList() ??
+      const <String>[];
+  if (parts.isEmpty) return 'Personal';
+  return fxTitleCaseName(parts.first);
+}
+
+/// @Deprecated — Home operacional não usa saudação horária.
 String dashboardGreeting(String? nome, {bool compact = false}) {
   final hour = DateTime.now().hour;
   final prefix =
@@ -23,10 +38,10 @@ String dashboardGreeting(String? nome, {bool compact = false}) {
           : hour < 18
           ? 'Boa tarde'
           : 'Boa noite';
-  final display = dashboardPersonalFirstName(nome);
+  final display = dashboardPersonalDisplayName(nome);
   if (display == 'Personal') return prefix;
-  if (compact && display.length > 10) {
-    return '$prefix, ${display.substring(0, 9)}…';
+  if (compact && display.length > 18) {
+    return '$prefix, ${display.substring(0, 17)}…';
   }
   return '$prefix, $display';
 }
