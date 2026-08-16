@@ -133,8 +133,10 @@ class DashboardHomeHeader extends ConsumerWidget {
                           'Olá, $firstName',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: dashboardCardTitleStyle(ink).copyWith(
-                            fontSize: 18,
+                          style: dashboardPageTitleStyle(
+                            context,
+                            color: ink,
+                          ).copyWith(
                             fontWeight: FontWeight.w800,
                             height: 1.15,
                           ),
@@ -241,6 +243,7 @@ class DashboardHomeHeader extends ConsumerWidget {
                                     ? DashboardMicrocopy.headerRailAjudaHint
                                     : null,
                             primary: primary,
+                            tooltip: DashboardMicrocopy.helpHomeOpen,
                             onTap: onHelp!,
                           ),
                         ),
