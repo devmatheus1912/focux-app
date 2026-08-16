@@ -79,13 +79,20 @@ class DashboardDayFocusBanner extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(TokensStrip.rCard),
               child: Stack(
+                clipBehavior: Clip.hardEdge,
                 children: [
                   if (focus.kind == DashboardDayFocusKind.retomadaUrgente)
-                    Positioned.fill(
-                      child: CustomPaint(
-                        painter: DashboardDayFocusRipplePainter(
-                          color: accent,
-                          isDark: isDark,
+                    Positioned(
+                      right: -28,
+                      bottom: -36,
+                      width: 168,
+                      height: 168,
+                      child: IgnorePointer(
+                        child: CustomPaint(
+                          painter: DashboardDayFocusRipplePainter(
+                            color: accent,
+                            isDark: isDark,
+                          ),
                         ),
                       ),
                     ),
@@ -244,16 +251,37 @@ class DashboardDayFocusBanner extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: TokensStrip.s2),
-                        Text(
-                          focus.headline,
-                          style: dashboardPageTitleStyle(context, color: ink),
+                        Padding(
+                          padding: EdgeInsets.only(
+                            right:
+                                focus.kind ==
+                                        DashboardDayFocusKind.retomadaUrgente
+                                    ? 36
+                                    : 0,
+                          ),
+                          child: Text(
+                            focus.headline,
+                            style: dashboardPageTitleStyle(
+                              context,
+                              color: ink,
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 4),
-                        Text(
-                          focus.detail,
-                          style: dashboardCardSubtitleStyle(
-                            context,
-                            isDark: isDark,
+                        Padding(
+                          padding: EdgeInsets.only(
+                            right:
+                                focus.kind ==
+                                        DashboardDayFocusKind.retomadaUrgente
+                                    ? 48
+                                    : 0,
+                          ),
+                          child: Text(
+                            focus.detail,
+                            style: dashboardCardSubtitleStyle(
+                              context,
+                              isDark: isDark,
+                            ),
                           ),
                         ),
                       ],
