@@ -314,26 +314,30 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                           ),
                         ],
                       ),
-                      AnimatedSwitcher(
-                        duration: reduceMotion
-                            ? Duration.zero
-                            : const Duration(milliseconds: 220),
-                        switchInCurve: Curves.easeOutCubic,
-                        switchOutCurve: Curves.easeInCubic,
-                        child:
-                            showStickyPrioritiesAction
-                                ? DashboardPrioritiesOverlay(
-                                  key: const ValueKey('priorities-overlay'),
-                                  isDark: themeDark,
-                                  primary: primary,
-                                  label:
-                                      stickyCommandActionsLabel ??
-                                      DashboardMicrocopy.verPrioridades,
-                                  onTap: openCommandQuickActions,
-                                )
-                                : const SizedBox.shrink(
-                                  key: ValueKey('priorities-overlay-off'),
-                                ),
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: AnimatedSwitcher(
+                          duration: reduceMotion
+                              ? Duration.zero
+                              : const Duration(milliseconds: 220),
+                          switchInCurve: Curves.easeOutCubic,
+                          switchOutCurve: Curves.easeInCubic,
+                          child:
+                              showStickyPrioritiesAction
+                                  ? DashboardPrioritiesOverlay(
+                                    key: const ValueKey('priorities-overlay'),
+                                    isDark: themeDark,
+                                    primary: primary,
+                                    label:
+                                        stickyCommandActionsLabel ??
+                                        DashboardMicrocopy.verPrioridades,
+                                    onTap: openCommandQuickActions,
+                                  )
+                                  : const SizedBox.shrink(
+                                    key: ValueKey('priorities-overlay-off'),
+                                  ),
+                        ),
                       ),
                     ],
                   ),

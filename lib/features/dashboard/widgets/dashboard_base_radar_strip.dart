@@ -49,20 +49,24 @@ class DashboardBaseRadarStrip extends StatelessWidget {
       initiallyExpanded: initiallyExpanded,
       child: DashboardHorizontalScrollPeek(
         showPeek: items.length > 1,
-        child: Row(
-          children: [
-            for (var i = 0; i < items.length; i++) ...[
-              if (i > 0) const SizedBox(width: TokensStrip.s2),
-              _RadarCard(
-                item: items[i],
-                width: cardW,
-                ink: ink,
-                isDark: isDark,
-                index: i,
-                total: items.length,
-              ),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          child: Row(
+            children: [
+              for (var i = 0; i < items.length; i++) ...[
+                if (i > 0) const SizedBox(width: TokensStrip.s2),
+                _RadarCard(
+                  item: items[i],
+                  width: cardW,
+                  ink: ink,
+                  isDark: isDark,
+                  index: i,
+                  total: items.length,
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -129,6 +133,7 @@ class _RadarCard extends StatelessWidget {
             ),
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(

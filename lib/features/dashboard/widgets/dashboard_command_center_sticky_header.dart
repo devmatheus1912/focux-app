@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
@@ -205,6 +204,7 @@ class DashboardCommandCenterStickyHeaderDelegate
 }
 
 /// Chip flutuante — fora do CustomScrollView para não deslocar o extent.
+/// Não usa [Positioned]: o pai (Stack) deve posicionar o chip.
 class DashboardPrioritiesOverlay extends StatelessWidget {
   const DashboardPrioritiesOverlay({
     super.key,
@@ -223,36 +223,36 @@ class DashboardPrioritiesOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     final chipFg = dashboardPrioritiesChipForeground(primary, isDark: isDark);
     final chipBg = dashboardPrioritiesChipBackground(primary, isDark: isDark);
-    return Positioned(
-      top: 0,
-      right: 0,
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 4, TokensStrip.s4, 4),
-          child: Semantics(
-            button: true,
-            label: label,
-            child: Material(
-              color: chipBg,
-              elevation: isDark ? 4 : 2,
-              shadowColor: primary.withValues(alpha: isDark ? 0.55 : 0.28),
-              shape: const StadiumBorder(),
-              child: InkWell(
-                onTap: onTap,
-                customBorder: const StadiumBorder(),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    child: Center(
-                      child: Text(
-                        label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: dashboardChipLabelStyle(chipFg).copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 4, TokensStrip.s4, 4),
+        child: Semantics(
+          button: true,
+          label: label,
+          child: Material(
+            color: chipBg,
+            elevation: isDark ? 4 : 2,
+            shadowColor: primary.withValues(alpha: isDark ? 0.55 : 0.28),
+            shape: const StadiumBorder(),
+            child: InkWell(
+              onTap: onTap,
+              customBorder: const StadiumBorder(),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: 48,
+                  minWidth: 48,
+                  maxWidth: 220,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  child: Center(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: dashboardChipLabelStyle(chipFg).copyWith(
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),

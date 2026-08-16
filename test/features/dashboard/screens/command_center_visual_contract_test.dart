@@ -59,6 +59,26 @@ void main() {
     expect(widget, contains("collapsedActionLabel: 'Revisar'"));
     expect(widget, contains('class DashboardPrioritiesOverlay'));
     expect(widget, contains('dashboardPanelIsOffscreen'));
+    expect(
+      File('lib/features/dashboard/widgets/dashboard_base_radar_strip.dart')
+          .readAsStringSync(),
+      contains('SingleChildScrollView'),
+    );
+    expect(
+      File(
+        'lib/features/dashboard/screens/personal_dashboard_screen_build.part.dart',
+      ).readAsStringSync(),
+      allOf(
+        contains('Positioned('),
+        contains('DashboardPrioritiesOverlay'),
+      ),
+    );
+    expect(
+      File(
+        'lib/features/dashboard/widgets/dashboard_command_center_sticky_header.dart',
+      ).readAsStringSync(),
+      isNot(contains('return Positioned(')),
+    );
     expect(widget, contains('verPrioridades'));
     expect(widget, contains('dashboardShowsStickyPrioritiesAction'));
     expect(widget, contains('panelOffscreen'));
