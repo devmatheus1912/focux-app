@@ -139,7 +139,7 @@ List<Widget> buildDashboardHomePrimarySlivers({
             TokensStrip.s4,
             0,
             TokensStrip.s4,
-            TokensStrip.s4,
+            TokensStrip.s3,
           ),
           child: DashboardCommandCenterSection(
             isDark: isDark,

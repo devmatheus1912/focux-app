@@ -74,7 +74,8 @@ class DashboardDayFocusBanner extends StatelessWidget {
               context,
               accent: primary,
               radius: TokensStrip.rCard,
-              glowStrength: focusMode ? 0.10 : 0.05,
+              glowStrength: focusMode ? 0.16 : 0.10,
+              emphasize: true,
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(TokensStrip.rCard),

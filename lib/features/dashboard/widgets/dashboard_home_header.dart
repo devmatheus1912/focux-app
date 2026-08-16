@@ -16,7 +16,7 @@ import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import 'dashboard_header_profile_avatar.dart';
 
-/// Header Home — identidade + rail de atalhos (ref. claro/escuro).
+/// Header Home compacto — identidade 2 linhas + rail curto (chrome recede).
 class DashboardHomeHeader extends ConsumerWidget {
   const DashboardHomeHeader({
     super.key,
@@ -55,12 +55,10 @@ class DashboardHomeHeader extends ConsumerWidget {
         fullName.isEmpty
             ? dashboardPersonalDisplayName(nomePersonal)
             : fxTitleCaseName(fullName);
-    final width = MediaQuery.sizeOf(context).width;
-    final showHints = width >= 360;
+    final compact = MediaQuery.sizeOf(context).width < 360;
     final live = ref.watch(notificacoesNaoLidasProvider).valueOrNull;
     final notifCount = notificacoesCountOverride ?? live ?? 0;
 
-    // Rail sempre profundo — contraste estável em claro e escuro.
     final railBg =
         isDark ? const Color(0xFF070E14) : const Color(0xFF0F1720);
     final railBorder = primary.withValues(alpha: isDark ? 0.22 : 0.14);
@@ -77,10 +75,10 @@ class DashboardHomeHeader extends ConsumerWidget {
           context,
           accent: primary,
           radius: TokensStrip.rCard,
-          glowStrength: 0.06,
+          glowStrength: 0.05,
         ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -98,15 +96,15 @@ class DashboardHomeHeader extends ConsumerWidget {
                           isDark: isDark,
                           photoUrl: logoUrl,
                           initials: fxInitials(nomePersonal ?? 'F'),
-                          size: 48,
+                          size: 44,
                           onTap: onProfileTap,
                         ),
                         Positioned(
-                          right: 1,
-                          bottom: 1,
+                          right: 0,
+                          bottom: 0,
                           child: Container(
-                            width: 11,
-                            height: 11,
+                            width: 10,
+                            height: 10,
                             decoration: BoxDecoration(
                               color: primary,
                               shape: BoxShape.circle,
@@ -115,7 +113,7 @@ class DashboardHomeHeader extends ConsumerWidget {
                                     isDark
                                         ? EagleTokens.darkCard
                                         : TokensStrip.cardBg,
-                                width: 2,
+                                width: 1.75,
                               ),
                             ),
                           ),
@@ -123,7 +121,7 @@ class DashboardHomeHeader extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,10 +136,10 @@ class DashboardHomeHeader extends ConsumerWidget {
                             color: ink,
                           ).copyWith(
                             fontWeight: FontWeight.w800,
-                            height: 1.15,
+                            height: 1.1,
                           ),
                         ),
-                        const SizedBox(height: 3),
+                        const SizedBox(height: 2),
                         Text.rich(
                           TextSpan(
                             style: dashboardCardSubtitleStyle(
@@ -149,8 +147,7 @@ class DashboardHomeHeader extends ConsumerWidget {
                               isDark: isDark,
                             ).copyWith(
                               color: mute,
-                              fontSize: 12.5,
-                              height: 1.25,
+                              height: 1.2,
                             ),
                             children: [
                               const TextSpan(
@@ -160,37 +157,64 @@ class DashboardHomeHeader extends ConsumerWidget {
                                 text: DashboardMicrocopy.headerTaglineAccent,
                                 style: TextStyle(
                                   color: primary,
-                                  fontWeight: FontWeight.w700,
+                                  fontWeight: FontWeight.w800,
                                 ),
                               ),
                               const TextSpan(
                                 text: DashboardMicrocopy.headerTaglineTail,
                               ),
+                              if (!compact &&
+                                  freshnessLabel != null &&
+                                  freshnessLabel!.isNotEmpty) ...[
+                                TextSpan(
+                                  text: ' · ',
+                                  style: TextStyle(
+                                    color: mute.withValues(alpha: 0.55),
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: freshnessLabel,
+                                  style: TextStyle(
+                                    color: mute.withValues(alpha: 0.8),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        if (freshnessLabel != null &&
-                            freshnessLabel!.isNotEmpty) ...[
-                          const SizedBox(height: 2),
+                        if (compact &&
+                            freshnessLabel != null &&
+                            freshnessLabel!.isNotEmpty)
                           Semantics(
                             liveRegion: true,
-                            child: Text(
-                              freshnessLabel!,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: dashboardCardSubtitleStyle(
-                                context,
-                                isDark: isDark,
-                              ).copyWith(
-                                color: mute.withValues(alpha: 0.85),
-                                fontSize: 11,
-                                height: 1.2,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 1),
+                              child: Text(
+                                freshnessLabel!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: dashboardCardSubtitleStyle(
+                                  context,
+                                  isDark: isDark,
+                                ).copyWith(
+                                  color: mute.withValues(alpha: 0.8),
+                                  height: 1.15,
+                                ),
                               ),
                             ),
+                          )
+                        else if (!compact &&
+                            freshnessLabel != null &&
+                            freshnessLabel!.isNotEmpty)
+                          Semantics(
+                            liveRegion: true,
+                            container: false,
+                            label: freshnessLabel,
+                            child: const SizedBox.shrink(),
                           ),
-                        ],
                       ],
                     ),
                   ),
@@ -198,35 +222,31 @@ class DashboardHomeHeader extends ConsumerWidget {
                   _HeaderThemeSquare(primary: primary, isDark: isDark),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               DecoratedBox(
                 decoration: BoxDecoration(
                   color: railBg,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: railBorder, width: 1),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(
-                        alpha: isDark ? 0.35 : 0.18,
+                        alpha: isDark ? 0.28 : 0.14,
                       ),
-                      blurRadius: 14,
-                      offset: const Offset(0, 6),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-                child: IntrinsicHeight(
+                child: SizedBox(
+                  height: 58,
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       if (onQuickSearch != null)
                         Expanded(
                           child: _HeaderRailAction(
                             icon: 'search',
                             label: DashboardMicrocopy.headerRailBuscar,
-                            hint:
-                                showHints
-                                    ? DashboardMicrocopy.headerRailBuscarHint
-                                    : null,
                             primary: primary,
                             onTap: onQuickSearch!,
                           ),
@@ -238,10 +258,6 @@ class DashboardHomeHeader extends ConsumerWidget {
                           child: _HeaderRailAction(
                             icon: 'help',
                             label: DashboardMicrocopy.headerRailAjuda,
-                            hint:
-                                showHints
-                                    ? DashboardMicrocopy.headerRailAjudaHint
-                                    : null,
                             primary: primary,
                             tooltip: DashboardMicrocopy.helpHomeOpen,
                             onTap: onHelp!,
@@ -252,10 +268,6 @@ class DashboardHomeHeader extends ConsumerWidget {
                         child: _HeaderRailAction(
                           icon: focusMode ? 'zap' : 'moon',
                           label: DashboardMicrocopy.modoFoco,
-                          hint:
-                              showHints
-                                  ? DashboardMicrocopy.headerRailFocoHint
-                                  : null,
                           primary: primary,
                           active: focusMode,
                           semanticLabel:
@@ -270,10 +282,6 @@ class DashboardHomeHeader extends ConsumerWidget {
                         child: _HeaderRailAction(
                           icon: 'bell',
                           label: DashboardMicrocopy.headerRailNotif,
-                          hint:
-                              showHints
-                                  ? DashboardMicrocopy.headerRailNotifHint
-                                  : null,
                           primary: primary,
                           badgeCount: notifCount,
                           tooltip: notificacaoBadgeTooltip(notifCount),
@@ -307,15 +315,15 @@ class _HeaderThemeSquare extends ConsumerWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () => ref.read(themeModeProvider.notifier).toggle(),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
           child: Ink(
-            width: 40,
-            height: 40,
-            decoration: chrome.headerAction(radius: 12),
+            width: 36,
+            height: 36,
+            decoration: chrome.headerAction(radius: 10),
             child: Center(
               child: FxIcon(
                 name: isDark ? 'sun' : 'moon',
-                size: 18,
+                size: 16,
                 color: primary,
               ),
             ),
@@ -332,12 +340,10 @@ class _HeaderRailDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: SizedBox(
         width: 1,
-        child: ColoredBox(
-          color: Colors.white.withValues(alpha: 0.10),
-        ),
+        child: ColoredBox(color: Colors.white.withValues(alpha: 0.10)),
       ),
     );
   }
@@ -349,7 +355,6 @@ class _HeaderRailAction extends StatelessWidget {
     required this.label,
     required this.primary,
     required this.onTap,
-    this.hint,
     this.active = false,
     this.badgeCount = 0,
     this.tooltip,
@@ -358,7 +363,6 @@ class _HeaderRailAction extends StatelessWidget {
 
   final String icon;
   final String label;
-  final String? hint;
   final Color primary;
   final VoidCallback onTap;
   final bool active;
@@ -372,55 +376,62 @@ class _HeaderRailAction extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
-                width: 36,
-                height: 28,
+                width: 32,
+                height: 22,
                 child: Stack(
                   alignment: Alignment.center,
                   clipBehavior: Clip.none,
                   children: [
-                    DecoratedBox(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: primary.withValues(
-                              alpha: active ? 0.55 : 0.32,
+                    if (active)
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: primary.withValues(alpha: 0.5),
+                              blurRadius: 12,
+                              spreadRadius: 0.5,
                             ),
-                            blurRadius: active ? 16 : 12,
-                            spreadRadius: active ? 1 : 0,
-                          ),
-                          BoxShadow(
-                            color: primary.withValues(alpha: 0.14),
-                            blurRadius: 22,
-                            spreadRadius: 2,
-                          ),
-                        ],
+                          ],
+                        ),
+                        child: const SizedBox(width: 18, height: 18),
+                      )
+                    else
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: primary.withValues(alpha: 0.18),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                        child: const SizedBox(width: 16, height: 16),
                       ),
-                      child: const SizedBox(width: 22, height: 22),
-                    ),
                     FxIcon(
                       name: icon,
-                      size: 18,
+                      size: 16,
                       color: Colors.white.withValues(
-                        alpha: active ? 1 : 0.92,
+                        alpha: active ? 1 : 0.88,
                       ),
-                      strokeWidth: active ? 2.1 : 1.7,
+                      strokeWidth: active ? 2.05 : 1.65,
                     ),
                     if (badgeCount > 0)
                       Positioned(
-                        top: -2,
-                        right: 0,
+                        top: -3,
+                        right: -2,
                         child: Container(
                           constraints: const BoxConstraints(
-                            minWidth: 16,
-                            minHeight: 14,
+                            minWidth: 15,
+                            minHeight: 13,
                           ),
                           padding: const EdgeInsets.symmetric(horizontal: 3),
                           decoration: BoxDecoration(
@@ -428,7 +439,7 @@ class _HeaderRailAction extends StatelessWidget {
                             borderRadius: BorderRadius.circular(999),
                             border: Border.all(
                               color: const Color(0xFF0F1720),
-                              width: 1.2,
+                              width: 1.1,
                             ),
                           ),
                           alignment: Alignment.center,
@@ -436,7 +447,7 @@ class _HeaderRailAction extends StatelessWidget {
                             badgeCount > 9 ? '9+' : '$badgeCount',
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 8,
+                              fontSize: 7.5,
                               fontWeight: FontWeight.w800,
                               height: 1,
                             ),
@@ -446,34 +457,19 @@ class _HeaderRailAction extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 3),
               Text(
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: active ? 1 : 0.95),
-                  fontSize: 11,
+                  color: Colors.white.withValues(alpha: active ? 1 : 0.9),
+                  fontSize: 10,
                   fontWeight: FontWeight.w700,
-                  height: 1.1,
+                  height: 1.05,
                 ),
               ),
-              if (hint != null) ...[
-                const SizedBox(height: 2),
-                Text(
-                  hint!,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.48),
-                    fontSize: 9,
-                    fontWeight: FontWeight.w500,
-                    height: 1.1,
-                  ),
-                ),
-              ],
             ],
           ),
         ),
