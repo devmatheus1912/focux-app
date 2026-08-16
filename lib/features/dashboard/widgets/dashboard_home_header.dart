@@ -49,6 +49,8 @@ class DashboardHomeHeader extends StatelessWidget {
         fullName.isEmpty
             ? dashboardPersonalDisplayName(nomePersonal)
             : fxTitleCaseName(fullName);
+    final width = MediaQuery.sizeOf(context).width;
+    final compactChrome = width < 360;
     final freshness =
         (freshnessLabel != null && freshnessLabel!.isNotEmpty)
             ? freshnessLabel!
@@ -148,7 +150,8 @@ class DashboardHomeHeader extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               _HeaderChromeCluster(
-                onQuickSearch: onQuickSearch,
+                // <360: 3 ícones — busca cai (catálogo/tools cobrem).
+                onQuickSearch: compactChrome ? null : onQuickSearch,
                 onHelp: onHelp,
                 notificacoesCountOverride: notificacoesCountOverride,
               ),

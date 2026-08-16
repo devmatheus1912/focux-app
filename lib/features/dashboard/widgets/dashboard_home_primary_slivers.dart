@@ -204,7 +204,12 @@ List<Widget> buildDashboardHomePrimarySlivers({
     if (focusRules.omitSecondarySections && alunosScore.isNotEmpty)
       SliverToBoxAdapter(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s4),
+          padding: const EdgeInsets.fromLTRB(
+            TokensStrip.s4,
+            TokensStrip.s3,
+            TokensStrip.s4,
+            0,
+          ),
           child: DashboardBaseRadarStrip(
             isDark: isDark,
             scores: alunosScore,
@@ -216,9 +221,9 @@ List<Widget> buildDashboardHomePrimarySlivers({
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
           TokensStrip.s4,
-          TokensStrip.s2,
+          TokensStrip.s3,
           TokensStrip.s4,
-          TokensStrip.s4,
+          TokensStrip.s3,
         ),
         child: DashboardDayPulseStrip(
           fade: kpiFade,

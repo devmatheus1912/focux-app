@@ -151,7 +151,7 @@ class DashboardCommandCenterSectionState
                   )
                   : null,
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: TokensStrip.s3),
         _MessagesShortcutRow(
           isDark: isDark,
           primary: primary,
@@ -183,63 +183,51 @@ class _MessagesShortcutRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final actionColor = BrandPalette.sectionAction(primary, dark: isDark);
-    final kicker = dashboardMicroLabelStyle(
-      context,
-      isDark: isDark,
-      color: actionColor,
-      fontWeight: FontWeight.w700,
-    );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(DashboardMicrocopy.atalhoKicker, style: kicker),
-        const SizedBox(height: 4),
-        Semantics(
-          button: true,
-          label: '$title. $subtitle',
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(TokensStrip.rInput),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
-              child: Row(
-                children: [
-                  FxIcon(
-                    name: 'message-circle',
-                    size: 18,
-                    color: actionColor,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: title,
-                            style: dashboardCardTitleStyle(ink).copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          TextSpan(
-                            text: ' · $subtitle',
-                            style: dashboardCardSubtitleStyle(
-                              context,
-                              isDark: isDark,
-                            ),
-                          ),
-                        ],
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  FxIcon(name: 'chevron-right', color: actionColor, size: 16),
-                ],
+    // Linha leve (não card) — peso visual abaixo de Foco/P0.
+    return Semantics(
+      button: true,
+      label: '$title. $subtitle',
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(TokensStrip.rInput),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
+          child: Row(
+            children: [
+              FxIcon(
+                name: 'message-circle',
+                size: 17,
+                color: actionColor,
               ),
-            ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: title,
+                        style: dashboardCardTitleStyle(ink).copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      TextSpan(
+                        text: ' · $subtitle',
+                        style: dashboardCardSubtitleStyle(
+                          context,
+                          isDark: isDark,
+                        ),
+                      ),
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              FxIcon(name: 'chevron-right', color: actionColor, size: 16),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 }
