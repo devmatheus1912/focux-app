@@ -85,7 +85,6 @@ abstract final class DashboardMicrocopy {
   static const rankingSemanalHint = 'Ranking semanal · toque para ver';
   static const treinosRankingHint = 'Treinos e ranking · toque para ver';
   static const abrirCatalogo = 'Abrir catálogo';
-  static const atalhoKicker = 'Atalho';
   static const nenhumaFerramenta = 'Nenhuma ferramenta encontrada.';
   static const modoFocoChipOnHint = 'Toque para desligar o foco';
   static const modoFocoChipOffHint = 'Toque para ligar o foco';
