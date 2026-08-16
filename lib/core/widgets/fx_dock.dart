@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme/app_typography.dart';
-import '../theme/brand_palette.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_icon.dart';
 
@@ -30,7 +29,7 @@ class FxDockItems {
   ];
 }
 
-/// Floating glass bottom navigation — TOKENS STRIP liquid chrome.
+/// Dock flutuante — glass profissional, ativo preciso (claro/escuro).
 class FxDock extends StatelessWidget {
   const FxDock({
     super.key,
@@ -47,6 +46,8 @@ class FxDock extends StatelessWidget {
   final bool isDark;
   final bool cinematicChrome;
 
+  static const double _radius = 22;
+
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
@@ -55,44 +56,54 @@ class FxDock extends StatelessWidget {
 
     final surface = TokensStrip.glassFill(
       dark: isDark,
-      opacity: isDark ? 0.90 : 0.94,
+      opacity: isDark ? (cinematicChrome ? 0.88 : 0.92) : 0.92,
     );
+    final border = TokensStrip.glassBorder(dark: isDark, accent: primary)
+        .withValues(alpha: isDark ? 0.42 : 0.55);
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(TokensStrip.rXl),
+        borderRadius: BorderRadius.circular(_radius),
         boxShadow: [
-          ...TokensStrip.elevation(12, dark: isDark, accent: primary),
-          ...TokensStrip.coloredDepthGlow(primary, strength: 0.18),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.42 : 0.10),
+            blurRadius: isDark ? 28 : 22,
+            offset: const Offset(0, 10),
+            spreadRadius: -6,
+          ),
+          BoxShadow(
+            color: primary.withValues(alpha: isDark ? 0.14 : 0.08),
+            blurRadius: 28,
+            offset: const Offset(0, 8),
+            spreadRadius: -4,
+          ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(TokensStrip.rXl),
+        borderRadius: BorderRadius.circular(_radius),
         child: BackdropFilter(
           filter: TokensStrip.blurFilter(TokensStrip.blurHeavy),
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: surface,
-              borderRadius: BorderRadius.circular(TokensStrip.rXl),
-              border: Border.all(
-                color: TokensStrip.glassBorder(dark: isDark, accent: primary),
-                width: 1,
-              ),
+              borderRadius: BorderRadius.circular(_radius),
+              border: Border.all(color: border, width: 0.85),
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.white.withValues(alpha: isDark ? 0.06 : 0.55),
+                  Colors.white.withValues(alpha: isDark ? 0.07 : 0.42),
                   Colors.transparent,
                 ],
+                stops: const [0.0, 0.55],
               ),
             ),
             child: Padding(
               padding: EdgeInsets.fromLTRB(
                 TokensStrip.s2,
-                compact ? TokensStrip.s2 : 10,
+                compact ? 8 : 9,
                 TokensStrip.s2,
-                compact ? 10 : TokensStrip.s3,
+                compact ? 8 : 9,
               ),
               child: Row(
                 children: List.generate(items.length, (i) {
@@ -143,25 +154,15 @@ class _FxDockNavItem extends StatefulWidget {
 class _FxDockNavItemState extends State<_FxDockNavItem> {
   bool _pressed = false;
 
-  Color get _activePillFill {
-    if (!widget.active) return Colors.transparent;
-    // Glow radial (ref.): pill suave nos dois temas, sem manchar o glass.
-    if (widget.isDark) {
-      return BrandPalette.soft(widget.primary, dark: true).withValues(
-        alpha: 0.38,
-      );
-    }
-    return widget.primary.withValues(alpha: 0.12);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final inactive = TokensStrip.textSecondary.withValues(
-      alpha: widget.isDark ? 0.78 : 0.68,
-    );
+    final inactive = widget.isDark
+        ? TokensStrip.textSecondary.withValues(alpha: 0.72)
+        : const Color(0xFF5B6B76);
     final color = widget.active ? widget.primary : inactive;
-    final iconSize = widget.compact ? 21.0 : 22.0;
-    final labelSize = widget.compact ? 10.5 : 11.0;
+    final iconSize = widget.compact ? 20.0 : 21.0;
+    final labelSize = widget.compact ? 10.0 : 10.5;
+    final glowSize = widget.compact ? 34.0 : 36.0;
 
     return Semantics(
       button: true,
@@ -173,55 +174,57 @@ class _FxDockNavItemState extends State<_FxDockNavItem> {
           onTap: widget.onTap,
           onHighlightChanged: (v) => setState(() => _pressed = v),
           borderRadius: BorderRadius.circular(TokensStrip.rCard),
-          splashColor: widget.primary.withValues(alpha: 0.12),
-          highlightColor: widget.primary.withValues(alpha: 0.06),
+          splashColor: widget.primary.withValues(alpha: 0.10),
+          highlightColor: widget.primary.withValues(alpha: 0.05),
           child: AnimatedScale(
-            scale: _pressed ? 0.94 : 1,
-            duration: const Duration(milliseconds: 120),
+            scale: _pressed ? 0.95 : 1,
+            duration: const Duration(milliseconds: 110),
             curve: Curves.easeOutCubic,
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 48),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 240),
-                      curve: Curves.easeOutCubic,
-                      width: widget.compact ? 40 : 44,
-                      height: widget.compact ? 30 : 32,
-                      decoration: BoxDecoration(
-                        color: _activePillFill,
-                        borderRadius: BorderRadius.circular(TokensStrip.rPill),
-                        boxShadow:
-                            widget.active
-                                ? [
-                                  BoxShadow(
-                                    color: widget.primary.withValues(
-                                      alpha: widget.isDark ? 0.55 : 0.32,
+                    SizedBox(
+                      width: glowSize,
+                      height: glowSize,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          AnimatedOpacity(
+                            duration: const Duration(milliseconds: 220),
+                            curve: Curves.easeOutCubic,
+                            opacity: widget.active ? 1 : 0,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: RadialGradient(
+                                  colors: [
+                                    widget.primary.withValues(
+                                      alpha: widget.isDark ? 0.38 : 0.22,
                                     ),
-                                    blurRadius: widget.isDark ? 18 : 14,
-                                    spreadRadius: widget.isDark ? 1 : 0,
-                                  ),
-                                  ...TokensStrip.interactiveGlow(
-                                    widget.primary,
-                                    intensity: widget.isDark ? 0.42 : 0.28,
-                                    dark: widget.isDark,
-                                  ),
-                                ]
-                                : null,
-                      ),
-                      child: Center(
-                        child: FxIcon(
-                          name: widget.item.icon,
-                          size: iconSize,
-                          color: color,
-                          strokeWidth: widget.active ? 2.3 : 1.75,
-                        ),
+                                    widget.primary.withValues(alpha: 0),
+                                  ],
+                                ),
+                              ),
+                              child: SizedBox(
+                                width: glowSize,
+                                height: glowSize,
+                              ),
+                            ),
+                          ),
+                          FxIcon(
+                            name: widget.item.icon,
+                            size: iconSize,
+                            color: color,
+                            strokeWidth: widget.active ? 2.05 : 1.7,
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       widget.item.label,
                       style: AppTypography.inter(
@@ -229,29 +232,39 @@ class _FxDockNavItemState extends State<_FxDockNavItem> {
                         fontWeight:
                             widget.active ? FontWeight.w700 : FontWeight.w600,
                         color: color,
-                        height: 1.1,
-                        letterSpacing: widget.active ? 0.1 : 0,
+                        height: 1.05,
+                        letterSpacing: widget.active ? 0.15 : 0.05,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 5),
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 240),
-                      curve: Curves.easeOutCubic,
-                      width: widget.active ? 18 : 0,
-                      height: widget.active ? 3 : 0,
-                      decoration: BoxDecoration(
-                        color: widget.primary,
-                        borderRadius: BorderRadius.circular(999),
-                        boxShadow:
-                            widget.active
-                                ? TokensStrip.coloredDepthGlow(
-                                  widget.primary,
-                                  strength: 0.55,
-                                )
-                                : null,
+                    const SizedBox(height: 3),
+                    SizedBox(
+                      height: 3,
+                      child: Center(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.easeOutCubic,
+                          width: widget.active ? 16 : 0,
+                          height: 3,
+                          decoration: BoxDecoration(
+                            color: widget.primary,
+                            borderRadius: BorderRadius.circular(999),
+                            boxShadow:
+                                widget.active
+                                    ? [
+                                      BoxShadow(
+                                        color: widget.primary.withValues(
+                                          alpha: 0.45,
+                                        ),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 1),
+                                      ),
+                                    ]
+                                    : null,
+                          ),
+                        ),
                       ),
                     ),
                   ],
