@@ -106,8 +106,6 @@ List<Widget> buildDashboardHomePrimarySlivers({
         isDark: isDark,
         primary: brandAccent ?? primary,
         onProfileTap: () => context.push('/perfil'),
-        focusMode: focusMode,
-        onToggleFocus: onToggleFocus,
         notificacoesCountOverride: notificacoesNaoLidasOverride,
         onQuickSearch: onQuickSearch,
         onHelp: onHelp,
