@@ -8,6 +8,13 @@ import '../../alunos/data/aluno_repository.dart';
 import '../constants/dashboard_layout.dart';
 import '../data/command_center_data.dart';
 
+String dashboardPersonalFirstName(String? nome) {
+  final first = nome?.split(' ').first.trim();
+  if (first == null || first.isEmpty) return 'Personal';
+  return fxTitleCaseName(first);
+}
+
+/// @Deprecated — Home operacional usa [dashboardPersonalFirstName] (sem saudação).
 String dashboardGreeting(String? nome, {bool compact = false}) {
   final hour = DateTime.now().hour;
   final prefix =
@@ -16,9 +23,8 @@ String dashboardGreeting(String? nome, {bool compact = false}) {
           : hour < 18
           ? 'Boa tarde'
           : 'Boa noite';
-  final first = nome?.split(' ').first.trim();
-  if (first == null || first.isEmpty) return prefix;
-  final display = fxTitleCaseName(first);
+  final display = dashboardPersonalFirstName(nome);
+  if (display == 'Personal') return prefix;
   if (compact && display.length > 10) {
     return '$prefix, ${display.substring(0, 9)}…';
   }

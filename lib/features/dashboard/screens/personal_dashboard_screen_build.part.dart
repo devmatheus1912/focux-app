@@ -274,8 +274,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                   context,
                                   isDark: themeDark,
                                 ),
-                            onIaTeaser:
-                                () => goPersonalShellTab(context, '/ia'),
                           ),
                           if (!focusRules.omitSecondarySections)
                             SliverToBoxAdapter(
