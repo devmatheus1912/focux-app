@@ -1,8 +1,7 @@
 /// Regras puras de scroll do hub personal.
 ///
-/// «Ver prioridades» no painel fica visível no topo; no sticky só aparece
-/// depois que o painel de próximas ações (medido via GlobalKey) sai
-/// fisicamente da viewport — evita 2–3 CTAs iguais na mesma tela.
+/// «Ver prioridades» no painel fica visível no topo; no sticky (acima do dock)
+/// só aparece depois que o painel de próximas ações sai da viewport.
 const double dashboardScrollOffsetEpsilon = 2;
 
 /// @Deprecated — chip flutuante removido (duplicava sticky + painel).

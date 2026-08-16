@@ -233,10 +233,7 @@ List<Widget> buildDashboardHomePrimarySlivers({
           hideRiscoChip: snap.alunosEmRisco.isNotEmpty,
           primary: primary,
           collapseBody: focusRules.collapsePulseBody,
-          trailingReserve:
-              prioritiesChipVisible
-                  ? DashboardLayout.prioritiesOverlayReserve
-                  : 0,
+          trailingReserve: 0,
           emptyHint: dashboardPulseEmptyHint(
             checkinsHoje: checkinsHoje,
             checkinsTrend: checkinsTrend,

@@ -11,7 +11,7 @@ import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import 'dashboard_header_profile_avatar.dart';
 
-/// Saudação + chrome (tema, busca, IA, notificações, avatar).
+/// Saudação em largura total + chrome numa segunda linha (não compete com o nome).
 class DashboardHomeHeader extends StatelessWidget {
   const DashboardHomeHeader({
     super.key,
@@ -48,6 +48,8 @@ class DashboardHomeHeader extends StatelessWidget {
       focusMode: compact,
       compact: compact,
     );
+    final mute = dashboardReadableCaption(context, isDark: isDark);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         TokensStrip.s4,
@@ -58,22 +60,36 @@ class DashboardHomeHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Semantics(
+            header: true,
+            child: Text(
+              dashboardGreeting(nomePersonal, compact: compact),
+              maxLines: 2,
+              softWrap: true,
+              overflow: TextOverflow.ellipsis,
+              style: dashboardPageTitleStyle(context, color: ink),
+            ),
+          ),
+          const SizedBox(height: 8),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Expanded(
-                child: Semantics(
-                  header: true,
-                  child: Text(
-                    dashboardGreeting(nomePersonal, compact: compact),
-                    maxLines: 2,
-                    softWrap: true,
-                    overflow: TextOverflow.ellipsis,
-                    style: dashboardPageTitleStyle(context, color: ink),
+              if (freshnessLabel != null && freshnessLabel!.isNotEmpty)
+                Expanded(
+                  child: Semantics(
+                    liveRegion: true,
+                    child: Text(
+                      freshnessLabel!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: dashboardCardSubtitleStyle(
+                        context,
+                        isDark: isDark,
+                      ).copyWith(color: mute),
+                    ),
                   ),
-                ),
-              ),
-              SizedBox(width: chromeGap),
+                )
+              else
+                const Spacer(),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -126,18 +142,6 @@ class DashboardHomeHeader extends StatelessWidget {
               ),
             ],
           ),
-          if (freshnessLabel != null && freshnessLabel!.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Semantics(
-              liveRegion: true,
-              child: Text(
-                freshnessLabel!,
-                style: FocuxHubTypography.bodyMuted(
-                  color: dashboardReadableCaption(context, isDark: isDark),
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );

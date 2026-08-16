@@ -16,7 +16,8 @@ abstract final class DashboardLayout {
   /// `dockClearance` (~102–112 + safe inset) — aqui só respiração de conteúdo,
   /// não um segundo “dock fantasma”.
   static const double bottomDockClearance = 24;
-  static const double prioritiesOverlayReserve = 136;
+  /// Folga no fim do scroll quando o chip sticky fica acima do dock.
+  static const double prioritiesOverlayReserve = 72;
   static const double touchTarget = 48;
   static const double commandCardPad = TokensStrip.s3; // 12
   static const double commandModuleGap = TokensStrip.s3;

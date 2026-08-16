@@ -202,8 +202,8 @@ class _PersonalDashboardScreenState
     _measureCommandPanelOffscreen();
   }
 
-  /// Mede se o painel de próximas ações saiu da viewport (abaixo do sticky
-  /// header) — dita quando o CTA "Ver prioridades" aparece fixo no topo.
+  /// Mede se o painel de próximas ações saiu da viewport — dita quando o CTA
+  /// "Ver prioridades" aparece flutuando acima do dock.
   void _measureCommandPanelOffscreen() {
     final box =
         _commandPanelKey.currentContext?.findRenderObject() as RenderBox?;

@@ -69,8 +69,9 @@ void main() {
         'lib/features/dashboard/screens/personal_dashboard_screen_build.part.dart',
       ).readAsStringSync(),
       allOf(
-        contains('Positioned('),
+        contains('bottom: 0'),
         contains('DashboardPrioritiesOverlay'),
+        contains('Alignment.bottomCenter'),
       ),
     );
     expect(
