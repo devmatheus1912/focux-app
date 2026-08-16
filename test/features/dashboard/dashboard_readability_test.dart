@@ -15,6 +15,17 @@ void main() {
     expect(colors.foreground.computeLuminance() < 0.35, isTrue);
   });
 
+  test('P0 badge light uses deep warn and white ink', () {
+    final colors = dashboardPriorityBadgeColors(
+      isDark: false,
+      accent: EagleTokens.brand,
+      badge: 'P0',
+    );
+    expect(colors.background, EagleTokens.warnDeep);
+    expect(colors.foreground, Colors.white);
+    expect(colors.foreground.computeLuminance() > 0.8, isTrue);
+  });
+
   test('P1 badge uses solid good fill and dark ink in dark mode', () {
     final colors = dashboardPriorityBadgeColors(
       isDark: true,

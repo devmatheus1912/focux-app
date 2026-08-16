@@ -6,6 +6,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
+import '../constants/dashboard_layout.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_screen_helpers.dart';
@@ -50,7 +51,7 @@ class DashboardHomeHeader extends StatelessWidget {
             ? dashboardPersonalDisplayName(nomePersonal)
             : fxTitleCaseName(fullName);
     final width = MediaQuery.sizeOf(context).width;
-    final compactChrome = width < 360;
+    final compactChrome = DashboardLayout.isCompact(width);
     final freshness =
         (freshnessLabel != null && freshnessLabel!.isNotEmpty)
             ? freshnessLabel!

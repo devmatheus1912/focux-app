@@ -35,10 +35,17 @@ Color dashboardHeroMutedOnTeal() => Colors.white.withValues(alpha: 0.90);
 }) {
   final normalized = badge?.trim().toUpperCase();
   if (normalized == 'P0') {
-    final warn = isDark ? EagleTokens.warnDark : EagleTokens.warn;
+    if (isDark) {
+      final warn = EagleTokens.warnDark;
+      return (
+        background: warn,
+        foreground: Color.lerp(warn, Colors.black, 0.78)!,
+      );
+    }
+    // Claro: fill profundo + tinta clara — contraste WCAG do badge.
     return (
-      background: warn,
-      foreground: Color.lerp(warn, Colors.black, isDark ? 0.78 : 0.62)!,
+      background: EagleTokens.warnDeep,
+      foreground: Colors.white,
     );
   }
   if (normalized == 'P1') {

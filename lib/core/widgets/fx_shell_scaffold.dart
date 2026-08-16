@@ -366,15 +366,15 @@ BoxDecoration fxStripCardDecoration(
   if (isDark) {
     if (emphasize) {
       return BoxDecoration(
-        color: TokensStrip.glassFill(dark: true, opacity: 0.97),
+        color: TokensStrip.glassFill(dark: true, opacity: 0.96),
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(
-          color: primary.withValues(alpha: 0.58),
-          width: 1.7,
+          color: primary.withValues(alpha: 0.38),
+          width: 1.35,
         ),
         boxShadow: [
-          ...TokensStrip.elevation(12, dark: true, accent: primary),
-          ...TokensStrip.coloredDepthGlow(primary, strength: 0.72),
+          ...TokensStrip.elevation(10, dark: true, accent: primary),
+          ...TokensStrip.coloredDepthGlow(primary, strength: 0.36),
         ],
       );
     }

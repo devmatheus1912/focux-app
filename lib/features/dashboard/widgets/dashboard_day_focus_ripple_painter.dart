@@ -25,8 +25,8 @@ class DashboardDayFocusRipplePainter extends CustomPainter {
         origin,
         span * 0.72,
         [
-          color.withValues(alpha: isDark ? 0.20 : 0.11),
-          color.withValues(alpha: isDark ? 0.06 : 0.035),
+          color.withValues(alpha: isDark ? 0.12 : 0.11),
+          color.withValues(alpha: isDark ? 0.04 : 0.035),
           color.withValues(alpha: 0),
         ],
         const [0.0, 0.45, 1.0],
