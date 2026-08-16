@@ -9,6 +9,7 @@ import '../utils/dashboard_day_focus.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
+import 'dashboard_day_focus_ripple_painter.dart';
 
 class DashboardDayFocusBanner extends StatelessWidget {
   const DashboardDayFocusBanner({
@@ -75,157 +76,187 @@ class DashboardDayFocusBanner extends StatelessWidget {
               radius: TokensStrip.rCard,
               glowStrength: focusMode ? 0.10 : 0.05,
             ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 12, 14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(TokensStrip.rCard),
+              child: Stack(
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: accent.withValues(
-                            alpha: isDark ? 0.24 : 0.12,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Center(
-                          child: FxIcon(
-                            name: 'route',
-                            size: 17,
-                            color: accent,
-                          ),
+                  if (focus.kind == DashboardDayFocusKind.retomadaUrgente)
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: DashboardDayFocusRipplePainter(
+                          color: accent,
+                          isDark: isDark,
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'Foco do dia',
-                          style: dashboardMicroLabelStyle(
-                            context,
-                            isDark: isDark,
-                            color: accent,
-                          ),
-                        ),
-                      ),
-                      Semantics(
-                        button: true,
-                        toggled: focusMode,
-                        label:
-                            focusMode
-                                ? DashboardMicrocopy.modoFocoOn
-                                : DashboardMicrocopy.modoFocoOff,
-                        child: Tooltip(
-                          message:
-                              focusMode
-                                  ? DashboardMicrocopy.modoFocoChipOnHint
-                                  : DashboardMicrocopy.modoFocoChipOffHint,
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: onToggleFocus,
-                              borderRadius: BorderRadius.circular(999),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 220),
-                                curve: Curves.easeOutCubic,
-                                constraints: const BoxConstraints(
-                                  minWidth: 48,
-                                  minHeight: 36,
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 12, 12, 14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: accent.withValues(
+                                  alpha: isDark ? 0.24 : 0.12,
                                 ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 7,
-                                ),
-                                decoration: BoxDecoration(
-                                  color:
-                                      focusMode
-                                          ? primary
-                                          : BrandPalette.soft(
-                                            primary,
-                                            dark: isDark,
-                                          ).withValues(
-                                            alpha: isDark ? 0.28 : 0.55,
-                                          ),
-                                  borderRadius: BorderRadius.circular(999),
-                                  border: Border.all(
-                                    width: focusMode ? 0 : 1.4,
-                                    color: accent.withValues(alpha: 0.72),
-                                  ),
-                                  boxShadow:
-                                      focusMode
-                                          ? [
-                                            BoxShadow(
-                                              color: primary.withValues(
-                                                alpha: isDark ? 0.45 : 0.28,
-                                              ),
-                                              blurRadius: 10,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ]
-                                          : null,
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      focusMode
-                                          ? Icons.bolt_rounded
-                                          : Icons.bolt_outlined,
-                                      size: 15,
-                                      color:
-                                          focusMode
-                                              ? (isDark
-                                                  ? EagleTokens.brandDeep
-                                                  : Colors.white)
-                                              : link,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      chipLabel,
-                                      style: dashboardActionChipStyle(
-                                        focusMode
-                                            ? (isDark
-                                                ? EagleTokens.brandDeep
-                                                : Colors.white)
-                                            : link,
-                                      ).copyWith(
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                    if (focusMode) ...[
-                                      const SizedBox(width: 4),
-                                      Icon(
-                                        Icons.check_rounded,
-                                        size: 14,
-                                        color:
-                                            isDark
-                                                ? EagleTokens.brandDeep
-                                                : Colors.white,
-                                      ),
-                                    ],
-                                  ],
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Center(
+                                child: FxIcon(
+                                  name:
+                                      focus.kind ==
+                                              DashboardDayFocusKind
+                                                  .retomadaUrgente
+                                          ? 'target'
+                                          : 'route',
+                                  size: 17,
+                                  color: accent,
                                 ),
                               ),
                             ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Foco do dia',
+                                style: dashboardMicroLabelStyle(
+                                  context,
+                                  isDark: isDark,
+                                  color: accent,
+                                ),
+                              ),
+                            ),
+                            Semantics(
+                              button: true,
+                              toggled: focusMode,
+                              label:
+                                  focusMode
+                                      ? DashboardMicrocopy.modoFocoOn
+                                      : DashboardMicrocopy.modoFocoOff,
+                              child: Tooltip(
+                                message:
+                                    focusMode
+                                        ? DashboardMicrocopy
+                                            .modoFocoChipOnHint
+                                        : DashboardMicrocopy
+                                            .modoFocoChipOffHint,
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: onToggleFocus,
+                                    borderRadius: BorderRadius.circular(999),
+                                    child: AnimatedContainer(
+                                      duration: const Duration(
+                                        milliseconds: 220,
+                                      ),
+                                      curve: Curves.easeOutCubic,
+                                      constraints: const BoxConstraints(
+                                        minWidth: 48,
+                                        minHeight: 36,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 7,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color:
+                                            focusMode
+                                                ? primary
+                                                : BrandPalette.soft(
+                                                  primary,
+                                                  dark: isDark,
+                                                ).withValues(
+                                                  alpha: isDark ? 0.28 : 0.55,
+                                                ),
+                                        borderRadius: BorderRadius.circular(
+                                          999,
+                                        ),
+                                        border: Border.all(
+                                          width: focusMode ? 0 : 1.4,
+                                          color: accent.withValues(
+                                            alpha: 0.72,
+                                          ),
+                                        ),
+                                        boxShadow:
+                                            focusMode
+                                                ? [
+                                                  BoxShadow(
+                                                    color: primary.withValues(
+                                                      alpha:
+                                                          isDark ? 0.45 : 0.28,
+                                                    ),
+                                                    blurRadius: 10,
+                                                    offset: const Offset(0, 2),
+                                                  ),
+                                                ]
+                                                : null,
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            focusMode
+                                                ? Icons.bolt_rounded
+                                                : Icons.bolt_outlined,
+                                            size: 15,
+                                            color:
+                                                focusMode
+                                                    ? (isDark
+                                                        ? EagleTokens.brandDeep
+                                                        : Colors.white)
+                                                    : link,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            chipLabel,
+                                            style: dashboardActionChipStyle(
+                                              focusMode
+                                                  ? (isDark
+                                                      ? EagleTokens.brandDeep
+                                                      : Colors.white)
+                                                  : link,
+                                            ).copyWith(
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
+                                          if (focusMode) ...[
+                                            const SizedBox(width: 4),
+                                            Icon(
+                                              Icons.check_rounded,
+                                              size: 14,
+                                              color:
+                                                  isDark
+                                                      ? EagleTokens.brandDeep
+                                                      : Colors.white,
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: TokensStrip.s2),
+                        Text(
+                          focus.headline,
+                          style: dashboardPageTitleStyle(context, color: ink),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          focus.detail,
+                          style: dashboardCardSubtitleStyle(
+                            context,
+                            isDark: isDark,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: TokensStrip.s2),
-                  Text(
-                    focus.headline,
-                    style: dashboardPageTitleStyle(context, color: ink),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    focus.detail,
-                    style: dashboardCardSubtitleStyle(
-                      context,
-                      isDark: isDark,
+                      ],
                     ),
                   ),
                 ],

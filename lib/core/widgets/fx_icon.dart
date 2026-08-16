@@ -363,6 +363,18 @@ class _FxIconPainter extends CustomPainter {
         );
         break;
 
+      case 'target':
+        canvas.drawCircle(const Offset(12, 12), 8.5, paint);
+        canvas.drawCircle(const Offset(12, 12), 4.5, paint);
+        canvas.drawCircle(
+          const Offset(12, 12),
+          1.6,
+          Paint()
+            ..color = color
+            ..style = PaintingStyle.fill,
+        );
+        break;
+
       case 'chevron-right':
         canvas.drawPath(
           Path()
