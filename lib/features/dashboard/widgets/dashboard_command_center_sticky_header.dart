@@ -223,6 +223,7 @@ class DashboardPrioritiesOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     final chipFg = dashboardPrioritiesChipForeground(primary, isDark: isDark);
     final chipBg = dashboardPrioritiesChipBackground(primary, isDark: isDark);
+    // Align + Material sem Center: evita o chip esticar na largura do Stack.
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         TokensStrip.s4,
@@ -230,33 +231,30 @@ class DashboardPrioritiesOverlay extends StatelessWidget {
         TokensStrip.s4,
         8,
       ),
-      child: Semantics(
-        button: true,
-        label: label,
-        child: Material(
-          color: chipBg,
-          elevation: isDark ? 6 : 3,
-          shadowColor: primary.withValues(alpha: isDark ? 0.55 : 0.28),
-          shape: const StadiumBorder(),
-          child: InkWell(
-            onTap: onTap,
-            customBorder: const StadiumBorder(),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: 48,
-                minWidth: 48,
-                maxWidth: 280,
-              ),
+      child: Align(
+        alignment: Alignment.center,
+        child: Semantics(
+          button: true,
+          label: label,
+          child: Material(
+            color: chipBg,
+            elevation: isDark ? 6 : 3,
+            shadowColor: primary.withValues(alpha: isDark ? 0.55 : 0.28),
+            shape: const StadiumBorder(),
+            child: InkWell(
+              onTap: onTap,
+              customBorder: const StadiumBorder(),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 18),
-                child: Center(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: dashboardChipLabelStyle(chipFg).copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 14,
+                ),
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: dashboardChipLabelStyle(chipFg).copyWith(
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
