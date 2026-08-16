@@ -4,7 +4,6 @@ class _PersonalDashboardScreenState
     extends ConsumerState<PersonalDashboardScreen>
     with TickerProviderStateMixin {
   FinanceiroDashboard? _finData;
-  bool _loadingFin = true;
   double _homeScrollOffset = 0;
   late final ScrollController _homeScrollController;
   final GlobalKey _commandPanelKey = GlobalKey();
@@ -21,8 +20,11 @@ class _PersonalDashboardScreenState
   bool _sessionFocusTouched = false;
   DateTime? _homeFetchedAt;
   bool _homeViewTracked = false;
+  bool _homeTtvTracked = false;
+  final DateTime _homeOpenedAt = DateTime.now();
   bool _coachSeen = true;
   bool _coachLoaded = false;
+  bool _deepLinkApplied = false;
 
   late AnimationController _gradientCtrl;
   late AnimationController _counterCtrl;
@@ -90,15 +92,68 @@ class _PersonalDashboardScreenState
     setState(() => _coachSeen = true);
   }
 
+  void _applyHomeDeepLinkOnce(BuildContext context) {
+    if (_deepLinkApplied) return;
+    _deepLinkApplied = true;
+    final Map<String, String> params;
+    try {
+      params = GoRouterState.of(context).uri.queryParameters;
+    } catch (_) {
+      return;
+    }
+    final focus = params['focus']?.toLowerCase();
+    if (focus == 'on' || focus == '1' || focus == 'true') {
+      setState(() {
+        _focusMode = true;
+        _sessionFocusTouched = true;
+        _autoFocusApplied = true;
+      });
+    } else if (focus == 'off' || focus == '0' || focus == 'false') {
+      setState(() {
+        _focusMode = false;
+        _sessionFocusTouched = true;
+        _autoFocusApplied = true;
+      });
+    }
+    final sheet = params['sheet']?.toLowerCase();
+    if (sheet == null || sheet.isEmpty) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final primary = Theme.of(context).colorScheme.primary;
+      if (sheet == 'search') {
+        showDashboardQuickSearchSheet(
+          context,
+          isDark: isDark,
+          primary: primary,
+        );
+        return;
+      }
+      if (sheet == 'help') {
+        showDashboardHomeHelpSheet(context, isDark: isDark);
+        return;
+      }
+      if (sheet == 'catalog') {
+        showDashboardToolsCatalogSheet(
+          context,
+          ref: ref,
+          isDark: isDark,
+          shortcutAspectRatio:
+              DashboardLayout.isCompact(MediaQuery.sizeOf(context).width)
+                  ? 2.55
+                  : 2.85,
+        );
+      }
+    });
+  }
+
   Future<void> _loadFocusPreference() async {
     final persisted = await DashboardHomeFocusStore.load();
     if (!mounted) return;
     setState(() {
       _focusPreferenceLoaded = true;
       // Não sobrescreve toggle feito enquanto o load estava em voo.
-      if (_persistedFocusMode == null) {
-        _persistedFocusMode = persisted;
-      }
+      _persistedFocusMode ??= persisted;
       // Persistido ON aplica já; OFF espera o dia (crise ignora OFF).
       if (persisted == true && !_sessionFocusTouched) {
         _focusMode = true;
@@ -170,7 +225,12 @@ class _PersonalDashboardScreenState
 
   void _bindDashboardReturnListener() {
     if (!mounted || _routeListener != null) return;
-    final router = GoRouter.of(context);
+    final GoRouter router;
+    try {
+      router = GoRouter.of(context);
+    } catch (_) {
+      return;
+    }
     _lastTrackedLocation = router.routeInformationProvider.value.uri.path;
     _routeInformationProvider = router.routeInformationProvider;
     _routeListener = () {
@@ -216,20 +276,12 @@ class _PersonalDashboardScreenState
   }
 
   Future<void> _loadFinFromHome() async {
-    if (mounted) {
-      setState(() {
-        _loadingFin = true;
-      });
-    }
     try {
       final home = await ref.read(dashboardHomeProvider.future);
       if (!mounted) return;
       _applyFinanceData(home.financeiro);
     } catch (e) {
       if (mounted) {
-        setState(() {
-          _loadingFin = false;
-        });
         FeedbackHelper.showWarn(context, friendlyError(e));
       }
     }
@@ -239,7 +291,6 @@ class _PersonalDashboardScreenState
     if (!mounted) return;
     setState(() {
       _finData = data;
-      _loadingFin = false;
     });
     _counterAnim = Tween<double>(
       begin: 0,

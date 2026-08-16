@@ -12,8 +12,10 @@ abstract final class DashboardLayout {
   static const double attentionRailHeight = 184;
   static const double attentionCardWidth = 268;
   static const double attentionCardWidthCompact = 240;
-  /// Folga só no último sliver (dock + 24). Não inflar o meio do scroll.
-  static const double bottomDockClearance = 104;
+  /// Folga extra no fim do scroll. O [MainShell] já aplica
+  /// `dockClearance` (~102–112 + safe inset) — aqui só respiração de conteúdo,
+  /// não um segundo “dock fantasma”.
+  static const double bottomDockClearance = 24;
   static const double prioritiesOverlayReserve = 136;
   static const double touchTarget = 48;
   static const double commandCardPad = TokensStrip.s3; // 12
@@ -32,6 +34,16 @@ abstract final class DashboardLayout {
   static bool isCompact(double width) => width < compactWidth;
 
   static bool isComfortable(double width) => width >= comfortableWidth;
+
+  static bool isLandscape(BuildContext context) =>
+      MediaQuery.orientationOf(context) == Orientation.landscape;
+
+  /// Em landscape confortável, abre mais cards no radar/rails.
+  static int radarCardLimit(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    if (isLandscape(context) || isComfortable(width)) return 5;
+    return 3;
+  }
 
   static double headerActionSize(double width) =>
       width < 430 ? headerActionCompact : headerActionComfort;

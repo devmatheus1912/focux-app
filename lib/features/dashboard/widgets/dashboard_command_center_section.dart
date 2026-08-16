@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
-import '../../chat/screens/chat_inbox_screen.dart';
 import '../data/command_action_item.dart';
 import '../providers/dashboard_provider.dart';
 import '../utils/dashboard_chat_subtitle.dart';
@@ -95,32 +95,18 @@ class DashboardCommandCenterSectionState
     final mute = dashboardReadableCaption(context, isDark: isDark);
     final heading = BrandPalette.sectionHeading(primary, dark: isDark);
 
-    // Prefer props do pai (snapshot). Fallback a watches só se omitidos.
+    // Prefer props do pai (snapshot BFF). Fallback só se omitidos.
     final useParentPulse = widget.alunosAtivos != null;
-    final chatAsync = useParentPulse ? null : ref.watch(chatInboxProvider);
     final commandAsync =
         useParentPulse ? null : ref.watch(commandCenterProvider);
     final isCommandPreparing =
         widget.isCommandPreparing ?? commandAsync?.isLoading ?? false;
     final commandUnavailable =
         widget.commandUnavailable ?? commandAsync?.hasError ?? false;
-    final unreadFromInbox =
-        chatAsync?.maybeWhen(
-          data: (items) => items.fold<int>(0, (sum, i) => sum + i.naoLidas),
-          orElse: () => 0,
-        ) ??
-        0;
     final unreadCount =
         widget.unreadCount ??
-        dashboardResolveUnreadCount(
-          pulseUnread: widget.mensagensNaoLidas,
-          inboxReady: chatAsync?.hasValue ?? false,
-          inboxUnread: unreadFromInbox,
-        );
-    final totalConversas =
-        widget.conversationCount ??
-        chatAsync?.maybeWhen(data: (items) => items.length, orElse: () => 0) ??
-        0;
+        dashboardChatUnreadCount(widget.mensagensNaoLidas);
+    final totalConversas = widget.conversationCount ?? 0;
     final chatSubtitle = dashboardChatShortcutSubtitle(
       unreadCount: unreadCount,
       conversationCount: totalConversas,
@@ -264,6 +250,10 @@ void showCommandActionsSheet(
   required Color primary,
   required List<CommandActionItem> actions,
 }) {
+  AnalyticsService.instance.track(
+    ProductEvents.homePrioritiesOpened,
+    props: {'actions': actions.length},
+  );
   showModalBottomSheet<void>(
     context: context,
     backgroundColor: Colors.transparent,

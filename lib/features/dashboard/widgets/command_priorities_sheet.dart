@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -11,7 +12,6 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/command_action_item.dart';
 import '../utils/dashboard_haptic.dart';
 import '../utils/dashboard_readability.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import 'command_action_tile.dart';
 
 class CommandPrioritiesSheet extends StatefulWidget {
@@ -47,6 +47,15 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
   }
 
   void _openAction(CommandActionItem item) {
+    AnalyticsService.instance.track(
+      ProductEvents.homeDayFocusAction,
+      props: {
+        'route': item.route,
+        'title': item.title,
+        'priority': item.priorityBadge,
+        'source': 'priorities_sheet',
+      },
+    );
     Navigator.of(widget.sheetContext).pop();
     widget.parentContext.go(item.route);
   }

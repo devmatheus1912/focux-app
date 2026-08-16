@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/dashboard/data/command_center_data.dart';
 import 'package:focux_app/features/dashboard/data/dashboard_repository.dart';
+import 'package:focux_app/features/dashboard/utils/dashboard_day_focus.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_home_snapshot.dart';
 import 'package:focux_app/features/financeiro/data/financeiro_repository.dart';
 
@@ -65,6 +66,14 @@ void main() {
           mensagensNaoLidas: 3,
           checkinsTrend: [0, 0, 1, 0, 2, 0, 0],
         ),
+        dayFocus: const DashboardDayFocus(
+          kind: DashboardDayFocusKind.retomadaUrgente,
+          coversRetention: true,
+          riskDominante: true,
+          headline: 'Retomada urgente da base',
+          detail: '1 de 8',
+          semanticLabel: 'Foco',
+        ),
       );
 
       final snap = DashboardHomeSnapshot.build(
@@ -73,8 +82,6 @@ void main() {
         alunos: null,
         historicoCheckins: null,
         commandCenter: commandCenter,
-        inboxUnread: 0,
-        inboxReady: false,
         focusMode: true,
         isCommandPreparing: false,
         now: DateTime(2026, 8, 12),

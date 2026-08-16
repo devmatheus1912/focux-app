@@ -1,10 +1,6 @@
-/// Resolve não-lidas da Home: inbox vivo quando carregado; pulse no first paint.
-int dashboardResolveUnreadCount({
-  required int? pulseUnread,
-  required bool inboxReady,
-  required int inboxUnread,
-}) {
-  if (inboxReady) return inboxUnread < 0 ? 0 : inboxUnread;
-  final pulse = pulseUnread ?? 0;
-  return pulse < 0 ? 0 : pulse;
+/// Chat unread SSOT da Home: campo BFF `pulse.mensagensNaoLidas`.
+/// Não misturar com notificações de app (`notificacoesNaoLidas`).
+int dashboardChatUnreadCount(int? pulseMensagensNaoLidas) {
+  final n = pulseMensagensNaoLidas ?? 0;
+  return n < 0 ? 0 : n;
 }

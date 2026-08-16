@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../constants/dashboard_layout.dart';
@@ -32,17 +31,15 @@ class DashboardBaseRadarStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
-    final comfortable = DashboardLayout.isComfortable(width);
-    final take = limit ?? (comfortable ? 5 : 3);
+    final take = limit ?? DashboardLayout.radarCardLimit(context);
     final items = dashboardRadarItems(scores, limit: take);
     if (items.isEmpty) return const SizedBox.shrink();
 
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final muted = dashboardReadableCaption(context, isDark: isDark);
     final cardW =
-        comfortable
-            ? DashboardLayout.attentionCardWidth
-            : DashboardLayout.attentionCardWidthCompact;
+        DashboardLayout.isCompact(width)
+            ? DashboardLayout.attentionCardWidthCompact
+            : DashboardLayout.attentionCardWidth;
 
     return DashboardCollapsibleSection(
       title: DashboardMicrocopy.radarDaBase,
@@ -60,7 +57,6 @@ class DashboardBaseRadarStrip extends StatelessWidget {
                 item: items[i],
                 width: cardW,
                 ink: ink,
-                muted: muted,
                 isDark: isDark,
                 index: i,
                 total: items.length,
@@ -78,7 +74,6 @@ class _RadarCard extends StatelessWidget {
     required this.item,
     required this.width,
     required this.ink,
-    required this.muted,
     required this.isDark,
     required this.index,
     required this.total,
@@ -87,7 +82,6 @@ class _RadarCard extends StatelessWidget {
   final AlunoScoreResumo item;
   final double width;
   final Color ink;
-  final Color muted;
   final bool isDark;
   final int index;
   final int total;
@@ -155,18 +149,27 @@ class _RadarCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 4),
-              Text(
-                item.risco,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: FocuxHubTypography.bodyMuted(color: muted),
+              Tooltip(
+                message: DashboardMicrocopy.scoreComoCalculamos,
+                child: Text(
+                  item.risco,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: dashboardCardSubtitleStyle(
+                    context,
+                    isDark: isDark,
+                  ),
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 item.proximaAcao,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: FocuxHubTypography.body(color: ink),
+                style: dashboardCardTitleStyle(ink).copyWith(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),

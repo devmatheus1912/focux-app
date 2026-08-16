@@ -187,6 +187,20 @@ class _FxIconPainter extends CustomPainter {
         canvas.drawLine(const Offset(16, 16), const Offset(21, 21), paint);
         break;
 
+      case 'help':
+        canvas.drawCircle(const Offset(12, 12), 9, paint);
+        canvas.drawLine(const Offset(12, 16.5), const Offset(12, 17.2), paint);
+        canvas.drawPath(
+          Path()
+            ..moveTo(9.2, 10.2)
+            ..cubicTo(9.2, 8.2, 10.5, 7.2, 12, 7.2)
+            ..cubicTo(13.5, 7.2, 14.8, 8.2, 14.8, 9.8)
+            ..cubicTo(14.8, 11.2, 13.6, 11.8, 12.6, 12.6)
+            ..cubicTo(12.2, 12.9, 12, 13.3, 12, 14),
+          paint,
+        );
+        break;
+
       case 'bell':
         canvas.drawPath(
           Path()

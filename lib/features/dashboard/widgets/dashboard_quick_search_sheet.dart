@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../data/dashboard_tool_shortcuts.dart';
@@ -17,6 +17,7 @@ Future<void> showDashboardQuickSearchSheet(
   required bool isDark,
   required Color primary,
 }) {
+  AnalyticsService.instance.track(ProductEvents.homeSearchOpened);
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,

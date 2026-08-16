@@ -125,4 +125,9 @@ class ProductEvents {
   static const homeRadarTap = 'home_radar_tap';
   static const homeCatalogOpened = 'home_catalog_opened';
   static const homeCoachDismissed = 'home_coach_dismissed';
+  static const homeTtv = 'home_ttv';
+  static const homeSearchOpened = 'home_search_opened';
+  static const homePrioritiesOpened = 'home_priorities_opened';
+  static const homeDayFocusAction = 'home_day_focus_action';
+  static const homeHelpOpened = 'home_help_opened';
 }

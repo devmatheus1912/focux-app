@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
@@ -24,6 +23,7 @@ class DashboardHomeHeader extends StatelessWidget {
     this.notificacoesCountOverride,
     this.onQuickSearch,
     this.onIaTeaser,
+    this.onHelp,
     this.freshnessLabel,
   });
 
@@ -35,6 +35,7 @@ class DashboardHomeHeader extends StatelessWidget {
   final int? notificacoesCountOverride;
   final VoidCallback? onQuickSearch;
   final VoidCallback? onIaTeaser;
+  final VoidCallback? onHelp;
   final String? freshnessLabel;
 
   @override
@@ -85,12 +86,24 @@ class DashboardHomeHeader extends StatelessWidget {
                     ),
                     SizedBox(width: chromeGap),
                   ],
-                  if (onIaTeaser != null) ...[
+                  if (onHelp != null) ...[
                     ShellHeaderIconButton(
-                      icon: 'spark',
+                      icon: 'help',
                       size: chromeSize,
-                      tooltip: DashboardMicrocopy.sugestaoIa,
-                      onTap: onIaTeaser!,
+                      tooltip: DashboardMicrocopy.helpHomeOpen,
+                      onTap: onHelp!,
+                    ),
+                    SizedBox(width: chromeGap),
+                  ],
+                  if (onIaTeaser != null) ...[
+                    Tooltip(
+                      message: DashboardMicrocopy.sugestaoIaDisclaimer,
+                      child: ShellHeaderIconButton(
+                        icon: 'spark',
+                        size: chromeSize,
+                        tooltip: DashboardMicrocopy.sugestaoIa,
+                        onTap: onIaTeaser!,
+                      ),
                     ),
                     SizedBox(width: chromeGap),
                   ],

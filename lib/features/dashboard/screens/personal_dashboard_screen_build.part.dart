@@ -30,6 +30,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                     },
                   ),
               data: (home) {
+                _applyHomeDeepLinkOnce(context);
                 final data = home.personal;
                 final screenWidth = MediaQuery.sizeOf(context).width;
                 final isCompactPhone = DashboardLayout.isCompact(screenWidth);
@@ -56,6 +57,20 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                             home.commandCenter.alunosScore.length,
                       },
                     );
+                    if (!_homeTtvTracked) {
+                      _homeTtvTracked = true;
+                      AnalyticsService.instance.track(
+                        ProductEvents.homeTtv,
+                        props: {
+                          'ms': DateTime.now()
+                              .difference(_homeOpenedAt)
+                              .inMilliseconds,
+                          'day_focus_kind': home.dayFocus?.kind?.name,
+                          'next_actions':
+                              home.commandCenter.filaAcoes.length,
+                        },
+                      );
+                    }
                   });
                 }
                 final planoFromHome = home.planoFeatures;
@@ -74,8 +89,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                   alunos: null,
                   historicoCheckins: null,
                   commandCenter: home.commandCenter,
-                  inboxUnread: 0,
-                  inboxReady: false,
                   focusMode: _focusMode,
                   isCommandPreparing: false,
                 );
@@ -175,6 +188,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
 
                 return RefreshIndicator(
                   onRefresh: () async {
+                    DashboardHomeClientCache.clear();
                     ref.invalidate(dashboardHomeProvider);
                     ref.invalidate(notificacoesProvider);
                     ref.invalidate(notificacoesNaoLidasProvider);
@@ -234,7 +248,13 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                             alunosScore: home.commandCenter.alunosScore,
                             freshnessLabel:
                                 _homeFetchedAt == null
-                                    ? null
+                                    ? DashboardHomeClientCache.fetchedAt == null
+                                        ? null
+                                        : DashboardMicrocopy.atualizadoHa(
+                                          DateTime.now().difference(
+                                            DashboardHomeClientCache.fetchedAt!,
+                                          ),
+                                        )
                                     : DashboardMicrocopy.atualizadoHa(
                                       DateTime.now().difference(
                                         _homeFetchedAt!,
@@ -248,6 +268,11 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                   context,
                                   isDark: themeDark,
                                   primary: primary,
+                                ),
+                            onHelp:
+                                () => showDashboardHomeHelpSheet(
+                                  context,
+                                  isDark: themeDark,
                                 ),
                             onIaTeaser:
                                 () => goPersonalShellTab(context, '/ia'),

@@ -1,5 +1,6 @@
 /// Narrativa única do dia — evita repetir “retomada/aderência” em vários blocos.
-/// Preferir payload BFF (`fromJson`); [resolve] é fallback legado.
+/// Runtime da Home: só payload BFF (`fromJson`). [resolve] espelha o BE em testes —
+/// não usar como SSOT no snapshot da tela.
 enum DashboardDayFocusKind {
   cobrancaRetencao,
   retomadaUrgente,
@@ -47,6 +48,16 @@ class DashboardDayFocus {
   final DashboardDayFocusKind? kind;
   final bool? coversRetention;
   final bool? riskDominante;
+
+  /// Gap de contrato: BFF omitiu `dayFocus`. Só release; debug falha no assert do snapshot.
+  static const estavelSsotGap = DashboardDayFocus(
+    kind: DashboardDayFocusKind.estavel,
+    coversRetention: false,
+    riskDominante: false,
+    headline: 'Operação sob controle',
+    detail: 'Use as próximas ações para a melhor próxima ação.',
+    semanticLabel: 'Foco do dia: operação sob controle.',
+  );
 
   factory DashboardDayFocus.fromJson(Map<String, dynamic> json) {
     return DashboardDayFocus(

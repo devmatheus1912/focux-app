@@ -39,7 +39,6 @@ void main() {
 
     expect(widget, contains('class DashboardCommandCenterSection'));
     expect(widget, contains('commandCenterProvider'));
-    expect(widget, contains('chatInboxProvider'));
     expect(widget, contains('commandCenterTitle'));
     expect(widget, contains('class CommandActionPanel'));
     expect(widget, contains('class CommandActionTile'));
@@ -71,12 +70,13 @@ void main() {
     expect(widget, contains('checkinsTrend'));
     expect(widget, contains('attentionRiskLimit'));
     expect(widget, contains('dashboardChatShortcutSubtitle'));
-    expect(widget, contains('dashboardResolveUnreadCount'));
+    expect(widget, contains('dashboardChatUnreadCount'));
     expect(widget, contains('tendenciaVaziaChip'));
     expect(widget, contains('dashboardPulseEmptyHint'));
     expect(widget, contains('pulseAgendaAccent'));
     expect(widget, contains('dashboardShowsInlinePrioritiesLink'));
     expect(widget, contains('mensagensNaoLidas'));
+    expect(widget, contains('notificacoesNaoLidas'));
     expect(widget, contains('dashboardScrollOffsetMeaningfullyChanged'));
     expect(widget, contains('dashboardScrollVisualStateChanged'));
     expect(widget, isNot(contains('DashboardMicrocopy.recentes')));
@@ -86,6 +86,9 @@ void main() {
         contains('dashboardShowsFloatingPrioritiesChip(_homeScrollOffset)'),
       ),
     );
+    expect(widget, isNot(contains('inboxUnread: 0')));
+    expect(widget, isNot(contains('inboxReady: false')));
+    expect(widget, isNot(contains('DashboardDayFocus.resolve(')));
     expect(widget, contains('prioritiesActionLabel'));
     expect(widget, contains('showPrioritiesLink'));
     expect(widget, contains('CommandPrioritiesSheet'));

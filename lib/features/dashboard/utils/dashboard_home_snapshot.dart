@@ -91,8 +91,6 @@ class DashboardHomeSnapshot {
     required List<Aluno>? alunos,
     required List<ExecucaoTreino>? historicoCheckins,
     required CommandCenterData? commandCenter,
-    required int inboxUnread,
-    required bool inboxReady,
     required bool focusMode,
     required bool isCommandPreparing,
     DateTime? now,
@@ -149,22 +147,12 @@ class DashboardHomeSnapshot {
       finData?.evolucaoMensal ?? const [],
     );
     final agendaHoje = commandCenter?.agendaHoje.length ?? 0;
-    final riskDominante =
-        home.dayFocus?.riskDominante ??
-        (alunosAtivos > 0 &&
-            riscoAlto >= math.max(2, (alunosAtivos * 0.5).ceil()));
-    final vencimentosCount = finData?.vencimentosProximos.length ?? 0;
-    final dayFocus =
-        home.dayFocus ??
-        DashboardDayFocus.resolve(
-          riscoAlto: riscoAlto,
-          alunosAtivos: alunosAtivos,
-          checkinsHoje: checkinsHoje,
-          agendaHoje: agendaHoje,
-          receitaMes: receitaAtual,
-          vencimentosPendentes: vencimentosCount,
-          riskDominante: riskDominante,
-        );
+    assert(
+      home.dayFocus != null,
+      'BFF GET /api/dashboard/home deve enviar dayFocus (SSOT)',
+    );
+    final dayFocus = home.dayFocus ?? DashboardDayFocus.estavelSsotGap;
+    final riskDominante = dayFocus.riskDominante ?? false;
     final focusRules = DashboardHomeFocusRules.resolve(
       focusMode: focusMode,
       dayFocus: dayFocus,
@@ -208,10 +196,9 @@ class DashboardHomeSnapshot {
     }
 
     final filaAcoes = commandCenter?.filaAcoes ?? const <FilaAcaoResumo>[];
-    final unreadCount = dashboardResolveUnreadCount(
-      pulseUnread: home.pulse?.mensagensNaoLidas,
-      inboxReady: inboxReady,
-      inboxUnread: inboxUnread,
+    // Chat unread = pulse BFF. Notificações de app usam notificacoesNaoLidas.
+    final unreadCount = dashboardChatUnreadCount(
+      home.pulse?.mensagensNaoLidas,
     );
     final cobrancasPendentes =
         commandCenter?.cobrancasPendentes.length ??

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../data/command_center_data.dart';
@@ -29,7 +27,6 @@ class DashboardAgendaHojeStrip extends StatelessWidget {
     if (items.isEmpty) return const SizedBox.shrink();
     final visible = items.take(3).toList(growable: false);
     final heading = BrandPalette.sectionHeading(primary, dark: isDark);
-    final mute = dashboardReadableCaption(context, isDark: isDark);
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
 
     return Padding(
@@ -92,12 +89,15 @@ class DashboardAgendaHojeStrip extends StatelessWidget {
                               '${a.horario} · ${a.nomeAluno}',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: FocuxHubTypography.cardTitle(color: ink),
+                              style: dashboardCardTitleStyle(ink),
                             ),
                           ),
                           Text(
                             a.status,
-                            style: FocuxHubTypography.bodyMuted(color: mute),
+                            style: dashboardCardSubtitleStyle(
+                              context,
+                              isDark: isDark,
+                            ),
                           ),
                         ],
                       ),

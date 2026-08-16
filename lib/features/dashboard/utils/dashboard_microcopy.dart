@@ -42,12 +42,23 @@ abstract final class DashboardMicrocopy {
   static const buscaRapida = 'Busca rápida';
   static const buscaRapidaHint = 'Aluno ou ferramenta…';
   static const sugestaoIa = 'Sugestão IA';
+  static const sugestaoIaDisclaimer =
+      'Sugestão opcional — você decide se aplica.';
+  static const scoreComoCalculamos =
+      'Índice Focux (0–100): perfil, consistência de treinos (7d), evolução (30d), '
+      'medida recente, chat recente e status financeiro. Risco sobe com dias sem treino.';
+  static const helpHomeTitle = 'Ajuda da Home';
+  static const helpHomeBody =
+      'Foco do dia prioriza o que importa. Próximas ações são o 1-toque. '
+      'Radar mostra saúde da base. Use busca ou o catálogo em Mais ferramentas. '
+      'Modo Foco esconde o secundário em dia de crise.';
+  static const helpHomeOpen = 'Ajuda';
   static const radarDaBase = 'Radar da base';
   static const coachCatalogHint =
       'Abra o catálogo em Mais ferramentas para achar qualquer recurso.';
   static const coachEntendi = 'Entendi';
-  /// Legado — preferir [proximasAcoes] na Home.
-  static const commandCenterTitle = 'Próximas ações';
+  /// Alias estável de [proximasAcoes] (contratos/source-scan).
+  static const commandCenterTitle = proximasAcoes;
   static const commandCenterSubtitle =
       'A melhor próxima ação para proteger receita e aderência.';
   static const modoFoco = 'Modo foco';

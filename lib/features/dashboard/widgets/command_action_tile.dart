@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
@@ -50,7 +51,20 @@ class CommandActionTile extends StatelessWidget {
       label: '${item.title}. ${item.subtitle}',
       button: true,
       child: InkWell(
-        onTap: onTap ?? () => context.go(item.route),
+        onTap:
+            onTap ??
+            () {
+              AnalyticsService.instance.track(
+                ProductEvents.homeDayFocusAction,
+                props: {
+                  'route': item.route,
+                  'title': item.title,
+                  'priority': item.priorityBadge,
+                  'source': 'next_actions',
+                },
+              );
+              context.go(item.route);
+            },
         borderRadius: BorderRadius.circular(TokensStrip.rCard),
         child: Container(
           padding: const EdgeInsets.all(12),
