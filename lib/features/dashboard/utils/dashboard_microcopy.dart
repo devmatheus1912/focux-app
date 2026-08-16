@@ -41,6 +41,16 @@ abstract final class DashboardMicrocopy {
   static const verAgenda = 'Ver agenda';
   static const buscaRapida = 'Busca rápida';
   static const buscaRapidaHint = 'Aluno ou ferramenta…';
+  static const headerRailBuscar = 'Buscar';
+  static const headerRailBuscarHint = 'Encontre rápido';
+  static const headerRailAjuda = 'Ajuda';
+  static const headerRailAjudaHint = 'Central de ajuda';
+  static const headerRailFocoHint = 'Menos distrações';
+  static const headerRailNotif = 'Notificações';
+  static const headerRailNotifHint = 'Novidades e alertas';
+  static const headerTaglineLead = 'Foco hoje, ';
+  static const headerTaglineAccent = 'resultado';
+  static const headerTaglineTail = ' amanhã.';
   static const sugestaoIa = 'Sugestão IA';
   static const sugestaoIaDisclaimer =
       'Sugestão opcional — você decide se aplica.';

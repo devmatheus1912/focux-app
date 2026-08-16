@@ -145,12 +145,13 @@ class _FxDockNavItemState extends State<_FxDockNavItem> {
 
   Color get _activePillFill {
     if (!widget.active) return Colors.transparent;
+    // Glow radial (ref.): pill suave nos dois temas, sem manchar o glass.
     if (widget.isDark) {
       return BrandPalette.soft(widget.primary, dark: true).withValues(
-        alpha: 0.52,
+        alpha: 0.38,
       );
     }
-    return widget.primary.withValues(alpha: 0.14);
+    return widget.primary.withValues(alpha: 0.12);
   }
 
   @override
@@ -193,20 +194,22 @@ class _FxDockNavItemState extends State<_FxDockNavItem> {
                       decoration: BoxDecoration(
                         color: _activePillFill,
                         borderRadius: BorderRadius.circular(TokensStrip.rPill),
-                        border:
-                            widget.active && !widget.isDark
-                                ? Border.all(
-                                  color: widget.primary.withValues(alpha: 0.24),
-                                  width: 0.8,
-                                )
-                                : null,
                         boxShadow:
                             widget.active
-                                ? TokensStrip.interactiveGlow(
-                                  widget.primary,
-                                  intensity: widget.isDark ? 0.38 : 0.22,
-                                  dark: widget.isDark,
-                                )
+                                ? [
+                                  BoxShadow(
+                                    color: widget.primary.withValues(
+                                      alpha: widget.isDark ? 0.55 : 0.32,
+                                    ),
+                                    blurRadius: widget.isDark ? 18 : 14,
+                                    spreadRadius: widget.isDark ? 1 : 0,
+                                  ),
+                                  ...TokensStrip.interactiveGlow(
+                                    widget.primary,
+                                    intensity: widget.isDark ? 0.42 : 0.28,
+                                    dark: widget.isDark,
+                                  ),
+                                ]
                                 : null,
                       ),
                       child: Center(
