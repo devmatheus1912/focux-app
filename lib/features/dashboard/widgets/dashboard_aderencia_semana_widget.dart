@@ -95,74 +95,83 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
       child: Column(
         children: List.generate(items.length, (index) {
           final a = items[index];
-          return InkWell(
-            onTap: () => context.push('/alunos/${a.alunoId}'),
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
-              ),
-              decoration: BoxDecoration(
-                border:
-                    index < items.length - 1
-                        ? Border(
-                          bottom: BorderSide(
-                            color:
-                                isDark
-                                    ? EagleTokens.darkLine
-                                    : TokensStrip.borderDefault,
-                            width: 0.5,
-                          ),
-                        )
-                        : null,
-              ),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: primarySoft,
-                    child: Text(
-                      fxInitials(a.nome),
-                      style: FocuxHubTypography.chip(rowAccent),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          fxTitleCaseName(a.nome),
-                          style: FocuxHubTypography.cardTitle(color: ink),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${a.objetivo ?? 'Objetivo'} · ${a.totalCheckinsSemana} check-ins',
-                          style: FocuxHubTypography.bodyMuted(color: mute),
-                        ),
-                      ],
-                    ),
-                  ),
-                  FxSparkline(
-                    data: a.sparkline,
-                    width: 56,
-                    height: 22,
-                    color: rowAccent,
-                  ),
-                  const SizedBox(width: 14),
-                  SizedBox(
-                    width: 40,
-                    child: Text(
-                      '${a.aderenciaPercent}%',
-                      textAlign: TextAlign.right,
-                      style: FocuxHubTypography.metric(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: ink,
+          final nome = fxTitleCaseName(a.nome);
+          return Semantics(
+            button: true,
+            label:
+                '$nome. ${a.objetivo ?? 'Objetivo'}. '
+                '${a.totalCheckinsSemana} check-ins. '
+                'Aderência ${a.aderenciaPercent} por cento. '
+                'Abrir aluno',
+            child: InkWell(
+              onTap: () => context.push('/alunos/${a.alunoId}'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  border:
+                      index < items.length - 1
+                          ? Border(
+                            bottom: BorderSide(
+                              color:
+                                  isDark
+                                      ? EagleTokens.darkLine
+                                      : TokensStrip.borderDefault,
+                              width: 0.5,
+                            ),
+                          )
+                          : null,
+                ),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor: primarySoft,
+                      child: Text(
+                        fxInitials(a.nome),
+                        style: FocuxHubTypography.chip(rowAccent),
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            nome,
+                            style: FocuxHubTypography.cardTitle(color: ink),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${a.objetivo ?? 'Objetivo'} · ${a.totalCheckinsSemana} check-ins',
+                            style: FocuxHubTypography.bodyMuted(color: mute),
+                          ),
+                        ],
+                      ),
+                    ),
+                    FxSparkline(
+                      data: a.sparkline,
+                      width: 56,
+                      height: 22,
+                      color: rowAccent,
+                    ),
+                    const SizedBox(width: 14),
+                    SizedBox(
+                      width: 40,
+                      child: Text(
+                        '${a.aderenciaPercent}%',
+                        textAlign: TextAlign.right,
+                        style: FocuxHubTypography.metric(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: ink,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );

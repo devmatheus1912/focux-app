@@ -131,7 +131,7 @@ class DashboardCommandCenterSectionState
       children: [
         if (!widget.hideHeader) ...[
           Text(
-            DashboardMicrocopy.commandCenterTitle,
+            DashboardMicrocopy.proximasAcoes,
             style: dashboardSectionTitleStyle(
               context,
               color: heading,
@@ -139,8 +139,7 @@ class DashboardCommandCenterSectionState
           ),
           const SizedBox(height: 4),
           Text(
-            contextualSubtitle ??
-                'A melhor próxima ação para proteger receita e aderência.',
+            contextualSubtitle ?? DashboardMicrocopy.commandCenterSubtitle,
             style: TokensStrip.bodyMuted(color: mute).copyWith(
               height: 1.35,
             ),

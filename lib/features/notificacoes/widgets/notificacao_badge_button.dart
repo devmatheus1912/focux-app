@@ -14,13 +14,20 @@ String notificacaoBadgeTooltip(int count) {
 
 /// Header notification bell — TOKENS STRIP chrome, reacts to theme changes.
 class NotificacaoBadgeButton extends ConsumerWidget {
-  const NotificacaoBadgeButton({super.key, this.size = 38});
+  const NotificacaoBadgeButton({
+    super.key,
+    this.size = 38,
+    this.countOverride,
+  });
 
   final double size;
+  /// Preferência do BFF `/home` — unifica badge sem sidecar.
+  final int? countOverride;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final count = ref.watch(notificacoesNaoLidasProvider).valueOrNull ?? 0;
+    final live = ref.watch(notificacoesNaoLidasProvider).valueOrNull;
+    final count = countOverride ?? live ?? 0;
 
     return ShellHeaderIconButton(
       icon: 'bell',

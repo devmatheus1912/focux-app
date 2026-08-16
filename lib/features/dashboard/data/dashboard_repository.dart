@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../financeiro/data/financeiro_repository.dart';
+import '../../onboarding/data/onboarding_status_data.dart';
 import 'command_center_data.dart';
 
 class DashboardAderenciaTopItem {
@@ -68,6 +69,9 @@ class DashboardHomeBundle {
   final FinanceiroDashboard financeiro;
   final List<DashboardAderenciaTopItem> topAderencia;
   final DashboardPulseSnapshot? pulse;
+  final int? notificacoesNaoLidas;
+  final OnboardingStatusData? onboardingResumo;
+  final Map<String, dynamic>? planoFeatures;
 
   DashboardHomeBundle({
     required this.personal,
@@ -75,11 +79,16 @@ class DashboardHomeBundle {
     required this.financeiro,
     this.topAderencia = const [],
     this.pulse,
+    this.notificacoesNaoLidas,
+    this.onboardingResumo,
+    this.planoFeatures,
   });
 
   factory DashboardHomeBundle.fromJson(Map<String, dynamic> json) {
     final topRaw = json['topAderencia'] as List<dynamic>? ?? const [];
     final pulseRaw = json['pulse'];
+    final onboardingRaw = json['onboardingResumo'];
+    final planoRaw = json['planoFeatures'];
     return DashboardHomeBundle(
       personal: DashboardData.fromJson(
         json['personal'] as Map<String, dynamic>,
@@ -105,6 +114,15 @@ class DashboardHomeBundle {
                 Map<String, dynamic>.from(pulseRaw),
               )
               : null,
+      notificacoesNaoLidas: (json['notificacoesNaoLidas'] as num?)?.toInt(),
+      onboardingResumo:
+          onboardingRaw is Map
+              ? OnboardingStatusData.fromJson(
+                Map<String, dynamic>.from(onboardingRaw),
+              )
+              : null,
+      planoFeatures:
+          planoRaw is Map ? Map<String, dynamic>.from(planoRaw) : null,
     );
   }
 }

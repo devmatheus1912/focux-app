@@ -10,7 +10,6 @@ class DashboardHomeFocusRules {
     required this.collapseFinance,
     required this.hideSecondaryRiskCtas,
     required this.hidePromoBanners,
-    required this.collapseQuickLinks,
     required this.suppressSecondaryEmptyCtas,
     required this.compactCommandSticky,
     required this.hideFeaturedTools,
@@ -26,8 +25,6 @@ class DashboardHomeFocusRules {
   final bool collapseFinance;
   final bool hideSecondaryRiskCtas;
   final bool hidePromoBanners;
-  /// Atalhos rápidos começam recolhidos (sempre — dock já cobre nav).
-  final bool collapseQuickLinks;
   /// Esconde CTAs de empty (aderência/pulso) que competem com o P1.
   final bool suppressSecondaryEmptyCtas;
   /// Sticky da Central mais compacto (menos título duplicado).
@@ -103,7 +100,6 @@ class DashboardHomeFocusRules {
       collapseFinance: focusMode || covers || receitaAtual <= 0,
       hideSecondaryRiskCtas: focusMode || covers,
       hidePromoBanners: retentionGuard || focusMode,
-      collapseQuickLinks: true,
       suppressSecondaryEmptyCtas: focusMode || covers,
       compactCommandSticky: focusMode,
       hideFeaturedTools: focusMode,

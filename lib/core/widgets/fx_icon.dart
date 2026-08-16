@@ -182,6 +182,11 @@ class _FxIconPainter extends CustomPainter {
         );
         break;
 
+      case 'search':
+        canvas.drawCircle(const Offset(11, 11), 6.5, paint);
+        canvas.drawLine(const Offset(16, 16), const Offset(21, 21), paint);
+        break;
+
       case 'bell':
         canvas.drawPath(
           Path()

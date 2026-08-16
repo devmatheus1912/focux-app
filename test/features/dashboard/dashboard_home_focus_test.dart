@@ -44,7 +44,6 @@ void main() {
       expect(rules.collapseFinance, isTrue);
       expect(rules.hidePromoBanners, isTrue);
       expect(rules.hideSecondaryRiskCtas, isTrue);
-      expect(rules.collapseQuickLinks, isTrue);
       expect(rules.suppressSecondaryEmptyCtas, isTrue);
       expect(rules.compactCommandSticky, isTrue);
       expect(rules.hideFeaturedTools, isTrue);
@@ -77,7 +76,7 @@ void main() {
       expect(rules.maxVisibleNextActions, 2);
     });
 
-    test('focus off keeps quick links collapsed by default', () {
+    test('focus off keeps secondary sections visible', () {
       const focus = DashboardDayFocus(
         headline: 'Rotina estável',
         detail: 'x',
@@ -89,7 +88,6 @@ void main() {
         riscoAlto: 0,
         receitaAtual: 1000,
       );
-      expect(rules.collapseQuickLinks, isTrue);
       expect(rules.hidePromoBanners, isFalse);
       expect(rules.hideFeaturedTools, isFalse);
       expect(rules.omitSecondarySections, isFalse);

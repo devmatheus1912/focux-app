@@ -127,3 +127,18 @@ String? dashboardPulseEmptyHint({
   if (weekEmpty) return 'Sem treinos';
   return 'Nenhum check-in hoje';
 }
+
+/// Cor primária do personal (BFF) — soft branding no chrome da Home.
+Color? dashboardParseBrandColor(String? raw) {
+  if (raw == null) return null;
+  var hex = raw.trim();
+  if (hex.isEmpty) return null;
+  if (hex.startsWith('#')) hex = hex.substring(1);
+  if (hex.length == 3) {
+    hex = hex.split('').map((c) => '$c$c').join();
+  }
+  if (hex.length != 6) return null;
+  final value = int.tryParse(hex, radix: 16);
+  if (value == null) return null;
+  return Color(0xFF000000 | value);
+}

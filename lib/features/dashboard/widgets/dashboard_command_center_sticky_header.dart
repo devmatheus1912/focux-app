@@ -69,8 +69,8 @@ class DashboardCommandCenterStickyHeaderDelegate
                 ? trailingActionLabel!
                 : 'Prioridades')
             : showSubtitle
-            ? '${DashboardMicrocopy.commandCenterTitle}. $subtitle'
-            : DashboardMicrocopy.commandCenterTitle;
+            ? '${DashboardMicrocopy.proximasAcoes}. $subtitle'
+            : DashboardMicrocopy.proximasAcoes;
 
     return Semantics(
       header: !utilityOnly,
@@ -123,7 +123,7 @@ class DashboardCommandCenterStickyHeaderDelegate
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  DashboardMicrocopy.commandCenterTitle,
+                                  DashboardMicrocopy.proximasAcoes,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: FocuxHubTypography.sectionTitle(

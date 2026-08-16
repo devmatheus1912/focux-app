@@ -8,6 +8,7 @@ import '../../onboarding/screens/setup_onboarding_widget.dart';
 import '../../subscription/widgets/dashboard_activation_cta.dart';
 import '../../subscription/widgets/plan_usage_banner.dart';
 import '../../subscription/widgets/trial_countdown_banner.dart';
+import '../data/command_center_data.dart';
 import '../constants/dashboard_layout.dart';
 import '../utils/dashboard_day_focus.dart';
 import '../utils/dashboard_entry_motion.dart';
@@ -16,12 +17,13 @@ import '../utils/dashboard_home_snapshot.dart';
 import '../utils/dashboard_scroll_logic.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import 'dashboard_attention_rail.dart';
+import 'dashboard_agenda_hoje_strip.dart';
 import 'dashboard_command_center_section.dart';
 import 'dashboard_day_focus_banner.dart';
 import 'dashboard_home_header.dart';
 import 'dashboard_pulse_strip.dart';
 
-/// Slivers do fold principal: promo → header → foco → CC → atenção → pulso.
+/// Slivers do fold principal: promo → header → foco → CC → agenda → atenção → pulso.
 List<Widget> buildDashboardHomePrimarySlivers({
   required BuildContext context,
   required DashboardHomeSnapshot snap,
@@ -50,6 +52,11 @@ List<Widget> buildDashboardHomePrimarySlivers({
   required bool primeiroTreinoCriado,
   bool prioritiesChipVisible = false,
   String? pulseEmptyHint,
+  int? notificacoesNaoLidasOverride,
+  Color? brandAccent,
+  VoidCallback? onQuickSearch,
+  VoidCallback? onIaTeaser,
+  List<AgendamentoResumo> agendaItems = const [],
 }) {
   final alunosAtivos = snap.alunosAtivos;
   final riscoAlto = snap.riscoAlto;
@@ -90,8 +97,11 @@ List<Widget> buildDashboardHomePrimarySlivers({
         nomePersonal: nomePersonal,
         logoUrl: logoUrl,
         isDark: isDark,
-        primary: primary,
+        primary: brandAccent ?? primary,
         onProfileTap: () => context.push('/perfil'),
+        notificacoesCountOverride: notificacoesNaoLidasOverride,
+        onQuickSearch: onQuickSearch,
+        onIaTeaser: onIaTeaser,
       ),
     ),
     SliverToBoxAdapter(
@@ -136,6 +146,14 @@ List<Widget> buildDashboardHomePrimarySlivers({
         ),
       ),
     ),
+    if (agendaItems.isNotEmpty)
+      SliverToBoxAdapter(
+        child: DashboardAgendaHojeStrip(
+          items: agendaItems,
+          isDark: isDark,
+          primary: primary,
+        ),
+      ),
     if (riscoAlto > 0 &&
         !snap.attentionVisible &&
         !focusRules.hideSecondaryRiskCtas)

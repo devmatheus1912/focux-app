@@ -68,15 +68,21 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                   });
                 }
 
+                final onboardingFromHome = home.onboardingResumo;
                 final onboardingAsync = ref.watch(onboardingStatusProvider);
-                final onboardingIncomplete = onboardingAsync.maybeWhen(
-                  data: (s) => !s.ativacaoCompleta,
-                  orElse: () => false,
-                );
-                final primeiroTreinoCriado = onboardingAsync.maybeWhen(
-                  data: (s) => s.primeiroTreinoCriado,
-                  orElse: () => false,
-                );
+                final onboardingIncomplete =
+                    onboardingFromHome != null
+                        ? !onboardingFromHome.ativacaoCompleta
+                        : onboardingAsync.maybeWhen(
+                          data: (s) => !s.ativacaoCompleta,
+                          orElse: () => false,
+                        );
+                final primeiroTreinoCriado =
+                    onboardingFromHome?.primeiroTreinoCriado ??
+                    onboardingAsync.maybeWhen(
+                      data: (s) => s.primeiroTreinoCriado,
+                      orElse: () => false,
+                    );
                 if (_focusPreferenceLoaded &&
                     !_autoFocusApplied &&
                     !_sessionFocusTouched) {
@@ -182,6 +188,20 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                             primeiroTreinoCriado: primeiroTreinoCriado,
                             prioritiesChipVisible: showStickyPrioritiesAction,
                             pulseEmptyHint: home.pulse?.emptyHint,
+                            notificacoesNaoLidasOverride:
+                                home.notificacoesNaoLidas,
+                            brandAccent: dashboardParseBrandColor(
+                              data.corPrimaria,
+                            ),
+                            agendaItems: home.commandCenter.agendaHoje,
+                            onQuickSearch:
+                                () => showDashboardQuickSearchSheet(
+                                  context,
+                                  isDark: themeDark,
+                                  primary: primary,
+                                ),
+                            onIaTeaser:
+                                () => goPersonalShellTab(context, '/ia'),
                           ),
                           if (!focusRules.omitSecondarySections)
                             SliverToBoxAdapter(
@@ -218,15 +238,27 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                           ),
                         ],
                       ),
-                      if (showStickyPrioritiesAction)
-                        DashboardPrioritiesOverlay(
-                          isDark: themeDark,
-                          primary: primary,
-                          label:
-                              stickyCommandActionsLabel ??
-                              DashboardMicrocopy.verPrioridades,
-                          onTap: openCommandQuickActions,
-                        ),
+                      AnimatedSwitcher(
+                        duration: reduceMotion
+                            ? Duration.zero
+                            : const Duration(milliseconds: 220),
+                        switchInCurve: Curves.easeOutCubic,
+                        switchOutCurve: Curves.easeInCubic,
+                        child:
+                            showStickyPrioritiesAction
+                                ? DashboardPrioritiesOverlay(
+                                  key: const ValueKey('priorities-overlay'),
+                                  isDark: themeDark,
+                                  primary: primary,
+                                  label:
+                                      stickyCommandActionsLabel ??
+                                      DashboardMicrocopy.verPrioridades,
+                                  onTap: openCommandQuickActions,
+                                )
+                                : const SizedBox.shrink(
+                                  key: ValueKey('priorities-overlay-off'),
+                                ),
+                      ),
                     ],
                   ),
                 );

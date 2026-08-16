@@ -37,12 +37,22 @@ Future<void> showDashboardToolsCatalogSheet(
           snap: true,
           snapSizes: const [0.40, 0.58, 0.96],
           builder:
-              (_, scrollController) => DashboardToolsCatalogSheet(
-                parentContext: context,
-                parentRef: ref,
-                isDark: isDark,
-                shortcutAspectRatio: shortcutAspectRatio,
-                scrollController: scrollController,
+              (_, scrollController) => TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                builder:
+                    (context, value, child) => Opacity(
+                      opacity: value,
+                      child: child,
+                    ),
+                child: DashboardToolsCatalogSheet(
+                  parentContext: context,
+                  parentRef: ref,
+                  isDark: isDark,
+                  shortcutAspectRatio: shortcutAspectRatio,
+                  scrollController: scrollController,
+                ),
               ),
         ),
       );

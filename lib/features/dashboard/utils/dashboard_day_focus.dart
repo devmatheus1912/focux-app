@@ -67,13 +67,13 @@ class DashboardDayFocus {
       return DashboardDayFocus(
         headline: 'Agenda cheia hoje',
         detail:
-            '$agendaHoje compromisso${agendaHoje == 1 ? '' : 's'} · confira a Central de Comando.',
+            '$agendaHoje compromisso${agendaHoje == 1 ? '' : 's'} · confira as próximas ações.',
         semanticLabel: 'Foco do dia: $agendaHoje compromissos na agenda.',
       );
     }
     return const DashboardDayFocus(
       headline: 'Operação sob controle',
-      detail: 'Use a Central de Comando para a melhor próxima ação.',
+      detail: 'Use as próximas ações para a melhor próxima ação.',
       semanticLabel: 'Foco do dia: operação sob controle.',
     );
   }

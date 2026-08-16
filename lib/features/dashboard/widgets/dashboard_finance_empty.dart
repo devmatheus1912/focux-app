@@ -38,17 +38,21 @@ class DashboardFinanceEmptyState extends StatelessWidget {
             onPressed: onOpen,
             style: FilledButton.styleFrom(
               minimumSize: const Size(48, 48),
-              backgroundColor: Colors.white.withValues(alpha: 0.42),
-              foregroundColor: Colors.white,
-              side: BorderSide(
-                color: Colors.white.withValues(alpha: 0.85),
-                width: 1.2,
+              // CTA sólido branco + tinta escura — AA no teal (light e dark).
+              backgroundColor: Colors.white,
+              foregroundColor: const Color(0xFF0B1524),
+              disabledForegroundColor: const Color(0xFF0B1524).withValues(
+                alpha: 0.5,
               ),
+              side: BorderSide.none,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(TokensStrip.rButton),
               ),
             ),
-            child: Text(label),
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
           ),
         ),
       ],

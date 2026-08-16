@@ -114,7 +114,8 @@ void main() {
     expect(shortcutsFile, contains("label: 'Marca própria'"));
     expect(screen, isNot(contains('retornoRapido')));
     expect(screen, isNot(contains('DashboardRoiQuickLinksRow')));
-    expect(screen, contains('DashboardMicrocopy.commandCenterTitle'));
+    expect(screen, contains('DashboardMicrocopy.commandCenterSubtitle'));
+    expect(screen, contains('DashboardMicrocopy.verPrioridades'));
     expect(screen, contains('featuredTools'));
     expect(screen, contains('verCatalogoCompleto'));
     expect(screen, contains('omitSecondarySections'));

@@ -87,7 +87,7 @@ void main() {
       expect(snap.alunosEmRisco, isNotEmpty);
       expect(snap.alunosEmRisco.first.nome, 'Ana');
       expect(snap.focusRules.hideFeaturedTools, isTrue);
-      expect(snap.focusRules.collapseQuickLinks, isTrue);
+      expect(snap.focusRules.omitSecondarySections, isTrue);
       expect(snap.riscoAlto, 1);
       expect(snap.dashboardNextActions.first.priorityBadge, 'P0');
       expect(snap.dashboardNextActions.first.route, '/retencao');

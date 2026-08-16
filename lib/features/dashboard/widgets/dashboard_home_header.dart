@@ -6,12 +6,12 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import '../constants/dashboard_layout.dart';
+import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import 'dashboard_header_profile_avatar.dart';
 
-/// Saudação + chrome (tema, notificações, avatar).
-/// Modo foco fica no banner “Foco do dia” — header sem crowding.
+/// Saudação + chrome (tema, busca, IA, notificações, avatar).
 class DashboardHomeHeader extends StatelessWidget {
   const DashboardHomeHeader({
     super.key,
@@ -20,6 +20,9 @@ class DashboardHomeHeader extends StatelessWidget {
     required this.isDark,
     required this.primary,
     required this.onProfileTap,
+    this.notificacoesCountOverride,
+    this.onQuickSearch,
+    this.onIaTeaser,
   });
 
   final String? nomePersonal;
@@ -27,6 +30,9 @@ class DashboardHomeHeader extends StatelessWidget {
   final bool isDark;
   final Color primary;
   final VoidCallback onProfileTap;
+  final int? notificacoesCountOverride;
+  final VoidCallback? onQuickSearch;
+  final VoidCallback? onIaTeaser;
 
   @override
   Widget build(BuildContext context) {
@@ -64,9 +70,30 @@ class DashboardHomeHeader extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (onQuickSearch != null) ...[
+                ShellHeaderIconButton(
+                  icon: 'search',
+                  size: chromeSize,
+                  tooltip: DashboardMicrocopy.buscaRapida,
+                  onTap: onQuickSearch!,
+                ),
+                SizedBox(width: chromeGap),
+              ],
+              if (onIaTeaser != null) ...[
+                ShellHeaderIconButton(
+                  icon: 'spark',
+                  size: chromeSize,
+                  tooltip: DashboardMicrocopy.sugestaoIa,
+                  onTap: onIaTeaser!,
+                ),
+                SizedBox(width: chromeGap),
+              ],
               ShellThemeToggle(size: chromeSize),
               SizedBox(width: chromeGap),
-              NotificacaoBadgeButton(size: chromeSize),
+              NotificacaoBadgeButton(
+                size: chromeSize,
+                countOverride: notificacoesCountOverride,
+              ),
               SizedBox(width: chromeGap),
               DashboardHeaderProfileAvatar(
                 primary: primary,

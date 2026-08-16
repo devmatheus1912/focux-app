@@ -26,8 +26,15 @@ abstract final class DashboardMicrocopy {
   static const tendenciaVaziaGeral = 'Sem check-ins nos últimos 7 dias';
   static const abrirMensagens = 'Abrir mensagens';
   static const proximasAcoes = 'Próximas ações';
-  static const commandCenterTitle = 'Central de Comando';
-  static const commandCenterSubtitle = 'Próximas ações com maior impacto hoje.';
+  static const agendaHoje = 'Agenda de hoje';
+  static const verAgenda = 'Ver agenda';
+  static const buscaRapida = 'Busca rápida';
+  static const buscaRapidaHint = 'Aluno ou ferramenta…';
+  static const sugestaoIa = 'Sugestão IA';
+  /// Legado — preferir [proximasAcoes] na Home.
+  static const commandCenterTitle = 'Próximas ações';
+  static const commandCenterSubtitle =
+      'A melhor próxima ação para proteger receita e aderência.';
   static const modoFoco = 'Modo foco';
   static const modoFocoOn = 'Modo foco ligado';
   static const modoFocoOff = 'Modo foco desligado';

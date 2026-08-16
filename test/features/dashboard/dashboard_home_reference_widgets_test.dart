@@ -1,0 +1,68 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/dashboard/data/command_center_data.dart';
+import 'package:focux_app/features/dashboard/utils/dashboard_microcopy.dart';
+import 'package:focux_app/features/dashboard/widgets/dashboard_agenda_hoje_strip.dart';
+import 'package:focux_app/features/dashboard/widgets/dashboard_finance_empty.dart';
+
+void main() {
+  testWidgets('finance empty CTA usa contraste AA (branco + tinta escura)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DashboardFinanceEmptyState(
+            mes: 'agosto',
+            onOpen: () {},
+          ),
+        ),
+      ),
+    );
+
+    final button = tester.widget<FilledButton>(find.byType(FilledButton));
+    final style = button.style!;
+    expect(
+      style.backgroundColor!.resolve({}),
+      Colors.white,
+    );
+    expect(
+      style.foregroundColor!.resolve({}),
+      const Color(0xFF0B1524),
+    );
+  });
+
+  testWidgets('agenda strip mostra até 3 compromissos', (tester) async {
+    final items = [
+      AgendamentoResumo(
+        id: 1,
+        nomeAluno: 'Ana',
+        horario: '08:00',
+        status: 'CONFIRMADO',
+      ),
+      AgendamentoResumo(
+        id: 2,
+        nomeAluno: 'Bruno',
+        horario: '10:00',
+        status: 'PENDENTE',
+      ),
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DashboardAgendaHojeStrip(
+            items: items,
+            isDark: true,
+            primary: const Color(0xFF00D4E8),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(DashboardMicrocopy.agendaHoje), findsOneWidget);
+    expect(find.textContaining('Ana'), findsOneWidget);
+    expect(find.textContaining('Bruno'), findsOneWidget);
+  });
+}
+
