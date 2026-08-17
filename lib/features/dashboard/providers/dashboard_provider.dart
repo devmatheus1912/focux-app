@@ -21,6 +21,12 @@ final dashboardHomeProvider = FutureProvider<DashboardHomeBundle>((ref) async {
   return fresh;
 });
 
+/// Home BFF do aluno — `GET /api/dashboard/aluno/home` (TTL client 60s).
+final alunoDashboardHomeProvider =
+    FutureProvider<AlunoDashboardHomeBundle>((ref) async {
+  return ref.read(dashboardRepositoryProvider).getAlunoHome();
+});
+
 final dashboardProvider = FutureProvider<DashboardData>((ref) async {
   return (await ref.watch(dashboardHomeProvider.future)).personal;
 });

@@ -1,5 +1,10 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/providers/personal_brand_provider.dart';
+import '../../alunos/data/aluno_repository.dart';
+import '../../chat/data/chat_repository.dart';
+import '../../checkin/data/checkin_repository.dart';
+import '../../evolucao/data/evolucao_repository.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../../onboarding/data/onboarding_status_data.dart';
 import '../../planos/data/planos_repository.dart';
@@ -250,6 +255,105 @@ class DashboardRepository {
     await _dio.post(
       '/api/dashboard/command-center/actions/snooze',
       data: {'actionKey': actionKey, 'hours': hours},
+    );
+  }
+
+  Future<AlunoDashboardHomeBundle> getAlunoHome() async {
+    final response = await _dio.get('/api/dashboard/aluno/home');
+    return AlunoDashboardHomeBundle.fromJson(
+      response.data as Map<String, dynamic>,
+    );
+  }
+}
+
+/// Sinal de chat do BFF aluno (sem marcar mensagens como lidas).
+class AlunoDashboardChatResumo {
+  final bool possuiMensagemDoAluno;
+  final DateTime? ultimaMensagemAlunoEm;
+  final int naoLidasDoPersonal;
+
+  const AlunoDashboardChatResumo({
+    required this.possuiMensagemDoAluno,
+    this.ultimaMensagemAlunoEm,
+    required this.naoLidasDoPersonal,
+  });
+
+  factory AlunoDashboardChatResumo.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return const AlunoDashboardChatResumo(
+        possuiMensagemDoAluno: false,
+        naoLidasDoPersonal: 0,
+      );
+    }
+    return AlunoDashboardChatResumo(
+      possuiMensagemDoAluno: json['possuiMensagemDoAluno'] as bool? ?? false,
+      ultimaMensagemAlunoEm: DateTime.tryParse(
+        json['ultimaMensagemAlunoEm']?.toString() ?? '',
+      ),
+      naoLidasDoPersonal: (json['naoLidasDoPersonal'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  /// Compat com [buildAlunoHomeExperience] sem dump do histórico.
+  List<ChatMsg> toSyntheticMessages() {
+    if (!possuiMensagemDoAluno || ultimaMensagemAlunoEm == null) {
+      return const [];
+    }
+    return [
+      ChatMsg(
+        remetente: 'ALUNO',
+        conteudo: '',
+        enviadoEm: ultimaMensagemAlunoEm!,
+      ),
+    ];
+  }
+}
+
+/// BFF `GET /api/dashboard/aluno/home` — single round-trip da Home do aluno.
+class AlunoDashboardHomeBundle {
+  final Aluno aluno;
+  final PersonalBrand personalBrand;
+  final List<ExecucaoTreino> treinos;
+  final List<ExecucaoTreino> historico;
+  final List<MedidaCorporal> medidas;
+  final AlunoDashboardChatResumo chat;
+  final int notificacoesNaoLidas;
+  final DateTime fetchedAt;
+
+  AlunoDashboardHomeBundle({
+    required this.aluno,
+    required this.personalBrand,
+    required this.treinos,
+    required this.historico,
+    required this.medidas,
+    required this.chat,
+    required this.notificacoesNaoLidas,
+    DateTime? fetchedAt,
+  }) : fetchedAt = fetchedAt ?? DateTime.now();
+
+  factory AlunoDashboardHomeBundle.fromJson(Map<String, dynamic> json) {
+    List<ExecucaoTreino> parseExec(dynamic raw) =>
+        (raw as List? ?? const [])
+            .map((e) => ExecucaoTreino.fromJson(e as Map<String, dynamic>))
+            .toList();
+    List<MedidaCorporal> parseMedidas(dynamic raw) =>
+        (raw as List? ?? const [])
+            .map((e) => MedidaCorporal.fromJson(e as Map<String, dynamic>))
+            .toList();
+
+    return AlunoDashboardHomeBundle(
+      aluno: Aluno.fromJson(json['aluno'] as Map<String, dynamic>),
+      personalBrand: PersonalBrand.fromJson(
+        json['personalBrand'] as Map<String, dynamic>? ?? const {},
+      ),
+      treinos: parseExec(json['treinos']),
+      historico: parseExec(json['historico']),
+      medidas: parseMedidas(json['medidas']),
+      chat: AlunoDashboardChatResumo.fromJson(
+        json['chat'] as Map<String, dynamic>?,
+      ),
+      notificacoesNaoLidas:
+          (json['notificacoesNaoLidas'] as num?)?.toInt() ?? 0,
     );
   }
 }

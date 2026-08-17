@@ -264,42 +264,6 @@ class _StudentToolTile extends StatelessWidget {
   }
 }
 
-class _HeroCardSkeleton extends StatelessWidget {
-  final bool isDark;
-
-  const _HeroCardSkeleton({required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    final shimmer = isDark ? EagleTokens.darkCardHi : TokensStrip.borderDefault;
-    return Container(
-      height: 170,
-      decoration: BoxDecoration(
-        color: shimmer,
-        borderRadius: BorderRadius.circular(24),
-      ),
-    );
-  }
-}
-
-class _FocusCardSkeleton extends StatelessWidget {
-  final bool isDark;
-
-  const _FocusCardSkeleton({required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    final shimmer = isDark ? EagleTokens.darkCard : TokensStrip.borderDefault;
-    return Container(
-      height: 220,
-      decoration: BoxDecoration(
-        color: shimmer,
-        borderRadius: BorderRadius.circular(20),
-      ),
-    );
-  }
-}
-
 class _AlunoProfileCard extends StatelessWidget {
   final Aluno aluno;
   final bool isDark;
@@ -472,63 +436,6 @@ class _Chip extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ── Skeleton while loading ────────────────────────────────────────────────────
-
-class _ProfileCardSkeleton extends StatelessWidget {
-  final bool isDark;
-
-  const _ProfileCardSkeleton({required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    final shimmer = isDark ? EagleTokens.darkCardHi : TokensStrip.borderDefault;
-    final primary = Theme.of(context).colorScheme.primary;
-
-    return Container(
-      height: 88,
-      decoration: fxListCardDecoration(context, accent: primary),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: shimmer),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    height: 14,
-                    width: 140,
-                    decoration: BoxDecoration(
-                      color: shimmer,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    height: 10,
-                    width: 90,
-                    decoration: BoxDecoration(
-                      color: shimmer,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
