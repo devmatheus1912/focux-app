@@ -6,11 +6,11 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/alunos/data/aluno_repository.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../features/auth/providers/auth_provider.dart';
 import '../data/agenda_repository.dart';
+import '../providers/agenda_provider.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -51,16 +51,17 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     _load();
   }
 
-  Future<void> _load() async {
+  Future<void> _load({bool force = false}) async {
     setState(() {
       _loading = true;
       _erro = null;
     });
     try {
-      final r = await AgendaRepository(ref.read(apiClientProvider)).proximos();
+      if (force) invalidateAgendaCaches(ref);
+      final home = await ref.read(agendaHomeProvider.future);
       if (!mounted) return;
       setState(() {
-        _ags = r;
+        _ags = home.firstPaintItems;
         _loading = false;
         _fetchedAt = DateTime.now();
       });
@@ -77,7 +78,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   Future<void> _novoAgendamento() async {
     await context.push('/agenda/novo');
     if (!mounted) return;
-    _load();
+    _load(force: true);
   }
 
   Color _statusColor(String s, bool isDark, Color primary) {
@@ -135,7 +136,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   Future<void> _copyIcalLink() async {
     try {
       final info =
-          await AgendaRepository(ref.read(apiClientProvider)).icalToken();
+          await ref.read(agendaRepositoryProvider).icalToken();
       final fullUrl = _resolveAbsoluteApiUrl(info.url);
       await Clipboard.setData(ClipboardData(text: fullUrl));
       if (mounted) {
@@ -165,12 +166,10 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
             agendamento: ag,
             statusLabel: _statusText(ag.status),
             onDelete: () async {
-              await AgendaRepository(
-                ref.read(apiClientProvider),
-              ).excluir(ag.id);
+              await ref.read(agendaRepositoryProvider).excluir(ag.id);
               if (!mounted) return;
               Navigator.pop(context);
-              _load();
+              _load(force: true);
               FeedbackHelper.showSuccess(context, 'Agendamento excluído.');
             },
           ),

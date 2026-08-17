@@ -91,9 +91,13 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
     }
     setState(() => _saving = true);
     try {
-      await AgendaRepository(
-        ref.read(apiClientProvider),
-      ).criar(alunoId, inicio, fim, _titulo.text.isEmpty ? null : _titulo.text);
+      await ref.read(agendaRepositoryProvider).criar(
+        alunoId,
+        inicio,
+        fim,
+        _titulo.text.isEmpty ? null : _titulo.text,
+      );
+      invalidateAgendaCaches(ref);
       if (mounted) safePopOrGo(context, '/agenda');
     } catch (e) {
       if (mounted) {
