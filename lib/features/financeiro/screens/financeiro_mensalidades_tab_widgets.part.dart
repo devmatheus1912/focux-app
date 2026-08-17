@@ -2,55 +2,17 @@ part of 'financeiro_mensalidades_tab.dart';
 
 extension FinanceiroMensalidadesTabWidgets on _FinanceiroMensalidadesTabState {
   Widget _buildMensalidadesLoading(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 4, 16, 80),
-      itemCount: 5,
-      itemBuilder:
-          (_, __) => Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Container(
-              height: 82,
-              decoration: fxListCardDecoration(context, radius: 20),
-              child: const SizedBox.shrink(),
-            ),
-          ),
+    return const Padding(
+      padding: EdgeInsets.only(top: 4),
+      child: SkeletonList(count: 5),
     );
   }
 
   Widget _buildMensalidadesEmpty(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final ink = chrome.ink;
-    final mute = chrome.mute;
-    final primary = Theme.of(context).colorScheme.primary;
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: primary.withValues(alpha: chrome.isDark ? 0.15 : 0.08),
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Icon(Icons.receipt_long_rounded, color: primary, size: 24),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            'Nenhuma mensalidade',
-            style: AppTypography.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: ink,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Toque + para lançar a primeira.',
-            style: TextStyle(color: mute, fontSize: 13),
-          ),
-        ],
-      ),
+    return const FxEmptyState(
+      icon: 'dollar-sign',
+      title: 'Nenhuma mensalidade',
+      subtitle: 'Toque + para lançar a primeira.',
     );
   }
 }

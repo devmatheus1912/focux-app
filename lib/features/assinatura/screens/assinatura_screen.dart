@@ -221,7 +221,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       _purchaseSubscription = InAppPurchase.instance.purchaseStream.listen(
         _handlePurchaseUpdates,
         onError: (Object error) {
-          _finishPurchaseFlowWithError('Erro ao acompanhar a compra: $error');
+          _finishPurchaseFlowWithError(
+            friendlyError(error, fallback: 'Erro ao acompanhar a compra.'),
+          );
         },
       );
     }
@@ -486,7 +488,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     } catch (error) {
       _handledPurchases.remove(purchaseKey);
       _finishPurchaseFlowWithError(
-        'Não foi possível sincronizar a assinatura: $error',
+        friendlyError(
+          error,
+          fallback: 'Não foi possível sincronizar a assinatura.',
+        ),
       );
     } finally {
       if (mounted) {
@@ -605,7 +610,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         final uri = Uri.parse(checkoutUrl);
         await launchUrl(uri, webOnlyWindowName: '_self');
       } catch (error) {
-        _finishPurchaseFlowWithError('Erro ao gerar checkout web: $error');
+        _finishPurchaseFlowWithError(
+          friendlyError(error, fallback: 'Erro ao gerar checkout web.'),
+        );
       }
       return;
     }
@@ -650,7 +657,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         purchaseParam: PurchaseParam(productDetails: product),
       );
     } catch (error) {
-      _finishPurchaseFlowWithError('Erro ao iniciar a compra na loja: $error');
+      _finishPurchaseFlowWithError(
+        friendlyError(error, fallback: 'Erro ao iniciar a compra na loja.'),
+      );
     }
   }
 

@@ -478,40 +478,6 @@ class _MontarComModeloCard extends StatelessWidget {
   }
 }
 
-class _AddExerciseErrorBanner extends StatelessWidget {
-  const _AddExerciseErrorBanner({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: EagleTokens.bad.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: EagleTokens.bad.withValues(alpha: 0.25)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.error_outline, color: EagleTokens.bad, size: 18),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              message,
-              style: AppTypography.inter(
-                color: EagleTokens.bad,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _ActivePrescriptionStrip extends StatelessWidget {
   const _ActivePrescriptionStrip({
     required this.presetId,
@@ -647,7 +613,12 @@ class _StickyAddExerciseBar extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (error != null) ...[
-            _AddExerciseErrorBanner(message: error!),
+            FxErrorState(
+              chromeOnDark: isDark,
+              primary: primary,
+              message: error!,
+              onRetry: onSubmit,
+            ),
             const SizedBox(height: 10),
           ],
           OutlinedButton.icon(

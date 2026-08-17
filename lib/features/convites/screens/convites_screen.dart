@@ -12,13 +12,14 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_glass_surface.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/convite_repository.dart';
 import '../providers/convite_provider.dart';
-import '../../../core/widgets/fx_screen_a11y.dart';
 
 class ConvitesScreen extends ConsumerStatefulWidget {
   const ConvitesScreen({super.key});
@@ -149,12 +150,12 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 14),
-                  Semantics(
-                    liveRegion: true,
-                    child: Text(
-                      _error!,
-                      style: const TextStyle(color: EagleTokens.bad),
-                    ),
+                  FxErrorState(
+                    chromeOnDark: isDark,
+                    primary: primary,
+                    title: 'Não conseguimos gerar o convite',
+                    message: _error!,
+                    onRetry: _gerar,
                   ),
                 ],
                 if (_convite != null) ...[

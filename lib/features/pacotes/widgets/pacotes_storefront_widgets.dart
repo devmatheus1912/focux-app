@@ -10,6 +10,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -302,7 +303,7 @@ class StorefrontLinkCard extends StatelessWidget {
   }
 }
 
-/// Empty state alinhado ao Setup D0.
+/// Empty state alinhado ao Setup D0 — delega ao canônico [FxEmptyState].
 class PacotesEmptyState extends StatelessWidget {
   const PacotesEmptyState({super.key, required this.onCreate});
 
@@ -310,51 +311,14 @@ class PacotesEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final ink = fxScreenInk(context);
-    final mute = fxScreenMute(context);
-
-    return Container(
-      decoration: fxStripCardDecoration(context),
-      padding: const EdgeInsets.fromLTRB(22, 28, 22, 24),
-      child: Column(
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: primary.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.inventory_2_outlined, color: primary, size: 28),
-          ),
-          const SizedBox(height: TokensStrip.s4),
-          Text(
-            'Crie seu primeiro plano',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: ink,
-              fontWeight: FontWeight.w800,
-              fontSize: 18,
-              letterSpacing: -0.4,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Um plano tem nome, preço e o que está incluso (treino, nutrição…). '
-            'Ele aparece na sua página quando alguém abrir seu link.\n\n'
-            'Ex.: Musculação · 3 meses · R\$ 500',
-            textAlign: TextAlign.center,
-            style: TokensStrip.bodyMuted(color: mute).copyWith(height: 1.45),
-          ),
-          const SizedBox(height: TokensStrip.s5),
-          FxLiquidPrimaryButton(
-            label: 'Criar plano',
-            icon: Icons.add_rounded,
-            onPressed: onCreate,
-          ),
-        ],
-      ),
+    return FxEmptyState(
+      icon: 'coin',
+      title: 'Crie seu primeiro plano',
+      subtitle:
+          'Um plano tem nome, preço e o que está incluso (treino, nutrição…). '
+          'Ele aparece na sua página quando alguém abrir seu link.\n\n'
+          'Ex.: Musculação · 3 meses · R\$ 500',
+      action: FxEmptyAction(label: 'Criar plano', onTap: onCreate),
     );
   }
 }

@@ -10,14 +10,17 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../dashboard/widgets/dashboard_error_state.dart';
 import '../data/financeiro_repository.dart';
 import '../providers/financeiro_provider.dart';
 import '../utils/financeiro_mensalidade_status.dart';
@@ -126,7 +129,9 @@ class _FinanceiroMensalidadesTabState
     final chrome = ShellChrome.of(context);
     final mute = chrome.mute;
     final primary = Theme.of(context).colorScheme.primary;
-    return Scaffold(
+    return fxScreenA11yScope(
+      label: 'Mensalidades',
+      child: Scaffold(
       extendBody: true,
       backgroundColor: Colors.transparent,
       floatingActionButton: Column(
@@ -216,7 +221,7 @@ class _FinanceiroMensalidadesTabState
                 _loading
                     ? _buildMensalidadesLoading(context)
                     : _erro != null
-                    ? DashboardErrorState(
+                    ? FxErrorState(
                       chromeOnDark: chrome.isDark,
                       primary: primary,
                       message: _erro!,
@@ -349,6 +354,7 @@ class _FinanceiroMensalidadesTabState
           ),
         ],
       ),
+    ),
     );
   }
 }

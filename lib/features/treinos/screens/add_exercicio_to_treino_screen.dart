@@ -259,7 +259,12 @@ class _AddExercicioToTreinoScreenState
                         if (_error != null && (_tabIndex != 0 || _selecionado == null))
                           Padding(
                             padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-                            child: _AddExerciseErrorBanner(message: _error!),
+                            child: FxErrorState(
+                              chromeOnDark: isDark,
+                              primary: primary,
+                              message: _error!,
+                              onRetry: () => setState(() => _error = null),
+                            ),
                           ),
                         Expanded(
                           child: SingleChildScrollView(
