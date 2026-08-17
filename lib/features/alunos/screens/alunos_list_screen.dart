@@ -45,6 +45,7 @@ part 'alunos_list_screen_filters.part.dart';
 part 'alunos_list_screen_header.part.dart';
 part 'alunos_list_screen_body.part.dart';
 part 'alunos_list_screen_cards.part.dart';
+part 'alunos_list_screen_aluno_card.part.dart';
 part 'alunos_list_screen_actions.part.dart';
 
 class AlunosListScreen extends ConsumerStatefulWidget {

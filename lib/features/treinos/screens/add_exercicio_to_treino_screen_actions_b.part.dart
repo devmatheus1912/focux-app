@@ -87,6 +87,7 @@ extension AddExercicioToTreinoScreenActionsB
       await _persistAfterAdd(exercicioId);
       if (!mounted) return;
       HapticFeedback.mediumImpact();
+      ref.invalidate(treinoPickerHomeProvider(widget.treinoId));
       ref.invalidate(treinoProvider(widget.treinoId));
       setState(() {
         _selecionado = null;
@@ -136,6 +137,7 @@ extension AddExercicioToTreinoScreenActionsB
         props: {'exId': exercicio.id, 'treinoId': widget.treinoId},
       );
       if (mounted) {
+        ref.invalidate(treinoPickerHomeProvider(widget.treinoId));
         ref.invalidate(treinoProvider(widget.treinoId));
         FeedbackHelper.showSuccess(
           context,
@@ -222,8 +224,9 @@ extension AddExercicioToTreinoScreenActionsB
   }
 
   Future<Exercicio?> _freshExercicio(int exercicioId) async {
-    final list = await ref.read(exerciciosProvider.future);
-    for (final exercicio in list) {
+    final home =
+        await ref.read(treinoPickerHomeProvider(widget.treinoId).future);
+    for (final exercicio in home.exercicios) {
       if (exercicio.id == exercicioId) return exercicio;
     }
     return null;
@@ -236,6 +239,7 @@ extension AddExercicioToTreinoScreenActionsB
     ]) {
       await Future<void>.delayed(delay);
       if (!mounted) return;
+      ref.invalidate(treinoPickerHomeProvider(widget.treinoId));
       ref.invalidate(exerciciosProvider);
       final fresh = await _freshExercicio(exercicioId);
       if (fresh == null || !mounted) continue;
@@ -284,6 +288,7 @@ extension AddExercicioToTreinoScreenActionsB
         'video_personal_upload',
         props: {'exId': exercicio.id, 'origin': origin},
       );
+      ref.invalidate(treinoPickerHomeProvider(widget.treinoId));
       ref.invalidate(exerciciosProvider);
       if (!mounted) return null;
       final fresh = await _freshExercicio(updated.id) ?? updated;
@@ -339,6 +344,7 @@ extension AddExercicioToTreinoScreenActionsB
         'video_personal_remove',
         props: {'exId': exercicio.id, 'origin': 'treino_add_exercise'},
       );
+      ref.invalidate(treinoPickerHomeProvider(widget.treinoId));
       ref.invalidate(exerciciosProvider);
       if (!mounted) return;
       setState(() => _selecionado = updated);

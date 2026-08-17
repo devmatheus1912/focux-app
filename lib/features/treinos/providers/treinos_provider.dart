@@ -25,6 +25,12 @@ final treinoProvider = FutureProvider.family<Treino, int>((ref, id) async {
   return ref.watch(treinoRepositoryProvider).buscar(id);
 });
 
+/// First paint do picker — um GET (`/api/treinos/{id}/picker/home`).
+final treinoPickerHomeProvider =
+    FutureProvider.family<TreinoPickerHomeBundle, int>((ref, treinoId) async {
+      return ref.watch(treinoRepositoryProvider).getPickerHome(treinoId);
+    });
+
 void invalidateTreinosCaches(WidgetRef ref) {
   ref.invalidate(treinosHomeProvider);
 }

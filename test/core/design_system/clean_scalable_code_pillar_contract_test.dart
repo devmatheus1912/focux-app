@@ -76,7 +76,7 @@ void main() {
       'lib/features/alunos/screens/alunos_list_screen.dart',
     ).readAsStringSync();
     final cards = File(
-      'lib/features/alunos/screens/alunos_list_screen_cards.part.dart',
+      'lib/features/alunos/screens/alunos_list_screen_aluno_card.part.dart',
     ).readAsStringSync();
     expect(screen, contains('alunos_list_sparkline_logic.dart'));
     expect(cards, contains('alunosListSparklineMetrics'));

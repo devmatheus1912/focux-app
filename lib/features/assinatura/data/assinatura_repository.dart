@@ -10,6 +10,13 @@ import '../../planos/paywall/paywall_vitrine.dart';
 
 import 'plano.dart';
 
+class PaywallHomeBundle {
+  final List<Plano> planos;
+  final PaywallVitrineSnapshot vitrine;
+
+  const PaywallHomeBundle({required this.planos, required this.vitrine});
+}
+
 class AssinaturaRepository {
   final Dio _dio;
   final Dio _paymentDio;
@@ -23,6 +30,30 @@ class AssinaturaRepository {
     final response = await _dio.get('/api/planos');
     final list = response.data as List<dynamic>;
     return list.map((e) => Plano.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  /// BFF first paint — planos + vitrine em um round-trip.
+  Future<PaywallHomeBundle> getPaywallHome({bool forceRefresh = false}) async {
+    if (forceRefresh) {
+      await clearVitrineCache();
+    }
+    final response = await _dio.get('/api/planos/paywall/home');
+    final raw = response.data as Map<String, dynamic>;
+    final planosRaw = (raw['planos'] as List<dynamic>? ?? const []);
+    final planos =
+        planosRaw
+            .map((e) => Plano.fromJson(e as Map<String, dynamic>))
+            .toList();
+    final vitrineRaw =
+        (raw['vitrine'] as Map<String, dynamic>?) ?? <String, dynamic>{};
+    await _saveVitrineCache(vitrineRaw);
+    PaywallVitrineSnapshot vitrine;
+    try {
+      vitrine = PaywallVitrineSnapshot.fromApi(vitrineRaw);
+    } catch (_) {
+      vitrine = PaywallVitrineSnapshot.fromCatalog();
+    }
+    return PaywallHomeBundle(planos: planos, vitrine: vitrine);
   }
 
   Future<PaywallVitrineSnapshot> fetchVitrine({
@@ -42,6 +73,7 @@ class AssinaturaRepository {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_vitrineCacheKey);
     await LocalCache.invalidate('/api/planos/vitrine');
+    await LocalCache.invalidate('/api/planos/paywall/home');
   }
 
   Future<PaywallVitrineSnapshot?> _loadVitrineCache() async {

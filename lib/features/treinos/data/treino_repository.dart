@@ -145,6 +145,25 @@ class TreinosHomeBundle {
   );
 }
 
+class TreinoPickerHomeBundle {
+  final Treino treino;
+  final List<Exercicio> exercicios;
+
+  const TreinoPickerHomeBundle({
+    required this.treino,
+    required this.exercicios,
+  });
+
+  factory TreinoPickerHomeBundle.fromJson(Map<String, dynamic> j) =>
+      TreinoPickerHomeBundle(
+        treino: Treino.fromJson(j['treino'] as Map<String, dynamic>),
+        exercicios:
+            ((j['exercicios'] as List?) ?? const [])
+                .map((e) => Exercicio.fromJson(e as Map<String, dynamic>))
+                .toList(),
+      );
+}
+
 class TreinoRepository {
   final Dio _dio;
 
@@ -161,6 +180,14 @@ class TreinoRepository {
   Future<TreinosHomeBundle> getHome() async {
     final response = await _dio.get('/api/treinos/home');
     return TreinosHomeBundle.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// BFF tipado — first paint do picker (treino + biblioteca).
+  Future<TreinoPickerHomeBundle> getPickerHome(int treinoId) async {
+    final response = await _dio.get('/api/treinos/$treinoId/picker/home');
+    return TreinoPickerHomeBundle.fromJson(
+      response.data as Map<String, dynamic>,
+    );
   }
 
   Future<Treino> buscar(int id) async {

@@ -134,10 +134,11 @@ extension AddExercicioToTreinoScreenActionsA
     if (!mounted) return;
     final selectedId = _selecionado?.id;
     if (selectedId == null) return;
-    ref.invalidate(exerciciosProvider);
-    final list = await ref.read(exerciciosProvider.future);
+    ref.invalidate(treinoPickerHomeProvider(widget.treinoId));
+    final home =
+        await ref.read(treinoPickerHomeProvider(widget.treinoId).future);
     Exercicio? fresh;
-    for (final exercicio in list) {
+    for (final exercicio in home.exercicios) {
       if (exercicio.id == selectedId) {
         fresh = exercicio;
         break;
@@ -180,6 +181,7 @@ extension AddExercicioToTreinoScreenActionsA
   Future<void> _openCreateExercise() async {
     final criado = await context.push<bool>('/exercicios/novo');
     if (criado == true && mounted) {
+      ref.invalidate(treinoPickerHomeProvider(widget.treinoId));
       ref.invalidate(exerciciosProvider);
     }
   }
@@ -198,7 +200,9 @@ extension AddExercicioToTreinoScreenActionsA
               ),
               body: TemplateSplitPicker(
                 alreadyInTreinoIds: _treinoExercicioIds(
-                  ref.read(treinoProvider(widget.treinoId)),
+                  ref
+                      .read(treinoPickerHomeProvider(widget.treinoId))
+                      .whenData((h) => h.treino),
                 ),
                 onAdicionar: (exercicio) async {
                   await _adicionarRapido(exercicio);
@@ -211,7 +215,10 @@ extension AddExercicioToTreinoScreenActionsA
             ),
       ),
     );
-    if (mounted) ref.invalidate(treinoProvider(widget.treinoId));
+    if (mounted) {
+      ref.invalidate(treinoPickerHomeProvider(widget.treinoId));
+      ref.invalidate(treinoProvider(widget.treinoId));
+    }
   }
 
   void _applyPreset(String id, {bool notify = true}) {

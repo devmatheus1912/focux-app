@@ -39,6 +39,7 @@ void main() {
     expect(screen, contains("part 'alunos_list_screen_header.part.dart'"));
     expect(screen, contains("part 'alunos_list_screen_body.part.dart'"));
     expect(screen, contains("part 'alunos_list_screen_cards.part.dart'"));
+    expect(screen, contains("part 'alunos_list_screen_aluno_card.part.dart'"));
     expect(screen, isNot(contains("aluno.email.toLowerCase()")));
     expect(screen, contains('isScrollControlled: true'));
     expect(screen, contains('useSafeArea: true'));

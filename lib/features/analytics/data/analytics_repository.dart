@@ -137,21 +137,4 @@ class AnalyticsRepository {
     final r = await _dio.get('/api/analytics/funil');
     return FunilAtivacao.fromJson(r.data as Map<String, dynamic>);
   }
-
-  Future<List<WauSemanal>> getWau() async {
-    final r = await _dio.get('/api/analytics/wau');
-    return (r.data as List)
-        .map((e) => WauSemanal.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
-
-  Future<List<CohortRetencao>> getCohort({int meses = 6}) async {
-    final r = await _dio.get(
-      '/api/analytics/cohort',
-      queryParameters: {'meses': meses},
-    );
-    return (r.data as List)
-        .map((e) => CohortRetencao.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
 }

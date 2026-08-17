@@ -12,15 +12,14 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
 
     final perfil = ref.watch(perfilProvider).valueOrNull;
     final currentPlan = subscriptionPlanFromApi(perfil?.plano);
-    final planosAsync = ref.watch(planosProvider);
-    final vitrineAsync = ref.watch(paywallVitrineProvider);
-    final vitrine = vitrineAsync.valueOrNull;
+    final homeAsync = ref.watch(paywallHomeProvider);
+    final vitrine = homeAsync.valueOrNull?.vitrine;
     final trialDaysFromVitrine = vitrine?.trialDaysOffer;
     final vitrineComparison =
         vitrine?.effectiveComparisonRows ?? PaywallCatalog.comparisonRows;
     final featuresAsync = ref.watch(planoFeaturesProvider);
 
-    final planos = planosAsync.valueOrNull;
+    final planos = homeAsync.valueOrNull?.planos;
 
     SubscriptionPlan? paywallNextTier;
     var paywallHasUpgradeAbove = false;
@@ -279,7 +278,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                   ),
                 ),
               ),
-      body: planosAsync.when(
+      body: homeAsync.when(
         loading: () => const PaywallLoadingSkeleton(),
         error:
             (error, _) => FxErrorState(
@@ -287,12 +286,12 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
               primary: primary,
               message: friendlyError(error),
               onRetry: () {
-                ref.invalidate(planosProvider);
-                ref.invalidate(paywallVitrineProvider);
+                ref.invalidate(paywallHomeProvider);
               },
               title: 'Não foi possível carregar os planos',
             ),
-        data: (planosList) {
+        data: (home) {
+          final planosList = home.planos;
           if (planosList.isEmpty) {
             return FxEmptyState(
               icon: 'dollar-sign',
@@ -301,8 +300,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
               action: FxEmptyAction(
                 label: 'Tentar de novo',
                 onTap: () {
-                  ref.invalidate(planosProvider);
-                  ref.invalidate(paywallVitrineProvider);
+                  ref.invalidate(paywallHomeProvider);
                 },
               ),
             );

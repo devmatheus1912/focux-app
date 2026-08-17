@@ -146,8 +146,9 @@ class _AddExercicioToTreinoScreenState
 
   @override
   Widget build(BuildContext context) {
-    final exerciciosAsync = ref.watch(exerciciosProvider);
-    final treinoAsync = ref.watch(treinoProvider(widget.treinoId));
+    final pickerAsync = ref.watch(treinoPickerHomeProvider(widget.treinoId));
+    final exerciciosAsync = pickerAsync.whenData((h) => h.exercicios);
+    final treinoAsync = pickerAsync.whenData((h) => h.treino);
     final alreadyInTreinoIds = _treinoExercicioIds(treinoAsync);
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
@@ -215,7 +216,10 @@ class _AddExercicioToTreinoScreenState
                       primary: primary,
                       title: 'Não conseguimos carregar os exercícios',
                       message: friendlyError(e),
-                      onRetry: () => ref.invalidate(exerciciosProvider),
+                      onRetry:
+                          () => ref.invalidate(
+                            treinoPickerHomeProvider(widget.treinoId),
+                          ),
                     ),
                 data:
                     (exercicios) {
@@ -236,6 +240,9 @@ class _AddExercicioToTreinoScreenState
                                 await ref
                                     .read(exercicioRepositoryProvider)
                                     .importarSeedPremiumV1();
+                                ref.invalidate(
+                                  treinoPickerHomeProvider(widget.treinoId),
+                                );
                                 ref.invalidate(exerciciosProvider);
                               } catch (e) {
                                 if (!context.mounted) return;

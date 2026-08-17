@@ -1,16 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../alertas/data/alertas_repository.dart';
-import '../../../features/auth/providers/auth_provider.dart';
 import '../data/aluno_repository.dart';
 import 'aluno_detail_providers.dart';
 import 'alunos_provider.dart';
-
-/// Dedicated GET `/api/alertas/configuracao` — config screen only.
-/// List and 360 first paint must read `AlunosHomeBundle.alertasConfig`.
-final alertasConfigProvider = FutureProvider<AlertasConfiguracao>((ref) async {
-  return AlertasRepository(ref.read(apiClientProvider)).getConfiguracao();
-});
 
 final alunosStatsProvider = FutureProvider<AlunosStats>((ref) async {
   return (await ref.watch(alunosHomeProvider.future)).stats;

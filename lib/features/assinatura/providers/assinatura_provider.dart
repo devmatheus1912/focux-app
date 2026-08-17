@@ -12,15 +12,22 @@ final assinaturaRepositoryProvider = Provider<AssinaturaRepository>(
   ),
 );
 
-final planosProvider = FutureProvider<List<Plano>>((ref) async {
-  return ref.read(assinaturaRepositoryProvider).listarPlanos();
+/// First paint do paywall — um GET (`/api/planos/paywall/home`).
+final paywallHomeProvider = FutureProvider<PaywallHomeBundle>((ref) async {
+  return ref.read(assinaturaRepositoryProvider).getPaywallHome();
 });
 
+/// Derivado do BFF — sem GET extra quando [paywallHomeProvider] está fresco.
+final planosProvider = FutureProvider<List<Plano>>((ref) async {
+  return (await ref.watch(paywallHomeProvider.future)).planos;
+});
+
+/// Derivado do BFF — fallback estático se o home falhar.
 final paywallVitrineProvider = FutureProvider<PaywallVitrineSnapshot>((
   ref,
 ) async {
   try {
-    return await ref.read(assinaturaRepositoryProvider).fetchVitrine();
+    return (await ref.watch(paywallHomeProvider.future)).vitrine;
   } catch (_) {
     return PaywallVitrineSnapshot.fromCatalog();
   }

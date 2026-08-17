@@ -38,8 +38,7 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
         action: FxEmptyAction(
           label: 'Atualizar',
           onTap: () {
-            ref.invalidate(planosProvider);
-            ref.invalidate(paywallVitrineProvider);
+            ref.invalidate(paywallHomeProvider);
           },
         ),
       );

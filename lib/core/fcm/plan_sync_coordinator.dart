@@ -35,7 +35,7 @@ class PlanSyncCoordinator {
 
     await container.read(planosRepositoryProvider).clearPlanoFeaturesCache();
     await container.read(assinaturaRepositoryProvider).clearVitrineCache();
-    container.invalidate(paywallVitrineProvider);
+    container.invalidate(paywallHomeProvider);
     container.invalidate(perfilProvider);
     await container
         .read(planoFeaturesProvider.notifier)
