@@ -10,8 +10,8 @@ import '../data/alimentar_repository.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -269,7 +269,7 @@ class _PlanoAlimentarDetailScreenState
             Expanded(
               child:
                   _loading
-                      ? const FxLoading()
+                      ? const SkeletonList(count: 4)
                       : _erro != null
                       ? FxErrorState(
                         chromeOnDark:

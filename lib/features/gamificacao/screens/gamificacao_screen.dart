@@ -14,7 +14,7 @@ import '../models/gamificacao_badge_tile.dart';
 import '../providers/gamificacao_provider.dart';
 import 'package:focux_app/core/widgets/fx_rive_player.dart';
 import 'package:focux_app/core/widgets/fx_empty_state.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../dashboard/widgets/dashboard_error_state.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
@@ -46,7 +46,7 @@ class GamificacaoScreen extends ConsumerWidget {
         ),
         body: FxContentWidthLimiter(
           child: async.when(
-            loading: () => Center(child: FxLoading(color: brand)),
+            loading: () => const SkeletonList(count: 5),
             error:
                 (e, _) => RefreshIndicator(
                   color: brand,

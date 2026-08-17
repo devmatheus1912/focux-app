@@ -5,6 +5,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -33,6 +34,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
   List<ComplianceItem> _compliance = [];
   bool _loading = true;
   String? _error;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -46,12 +48,12 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
       _error = null;
     });
     try {
-      final repo = ref.read(_repoProvider);
-      final results = await Future.wait([repo.listar(), repo.compliance()]);
+      final home = await ref.read(_repoProvider).getHome();
       if (!mounted) return;
       setState(() {
-        _habitos = results[0] as List<Habito>;
-        _compliance = results[1] as List<ComplianceItem>;
+        _habitos = home.habitos;
+        _compliance = home.compliance;
+        _fetchedAt = DateTime.now();
         _loading = false;
       });
     } catch (e) {
@@ -171,6 +173,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Hábitos & Compliance',
@@ -180,9 +183,9 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
         capability: 'habitCoaching',
         child: FxShellScaffold(
           useMesh: true,
-          appBar: const FxShellAppBar(
+          appBar: FxShellAppBar(
             title: 'Hábitos & Compliance',
-            subtitle: 'Coaching diário e aderência',
+            subtitle: freshnessLabel ?? 'Coaching diário e aderência',
           ),
         floatingActionButton: Semantics(
           label: 'Novo hábito',

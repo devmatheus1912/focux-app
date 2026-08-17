@@ -168,6 +168,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
         'preferenciasTreino': _preferenciasTreino.text.trim(),
         'restricoesAlimentares': _restricoesAlimentares.text.trim(),
       });
+      ref.invalidate(alunoPerfilHomeProvider);
       ref.invalidate(alunoMeProvider);
       if (!silent && mounted) {
         FeedbackHelper.showSuccess(context, 'Perfil do aluno atualizado.');
@@ -412,7 +413,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                   ),
                   fotoUrl: fotoUrl,
                 );
-                ref.invalidate(minhasMedidasProvider);
+                ref.invalidate(alunoPerfilHomeProvider);
                 if (peso != null) {
                   _peso.text = peso.toStringAsFixed(1);
                   await _save(silent: true);
@@ -572,8 +573,10 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final async = ref.watch(alunoMeProvider);
-    final medidasAsync = ref.watch(minhasMedidasProvider);
+    final homeAsync = ref.watch(alunoPerfilHomeProvider);
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(
+      homeAsync.valueOrNull?.fetchedAt,
+    );
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final chrome = ShellChrome.forDark(isDark);
     final ink = chrome.ink;
@@ -586,6 +589,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Meu perfil',
+          subtitle: freshnessLabel,
           onBack: () => safePopOrGo(context, '/dashboard/aluno'),
           actions: [
             TextButton(
@@ -601,7 +605,7 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
             ),
           ],
         ),
-        body: async.when(
+        body: homeAsync.when(
           loading:
               () => const Padding(
                 padding: EdgeInsets.all(TokensStrip.s4),
@@ -613,11 +617,49 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                 primary: primary,
                 message: friendlyError(e),
                 title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                onRetry: () => ref.invalidate(alunoMeProvider),
+                onRetry: () => ref.invalidate(alunoPerfilHomeProvider),
               ),
-          data: (aluno) {
+          data: (home) {
+            final aluno = home.aluno;
+            final medidas = home.medidas;
             _loadIfNeeded(aluno);
             final completion = _completionScore();
+            final ultima = medidas.isNotEmpty ? medidas.first : null;
+            final medidasCards = <Widget>[
+              _MetricHighlightCard(
+                label: 'Último peso',
+                value:
+                    ultima?.peso != null
+                        ? '${ultima!.peso!.toStringAsFixed(1)} kg'
+                        : 'Sem registro',
+                helper:
+                    ultima != null
+                        ? 'Atualizado em ${_formatarDataCurta(ultima.data)}'
+                        : 'Registre a primeira medida',
+                icon: Icons.monitor_weight_outlined,
+                isDark: isDark,
+              ),
+              _MetricHighlightCard(
+                label: 'Variação',
+                value:
+                    medidas.where((item) => item.peso != null).length >= 2
+                        ? _variacaoPeso(medidas).split(' desde').first
+                        : '--',
+                helper: _variacaoPeso(medidas),
+                icon: Icons.show_chart,
+                isDark: isDark,
+              ),
+              _MetricHighlightCard(
+                label: 'Entradas',
+                value: '${medidas.length}',
+                helper:
+                    medidas.isEmpty
+                        ? 'Nenhuma atualização ainda'
+                        : 'Histórico pronto para comparar',
+                icon: Icons.timeline,
+                isDark: isDark,
+              ),
+            ];
             return Form(
               key: _formKey,
               child: SingleChildScrollView(
@@ -898,109 +940,47 @@ class _PerfilAlunoScreenState extends ConsumerState<PerfilAlunoScreen> {
                         label: const Text('Registrar'),
                       ),
                       children: [
-                        medidasAsync.when(
-                          loading:
-                              () => const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 4),
-                                child: SkeletonList(count: 3),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            for (var i = 0; i < medidasCards.length; i++) ...[
+                              medidasCards[i],
+                              if (i != medidasCards.length - 1)
+                                const SizedBox(height: 10),
+                            ],
+                            const SizedBox(height: 12),
+                            if (medidas.isEmpty)
+                              FxEmptyState(
+                                icon: 'chart',
+                                title: 'Histórico corporal vazio',
+                                subtitle:
+                                    'Registrar a primeira medida melhora acompanhamento, ajuste de carga e conversa com o personal.',
+                                action: FxEmptyAction(
+                                  label: 'Registrar medida',
+                                  onTap: _registrarMedida,
+                                ),
+                              )
+                            else ...[
+                              Text(
+                                'Últimas atualizações',
+                                style: TextStyle(
+                                  color: ink,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                          error:
-                              (e, _) => FxErrorState(
-                                chromeOnDark: isDark,
-                                primary: primary,
-                                title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                                message: friendlyError(e),
-                                onRetry:
-                                    () => ref.invalidate(minhasMedidasProvider),
-                              ),
-                          data: (medidas) {
-                            final ultima =
-                                medidas.isNotEmpty ? medidas.first : null;
-                            final cards = <Widget>[
-                              _MetricHighlightCard(
-                                label: 'Último peso',
-                                value:
-                                    ultima?.peso != null
-                                        ? '${ultima!.peso!.toStringAsFixed(1)} kg'
-                                        : 'Sem registro',
-                                helper:
-                                    ultima != null
-                                        ? 'Atualizado em ${_formatarDataCurta(ultima.data)}'
-                                        : 'Registre a primeira medida',
-                                icon: Icons.monitor_weight_outlined,
-                                isDark: isDark,
-                              ),
-                              _MetricHighlightCard(
-                                label: 'Variação',
-                                value:
-                                    medidas
-                                                .where(
-                                                  (item) => item.peso != null,
-                                                )
-                                                .length >=
-                                            2
-                                        ? _variacaoPeso(
-                                          medidas,
-                                        ).split(' desde').first
-                                        : '--',
-                                helper: _variacaoPeso(medidas),
-                                icon: Icons.show_chart,
-                                isDark: isDark,
-                              ),
-                              _MetricHighlightCard(
-                                label: 'Entradas',
-                                value: '${medidas.length}',
-                                helper:
-                                    medidas.isEmpty
-                                        ? 'Nenhuma atualização ainda'
-                                        : 'Histórico pronto para comparar',
-                                icon: Icons.timeline,
-                                isDark: isDark,
-                              ),
-                            ];
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                for (var i = 0; i < cards.length; i++) ...[
-                                  cards[i],
-                                  if (i != cards.length - 1)
-                                    const SizedBox(height: 10),
-                                ],
-                                const SizedBox(height: 12),
-                                if (medidas.isEmpty)
-                                  FxEmptyState(
-                                    icon: 'chart',
-                                    title: 'Histórico corporal vazio',
-                                    subtitle:
-                                        'Registrar a primeira medida melhora acompanhamento, ajuste de carga e conversa com o personal.',
-                                    action: FxEmptyAction(
-                                      label: 'Registrar medida',
-                                      onTap: _registrarMedida,
-                                    ),
-                                  )
-                                else ...[
-                                  Text(
-                                    'Últimas atualizações',
-                                    style: TextStyle(
-                                      color: ink,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
+                              const SizedBox(height: 10),
+                              ...medidas
+                                  .take(3)
+                                  .map(
+                                    (medida) => _ProgressEntryCard(
+                                      medida: medida,
+                                      isDark: isDark,
+                                      formatarData: _formatarDataCurta,
                                     ),
                                   ),
-                                  const SizedBox(height: 10),
-                                  ...medidas
-                                      .take(3)
-                                      .map(
-                                        (medida) => _ProgressEntryCard(
-                                          medida: medida,
-                                          isDark: isDark,
-                                          formatarData: _formatarDataCurta,
-                                        ),
-                                      ),
-                                ],
-                              ],
-                            );
-                          },
+                            ],
+                          ],
                         ),
                       ],
                     ),

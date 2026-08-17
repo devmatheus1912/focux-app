@@ -36,7 +36,11 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
   @override
   Widget build(BuildContext context) {
     final aluno360Async = ref.watch(aluno360Provider(alunoId));
-    final alunoAsync = ref.watch(alunoProvider(alunoId));
+    // First paint: only /360. Watch GET /alunos/{id} solely when 360 failed.
+    final alunoFallbackAsync =
+        shouldWatchAlunoDetailFallback(aluno360Async)
+            ? ref.watch(alunoProvider(alunoId))
+            : null;
     final tabIndex = _tabController.index;
     final autonomiaResumoAsync =
         tabIndex == 0 && !aluno360Async.hasValue
@@ -60,10 +64,10 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
     final ink = chrome.ink;
     final mute = chrome.mute;
 
-    AsyncValue<Aluno> resolvedAlunoAsync = alunoAsync;
-    if (aluno360Async.hasValue) {
-      resolvedAlunoAsync = AsyncData(aluno360Async.value!.aluno);
-    }
+    final resolvedAlunoAsync = resolveAlunoDetailAlunoAsync(
+      aluno360Async: aluno360Async,
+      alunoFallbackAsync: alunoFallbackAsync,
+    );
 
     AsyncValue<AlunoAutonomiaResumo> resolvedAutonomiaResumoAsync =
         autonomiaResumoAsync;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 
@@ -37,6 +38,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   List<FeedPost> _posts = [];
   bool _loading = true;
   String? _erro;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -60,6 +62,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           _comentariosLocais[p.id] = p.totalComentarios;
         }
         _loading = false;
+        _fetchedAt = DateTime.now();
       });
     } catch (e) {
       if (mounted) {
@@ -460,6 +463,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
     final primaryDeep = BrandPalette.deep(primary);
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     return fxScreenA11yScope(
       label: 'Feed',
       child: FxShellScaffold(
@@ -528,14 +532,33 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Expanded(
-                                  child: Text(
-                                    'Feed',
-                                    style: TextStyle(
-                                      color: chrome.ink,
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: -0.5,
-                                    ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Feed',
+                                        style: TextStyle(
+                                          color: chrome.ink,
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: -0.5,
+                                        ),
+                                      ),
+                                      if (freshnessLabel != null) ...[
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          freshnessLabel,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: chrome.mute,
+                                            fontSize: 11.5,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                 ),
                                 InkWell(

@@ -21,6 +21,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 
 class IaAlunoScreen extends ConsumerStatefulWidget {
   const IaAlunoScreen({super.key});
@@ -107,7 +108,7 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen>
         ),
         body:
             _resolving
-                ? const Center(child: FxLoading())
+                ? const SkeletonList(count: 5)
                 : _resolveError != null
                 ? FxErrorState(
                   chromeOnDark: chrome.isDark,

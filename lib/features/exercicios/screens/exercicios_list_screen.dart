@@ -7,6 +7,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -36,6 +37,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   final _picker = ImagePicker();
   ExerciciosUiFilter _filter = const ExerciciosUiFilter();
   final Set<int> _selected = {};
+  DateTime? _fetchedAt;
 
   List<Exercicio> _applyFilter(List<Exercicio> input) {
     final query = _filter.query.trim().toLowerCase();
@@ -294,10 +296,16 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   @override
   Widget build(BuildContext context) {
     final asyncList = ref.watch(exerciciosProvider);
+    ref.listen<AsyncValue<List<Exercicio>>>(exerciciosProvider, (_, next) {
+      if (!next.isLoading && next.hasValue) {
+        setState(() => _fetchedAt = DateTime.now());
+      }
+    });
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final mute = chrome.mute;
     final primary = Theme.of(context).colorScheme.primary;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Exercicios',
@@ -307,7 +315,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
             _selected.isEmpty
                 ? FxShellAppBar(
                   title: 'Exercicios',
-                  subtitle: 'BIBLIOTECA',
+                  subtitle: freshnessLabel ?? 'BIBLIOTECA',
                   onBack: () => safePopOrGo(context, '/dashboard/personal'),
                   actions: [
                     IconButton(

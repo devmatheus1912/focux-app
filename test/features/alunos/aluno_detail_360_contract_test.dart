@@ -130,6 +130,8 @@ void main() {
     expect(screen, contains('class Aluno360TimelineCard'));
     expect(screen, contains("'Linha do tempo 360'"));
     expect(screen, contains('aluno360Provider'));
+    expect(screen, contains('shouldWatchAlunoDetailFallback'));
+    expect(screen, contains('resolveAlunoDetailAlunoAsync'));
     expect(screen, contains('buscarAluno360'));
     expect(screen, contains('class Timeline360Tile'));
     expect(screen, contains('alunoCopilotoActionProvider'));

@@ -8,8 +8,8 @@ import '../data/alimentar_repository.dart';
 import 'plano_alimentar_detail_screen.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -90,7 +90,7 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
         ),
         body:
             _loading
-                ? const FxLoading()
+                ? const SkeletonList(count: 5)
                 : _erro != null
                 ? FxErrorState(
                   chromeOnDark: chrome.isDark,

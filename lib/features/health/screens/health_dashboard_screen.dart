@@ -6,6 +6,7 @@ import '../../../core/health/health_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -33,6 +34,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
   String? _erro;
   HealthSummary? _summary;
   RecoverySnapshot? _recovery;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -106,6 +108,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           _summary = summary;
           _recovery = synced;
           _loading = false;
+          _fetchedAt = DateTime.now();
         });
       }
     } catch (e) {
@@ -128,9 +131,11 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
       label: 'Saúde & Wearables',
       child: FxShellScaffold(
         useMesh: true,
-        appBar: const FxShellAppBar(
+        appBar: FxShellAppBar(
           title: 'Saúde & Wearables',
-          subtitle: 'Dados do Apple Health e Google Fit',
+          subtitle:
+              FxHubFreshness.fromFetchedAt(_fetchedAt) ??
+              'Dados do Apple Health e Google Fit',
         ),
         body:
             _loading

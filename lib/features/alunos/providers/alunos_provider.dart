@@ -29,9 +29,14 @@ final alunoAutonomiaResumoProvider =
       return ref.read(alunoRepositoryProvider).buscarAutonomiaResumo(id);
     });
 
-/// Perfil do aluno autenticado (endpoint /api/alunos/me).
+/// Perfil do aluno autenticado (endpoint /api/aluno/me).
 final alunoMeProvider = FutureProvider<Aluno>((ref) async {
   return ref.read(alunoRepositoryProvider).me();
+});
+
+/// BFF da aba Perfil — `GET /api/aluno/perfil/home`.
+final alunoPerfilHomeProvider = FutureProvider<AlunoPerfilHomeBundle>((ref) async {
+  return ref.read(alunoRepositoryProvider).getPerfilHome();
 });
 
 void invalidateAlunosCaches(WidgetRef ref) {

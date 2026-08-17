@@ -94,6 +94,30 @@ class ComplianceItem {
   );
 }
 
+/// BFF `GET /api/habitos/home` — lista + compliance em um round-trip.
+class HabitosHomeBundle {
+  final List<Habito> habitos;
+  final List<ComplianceItem> compliance;
+
+  const HabitosHomeBundle({
+    required this.habitos,
+    required this.compliance,
+  });
+
+  factory HabitosHomeBundle.fromJson(Map<String, dynamic> j) {
+    return HabitosHomeBundle(
+      habitos:
+          ((j['habitos'] as List?) ?? const [])
+              .map((e) => Habito.fromJson(e as Map<String, dynamic>))
+              .toList(),
+      compliance:
+          ((j['compliance'] as List?) ?? const [])
+              .map((e) => ComplianceItem.fromJson(e as Map<String, dynamic>))
+              .toList(),
+    );
+  }
+}
+
 class HabitoRepository {
   final Dio _dio;
   HabitoRepository(ApiClient c) : _dio = c.dio;
@@ -110,6 +134,12 @@ class HabitoRepository {
     return (r.data as List<dynamic>)
         .map((e) => Habito.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  /// BFF tipado — first paint da tela Hábitos (lista + compliance).
+  Future<HabitosHomeBundle> getHome() async {
+    final r = await _dio.get('/api/habitos/home');
+    return HabitosHomeBundle.fromJson(r.data as Map<String, dynamic>);
   }
 
   Future<Habito> criar({

@@ -10,8 +10,8 @@ import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
@@ -115,7 +115,7 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
           ),
           body:
               _loading
-                  ? const Center(child: FxLoading())
+                  ? const SkeletonList(count: 5)
                   : _error != null
                   ? FxErrorState(
                     chromeOnDark: isDark,

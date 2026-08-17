@@ -6,13 +6,14 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/nps_repository.dart';
-import '../../../core/widgets/fx_screen_a11y.dart';
 
 class NpsDashboardScreen extends ConsumerStatefulWidget {
   const NpsDashboardScreen({super.key});
@@ -26,6 +27,7 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
   List<NpsItem> _recentes = [];
   bool _loading = true;
   String? _erro;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -40,13 +42,13 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
     });
     try {
       final repo = NpsRepository(ref.read(apiClientProvider));
-      final resumo = await repo.resumo();
-      final recentes = await repo.recentes();
+      final home = await repo.getHome();
       if (mounted) {
         setState(() {
-          _resumo = resumo;
-          _recentes = recentes;
+          _resumo = home.resumo;
+          _recentes = home.recentes;
           _loading = false;
+          _fetchedAt = DateTime.now();
         });
       }
     } catch (e) {
@@ -75,12 +77,14 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = chrome.isDark;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     return fxScreenA11yScope(
       label: 'NPS & Satisfação',
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'NPS & Satisfação',
+          subtitle: freshnessLabel,
           onBack: () => context.pop(),
         ),
         body:

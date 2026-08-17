@@ -18,7 +18,7 @@ import '../../../features/alunos/widgets/aluno_outreach_message_sheet.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/relatorio_repository.dart';
 import '../../alunos/constants/aluno_360_layout.dart';
-import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 
@@ -277,7 +277,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                   ),
                   const SizedBox(height: 20),
                   if (_carregando)
-                    const SizedBox(height: 200, child: FxLoading())
+                    const SkeletonList(count: 4)
                   else if (_erro != null)
                     SizedBox(
                       height: 280,

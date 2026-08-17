@@ -11,6 +11,10 @@ void main() {
     expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
     expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
+    expect(screen, contains('alunoPerfilHomeProvider'));
+    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, isNot(contains('minhasMedidasProvider')));
+    expect(screen, isNot(contains('ref.watch(alunoMeProvider)')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 }

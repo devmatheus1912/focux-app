@@ -8,8 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -144,7 +144,7 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
         ),
         body:
             _loading
-                ? const FxLoading()
+                ? const SkeletonList(count: 4)
                 : _erro != null
                 ? FxErrorState(
                   chromeOnDark: isDark,

@@ -8,7 +8,8 @@ void main() {
       'lib/features/notificacoes/screens/notificacoes_screen.dart',
     );
 
-    expect(screen, contains("subtitle: 'INBOX'"));
+    expect(screen, contains("freshnessLabel ?? 'INBOX'"));
+    expect(screen, contains('FxHubFreshness'));
     expect(screen, contains('formatDisplayName'));
     expect(screen, contains('Todas marcadas como lidas.'));
     expect(screen, contains('BrandPalette.deep(primary)'));

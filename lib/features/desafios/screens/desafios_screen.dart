@@ -15,9 +15,9 @@ import '../../../core/widgets/fx_empty_state.dart';
 
 import '../../../core/widgets/fx_error_state.dart';
 
-import '../../../core/widgets/fx_loading.dart';
-
 import '../../../core/widgets/fx_motion.dart';
+
+import '../../../core/widgets/skeleton_loader.dart';
 
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -209,7 +209,7 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
 
         body:
             _loading
-                ? const Center(child: FxLoading())
+                ? const SkeletonList(count: 5)
                 : _error != null
                 ? FxErrorState(
                   chromeOnDark: chrome.isDark,

@@ -9,8 +9,8 @@ import '../data/avaliacao_repository.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -101,7 +101,7 @@ class _EvolucaoComparativoScreenState
         ),
         body:
             _loading
-                ? const Center(child: FxLoading())
+                ? const SkeletonList(count: 4)
                 : _erro != null
                 ? FxErrorState(
                   chromeOnDark: isDark,

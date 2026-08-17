@@ -55,6 +55,34 @@ class NpsItem {
   );
 }
 
+class NpsHomeBundle {
+  final NpsResumo resumo;
+  final List<NpsItem> recentes;
+
+  const NpsHomeBundle({required this.resumo, required this.recentes});
+
+  factory NpsHomeBundle.fromJson(Map<String, dynamic> j) {
+    final resumoJson = j['resumo'];
+    return NpsHomeBundle(
+      resumo:
+          resumoJson is Map<String, dynamic>
+              ? NpsResumo.fromJson(resumoJson)
+              : NpsResumo(
+                total: 0,
+                npsScore: 0,
+                media: 0,
+                promotores: 0,
+                detratores: 0,
+                neutros: 0,
+              ),
+      recentes:
+          ((j['recentes'] as List?) ?? const [])
+              .map((e) => NpsItem.fromJson(e as Map<String, dynamic>))
+              .toList(),
+    );
+  }
+}
+
 class NpsRepository {
   final Dio _dio;
   NpsRepository(ApiClient c) : _dio = c.dio;
@@ -85,5 +113,11 @@ class NpsRepository {
     return (r.data as List)
         .map((e) => NpsItem.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  /// BFF tipado — first paint da tela NPS (resumo + recentes).
+  Future<NpsHomeBundle> getHome() async {
+    final r = await _dio.get('/api/nps/home');
+    return NpsHomeBundle.fromJson(r.data as Map<String, dynamic>);
   }
 }

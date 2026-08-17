@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../alertas/data/alertas_repository.dart';
 import '../../exercicios/data/enums.dart';
+import '../../evolucao/data/evolucao_repository.dart';
 import '../../health/data/health_repository.dart';
 
 class Aluno {
@@ -702,6 +703,14 @@ class AlunoRepository {
     return Aluno.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// BFF tipado — first paint da aba Perfil (aluno + medidas).
+  Future<AlunoPerfilHomeBundle> getPerfilHome() async {
+    final response = await _dio.get('/api/aluno/perfil/home');
+    return AlunoPerfilHomeBundle.fromJson(
+      response.data as Map<String, dynamic>,
+    );
+  }
+
   Future<Aluno> atualizarMe(Map<String, dynamic> data) async {
     final response = await _dio.put('/api/aluno/me', data: data);
     return Aluno.fromJson(response.data as Map<String, dynamic>);
@@ -755,4 +764,34 @@ class AlunosHomeBundle {
           const {'diasSemTreino': 7, 'aderenciaMinima': 50},
     ),
   );
+}
+
+/// BFF `GET /api/aluno/perfil/home` — perfil + medidas em um round-trip.
+class AlunoPerfilHomeBundle {
+  final Aluno aluno;
+  final List<MedidaCorporal> medidas;
+  final DateTime fetchedAt;
+
+  AlunoPerfilHomeBundle({
+    required this.aluno,
+    required this.medidas,
+    DateTime? fetchedAt,
+  }) : fetchedAt = fetchedAt ?? DateTime.now();
+
+  factory AlunoPerfilHomeBundle.fromJson(Map<String, dynamic> json) {
+    final alunoJson = json['aluno'];
+    if (alunoJson is! Map<String, dynamic>) {
+      throw const FormatException('aluno ausente em /api/aluno/perfil/home');
+    }
+    return AlunoPerfilHomeBundle(
+      aluno: Aluno.fromJson(alunoJson),
+      medidas:
+          ((json['medidas'] as List?) ?? const [])
+              .whereType<Map>()
+              .map(
+                (row) => MedidaCorporal.fromJson(Map<String, dynamic>.from(row)),
+              )
+              .toList(),
+    );
+  }
 }

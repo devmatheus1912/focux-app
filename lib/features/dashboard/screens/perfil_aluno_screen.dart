@@ -25,15 +25,11 @@ import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 part 'perfil_aluno_screen_state.part.dart';
 part 'perfil_aluno_screen_widgets.part.dart';
-
-final minhasMedidasProvider = FutureProvider<List<MedidaCorporal>>((ref) async {
-  final repo = EvolucaoRepository(ref.read(apiClientProvider));
-  return repo.listarMinhasMedidas();
-});
 
 class PerfilAlunoScreen extends ConsumerStatefulWidget {
   const PerfilAlunoScreen({super.key});

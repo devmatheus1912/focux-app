@@ -15,6 +15,7 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 
 class AnamneseScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -242,7 +243,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
         label: 'Anamnese',
         child: const FxShellScaffold(
           useMesh: true,
-          body: Center(child: FxLoading()),
+          body: SkeletonList(count: 5),
         ),
       );
     }

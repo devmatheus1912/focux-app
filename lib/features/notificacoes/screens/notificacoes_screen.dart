@@ -8,6 +8,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -21,16 +22,32 @@ import '../notificacao_display.dart';
 
 part 'notificacoes_screen_widgets.part.dart';
 
-class NotificacoesScreen extends ConsumerWidget {
+class NotificacoesScreen extends ConsumerStatefulWidget {
   const NotificacoesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NotificacoesScreen> createState() => _NotificacoesScreenState();
+}
+
+class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
+  DateTime? _fetchedAt;
+
+  @override
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final async = ref.watch(notificacoesProvider);
+    ref.listen<AsyncValue<List<NotificacaoApp>>>(notificacoesProvider, (
+      _,
+      next,
+    ) {
+      if (!next.isLoading && next.hasValue) {
+        setState(() => _fetchedAt = DateTime.now());
+      }
+    });
     final repo = ref.read(notificacoesRepositoryProvider);
     final primary = Theme.of(context).colorScheme.primary;
     final actionInk = isDark ? primary : BrandPalette.deep(primary);
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     Future<void> reload() async {
       ref.invalidate(notificacoesProvider);
@@ -54,7 +71,7 @@ class NotificacoesScreen extends ConsumerWidget {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Notificações',
-          subtitle: 'INBOX',
+          subtitle: freshnessLabel ?? 'INBOX',
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
           actions: [
             Semantics(

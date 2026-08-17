@@ -11,8 +11,8 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/relatorio_repository.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../subscription/models/subscription_plan.dart';
@@ -83,7 +83,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
           ),
           body:
               _loading
-                  ? const FxLoading()
+                  ? const SkeletonList(count: 5)
                   : _erro != null
                   ? FxErrorState(
                     chromeOnDark: ShellChrome.of(context).isDark,
