@@ -63,7 +63,7 @@ class PerfilActionTile extends StatelessWidget {
           onTap();
         },
         child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
             border:
                 showDivider

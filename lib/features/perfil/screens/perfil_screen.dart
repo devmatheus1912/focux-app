@@ -31,6 +31,7 @@ import '../utils/perfil_plan_labels.dart';
 import '../utils/perfil_professional_summary.dart';
 import '../utils/perfil_readiness.dart';
 import '../../subscription/utils/landing_editor_access.dart';
+import '../constants/perfil_layout.dart';
 import '../widgets/landing_editor_widgets.dart';
 import '../widgets/perfil_action_tile.dart';
 import '../widgets/perfil_card_section.dart';

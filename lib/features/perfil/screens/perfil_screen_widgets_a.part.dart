@@ -74,35 +74,25 @@ class _PerfilBody extends StatelessWidget {
             ? '—'
             : '${dashboard.totalAlunos} alunos · ${dashboard.alunosAtivos} ativos';
     final usingDefaultBrand = _usesDefaultPalette(primaryColor, secondaryColor);
-    // Sticky Meus alunos / Hoje — CTA de gap fica só na prontidão (topo).
-    // IA só no dock do shell (paridade Home).
-    const scrollBottomPad = 108.0;
-    const chromeSize = 36.0;
-    const chromeGap = 3.0;
+    // Sticky quiet: chip Hoje + atalho alunos (paridade Home overlay).
+    const scrollBottomPad = PerfilLayout.stickyOverlayReserve;
+    const chromeSize = PerfilLayout.headerChromeSize;
+    const chromeGap = PerfilLayout.headerChromeGap;
 
     return FxShellScaffold(
       useMesh: true,
       safeArea: false,
       constrainWidth: true,
-      bottomNavigationBar: FxStaggerItem(
-        index: 0,
-        slideOffset: 16,
-        duration: const Duration(milliseconds: 420),
-        child: PerfilStickyBar(
-          accent: accent,
-          actionInk: actionInk,
-          isDark: isDark,
-          profileComplete: profileComplete,
-        ),
-      ),
-      body: SafeArea(
-        bottom: false,
-        child: RefreshIndicator(
-          color: accent,
-          onRefresh: onRefresh,
-          child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
+      body: Stack(
+        children: [
+          SafeArea(
+            bottom: false,
+            child: RefreshIndicator(
+              color: accent,
+              onRefresh: onRefresh,
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
               SliverToBoxAdapter(
                 child: FxStaggerItem(
                   index: 1,
@@ -347,7 +337,7 @@ class _PerfilBody extends StatelessWidget {
                               onChecklistAction: onChecklistAction,
                             ),
                           ),
-                          const SizedBox(height: TokensStrip.s3),
+                          const SizedBox(height: PerfilLayout.sectionGapPrimary),
                         ],
                         FxStaggerItem(
                           index: 3,
@@ -402,7 +392,7 @@ class _PerfilBody extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: TokensStrip.s3),
+                        const SizedBox(height: PerfilLayout.sectionGapPrimary),
                         FxStaggerItem(
                           index: 4,
                           child: _ProfessionalDataPanel(
@@ -415,7 +405,7 @@ class _PerfilBody extends StatelessWidget {
                             onEdit: onEditPerfil,
                           ),
                         ),
-                        const SizedBox(height: TokensStrip.s3),
+                        const SizedBox(height: PerfilLayout.sectionGapQuiet),
                         FxStaggerItem(
                           index: 5,
                           child: PerfilQuietCollapsible(
@@ -436,7 +426,7 @@ class _PerfilBody extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: TokensStrip.s3),
+                        const SizedBox(height: PerfilLayout.sectionGapQuiet),
                         FxStaggerItem(
                           index: 6,
                           child: PerfilQuietCollapsible(
@@ -463,7 +453,7 @@ class _PerfilBody extends StatelessWidget {
                           ),
                         ),
                         if (kDebugMode) ...[
-                          const SizedBox(height: TokensStrip.s3),
+                          const SizedBox(height: PerfilLayout.sectionGapQuiet),
                           FxStaggerItem(
                             index: 7,
                             child: _PerfilDebugTools(
@@ -479,9 +469,30 @@ class _PerfilBody extends StatelessWidget {
                   ]),
                 ),
               ),
-            ],
+                ],
+              ),
+            ),
           ),
-        ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: SafeArea(
+              top: false,
+              child: FxStaggerItem(
+                index: 0,
+                slideOffset: 12,
+                duration: const Duration(milliseconds: 380),
+                child: PerfilStickyBar(
+                  accent: accent,
+                  actionInk: actionInk,
+                  isDark: isDark,
+                  profileComplete: profileComplete,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -55,7 +55,7 @@ void main() {
     expect(find.text('Carteira e PIX'), findsOneWidget);
     expect(find.text('Meus alunos'), findsOneWidget);
     // Fixture incompleto (WhatsApp pendente) → sticky pede completar, não Copiloto/Hoje.
-    expect(find.text('Completar perfil'), findsOneWidget);
+    expect(find.text('Completar'), findsOneWidget);
     expect(find.text('Copiloto IA'), findsNothing);
     // Conta quiet colapsada + debug fora do card LGPD.
     expect(find.text('Conta e segurança'), findsOneWidget);

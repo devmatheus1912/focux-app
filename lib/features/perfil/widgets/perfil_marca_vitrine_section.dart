@@ -34,6 +34,7 @@ class PerfilMarcaVitrineSection extends StatelessWidget {
       isDark: isDark,
       accent: accent,
       actionInk: actionInk,
+      quiet: profileComplete,
       child: Semantics(
         container: true,
         label: 'Marca e vitrine online',
