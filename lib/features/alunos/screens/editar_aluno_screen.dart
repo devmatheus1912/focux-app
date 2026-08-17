@@ -12,6 +12,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/aluno_repository.dart';
@@ -110,61 +111,63 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final chrome = ShellChrome.forDark(isDark);
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Editar Aluno',
-        subtitle: 'ALUNO',
-        onBack: () => safePopOrGo(context, '/alunos/${widget.aluno.id}'),
-      ),
-      bottomNavigationBar: Material(
-        color: Colors.transparent,
-        child: Container(
-          decoration: BoxDecoration(
-            color: (isDark ? EagleTokens.darkCard : TokensStrip.cardBg)
-                .withValues(alpha: 0.96),
-            border: Border(top: BorderSide(color: chrome.line)),
-          ),
-          padding: const EdgeInsets.fromLTRB(
-            TokensStrip.s5,
-            12,
-            TokensStrip.s5,
-            12,
-          ),
-          child: SafeArea(
-            top: false,
-            child: Semantics(
-              button: true,
-              enabled: !_salvando,
-              label:
-                  _salvando
-                      ? 'Salvando alterações do aluno'
-                      : 'Salvar alterações do aluno',
-              child: FxLiquidPrimaryButton(
-                label: 'Salvar alterações',
-                loadingLabel: 'Salvando…',
-                loading: _salvando,
-                onPressed: _salvando ? null : _salvar,
+    return fxScreenA11yScope(
+      label: 'Editar Aluno',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Editar Aluno',
+          subtitle: 'ALUNO',
+          onBack: () => safePopOrGo(context, '/alunos/${widget.aluno.id}'),
+        ),
+        bottomNavigationBar: Material(
+          color: Colors.transparent,
+          child: Container(
+            decoration: BoxDecoration(
+              color: (isDark ? EagleTokens.darkCard : TokensStrip.cardBg)
+                  .withValues(alpha: 0.96),
+              border: Border(top: BorderSide(color: chrome.line)),
+            ),
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s5,
+              12,
+              TokensStrip.s5,
+              12,
+            ),
+            child: SafeArea(
+              top: false,
+              child: Semantics(
+                button: true,
+                enabled: !_salvando,
+                label:
+                    _salvando
+                        ? 'Salvando alterações do aluno'
+                        : 'Salvar alterações do aluno',
+                child: FxLiquidPrimaryButton(
+                  label: 'Salvar alterações',
+                  loadingLabel: 'Salvando…',
+                  loading: _salvando,
+                  onPressed: _salvando ? null : _salvar,
+                ),
               ),
             ),
           ),
         ),
-      ),
-      body: FxPremiumEntrance(
-        child: SafeArea(
-          bottom: false,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
-              TokensStrip.s5,
-              8,
-              TokensStrip.s5,
-              24,
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+        body: FxPremiumEntrance(
+          child: SafeArea(
+            bottom: false,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(
+                TokensStrip.s5,
+                8,
+                TokensStrip.s5,
+                24,
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                   ListenableBuilder(
                     listenable: Listenable.merge([_nome, _objetivo]),
                     builder: (context, _) {
@@ -377,7 +380,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                       label: _error!,
                       child: Text(
                         _error!,
-                        style: const TextStyle(color: EagleTokens.bad),
+                        style: TextStyle(color: EagleTokens.bad, height: 1.35),
                       ),
                     ),
                   ],
@@ -386,6 +389,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

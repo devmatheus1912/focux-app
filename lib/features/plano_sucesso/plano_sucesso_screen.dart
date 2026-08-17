@@ -6,8 +6,11 @@ import 'package:provider/provider.dart';
 import '../../core/router/safe_navigation.dart';
 import '../../core/theme/brand_palette.dart';
 import '../../core/theme/design_tokens.dart';
+import '../../core/theme/shell_chrome.dart';
 import '../../core/theme/tokens_strip.dart';
+import '../../core/utils/friendly_error.dart';
 import '../../core/widgets/fx_empty_state.dart';
+import '../../core/widgets/fx_error_state.dart';
 import '../../core/widgets/feedback_helper.dart';
 import '../../core/widgets/fx_shell_scaffold.dart';
 import '../../core/widgets/skeleton_loader.dart';
@@ -40,6 +43,7 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
     final provider = context.watch<PlanoSucessoProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
+    final chrome = ShellChrome.forDark(isDark);
 
     if (provider.isLoading) {
       return fxScreenA11yScope(
@@ -56,26 +60,50 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
       );
     }
 
+    if (provider.erro != null) {
+      return fxScreenA11yScope(
+        label: 'Plano de Sucesso',
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Plano de Sucesso',
+            subtitle: 'Marcos e metas do aluno',
+            onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+          ),
+          body: FxErrorState(
+            chromeOnDark: isDark,
+            primary: primary,
+            message: provider.erro!,
+            onRetry: () => provider.fetchPlano(widget.alunoId),
+            title: 'Não conseguimos carregar o plano',
+          ),
+        ),
+      );
+    }
+
     final plano = provider.plano;
     if (plano == null) {
-      return FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Plano de Sucesso',
-          subtitle: 'Marcos e metas do aluno',
-          onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-        ),
-        body: SafeArea(
-          child: FxEmptyState(
-            icon: 'flag',
-            title: 'Nenhum plano ativo',
-            subtitle:
-                widget.alunoNome != null
-                    ? '${satelliteFirstName(widget.alunoNome)} ainda não possui marcos de sucesso definidos.'
-                    : 'Este aluno ainda não possui plano de sucesso.',
-            action: FxEmptyAction(
-              label: 'Voltar ao Aluno 360',
-              onTap: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+      return fxScreenA11yScope(
+        label: 'Plano de Sucesso',
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Plano de Sucesso',
+            subtitle: 'Marcos e metas do aluno',
+            onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+          ),
+          body: SafeArea(
+            child: FxEmptyState(
+              icon: 'flag',
+              title: 'Nenhum plano ativo',
+              subtitle:
+                  widget.alunoNome != null
+                      ? '${satelliteFirstName(widget.alunoNome)} ainda não possui marcos de sucesso definidos.'
+                      : 'Este aluno ainda não possui plano de sucesso.',
+              action: FxEmptyAction(
+                label: 'Voltar ao Aluno 360',
+                onTap: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+              ),
             ),
           ),
         ),
@@ -88,133 +116,139 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
     final pendentes = plano.marcos.where((m) => !m.atingido).toList();
     final atual = pendentes.isEmpty ? null : pendentes.first.id;
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Plano de Sucesso',
-        subtitle:
-            widget.alunoNome?.trim().isNotEmpty == true
-                ? widget.alunoNome!.trim()
-                : 'Aluno #${widget.alunoId}',
-        onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-      ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            TokensStrip.s4,
-            TokensStrip.s1,
-            TokensStrip.s4,
-            TokensStrip.s7,
-          ),
-          children: [
-            Container(
-              padding: const EdgeInsets.all(TokensStrip.s5),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(TokensStrip.r2xl),
-                gradient: LinearGradient(
-                  colors:
-                      isDark
-                          ? [
-                            BrandPalette.deep(primary),
-                            BrandPalette.deep(primary).withValues(alpha: 0.55),
-                          ]
-                          : [
-                            BrandPalette.softened(primary),
-                            BrandPalette.deep(primary),
-                          ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: primary.withValues(alpha: isDark ? 0.30 : 0.22),
-                    blurRadius: 32,
-                    offset: const Offset(0, 16),
-                    spreadRadius: -8,
+    return fxScreenA11yScope(
+      label: 'Plano de Sucesso',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Plano de Sucesso',
+          subtitle:
+              widget.alunoNome?.trim().isNotEmpty == true
+                  ? widget.alunoNome!.trim()
+                  : 'Aluno #${widget.alunoId}',
+          onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+        ),
+        body: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s4,
+              TokensStrip.s1,
+              TokensStrip.s4,
+              TokensStrip.s7,
+            ),
+            children: [
+              Container(
+                padding: const EdgeInsets.all(TokensStrip.s5),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(TokensStrip.r2xl),
+                  gradient: LinearGradient(
+                    colors:
+                        isDark
+                            ? [
+                              BrandPalette.deep(primary),
+                              BrandPalette.deep(primary).withValues(alpha: 0.55),
+                            ]
+                            : [
+                              BrandPalette.softened(primary),
+                              BrandPalette.deep(primary),
+                            ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  _SuccessRing(fraction: progresso),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'PROGRESSO DO ONBOARDING',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '$done de $total etapas',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          pendentes.isEmpty
-                              ? 'Plano completo'
-                              : 'Próximo: ${pendentes.first.titulo}',
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
+                  boxShadow: [
+                    BoxShadow(
+                      color: primary.withValues(alpha: isDark ? 0.30 : 0.22),
+                      blurRadius: 32,
+                      offset: const Offset(0, 16),
+                      spreadRadius: -8,
                     ),
-                  ),
-                ],
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    _SuccessRing(fraction: progresso),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'PROGRESSO DO ONBOARDING',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '$done de $total etapas',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            pendentes.isEmpty
+                                ? 'Plano completo'
+                                : 'Próximo: ${pendentes.first.titulo}',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: TokensStrip.s4),
-            Text(
-              'Marcos',
-              style: TextStyle(
-                color: fxScreenInk(context),
-                fontSize: 17,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.3,
+              const SizedBox(height: TokensStrip.s4),
+              Text(
+                'Marcos',
+                style: TextStyle(
+                  color: chrome.ink,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.3,
+                ),
               ),
-            ),
-            const SizedBox(height: 10),
-            for (var i = 0; i < plano.marcos.length; i++)
-              _MarcoTile(
-                index: i + 1,
-                marco: plano.marcos[i],
-                atual: plano.marcos[i].id == atual,
-                onChanged:
-                    plano.marcos[i].atingido
-                        ? null
-                        : () async {
-                          try {
-                            await provider.atingirMarco(plano.marcos[i].id);
-                            if (!context.mounted) return;
-                            FeedbackHelper.showSuccess(
-                              context,
-                              'Marco atingido!',
-                            );
-                          } catch (_) {
-                            if (!context.mounted) return;
-                            FeedbackHelper.showError(
-                              context,
-                              'Erro ao atualizar o marco.',
-                            );
-                          }
-                        },
-              ),
-          ],
+              const SizedBox(height: 10),
+              for (var i = 0; i < plano.marcos.length; i++)
+                _MarcoTile(
+                  index: i + 1,
+                  marco: plano.marcos[i],
+                  atual: plano.marcos[i].id == atual,
+                  onChanged:
+                      plano.marcos[i].atingido
+                          ? null
+                          : () async {
+                            try {
+                              await provider.atingirMarco(plano.marcos[i].id);
+                              if (!context.mounted) return;
+                              FeedbackHelper.showSuccess(
+                                context,
+                                'Marco atingido!',
+                              );
+                            } catch (e) {
+                              if (!context.mounted) return;
+                              FeedbackHelper.showError(
+                                context,
+                                friendlyError(
+                                  e,
+                                  fallback: 'Erro ao atualizar o marco.',
+                                ),
+                              );
+                            }
+                          },
+                ),
+            ],
+          ),
         ),
       ),
     );

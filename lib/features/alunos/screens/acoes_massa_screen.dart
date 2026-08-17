@@ -7,13 +7,16 @@ import '../data/aluno_contact_utils.dart';
 import '../data/aluno_repository.dart';
 import '../providers/alunos_provider.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class AcoesMassaScreen extends ConsumerStatefulWidget {
@@ -182,6 +185,9 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
   @override
   Widget build(BuildContext context) {
     final alunosAsync = ref.watch(alunosProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final chrome = ShellChrome.forDark(isDark);
 
     return fxScreenA11yScope(
       label: 'Ações em Massa',
@@ -200,6 +206,7 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
                           _selecionados.length == alunos.length
                               ? 'Desmarcar todos'
                               : 'Selecionar todos',
+                          style: TextStyle(color: chrome.ink),
                         ),
                       ),
                 ) ??
@@ -207,13 +214,18 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
           ],
         ),
         body: alunosAsync.when(
-          loading: () => const FxLoading(),
+          loading:
+              () => const Padding(
+                padding: EdgeInsets.all(TokensStrip.s4),
+                child: SkeletonList(count: 6),
+              ),
           error:
-              (e, _) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(TokensStrip.s5),
-                  child: Text(friendlyError(e), textAlign: TextAlign.center),
-                ),
+              (e, _) => FxErrorState(
+                chromeOnDark: isDark,
+                primary: primary,
+                message: friendlyError(e),
+                onRetry: () => ref.invalidate(alunosProvider),
+                title: 'Não conseguimos carregar os alunos',
               ),
           data:
               (alunos) =>
@@ -238,6 +250,7 @@ class _AcoesMassaScreenState extends ConsumerState<AcoesMassaScreen> {
                                 title: Text(a.nome),
                                 subtitle: Text(
                                   '${maskEmailForList(a.email)} · ${a.status}',
+                                  style: TextStyle(color: chrome.mute),
                                 ),
                                 secondary: CircleAvatar(
                                   child: Text(a.nome[0].toUpperCase()),

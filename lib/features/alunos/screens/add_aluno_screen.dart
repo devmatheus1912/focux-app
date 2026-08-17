@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../providers/alunos_provider.dart';
@@ -15,6 +16,7 @@ import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import '../../../core/theme/tokens_strip.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import 'package:focux_app/core/utils/friendly_error.dart';
 
 part 'add_aluno_screen_widgets.part.dart';
 
@@ -153,7 +155,10 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
       }
     } catch (e) {
       HapticFeedback.heavyImpact();
-      var errorMsg = 'Não foi possível cadastrar o aluno. Revise os dados.';
+      var errorMsg = friendlyError(
+        e,
+        fallback: 'Não foi possível cadastrar o aluno. Revise os dados.',
+      );
       String? requestId;
 
       if (e is DioException && e.response?.data is Map) {
@@ -451,7 +456,8 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
 
     return fxScreenA11yScope(
@@ -649,7 +655,14 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                             ],
                             if (_error != null) ...[
                               const SizedBox(height: 14),
-                              _ErrorCard(message: _error!, isDark: isDark),
+                              Semantics(
+                                liveRegion: true,
+                                label: _error!,
+                                child: _ErrorCard(
+                                  message: _error!,
+                                  isDark: isDark,
+                                ),
+                              ),
                             ],
                           ],
                         ),

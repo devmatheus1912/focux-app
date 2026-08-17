@@ -10,6 +10,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -46,6 +47,8 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
 
   bool _loading = true, _saving = false;
   String? _erro;
+  bool _semFicha = false;
+  bool _preenchendo = false;
 
   static const _niveis = [
     'SEDENTARIO',
@@ -90,6 +93,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
       setState(() {
         _loading = true;
         _erro = null;
+        _semFicha = false;
       });
     }
     try {
@@ -109,10 +113,17 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
       _dispSemanal = a.disponibilidadeSemanal ?? 3;
       _prefTreinoCtrl.text = a.preferenciasTreino ?? '';
       _restricoesCtrl.text = a.restricoesAlimentares ?? '';
+      if (mounted) setState(() => _semFicha = false);
     } catch (e) {
-      // 404 = aluno ainda não tem ficha; a tela deve abrir como formulário vazio.
+      // 404 = aluno ainda não tem ficha; empty state + formulário sob demanda.
       final semFicha = e is DioException && e.response?.statusCode == 404;
-      if (mounted && !semFicha) setState(() => _erro = friendlyError(e));
+      if (mounted) {
+        if (semFicha) {
+          setState(() => _semFicha = true);
+        } else {
+          setState(() => _erro = friendlyError(e));
+        }
+      }
     }
     if (mounted) setState(() => _loading = false);
   }
@@ -211,6 +222,10 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
       });
       if (mounted) {
         FeedbackHelper.showSuccess(context, 'Anamnese salva!');
+        setState(() {
+          _semFicha = false;
+          _preenchendo = false;
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -248,6 +263,28 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
             message: _erro!,
             onRetry: _load,
             title: 'Não conseguimos carregar a anamnese',
+          ),
+        ),
+      );
+    }
+    if (_semFicha && !_preenchendo) {
+      return fxScreenA11yScope(
+        label: 'Anamnese',
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: const FxShellAppBar(
+            title: 'Anamnese',
+            subtitle: 'Ficha de saúde e objetivos do aluno',
+          ),
+          body: FxEmptyState(
+            icon: 'article',
+            title: 'Nenhuma ficha ainda',
+            subtitle:
+                'Preencha a anamnese para registrar saúde, objetivos e preferências do aluno.',
+            action: FxEmptyAction(
+              label: 'Preencher ficha',
+              onTap: () => setState(() => _preenchendo = true),
+            ),
           ),
         ),
       );

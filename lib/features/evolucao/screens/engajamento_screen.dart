@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 
@@ -86,6 +87,8 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
     return fxScreenA11yScope(
       label: 'Engajamento — ${widget.alunoNome}',
       child: FxShellScaffold(
@@ -99,6 +102,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
               child: DropdownButton<int>(
                 value: _dias,
                 underline: const SizedBox(),
+                style: TextStyle(color: chrome.ink),
                 items:
                     [30, 60, 90]
                         .map(
@@ -123,8 +127,8 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                 ? const SkeletonList(count: 6)
                 : _erro != null
                 ? FxErrorState(
-                  chromeOnDark: Theme.of(context).brightness == Brightness.dark,
-                  primary: Theme.of(context).colorScheme.primary,
+                  chromeOnDark: chrome.isDark,
+                  primary: primary,
                   message: _erro!,
                   onRetry: _load,
                   title: 'Não conseguimos carregar o engajamento',
@@ -134,7 +138,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                   physics: const AlwaysScrollableScrollPhysics(),
                   children: const [
                     FxEmptyState(
-                      icon: 'chart',
+                      icon: 'trend',
                       title: 'Nenhum evento registrado',
                       subtitle:
                           'Check-ins e treinos do aluno aparecerão aqui nos últimos dias.',
@@ -146,18 +150,17 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                   itemCount: _eventos.length,
                   itemBuilder: (_, i) {
                     final e = _eventos[i];
-                    final primary = Theme.of(context).colorScheme.primary;
                     return FxSatelliteListTile(
                       accent: primary,
                       title: e.descricao,
                       titleCase: false,
-                      subtitle: Text(e.tipo),
+                      subtitle: Text(
+                        e.tipo,
+                        style: TextStyle(color: chrome.mute),
+                      ),
                       trailing: Text(
                         _formatarDataHora(e.dataHora),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: TokensStrip.textSecondary,
-                        ),
+                        style: TextStyle(fontSize: 12, color: chrome.mute),
                       ),
                       leading: CircleAvatar(
                         backgroundColor:

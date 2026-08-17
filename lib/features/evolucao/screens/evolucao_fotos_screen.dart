@@ -6,13 +6,14 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 
@@ -124,6 +125,7 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
+    final chrome = ShellChrome.forDark(isDark);
     return fxScreenA11yScope(
       label: 'Evolução · ${widget.alunoNome}',
       child: FxShellScaffold(
@@ -135,7 +137,7 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
           actions: [
             IconButton(
               tooltip: 'Adicionar foto',
-              icon: const Icon(Icons.add_a_photo),
+              icon: Icon(Icons.add_a_photo, color: chrome.ink),
               onPressed: _addFoto,
             ),
           ],
@@ -152,48 +154,20 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
                   title: 'Não conseguimos carregar as fotos',
                 )
                 : _fotos.isEmpty
-                ? _empty(primary)
+                ? FxEmptyState(
+                  icon: 'spark',
+                  title: 'Nenhuma foto de evolução',
+                  subtitle:
+                      'Tire a primeira foto para acompanhar a evolução.',
+                  action: FxEmptyAction(
+                    label: 'Tirar Foto',
+                    onTap: _addFoto,
+                  ),
+                )
                 : _content(isDark, primary),
       ),
     );
   }
-
-  Widget _empty(Color p) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(TokensStrip.s5),
-            decoration: BoxDecoration(
-              color: p.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.compare, size: 64, color: p),
-          ),
-          const SizedBox(height: TokensStrip.s5),
-          const Text(
-            'Nenhuma foto de evolução',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Tire a primeira foto para acompanhar a evolução.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: TokensStrip.textSecondary),
-          ),
-          const SizedBox(height: TokensStrip.s5),
-          FxLiquidPrimaryButton(
-            label: 'Tirar Foto',
-            icon: Icons.camera_alt_rounded,
-            onPressed: _addFoto,
-            expand: false,
-          ),
-        ],
-      ),
-    ),
-  );
 
   Widget _content(bool isDark, Color primary) => Column(
     children: [

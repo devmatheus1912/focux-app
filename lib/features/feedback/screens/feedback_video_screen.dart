@@ -12,9 +12,10 @@ import 'package:focux_app/core/widgets/fx_error_state.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
-import '../../alunos/widgets/aluno360_action_empty_panel.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class FeedbackVideoScreen extends ConsumerStatefulWidget {
@@ -108,6 +109,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final primaryDeep = BrandPalette.deep(primary);
+    final chrome = ShellChrome.of(context);
     return fxScreenA11yScope(
       label: 'Feedback Video',
       child: FxShellScaffold(
@@ -121,7 +123,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
           subtitle: 'Análises técnicas de execução',
           actions: [
             IconButton(
-              icon: const Icon(Icons.refresh),
+              icon: Icon(Icons.refresh, color: chrome.ink),
               tooltip: 'Atualizar feedbacks',
               onPressed: _load,
             ),
@@ -151,7 +153,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                 ? Center(child: FxLoading(color: primary))
                 : _erro != null
                 ? FxErrorState(
-                  chromeOnDark: Theme.of(context).brightness == Brightness.dark,
+                  chromeOnDark: chrome.isDark,
                   primary: primary,
                   message: _erro!,
                   onRetry: _load,
@@ -159,27 +161,18 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                 )
                 : _feedbacks.isEmpty
                 ? satelliteEmptyBody(
-                  child: Aluno360ActionEmptyPanel(
+                  child: FxEmptyState(
                     key: const ValueKey('feedback_video_empty'),
-                    icon: Icons.video_camera_back_outlined,
+                    icon: 'spark',
                     title: 'Nenhum feedback de vídeo',
                     subtitle:
                         widget.alunoNome != null
                             ? 'Peça a ${satelliteFirstName(widget.alunoNome)} um vídeo de execução ou registre o primeiro feedback técnico.'
                             : 'Registre o primeiro feedback técnico com URL do vídeo e comentário.',
-                    primaryLabel: 'Novo feedback',
-                    primaryIcon: Icons.add_rounded,
-                    onPrimary: _novoFeedback,
-                    secondaryActions:
-                        widget.alunoId != null
-                            ? [
-                              Aluno360SecondaryAction(
-                                label: 'Voltar ao Aluno 360',
-                                icon: Icons.arrow_back_rounded,
-                                onTap: () => Navigator.maybePop(context),
-                              ),
-                            ]
-                            : const [],
+                    action: FxEmptyAction(
+                      label: 'Novo feedback',
+                      onTap: _novoFeedback,
+                    ),
                   ),
                 )
                 : ListView.builder(

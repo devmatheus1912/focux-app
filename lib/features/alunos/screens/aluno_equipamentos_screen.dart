@@ -7,10 +7,12 @@ import '../providers/alunos_provider.dart';
 import '../utils/satellite_screen_utils.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 
 class AlunoEquipamentosScreen extends ConsumerStatefulWidget {
   const AlunoEquipamentosScreen({super.key, required this.alunoId});
@@ -45,6 +47,8 @@ class _AlunoEquipamentosScreenState
   Widget build(BuildContext context) {
     final alunoAsync = ref.watch(alunoProvider(widget.alunoId));
     final selected = _selected;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return fxScreenA11yScope(
       label: 'Equipamentos',
@@ -78,13 +82,18 @@ class _AlunoEquipamentosScreenState
                   ],
         ),
         body: alunoAsync.when(
-          loading: () => const FxLoading(),
+          loading:
+              () => const Padding(
+                padding: EdgeInsets.all(TokensStrip.s4),
+                child: SkeletonList(count: 4),
+              ),
           error:
-              (e, _) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(TokensStrip.s5),
-                  child: Text(friendlyError(e), textAlign: TextAlign.center),
-                ),
+              (e, _) => FxErrorState(
+                chromeOnDark: isDark,
+                primary: primary,
+                message: friendlyError(e),
+                onRetry: () => ref.invalidate(alunoProvider(widget.alunoId)),
+                title: 'Não conseguimos carregar os equipamentos',
               ),
           data: (aluno) {
             _selected ??= {...aluno.equipamentosDisponiveis};

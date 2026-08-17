@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/avaliacao_repository.dart';
 import '../../evolucao/data/evolucao_repository.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
@@ -46,6 +48,7 @@ class _EvolucaoComparativoScreenState
   ComparativoEvolucao? _comparativo;
   bool _loading = true;
   String? _erro;
+  bool _semAvaliacao = false;
 
   @override
   void initState() {
@@ -57,6 +60,7 @@ class _EvolucaoComparativoScreenState
     setState(() {
       _loading = true;
       _erro = null;
+      _semAvaliacao = false;
     });
     try {
       final c = await AvaliacaoRepository(
@@ -72,7 +76,11 @@ class _EvolucaoComparativoScreenState
       final eh404 = msg.contains('404') || msg.contains('Not Found');
       if (!mounted) return;
       setState(() {
-        _erro = eh404 ? 'Nenhuma avaliação encontrada para comparativo.' : msg;
+        if (eh404) {
+          _semAvaliacao = true;
+        } else {
+          _erro = msg;
+        }
         _loading = false;
       });
     }
@@ -80,6 +88,8 @@ class _EvolucaoComparativoScreenState
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     return fxScreenA11yScope(
       label: 'Evolução de ${widget.alunoNome}',
       child: FxShellScaffold(
@@ -93,33 +103,24 @@ class _EvolucaoComparativoScreenState
             _loading
                 ? const Center(child: FxLoading())
                 : _erro != null
-                ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(TokensStrip.s5),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.info_outline,
-                          size: 48,
-                          color: TokensStrip.textSecondary,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          _erro!,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: TokensStrip.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: TokensStrip.s4),
-                        OutlinedButton.icon(
-                          onPressed: _load,
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Tentar novamente'),
-                        ),
-                      ],
-                    ),
+                ? FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: primary,
+                  message: _erro!,
+                  onRetry: _load,
+                  title: 'Não conseguimos carregar o comparativo',
+                )
+                : _semAvaliacao
+                ? FxEmptyState(
+                  icon: 'trend',
+                  title: 'Nenhuma avaliação para comparar',
+                  subtitle:
+                      'Registre ao menos duas avaliações físicas para ver a evolução.',
+                  action: FxEmptyAction(
+                    label: 'Voltar ao Aluno 360',
+                    onTap:
+                        () =>
+                            safePopOrGo(context, '/alunos/${widget.alunoId}'),
                   ),
                 )
                 : _buildConteudo(_comparativo!),

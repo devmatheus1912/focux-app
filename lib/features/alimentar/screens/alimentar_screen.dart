@@ -6,14 +6,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alimentar_repository.dart';
 import 'plano_alimentar_detail_screen.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
-import '../../alunos/widgets/aluno360_action_empty_panel.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class AlimentarScreen extends ConsumerStatefulWidget {
@@ -63,6 +64,8 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
     return fxScreenA11yScope(
       label: 'Planos Alimentares',
       child: FxShellScaffold(
@@ -90,46 +93,37 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
                 ? const FxLoading()
                 : _erro != null
                 ? FxErrorState(
-                  chromeOnDark: Theme.of(context).brightness == Brightness.dark,
-                  primary: Theme.of(context).colorScheme.primary,
+                  chromeOnDark: chrome.isDark,
+                  primary: primary,
                   message: _erro!,
                   onRetry: _load,
                   title: 'Não conseguimos carregar os planos',
                 )
                 : _planos.isEmpty
                 ? satelliteEmptyBody(
-                  child: Aluno360ActionEmptyPanel(
+                  child: FxEmptyState(
                     key: const ValueKey('alimentar_empty'),
-                    icon: Icons.restaurant_menu_rounded,
+                    icon: 'target',
                     title: 'Nenhum plano alimentar',
                     subtitle:
                         widget.alunoNome != null
                             ? 'Monte o primeiro plano de ${satelliteFirstName(widget.alunoNome)} com metas de calorias e macros.'
                             : 'Crie o primeiro plano com metas de calorias e macros.',
-                    primaryLabel: 'Criar plano',
-                    primaryIcon: Icons.add_rounded,
-                    onPrimary: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (_) => _NovoPlanoScreen(alunoId: widget.alunoId),
-                        ),
-                      );
-                      if (!context.mounted) return;
-                      _load();
-                    },
-                    secondaryActions: [
-                      Aluno360SecondaryAction(
-                        label: 'Voltar ao Aluno 360',
-                        icon: Icons.arrow_back_rounded,
-                        onTap:
-                            () => safePopOrGo(
-                              context,
-                              '/alunos/${widget.alunoId}',
-                            ),
-                      ),
-                    ],
+                    action: FxEmptyAction(
+                      label: 'Criar plano',
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (_) =>
+                                    _NovoPlanoScreen(alunoId: widget.alunoId),
+                          ),
+                        );
+                        if (!context.mounted) return;
+                        _load();
+                      },
+                    ),
                   ),
                 )
                 : ListView.builder(

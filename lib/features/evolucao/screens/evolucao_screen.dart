@@ -15,9 +15,10 @@ import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
-import '../../alunos/widgets/aluno360_action_empty_panel.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 // ─── Providers ───────────────────────────────────────────────────────────────
@@ -84,6 +85,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
+    final chrome = ShellChrome.forDark(isDark);
     final medidasAsync = ref.watch(medidasProvider(widget.alunoId));
     final recordesAsync = ref.watch(recordesProvider(widget.alunoId));
 
@@ -106,8 +108,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
               controller: _tabController,
               indicatorColor: primary,
               labelColor: primary,
-              unselectedLabelColor:
-                  isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+              unselectedLabelColor: chrome.mute,
               indicatorWeight: 2.5,
               tabs: const [
                 Tab(text: 'Medidas Corporais'),
@@ -406,22 +407,16 @@ class _TabMedidas extends StatelessWidget {
         if (lista.isEmpty) {
           final first = satelliteFirstName(alunoNome);
           return satelliteEmptyBody(
-            child: Aluno360ActionEmptyPanel(
+            child: FxEmptyState(
               key: const ValueKey('evolucao_medidas_empty'),
-              icon: Icons.monitor_weight_outlined,
+              icon: 'trend',
               title: 'Nenhuma medida registrada',
               subtitle:
                   'Registre peso e circunferências de $first para liberar o gráfico e o radar corporal.',
-              primaryLabel: 'Registrar medida',
-              primaryIcon: Icons.add_rounded,
-              onPrimary: onRegister,
-              secondaryActions: [
-                Aluno360SecondaryAction(
-                  label: 'Voltar ao Aluno 360',
-                  icon: Icons.arrow_back_rounded,
-                  onTap: () => safePopOrGo(context, '/alunos/$alunoId'),
-                ),
-              ],
+              action: FxEmptyAction(
+                label: 'Registrar medida',
+                onTap: onRegister,
+              ),
             ),
           );
         }
@@ -559,22 +554,16 @@ class _TabRecordes extends StatelessWidget {
         if (lista.isEmpty) {
           final first = satelliteFirstName(alunoNome);
           return satelliteEmptyBody(
-            child: Aluno360ActionEmptyPanel(
+            child: FxEmptyState(
               key: const ValueKey('evolucao_recordes_empty'),
-              icon: Icons.emoji_events_outlined,
+              icon: 'star',
               title: 'Nenhum recorde registrado',
               subtitle:
                   'Marque o primeiro recorde de $first após um check-in ou treino forte.',
-              primaryLabel: 'Registrar recorde',
-              primaryIcon: Icons.add_rounded,
-              onPrimary: onRegister,
-              secondaryActions: [
-                Aluno360SecondaryAction(
-                  label: 'Voltar ao Aluno 360',
-                  icon: Icons.arrow_back_rounded,
-                  onTap: () => safePopOrGo(context, '/alunos/$alunoId'),
-                ),
-              ],
+              action: FxEmptyAction(
+                label: 'Registrar recorde',
+                onTap: onRegister,
+              ),
             ),
           );
         }

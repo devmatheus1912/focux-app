@@ -1,5 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../../core/api/api_client.dart';
+import '../../core/utils/friendly_error.dart';
 import 'plano_sucesso_model.dart';
 
 class PlanoSucessoProvider with ChangeNotifier {
@@ -7,18 +9,23 @@ class PlanoSucessoProvider with ChangeNotifier {
 
   PlanoSucesso? _plano;
   bool _isLoading = false;
+  String? _erro;
 
   PlanoSucesso? get plano => _plano;
   bool get isLoading => _isLoading;
+  String? get erro => _erro;
 
   Future<void> fetchPlano(int alunoId) async {
     _isLoading = true;
+    _erro = null;
     notifyListeners();
     try {
       final res = await _api.dio.get('/api/planos-sucesso/aluno/$alunoId');
       _plano = PlanoSucesso.fromJson(res.data);
     } catch (e) {
       _plano = null;
+      final notFound = e is DioException && e.response?.statusCode == 404;
+      _erro = notFound ? null : friendlyError(e);
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -41,6 +48,7 @@ class PlanoSucessoProvider with ChangeNotifier {
       }
     } catch (e) {
       debugPrint(e.toString());
+      rethrow;
     }
   }
 }

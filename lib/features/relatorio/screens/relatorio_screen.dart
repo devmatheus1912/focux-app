@@ -5,6 +5,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -18,6 +19,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/relatorio_repository.dart';
 import '../../alunos/constants/aluno_360_layout.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 
 class RelatorioScreen extends ConsumerStatefulWidget {
@@ -225,6 +227,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final chrome = ShellChrome.of(context);
 
     return fxScreenA11yScope(
       label: 'Relatório — ${widget.alunoNome}',
@@ -244,7 +247,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                 onPressed: _dados != null ? _exportarPdf : null,
                 icon: Icon(
                   Icons.picture_as_pdf_rounded,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                  color: chrome.ink.withValues(alpha: 0.75),
                   size: 22,
                 ),
               ),
@@ -279,11 +282,22 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                     SizedBox(
                       height: 280,
                       child: FxErrorState(
-                        chromeOnDark: theme.brightness == Brightness.dark,
+                        chromeOnDark: chrome.isDark,
                         primary: theme.colorScheme.primary,
                         message: _erro!,
                         onRetry: _carregarDados,
                         title: 'Não conseguimos carregar o relatório',
+                      ),
+                    )
+                  else if (_dados != null && _dados!.treinosTotal == 0)
+                    FxEmptyState(
+                      icon: 'article',
+                      title: 'Sem dados neste período',
+                      subtitle:
+                          'Quando ${satelliteFirstName(widget.alunoNome)} concluir treinos, o relatório aparece aqui.',
+                      action: FxEmptyAction(
+                        label: 'Atualizar',
+                        onTap: _carregarDados,
                       ),
                     )
                   else if (_dados != null) ...[

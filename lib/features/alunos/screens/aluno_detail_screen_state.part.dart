@@ -133,7 +133,9 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                         sheetFill: chrome.sheetFill,
                       ),
                   error:
-                      (e, _) => AlunoDetailErrorState(
+                      (e, _) => FxErrorState(
+                        chromeOnDark: isDark,
+                        primary: primary,
                         message: friendlyError(
                           aluno360Async.error ?? e,
                           fallback:
@@ -142,6 +144,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                         onRetry: () {
                           invalidateAluno360Providers(ref, alunoId);
                         },
+                        title: 'Não conseguimos carregar o aluno',
                       ),
                   data: (aluno) {
                     ref.watch(alertasConfigProvider);

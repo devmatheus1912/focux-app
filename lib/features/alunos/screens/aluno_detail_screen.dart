@@ -22,9 +22,9 @@ import '../widgets/aluno360_detail_evolucao_tab.dart';
 import '../widgets/aluno360_detail_ferramentas_tab.dart';
 import '../widgets/aluno360_detail_operacao_tab.dart';
 import '../widgets/aluno360_operacao_sticky_cta.dart';
-import '../widgets/aluno_detail_error_state.dart';
 import '../widgets/aluno_detail_hero_card.dart';
 import '../widgets/aluno_detail_loading_skeleton.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 
 part 'aluno_detail_screen_state.part.dart';

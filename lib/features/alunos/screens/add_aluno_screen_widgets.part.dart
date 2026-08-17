@@ -531,7 +531,7 @@ class _ErrorCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: EagleTokens.bad.withValues(alpha: 0.1),
+        color: EagleTokens.bad.withValues(alpha: isDark ? 0.16 : 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: EagleTokens.bad.withValues(alpha: 0.25)),
       ),
@@ -543,7 +543,11 @@ class _ErrorCard extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(color: EagleTokens.bad, fontSize: 13),
+              style: const TextStyle(
+                color: EagleTokens.bad,
+                fontSize: 13,
+                height: 1.35,
+              ),
             ),
           ),
         ],

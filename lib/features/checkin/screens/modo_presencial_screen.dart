@@ -7,6 +7,8 @@ import '../../../core/widgets/fx_motion.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
 import '../../../core/utils/friendly_error.dart';
+import 'package:focux_app/core/widgets/fx_empty_state.dart';
+import 'package:focux_app/core/widgets/fx_error_state.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
@@ -131,42 +133,45 @@ class _State extends ConsumerState<ModoPresencialScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     if (_loading) {
       return fxScreenA11yScope(
         label: 'Modo Presencial',
         child: Scaffold(
           backgroundColor: EagleTokens.darkBg,
-          body: Center(
-            child: FxLoading(color: Theme.of(context).colorScheme.primary),
+          body: Center(child: FxLoading(color: primary)),
+        ),
+      );
+    }
+    if (_erro != null) {
+      return fxScreenA11yScope(
+        label: 'Modo Presencial',
+        child: Scaffold(
+          backgroundColor: EagleTokens.darkBg,
+          body: FxErrorState(
+            chromeOnDark: true,
+            primary: primary,
+            message: _erro!,
+            onRetry: _start,
+            title: 'Não conseguimos iniciar o treino',
           ),
         ),
       );
     }
     if (_exec == null || _exec!.exercicios.isEmpty) {
-      return Scaffold(
-        backgroundColor: EagleTokens.darkBg,
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.error_outline,
-                color: EagleTokens.darkInkMute,
-                size: 48,
-              ),
-              const SizedBox(height: TokensStrip.s4),
-              Text(
-                _erro ?? 'Treino não encontrado',
-                style: TextStyle(color: EagleTokens.darkInkMute, fontSize: 18),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: TokensStrip.s5),
-              FxLiquidPrimaryButton(
-                label: 'Voltar',
-                onPressed: () => Navigator.pop(context),
-                expand: false,
-              ),
-            ],
+      return fxScreenA11yScope(
+        label: 'Modo Presencial',
+        child: Scaffold(
+          backgroundColor: EagleTokens.darkBg,
+          body: FxEmptyState(
+            icon: 'dumbbell',
+            title: 'Treino não encontrado',
+            subtitle:
+                'Volte e escolha um treino com exercícios para o modo presencial.',
+            action: FxEmptyAction(
+              label: 'Voltar',
+              onTap: () => Navigator.pop(context),
+            ),
           ),
         ),
       );
@@ -175,15 +180,17 @@ class _State extends ConsumerState<ModoPresencialScreen> {
     final ex = _exec!.exercicios[_currentIdx];
     final total = _exec!.exercicios.length;
     final done = _exec!.exercicios.where((e) => e.concluido).length;
-    final primary = Theme.of(context).colorScheme.primary;
 
-    return Scaffold(
-      backgroundColor: EagleTokens.darkBg,
-      body: SafeArea(
-        child:
-            _resting
-                ? _restView(primary)
-                : _trainingView(ex, total, done, primary),
+    return fxScreenA11yScope(
+      label: 'Modo Presencial',
+      child: Scaffold(
+        backgroundColor: EagleTokens.darkBg,
+        body: SafeArea(
+          child:
+              _resting
+                  ? _restView(primary)
+                  : _trainingView(ex, total, done, primary),
+        ),
       ),
     );
   }
