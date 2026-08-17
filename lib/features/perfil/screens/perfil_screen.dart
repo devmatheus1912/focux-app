@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,7 +32,6 @@ import '../utils/perfil_readiness.dart';
 import '../../subscription/utils/landing_editor_access.dart';
 import '../constants/perfil_layout.dart';
 import '../widgets/landing_editor_widgets.dart';
-import '../widgets/perfil_action_tile.dart';
 import '../widgets/perfil_card_section.dart';
 import '../widgets/perfil_conta_seguranca_section.dart';
 import '../widgets/perfil_marca_vitrine_section.dart';

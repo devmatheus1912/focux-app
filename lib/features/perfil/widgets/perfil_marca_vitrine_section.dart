@@ -43,7 +43,7 @@ class PerfilMarcaVitrineSection extends StatelessWidget {
                 letterSpacing: 0.08,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             publicLink,
           ],
         ),

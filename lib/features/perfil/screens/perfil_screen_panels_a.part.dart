@@ -283,6 +283,7 @@ class _PerfilPublicLinkCard extends StatelessWidget {
             const SizedBox(height: TokensStrip.s2),
             _PerfilVitrineQuietActions(
               mute: mute,
+              actionInk: actionInk,
               copyUrl: copyUrl,
               onOpenEditor: onOpenEditor,
               includeShare: true,
@@ -315,6 +316,7 @@ class _PerfilPublicLinkCard extends StatelessWidget {
             const SizedBox(height: TokensStrip.s2),
             _PerfilVitrineQuietActions(
               mute: mute,
+              actionInk: actionInk,
               copyUrl: copyUrl,
               onOpenEditor: onOpenEditor,
               includeShare: false,
@@ -329,12 +331,14 @@ class _PerfilPublicLinkCard extends StatelessWidget {
 class _PerfilVitrineQuietActions extends StatelessWidget {
   const _PerfilVitrineQuietActions({
     required this.mute,
+    required this.actionInk,
     required this.copyUrl,
     required this.onOpenEditor,
     this.includeShare = true,
   });
 
   final Color mute;
+  final Color actionInk;
   final String copyUrl;
   final VoidCallback onOpenEditor;
   final bool includeShare;
@@ -368,12 +372,12 @@ class _PerfilVitrineQuietActions extends StatelessWidget {
                 );
               },
               style: TextButton.styleFrom(
-                foregroundColor: mute,
+                foregroundColor: actionInk,
                 minimumSize: const Size(48, 40),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
               ),
-              icon: const Icon(Icons.ios_share_rounded, size: 16),
+              icon: Icon(Icons.ios_share_rounded, size: 16, color: actionInk),
               label: const Text('Compartilhar'),
             ),
           ),

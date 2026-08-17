@@ -67,8 +67,8 @@ void main() {
     expect(find.text('Completar'), findsOneWidget);
     expect(find.text('Meus alunos'), findsNothing);
     expect(find.text('Copiloto IA'), findsNothing);
-    // Conta quiet colapsada + debug fora do card LGPD.
     expect(find.text('Conta e segurança'), findsOneWidget);
+    expect(find.text('Ferramentas de desenvolvimento'), findsNothing);
   });
 
   testWidgets('perfil completo usa sticky Hoje (sem teaser de IA)', (
@@ -109,6 +109,7 @@ void main() {
     expect(find.text('Meus alunos'), findsNothing);
     expect(find.text('Copiloto IA'), findsNothing);
     expect(find.text('Compartilhar'), findsOneWidget);
+    expect(find.text('Ferramentas de desenvolvimento'), findsNothing);
     expect(find.byType(FxLiquidPrimaryButton), findsNothing);
   });
 }

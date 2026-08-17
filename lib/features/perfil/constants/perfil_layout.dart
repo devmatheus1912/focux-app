@@ -14,7 +14,7 @@ abstract final class PerfilLayout {
 
   static const double stickyRowHeight = 44;
 
-  /// Secundário quiet (Operação, Conta, debug).
+  /// Secundário quiet (Operação, Conta).
   static const double sectionGapQuiet = TokensStrip.s2;
 
   /// Blocos primários (Marca, prontidão).

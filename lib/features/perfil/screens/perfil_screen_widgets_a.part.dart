@@ -426,8 +426,8 @@ class _PerfilBodyState extends State<_PerfilBody> {
                             ),
                           ),
                         ),
+                        const SizedBox(height: PerfilLayout.sectionGapPrimary),
                         if (!profileComplete) ...[
-                          const SizedBox(height: PerfilLayout.sectionGapPrimary),
                           FxStaggerItem(
                             index: 4,
                             child: _ProfessionalDataPanel(
@@ -440,8 +440,8 @@ class _PerfilBodyState extends State<_PerfilBody> {
                               onEdit: onEditPerfil,
                             ),
                           ),
+                          const SizedBox(height: PerfilLayout.sectionGapQuiet),
                         ],
-                        const SizedBox(height: PerfilLayout.sectionGapQuiet),
                         FxStaggerItem(
                           index: 5,
                           child: PerfilQuietCollapsible(
@@ -488,18 +488,6 @@ class _PerfilBodyState extends State<_PerfilBody> {
                             ),
                           ),
                         ),
-                        if (kDebugMode) ...[
-                          const SizedBox(height: PerfilLayout.sectionGapQuiet),
-                          FxStaggerItem(
-                            index: 7,
-                            child: _PerfilDebugTools(
-                              accent: accent,
-                              actionInk: actionInk,
-                              mute: mute,
-                              line: line,
-                            ),
-                          ),
-                        ],
                       ],
                     ),
                   ]),

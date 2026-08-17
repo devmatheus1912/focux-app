@@ -120,7 +120,7 @@ class _PerfilQuietCollapsibleState extends State<PerfilQuietCollapsible> {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: FocuxHubTypography.bodyMuted(
-                                    color: heading,
+                                    color: caption,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
