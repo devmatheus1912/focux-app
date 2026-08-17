@@ -425,6 +425,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   onPressed:
                                       _loadingGoogle ? null : _submitGoogle,
                                   isLoading: _loadingGoogle,
+                                  dark: true,
                                 ),
                               ],
                               if (_googleStatusNote != null) ...[

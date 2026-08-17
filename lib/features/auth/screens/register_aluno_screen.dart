@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../providers/auth_provider.dart';
@@ -104,24 +105,34 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
         ),
         child: Scaffold(
           body: AuthShell(
-            child: SingleChildScrollView(
-              padding: authScrollPadding(context, top: 48, bottomExtra: 28),
-              child: Form(
-                key: _formKey,
-                child: AuthFormEntrance(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AuthBackButton(
-                        onTap: () => context.go('/login?role=aluno'),
-                      ),
-                      const SizedBox(height: 8),
-                      AuthRoleHeader(
-                        roleLabel: 'ALUNO',
-                        center: true,
-                        width: authLogoWidthFor(context),
-                      ),
-                      const SizedBox(height: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s5,
+                    TokensStrip.s2,
+                    TokensStrip.s5,
+                    0,
+                  ),
+                  child: AuthStickyRoleBar(
+                    roleLabel: 'ALUNO',
+                    onBack: () => context.go('/login?role=aluno'),
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: authScrollPadding(
+                      context,
+                      top: TokensStrip.s3,
+                      bottomExtra: 28,
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: AuthFormEntrance(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14,
@@ -306,11 +317,14 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                               ? null
                               : () => context.go('/login?role=aluno'),
                     ),
-                      const SizedBox(height: 8),
-                    ],
+                    const SizedBox(height: 8),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
         ),

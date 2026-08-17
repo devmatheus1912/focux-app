@@ -65,8 +65,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1000));
 
     expect(find.textContaining('Centro de Comando'), findsOneWidget);
-    // Slide 1: métricas sim, checklist não.
-    expect(find.text('360°'), findsOneWidget);
+    // Slide 1: hero budget — sem metric chips nem checklist.
+    expect(find.text('360°'), findsNothing);
     expect(find.textContaining('Modos Treino'), findsNothing);
 
     await tester.tap(find.text(FocuxBrandCopy.onboardingCtaNext));
@@ -165,11 +165,11 @@ void main() {
     expect(prefs.getBool('onboarding_done_v3'), isTrue);
   });
 
-  testWidgets('slide 1 compacto oculta metric chips em telas baixas', (
+  testWidgets('slide 1 sem metric chips (hero budget Home)', (
     tester,
   ) async {
     SharedPreferences.setMockInitialValues({});
-    _setSurface(tester, const Size(390, 640));
+    _setSurface(tester, const Size(430, 932));
 
     await tester.pumpWidget(_onboardingApp());
     await tester.pump();

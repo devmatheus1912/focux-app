@@ -13,7 +13,7 @@ void main() {
       screen.indexOf('Criar conta'),
       lessThan(screen.indexOf('authInviteExistingAccountCta')),
     );
-    expect(screen, contains('authLogoWidthFor'));
+    expect(screen, contains('AuthStickyRoleBar'));
     expect(screen, contains('AuthFormEntrance'));
     expect(screen, contains('minLength: 8'));
     expect(screen, contains('Mín. 8 caracteres'));

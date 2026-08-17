@@ -13,6 +13,7 @@ import '../../../core/config/env.dart';
 import '../../../core/legal/focux_legal.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/hero_teal.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/br_phone.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
@@ -234,24 +235,34 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ),
         child: Scaffold(
           body: AuthShell(
-            child: SingleChildScrollView(
-              padding: authScrollPadding(context, top: 48, bottomExtra: 28),
-              child: Form(
-                key: _formKey,
-                child: AuthFormEntrance(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AuthBackButton(
-                        onTap: () => context.go('/login?role=personal'),
-                      ),
-                      const SizedBox(height: 8),
-                      AuthRoleHeader(
-                        roleLabel: 'PERSONAL',
-                        center: true,
-                        width: authLogoWidthFor(context),
-                      ),
-                      const SizedBox(height: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s5,
+                    TokensStrip.s2,
+                    TokensStrip.s5,
+                    0,
+                  ),
+                  child: AuthStickyRoleBar(
+                    roleLabel: 'PERSONAL',
+                    onBack: () => context.go('/login?role=personal'),
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: authScrollPadding(
+                      context,
+                      top: TokensStrip.s3,
+                      bottomExtra: 28,
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: AuthFormEntrance(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                       Text(
                         'Criar conta',
                         style: AppTypography.inter(
@@ -439,6 +450,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     GoogleSignInButton(
                       label: 'Cadastrar com Google',
                       isLoading: _loadingGoogle,
+                      dark: true,
                       onPressed: _loadingGoogle ? null : _submitGoogle,
                     ),
                     const SizedBox(height: 14),
@@ -483,10 +495,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         textAlign: TextAlign.center,
                       ),
                     ),
-                  ],
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
         ),

@@ -48,56 +48,21 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   bool _motionConfigured = false;
 
-  /// Telas ≤760px de altura útil — esconde metric chips / hook (hero budget Home).
+  /// Telas ≤760px de altura útil — logo/tipografia mais compactos.
   static bool _isCompactLayout(BuildContext context) {
     final height = MediaQuery.sizeOf(context).height;
     final padding = MediaQuery.paddingOf(context);
     return (height - padding.top - padding.bottom) < 760;
   }
 
-  static const _pageIconsPersonal = [
-    [
-      Icons.dashboard_customize_rounded,
-      Icons.fitness_center_rounded,
-      Icons.insights_rounded,
-    ],
-    [Icons.psychology_rounded, Icons.pix_rounded, Icons.today_rounded],
-  ];
-
-  static const _pageIconsAluno = [
-    [
-      Icons.fitness_center_rounded,
-      Icons.emoji_events_outlined,
-      Icons.insights_rounded,
-    ],
-    [
-      Icons.smart_toy_outlined,
-      Icons.videocam_outlined,
-      Icons.receipt_long_rounded,
-    ],
-  ];
-
   List<_OBData> _pagesFor(OnboardingPersona persona) {
     final slides = FocuxBrandCopy.slidesFor(persona);
-    final icons =
-        persona == OnboardingPersona.aluno
-            ? _pageIconsAluno
-            : _pageIconsPersonal;
     return List.generate(slides.length, (i) {
       final slide = slides[i];
-      final pageIcons = icons[i];
       return _OBData(
         title: slide.title,
         titleHighlight: slide.titleHighlight,
         subtitle: slide.subtitle,
-        metrics: List.generate(
-          slide.metrics.length,
-          (j) => _MetricChip(
-            label: slide.metrics[j].label,
-            value: slide.metrics[j].value,
-            icon: pageIcons[j.clamp(0, pageIcons.length - 1)],
-          ),
-        ),
         features: slide.features,
       );
     });

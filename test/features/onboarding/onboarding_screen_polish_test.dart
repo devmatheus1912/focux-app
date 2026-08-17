@@ -23,6 +23,8 @@ void main() {
     );
     expect(widgets, contains('glassPanel'));
     expect(screen, contains('< 760'));
-    expect(widgets, contains('pageIndex == 0 && !compact'));
+    // Hero budget: metric chips removidos do slide 1.
+    expect(widgets, isNot(contains('class _MetricChipWidget')));
+    expect(widgets, contains('_OnboardingHook'));
   });
 }

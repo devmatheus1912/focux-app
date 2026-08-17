@@ -713,6 +713,47 @@ class AuthBackButton extends StatelessWidget {
   }
 }
 
+/// Barra fixa de marca no cadastro / esqueci — back + papel sempre no viewport.
+class AuthStickyRoleBar extends StatelessWidget {
+  const AuthStickyRoleBar({
+    super.key,
+    required this.roleLabel,
+    required this.onBack,
+  });
+
+  final String roleLabel;
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return Semantics(
+      label: 'Focux $roleLabel',
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+        child: Row(
+          children: [
+            AuthBackButton(onTap: onBack),
+            Expanded(
+              child: Text(
+                '— ${roleLabel.toUpperCase()} —',
+                textAlign: TextAlign.center,
+                style: AppTypography.inter(
+                  color: primary.withValues(alpha: 0.92),
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 2.4,
+                ),
+              ),
+            ),
+            const SizedBox(width: 38),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Link de rich text acessível para rodapés de auth (ex.: "Não tem conta? Criar conta").
 /// Expõe Semantics(link, button) em vez de depender apenas do gesto visual.
 class AuthTextLink extends StatelessWidget {

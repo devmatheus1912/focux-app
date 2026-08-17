@@ -1,26 +1,14 @@
 part of 'onboarding_screen.dart';
 
-class _MetricChip {
-  final String label, value;
-  final IconData icon;
-  const _MetricChip({
-    required this.label,
-    required this.value,
-    required this.icon,
-  });
-}
-
 class _OBData {
   final String title;
   final String titleHighlight;
   final String subtitle;
-  final List<_MetricChip> metrics;
   final List<String> features;
   const _OBData({
     required this.title,
     required this.titleHighlight,
     required this.subtitle,
-    required this.metrics,
     required this.features,
   });
 }
@@ -258,10 +246,8 @@ class _OBPageWidget extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final titleSize =
         pageIndex == 0 ? (compact ? 24.0 : 26.0) : (compact ? 25.0 : 27.0);
-    // Slide 1: métricas (se houver e não compact). Slide 2: checklist.
-    // Nunca os dois no mesmo viewport (hero budget).
-    final showMetrics =
-        pageIndex == 0 && !compact && data.metrics.isNotEmpty;
+    // Hero budget Home: slide 1 = marca + headline + body (+ CTAs no footer).
+    // Checklist só no slide 2 — sem metric chips no primeiro viewport.
     final showFeatures = data.features.isNotEmpty;
 
     return AnimatedBuilder(
@@ -283,7 +269,7 @@ class _OBPageWidget extends StatelessWidget {
                   alignment: Alignment.center,
                   child: _buildHero(),
                 ),
-                if (pageIndex == 0 && !compact) ...[
+                if (pageIndex == 0) ...[
                   SizedBox(height: compact ? 4 : 8),
                   Transform.translate(
                     offset: Offset(0, subtitleSlide.value * 0.5),
@@ -296,7 +282,9 @@ class _OBPageWidget extends StatelessWidget {
                     ),
                   ),
                 ],
-                SizedBox(height: pageIndex == 0 ? (compact ? 8 : TokensStrip.s3) : 14),
+                SizedBox(
+                  height: pageIndex == 0 ? (compact ? 8 : TokensStrip.s3) : 14,
+                ),
                 Transform.translate(
                   offset: Offset(0, titleSlide.value),
                   child: Opacity(
@@ -343,28 +331,7 @@ class _OBPageWidget extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: pageIndex == 0 ? (compact ? 10 : 14) : 12),
-                if (showMetrics)
-                  Transform.translate(
-                    offset: Offset(0, metricsSlide.value),
-                    child: Opacity(
-                      opacity: fade.value.clamp(0.0, 1.0),
-                      child: Row(
-                        children:
-                            data.metrics
-                                .map(
-                                  (m) => Expanded(
-                                    child: _MetricChipWidget(
-                                      metric: m,
-                                      primary: primary,
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                      ),
-                    ),
-                  ),
-                if (showFeatures) ...[
-                  if (showMetrics) const SizedBox(height: 10),
+                if (showFeatures)
                   Transform.translate(
                     offset: Offset(0, metricsSlide.value * 0.7),
                     child: Opacity(
@@ -429,7 +396,6 @@ class _OBPageWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-                ],
               ],
             ),
           ),
@@ -525,52 +491,6 @@ class _OnboardingHook extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _MetricChipWidget extends StatelessWidget {
-  final _MetricChip metric;
-  final Color primary;
-  const _MetricChipWidget({required this.metric, required this.primary});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 3),
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-      decoration: BoxDecoration(
-        color: heroTealSurface(0.03),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: heroTealSurface(0.06)),
-      ),
-      child: Column(
-        children: [
-          Icon(metric.icon, color: primary, size: 18),
-          const SizedBox(height: 8),
-          Text(
-            metric.value,
-            style: AppTypography.inter(
-              color: heroTealInk(),
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              height: 1,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            metric.label,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            style: AppTypography.inter(
-              color: heroTealSurface(0.78),
-              fontSize: 10.5,
-              fontWeight: FontWeight.w500,
-              height: 1.2,
-            ),
-          ),
-        ],
       ),
     );
   }

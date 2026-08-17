@@ -182,22 +182,34 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
         ),
         child: Scaffold(
           body: AuthShell(
-            child: SingleChildScrollView(
-              padding: authScrollPadding(context, top: 44, bottomExtra: 24),
-              child: Form(
-                key: _formKey,
-                child: AuthFormEntrance(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AuthBackButton(onTap: () => context.go(_loginPath)),
-                      const SizedBox(height: 20),
-                      AuthRoleHeader(
-                        roleLabel: _isAluno ? 'ALUNO' : 'PERSONAL',
-                        center: true,
-                        width: authLogoWidthFor(context),
-                      ),
-                      const SizedBox(height: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s5,
+                    TokensStrip.s2,
+                    TokensStrip.s5,
+                    0,
+                  ),
+                  child: AuthStickyRoleBar(
+                    roleLabel: _isAluno ? 'ALUNO' : 'PERSONAL',
+                    onBack: () => context.go(_loginPath),
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: authScrollPadding(
+                      context,
+                      top: TokensStrip.s3,
+                      bottomExtra: 24,
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: AuthFormEntrance(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                     Text(
                       'Recuperar senha',
                       style: AppTypography.inter(
@@ -314,10 +326,13 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                           fontSize: 13,
                         ),
                       ),
-                    ],
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
         ),
