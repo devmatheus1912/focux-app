@@ -7,6 +7,7 @@ import '../../../core/legal/focux_legal.dart';
 import '../../../core/platform/secure_screen.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../planos/paywall/paywall_catalog.dart';
 import '../../subscription/models/subscription_plan.dart';
@@ -80,126 +81,134 @@ class _AssinaturaReviewScreenState extends State<AssinaturaReviewScreen> {
         '${nextBill.month.toString().padLeft(2, '0')}/'
         '${nextBill.year}';
 
-    return FxShellScaffold(
-      appBar: FxShellAppBar(
-        title: 'Confirmar assinatura',
-        onBack: () => Navigator.of(context).pop(false),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: accent.withValues(alpha: 0.35)),
-              color: accent.withValues(alpha: 0.08),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.plan.apiName,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.6,
-                    color: accent,
+    return fxScreenA11yScope(
+      label: 'Confirmar assinatura',
+      child: FxShellScaffold(
+        appBar: FxShellAppBar(
+          title: 'Confirmar assinatura',
+          onBack: () => Navigator.of(context).pop(false),
+        ),
+        body: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: accent.withValues(alpha: 0.35)),
+                color: accent.withValues(alpha: 0.08),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.plan.apiName,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.6,
+                      color: accent,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  widget.priceDisplay,
-                  style: TokensStrip.h1(color: ink).copyWith(fontSize: 28),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Cobrança $freq · renovação automática',
-                  style: TokensStrip.bodyMuted(color: mute),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Próxima cobrança estimada: $nextLabel',
-                  style: TokensStrip.bodyMuted(color: mute),
-                ),
-                if (widget.trialNote != null) ...[
-                  const SizedBox(height: 10),
-                  Text(widget.trialNote!, style: TokensStrip.body(color: ink)),
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.priceDisplay,
+                    style: TokensStrip.h1(color: ink).copyWith(fontSize: 28),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Cobrança $freq · renovação automática',
+                    style: TokensStrip.bodyMuted(color: mute),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Próxima cobrança estimada: $nextLabel',
+                    style: TokensStrip.bodyMuted(color: mute),
+                  ),
+                  if (widget.trialNote != null) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      widget.trialNote!,
+                      style: TokensStrip.body(color: ink),
+                    ),
+                  ],
                 ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Incluído no plano',
+              style: TokensStrip.h2(color: ink).copyWith(fontSize: 17),
+            ),
+            const SizedBox(height: 10),
+            ..._topFeatures(widget.plan).map(
+              (f) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    Icon(Icons.check_circle_rounded, size: 18, color: accent),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(f, style: TokensStrip.body(color: ink)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              _legalBody(widget.priceDisplay, freq),
+              style: TokensStrip.bodyMuted(
+                color: mute,
+              ).copyWith(fontSize: 12, height: 1.5),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 12,
+              children: [
+                TextButton(
+                  onPressed: () => FocuxLegal.openPrivacy(),
+                  child: const Text('Privacidade'),
+                ),
+                TextButton(
+                  onPressed: () => FocuxLegal.openTerms(),
+                  child: const Text('Termos'),
+                ),
               ],
             ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Incluído no plano',
-            style: TokensStrip.h2(color: ink).copyWith(fontSize: 17),
-          ),
-          const SizedBox(height: 10),
-          ..._topFeatures(widget.plan).map(
-            (f) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                children: [
-                  Icon(Icons.check_circle_rounded, size: 18, color: accent),
-                  const SizedBox(width: 10),
-                  Expanded(child: Text(f, style: TokensStrip.body(color: ink))),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            _legalBody(widget.priceDisplay, freq),
-            style: TokensStrip.bodyMuted(
-              color: mute,
-            ).copyWith(fontSize: 12, height: 1.5),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 12,
-            children: [
-              TextButton(
-                onPressed: () => FocuxLegal.openPrivacy(),
-                child: const Text('Privacidade'),
-              ),
-              TextButton(
-                onPressed: () => FocuxLegal.openTerms(),
-                child: const Text('Termos'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Semantics(
-            button: true,
-            label: 'Confirmar e assinar plano ${widget.plan.apiName}',
-            child: FilledButton(
-              onPressed: () {
-                HapticFeedback.mediumImpact();
-                context.pop(true);
-              },
-              style: FilledButton.styleFrom(
-                backgroundColor: accent,
-                foregroundColor: EagleTokens.inkDeep,
-                minimumSize: const Size.fromHeight(52),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+            const SizedBox(height: 24),
+            Semantics(
+              button: true,
+              label: 'Confirmar e assinar plano ${widget.plan.apiName}',
+              child: FilledButton(
+                onPressed: () {
+                  HapticFeedback.mediumImpact();
+                  context.pop(true);
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: accent,
+                  foregroundColor: EagleTokens.inkDeep,
+                  minimumSize: const Size.fromHeight(52),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: const Text(
+                  'Confirmar e assinar',
+                  style: TextStyle(fontWeight: FontWeight.w900),
                 ),
               ),
-              child: const Text(
-                'Confirmar e assinar',
-                style: TextStyle(fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 10),
+            TextButton(
+              onPressed: () => context.pop(false),
+              child: Text(
+                'Voltar',
+                style: TextStyle(color: mute, fontWeight: FontWeight.w600),
               ),
             ),
-          ),
-          const SizedBox(height: 10),
-          TextButton(
-            onPressed: () => context.pop(false),
-            child: Text(
-              'Voltar',
-              style: TextStyle(color: mute, fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

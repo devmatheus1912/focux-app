@@ -9,6 +9,7 @@ import '../data/exercicio_repository.dart';
 import '../data/exercicio_taxonomy_labels.dart';
 import '../providers/exercicios_provider.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';

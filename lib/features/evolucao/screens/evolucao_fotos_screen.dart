@@ -6,6 +6,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/fx_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -31,6 +32,7 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
   final _picker = ImagePicker();
   List<_Foto> _fotos = [];
   bool _loading = true;
+  String? _erro;
   int? _selBefore;
   int? _selAfter;
   double _slider = 0.5;
@@ -42,6 +44,12 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
   }
 
   Future<void> _load() async {
+    if (mounted) {
+      setState(() {
+        _loading = true;
+        _erro = null;
+      });
+    }
     try {
       final api = ref.read(apiClientProvider);
       final res = await api.dio.get('/api/alunos/${widget.alunoId}/fotos');
@@ -55,8 +63,13 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
           _loading = false;
         });
       }
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _erro = friendlyError(e);
+          _loading = false;
+        });
+      }
     }
   }
 
@@ -130,6 +143,14 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
         body:
             _loading
                 ? const FxLoading()
+                : _erro != null
+                ? FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: primary,
+                  message: _erro!,
+                  onRetry: _load,
+                  title: 'Não conseguimos carregar as fotos',
+                )
                 : _fotos.isEmpty
                 ? _empty(primary)
                 : _content(isDark, primary),

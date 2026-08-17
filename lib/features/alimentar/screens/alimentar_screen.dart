@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/alimentar_repository.dart';
 import 'plano_alimentar_detail_screen.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -26,6 +27,7 @@ class AlimentarScreen extends ConsumerStatefulWidget {
 class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
   List<PlanoAlimentar> _planos = [];
   bool _loading = true;
+  String? _erro;
 
   @override
   void initState() {
@@ -34,6 +36,12 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
   }
 
   Future<void> _load() async {
+    if (mounted) {
+      setState(() {
+        _loading = true;
+        _erro = null;
+      });
+    }
     try {
       final r = await AlimentarRepository(
         ref.read(apiClientProvider),
@@ -45,8 +53,10 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
       });
     } catch (e) {
       if (mounted) {
-        setState(() => _loading = false);
-        FeedbackHelper.showError(context, friendlyError(e));
+        setState(() {
+          _erro = friendlyError(e);
+          _loading = false;
+        });
       }
     }
   }
@@ -78,6 +88,14 @@ class _AlimentarScreenState extends ConsumerState<AlimentarScreen> {
         body:
             _loading
                 ? const FxLoading()
+                : _erro != null
+                ? FxErrorState(
+                  chromeOnDark: Theme.of(context).brightness == Brightness.dark,
+                  primary: Theme.of(context).colorScheme.primary,
+                  message: _erro!,
+                  onRetry: _load,
+                  title: 'Não conseguimos carregar os planos',
+                )
                 : _planos.isEmpty
                 ? satelliteEmptyBody(
                   child: Aluno360ActionEmptyPanel(

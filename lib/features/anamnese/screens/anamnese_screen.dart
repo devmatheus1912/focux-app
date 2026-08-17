@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
@@ -9,7 +10,9 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 
 class AnamneseScreen extends ConsumerStatefulWidget {
@@ -42,6 +45,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
   final _restricoesCtrl = TextEditingController();
 
   bool _loading = true, _saving = false;
+  String? _erro;
 
   static const _niveis = [
     'SEDENTARIO',
@@ -82,6 +86,12 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
   }
 
   Future<void> _load() async {
+    if (mounted) {
+      setState(() {
+        _loading = true;
+        _erro = null;
+      });
+    }
     try {
       final a = await AnamneseRepository(
         ref.read(apiClientProvider),
@@ -99,7 +109,11 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
       _dispSemanal = a.disponibilidadeSemanal ?? 3;
       _prefTreinoCtrl.text = a.preferenciasTreino ?? '';
       _restricoesCtrl.text = a.restricoesAlimentares ?? '';
-    } catch (_) {}
+    } catch (e) {
+      // 404 = aluno ainda não tem ficha; a tela deve abrir como formulário vazio.
+      final semFicha = e is DioException && e.response?.statusCode == 404;
+      if (mounted && !semFicha) setState(() => _erro = friendlyError(e));
+    }
     if (mounted) setState(() => _loading = false);
   }
 
@@ -209,59 +223,84 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen>
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const FxShellScaffold(
-        useMesh: true,
-        body: Center(child: FxLoading()),
+      return fxScreenA11yScope(
+        label: 'Anamnese',
+        child: const FxShellScaffold(
+          useMesh: true,
+          body: Center(child: FxLoading()),
+        ),
       );
     }
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Anamnese',
-        subtitle: 'Ficha de saúde e objetivos do aluno',
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.picture_as_pdf_outlined),
-            tooltip: 'Exportar PDF',
-            onPressed: _exportarPdf,
+    if (_erro != null) {
+      return fxScreenA11yScope(
+        label: 'Anamnese',
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: const FxShellAppBar(
+            title: 'Anamnese',
+            subtitle: 'Ficha de saúde e objetivos do aluno',
           ),
-          Semantics(
-            button: true,
-            label: _saving ? 'Salvando anamnese' : 'Salvar anamnese',
-            child: TextButton(
-              onPressed: _saving ? null : _salvar,
-              child:
-                  _saving
-                      ? const FxLoading(size: 18, strokeWidth: 2)
-                      : const Text('Salvar'),
+          body: FxErrorState(
+            chromeOnDark: Theme.of(context).brightness == Brightness.dark,
+            primary: primary,
+            message: _erro!,
+            onRetry: _load,
+            title: 'Não conseguimos carregar a anamnese',
+          ),
+        ),
+      );
+    }
+    return fxScreenA11yScope(
+      label: 'Anamnese',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Anamnese',
+          subtitle: 'Ficha de saúde e objetivos do aluno',
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.picture_as_pdf_outlined),
+              tooltip: 'Exportar PDF',
+              onPressed: _exportarPdf,
             ),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          TabBar(
-            indicatorColor: primary,
-            labelColor: primary,
-            unselectedLabelColor: chrome.mute,
-            indicatorWeight: 2.5,
-            dividerColor: Colors.transparent,
-            controller: _tabController,
-            tabs: const [
-              Tab(text: 'Básico'),
-              Tab(text: 'Saúde'),
-              Tab(text: 'Treino & Nutrição'),
-            ],
-          ),
-          Expanded(
-            child: TabBarView(
+            Semantics(
+              button: true,
+              label: _saving ? 'Salvando anamnese' : 'Salvar anamnese',
+              child: TextButton(
+                onPressed: _saving ? null : _salvar,
+                child:
+                    _saving
+                        ? const FxLoading(size: 18, strokeWidth: 2)
+                        : const Text('Salvar'),
+              ),
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            TabBar(
+              indicatorColor: primary,
+              labelColor: primary,
+              unselectedLabelColor: chrome.mute,
+              indicatorWeight: 2.5,
+              dividerColor: Colors.transparent,
               controller: _tabController,
-              children: [_tabBasico(), _tabSaude(), _tabTreinoNutricao()],
+              tabs: const [
+                Tab(text: 'Básico'),
+                Tab(text: 'Saúde'),
+                Tab(text: 'Treino & Nutrição'),
+              ],
             ),
-          ),
-        ],
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [_tabBasico(), _tabSaude(), _tabTreinoNutricao()],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

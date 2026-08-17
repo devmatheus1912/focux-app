@@ -5,6 +5,7 @@ import '../../../core/api/media_upload_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/galeria_repository.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
@@ -22,6 +23,7 @@ class GaleriaScreen extends ConsumerStatefulWidget {
 class _State extends ConsumerState<GaleriaScreen> {
   List<GalleryItem> _fotos = [];
   bool _loading = true, _uploading = false;
+  String? _erro;
 
   @override
   void initState() {
@@ -30,7 +32,10 @@ class _State extends ConsumerState<GaleriaScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final items =
           await GaleriaRepository(ref.read(apiClientProvider)).listar();
@@ -40,8 +45,13 @@ class _State extends ConsumerState<GaleriaScreen> {
           _loading = false;
         });
       }
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _erro = friendlyError(e);
+          _loading = false;
+        });
+      }
     }
   }
 
@@ -65,10 +75,9 @@ class _State extends ConsumerState<GaleriaScreen> {
         folder: 'galeria',
         resourceType: 'image',
       );
-      await GaleriaRepository(client).adicionar(
-        fotoUrl: url,
-        ordem: _fotos.length,
-      );
+      await GaleriaRepository(
+        client,
+      ).adicionar(fotoUrl: url, ordem: _fotos.length);
       await _load();
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
@@ -132,6 +141,14 @@ class _State extends ConsumerState<GaleriaScreen> {
         body:
             _loading
                 ? const FxLoading()
+                : _erro != null
+                ? FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: Theme.of(context).colorScheme.primary,
+                  message: _erro!,
+                  onRetry: _load,
+                  title: 'Não conseguimos carregar a galeria',
+                )
                 : _fotos.isEmpty
                 ? Center(
                   child: Column(

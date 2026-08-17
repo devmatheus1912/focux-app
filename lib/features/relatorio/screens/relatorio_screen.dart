@@ -5,6 +5,8 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
@@ -224,104 +226,102 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return FxShellScaffold(
-      constrainWidth: false,
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Relatório',
-        subtitle: widget.alunoNome,
-        onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-        actions: [
-          Semantics(
-            label: 'Exportar relatório em PDF',
-            button: true,
-            child: IconButton(
-              tooltip: 'Exportar PDF',
-              onPressed: _dados != null ? _exportarPdf : null,
-              icon: Icon(
-                Icons.picture_as_pdf_rounded,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
-                size: 22,
+    return fxScreenA11yScope(
+      label: 'Relatório — ${widget.alunoNome}',
+      child: FxShellScaffold(
+        constrainWidth: false,
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Relatório',
+          subtitle: widget.alunoNome,
+          onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
+          actions: [
+            Semantics(
+              label: 'Exportar relatório em PDF',
+              button: true,
+              child: IconButton(
+                tooltip: 'Exportar PDF',
+                onPressed: _dados != null ? _exportarPdf : null,
+                icon: Icon(
+                  Icons.picture_as_pdf_rounded,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                  size: 22,
+                ),
               ),
             ),
-          ),
-        ],
-      ),
-      body: FxContentWidthLimiter(
-        child: RefreshIndicator(
-          onRefresh: _carregarDados,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(TokensStrip.s4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _SeletorPeriodo(
-                  diasSelecionado: _dias,
-                  rangeCustom: _rangeCustom,
-                  onChanged: (dias) {
-                    setState(() {
-                      _dias = dias;
-                      _rangeCustom = null;
-                    });
-                    _carregarDados();
-                  },
-                  onCustom: _escolherPeriodoCustom,
-                ),
-                const SizedBox(height: 20),
-                if (_carregando)
-                  const SizedBox(height: 200, child: FxLoading())
-                else if (_erro != null)
-                  Container(
-                    decoration: fxListCardDecoration(
-                      context,
-                      accent: theme.colorScheme.error,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(TokensStrip.s4),
-                      child: Text(
-                        'Erro ao carregar relatório: $_erro',
-                        style: TextStyle(
-                          color: theme.colorScheme.onErrorContainer,
-                        ),
-                      ),
-                    ),
-                  )
-                else if (_dados != null) ...[
-                  _CardAderencia(
-                    dados: _dados!,
-                    alunoId: widget.alunoId,
-                    alunoNome: widget.alunoNome,
+          ],
+        ),
+        body: FxContentWidthLimiter(
+          child: RefreshIndicator(
+            onRefresh: _carregarDados,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(TokensStrip.s4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _SeletorPeriodo(
+                    diasSelecionado: _dias,
+                    rangeCustom: _rangeCustom,
+                    onChanged: (dias) {
+                      setState(() {
+                        _dias = dias;
+                        _rangeCustom = null;
+                      });
+                      _carregarDados();
+                    },
+                    onCustom: _escolherPeriodoCustom,
                   ),
-                  const SizedBox(height: TokensStrip.s4),
-                  if (_comparativo != null) ...[
-                    _CardComparativo(comparativo: _comparativo!),
+                  const SizedBox(height: 20),
+                  if (_carregando)
+                    const SizedBox(height: 200, child: FxLoading())
+                  else if (_erro != null)
+                    SizedBox(
+                      height: 280,
+                      child: FxErrorState(
+                        chromeOnDark: theme.brightness == Brightness.dark,
+                        primary: theme.colorScheme.primary,
+                        message: _erro!,
+                        onRetry: _carregarDados,
+                        title: 'Não conseguimos carregar o relatório',
+                      ),
+                    )
+                  else if (_dados != null) ...[
+                    _CardAderencia(
+                      dados: _dados!,
+                      alunoId: widget.alunoId,
+                      alunoNome: widget.alunoNome,
+                    ),
                     const SizedBox(height: TokensStrip.s4),
-                  ],
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _CardInfo(
-                          icone: Icons.check_circle_outline,
-                          titulo: 'Treinos Concluídos',
-                          valor:
-                              '${_dados!.treinosConcluidos} / ${_dados!.treinosTotal}',
-                          cor: theme.colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _CardInfo(
-                          icone: Icons.calendar_today_outlined,
-                          titulo: 'Dias Analisados',
-                          valor: '${_dados!.diasAnalisados}',
-                          cor: theme.colorScheme.secondary,
-                        ),
-                      ),
+                    if (_comparativo != null) ...[
+                      _CardComparativo(comparativo: _comparativo!),
+                      const SizedBox(height: TokensStrip.s4),
                     ],
-                  ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _CardInfo(
+                            icone: Icons.check_circle_outline,
+                            titulo: 'Treinos Concluídos',
+                            valor:
+                                '${_dados!.treinosConcluidos} / ${_dados!.treinosTotal}',
+                            cor: theme.colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _CardInfo(
+                            icone: Icons.calendar_today_outlined,
+                            titulo: 'Dias Analisados',
+                            valor: '${_dados!.diasAnalisados}',
+                            cor: theme.colorScheme.secondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),

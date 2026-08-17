@@ -8,9 +8,11 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -247,251 +249,263 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
         if (didPop) return;
         await _handleBack();
       },
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(title: 'Carteira e PIX', onBack: _handleBack),
-        body: perfilAsync.when(
-          loading: () => const FxLoading(),
-          error: (e, _) => Center(child: Text(friendlyError(e))),
-          data: (perfil) {
-            _preencherDadosAtuais(perfil);
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(TokensStrip.s4),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    FxStaggerItem(
-                      index: 0,
-                      child: Semantics(
-                        container: true,
-                        label:
-                            'Configure PIX e dados bancários para receber dos alunos.',
-                        child: Container(
-                          padding: const EdgeInsets.all(TokensStrip.s3),
-                          decoration: fxListCardDecoration(context),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(
-                                Icons.account_balance_wallet_outlined,
-                                color: primary,
-                              ),
-                              const SizedBox(width: TokensStrip.s2),
-                              Expanded(
-                                child: Text(
-                                  'Configure PIX e dados bancários para receber pagamentos dos alunos.',
-                                  style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.onSurface,
-                                    height: 1.45,
+      child: fxScreenA11yScope(
+        label: 'Carteira e PIX',
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(title: 'Carteira e PIX', onBack: _handleBack),
+          body: perfilAsync.when(
+            loading: () => const FxLoading(),
+            error:
+                (e, _) => FxErrorState(
+                  chromeOnDark: Theme.of(context).brightness == Brightness.dark,
+                  primary: primary,
+                  message: friendlyError(e),
+                  onRetry: () => ref.invalidate(perfilProvider),
+                  title: 'Não conseguimos carregar a carteira',
+                ),
+            data: (perfil) {
+              _preencherDadosAtuais(perfil);
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(TokensStrip.s4),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      FxStaggerItem(
+                        index: 0,
+                        child: Semantics(
+                          container: true,
+                          label:
+                              'Configure PIX e dados bancários para receber dos alunos.',
+                          child: Container(
+                            padding: const EdgeInsets.all(TokensStrip.s3),
+                            decoration: fxListCardDecoration(context),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.account_balance_wallet_outlined,
+                                  color: primary,
+                                ),
+                                const SizedBox(width: TokensStrip.s2),
+                                Expanded(
+                                  child: Text(
+                                    'Configure PIX e dados bancários para receber pagamentos dos alunos.',
+                                    style: TextStyle(
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
+                                      height: 1.45,
+                                    ),
                                   ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: TokensStrip.s4),
+                      const FxStaggerItem(index: 1, child: _ResumoMensalCard()),
+                      const SizedBox(height: TokensStrip.s4),
+                      FxStaggerItem(
+                        index: 2,
+                        child: _WalletSectionCard(
+                          title: 'Dados PIX',
+                          child: Column(
+                            children: [
+                              FormField<String>(
+                                initialValue: _tipoChavePix,
+                                validator: WalletPixValidation.validateTipo,
+                                builder: (field) {
+                                  final tipoLabel =
+                                      _tipoChavePix == null
+                                          ? 'Selecione o tipo'
+                                          : WalletPixValidation.labelForTipo(
+                                            _tipoChavePix!,
+                                          );
+                                  return Semantics(
+                                    button: true,
+                                    label: 'Tipo de chave PIX, $tipoLabel',
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(
+                                        TokensStrip.rSm,
+                                      ),
+                                      onTap: () => _selecionarTipoPix(field),
+                                      child: InputDecorator(
+                                        decoration: FxInputDeco.build(
+                                          context,
+                                          'Tipo de chave PIX',
+                                          icon: Icons.key_rounded,
+                                        ).copyWith(errorText: field.errorText),
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                tipoLabel,
+                                                style: TextStyle(
+                                                  color:
+                                                      _tipoChavePix == null
+                                                          ? TokensStrip
+                                                              .textSecondary
+                                                          : Theme.of(context)
+                                                              .colorScheme
+                                                              .onSurface,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                            Icon(
+                                              Icons.expand_more_rounded,
+                                              color: TokensStrip.textSecondary,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              const SizedBox(height: TokensStrip.s3),
+                              Semantics(
+                                label: 'Chave PIX',
+                                child: TextFormField(
+                                  controller: _chavePixCtrl,
+                                  decoration: FxInputDeco.build(
+                                    context,
+                                    'Chave PIX',
+                                    icon: Icons.pix_rounded,
+                                    hint: WalletPixValidation.hintForTipo(
+                                      _tipoChavePix,
+                                    ),
+                                    suffix:
+                                        _chavePixCtrl.text.trim().isNotEmpty
+                                            ? IconButton(
+                                              tooltip: 'Copiar chave PIX',
+                                              icon: const Icon(
+                                                Icons.copy_rounded,
+                                                size: 20,
+                                              ),
+                                              onPressed: _copiarChavePix,
+                                            )
+                                            : null,
+                                  ),
+                                  keyboardType:
+                                      WalletPixValidation.keyboardForTipo(
+                                        _tipoChavePix,
+                                      ),
+                                  inputFormatters:
+                                      WalletPixValidation.formattersForTipo(
+                                        _tipoChavePix,
+                                      ),
+                                  validator:
+                                      (v) => WalletPixValidation.validateChave(
+                                        _tipoChavePix,
+                                        v ?? '',
+                                      ),
                                 ),
                               ),
                             ],
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: TokensStrip.s4),
-                    const FxStaggerItem(index: 1, child: _ResumoMensalCard()),
-                    const SizedBox(height: TokensStrip.s4),
-                    FxStaggerItem(
-                      index: 2,
-                      child: _WalletSectionCard(
-                        title: 'Dados PIX',
-                        child: Column(
-                          children: [
-                            FormField<String>(
-                              initialValue: _tipoChavePix,
-                              validator: WalletPixValidation.validateTipo,
-                              builder: (field) {
-                                final tipoLabel =
-                                    _tipoChavePix == null
-                                        ? 'Selecione o tipo'
-                                        : WalletPixValidation.labelForTipo(
-                                          _tipoChavePix!,
-                                        );
-                                return Semantics(
-                                  button: true,
-                                  label: 'Tipo de chave PIX, $tipoLabel',
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(
-                                      TokensStrip.rSm,
-                                    ),
-                                    onTap: () => _selecionarTipoPix(field),
-                                    child: InputDecorator(
+                      const SizedBox(height: TokensStrip.s4),
+                      FxStaggerItem(
+                        index: 3,
+                        child: _WalletSectionCard(
+                          title: 'Dados bancários',
+                          subtitle:
+                              'Opcional — complementa o PIX para transferências.',
+                          child: Column(
+                            children: [
+                              Semantics(
+                                label: 'Banco',
+                                child: TextFormField(
+                                  controller: _bancoCtrl,
+                                  decoration: FxInputDeco.build(
+                                    context,
+                                    'Banco',
+                                    icon: Icons.account_balance_outlined,
+                                    hint: 'Ex.: Nubank, Itaú, Bradesco',
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: TokensStrip.s3),
+                              LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final stacked = constraints.maxWidth < 360;
+                                  final agencia = Semantics(
+                                    label: 'Agência',
+                                    child: TextFormField(
+                                      controller: _agenciaCtrl,
                                       decoration: FxInputDeco.build(
                                         context,
-                                        'Tipo de chave PIX',
-                                        icon: Icons.key_rounded,
-                                      ).copyWith(errorText: field.errorText),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              tipoLabel,
-                                              style: TextStyle(
-                                                color:
-                                                    _tipoChavePix == null
-                                                        ? TokensStrip
-                                                            .textSecondary
-                                                        : Theme.of(
-                                                          context,
-                                                        ).colorScheme.onSurface,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ),
-                                          Icon(
-                                            Icons.expand_more_rounded,
-                                            color: TokensStrip.textSecondary,
-                                          ),
-                                        ],
+                                        'Agência',
+                                        icon: Icons.tag_outlined,
                                       ),
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.digitsOnly,
+                                        LengthLimitingTextInputFormatter(6),
+                                      ],
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(height: TokensStrip.s3),
-                            Semantics(
-                              label: 'Chave PIX',
-                              child: TextFormField(
-                                controller: _chavePixCtrl,
-                                decoration: FxInputDeco.build(
-                                  context,
-                                  'Chave PIX',
-                                  icon: Icons.pix_rounded,
-                                  hint: WalletPixValidation.hintForTipo(
-                                    _tipoChavePix,
-                                  ),
-                                  suffix:
-                                      _chavePixCtrl.text.trim().isNotEmpty
-                                          ? IconButton(
-                                            tooltip: 'Copiar chave PIX',
-                                            icon: const Icon(
-                                              Icons.copy_rounded,
-                                              size: 20,
-                                            ),
-                                            onPressed: _copiarChavePix,
-                                          )
-                                          : null,
-                                ),
-                                keyboardType:
-                                    WalletPixValidation.keyboardForTipo(
-                                      _tipoChavePix,
+                                  );
+                                  final conta = Semantics(
+                                    label: 'Conta',
+                                    child: TextFormField(
+                                      controller: _contaCtrl,
+                                      decoration: FxInputDeco.build(
+                                        context,
+                                        'Conta',
+                                        icon: Icons.numbers_rounded,
+                                      ),
+                                      keyboardType: TextInputType.text,
+                                      inputFormatters:
+                                          WalletPixValidation.formattersForConta(),
                                     ),
-                                inputFormatters:
-                                    WalletPixValidation.formattersForTipo(
-                                      _tipoChavePix,
-                                    ),
-                                validator:
-                                    (v) => WalletPixValidation.validateChave(
-                                      _tipoChavePix,
-                                      v ?? '',
-                                    ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: TokensStrip.s4),
-                    FxStaggerItem(
-                      index: 3,
-                      child: _WalletSectionCard(
-                        title: 'Dados bancários',
-                        subtitle:
-                            'Opcional — complementa o PIX para transferências.',
-                        child: Column(
-                          children: [
-                            Semantics(
-                              label: 'Banco',
-                              child: TextFormField(
-                                controller: _bancoCtrl,
-                                decoration: FxInputDeco.build(
-                                  context,
-                                  'Banco',
-                                  icon: Icons.account_balance_outlined,
-                                  hint: 'Ex.: Nubank, Itaú, Bradesco',
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: TokensStrip.s3),
-                            LayoutBuilder(
-                              builder: (context, constraints) {
-                                final stacked = constraints.maxWidth < 360;
-                                final agencia = Semantics(
-                                  label: 'Agência',
-                                  child: TextFormField(
-                                    controller: _agenciaCtrl,
-                                    decoration: FxInputDeco.build(
-                                      context,
-                                      'Agência',
-                                      icon: Icons.tag_outlined,
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                      LengthLimitingTextInputFormatter(6),
-                                    ],
-                                  ),
-                                );
-                                final conta = Semantics(
-                                  label: 'Conta',
-                                  child: TextFormField(
-                                    controller: _contaCtrl,
-                                    decoration: FxInputDeco.build(
-                                      context,
-                                      'Conta',
-                                      icon: Icons.numbers_rounded,
-                                    ),
-                                    keyboardType: TextInputType.text,
-                                    inputFormatters:
-                                        WalletPixValidation.formattersForConta(),
-                                  ),
-                                );
+                                  );
 
-                                if (stacked) {
-                                  return Column(
+                                  if (stacked) {
+                                    return Column(
+                                      children: [
+                                        agencia,
+                                        const SizedBox(height: TokensStrip.s3),
+                                        conta,
+                                      ],
+                                    );
+                                  }
+
+                                  return Row(
                                     children: [
-                                      agencia,
-                                      const SizedBox(height: TokensStrip.s3),
-                                      conta,
+                                      Expanded(flex: 2, child: agencia),
+                                      const SizedBox(width: TokensStrip.s3),
+                                      Expanded(flex: 3, child: conta),
                                     ],
                                   );
-                                }
-
-                                return Row(
-                                  children: [
-                                    Expanded(flex: 2, child: agencia),
-                                    const SizedBox(width: TokensStrip.s3),
-                                    Expanded(flex: 3, child: conta),
-                                  ],
-                                );
-                              },
-                            ),
-                          ],
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: TokensStrip.s5),
-                    FxStaggerItem(
-                      index: 4,
-                      child: FxLiquidPrimaryButton(
-                        label: 'Salvar dados',
-                        icon: Icons.save_rounded,
-                        loading: _carregando,
-                        onPressed: _carregando ? null : _salvar,
+                      const SizedBox(height: TokensStrip.s5),
+                      FxStaggerItem(
+                        index: 4,
+                        child: FxLiquidPrimaryButton(
+                          label: 'Salvar dados',
+                          icon: Icons.save_rounded,
+                          loading: _carregando,
+                          onPressed: _carregando ? null : _salvar,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );

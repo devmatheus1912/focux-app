@@ -7,9 +7,11 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_input_deco.dart';
-import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../models/trilha.dart';
 import '../providers/trilhas_provider.dart';
 
@@ -29,53 +31,56 @@ class TrilhasScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final trilhasAsync = ref.watch(trilhasAlunoProvider(alunoId));
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Trilhas de Progresso',
-        subtitle: alunoNome,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add_rounded),
-            tooltip: 'Criar nova trilha',
-            onPressed: () => _showCriarTrilha(context, ref),
-          ),
-        ],
-      ),
-      body: trilhasAsync.when(
-        loading: () => const Center(child: FxLoading()),
-        error:
-            (e, _) => Center(
-              child: Padding(
-                padding: const EdgeInsets.all(TokensStrip.s5),
-                child: Text(
-                  friendlyError(e),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: EagleTokens.bad),
-                ),
-              ),
+    return fxScreenA11yScope(
+      label: 'Trilhas de Progresso — $alunoNome',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Trilhas de Progresso',
+          subtitle: alunoNome,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.add_rounded),
+              tooltip: 'Criar nova trilha',
+              onPressed: () => _showCriarTrilha(context, ref),
             ),
-        data: (trilhas) {
-          if (trilhas.isEmpty) {
-            return FxEmptyState(
-              icon: 'map',
-              title: 'Nenhuma trilha criada ainda',
-              subtitle:
-                  'Crie metas com marcos para acompanhar a evolução de $alunoNome.',
-              action: FxEmptyAction(
-                label: 'Criar primeira trilha',
-                onTap: () => _showCriarTrilha(context, ref),
+          ],
+        ),
+        body: trilhasAsync.when(
+          loading: () => const SkeletonList(count: 4),
+          error:
+              (e, _) => FxErrorState(
+                chromeOnDark: Theme.of(context).brightness == Brightness.dark,
+                primary: Theme.of(context).colorScheme.primary,
+                message: friendlyError(e),
+                onRetry: () => ref.invalidate(trilhasAlunoProvider(alunoId)),
+                title: 'Não conseguimos carregar as trilhas',
               ),
+          data: (trilhas) {
+            if (trilhas.isEmpty) {
+              return FxEmptyState(
+                icon: 'map',
+                title: 'Nenhuma trilha criada ainda',
+                subtitle:
+                    'Crie metas com marcos para acompanhar a evolução de $alunoNome.',
+                action: FxEmptyAction(
+                  label: 'Criar primeira trilha',
+                  onTap: () => _showCriarTrilha(context, ref),
+                ),
+              );
+            }
+            return ListView.builder(
+              padding: const EdgeInsets.all(TokensStrip.s4),
+              itemCount: trilhas.length,
+              itemBuilder:
+                  (ctx, i) => _TrilhaCard(
+                    trilha: trilhas[i],
+                    alunoId: alunoId,
+                    ref: ref,
+                  ),
             );
-          }
-          return ListView.builder(
-            padding: const EdgeInsets.all(TokensStrip.s4),
-            itemCount: trilhas.length,
-            itemBuilder:
-                (ctx, i) =>
-                    _TrilhaCard(trilha: trilhas[i], alunoId: alunoId, ref: ref),
-          );
-        },
+          },
+        ),
       ),
     );
   }
@@ -158,17 +163,19 @@ class TrilhasScreen extends ConsumerWidget {
                       label: 'Criar Trilha',
                       onPressed: () async {
                         if (tituloCtrl.text.trim().isEmpty) return;
-                        await ref.read(trilhasRepositoryProvider).criarTrilha(
-                          NovaTrilhaRequest(
-                            alunoId: alunoId,
-                            titulo: tituloCtrl.text.trim(),
-                            descricao:
-                                descCtrl.text.trim().isEmpty
-                                    ? null
-                                    : descCtrl.text.trim(),
-                            metaTipo: metaTipo,
-                          ),
-                        );
+                        await ref
+                            .read(trilhasRepositoryProvider)
+                            .criarTrilha(
+                              NovaTrilhaRequest(
+                                alunoId: alunoId,
+                                titulo: tituloCtrl.text.trim(),
+                                descricao:
+                                    descCtrl.text.trim().isEmpty
+                                        ? null
+                                        : descCtrl.text.trim(),
+                                metaTipo: metaTipo,
+                              ),
+                            );
                         ref.invalidate(trilhasAlunoProvider(alunoId));
                         if (ctx.mounted) Navigator.pop(ctx);
                       },
@@ -356,10 +363,9 @@ class _MarcoTile extends StatelessWidget {
               marco.concluido
                   ? null
                   : () async {
-                    await ref.read(trilhasRepositoryProvider).concluirMarco(
-                      trilhaId: trilhaId,
-                      marcoId: marco.id,
-                    );
+                    await ref
+                        .read(trilhasRepositoryProvider)
+                        .concluirMarco(trilhaId: trilhaId, marcoId: marco.id);
                     ref.invalidate(trilhasAlunoProvider(alunoId));
                   },
         ),

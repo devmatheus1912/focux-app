@@ -8,6 +8,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/feedback_video_repository.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import 'package:focux_app/core/widgets/fx_error_state.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -30,6 +31,7 @@ class FeedbackVideoScreen extends ConsumerStatefulWidget {
 class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
   List<FeedbackVideo> _feedbacks = [];
   bool _loading = true;
+  String? _erro;
 
   @override
   void initState() {
@@ -38,7 +40,10 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final repo = FeedbackVideoRepository(ref.read(apiClientProvider));
       final r =
@@ -53,8 +58,10 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _loading = false);
-        FeedbackHelper.showError(context, friendlyError(e));
+        setState(() {
+          _erro = friendlyError(e);
+          _loading = false;
+        });
       }
     }
   }
@@ -142,6 +149,14 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
         body:
             _loading
                 ? Center(child: FxLoading(color: primary))
+                : _erro != null
+                ? FxErrorState(
+                  chromeOnDark: Theme.of(context).brightness == Brightness.dark,
+                  primary: primary,
+                  message: _erro!,
+                  onRetry: _load,
+                  title: 'Não conseguimos carregar os feedbacks',
+                )
                 : _feedbacks.isEmpty
                 ? satelliteEmptyBody(
                   child: Aluno360ActionEmptyPanel(

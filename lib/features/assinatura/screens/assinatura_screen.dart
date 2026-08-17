@@ -14,6 +14,7 @@ import '../../../core/legal/focux_legal.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';

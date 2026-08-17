@@ -5,8 +5,9 @@ import '../data/evolucao_repository.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 
@@ -119,21 +120,14 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
         ),
         body:
             _loading
-                ? const Center(child: FxLoading())
+                ? const SkeletonList(count: 6)
                 : _erro != null
-                ? ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: [
-                    FxEmptyState(
-                      icon: 'cloud',
-                      title: 'Não conseguimos carregar o engajamento',
-                      subtitle: _erro!,
-                      action: FxEmptyAction(
-                        label: 'Tentar novamente',
-                        onTap: _load,
-                      ),
-                    ),
-                  ],
+                ? FxErrorState(
+                  chromeOnDark: Theme.of(context).brightness == Brightness.dark,
+                  primary: Theme.of(context).colorScheme.primary,
+                  message: _erro!,
+                  onRetry: _load,
+                  title: 'Não conseguimos carregar o engajamento',
                 )
                 : _eventos.isEmpty
                 ? ListView(

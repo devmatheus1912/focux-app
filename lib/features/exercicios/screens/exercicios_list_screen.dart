@@ -14,6 +14,7 @@ import 'widgets/exercicios_batch_actions.dart';
 import 'widgets/exercicios_filter_bar.dart';
 import 'widgets/exercicios_list_view.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
@@ -380,11 +381,12 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                 child: asyncList.when(
                   loading: () => const FxLoading(),
                   error:
-                      (e, _) => Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(TokensStrip.s5),
-                          child: Text(friendlyError(e)),
-                        ),
+                      (e, _) => FxErrorState(
+                        chromeOnDark: isDark,
+                        primary: Theme.of(context).colorScheme.primary,
+                        message: friendlyError(e),
+                        onRetry: _refresh,
+                        title: 'Nao conseguimos carregar os exercicios',
                       ),
                   data: (exercicios) {
                     final filtered = _applyFilter(exercicios);

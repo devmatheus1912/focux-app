@@ -15,6 +15,7 @@ import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/perfil_repository.dart';
@@ -141,7 +142,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
           );
       if (mounted) context.pop(true);
     } catch (e) {
-      setState(() => _error = 'Erro ao salvar. Tente novamente.');
+      if (mounted) setState(() => _error = friendlyError(e));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -154,284 +155,291 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final chrome = ShellChrome.forDark(isDark);
 
-    return FxShellScaffold(
-      useMesh: true,
-      appBar: FxShellAppBar(
-        title: 'Editar Perfil',
-        subtitle: 'PERFIL',
-        onBack: () => safePopOrGo(context, '/perfil'),
-      ),
-      bottomNavigationBar: Material(
-        color: Colors.transparent,
-        child: Container(
-          decoration: BoxDecoration(
-            color: (isDark ? EagleTokens.darkCard : TokensStrip.cardBg)
-                .withValues(alpha: 0.96),
-            border: Border(top: BorderSide(color: chrome.line)),
-          ),
-          padding: const EdgeInsets.fromLTRB(
-            TokensStrip.s5,
-            12,
-            TokensStrip.s5,
-            12,
-          ),
-          child: SafeArea(
-            top: false,
-            child: Semantics(
-              button: true,
-              enabled: !_loading,
-              label:
-                  _loading
-                      ? 'Salvando alterações do perfil'
-                      : 'Salvar alterações do perfil',
-              child: FxLiquidPrimaryButton(
-                label: 'Salvar alterações',
-                loadingLabel: 'Salvando…',
-                loading: _loading,
-                onPressed: _loading ? null : _submit,
+    return fxScreenA11yScope(
+      label: 'Editar Perfil',
+      child: FxShellScaffold(
+        useMesh: true,
+        appBar: FxShellAppBar(
+          title: 'Editar Perfil',
+          subtitle: 'PERFIL',
+          onBack: () => safePopOrGo(context, '/perfil'),
+        ),
+        bottomNavigationBar: Material(
+          color: Colors.transparent,
+          child: Container(
+            decoration: BoxDecoration(
+              color: (isDark ? EagleTokens.darkCard : TokensStrip.cardBg)
+                  .withValues(alpha: 0.96),
+              border: Border(top: BorderSide(color: chrome.line)),
+            ),
+            padding: const EdgeInsets.fromLTRB(
+              TokensStrip.s5,
+              12,
+              TokensStrip.s5,
+              12,
+            ),
+            child: SafeArea(
+              top: false,
+              child: Semantics(
+                button: true,
+                enabled: !_loading,
+                label:
+                    _loading
+                        ? 'Salvando alterações do perfil'
+                        : 'Salvar alterações do perfil',
+                child: FxLiquidPrimaryButton(
+                  label: 'Salvar alterações',
+                  loadingLabel: 'Salvando…',
+                  loading: _loading,
+                  onPressed: _loading ? null : _submit,
+                ),
               ),
             ),
           ),
         ),
-      ),
-      body: FxPremiumEntrance(
-        child: SafeArea(
-          bottom: false,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
-              TokensStrip.s4,
-              6,
-              TokensStrip.s4,
-              20,
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Semantics(
-                    button: true,
-                    enabled: !_uploadingPhoto,
-                    label:
-                        _uploadingPhoto
-                            ? 'Enviando foto do perfil'
-                            : 'Foto do perfil. Toque no ícone da câmera para trocar a foto',
-                    child: Center(
-                      child: FxGlowSurface(
-                        color: primary,
-                        enabled: true,
-                        intensity: 0.7,
-                        borderRadius: 999,
-                        child: Stack(
-                          alignment: Alignment.bottomRight,
-                          children: [
-                            CircleAvatar(
-                              radius: 44,
-                              backgroundColor: primary.withValues(alpha: 0.12),
-                              backgroundImage:
-                                  _logoUrl != null
-                                      ? NetworkImage(_logoUrl!)
-                                      : null,
-                              child:
-                                  _logoUrl == null
-                                      ? Text(
-                                        widget.perfil.nome.isNotEmpty
-                                            ? widget.perfil.nome[0]
-                                                .toUpperCase()
-                                            : '?',
-                                        style: AppTypography.inter(
-                                          fontSize: 36,
-                                          fontWeight: FontWeight.w800,
-                                          color: primary,
-                                        ),
-                                      )
-                                      : null,
-                            ),
-                            GestureDetector(
-                              onTap:
-                                  _uploadingPhoto ? null : _pickAndUploadPhoto,
-                              child: Container(
-                                width: 34,
-                                height: 34,
-                                decoration: BoxDecoration(
-                                  color: primary,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color:
-                                        isDark
-                                            ? EagleTokens.darkBg
-                                            : TokensStrip.pageBg,
-                                    width: 2,
-                                  ),
+        body: FxPremiumEntrance(
+          child: SafeArea(
+            bottom: false,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(
+                TokensStrip.s4,
+                6,
+                TokensStrip.s4,
+                20,
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Semantics(
+                      button: true,
+                      enabled: !_uploadingPhoto,
+                      label:
+                          _uploadingPhoto
+                              ? 'Enviando foto do perfil'
+                              : 'Foto do perfil. Toque no ícone da câmera para trocar a foto',
+                      child: Center(
+                        child: FxGlowSurface(
+                          color: primary,
+                          enabled: true,
+                          intensity: 0.7,
+                          borderRadius: 999,
+                          child: Stack(
+                            alignment: Alignment.bottomRight,
+                            children: [
+                              CircleAvatar(
+                                radius: 44,
+                                backgroundColor: primary.withValues(
+                                  alpha: 0.12,
                                 ),
+                                backgroundImage:
+                                    _logoUrl != null
+                                        ? NetworkImage(_logoUrl!)
+                                        : null,
                                 child:
-                                    _uploadingPhoto
-                                        ? const Padding(
-                                          padding: EdgeInsets.all(7),
-                                          child: FxLoading(
-                                            strokeWidth: 2,
-                                            color: Colors.white,
+                                    _logoUrl == null
+                                        ? Text(
+                                          widget.perfil.nome.isNotEmpty
+                                              ? widget.perfil.nome[0]
+                                                  .toUpperCase()
+                                              : '?',
+                                          style: AppTypography.inter(
+                                            fontSize: 36,
+                                            fontWeight: FontWeight.w800,
+                                            color: primary,
                                           ),
                                         )
-                                        : const Icon(
-                                          Icons.camera_alt_rounded,
-                                          size: 16,
-                                          color: Colors.white,
-                                        ),
+                                        : null,
+                              ),
+                              GestureDetector(
+                                onTap:
+                                    _uploadingPhoto
+                                        ? null
+                                        : _pickAndUploadPhoto,
+                                child: Container(
+                                  width: 34,
+                                  height: 34,
+                                  decoration: BoxDecoration(
+                                    color: primary,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color:
+                                          isDark
+                                              ? EagleTokens.darkBg
+                                              : TokensStrip.pageBg,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child:
+                                      _uploadingPhoto
+                                          ? const Padding(
+                                            padding: EdgeInsets.all(7),
+                                            child: FxLoading(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                          : const Icon(
+                                            Icons.camera_alt_rounded,
+                                            size: 16,
+                                            color: Colors.white,
+                                          ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Center(
+                      child: Text(
+                        'Toque no ícone para trocar a foto',
+                        style: TextStyle(fontSize: 12, color: mute),
+                      ),
+                    ),
+                    const SizedBox(height: TokensStrip.s3),
+                    FxStaggerItem(
+                      index: 0,
+                      child: _SectionCard(
+                        title: 'Dados pessoais',
+                        showHint: false,
+                        child: Column(
+                          children: [
+                            Semantics(
+                              label: 'Nome completo',
+                              child: TextFormField(
+                                controller: _nomeCtrl,
+                                decoration: FxInputDeco.build(
+                                  context,
+                                  'Nome completo',
+                                  icon: Icons.person_outline_rounded,
+                                ),
+                                validator:
+                                    (v) =>
+                                        v == null || v.isEmpty
+                                            ? 'Informe o nome'
+                                            : null,
+                              ),
+                            ),
+                            const SizedBox(height: TokensStrip.s2),
+                            Semantics(
+                              label: 'Telefone ou WhatsApp',
+                              child: TextFormField(
+                                controller: _telefoneCtrl,
+                                keyboardType: TextInputType.phone,
+                                inputFormatters: [BrPhone.formatter()],
+                                decoration: FxInputDeco.build(
+                                  context,
+                                  'Telefone / WhatsApp',
+                                  icon: Icons.phone_iphone_rounded,
+                                  hint: '(11) 99999-0000',
+                                ),
+                                validator: BrPhone.validateOptional,
                               ),
                             ),
                           ],
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Center(
-                    child: Text(
-                      'Toque no ícone para trocar a foto',
-                      style: TextStyle(fontSize: 12, color: mute),
-                    ),
-                  ),
-                  const SizedBox(height: TokensStrip.s3),
-                  FxStaggerItem(
-                    index: 0,
-                    child: _SectionCard(
-                      title: 'Dados pessoais',
-                      showHint: false,
-                      child: Column(
-                        children: [
-                          Semantics(
-                            label: 'Nome completo',
-                            child: TextFormField(
-                              controller: _nomeCtrl,
-                              decoration: FxInputDeco.build(
-                                context,
-                                'Nome completo',
-                                icon: Icons.person_outline_rounded,
+                    const SizedBox(height: TokensStrip.s3),
+                    FxStaggerItem(
+                      index: 1,
+                      child: _SectionCard(
+                        title: 'Dados profissionais',
+                        child: Column(
+                          children: [
+                            Semantics(
+                              label: 'CREF opcional',
+                              child: TextFormField(
+                                controller: _crefCtrl,
+                                decoration: FxInputDeco.build(
+                                  context,
+                                  'CREF (opcional)',
+                                  icon: Icons.badge_outlined,
+                                  hint: 'Ex: 012345-G/SP',
+                                ),
                               ),
-                              validator:
-                                  (v) =>
-                                      v == null || v.isEmpty
-                                          ? 'Informe o nome'
-                                          : null,
                             ),
-                          ),
-                          const SizedBox(height: TokensStrip.s2),
-                          Semantics(
-                            label: 'Telefone ou WhatsApp',
-                            child: TextFormField(
-                              controller: _telefoneCtrl,
-                              keyboardType: TextInputType.phone,
-                              inputFormatters: [BrPhone.formatter()],
-                              decoration: FxInputDeco.build(
-                                context,
-                                'Telefone / WhatsApp',
-                                icon: Icons.phone_iphone_rounded,
-                                hint: '(11) 99999-0000',
+                            const SizedBox(height: TokensStrip.s2),
+                            Semantics(
+                              label: 'Especialidade principal',
+                              child: TextFormField(
+                                controller: _especialidadeCtrl,
+                                decoration: FxInputDeco.build(
+                                  context,
+                                  'Especialidade principal',
+                                  icon: Icons.fitness_center_outlined,
+                                  hint: 'Ex: Musculação',
+                                ),
                               ),
-                              validator: BrPhone.validateOptional,
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: TokensStrip.s2),
+                            Semantics(
+                              label: 'Áreas de atuação opcional',
+                              child: TextFormField(
+                                controller: _especialidadesCtrl,
+                                decoration: FxInputDeco.build(
+                                  context,
+                                  'Áreas de atuação (opcional)',
+                                  icon: Icons.category_outlined,
+                                  hint: 'Ex: Funcional, Hipertrofia',
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: TokensStrip.s2),
+                            Semantics(
+                              label: 'Instagram opcional',
+                              child: TextFormField(
+                                controller: _instagramCtrl,
+                                decoration: FxInputDeco.build(
+                                  context,
+                                  'Instagram (opcional)',
+                                  icon: Icons.alternate_email_rounded,
+                                  hint: 'seuusuario',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: TokensStrip.s3),
-                  FxStaggerItem(
-                    index: 1,
-                    child: _SectionCard(
-                      title: 'Dados profissionais',
-                      child: Column(
-                        children: [
-                          Semantics(
-                            label: 'CREF opcional',
-                            child: TextFormField(
-                              controller: _crefCtrl,
-                              decoration: FxInputDeco.build(
-                                context,
-                                'CREF (opcional)',
-                                icon: Icons.badge_outlined,
-                                hint: 'Ex: 012345-G/SP',
-                              ),
+                    const SizedBox(height: TokensStrip.s3),
+                    FxStaggerItem(
+                      index: 2,
+                      child: _SectionCard(
+                        title: 'Bio / Apresentação',
+                        child: Semantics(
+                          label: 'Sobre você, até 500 caracteres',
+                          child: TextFormField(
+                            controller: _bioCtrl,
+                            maxLines: 4,
+                            maxLength: 500,
+                            decoration: FxInputDeco.build(
+                              context,
+                              'Sobre você (opcional)',
+                              icon: Icons.notes_rounded,
+                              hint:
+                                  'Conte sua história, metodologia e diferenciais...',
                             ),
-                          ),
-                          const SizedBox(height: TokensStrip.s2),
-                          Semantics(
-                            label: 'Especialidade principal',
-                            child: TextFormField(
-                              controller: _especialidadeCtrl,
-                              decoration: FxInputDeco.build(
-                                context,
-                                'Especialidade principal',
-                                icon: Icons.fitness_center_outlined,
-                                hint: 'Ex: Musculação',
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: TokensStrip.s2),
-                          Semantics(
-                            label: 'Áreas de atuação opcional',
-                            child: TextFormField(
-                              controller: _especialidadesCtrl,
-                              decoration: FxInputDeco.build(
-                                context,
-                                'Áreas de atuação (opcional)',
-                                icon: Icons.category_outlined,
-                                hint: 'Ex: Funcional, Hipertrofia',
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: TokensStrip.s2),
-                          Semantics(
-                            label: 'Instagram opcional',
-                            child: TextFormField(
-                              controller: _instagramCtrl,
-                              decoration: FxInputDeco.build(
-                                context,
-                                'Instagram (opcional)',
-                                icon: Icons.alternate_email_rounded,
-                                hint: 'seuusuario',
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: TokensStrip.s3),
-                  FxStaggerItem(
-                    index: 2,
-                    child: _SectionCard(
-                      title: 'Bio / Apresentação',
-                      child: Semantics(
-                        label: 'Sobre você, até 500 caracteres',
-                        child: TextFormField(
-                          controller: _bioCtrl,
-                          maxLines: 4,
-                          maxLength: 500,
-                          decoration: FxInputDeco.build(
-                            context,
-                            'Sobre você (opcional)',
-                            icon: Icons.notes_rounded,
-                            hint:
-                                'Conte sua história, metodologia e diferenciais...',
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  if (_error != null) ...[
-                    const SizedBox(height: 12),
-                    Semantics(
-                      liveRegion: true,
-                      label: _error!,
-                      child: Text(
-                        _error!,
-                        style: const TextStyle(color: EagleTokens.bad),
+                    if (_error != null) ...[
+                      const SizedBox(height: 12),
+                      Semantics(
+                        liveRegion: true,
+                        label: _error!,
+                        child: Text(
+                          _error!,
+                          style: const TextStyle(color: EagleTokens.bad),
+                        ),
                       ),
-                    ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),

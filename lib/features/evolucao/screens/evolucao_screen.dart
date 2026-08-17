@@ -8,9 +8,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 
 import '../../../core/router/safe_navigation.dart';
@@ -124,12 +125,16 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen>
                     alunoNome: widget.alunoNome,
                     medidasAsync: medidasAsync,
                     onRegister: () => _mostrarDialogMedida(context),
+                    onRetry:
+                        () => ref.invalidate(medidasProvider(widget.alunoId)),
                   ),
                   _TabRecordes(
                     alunoId: widget.alunoId,
                     alunoNome: widget.alunoNome,
                     recordesAsync: recordesAsync,
                     onRegister: () => _mostrarDialogRecorde(context),
+                    onRetry:
+                        () => ref.invalidate(recordesProvider(widget.alunoId)),
                   ),
                 ],
               ),
@@ -376,23 +381,26 @@ class _TabMedidas extends StatelessWidget {
   final String alunoNome;
   final AsyncValue<List<MedidaCorporal>> medidasAsync;
   final VoidCallback onRegister;
+  final VoidCallback onRetry;
   const _TabMedidas({
     required this.alunoId,
     required this.alunoNome,
     required this.medidasAsync,
     required this.onRegister,
+    required this.onRetry,
   });
 
   @override
   Widget build(BuildContext context) {
     return medidasAsync.when(
-      loading: () => const FxLoading(),
+      loading: () => const SkeletonList(count: 4),
       error:
-          (e, _) => Center(
-            child: Padding(
-              padding: const EdgeInsets.all(TokensStrip.s5),
-              child: Text(friendlyError(e), textAlign: TextAlign.center),
-            ),
+          (e, _) => FxErrorState(
+            chromeOnDark: Theme.of(context).brightness == Brightness.dark,
+            primary: Theme.of(context).colorScheme.primary,
+            message: friendlyError(e),
+            onRetry: onRetry,
+            title: 'Não conseguimos carregar as medidas',
           ),
       data: (lista) {
         if (lista.isEmpty) {
@@ -526,23 +534,26 @@ class _TabRecordes extends StatelessWidget {
   final String alunoNome;
   final AsyncValue<List<RecordePessoal>> recordesAsync;
   final VoidCallback onRegister;
+  final VoidCallback onRetry;
   const _TabRecordes({
     required this.alunoId,
     required this.alunoNome,
     required this.recordesAsync,
     required this.onRegister,
+    required this.onRetry,
   });
 
   @override
   Widget build(BuildContext context) {
     return recordesAsync.when(
-      loading: () => const FxLoading(),
+      loading: () => const SkeletonList(count: 4),
       error:
-          (e, _) => Center(
-            child: Padding(
-              padding: const EdgeInsets.all(TokensStrip.s5),
-              child: Text(friendlyError(e), textAlign: TextAlign.center),
-            ),
+          (e, _) => FxErrorState(
+            chromeOnDark: Theme.of(context).brightness == Brightness.dark,
+            primary: Theme.of(context).colorScheme.primary,
+            message: friendlyError(e),
+            onRetry: onRetry,
+            title: 'Não conseguimos carregar os recordes',
           ),
       data: (lista) {
         if (lista.isEmpty) {

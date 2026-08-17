@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/depoimento_repository.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -19,6 +21,7 @@ class DepoimentosPersonalScreen extends ConsumerStatefulWidget {
 class _State extends ConsumerState<DepoimentosPersonalScreen> {
   List<DepoimentoModel>? _items;
   bool _loading = true;
+  String? _erro;
 
   @override
   void initState() {
@@ -27,7 +30,10 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final items =
           await DepoimentoRepository(
@@ -39,8 +45,13 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
           _loading = false;
         });
       }
-    } catch (_) {
-      if (mounted) setState(() => _loading = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _erro = friendlyError(e);
+          _loading = false;
+        });
+      }
     }
   }
 
@@ -77,17 +88,20 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
         body:
             _loading
                 ? const Center(child: FxLoading())
+                : _erro != null
+                ? FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: primary,
+                  message: _erro!,
+                  onRetry: _load,
+                  title: 'Não conseguimos carregar os depoimentos',
+                )
                 : (_items == null || _items!.isEmpty)
-                ? Center(
-                  child: Text(
-                    'Nenhum depoimento ainda.',
-                    style: TextStyle(
-                      color:
-                          isDark
-                              ? EagleTokens.darkInkMute
-                              : TokensStrip.textSecondary,
-                    ),
-                  ),
+                ? const FxEmptyState(
+                  icon: 'star',
+                  title: 'Nenhum depoimento ainda',
+                  subtitle:
+                      'Quando seus alunos enviarem depoimentos, eles aparecem aqui para aprovação.',
                 )
                 : ListView.separated(
                   padding: const EdgeInsets.all(TokensStrip.s4),

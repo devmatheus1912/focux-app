@@ -8,6 +8,8 @@ import '../../ia/data/ia_repository.dart';
 import '../../ia/widgets/ia_quota_upgrade.dart';
 import '../data/alimentar_repository.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
@@ -34,6 +36,7 @@ class _PlanoAlimentarDetailScreenState
     extends ConsumerState<PlanoAlimentarDetailScreen> {
   List<Refeicao> _refeicoes = [];
   bool _loading = true;
+  String? _erro;
 
   @override
   void initState() {
@@ -42,7 +45,10 @@ class _PlanoAlimentarDetailScreenState
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final repo = AlimentarRepository(ref.read(apiClientProvider));
       final lista = await repo.listarRefeicoes(widget.alunoId, widget.plano.id);
@@ -53,8 +59,10 @@ class _PlanoAlimentarDetailScreenState
       });
     } catch (e) {
       if (mounted) {
-        setState(() => _loading = false);
-        FeedbackHelper.showError(context, friendlyError(e));
+        setState(() {
+          _erro = friendlyError(e);
+          _loading = false;
+        });
       }
     }
   }
@@ -262,12 +270,21 @@ class _PlanoAlimentarDetailScreenState
               child:
                   _loading
                       ? const FxLoading()
+                      : _erro != null
+                      ? FxErrorState(
+                        chromeOnDark:
+                            Theme.of(context).brightness == Brightness.dark,
+                        primary: Theme.of(context).colorScheme.primary,
+                        message: _erro!,
+                        onRetry: _load,
+                        title: 'Não conseguimos carregar as refeições',
+                      )
                       : _refeicoes.isEmpty
-                      ? const Center(
-                        child: Text(
-                          'Nenhuma refeição cadastrada.\nToque em + para adicionar.',
-                          textAlign: TextAlign.center,
-                        ),
+                      ? const FxEmptyState(
+                        icon: 'article',
+                        title: 'Nenhuma refeição cadastrada',
+                        subtitle:
+                            'Toque em + para adicionar a primeira refeição do plano.',
                       )
                       : ListView.builder(
                         padding: const EdgeInsets.fromLTRB(12, 12, 12, 100),

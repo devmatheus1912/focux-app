@@ -1,6 +1,5 @@
 part of 'exercicio_detail_screen.dart';
 
-
 class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
   bool _uploadingVideo = false;
 
@@ -150,11 +149,14 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
           child: exercicioAsync.when(
             loading: () => Center(child: FxLoading(color: primary)),
             error:
-                (e, _) => Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(TokensStrip.s5),
-                    child: Text(friendlyError(e), textAlign: TextAlign.center),
-                  ),
+                (e, _) => FxErrorState(
+                  chromeOnDark: isDark,
+                  primary: primary,
+                  message: friendlyError(e),
+                  onRetry:
+                      () =>
+                          ref.invalidate(exercicioProvider(widget.exercicioId)),
+                  title: 'Nao conseguimos carregar o exercicio',
                 ),
             data:
                 (ex) => SingleChildScrollView(

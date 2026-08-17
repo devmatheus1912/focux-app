@@ -296,30 +296,12 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
       body: planosAsync.when(
         loading: () => const PaywallLoadingSkeleton(),
         error:
-            (error, _) => Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Não foi possível carregar os planos.',
-                      style: TextStyle(color: mute),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '$error',
-                      textAlign: TextAlign.center,
-                      style: TokensStrip.bodyMuted(color: mute),
-                    ),
-                    const SizedBox(height: 16),
-                    FilledButton(
-                      onPressed: () => ref.invalidate(planosProvider),
-                      child: const Text('Tentar novamente'),
-                    ),
-                  ],
-                ),
-              ),
+            (error, _) => FxErrorState(
+              chromeOnDark: isDark,
+              primary: primary,
+              message: friendlyError(error),
+              onRetry: () => ref.invalidate(planosProvider),
+              title: 'Não foi possível carregar os planos',
             ),
         data: (planosList) {
           return buildPaywallPlansScroll(

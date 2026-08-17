@@ -6,6 +6,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -24,6 +25,7 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
   List<FeedbackVideo> _items = [];
   List<ExercicioOpcao> _exercicios = [];
   bool _loading = true;
+  String? _erro;
 
   @override
   void initState() {
@@ -32,7 +34,10 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final repo = FeedbackVideoRepository(ref.read(apiClientProvider));
       final items = await repo.meus();
@@ -48,7 +53,12 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _erro = friendlyError(e);
+          _loading = false;
+        });
+      }
     }
   }
 
@@ -113,6 +123,14 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
         body:
             _loading
                 ? const Center(child: FxLoading())
+                : _erro != null
+                ? FxErrorState(
+                  chromeOnDark: Theme.of(context).brightness == Brightness.dark,
+                  primary: Theme.of(context).colorScheme.primary,
+                  message: _erro!,
+                  onRetry: _load,
+                  title: 'Não conseguimos carregar seus vídeos',
+                )
                 : RefreshIndicator(
                   onRefresh: _load,
                   child:
