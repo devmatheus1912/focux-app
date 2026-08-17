@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -14,6 +15,8 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../features/planos/data/planos_repository.dart';
+import '../../../features/planos/providers/plano_features_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../data/habito_repository.dart';
 
@@ -32,6 +35,7 @@ class HabitosPersonalScreen extends ConsumerStatefulWidget {
 class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
   List<Habito> _habitos = [];
   List<ComplianceItem> _compliance = [];
+  PlanoFeatures? _planoFromHome;
   bool _loading = true;
   String? _error;
   DateTime? _fetchedAt;
@@ -53,6 +57,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
       setState(() {
         _habitos = home.habitos;
         _compliance = home.compliance;
+        _planoFromHome = home.planoFeatures;
         _fetchedAt = DateTime.now();
         _loading = false;
       });
@@ -161,6 +166,10 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
               metaSemanal: selected?.metaSemanal,
               icone: selected?.icone,
             );
+        AnalyticsService.instance.track(
+          ProductEvents.habitoCreated,
+          props: {'feature': 'habitos'},
+        );
         await _carregar();
       } catch (e) {
         if (!mounted) return;
@@ -174,6 +183,13 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final planoFromHome = _planoFromHome;
+    if (planoFromHome != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(planoFeaturesProvider.notifier).seedFromHome(planoFromHome);
+      });
+    }
 
     return fxScreenA11yScope(
       label: 'Hábitos & Compliance',

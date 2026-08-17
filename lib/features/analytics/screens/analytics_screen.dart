@@ -6,6 +6,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/analytics_repository.dart';
@@ -19,15 +20,45 @@ import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 part 'analytics_screen_widgets.part.dart';
 
-class AnalyticsScreen extends ConsumerWidget {
+class AnalyticsScreen extends ConsumerStatefulWidget {
   const AnalyticsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AnalyticsScreen> createState() => _AnalyticsScreenState();
+}
+
+class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
+  DateTime? _fetchedAt;
+  ProviderSubscription<AsyncValue<AnalyticsDashboard>>? _freshnessSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _freshnessSub = ref.listenManual(analyticsDashboardProvider, (
+      _,
+      next,
+    ) {
+      if (!next.hasValue || next.isLoading || next.hasError) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() => _fetchedAt = DateTime.now());
+      });
+    }, fireImmediately: true);
+  }
+
+  @override
+  void dispose() {
+    _freshnessSub?.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final chrome = ShellChrome.of(context);
     final async = ref.watch(analyticsDashboardProvider);
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Analytics',
@@ -36,6 +67,7 @@ class AnalyticsScreen extends ConsumerWidget {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Analytics',
+          subtitle: freshnessLabel,
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
         ),
         body: FxContentWidthLimiter(

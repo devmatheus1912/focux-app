@@ -1,8 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/automacoes/data/automacao_repository.dart';
+import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 
 void main() {
-  test('AutomacoesHomeBundle parses fluxos + templates', () {
+  test('AutomacoesHomeBundle parses fluxos + templates + optional planoFeatures', () {
     final bundle = AutomacoesHomeBundle.fromJson({
       'fluxos': [
         {
@@ -22,6 +23,10 @@ void main() {
           'triggerTipo': 'ALUNO_CRIADO',
         },
       ],
+      'planoFeatures': {
+        'plano': 'ENTERPRISE',
+        'features': {'automacoes': true, 'agenda': true},
+      },
     });
 
     expect(bundle.fluxos, hasLength(1));
@@ -31,11 +36,14 @@ void main() {
     expect(bundle.templates, hasLength(1));
     expect(bundle.templates.first.id, 'ONBOARDING_7D');
     expect(bundle.templates.first.nome, 'Onboarding 7 dias');
+    expect(bundle.planoFeatures?.plano, SubscriptionPlan.ENTERPRISE);
+    expect(bundle.planoFeatures?.automacoes, isTrue);
   });
 
   test('AutomacoesHomeBundle tolerates missing lists', () {
     final bundle = AutomacoesHomeBundle.fromJson({});
     expect(bundle.fluxos, isEmpty);
     expect(bundle.templates, isEmpty);
+    expect(bundle.planoFeatures, isNull);
   });
 }

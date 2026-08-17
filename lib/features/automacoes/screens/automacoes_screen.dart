@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -15,6 +16,8 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../planos/data/planos_repository.dart';
+import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/automacao_repository.dart';
 
@@ -32,6 +35,7 @@ class AutomacoesScreen extends ConsumerStatefulWidget {
 class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
   List<AutomacaoFluxo> _fluxos = [];
   List<AutomacaoTemplate> _templates = [];
+  PlanoFeatures? _planoFromHome;
   bool _loading = true;
   String? _error;
   DateTime? _fetchedAt;
@@ -53,6 +57,7 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
       setState(() {
         _fluxos = home.fluxos;
         _templates = home.templates;
+        _planoFromHome = home.planoFeatures;
         _fetchedAt = DateTime.now();
         _loading = false;
       });
@@ -66,6 +71,10 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
   }
 
   Future<void> _ativar(AutomacaoTemplate t) async {
+    AnalyticsService.instance.track(
+      ProductEvents.automacaoTemplateActivated,
+      props: {'feature': 'automacoes', 'template_id': t.id},
+    );
     try {
       await ref.read(_repo).ativarTemplate(t.id);
       await _load();
@@ -82,6 +91,13 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
     final chrome = ShellChrome.of(context);
     final scheme = Theme.of(context).colorScheme;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final planoFromHome = _planoFromHome;
+    if (planoFromHome != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(planoFeaturesProvider.notifier).seedFromHome(planoFromHome);
+      });
+    }
 
     return fxScreenA11yScope(
       label: 'Automações',

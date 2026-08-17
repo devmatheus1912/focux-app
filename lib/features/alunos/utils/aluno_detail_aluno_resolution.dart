@@ -9,6 +9,28 @@ bool shouldWatchAlunoDetailFallback(AsyncValue<Aluno360> aluno360Async) {
   return aluno360Async.hasError && !aluno360Async.hasValue;
 }
 
+/// Recovery sidecar GET: never while `/360` is loading. Use the bundled
+/// snapshot when present; only sidecar after 360 settled without recovery.
+bool shouldWatchAlunoRecoverySidecar(
+  AsyncValue<Aluno360> aluno360Async, {
+  required int tabIndex,
+}) {
+  if (tabIndex != 0) return false;
+  if (!aluno360Async.hasValue && !aluno360Async.hasError) return false;
+  return aluno360Async.valueOrNull?.recoverySnapshot == null;
+}
+
+/// Evolução / timeline sidecars: not while `/360` is loading. Prefer bundle
+/// fields on success; sidecar only when 360 settled without a payload.
+bool shouldWatchAluno360Tab1Sidecars(
+  AsyncValue<Aluno360> aluno360Async, {
+  required int tabIndex,
+}) {
+  if (tabIndex != 1) return false;
+  if (aluno360Async.hasValue) return false;
+  return aluno360Async.hasError;
+}
+
 /// Resolves the aluno shown on Aluno Detail: prefer the 360 payload, else the
 /// optional [alunoFallbackAsync] from [alunoProvider].
 AsyncValue<Aluno> resolveAlunoDetailAlunoAsync({

@@ -130,4 +130,14 @@ class ProductEvents {
   static const homePrioritiesOpened = 'home_priorities_opened';
   static const homeDayFocusAction = 'home_day_focus_action';
   static const homeHelpOpened = 'home_help_opened';
+
+  static const alunosAddTapped = 'alunos_add_tapped';
+  static const leadCreatedOrOpened = 'lead_created_or_opened';
+  static const alertaRiscoOpened = 'alerta_risco_opened';
+  static const dunningMarkedRecovered = 'dunning_marked_recovered';
+  static const automacaoTemplateActivated = 'automacao_template_activated';
+  static const lojaCheckoutStarted = 'loja_checkout_started';
+  static const habitoCreated = 'habito_created';
+  static const chatThreadOpened = 'chat_thread_opened';
+  static const financeiroCobrarViaChat = 'financeiro_cobrar_via_chat';
 }

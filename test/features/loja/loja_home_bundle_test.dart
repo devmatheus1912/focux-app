@@ -1,8 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/loja/data/loja_repository.dart';
+import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 
 void main() {
-  test('LojaHomeBundle parses pacotes + pedidos', () {
+  test('LojaHomeBundle parses pacotes + pedidos + optional planoFeatures', () {
     final bundle = LojaHomeBundle.fromJson({
       'pacotes': [
         {
@@ -27,6 +28,10 @@ void main() {
           'status': 'PENDENTE',
         },
       ],
+      'planoFeatures': {
+        'plano': 'ENTERPRISE_PRO',
+        'features': {'lojaDigital': true, 'agenda': true},
+      },
     });
     expect(bundle.pacotes, hasLength(1));
     expect(bundle.pacotes.first.titulo, 'Musculação');
@@ -34,6 +39,8 @@ void main() {
     expect(bundle.pedidos, hasLength(1));
     expect(bundle.pedidos.first.buyerEmail, 'ana@test.com');
     expect(bundle.pedidos.first.status, 'PENDENTE');
+    expect(bundle.planoFeatures?.plano, SubscriptionPlan.ENTERPRISE_PRO);
+    expect(bundle.planoFeatures?.lojaDigital, isTrue);
   });
 
   test('LojaHomeBundle skips inactive pacotes and missing lists', () {
@@ -54,5 +61,6 @@ void main() {
     });
     expect(bundle.pacotes, isEmpty);
     expect(bundle.pedidos, isEmpty);
+    expect(bundle.planoFeatures, isNull);
   });
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -66,6 +67,14 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
   }
 
   Future<void> _marcarRecuperado(DunningFalha falha) async {
+    AnalyticsService.instance.track(
+      ProductEvents.dunningMarkedRecovered,
+      props: {
+        'feature': 'dunning',
+        'falha_id': falha.id,
+        if (falha.alunoId != null) 'aluno_id': falha.alunoId,
+      },
+    );
     setState(() => _marcandoId = falha.id);
     try {
       await ref.read(dunningRepositoryProvider).marcarRecuperado(falha.id);

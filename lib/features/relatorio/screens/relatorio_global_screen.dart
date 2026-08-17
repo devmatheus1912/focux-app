@@ -5,6 +5,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -30,6 +31,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
   ResumoGlobal? _dados;
   bool _loading = true;
   String? _erro;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -49,6 +51,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
       setState(() {
         _dados = dados;
         _loading = false;
+        _fetchedAt = DateTime.now();
       });
     } catch (e) {
       if (!mounted) return;
@@ -61,6 +64,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     return fxScreenA11yScope(
       label: 'Relatorio global',
       child: FeatureGate(
@@ -72,6 +76,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
           useMesh: true,
           appBar: FxShellAppBar(
             title: 'Relatorio global',
+            subtitle: freshnessLabel,
             onBack: () => safePopOrGo(context, '/dashboard/personal'),
             actions: [
               IconButton(

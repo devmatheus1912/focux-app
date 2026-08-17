@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
@@ -70,13 +73,25 @@ class Aluno360TimelineFullSheet extends ConsumerWidget {
                 24 + MediaQuery.of(ctx).padding.bottom,
               ),
               child: pagedAsync.when(
-                loading: () => const Center(child: FxLoading()),
+                loading: () => const SkeletonList(count: 6),
                 error:
-                    (_, __) => Center(
-                      child: Text(
-                        'Não foi possível carregar o histórico.',
-                        style: Aluno360Layout.captionStyle(context),
+                    (e, _) => FxErrorState(
+                      chromeOnDark: isDark,
+                      primary: primary,
+                      message: friendlyError(
+                        e,
+                        fallback: 'Não foi possível carregar o histórico.',
                       ),
+                      onRetry:
+                          () =>
+                              ref
+                                  .read(
+                                    alunoTimeline360PagedProvider(
+                                      aluno.id,
+                                    ).notifier,
+                                  )
+                                  .refresh(),
+                      title: 'Não conseguimos carregar o histórico',
                     ),
                 data: (state) {
                   final items = _itemsFromEvents(state.events);

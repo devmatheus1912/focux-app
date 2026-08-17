@@ -139,7 +139,10 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
               Expanded(
                 child:
                     _loading
-                        ? Center(child: FxLoading(color: primary))
+                        ? Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+                          child: FxLoading.sectionShimmer(context, height: 200),
+                        )
                         : _comentarios.isEmpty
                         ? const Center(
                           child: Text('Seja o primeiro a comentar!'),

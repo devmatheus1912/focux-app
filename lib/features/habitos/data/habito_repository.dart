@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../planos/data/planos_repository.dart';
 
 class HabitoTemplate {
   final String tipo;
@@ -94,17 +95,20 @@ class ComplianceItem {
   );
 }
 
-/// BFF `GET /api/habitos/home` — lista + compliance em um round-trip.
+/// BFF `GET /api/habitos/home` — lista + compliance + planoFeatures.
 class HabitosHomeBundle {
   final List<Habito> habitos;
   final List<ComplianceItem> compliance;
+  final PlanoFeatures? planoFeatures;
 
   const HabitosHomeBundle({
     required this.habitos,
     required this.compliance,
+    this.planoFeatures,
   });
 
   factory HabitosHomeBundle.fromJson(Map<String, dynamic> j) {
+    final planoRaw = j['planoFeatures'];
     return HabitosHomeBundle(
       habitos:
           ((j['habitos'] as List?) ?? const [])
@@ -114,6 +118,10 @@ class HabitosHomeBundle {
           ((j['compliance'] as List?) ?? const [])
               .map((e) => ComplianceItem.fromJson(e as Map<String, dynamic>))
               .toList(),
+      planoFeatures:
+          planoRaw is Map
+              ? PlanoFeatures.fromJson(Map<String, dynamic>.from(planoRaw))
+              : null,
     );
   }
 }

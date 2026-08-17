@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/dashboard/utils/dashboard_home_client_cache.dart';
 import '../../features/planos/utils/plano_capability.dart';
 import '../../features/subscription/models/subscription_plan.dart';
 import '../../features/auth/providers/auth_provider.dart';
@@ -36,9 +37,32 @@ class FeatureGate extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final featuresAsync = ref.watch(planoFeaturesProvider);
+    final fromProvider = featuresAsync.valueOrNull;
+    final fromHome =
+        fromProvider == null
+            ? DashboardHomeClientCache.getIfFresh()?.planoFeatures
+            : null;
 
-    if (featuresAsync.isLoading) {
-      return const SkeletonList();
+    if (fromProvider == null && fromHome != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        if (ref.read(planoFeaturesProvider).valueOrNull != null) return;
+        ref.read(planoFeaturesProvider.notifier).seedFromHome(fromHome);
+      });
+    }
+
+    final features = fromProvider ?? fromHome;
+    if (features != null) {
+      final gated = features.normalizeForTier();
+      return _buildGatedContent(
+        context: context,
+        ref: ref,
+        features: gated,
+        hasAccess: _hasAccess(gated, requiredPlan, capability),
+        featureName: featureName,
+        capability: capability,
+        requiredPlan: requiredPlan,
+      );
     }
 
     if (featuresAsync.hasError) {
@@ -59,22 +83,7 @@ class FeatureGate extends ConsumerWidget {
       );
     }
 
-    final features = featuresAsync.value;
-    if (features == null) {
-      return const SkeletonList();
-    }
-
-    final gated = features.normalizeForTier();
-
-    return _buildGatedContent(
-      context: context,
-      ref: ref,
-      features: gated,
-      hasAccess: _hasAccess(gated, requiredPlan, capability),
-      featureName: featureName,
-      capability: capability,
-      requiredPlan: requiredPlan,
-    );
+    return const SkeletonList();
   }
 
   bool _hasAccess(

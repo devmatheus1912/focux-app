@@ -37,11 +37,14 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FeatureGate(
-      featureName: 'Migração Focux',
-      requiredPlan: SubscriptionPlan.PREMIUM,
-      capability: 'iaCopiloto',
-      child: _buildContent(context),
+    return fxScreenA11yScope(
+      label: 'Migração Focux — importar alunos',
+      child: FeatureGate(
+        featureName: 'Migração Focux',
+        requiredPlan: SubscriptionPlan.PREMIUM,
+        capability: 'iaCopiloto',
+        child: _buildContent(context),
+      ),
     );
   }
 
@@ -84,9 +87,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
         if (didPop) return;
         await _handleBack();
       },
-      child: fxScreenA11yScope(
-        label: 'Migração Focux — importar alunos',
-        child: FxShellScaffold(
+      child: FxShellScaffold(
           useMesh: true,
           appBar: FxShellAppBar(title: 'Migração Focux', onBack: _handleBack),
           body: SingleChildScrollView(
@@ -566,7 +567,6 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
               ),
             ],
           ),
-        ),
         ),
       ),
     );

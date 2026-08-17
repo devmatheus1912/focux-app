@@ -29,9 +29,13 @@ final alunoRecoveryProvider = FutureProvider.family<RecoverySnapshot?, int>((
   ref,
   alunoId,
 ) async {
-  final bundled =
-      ref.watch(aluno360Provider(alunoId)).valueOrNull?.recoverySnapshot;
-  if (bundled != null) return bundled;
+  try {
+    final bundled =
+        (await ref.watch(aluno360Provider(alunoId).future)).recoverySnapshot;
+    if (bundled != null) return bundled;
+  } catch (_) {
+    // 360 failed — sidecar below.
+  }
   return HealthRepository.fromClient(
     ref.read(apiClientProvider),
   ).fetchRecoveryForAluno(alunoId);
@@ -146,7 +150,9 @@ final aluno360OperacaoProvider =
       final forceIa = ref.watch(alunoCopilotoForceIaProvider(alunoId));
       final iaAsync =
           forceIa ? ref.watch(alunoCopilotoActionProvider(alunoId)) : null;
-      final recovery = ref.watch(alunoRecoveryProvider(alunoId)).valueOrNull;
+      final recovery =
+          bundle.recoverySnapshot ??
+          ref.watch(alunoRecoveryProvider(alunoId)).valueOrNull;
       final openActions =
           ref.watch(alunoOpenIaActionsProvider(alunoId)).valueOrNull ??
           const [];

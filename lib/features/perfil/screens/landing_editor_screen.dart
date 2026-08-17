@@ -618,6 +618,12 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
   @override
   Widget build(BuildContext context) {
     final perfilAsync = ref.watch(perfilProvider);
+    final perfil = perfilAsync.valueOrNull;
+    if (perfil != null && !_c.loaded) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _c.applyPerfil(perfil));
+      });
+    }
 
     return fxScreenA11yScope(
       label: 'Editor da landing',
@@ -625,50 +631,38 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
         requiredPlan: SubscriptionPlan.ENTERPRISE_PRO,
         capability: 'landingCompleta',
         featureName: 'Landing page completa',
-        child: perfilAsync.when(
-          loading:
-              () => const FxShellScaffold(
-                appBar: FxShellAppBar(title: 'Editor da landing'),
-                body: SkeletonList(count: 6),
-              ),
-          error:
-              (e, _) => FxShellScaffold(
-                appBar: FxShellAppBar(
-                  title: 'Editor da landing',
-                  onBack: () => context.pop(),
-                ),
-                body: FxErrorState(
-                  chromeOnDark: Theme.of(context).brightness == Brightness.dark,
-                  primary: Theme.of(context).colorScheme.primary,
-                  message: friendlyError(e),
-                  onRetry: () => ref.invalidate(perfilProvider),
-                ),
-              ),
-          data: (perfil) {
-            if (!_c.loaded) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (mounted) setState(() => _c.applyPerfil(perfil));
-              });
-            }
-
-            return PopScope(
-              canPop: !_c.dirty,
-              onPopInvokedWithResult: (didPop, _) async {
-                if (didPop) return;
-                await _tryPopAfterLeaveConfirm();
-              },
-              child: FxShellScaffold(
-                appBar: FxShellAppBar(
-                  title: 'Editor da landing',
-                  subtitle: _c.dirty ? 'Alterações pendentes' : null,
-                  onBack: _tryPopAfterLeaveConfirm,
-                ),
-                bottomNavigationBar: LandingStickySaveBar(
-                  dirty: _c.dirty,
-                  saving: _c.saving,
-                  onSave: _salvar,
-                ),
-                body: Column(
+        child: PopScope(
+          canPop: !_c.dirty,
+          onPopInvokedWithResult: (didPop, _) async {
+            if (didPop) return;
+            await _tryPopAfterLeaveConfirm();
+          },
+          child: FxShellScaffold(
+            appBar: FxShellAppBar(
+              title: 'Editor da landing',
+              subtitle: _c.dirty ? 'Alterações pendentes' : null,
+              onBack: _tryPopAfterLeaveConfirm,
+            ),
+            bottomNavigationBar:
+                perfil == null
+                    ? null
+                    : LandingStickySaveBar(
+                      dirty: _c.dirty,
+                      saving: _c.saving,
+                      onSave: _salvar,
+                    ),
+            body:
+                perfil == null
+                    ? (perfilAsync.hasError
+                        ? FxErrorState(
+                          chromeOnDark:
+                              Theme.of(context).brightness == Brightness.dark,
+                          primary: Theme.of(context).colorScheme.primary,
+                          message: friendlyError(perfilAsync.error!),
+                          onRetry: () => ref.invalidate(perfilProvider),
+                        )
+                        : const SkeletonList(count: 6))
+                    : Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     if (_c.loaded)
@@ -813,9 +807,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
                     ),
                   ],
                 ),
-              ),
-            );
-          },
+          ),
         ),
       ),
     );

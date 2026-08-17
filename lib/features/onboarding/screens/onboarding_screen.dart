@@ -13,6 +13,7 @@ import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/auth_grid_painter.dart';
 import '../../../core/widgets/focux_official_logo.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../auth/widgets/auth_shell.dart';
 import '../data/brand_pulse_repository.dart';
 
@@ -230,16 +231,18 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final textScaler = clampedTextScaler(context);
     final compact = _isCompactLayout(context);
 
-    return MediaQuery(
-      data: MediaQuery.of(context).copyWith(textScaler: textScaler),
-      child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: const SystemUiOverlayStyle(
-          statusBarColor: fxTransparent,
-          statusBarIconBrightness: Brightness.light,
-          statusBarBrightness: Brightness.dark,
-        ),
-        child: Scaffold(
-          body: Stack(
+    return fxScreenA11yScope(
+      label: 'Boas-vindas Focux',
+      child: MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+        child: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: const SystemUiOverlayStyle(
+            statusBarColor: fxTransparent,
+            statusBarIconBrightness: Brightness.light,
+            statusBarBrightness: Brightness.dark,
+          ),
+          child: Scaffold(
+            body: Stack(
             fit: StackFit.expand,
             children: [
               Container(color: TokensStrip.cinematicBg),
@@ -307,6 +310,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               ),
             ],
           ),
+        ),
         ),
       ),
     );

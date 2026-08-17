@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -28,6 +29,7 @@ class _FinanceiroResumoScreenState
   bool _loading = false;
   ResumoMensal? _resumo;
   String? _erro;
+  DateTime? _fetchedAt;
 
   static const _meses = [
     '',
@@ -75,6 +77,7 @@ class _FinanceiroResumoScreenState
         setState(() {
           _resumo = r;
           _loading = false;
+          _fetchedAt = DateTime.now();
         });
       }
     } catch (e) {
@@ -117,12 +120,17 @@ class _FinanceiroResumoScreenState
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = Theme.of(context).colorScheme.primary;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Financeiro Resumo',
       child: FxShellScaffold(
         useMesh: true,
         extendBody: true,
+        appBar: FxShellAppBar(
+          title: 'Resumo',
+          subtitle: freshnessLabel ?? '${_meses[_mes]} $_ano',
+        ),
         body: Column(
           children: [
             // Month/year picker

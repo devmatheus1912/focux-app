@@ -46,7 +46,7 @@ final _aluno360Fixture = Aluno360(
     cliques: 0,
     concluidos: 0,
   ),
-  timelinePreview: const [],
+  timelinePreview: _timelineFixture,
   proximaAcao: ProximaAcaoResumo(
     acao: 'Enviar mensagem de follow-up',
     motivo: 'Contato pendente',
@@ -80,23 +80,23 @@ List<Override> _flowOverrides() {
     alunoOpenIaActionsProvider(_alunoId).overrideWith((ref) async => const []),
     alunoMedidasResumoProvider(_alunoId).overrideWith((ref) async => null),
     alunoPesoHistoricoProvider(_alunoId).overrideWith((ref) async => const []),
-    alunoEvolucaoInteligenteProvider(_alunoId).overrideWith(
-      (ref) async => _aluno360Fixture.evolucaoInteligente,
-    ),
+    alunoEvolucaoInteligenteProvider(
+      _alunoId,
+    ).overrideWith((ref) async => _aluno360Fixture.evolucaoInteligente),
     alunoTimeline360PagedProvider(_alunoId).overrideWith(
-      (ref) =>
-          Timeline360PagedNotifier(ref, _alunoId)
-            ..state = AsyncValue.data(
-              Timeline360PagedState(
-                events: _timelineFixture,
-                hasMore: true,
-                nextOffset: 5,
-                totalCount: 12,
-              ),
-            ),
+      (ref) => Timeline360PagedNotifier(ref, _alunoId)
+        ..state = AsyncValue.data(
+          Timeline360PagedState(
+            events: _timelineFixture,
+            hasMore: true,
+            nextOffset: 5,
+            totalCount: 12,
+          ),
+        ),
     ),
-    alunoCopilotoActionProvider(_alunoId)
-        .overrideWith((ref) async => IaCopilotProximaAcao.empty),
+    alunoCopilotoActionProvider(
+      _alunoId,
+    ).overrideWith((ref) async => IaCopilotProximaAcao.empty),
   ];
 }
 
@@ -155,5 +155,4 @@ void main() {
     expect(find.text('Check-in 1'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
-
 }

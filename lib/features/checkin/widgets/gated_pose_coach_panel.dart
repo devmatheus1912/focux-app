@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../dashboard/utils/dashboard_home_client_cache.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import 'pose_coach_panel.dart';
@@ -26,23 +27,22 @@ class GatedPoseCoachPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final features = ref.watch(planoFeaturesProvider).valueOrNull;
-    if (features != null && !features.poseCoach) {
-      return FeatureGate(
-        featureName: 'Pose Coach',
-        requiredPlan: SubscriptionPlan.ENTERPRISE_PRO,
-        capability: 'poseCoach',
-        lockedBuilder: _UpgradeHint(brand: brand, dark: dark),
-        child: const SizedBox.shrink(),
-      );
-    }
-    return PoseCoachPanel(
-      exerciseName: exerciseName,
-      targetReps: targetReps,
-      brand: brand,
-      dark: dark,
-      onRepCompleted: onRepCompleted,
-      enhancedFeedback: features?.poseCoach ?? false,
+    final features =
+        ref.watch(planoFeaturesProvider).valueOrNull ??
+        DashboardHomeClientCache.getIfFresh()?.planoFeatures;
+    return FeatureGate(
+      featureName: 'Pose Coach',
+      requiredPlan: SubscriptionPlan.ENTERPRISE_PRO,
+      capability: 'poseCoach',
+      lockedBuilder: _UpgradeHint(brand: brand, dark: dark),
+      child: PoseCoachPanel(
+        exerciseName: exerciseName,
+        targetReps: targetReps,
+        brand: brand,
+        dark: dark,
+        onRepCompleted: onRepCompleted,
+        enhancedFeedback: features?.poseCoach ?? false,
+      ),
     );
   }
 }

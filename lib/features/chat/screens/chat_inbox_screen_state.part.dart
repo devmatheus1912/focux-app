@@ -1,6 +1,5 @@
 part of 'chat_inbox_screen.dart';
 
-
 class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabCtrl;
@@ -181,9 +180,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
                 ),
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(
-            _isSearching || _selectionActive
-                ? 56
-                : (showFreshness ? 112 : 104),
+            _isSearching || _selectionActive ? 56 : (showFreshness ? 112 : 104),
           ),
           child:
               _selectionActive || _isSearching
@@ -357,6 +354,14 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
     );
   }
 
+  void _openThread(int alunoId, {Object? extra}) {
+    AnalyticsService.instance.track(
+      ProductEvents.chatThreadOpened,
+      props: {'feature': 'chat', 'aluno_id': alunoId},
+    );
+    context.push('/alunos/$alunoId/chat', extra: extra);
+  }
+
   void _showAlunoPicker() {
     HapticFeedback.selectionClick();
     showModalBottomSheet(
@@ -379,7 +384,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
               child: _AlunoPickerSheet(
                 onSelect: (aluno) {
                   Navigator.pop(ctx);
-                  context.push('/alunos/${aluno.id}/chat', extra: aluno.nome);
+                  _openThread(aluno.id, extra: aluno.nome);
                 },
               ),
             ),
@@ -488,10 +493,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
                         _toggleSelection(item.alunoId);
                         return;
                       }
-                      context.push(
-                        '/alunos/${item.alunoId}/chat',
-                        extra: item.alunoNome,
-                      );
+                      _openThread(item.alunoId, extra: item.alunoNome);
                     },
                     onLongPress: () => _toggleSelection(item.alunoId),
                   ),

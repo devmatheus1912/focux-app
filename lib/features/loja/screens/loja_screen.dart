@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -18,6 +19,8 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../pacotes/data/pacote_repository.dart';
+import '../../planos/data/planos_repository.dart';
+import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/loja_repository.dart';
 import '../models/loja_pedido.dart';
@@ -38,6 +41,7 @@ class _LojaScreenState extends ConsumerState<LojaScreen>
   late final TabController _tabs;
   List<Pacote> _pacotes = [];
   List<LojaPedido> _pedidos = [];
+  PlanoFeatures? _planoFromHome;
   bool _loading = true;
   String? _error;
   DateTime? _fetchedAt;
@@ -67,6 +71,7 @@ class _LojaScreenState extends ConsumerState<LojaScreen>
       setState(() {
         _pacotes = home.pacotes;
         _pedidos = home.pedidos;
+        _planoFromHome = home.planoFeatures;
         _fetchedAt = DateTime.now();
         _loading = false;
       });
@@ -120,6 +125,11 @@ class _LojaScreenState extends ConsumerState<LojaScreen>
 
     if (ok != true || emailCtrl.text.trim().isEmpty) return;
 
+    AnalyticsService.instance.track(
+      ProductEvents.lojaCheckoutStarted,
+      props: {'feature': 'loja', 'pacote_id': pacote.id},
+    );
+
     try {
       final result = await ref.read(lojaRepositoryProvider).checkout(
         pacoteId: pacote.id,
@@ -165,6 +175,13 @@ class _LojaScreenState extends ConsumerState<LojaScreen>
     final scheme = Theme.of(context).colorScheme;
     final chrome = ShellChrome.of(context);
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final planoFromHome = _planoFromHome;
+    if (planoFromHome != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(planoFeaturesProvider.notifier).seedFromHome(planoFromHome);
+      });
+    }
 
     return fxScreenA11yScope(
       label: 'Loja digital',

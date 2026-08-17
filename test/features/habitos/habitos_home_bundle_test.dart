@@ -1,8 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/habitos/data/habito_repository.dart';
+import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 
 void main() {
-  test('HabitosHomeBundle parses habitos + compliance', () {
+  test('HabitosHomeBundle parses habitos + compliance + optional planoFeatures', () {
     final bundle = HabitosHomeBundle.fromJson({
       'habitos': [
         {
@@ -28,6 +29,10 @@ void main() {
           'compliancePct': 71,
         },
       ],
+      'planoFeatures': {
+        'plano': 'PREMIUM',
+        'features': {'habitCoaching': true, 'agenda': true},
+      },
     });
 
     expect(bundle.habitos, hasLength(1));
@@ -36,11 +41,14 @@ void main() {
     expect(bundle.compliance, hasLength(1));
     expect(bundle.compliance.first.alunoNome, 'Ana Silva');
     expect(bundle.compliance.first.compliancePct, 71);
+    expect(bundle.planoFeatures?.plano, SubscriptionPlan.PREMIUM);
+    expect(bundle.planoFeatures?.habitCoaching, isTrue);
   });
 
   test('HabitosHomeBundle tolerates missing lists', () {
     final bundle = HabitosHomeBundle.fromJson({});
     expect(bundle.habitos, isEmpty);
     expect(bundle.compliance, isEmpty);
+    expect(bundle.planoFeatures, isNull);
   });
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -52,13 +53,42 @@ final qualidadeProvider = FutureProvider<QualidadeOperacionalData>((ref) async {
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
-class QualidadeOperacionalScreen extends ConsumerWidget {
+class QualidadeOperacionalScreen extends ConsumerStatefulWidget {
   const QualidadeOperacionalScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<QualidadeOperacionalScreen> createState() =>
+      _QualidadeOperacionalScreenState();
+}
+
+class _QualidadeOperacionalScreenState
+    extends ConsumerState<QualidadeOperacionalScreen> {
+  DateTime? _fetchedAt;
+  ProviderSubscription<AsyncValue<QualidadeOperacionalData>>? _freshnessSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _freshnessSub = ref.listenManual(qualidadeProvider, (_, next) {
+      if (!next.hasValue || next.isLoading || next.hasError) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() => _fetchedAt = DateTime.now());
+      });
+    }, fireImmediately: true);
+  }
+
+  @override
+  void dispose() {
+    _freshnessSub?.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final asyncData = ref.watch(qualidadeProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Qualidade Operacional',
@@ -66,6 +96,7 @@ class QualidadeOperacionalScreen extends ConsumerWidget {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Qualidade Operacional',
+          subtitle: freshnessLabel,
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
         ),
         body: asyncData.when(

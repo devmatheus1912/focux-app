@@ -2,15 +2,22 @@ import 'package:dio/dio.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../pacotes/data/pacote_repository.dart';
+import '../../planos/data/planos_repository.dart';
 import '../models/loja_pedido.dart';
 
 class LojaHomeBundle {
   final List<Pacote> pacotes;
   final List<LojaPedido> pedidos;
+  final PlanoFeatures? planoFeatures;
 
-  const LojaHomeBundle({required this.pacotes, required this.pedidos});
+  const LojaHomeBundle({
+    required this.pacotes,
+    required this.pedidos,
+    this.planoFeatures,
+  });
 
   factory LojaHomeBundle.fromJson(Map<String, dynamic> j) {
+    final planoRaw = j['planoFeatures'];
     return LojaHomeBundle(
       pacotes:
           ((j['pacotes'] as List?) ?? const [])
@@ -19,6 +26,10 @@ class LojaHomeBundle {
               .where((p) => p.ativo)
               .toList(),
       pedidos: LojaPedido.parseList(j['pedidos']),
+      planoFeatures:
+          planoRaw is Map
+              ? PlanoFeatures.fromJson(Map<String, dynamic>.from(planoRaw))
+              : null,
     );
   }
 }

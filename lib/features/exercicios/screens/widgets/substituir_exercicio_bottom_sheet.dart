@@ -50,9 +50,9 @@ class SubstituirExercicioBottomSheet extends ConsumerWidget {
               decoration: fxListCardDecoration(context, accent: primary),
               child: asyncList.when(
                 loading:
-                    () => const SizedBox(
-                      height: 220,
-                      child: Center(child: FxLoading()),
+                    () => Padding(
+                      padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
+                      child: FxLoading.sectionShimmer(context, height: 180),
                     ),
                 error:
                     (_, __) => SizedBox(

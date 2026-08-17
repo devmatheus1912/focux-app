@@ -92,6 +92,9 @@ class _WhiteLabelSettingsScreenState
   @override
   Widget build(BuildContext context) {
     final configAsync = ref.watch(whiteLabelConfigProvider);
+    final config = configAsync.valueOrNull;
+    if (config != null) _apply(config);
+    final chrome = ShellChrome.of(context);
 
     final gated = FeatureGate(
       featureName: 'Marca própria',
@@ -107,19 +110,18 @@ class _WhiteLabelSettingsScreenState
           ),
         ),
         body: FxContentWidthLimiter(
-          child: configAsync.when(
-            loading: () => const SkeletonList(count: 5),
-            error:
-                (e, _) => FxErrorState(
-                  chromeOnDark: Theme.of(context).brightness == Brightness.dark,
-                  primary: Theme.of(context).colorScheme.primary,
-                  message: friendlyError(e),
-                  onRetry: () => ref.invalidate(whiteLabelConfigProvider),
-                ),
-            data: (config) {
-              _apply(config);
-              final chrome = ShellChrome.of(context);
-              return ListView(
+          child:
+              config == null
+                  ? (configAsync.hasError
+                      ? FxErrorState(
+                        chromeOnDark:
+                            Theme.of(context).brightness == Brightness.dark,
+                        primary: Theme.of(context).colorScheme.primary,
+                        message: friendlyError(configAsync.error!),
+                        onRetry: () => ref.invalidate(whiteLabelConfigProvider),
+                      )
+                      : const SkeletonList(count: 5))
+                  : ListView(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
                 children: [
                   _sectionTitle('App do aluno'),
@@ -295,9 +297,7 @@ class _WhiteLabelSettingsScreenState
                     ),
                   ),
                 ],
-              );
-            },
-          ),
+              ),
         ),
       ),
     );

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -32,6 +33,7 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
   List<TenantMembro> _membros = [];
   bool _loading = true;
   String? _error;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -48,7 +50,10 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
     try {
       _membros = await ref.read(equipeRepositoryProvider).listar();
       if (!mounted) return;
-      setState(() => _loading = false);
+      setState(() {
+        _loading = false;
+        _fetchedAt = DateTime.now();
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -102,18 +107,19 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final chrome = ShellChrome.of(context);
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
-    return FeatureGate(
-      featureName: 'Equipe',
-      requiredPlan: SubscriptionPlan.ENTERPRISE,
-      capability: 'equipeRbac',
-      child: fxScreenA11yScope(
-        label: 'Equipe',
+    return fxScreenA11yScope(
+      label: 'Equipe',
+      child: FeatureGate(
+        featureName: 'Equipe',
+        requiredPlan: SubscriptionPlan.ENTERPRISE,
+        capability: 'equipeRbac',
         child: FxShellScaffold(
           useMesh: true,
-          appBar: const FxShellAppBar(
+          appBar: FxShellAppBar(
             title: 'Equipe',
-            subtitle: 'Assistentes e permissões',
+            subtitle: freshnessLabel ?? 'Assistentes e permissões',
           ),
           floatingActionButton: Semantics(
             label: 'Convidar membro da equipe',

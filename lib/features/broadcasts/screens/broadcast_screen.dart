@@ -7,7 +7,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/broadcast_repository.dart';
-import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_empty_state.dart';
 import 'package:focux_app/core/widgets/fx_error_state.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
@@ -208,11 +208,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
                 ),
                 const SizedBox(height: 12),
                 historicoAsync.when(
-                  loading:
-                      () => const Padding(
-                        padding: EdgeInsets.all(TokensStrip.s5),
-                        child: FxLoading(),
-                      ),
+                  loading: () => const SkeletonList(count: 4),
                   error:
                       (e, _) => FxErrorState(
                         chromeOnDark: isDark,

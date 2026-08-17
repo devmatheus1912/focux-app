@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../planos/data/planos_repository.dart';
 
 class AutomacaoFluxo {
   final int id;
@@ -50,17 +51,20 @@ class AutomacaoTemplate {
       );
 }
 
-/// BFF `GET /api/automacoes/home` — fluxos + templates em um round-trip.
+/// BFF `GET /api/automacoes/home` — fluxos + templates + planoFeatures.
 class AutomacoesHomeBundle {
   final List<AutomacaoFluxo> fluxos;
   final List<AutomacaoTemplate> templates;
+  final PlanoFeatures? planoFeatures;
 
   const AutomacoesHomeBundle({
     required this.fluxos,
     required this.templates,
+    this.planoFeatures,
   });
 
   factory AutomacoesHomeBundle.fromJson(Map<String, dynamic> j) {
+    final planoRaw = j['planoFeatures'];
     return AutomacoesHomeBundle(
       fluxos:
           ((j['fluxos'] as List?) ?? const [])
@@ -70,6 +74,10 @@ class AutomacoesHomeBundle {
           ((j['templates'] as List?) ?? const [])
               .map((e) => AutomacaoTemplate.fromJson(e as Map<String, dynamic>))
               .toList(),
+      planoFeatures:
+          planoRaw is Map
+              ? PlanoFeatures.fromJson(Map<String, dynamic>.from(planoRaw))
+              : null,
     );
   }
 }

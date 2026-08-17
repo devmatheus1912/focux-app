@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -26,6 +27,7 @@ class _GrupoAulasPersonalScreenState
   List<GrupoAula> _aulas = [];
   bool _loading = true;
   String? _erro;
+  DateTime? _fetchedAt;
 
   String _fmt(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')} '
@@ -51,6 +53,7 @@ class _GrupoAulasPersonalScreenState
         setState(() {
           _aulas = aulas;
           _loading = false;
+          _fetchedAt = DateTime.now();
         });
       }
     } catch (e) {
@@ -106,11 +109,13 @@ class _GrupoAulasPersonalScreenState
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     return fxScreenA11yScope(
       label: 'Aulas em grupo',
       child: FxShellScaffold(
         appBar: FxShellAppBar(
           title: 'Aulas em grupo',
+          subtitle: freshnessLabel,
           onBack: () => context.pop(),
         ),
         floatingActionButton:

@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/providers/auth_provider.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
+import '../widgets/fx_screen_a11y.dart';
+import '../widgets/skeleton_loader.dart';
 
 String roleHomePath(WidgetRef ref) {
   final status = ref.read(authProvider);
@@ -30,13 +31,19 @@ class HomeRedirectScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final status = ref.watch(authProvider);
     if (status == AuthStatus.unknown) {
-      return const Scaffold(body: Center(child: FxLoading()));
+      return fxScreenA11yScope(
+        label: 'Carregando início',
+        child: const Scaffold(body: SkeletonList()),
+      );
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (context.mounted) goToRoleHome(context, ref);
     });
 
-    return const Scaffold(body: SizedBox.shrink());
+    return fxScreenA11yScope(
+      label: 'Redirecionando para o início',
+      child: const Scaffold(body: SizedBox.shrink()),
+    );
   }
 }

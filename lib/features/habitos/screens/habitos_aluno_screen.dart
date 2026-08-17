@@ -6,6 +6,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -32,6 +33,7 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
   List<Habito> _habitos = [];
   bool _loading = true;
   String? _error;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -49,6 +51,7 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
       if (!mounted) return;
       setState(() {
         _habitos = lista;
+        _fetchedAt = DateTime.now();
         _loading = false;
       });
     } catch (e) {
@@ -100,18 +103,19 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final chrome = ShellChrome.forDark(isDark);
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
-    return FeatureGate(
-      featureName: 'Habit Coaching',
-      requiredPlan: SubscriptionPlan.PREMIUM,
-      capability: 'habitCoaching',
-      child: fxScreenA11yScope(
-        label: 'Meus hábitos',
+    return fxScreenA11yScope(
+      label: 'Meus hábitos',
+      child: FeatureGate(
+        featureName: 'Habit Coaching',
+        requiredPlan: SubscriptionPlan.PREMIUM,
+        capability: 'habitCoaching',
         child: FxShellScaffold(
           useMesh: true,
-          appBar: const FxShellAppBar(
+          appBar: FxShellAppBar(
             title: 'Meus hábitos',
-            subtitle: 'Sua jornada de consistência diária',
+            subtitle: freshnessLabel ?? 'Sua jornada de consistência diária',
           ),
           body:
               _loading

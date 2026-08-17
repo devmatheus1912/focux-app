@@ -46,18 +46,32 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
         tabIndex == 0 && !aluno360Async.hasValue
             ? ref.watch(alunoAutonomiaResumoProvider(alunoId))
             : const AsyncValue<AlunoAutonomiaResumo>.loading();
+    final watchTab1Sidecars = shouldWatchAluno360Tab1Sidecars(
+      aluno360Async,
+      tabIndex: tabIndex,
+    );
     final evolucaoGranularAsync =
-        tabIndex == 1
+        watchTab1Sidecars
             ? ref.watch(alunoEvolucaoInteligenteProvider(alunoId))
             : const AsyncValue<EvolucaoInteligente>.loading();
     final timelineGranularAsync =
-        tabIndex == 1
+        watchTab1Sidecars
             ? ref.watch(alunoTimeline360ApiProvider(alunoId))
             : const AsyncValue<List<Timeline360Event>>.loading();
-    final recoveryAsync =
-        tabIndex == 0
-            ? ref.watch(alunoRecoveryProvider(alunoId))
-            : const AsyncValue<RecoverySnapshot?>.data(null);
+    final bundledRecovery = aluno360Async.valueOrNull?.recoverySnapshot;
+    final AsyncValue<RecoverySnapshot?> recoveryAsync;
+    if (tabIndex != 0) {
+      recoveryAsync = const AsyncValue.data(null);
+    } else if (bundledRecovery != null) {
+      recoveryAsync = AsyncValue.data(bundledRecovery);
+    } else if (shouldWatchAlunoRecoverySidecar(
+      aluno360Async,
+      tabIndex: tabIndex,
+    )) {
+      recoveryAsync = ref.watch(alunoRecoveryProvider(alunoId));
+    } else {
+      recoveryAsync = const AsyncValue.loading();
+    }
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
@@ -78,18 +92,14 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
     }
 
     AsyncValue<EvolucaoInteligente> resolvedEvolucaoAsync =
-        tabIndex == 1
-            ? evolucaoGranularAsync
-            : (aluno360Async.hasValue
-                ? AsyncData(aluno360Async.value!.evolucaoInteligente)
-                : evolucaoGranularAsync);
+        aluno360Async.hasValue
+            ? AsyncData(aluno360Async.value!.evolucaoInteligente)
+            : evolucaoGranularAsync;
 
     AsyncValue<List<Timeline360Event>> resolvedTimelineAsync =
-        tabIndex == 1
-            ? timelineGranularAsync
-            : (aluno360Async.hasValue
-                ? AsyncData(aluno360Async.value!.timelinePreview)
-                : timelineGranularAsync);
+        aluno360Async.hasValue
+            ? AsyncData(aluno360Async.value!.timelinePreview)
+            : timelineGranularAsync;
 
     final loadingPrimary = aluno360Async.isLoading && !aluno360Async.hasValue;
     final loadingFallback =

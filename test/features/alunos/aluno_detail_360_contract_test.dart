@@ -6,8 +6,10 @@ String _alunoDetailLibrarySource() {
   const dir = 'lib/features/alunos/screens';
   const mainFile = '$dir/aluno_detail_screen.dart';
   const statePartFile = '$dir/aluno_detail_screen_state.part.dart';
-  const providersFile = 'lib/features/alunos/providers/aluno_detail_providers.dart';
-  const heroWidgetFile = 'lib/features/alunos/widgets/aluno_detail_hero_card.dart';
+  const providersFile =
+      'lib/features/alunos/providers/aluno_detail_providers.dart';
+  const heroWidgetFile =
+      'lib/features/alunos/widgets/aluno_detail_hero_card.dart';
   const operacaoTabFile =
       'lib/features/alunos/widgets/aluno360_operacao_tab.dart';
   const headerWidgetFile =
@@ -34,7 +36,8 @@ String _alunoDetailLibrarySource() {
       'lib/features/alunos/widgets/aluno360_copilot_support.dart';
   const stickyCtaFile =
       'lib/features/alunos/widgets/aluno360_operacao_sticky_cta.dart';
-  const followUpFile = 'lib/features/alunos/widgets/aluno360_follow_up_card.dart';
+  const followUpFile =
+      'lib/features/alunos/widgets/aluno360_follow_up_card.dart';
   const financeBannerFile =
       'lib/features/alunos/widgets/aluno360_finance_risk_banner.dart';
   const ferramentasModulesFile =
@@ -87,7 +90,8 @@ String _alunoDetailLibrarySource() {
   final copilotLogic = File(copilotLogicFile).readAsStringSync();
   final copilotExecutarLogic =
       File(copilotExecutarLogicFile).readAsStringSync();
-  final copilotOutreachLogic = File(copilotOutreachLogicFile).readAsStringSync();
+  final copilotOutreachLogic =
+      File(copilotOutreachLogicFile).readAsStringSync();
   final copilotTextLogic = File(copilotTextLogicFile).readAsStringSync();
   final outreachSheet = File(outreachSheetFile).readAsStringSync();
   final copilotCard = File(copilotCardFile).readAsStringSync();
@@ -111,12 +115,14 @@ String _alunoDetailLibrarySource() {
   final iaRepository = File(iaRepositoryFile).readAsStringSync();
   final detailOperacaoTab = File(detailOperacaoTabFile).readAsStringSync();
   final detailEvolucaoTab = File(detailEvolucaoTabFile).readAsStringSync();
-  final detailFerramentasTab = File(detailFerramentasTabFile).readAsStringSync();
+  final detailFerramentasTab =
+      File(detailFerramentasTabFile).readAsStringSync();
   final recoveryInsight = File(recoveryInsightFile).readAsStringSync();
   final weightActivity = File(weightActivityFile).readAsStringSync();
   final emptyMiniState = File(emptyMiniStateFile).readAsStringSync();
   final detailErrorState = File(detailErrorStateFile).readAsStringSync();
-  final detailLoadingSkeleton = File(detailLoadingSkeletonFile).readAsStringSync();
+  final detailLoadingSkeleton =
+      File(detailLoadingSkeletonFile).readAsStringSync();
   final alunoRepository = File(alunoRepositoryFile).readAsStringSync();
   return '$main\n$statePart\n$providers\n$heroWidget\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachSheet\n$copilotCard\n$operationalSection\n$focusToggle\n$copilotSupport\n$stickyCta\n$followUp\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$actionEmptyPanel\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$emptyMiniState\n$detailErrorState\n$detailLoadingSkeleton\n$alunoRepository';
 }
@@ -131,6 +137,8 @@ void main() {
     expect(screen, contains("'Linha do tempo 360'"));
     expect(screen, contains('aluno360Provider'));
     expect(screen, contains('shouldWatchAlunoDetailFallback'));
+    expect(screen, contains('shouldWatchAlunoRecoverySidecar'));
+    expect(screen, contains('shouldWatchAluno360Tab1Sidecars'));
     expect(screen, contains('resolveAlunoDetailAlunoAsync'));
     expect(screen, contains('resolveDiasSemTreinoLimiteFromHome'));
     expect(screen, contains('ref.exists(alunosHomeProvider)'));
@@ -143,18 +151,21 @@ void main() {
     expect(screen, contains('commandCenterProvider'));
     expect(screen, contains('class Aluno360CopilotSignalTile'));
     expect(
-      File('lib/features/alunos/widgets/aluno360_copilot_prescription.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/alunos/widgets/aluno360_copilot_prescription.dart',
+      ).readAsStringSync(),
       contains('class Aluno360CopilotPrescription'),
     );
     expect(
-      File('lib/features/alunos/utils/aluno360_copilot_logic.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/alunos/utils/aluno360_copilot_logic.dart',
+      ).readAsStringSync(),
       contains('resolveCopilotAcao'),
     );
     expect(
-      File('lib/features/alunos/utils/aluno360_copilot_outreach_logic.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/alunos/utils/aluno360_copilot_outreach_logic.dart',
+      ).readAsStringSync(),
       contains('copilotMensagemPronta'),
     );
     expect(screen, contains('copySensitiveToClipboard'));
@@ -165,18 +176,21 @@ void main() {
     expect(screen, contains('executarAcaoCopiloto'));
     expect(screen, contains('resolveCopilotExecutarAcao'));
     expect(
-      File('lib/features/alunos/widgets/aluno360_copilot_executar_confirm.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/alunos/widgets/aluno360_copilot_executar_confirm.dart',
+      ).readAsStringSync(),
       contains('showCopilotExecutarConfirmSheet'),
     );
     expect(
-      File('lib/features/alunos/widgets/aluno360_finance_risk_banner.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/alunos/widgets/aluno360_finance_risk_banner.dart',
+      ).readAsStringSync(),
       contains('class Aluno360FinanceRiskBanner'),
     );
     expect(
-      File('lib/features/alunos/utils/aluno360_copilot_executar_logic.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/alunos/utils/aluno360_copilot_executar_logic.dart',
+      ).readAsStringSync(),
       contains('copilotExecutarConfirmBody'),
     );
     expect(
@@ -185,94 +199,103 @@ void main() {
     );
   });
 
-  test('aluno 360 polish: tabs, unified status, refresh, altura, sparkline', () {
-    final screen = _alunoDetailLibrarySource();
+  test(
+    'aluno 360 polish: tabs, unified status, refresh, altura, sparkline',
+    () {
+      final screen = _alunoDetailLibrarySource();
 
-    expect(screen, contains('class Aluno360FollowUpCard'));
-    expect(screen, contains('ConsumerState<Aluno360FollowUpCard>'));
-    expect(screen, contains('Contato registrado'));
-    expect(screen, contains('Aluno360Layout.captionStyle'));
-    expect(screen, contains('aderenciaSemanal'));
-    expect(screen, contains('class Aluno360OperationalStatusSection'));
-    expect(screen, contains('Status operacional'));
-    expect(screen, contains('Índice operacional'));
-    expect(screen, contains('Próximo contato:'));
-    expect(screen, contains('alunoOperacaoFocusModeProvider'));
-    expect(screen, contains('resolveOperacaoStickyAction'));
-    expect(screen, contains('operacaoHeroShowsRisco'));
-    expect(screen, contains('shouldShowCopilotProfileGapsButton'));
-    expect(screen, contains('Aluno360OperacaoFocusModeToggle'));
-    expect(
-      File('lib/features/alunos/utils/aluno360_copilot_logic.dart')
-          .readAsStringSync(),
-      contains('Sugestão offline'),
-    );
-    expect(screen, contains('invalidateAluno360Providers'));
-    expect(screen, contains('alunoPesoHistoricoProvider'));
-    expect(screen, contains('alunoAderenciaSemanalProvider'));
-    expect(screen, contains('AnimatedSwitcher'));
-    expect(screen, contains('hasOpenCopilotTask'));
-    expect(screen, contains('hidePrimaryCta'));
-    expect(screen, contains('hideChatCta'));
-    expect(screen, contains('shouldHideCopilotChatCta'));
-    expect(screen, contains('AlunoOperacaoAdherenceBars'));
-    expect(screen, contains('summarizeAderenciaWeek'));
-    expect(screen, contains('class Aluno360WeightTrendSparkline'));
-    expect(screen, contains('FxSparkline'));
-    expect(screen, contains('formatAlturaDisplay'));
-    expect(screen, contains('friendlyError'));
-    expect(screen, contains('class Aluno360OperacaoTab'));
-    expect(screen, contains('class Aluno360CompositeHeaderDelegate'));
-    expect(screen, contains("Tab(text: 'Operação')"));
-    expect(screen, contains("Tab(text: 'Evolução')"));
-    expect(screen, contains("Tab(text: 'Ferramentas')"));
-    expect(screen, contains('class Aluno360DetailOperacaoTab'));
-    expect(screen, contains('class Aluno360DetailEvolucaoTab'));
-    expect(screen, contains('class Aluno360DetailFerramentasTab'));
-    expect(screen, contains('FxLoading.sectionShimmer'));
-    expect(screen, contains('class AlunoDetailLoadingSkeleton'));
-    expect(screen, contains('aluno360_hero_skeleton'));
-    expect(
-      File('lib/features/alunos/widgets/aluno360_copilot_prescription.dart')
-          .readAsStringSync(),
-      contains('_collapsedLines = 2'),
-    );
-    expect(screen, contains('Aluno360CopilotPrescriptionBody'));
-    expect(screen, contains('operacaoStatusSubtitle'));
-    expect(screen, contains('copilotProfileGapsForCard'));
-    expect(screen, contains('copilotProfileGapsButtonLabel'));
-    expect(
-      File('lib/features/alunos/widgets/aluno360_copilot_prescription.dart')
-          .readAsStringSync(),
-      contains('Ver contexto'),
-    );
-    expect(screen, contains('alunoCopilotoForceIaProvider'));
-    expect(screen, contains('proximaAcao360'));
-    expect(screen, contains('/financeiro?alunoId='));
-    expect(screen, contains('Aluno360OperacaoStickyCtaBar'));
-    expect(screen, isNot(contains('Pulso operacional')));
-    expect(screen, isNot(contains('Score API')));
-    expect(screen, contains('confirmarExclusaoAlunoDetail'));
-    expect(screen, contains('riscoMetricIcon'));
-    expect(screen, contains('OperationalMetricTile'));
-    expect(screen, contains('copySensitiveToClipboard'));
-    expect(screen, isNot(contains('Erro: \$e')));
-    expect(screen, isNot(contains('operational_metrics.part.dart')));
-    expect(screen, contains('class AlunoDetailHeroCard'));
-    expect(screen, contains('aluno360_hero_card'));
-    expect(screen, contains('class _HeroRiscoMetricBadge'));
-    expect(screen, contains('alunoHeroRiscoMetricBadgeColors'));
-    expect(screen, contains('copySensitiveToClipboard'));
-    expect(screen, isNot(contains('trailing: Aluno360OperacaoFocusModeToggle')));
-    expect(screen, contains('showFocusToggle: true'));
-    expect(screen, contains('class _IdentityObjectiveRow'));
-    expect(screen, contains('alunoObjectiveIsDefined'));
-    expect(screen, contains('onDefineObjective'));
-    expect(screen, contains('Aluno360Layout'));
-    expect(screen, contains('operacaoScrollBottomReserve'));
-    expect(screen, contains('transitionBuilder:'));
-    expect(screen, contains('chrome.sheetFill'));
-  });
+      expect(screen, contains('class Aluno360FollowUpCard'));
+      expect(screen, contains('ConsumerState<Aluno360FollowUpCard>'));
+      expect(screen, contains('Contato registrado'));
+      expect(screen, contains('Aluno360Layout.captionStyle'));
+      expect(screen, contains('aderenciaSemanal'));
+      expect(screen, contains('class Aluno360OperationalStatusSection'));
+      expect(screen, contains('Status operacional'));
+      expect(screen, contains('Índice operacional'));
+      expect(screen, contains('Próximo contato:'));
+      expect(screen, contains('alunoOperacaoFocusModeProvider'));
+      expect(screen, contains('resolveOperacaoStickyAction'));
+      expect(screen, contains('operacaoHeroShowsRisco'));
+      expect(screen, contains('shouldShowCopilotProfileGapsButton'));
+      expect(screen, contains('Aluno360OperacaoFocusModeToggle'));
+      expect(
+        File(
+          'lib/features/alunos/utils/aluno360_copilot_logic.dart',
+        ).readAsStringSync(),
+        contains('Sugestão offline'),
+      );
+      expect(screen, contains('invalidateAluno360Providers'));
+      expect(screen, contains('alunoPesoHistoricoProvider'));
+      expect(screen, contains('alunoAderenciaSemanalProvider'));
+      expect(screen, contains('AnimatedSwitcher'));
+      expect(screen, contains('hasOpenCopilotTask'));
+      expect(screen, contains('hidePrimaryCta'));
+      expect(screen, contains('hideChatCta'));
+      expect(screen, contains('shouldHideCopilotChatCta'));
+      expect(screen, contains('AlunoOperacaoAdherenceBars'));
+      expect(screen, contains('summarizeAderenciaWeek'));
+      expect(screen, contains('class Aluno360WeightTrendSparkline'));
+      expect(screen, contains('FxSparkline'));
+      expect(screen, contains('formatAlturaDisplay'));
+      expect(screen, contains('friendlyError'));
+      expect(screen, contains('class Aluno360OperacaoTab'));
+      expect(screen, contains('class Aluno360CompositeHeaderDelegate'));
+      expect(screen, contains("Tab(text: 'Operação')"));
+      expect(screen, contains("Tab(text: 'Evolução')"));
+      expect(screen, contains("Tab(text: 'Ferramentas')"));
+      expect(screen, contains('class Aluno360DetailOperacaoTab'));
+      expect(screen, contains('class Aluno360DetailEvolucaoTab'));
+      expect(screen, contains('class Aluno360DetailFerramentasTab'));
+      expect(screen, contains('FxLoading.sectionShimmer'));
+      expect(screen, contains('class AlunoDetailLoadingSkeleton'));
+      expect(screen, contains('aluno360_hero_skeleton'));
+      expect(
+        File(
+          'lib/features/alunos/widgets/aluno360_copilot_prescription.dart',
+        ).readAsStringSync(),
+        contains('_collapsedLines = 2'),
+      );
+      expect(screen, contains('Aluno360CopilotPrescriptionBody'));
+      expect(screen, contains('operacaoStatusSubtitle'));
+      expect(screen, contains('copilotProfileGapsForCard'));
+      expect(screen, contains('copilotProfileGapsButtonLabel'));
+      expect(
+        File(
+          'lib/features/alunos/widgets/aluno360_copilot_prescription.dart',
+        ).readAsStringSync(),
+        contains('Ver contexto'),
+      );
+      expect(screen, contains('alunoCopilotoForceIaProvider'));
+      expect(screen, contains('proximaAcao360'));
+      expect(screen, contains('/financeiro?alunoId='));
+      expect(screen, contains('Aluno360OperacaoStickyCtaBar'));
+      expect(screen, isNot(contains('Pulso operacional')));
+      expect(screen, isNot(contains('Score API')));
+      expect(screen, contains('confirmarExclusaoAlunoDetail'));
+      expect(screen, contains('riscoMetricIcon'));
+      expect(screen, contains('OperationalMetricTile'));
+      expect(screen, contains('copySensitiveToClipboard'));
+      expect(screen, isNot(contains('Erro: \$e')));
+      expect(screen, isNot(contains('operational_metrics.part.dart')));
+      expect(screen, contains('class AlunoDetailHeroCard'));
+      expect(screen, contains('aluno360_hero_card'));
+      expect(screen, contains('class _HeroRiscoMetricBadge'));
+      expect(screen, contains('alunoHeroRiscoMetricBadgeColors'));
+      expect(screen, contains('copySensitiveToClipboard'));
+      expect(
+        screen,
+        isNot(contains('trailing: Aluno360OperacaoFocusModeToggle')),
+      );
+      expect(screen, contains('showFocusToggle: true'));
+      expect(screen, contains('class _IdentityObjectiveRow'));
+      expect(screen, contains('alunoObjectiveIsDefined'));
+      expect(screen, contains('onDefineObjective'));
+      expect(screen, contains('Aluno360Layout'));
+      expect(screen, contains('operacaoScrollBottomReserve'));
+      expect(screen, contains('transitionBuilder:'));
+      expect(screen, contains('chrome.sheetFill'));
+    },
+  );
 
   test('aluno 360 fase 3: tabs, semantics, friendly errors, shared tile', () {
     final screen = _alunoDetailLibrarySource();
@@ -287,8 +310,9 @@ void main() {
     expect(screen, contains('Ver todos os'));
     expect(screen, contains('class Aluno360DetailFerramentasTab'));
     expect(
-      File('lib/features/alunos/widgets/aluno360_ferramentas_tab.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/alunos/widgets/aluno360_ferramentas_tab.dart',
+      ).readAsStringSync(),
       allOf(
         contains("'Acesso rápido'"),
         contains("'Medidas'"),
@@ -296,16 +320,15 @@ void main() {
       ),
     );
     expect(
-      File('lib/features/alunos/widgets/aluno360_ferramentas_modules_grid.dart')
-          .readAsStringSync(),
-      allOf(
-        contains("'Treino & evolução'"),
-        contains("'Perfil & gestão'"),
-      ),
+      File(
+        'lib/features/alunos/widgets/aluno360_ferramentas_modules_grid.dart',
+      ).readAsStringSync(),
+      allOf(contains("'Treino & evolução'"), contains("'Perfil & gestão'")),
     );
     final layoutSource =
-        File('lib/features/alunos/constants/aluno_360_layout.dart')
-            .readAsStringSync();
+        File(
+          'lib/features/alunos/constants/aluno_360_layout.dart',
+        ).readAsStringSync();
     expect(layoutSource, contains('tabSectionTitleStyle'));
     expect(layoutSource, contains('compactSectionTitleStyle'));
     expect(layoutSource, contains('panelTitleStyle'));
@@ -333,33 +356,39 @@ void main() {
     expect(screen, contains('atualizarOperacaoFocus'));
     expect(layoutSource, contains('insetCardRadius'));
     expect(
-      File('lib/features/alunos/widgets/aluno360_section_header.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/alunos/widgets/aluno360_section_header.dart',
+      ).readAsStringSync(),
       contains('aluno360SectionHeaderSemantics'),
     );
     expect(
-      File('lib/features/alunos/widgets/aluno360_follow_up_card.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/alunos/widgets/aluno360_follow_up_card.dart',
+      ).readAsStringSync(),
       contains('aluno360FollowUpSemantics'),
     );
     expect(
-      File('lib/features/alunos/widgets/aluno360_module_tile.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/alunos/widgets/aluno360_module_tile.dart',
+      ).readAsStringSync(),
       contains('aluno360ModuleTileSemantics'),
     );
     expect(
-      File('lib/features/alunos/utils/aluno360_readability.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/alunos/utils/aluno360_readability.dart',
+      ).readAsStringSync(),
       contains('aluno360ReadableCaption'),
     );
     expect(
-      File('lib/features/alunos/widgets/aluno360_operational_status_section.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/alunos/widgets/aluno360_operational_status_section.dart',
+      ).readAsStringSync(),
       contains('Aluno360SectionHeader'),
     );
     expect(
-      File('lib/features/alunos/utils/aluno360_ferramentas_logic.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/alunos/utils/aluno360_ferramentas_logic.dart',
+      ).readAsStringSync(),
       contains('class Aluno360FerramentasLogic'),
     );
     expect(
@@ -369,23 +398,27 @@ void main() {
       contains('class Aluno360FerramentasMeasurementsRow'),
     );
     expect(
-      File('lib/features/alunos/widgets/aluno360_module_tile.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/alunos/widgets/aluno360_module_tile.dart',
+      ).readAsStringSync(),
       contains('class Aluno360ModuleTile'),
     );
     expect(
-      File('lib/features/alunos/widgets/aluno360_ferramentas_modules_grid.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/alunos/widgets/aluno360_ferramentas_modules_grid.dart',
+      ).readAsStringSync(),
       contains('class Aluno360FerramentasModulesGrid'),
     );
     expect(
-      File('lib/features/alunos/widgets/aluno360_copilot_executar_button.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/alunos/widgets/aluno360_copilot_executar_button.dart',
+      ).readAsStringSync(),
       contains('class Aluno360CopilotExecutarAcaoButton'),
     );
     expect(
-      File('lib/features/alunos/utils/aluno360_copilot_task_actions.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/alunos/utils/aluno360_copilot_task_actions.dart',
+      ).readAsStringSync(),
       contains('criarTarefaCopilotoFromAluno360'),
     );
     expect(screen, contains('Abas do perfil do aluno'));
@@ -394,8 +427,9 @@ void main() {
     expect(screen, contains('aluno360_evolucao_empty'));
     expect(screen, contains('ValueKey(\'aluno360_timeline_empty\')'));
     expect(
-      File('lib/features/alunos/widgets/aluno360_ferramentas_modules_grid.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/alunos/widgets/aluno360_ferramentas_modules_grid.dart',
+      ).readAsStringSync(),
       contains('ValueKey(\'aluno360_ferramentas_modulos\')'),
     );
     expect(screen, contains('class Aluno360ActionEmptyPanel'));
@@ -413,17 +447,22 @@ void main() {
     expect(screen, contains('showAluno360CopilotProfileGapsSheet'));
     expect(screen, contains('Sem sinais de evolução ainda'));
     expect(screen, contains('Linha do tempo ainda vazia'));
-    expect(screen, contains('friendlyError(e, fallback: \'Não foi possível gerar senha.\')'));
+    expect(
+      screen,
+      contains('friendlyError(e, fallback: \'Não foi possível gerar senha.\')'),
+    );
     expect(screen, contains('alunoTimeline360PagedProvider'));
     expect(screen, contains('reduceMotionOf(context)'));
     expect(
-      File('lib/features/alunos/providers/aluno_timeline360_paged_provider.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/alunos/providers/aluno_timeline360_paged_provider.dart',
+      ).readAsStringSync(),
       allOf(contains('loadMore'), contains('Timeline360PagedState')),
     );
     expect(
-      File('lib/features/alunos/widgets/aluno360_timeline_full_sheet.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/alunos/widgets/aluno360_timeline_full_sheet.dart',
+      ).readAsStringSync(),
       contains('class Aluno360TimelineFullSheet'),
     );
     expect(
@@ -439,7 +478,9 @@ void main() {
       contains('class OperationalMetricTile'),
     );
     expect(
-      File('lib/features/dashboard/widgets/dashboard_pulse_strip.dart').readAsStringSync(),
+      File(
+        'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
+      ).readAsStringSync(),
       contains('operationalMetricDecoration'),
     );
   });

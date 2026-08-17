@@ -7,6 +7,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -61,6 +62,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
   List<RetencaoAlunoScore> _scores = [];
   bool _loading = true;
   String? _error;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -79,6 +81,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
       setState(() {
         _scores = list;
         _loading = false;
+        _fetchedAt = DateTime.now();
       });
     } catch (e) {
       if (!mounted) return;
@@ -104,6 +107,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
         }).length;
     final saudavel =
         _scores.where((s) => s.riscoChurn.toUpperCase() == 'BAIXO').length;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Saúde da base',
@@ -111,7 +115,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Saúde da base',
-          subtitle: 'Score de retenção por aluno',
+          subtitle: freshnessLabel ?? 'Score de retenção por aluno',
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
         ),
         body:

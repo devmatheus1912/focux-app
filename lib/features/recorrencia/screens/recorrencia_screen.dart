@@ -7,6 +7,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -27,6 +28,7 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
   List<RecorrenciaAssinatura> _items = [];
   bool _loading = true;
   String? _erro;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -46,6 +48,7 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
         setState(() {
           _items = items;
           _loading = false;
+          _fetchedAt = DateTime.now();
         });
       }
     } catch (e) {
@@ -138,13 +141,14 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     return fxScreenA11yScope(
       label: 'Recorrência MP',
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Recorrência MP',
-          subtitle: 'Assinaturas Mercado Pago',
+          subtitle: freshnessLabel ?? 'Assinaturas Mercado Pago',
           onBack: () => context.pop(),
         ),
         floatingActionButton: FloatingActionButton.extended(

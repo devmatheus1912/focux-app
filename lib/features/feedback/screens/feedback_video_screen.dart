@@ -9,8 +9,8 @@ import '../data/feedback_video_repository.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_error_state.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -150,7 +150,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
         ),
         body:
             _loading
-                ? Center(child: FxLoading(color: primary))
+                ? const SkeletonList(count: 4)
                 : _erro != null
                 ? FxErrorState(
                   chromeOnDark: chrome.isDark,

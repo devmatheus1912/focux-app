@@ -91,12 +91,14 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
     }
     setState(() => _saving = true);
     try {
-      await ref.read(agendaRepositoryProvider).criar(
-        alunoId,
-        inicio,
-        fim,
-        _titulo.text.isEmpty ? null : _titulo.text,
-      );
+      await ref
+          .read(agendaRepositoryProvider)
+          .criar(
+            alunoId,
+            inicio,
+            fim,
+            _titulo.text.isEmpty ? null : _titulo.text,
+          );
       invalidateAgendaCaches(ref);
       if (mounted) safePopOrGo(context, '/agenda');
     } catch (e) {
@@ -127,136 +129,141 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
     return fxScreenA11yScope(
       label: 'Novo agendamento',
       child: FxShellScaffold(
-      useMesh: true,
-      safeArea: false,
-      appBar: FxShellAppBar(
-        title: 'Novo agendamento',
-        subtitle: 'AGENDA',
-        onBack: () => safePopOrGo(context, '/agenda'),
-      ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(22, 10, 22, 12),
-          child: Semantics(
-            button: true,
-            enabled: enabled,
-            label: _saving ? 'Agendando atendimento' : 'Agendar atendimento',
-            child: FxLiquidPrimaryButton(
-              label: 'Agendar',
-              loadingLabel: 'Agendando…',
-              loading: _saving,
-              onPressed: enabled ? _salvar : null,
+        useMesh: true,
+        safeArea: false,
+        appBar: FxShellAppBar(
+          title: 'Novo agendamento',
+          subtitle: 'AGENDA',
+          onBack: () => safePopOrGo(context, '/agenda'),
+        ),
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(22, 10, 22, 12),
+            child: Semantics(
+              button: true,
+              enabled: enabled,
+              label: _saving ? 'Agendando atendimento' : 'Agendar atendimento',
+              child: FxLiquidPrimaryButton(
+                label: 'Agendar',
+                loadingLabel: 'Agendando…',
+                loading: _saving,
+                onPressed: enabled ? _salvar : null,
+              ),
             ),
           ),
         ),
-      ),
-      body: SafeArea(
-        bottom: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(22, 8, 22, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: chrome.panel(radius: TokensStrip.rCard),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    ref
-                        .watch(alunosProvider)
-                        .when(
-                          loading:
-                              () => const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 12),
-                                child: Center(child: FxLoading(size: 22)),
-                              ),
-                          error:
-                              (e, _) => FxErrorState(
-                                chromeOnDark: chrome.isDark,
-                                primary: primary,
-                                message: friendlyError(
-                                  e,
-                                  fallback:
-                                      'Não foi possível carregar alunos.',
+        body: SafeArea(
+          bottom: false,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(22, 8, 22, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: chrome.panel(radius: TokensStrip.rCard),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      ref
+                          .watch(alunosProvider)
+                          .when(
+                            loading:
+                                () => Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 4,
+                                  ),
+                                  child: FxLoading.sectionShimmer(
+                                    context,
+                                    height: 72,
+                                    showHeader: false,
+                                  ),
                                 ),
-                                onRetry:
-                                    () => ref.invalidate(alunosProvider),
+                            error:
+                                (e, _) => FxErrorState(
+                                  chromeOnDark: chrome.isDark,
+                                  primary: primary,
+                                  message: friendlyError(
+                                    e,
+                                    fallback:
+                                        'Não foi possível carregar alunos.',
+                                  ),
+                                  onRetry: () => ref.invalidate(alunosProvider),
+                                ),
+                            data:
+                                (alunos) => _AgendaAlunoButton(
+                                  aluno: _alunoSelecionado,
+                                  onTap: () => _showAlunoSheet(alunos),
+                                  embedded: true,
+                                ),
+                          ),
+                      Divider(height: 20, thickness: 1, color: line),
+                      Semantics(
+                        textField: true,
+                        label: 'Título opcional do atendimento',
+                        child: TextFormField(
+                          controller: _titulo,
+                          style: TextStyle(
+                            color: ink,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          cursorColor: primary,
+                          decoration: InputDecoration(
+                            hintText: 'Título (opcional)',
+                            filled: true,
+                            fillColor: chrome.cardFill,
+                            hintStyle: TextStyle(
+                              color: mute.withValues(alpha: 0.72),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                            border: FxInputDeco.outlineBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(color: line),
+                            ),
+                            enabledBorder: FxInputDeco.outlineBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(color: line),
+                            ),
+                            focusedBorder: FxInputDeco.outlineBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(
+                                color: primary.withValues(alpha: 0.68),
+                                width: 1.5,
                               ),
-                          data:
-                              (alunos) => _AgendaAlunoButton(
-                                aluno: _alunoSelecionado,
-                                onTap: () => _showAlunoSheet(alunos),
-                                embedded: true,
-                              ),
-                        ),
-                    Divider(height: 20, thickness: 1, color: line),
-                    Semantics(
-                      textField: true,
-                      label: 'Título opcional do atendimento',
-                      child: TextFormField(
-                        controller: _titulo,
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        cursorColor: primary,
-                        decoration: InputDecoration(
-                          hintText: 'Título (opcional)',
-                          filled: true,
-                          fillColor: chrome.cardFill,
-                          hintStyle: TextStyle(
-                            color: mute.withValues(alpha: 0.72),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
-                          border: FxInputDeco.outlineBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(color: line),
-                          ),
-                          enabledBorder: FxInputDeco.outlineBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(color: line),
-                          ),
-                          focusedBorder: FxInputDeco.outlineBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(
-                              color: primary.withValues(alpha: 0.68),
-                              width: 1.5,
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    _AgendaHorarioCard(
-                      inicioLabel: _fmtDt(_inicio),
-                      fimLabel: _fmtDt(_fim),
-                      inicioPlaceholder: _inicio == null,
-                      fimPlaceholder: _fim == null,
-                      onInicio: () => _pickDateTime(true),
-                      onFim: () => _pickDateTime(false),
-                    ),
-                  ],
+                      const SizedBox(height: 12),
+                      _AgendaHorarioCard(
+                        inicioLabel: _fmtDt(_inicio),
+                        fimLabel: _fmtDt(_fim),
+                        inicioPlaceholder: _inicio == null,
+                        fimPlaceholder: _fim == null,
+                        onInicio: () => _pickDateTime(true),
+                        onFim: () => _pickDateTime(false),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Ao confirmar início, o fim é sugerido com +1 hora. Você pode ajustar depois.',
-                style: AppTypography.inter(
-                  fontSize: 11.5,
-                  height: 1.35,
-                  color: mute,
+                const SizedBox(height: 10),
+                Text(
+                  'Ao confirmar início, o fim é sugerido com +1 hora. Você pode ajustar depois.',
+                  style: AppTypography.inter(
+                    fontSize: 11.5,
+                    height: 1.35,
+                    color: mute,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }

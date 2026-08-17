@@ -132,7 +132,15 @@ extension ConversationScreenSheetsSearch on _ConversationScreenState {
                                                 'Encontre mensagens antigas da conversa.',
                                           )
                                           : searching
-                                          ? const Center(child: FxLoading())
+                                          ? Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 4,
+                                            ),
+                                            child: FxLoading.sectionShimmer(
+                                              context,
+                                              height: 168,
+                                            ),
+                                          )
                                           : searched && results.isEmpty
                                           ? const ConversationSearchState(
                                             icon: Icons.chat_bubble_outline,

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -47,9 +49,8 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
       _erro = null;
     });
     try {
-      final home = await AlertasRepository(
-        ref.read(apiClientProvider),
-      ).getHome();
+      final home =
+          await AlertasRepository(ref.read(apiClientProvider)).getHome();
       if (mounted) {
         setState(() {
           _alertas = home.riscos;
@@ -203,6 +204,18 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
     return _alertas.where((a) => a.score >= _filtroScoreMin!).toList();
   }
 
+  void _openAlerta(AlertaRisco alerta) {
+    AnalyticsService.instance.track(
+      ProductEvents.alertaRiscoOpened,
+      props: {
+        'feature': 'alertas',
+        'aluno_id': alerta.alunoId,
+        'score': alerta.score,
+      },
+    );
+    context.push('/alertas/aluno/${alerta.alunoId}', extra: alerta.alunoNome);
+  }
+
   void _openFiltros() {
     showModalBottomSheet(
       context: context,
@@ -344,6 +357,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                 final a = _filtrados[i];
                                 return AlertaRiscoCard(
                                   alerta: a,
+                                  onOpen: () => _openAlerta(a),
                                   onMensagem: () => _enviarMensagemChat(a),
                                   onResolver: () => _resolverAlerta(a),
                                 );

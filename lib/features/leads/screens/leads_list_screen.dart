@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -45,6 +46,10 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
     try {
       if (force) invalidateLeadsCaches(ref);
       final home = await ref.read(leadsHomeProvider.future);
+      final planoFromHome = home.planoFeatures;
+      if (planoFromHome != null) {
+        ref.read(planoFeaturesProvider.notifier).seedFromHome(planoFromHome);
+      }
       var leads = home.leads;
       if (_filtroStatus != null && _filtroStatus!.isNotEmpty) {
         final status = _filtroStatus!.toUpperCase();
@@ -68,6 +73,10 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
   }
 
   Future<void> _novoLead() async {
+    AnalyticsService.instance.track(
+      ProductEvents.leadCreatedOrOpened,
+      props: {'feature': 'leads', 'action': 'novo'},
+    );
     await context.push('/leads/novo');
     _load(force: true);
   }
@@ -81,6 +90,10 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
     final testeLeads = _leads.where((lead) => lead.status == 'TESTE').toList();
     final ativoLeads = _leads.where((lead) => lead.status == 'ATIVO').toList();
     Future<void> openLead(Lead lead) async {
+      AnalyticsService.instance.track(
+        ProductEvents.leadCreatedOrOpened,
+        props: {'feature': 'leads', 'action': 'abrir', 'lead_id': lead.id},
+      );
       await context.push('/leads/${lead.id}', extra: lead);
       _load(force: true);
     }

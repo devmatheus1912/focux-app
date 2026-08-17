@@ -6,6 +6,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 
 import '../../../core/widgets/feature_gate.dart';
 
@@ -43,6 +44,7 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
   bool _loading = true;
 
   String? _error;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -63,7 +65,10 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
 
       if (!mounted) return;
 
-      setState(() => _loading = false);
+      setState(() {
+        _loading = false;
+        _fetchedAt = DateTime.now();
+      });
     } catch (e) {
       if (!mounted) return;
 
@@ -174,6 +179,7 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
     final chrome = ShellChrome.of(context);
 
     final scheme = Theme.of(context).colorScheme;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Desafios',
@@ -187,10 +193,10 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
         child: FxShellScaffold(
           useMesh: true,
 
-          appBar: const FxShellAppBar(
+          appBar: FxShellAppBar(
             title: 'Desafios',
 
-            subtitle: 'Ranking e metas da comunidade',
+            subtitle: freshnessLabel ?? 'Ranking e metas da comunidade',
           ),
 
         floatingActionButton: Semantics(

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/utils/aluno_detail_aluno_resolution.dart';
+import 'package:focux_app/features/health/data/health_repository.dart';
 
 final _alunoFrom360 = Aluno(
   id: 1,
@@ -43,6 +44,25 @@ final _bundle360 = Aluno360(
   ),
 );
 
+final _recovery = RecoverySnapshot(
+  steps: 1000,
+  caloriesBurned: 200,
+  avgHeartRate: 62,
+  sleepHours: 7.5,
+  recoveryScore: 80,
+  recoveryLabel: 'Bom',
+  recoveryHint: 'ok',
+);
+
+final _bundle360WithRecovery = Aluno360(
+  aluno: _alunoFrom360,
+  autonomiaResumo: _bundle360.autonomiaResumo,
+  timelinePreview: _bundle360.timelinePreview,
+  proximaAcao: _bundle360.proximaAcao,
+  evolucaoInteligente: _bundle360.evolucaoInteligente,
+  recoverySnapshot: _recovery,
+);
+
 void main() {
   group('shouldWatchAlunoDetailFallback', () {
     test('false while loading or when 360 has data', () {
@@ -50,10 +70,7 @@ void main() {
         shouldWatchAlunoDetailFallback(const AsyncLoading<Aluno360>()),
         isFalse,
       );
-      expect(
-        shouldWatchAlunoDetailFallback(AsyncData(_bundle360)),
-        isFalse,
-      );
+      expect(shouldWatchAlunoDetailFallback(AsyncData(_bundle360)), isFalse);
     });
 
     test('true only when 360 failed without value', () {
@@ -62,6 +79,85 @@ void main() {
           AsyncError<Aluno360>(Exception('360 down'), StackTrace.current),
         ),
         isTrue,
+      );
+    });
+  });
+
+  group('shouldWatchAlunoRecoverySidecar', () {
+    test('false while 360 is loading', () {
+      expect(
+        shouldWatchAlunoRecoverySidecar(
+          const AsyncLoading<Aluno360>(),
+          tabIndex: 0,
+        ),
+        isFalse,
+      );
+    });
+
+    test('false when 360 has bundled recovery', () {
+      expect(
+        shouldWatchAlunoRecoverySidecar(
+          AsyncData(_bundle360WithRecovery),
+          tabIndex: 0,
+        ),
+        isFalse,
+      );
+    });
+
+    test('true when 360 settled without recovery', () {
+      expect(
+        shouldWatchAlunoRecoverySidecar(AsyncData(_bundle360), tabIndex: 0),
+        isTrue,
+      );
+      expect(
+        shouldWatchAlunoRecoverySidecar(
+          AsyncError<Aluno360>(Exception('360 down'), StackTrace.current),
+          tabIndex: 0,
+        ),
+        isTrue,
+      );
+    });
+
+    test('false on other tabs', () {
+      expect(
+        shouldWatchAlunoRecoverySidecar(AsyncData(_bundle360), tabIndex: 1),
+        isFalse,
+      );
+    });
+  });
+
+  group('shouldWatchAluno360Tab1Sidecars', () {
+    test('false while 360 is loading even on tab 1', () {
+      expect(
+        shouldWatchAluno360Tab1Sidecars(
+          const AsyncLoading<Aluno360>(),
+          tabIndex: 1,
+        ),
+        isFalse,
+      );
+    });
+
+    test('false when 360 has value — prefer bundle fields', () {
+      expect(
+        shouldWatchAluno360Tab1Sidecars(AsyncData(_bundle360), tabIndex: 1),
+        isFalse,
+      );
+    });
+
+    test('true on tab 1 only after 360 error', () {
+      expect(
+        shouldWatchAluno360Tab1Sidecars(
+          AsyncError<Aluno360>(Exception('360 down'), StackTrace.current),
+          tabIndex: 1,
+        ),
+        isTrue,
+      );
+      expect(
+        shouldWatchAluno360Tab1Sidecars(
+          AsyncError<Aluno360>(Exception('360 down'), StackTrace.current),
+          tabIndex: 0,
+        ),
+        isFalse,
       );
     });
   });

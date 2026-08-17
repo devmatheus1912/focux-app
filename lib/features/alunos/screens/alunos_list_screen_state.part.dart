@@ -77,6 +77,10 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
 
   Future<void> _adicionarAluno() async {
     HapticFeedback.selectionClick();
+    AnalyticsService.instance.track(
+      ProductEvents.alunosAddTapped,
+      props: {'feature': 'alunos'},
+    );
     final criado = await context.push<bool>('/alunos/novo');
     if (criado == true) {
       invalidateAlunosCaches(ref);
@@ -664,665 +668,678 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
           if (_hasActiveFilter) _handleHeaderBack();
         },
         child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: homeAsync.when(
-          loading:
-              () => const SafeArea(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    TokensStrip.s4,
-                    86,
-                    TokensStrip.s4,
-                    0,
+          backgroundColor: Colors.transparent,
+          body: homeAsync.when(
+            loading:
+                () => const SafeArea(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      TokensStrip.s4,
+                      86,
+                      TokensStrip.s4,
+                      0,
+                    ),
+                    child: SkeletonList(count: 6),
                   ),
-                  child: SkeletonList(count: 6),
                 ),
-              ),
-          error:
-              (e, _) => SafeArea(
-                child: FxErrorState(
-                  chromeOnDark: isDark,
-                  primary: primary,
-                  title: FocuxMicrocopy.erroAoCarregarAlunos,
-                  message: friendlyError(e),
-                  onRetry: () => invalidateAlunosCaches(ref),
+            error:
+                (e, _) => SafeArea(
+                  child: FxErrorState(
+                    chromeOnDark: isDark,
+                    primary: primary,
+                    title: FocuxMicrocopy.erroAoCarregarAlunos,
+                    message: friendlyError(e),
+                    onRetry: () => invalidateAlunosCaches(ref),
+                  ),
                 ),
-              ),
-          data: (home) {
-            final alunos = home.alunos;
-            final stats = home.stats;
-            final diasLimite = home.alertasConfig.diasSemTreino;
-            final filtrados = _filtrarAlunos(
-              alunos,
-              diasSemTreinoLimite: diasLimite,
-            );
-            final ativosCount = stats.totalAtivos;
-            final inadCount = stats.totalInadimplentes;
-            final riscoCount = stats.totalRiscoAlto;
-            final contatoCount = _contatoHojeCount(
-              alunos,
-              diasSemTreinoLimite: diasLimite,
-            );
-            final novosCount = stats.totalConvites;
-            final headerOps =
-                _modoSelecao
-                    ? _selectionSummary()
-                    : '$contatoCount contato · $riscoCount risco · $novosCount convites';
-            final showHeaderBack = !_modoSelecao && _hasActiveFilter;
-            final headerBackFromDashboard = _hasDeepLinkFiltro(context);
-            final triageContextActive =
-                !_modoSelecao &&
-                _filtro == AlunoFiltro.todos &&
-                (contatoCount > 0 || riscoCount > 0);
-            final listBottomGap =
-                FocuxPlatform.isCompact(context) ? 28.0 : 36.0;
+            data: (home) {
+              final alunos = home.alunos;
+              final stats = home.stats;
+              final diasLimite = home.alertasConfig.diasSemTreino;
+              final filtrados = _filtrarAlunos(
+                alunos,
+                diasSemTreinoLimite: diasLimite,
+              );
+              final ativosCount = stats.totalAtivos;
+              final inadCount = stats.totalInadimplentes;
+              final riscoCount = stats.totalRiscoAlto;
+              final contatoCount = _contatoHojeCount(
+                alunos,
+                diasSemTreinoLimite: diasLimite,
+              );
+              final novosCount = stats.totalConvites;
+              final headerOps =
+                  _modoSelecao
+                      ? _selectionSummary()
+                      : '$contatoCount contato · $riscoCount risco · $novosCount convites';
+              final showHeaderBack = !_modoSelecao && _hasActiveFilter;
+              final headerBackFromDashboard = _hasDeepLinkFiltro(context);
+              final triageContextActive =
+                  !_modoSelecao &&
+                  _filtro == AlunoFiltro.todos &&
+                  (contatoCount > 0 || riscoCount > 0);
+              final listBottomGap =
+                  FocuxPlatform.isCompact(context) ? 28.0 : 36.0;
 
-            return SafeArea(
-              bottom: false,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  FxPremiumEntrance(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Header (Alunos + Botão Adicionar)
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            TokensStrip.s5,
-                            14,
-                            20,
-                            14,
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              if (showHeaderBack) ...[
-                                Semantics(
-                                  button: true,
-                                  label:
-                                      headerBackFromDashboard
-                                          ? 'Voltar para Hoje'
-                                          : 'Limpar filtro',
-                                  child: InkWell(
-                                    onTap: _handleHeaderBack,
-                                    borderRadius: BorderRadius.circular(22),
-                                    child: Container(
-                                      width: 40,
-                                      height: 40,
-                                      decoration: chrome.headerAction(
-                                        radius: 20,
-                                      ),
-                                      child: Icon(
-                                        Icons.arrow_back_ios_new_rounded,
-                                        size: 18,
-                                        color: ink,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                              ],
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      headerOps,
-                                      style: AppTypography.inter(
-                                        fontSize: TokensStrip.fontBodySm,
-                                        color:
-                                            _modoSelecao
-                                                ? BrandPalette.sectionAction(
-                                                  primary,
-                                                  dark: isDark,
-                                                )
-                                                : mute,
-                                        fontWeight:
-                                            _modoSelecao
-                                                ? FontWeight.w600
-                                                : FontWeight.w500,
-                                        letterSpacing: _modoSelecao ? 1.2 : 0,
-                                        height: 1.2,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'Alunos',
-                                      style: AppTypography.inter(
-                                        fontSize: TokensStrip.fontH1,
-                                        color: ink,
-                                        fontWeight: TokensStrip.weightH1,
-                                        letterSpacing: TokensStrip.trackingH1,
-                                        height: 1.15,
-                                      ),
-                                    ),
-                                    if (freshnessLabel != null) ...[
-                                      const SizedBox(height: 3),
-                                      Text(
-                                        freshnessLabel,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: AppTypography.inter(
-                                          fontSize: 11.5,
-                                          fontWeight: FontWeight.w600,
-                                          color: mute,
+              return SafeArea(
+                bottom: false,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    FxPremiumEntrance(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Header (Alunos + Botão Adicionar)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              TokensStrip.s5,
+                              14,
+                              20,
+                              14,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                if (showHeaderBack) ...[
+                                  Semantics(
+                                    button: true,
+                                    label:
+                                        headerBackFromDashboard
+                                            ? 'Voltar para Hoje'
+                                            : 'Limpar filtro',
+                                    child: InkWell(
+                                      onTap: _handleHeaderBack,
+                                      borderRadius: BorderRadius.circular(22),
+                                      child: Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: chrome.headerAction(
+                                          radius: 20,
+                                        ),
+                                        child: Icon(
+                                          Icons.arrow_back_ios_new_rounded,
+                                          size: 18,
+                                          color: ink,
                                         ),
                                       ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                ],
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        headerOps,
+                                        style: AppTypography.inter(
+                                          fontSize: TokensStrip.fontBodySm,
+                                          color:
+                                              _modoSelecao
+                                                  ? BrandPalette.sectionAction(
+                                                    primary,
+                                                    dark: isDark,
+                                                  )
+                                                  : mute,
+                                          fontWeight:
+                                              _modoSelecao
+                                                  ? FontWeight.w600
+                                                  : FontWeight.w500,
+                                          letterSpacing: _modoSelecao ? 1.2 : 0,
+                                          height: 1.2,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'Alunos',
+                                        style: AppTypography.inter(
+                                          fontSize: TokensStrip.fontH1,
+                                          color: ink,
+                                          fontWeight: TokensStrip.weightH1,
+                                          letterSpacing: TokensStrip.trackingH1,
+                                          height: 1.15,
+                                        ),
+                                      ),
+                                      if (freshnessLabel != null) ...[
+                                        const SizedBox(height: 3),
+                                        Text(
+                                          freshnessLabel,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: AppTypography.inter(
+                                            fontSize: 11.5,
+                                            fontWeight: FontWeight.w600,
+                                            color: mute,
+                                          ),
+                                        ),
+                                      ],
                                     ],
-                                  ],
-                                ),
-                              ),
-                              if (_modoSelecao) ...[
-                                InkWell(
-                                  onTap: _toggleModoSelecao,
-                                  borderRadius: BorderRadius.circular(44),
-                                  child: Container(
-                                    width: 44,
-                                    height: 44,
-                                    decoration: chrome.headerAction(radius: 22),
-                                    child: Icon(
-                                      Icons.close,
-                                      size: 22,
-                                      color: ink,
-                                    ),
                                   ),
                                 ),
-                              ] else ...[
-                                const ShellThemeToggle(size: 40),
-                                const SizedBox(width: 8),
-                                InkWell(
-                                  onTap: _toggleModoSelecao,
-                                  borderRadius: BorderRadius.circular(44),
-                                  child: Container(
-                                    width: 44,
-                                    height: 44,
-                                    decoration: chrome.headerAction(radius: 22),
-                                    child: Icon(
-                                      Icons.checklist_rounded,
-                                      size: 22,
-                                      color: ink,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                FxGlowSurface(
-                                  color: primary,
-                                  enabled: true,
-                                  intensity: 0.9,
-                                  borderRadius: 44,
-                                  child: FxSpringButton(
-                                    onTap: _adicionarAluno,
+                                if (_modoSelecao) ...[
+                                  InkWell(
+                                    onTap: _toggleModoSelecao,
+                                    borderRadius: BorderRadius.circular(44),
                                     child: Container(
                                       width: 44,
                                       height: 44,
-                                      decoration: BoxDecoration(
-                                        color: primary,
-                                        shape: BoxShape.circle,
+                                      decoration: chrome.headerAction(
+                                        radius: 22,
                                       ),
-                                      child: const Icon(
-                                        Icons.add,
-                                        size: 24,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-
-                        // Search Bar
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 6,
-                          ),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 180),
-                            curve: Curves.easeOutCubic,
-                            padding: const EdgeInsets.fromLTRB(13, 3, 8, 3),
-                            decoration: BoxDecoration(
-                              color:
-                                  isDark
-                                      ? EagleTokens.darkCard
-                                      : Colors.white.withValues(alpha: 0.86),
-                              borderRadius: BorderRadius.circular(17),
-                              border: Border.all(
-                                color:
-                                    _searchFocusNode.hasFocus
-                                        ? primary.withValues(alpha: 0.32)
-                                        : (isDark
-                                            ? EagleTokens.darkLine
-                                            : TokensStrip.borderDefault),
-                                width: _searchFocusNode.hasFocus ? 1.2 : 1,
-                              ),
-                              boxShadow: [
-                                if (_searchFocusNode.hasFocus && !isDark)
-                                  BoxShadow(
-                                    color: primary.withValues(alpha: 0.08),
-                                    blurRadius: 18,
-                                    offset: const Offset(0, 8),
-                                    spreadRadius: -12,
-                                  ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 26,
-                                  height: 26,
-                                  decoration: BoxDecoration(
-                                    color:
-                                        _searchFocusNode.hasFocus
-                                            ? primary.withValues(alpha: 0.08)
-                                            : Colors.transparent,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.search_rounded,
-                                    size: 18,
-                                    color:
-                                        _searchFocusNode.hasFocus
-                                            ? primary
-                                            : mute,
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: TextField(
-                                    controller: _searchController,
-                                    focusNode: _searchFocusNode,
-                                    onChanged: (value) {
-                                      setState(() => _query = value);
-                                    },
-                                    textInputAction: TextInputAction.search,
-                                    cursorColor: primary,
-                                    style: AppTypography.inter(
-                                      fontSize: TokensStrip.fontBody,
-                                      color: ink,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    decoration: InputDecoration(
-                                      isDense: true,
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                            vertical: 10,
-                                          ),
-                                      hintText: 'Buscar por nome ou objetivo',
-                                      hintStyle: AppTypography.inter(
-                                        fontSize: TokensStrip.fontBody,
-                                        color: mute,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                      border: InputBorder.none,
-                                      enabledBorder: InputBorder.none,
-                                      focusedBorder: InputBorder.none,
-                                    ),
-                                  ),
-                                ),
-                                if (_query.isNotEmpty)
-                                  InkWell(
-                                    onTap: () {
-                                      _searchController.clear();
-                                      setState(() => _query = '');
-                                    },
-                                    borderRadius: BorderRadius.circular(999),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(6),
                                       child: Icon(
                                         Icons.close,
-                                        size: 18,
-                                        color: mute,
+                                        size: 22,
+                                        color: ink,
                                       ),
                                     ),
-                                  )
-                                else
-                                  Tooltip(
-                                    message: 'Organizar lista',
-                                    child: InkWell(
-                                      onTap: _showListOptions,
-                                      borderRadius: BorderRadius.circular(999),
+                                  ),
+                                ] else ...[
+                                  const ShellThemeToggle(size: 40),
+                                  const SizedBox(width: 8),
+                                  InkWell(
+                                    onTap: _toggleModoSelecao,
+                                    borderRadius: BorderRadius.circular(44),
+                                    child: Container(
+                                      width: 44,
+                                      height: 44,
+                                      decoration: chrome.headerAction(
+                                        radius: 22,
+                                      ),
+                                      child: Icon(
+                                        Icons.checklist_rounded,
+                                        size: 22,
+                                        color: ink,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  FxGlowSurface(
+                                    color: primary,
+                                    enabled: true,
+                                    intensity: 0.9,
+                                    borderRadius: 44,
+                                    child: FxSpringButton(
+                                      onTap: _adicionarAluno,
                                       child: Container(
-                                        width: 34,
-                                        height: 34,
-                                        alignment: Alignment.center,
+                                        width: 44,
+                                        height: 44,
                                         decoration: BoxDecoration(
-                                          color: primary.withValues(
-                                            alpha: isDark ? 0.14 : 0.07,
-                                          ),
+                                          color: primary,
                                           shape: BoxShape.circle,
                                         ),
-                                        child: Stack(
-                                          clipBehavior: Clip.none,
-                                          children: [
-                                            Icon(
-                                              Icons.tune_rounded,
-                                              size: 18,
-                                              color: primary,
+                                        child: const Icon(
+                                          Icons.add,
+                                          size: 24,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+
+                          // Search Bar
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 6,
+                            ),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              curve: Curves.easeOutCubic,
+                              padding: const EdgeInsets.fromLTRB(13, 3, 8, 3),
+                              decoration: BoxDecoration(
+                                color:
+                                    isDark
+                                        ? EagleTokens.darkCard
+                                        : Colors.white.withValues(alpha: 0.86),
+                                borderRadius: BorderRadius.circular(17),
+                                border: Border.all(
+                                  color:
+                                      _searchFocusNode.hasFocus
+                                          ? primary.withValues(alpha: 0.32)
+                                          : (isDark
+                                              ? EagleTokens.darkLine
+                                              : TokensStrip.borderDefault),
+                                  width: _searchFocusNode.hasFocus ? 1.2 : 1,
+                                ),
+                                boxShadow: [
+                                  if (_searchFocusNode.hasFocus && !isDark)
+                                    BoxShadow(
+                                      color: primary.withValues(alpha: 0.08),
+                                      blurRadius: 18,
+                                      offset: const Offset(0, 8),
+                                      spreadRadius: -12,
+                                    ),
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 26,
+                                    height: 26,
+                                    decoration: BoxDecoration(
+                                      color:
+                                          _searchFocusNode.hasFocus
+                                              ? primary.withValues(alpha: 0.08)
+                                              : Colors.transparent,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.search_rounded,
+                                      size: 18,
+                                      color:
+                                          _searchFocusNode.hasFocus
+                                              ? primary
+                                              : mute,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: TextField(
+                                      controller: _searchController,
+                                      focusNode: _searchFocusNode,
+                                      onChanged: (value) {
+                                        setState(() => _query = value);
+                                      },
+                                      textInputAction: TextInputAction.search,
+                                      cursorColor: primary,
+                                      style: AppTypography.inter(
+                                        fontSize: TokensStrip.fontBody,
+                                        color: ink,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      decoration: InputDecoration(
+                                        isDense: true,
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                              vertical: 10,
                                             ),
-                                            if (_ordenacao !=
-                                                    AlunoOrdenacao.prioridade ||
-                                                _filtro != AlunoFiltro.todos)
-                                              Positioned(
-                                                right: -2,
-                                                top: -2,
-                                                child: Container(
-                                                  width: 7,
-                                                  height: 7,
-                                                  decoration: BoxDecoration(
-                                                    color: primary,
-                                                    shape: BoxShape.circle,
-                                                    border: Border.all(
-                                                      color:
-                                                          isDark
-                                                              ? EagleTokens
-                                                                  .darkCard
-                                                              : TokensStrip
-                                                                  .cardBg,
-                                                      width: 1.5,
+                                        hintText: 'Buscar por nome ou objetivo',
+                                        hintStyle: AppTypography.inter(
+                                          fontSize: TokensStrip.fontBody,
+                                          color: mute,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        border: InputBorder.none,
+                                        enabledBorder: InputBorder.none,
+                                        focusedBorder: InputBorder.none,
+                                      ),
+                                    ),
+                                  ),
+                                  if (_query.isNotEmpty)
+                                    InkWell(
+                                      onTap: () {
+                                        _searchController.clear();
+                                        setState(() => _query = '');
+                                      },
+                                      borderRadius: BorderRadius.circular(999),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(6),
+                                        child: Icon(
+                                          Icons.close,
+                                          size: 18,
+                                          color: mute,
+                                        ),
+                                      ),
+                                    )
+                                  else
+                                    Tooltip(
+                                      message: 'Organizar lista',
+                                      child: InkWell(
+                                        onTap: _showListOptions,
+                                        borderRadius: BorderRadius.circular(
+                                          999,
+                                        ),
+                                        child: Container(
+                                          width: 34,
+                                          height: 34,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: primary.withValues(
+                                              alpha: isDark ? 0.14 : 0.07,
+                                            ),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Stack(
+                                            clipBehavior: Clip.none,
+                                            children: [
+                                              Icon(
+                                                Icons.tune_rounded,
+                                                size: 18,
+                                                color: primary,
+                                              ),
+                                              if (_ordenacao !=
+                                                      AlunoOrdenacao
+                                                          .prioridade ||
+                                                  _filtro != AlunoFiltro.todos)
+                                                Positioned(
+                                                  right: -2,
+                                                  top: -2,
+                                                  child: Container(
+                                                    width: 7,
+                                                    height: 7,
+                                                    decoration: BoxDecoration(
+                                                      color: primary,
+                                                      shape: BoxShape.circle,
+                                                      border: Border.all(
+                                                        color:
+                                                            isDark
+                                                                ? EagleTokens
+                                                                    .darkCard
+                                                                : TokensStrip
+                                                                    .cardBg,
+                                                        width: 1.5,
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
-                                              ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        // Filter Chips
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            TokensStrip.s4,
-                            4,
-                            16,
-                            10,
-                          ),
-                          child: FxHorizontalScrollPeek(
-                            showPeek: true,
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: [
-                                  _FxChip(
-                                    label: 'Todos',
-                                    count: alunos.length,
-                                    isSelected: _filtro == AlunoFiltro.todos,
-                                    isDark: isDark,
-                                    onTap:
-                                        () => setState(
-                                          () => _filtro = AlunoFiltro.todos,
-                                        ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  _FxChip(
-                                    label: 'Contato hoje',
-                                    count: contatoCount,
-                                    isSelected:
-                                        _filtro == AlunoFiltro.contatoHoje,
-                                    isDark: isDark,
-                                    onTap:
-                                        () => setState(
-                                          () =>
-                                              _filtro = AlunoFiltro.contatoHoje,
-                                        ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  _FxChip(
-                                    label: 'Ativos',
-                                    count: ativosCount,
-                                    isSelected: _filtro == AlunoFiltro.ativos,
-                                    isDark: isDark,
-                                    onTap:
-                                        () => setState(
-                                          () => _filtro = AlunoFiltro.ativos,
-                                        ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  _FxChip(
-                                    label: 'Inadimplentes',
-                                    count: inadCount,
-                                    isSelected:
-                                        _filtro == AlunoFiltro.inadimplentes,
-                                    isDark: isDark,
-                                    onTap:
-                                        () => setState(
-                                          () =>
-                                              _filtro =
-                                                  AlunoFiltro.inadimplentes,
-                                        ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  _FxChip(
-                                    label: 'Risco alto',
-                                    count: riscoCount,
-                                    isSelected: _filtro == AlunoFiltro.risco,
-                                    isDark: isDark,
-                                    onTap:
-                                        () => setState(
-                                          () => _filtro = AlunoFiltro.risco,
-                                        ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  _FxChip(
-                                    label: 'Convites',
-                                    count: novosCount,
-                                    isSelected: _filtro == AlunoFiltro.novos,
-                                    isDark: isDark,
-                                    onTap:
-                                        () => setState(
-                                          () => _filtro = AlunoFiltro.novos,
-                                        ),
-                                  ),
                                 ],
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
 
-                  if (!_modoSelecao &&
-                      _filtro == AlunoFiltro.todos &&
-                      contatoCount > 0)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                      child: _AlunosTriageBanner(
-                        count: contatoCount,
-                        isDark: isDark,
-                        title: '$contatoCount precisam de contato hoje',
-                        subtitle:
-                            'Risco, inadimplência ou $diasLimite+ dias sem treino',
-                        onTap:
-                            () => setState(
-                              () => _filtro = AlunoFiltro.contatoHoje,
+                          // Filter Chips
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              TokensStrip.s4,
+                              4,
+                              16,
+                              10,
                             ),
-                      ),
-                    )
-                  else if (!_modoSelecao &&
-                      _filtro == AlunoFiltro.todos &&
-                      riscoCount > 0)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                      child: _AlunosTriageBanner(
-                        count: riscoCount,
-                        isDark: isDark,
-                        title:
-                            '$riscoCount aluno${riscoCount == 1 ? '' : 's'} em risco',
-                        subtitle: 'Priorize contato e retomada de treino hoje',
-                        onTap:
-                            () => setState(() => _filtro = AlunoFiltro.risco),
-                      ),
-                    ),
-
-                  // List
-                  Expanded(
-                    child:
-                        filtrados.isEmpty
-                            ? _EmptyAlunosState(
-                              hasQuery: _query.trim().isNotEmpty,
-                              hasActiveFilter: _hasActiveFilter,
-                              filtroLabel: _filtroLabel(_filtro),
-                              onAdd: _adicionarAluno,
-                              onClear:
-                                  _query.trim().isEmpty
-                                      ? null
-                                      : () {
-                                        _searchController.clear();
-                                        setState(() => _query = '');
-                                      },
-                              onClearFilter:
-                                  _hasActiveFilter
-                                      ? () => setState(
-                                        () => _filtro = AlunoFiltro.todos,
-                                      )
-                                      : null,
-                            )
-                            : RefreshIndicator(
-                              onRefresh: () async {
-                                invalidateAlunosCaches(ref);
-                              },
-                              child: ListView.separated(
-                                padding: EdgeInsets.only(
-                                  left: 16,
-                                  right: 16,
-                                  top: 8,
-                                  bottom: listBottomGap,
-                                ),
-                                itemCount: filtrados.length,
-                                separatorBuilder:
-                                    (_, __) => const SizedBox(height: 10),
-                                itemBuilder: (context, i) {
-                                  final a = filtrados[i];
-                                  return FxStaggerItem(
-                                    index: i,
-                                    child: _AlunoCardFX(
-                                      aluno: a,
-                                      modoSelecao: _modoSelecao,
-                                      isSelected: _selecionados.contains(a.id),
-                                      onToggle: () => _toggleSelecionado(a.id),
-                                      onLongPress:
-                                          _modoSelecao
-                                              ? null
-                                              : _toggleModoSelecao,
-                                      activeFiltro: _filtro,
-                                      triageContextActive: triageContextActive,
-                                      diasSemTreinoLimite: diasLimite,
-                                      compact: _listaCompacta,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                  ),
-
-                  // Bottom action bar (seleção)
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    height:
-                        (_modoSelecao && _selecionados.isNotEmpty) ? null : 0,
-                    child:
-                        (_modoSelecao && _selecionados.isNotEmpty)
-                            ? SafeArea(
-                              top: false,
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  TokensStrip.s4,
-                                  8,
-                                  16,
-                                  12,
-                                ),
+                            child: FxHorizontalScrollPeek(
+                              showPeek: true,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
                                 child: Row(
                                   children: [
-                                    Expanded(
-                                      child: OutlinedButton.icon(
-                                        onPressed: () {
-                                          setState(() {
-                                            if (_selecionados.length ==
-                                                filtrados.length) {
-                                              _selecionados.clear();
-                                            } else {
-                                              _selecionados.addAll(
-                                                filtrados.map((a) => a.id),
-                                              );
-                                            }
-                                          });
-                                        },
-                                        icon: const Icon(
-                                          Icons.select_all,
-                                          size: 18,
-                                        ),
-                                        label: Text(
-                                          _selecionados.length ==
-                                                  filtrados.length
-                                              ? 'Desmarcar todos'
-                                              : 'Selecionar todos',
-                                        ),
-                                        style: OutlinedButton.styleFrom(
-                                          side: BorderSide(
-                                            color:
-                                                isDark
-                                                    ? EagleTokens.darkLine
-                                                    : TokensStrip.borderDefault,
+                                    _FxChip(
+                                      label: 'Todos',
+                                      count: alunos.length,
+                                      isSelected: _filtro == AlunoFiltro.todos,
+                                      isDark: isDark,
+                                      onTap:
+                                          () => setState(
+                                            () => _filtro = AlunoFiltro.todos,
                                           ),
-                                          foregroundColor: ink,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 12,
-                                          ),
-                                        ),
-                                      ),
                                     ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: ElevatedButton.icon(
-                                        onPressed: _showBulkActionsSheet,
-                                        icon: const Icon(
-                                          Icons.bolt_rounded,
-                                          size: 18,
-                                        ),
-                                        label: Text(
-                                          'Ações (${_selecionados.length})',
-                                        ),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: primary,
-                                          foregroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
+                                    const SizedBox(width: 8),
+                                    _FxChip(
+                                      label: 'Contato hoje',
+                                      count: contatoCount,
+                                      isSelected:
+                                          _filtro == AlunoFiltro.contatoHoje,
+                                      isDark: isDark,
+                                      onTap:
+                                          () => setState(
+                                            () =>
+                                                _filtro =
+                                                    AlunoFiltro.contatoHoje,
                                           ),
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 12,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _FxChip(
+                                      label: 'Ativos',
+                                      count: ativosCount,
+                                      isSelected: _filtro == AlunoFiltro.ativos,
+                                      isDark: isDark,
+                                      onTap:
+                                          () => setState(
+                                            () => _filtro = AlunoFiltro.ativos,
                                           ),
-                                          elevation: 0,
-                                        ),
-                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _FxChip(
+                                      label: 'Inadimplentes',
+                                      count: inadCount,
+                                      isSelected:
+                                          _filtro == AlunoFiltro.inadimplentes,
+                                      isDark: isDark,
+                                      onTap:
+                                          () => setState(
+                                            () =>
+                                                _filtro =
+                                                    AlunoFiltro.inadimplentes,
+                                          ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _FxChip(
+                                      label: 'Risco alto',
+                                      count: riscoCount,
+                                      isSelected: _filtro == AlunoFiltro.risco,
+                                      isDark: isDark,
+                                      onTap:
+                                          () => setState(
+                                            () => _filtro = AlunoFiltro.risco,
+                                          ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _FxChip(
+                                      label: 'Convites',
+                                      count: novosCount,
+                                      isSelected: _filtro == AlunoFiltro.novos,
+                                      isDark: isDark,
+                                      onTap:
+                                          () => setState(
+                                            () => _filtro = AlunoFiltro.novos,
+                                          ),
                                     ),
                                   ],
                                 ),
                               ),
-                            )
-                            : const SizedBox.shrink(),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    if (!_modoSelecao &&
+                        _filtro == AlunoFiltro.todos &&
+                        contatoCount > 0)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                        child: _AlunosTriageBanner(
+                          count: contatoCount,
+                          isDark: isDark,
+                          title: '$contatoCount precisam de contato hoje',
+                          subtitle:
+                              'Risco, inadimplência ou $diasLimite+ dias sem treino',
+                          onTap:
+                              () => setState(
+                                () => _filtro = AlunoFiltro.contatoHoje,
+                              ),
+                        ),
+                      )
+                    else if (!_modoSelecao &&
+                        _filtro == AlunoFiltro.todos &&
+                        riscoCount > 0)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                        child: _AlunosTriageBanner(
+                          count: riscoCount,
+                          isDark: isDark,
+                          title:
+                              '$riscoCount aluno${riscoCount == 1 ? '' : 's'} em risco',
+                          subtitle:
+                              'Priorize contato e retomada de treino hoje',
+                          onTap:
+                              () => setState(() => _filtro = AlunoFiltro.risco),
+                        ),
+                      ),
+
+                    // List
+                    Expanded(
+                      child:
+                          filtrados.isEmpty
+                              ? _EmptyAlunosState(
+                                hasQuery: _query.trim().isNotEmpty,
+                                hasActiveFilter: _hasActiveFilter,
+                                filtroLabel: _filtroLabel(_filtro),
+                                onAdd: _adicionarAluno,
+                                onClear:
+                                    _query.trim().isEmpty
+                                        ? null
+                                        : () {
+                                          _searchController.clear();
+                                          setState(() => _query = '');
+                                        },
+                                onClearFilter:
+                                    _hasActiveFilter
+                                        ? () => setState(
+                                          () => _filtro = AlunoFiltro.todos,
+                                        )
+                                        : null,
+                              )
+                              : RefreshIndicator(
+                                onRefresh: () async {
+                                  invalidateAlunosCaches(ref);
+                                },
+                                child: ListView.separated(
+                                  padding: EdgeInsets.only(
+                                    left: 16,
+                                    right: 16,
+                                    top: 8,
+                                    bottom: listBottomGap,
+                                  ),
+                                  itemCount: filtrados.length,
+                                  separatorBuilder:
+                                      (_, __) => const SizedBox(height: 10),
+                                  itemBuilder: (context, i) {
+                                    final a = filtrados[i];
+                                    return FxStaggerItem(
+                                      index: i,
+                                      child: _AlunoCardFX(
+                                        aluno: a,
+                                        modoSelecao: _modoSelecao,
+                                        isSelected: _selecionados.contains(
+                                          a.id,
+                                        ),
+                                        onToggle:
+                                            () => _toggleSelecionado(a.id),
+                                        onLongPress:
+                                            _modoSelecao
+                                                ? null
+                                                : _toggleModoSelecao,
+                                        activeFiltro: _filtro,
+                                        triageContextActive:
+                                            triageContextActive,
+                                        diasSemTreinoLimite: diasLimite,
+                                        compact: _listaCompacta,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                    ),
+
+                    // Bottom action bar (seleção)
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      height:
+                          (_modoSelecao && _selecionados.isNotEmpty) ? null : 0,
+                      child:
+                          (_modoSelecao && _selecionados.isNotEmpty)
+                              ? SafeArea(
+                                top: false,
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    TokensStrip.s4,
+                                    8,
+                                    16,
+                                    12,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: OutlinedButton.icon(
+                                          onPressed: () {
+                                            setState(() {
+                                              if (_selecionados.length ==
+                                                  filtrados.length) {
+                                                _selecionados.clear();
+                                              } else {
+                                                _selecionados.addAll(
+                                                  filtrados.map((a) => a.id),
+                                                );
+                                              }
+                                            });
+                                          },
+                                          icon: const Icon(
+                                            Icons.select_all,
+                                            size: 18,
+                                          ),
+                                          label: Text(
+                                            _selecionados.length ==
+                                                    filtrados.length
+                                                ? 'Desmarcar todos'
+                                                : 'Selecionar todos',
+                                          ),
+                                          style: OutlinedButton.styleFrom(
+                                            side: BorderSide(
+                                              color:
+                                                  isDark
+                                                      ? EagleTokens.darkLine
+                                                      : TokensStrip
+                                                          .borderDefault,
+                                            ),
+                                            foregroundColor: ink,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 12,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: ElevatedButton.icon(
+                                          onPressed: _showBulkActionsSheet,
+                                          icon: const Icon(
+                                            Icons.bolt_rounded,
+                                            size: 18,
+                                          ),
+                                          label: Text(
+                                            'Ações (${_selecionados.length})',
+                                          ),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: primary,
+                                            foregroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 12,
+                                            ),
+                                            elevation: 0,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                              : const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

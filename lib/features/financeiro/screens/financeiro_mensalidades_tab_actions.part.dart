@@ -329,6 +329,29 @@ extension FinanceiroMensalidadesTabActions on _FinanceiroMensalidadesTabState {
     }
   }
 
+  Future<void> _cobrarViaChat(Mensalidade m) async {
+    AnalyticsService.instance.track(
+      ProductEvents.financeiroCobrarViaChat,
+      props: {
+        'feature': 'financeiro',
+        'mensalidade_id': m.id,
+        'aluno_id': m.alunoId,
+      },
+    );
+    try {
+      final msg = await FinanceiroRepository(
+        ref.read(apiClientProvider),
+      ).cobrarViaChat(m.id);
+      if (mounted) {
+        FeedbackHelper.showSuccess(context, msg);
+      }
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    }
+  }
+
   Future<void> _pagar(int id) async {
     try {
       await FinanceiroRepository(ref.read(apiClientProvider)).pagar(id);

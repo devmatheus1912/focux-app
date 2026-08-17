@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../planos/data/planos_repository.dart';
 
 class Lead {
   final int id;
@@ -155,15 +156,21 @@ class LeadRepository {
 
 class LeadsHomeBundle {
   final List<Lead> leads;
+  final PlanoFeatures? planoFeatures;
 
-  LeadsHomeBundle({required this.leads});
+  LeadsHomeBundle({required this.leads, this.planoFeatures});
 
   factory LeadsHomeBundle.fromJson(Map<String, dynamic> j) {
+    final planoRaw = j['planoFeatures'];
     return LeadsHomeBundle(
       leads:
           ((j['leads'] as List?) ?? const [])
               .map((e) => Lead.fromJson(e as Map<String, dynamic>))
               .toList(),
+      planoFeatures:
+          planoRaw is Map
+              ? PlanoFeatures.fromJson(Map<String, dynamic>.from(planoRaw))
+              : null,
     );
   }
 }
