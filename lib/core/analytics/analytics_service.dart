@@ -140,4 +140,10 @@ class ProductEvents {
   static const habitoCreated = 'habito_created';
   static const chatThreadOpened = 'chat_thread_opened';
   static const financeiroCobrarViaChat = 'financeiro_cobrar_via_chat';
+
+  static const perfilViewed = 'perfil_viewed';
+  static const perfilRefreshed = 'perfil_refreshed';
+  static const perfilStickyTapped = 'perfil_sticky_tapped';
+  static const perfilShareTapped = 'perfil_share_tapped';
+  static const perfilMarcaHintOpened = 'perfil_marca_hint_opened';
 }

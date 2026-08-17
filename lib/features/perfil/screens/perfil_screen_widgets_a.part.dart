@@ -5,6 +5,8 @@ class _PerfilBody extends StatelessWidget {
   final DashboardData dashboard;
   final bool uploadingPhoto;
   final bool loadingMetrics;
+  final String? freshnessLabel;
+  final Future<void> Function() onRefresh;
   final VoidCallback onPickPhoto;
   final VoidCallback onEditPerfil;
   final Future<void> Function() onLogout;
@@ -16,6 +18,8 @@ class _PerfilBody extends StatelessWidget {
     required this.dashboard,
     required this.uploadingPhoto,
     this.loadingMetrics = false,
+    this.freshnessLabel,
+    required this.onRefresh,
     required this.onPickPhoto,
     required this.onEditPerfil,
     required this.onLogout,
@@ -69,7 +73,8 @@ class _PerfilBody extends StatelessWidget {
             ? '—'
             : '${dashboard.totalAlunos} alunos · ${dashboard.alunosAtivos} ativos';
     final usingDefaultBrand = _usesDefaultPalette(primaryColor, secondaryColor);
-    // Sticky Meus alunos / Copiloto — CTA de gap fica só na prontidão (topo).
+    // Sticky Meus alunos / Hoje — CTA de gap fica só na prontidão (topo).
+    // IA só no dock do shell (paridade Home).
     const scrollBottomPad = 108.0;
 
     return FxShellScaffold(
@@ -89,8 +94,12 @@ class _PerfilBody extends StatelessWidget {
       ),
       body: SafeArea(
         bottom: false,
-        child: CustomScrollView(
-          slivers: [
+        child: RefreshIndicator(
+          color: accent,
+          onRefresh: onRefresh,
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
             SliverToBoxAdapter(
               child: FxStaggerItem(
                 index: 1,
@@ -151,13 +160,35 @@ class _PerfilBody extends StatelessWidget {
                                 ),
                                 Semantics(
                                   header: true,
-                                  label: 'Perfil',
-                                  child: Text(
-                                    'Perfil',
-                                    style: FocuxHubTypography.eyebrow(
-                                      context,
-                                      color: Colors.white,
-                                    ),
+                                  label:
+                                      freshnessLabel == null
+                                          ? 'Perfil'
+                                          : 'Perfil. $freshnessLabel',
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        'Perfil',
+                                        style: FocuxHubTypography.eyebrow(
+                                          context,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      if (freshnessLabel != null) ...[
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          freshnessLabel!,
+                                          style: FocuxHubTypography.bodyMuted(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.78,
+                                            ),
+                                          ).copyWith(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                 ),
                                 const SizedBox(width: 6),
@@ -242,6 +273,22 @@ class _PerfilBody extends StatelessWidget {
                                               }
                                               context.push(
                                                 '/identidade-visual',
+                                              );
+                                            },
+                                            onShowHint: () {
+                                              HapticFeedback.selectionClick();
+                                              unawaited(
+                                                AnalyticsService.instance.track(
+                                                  ProductEvents
+                                                      .perfilMarcaHintOpened,
+                                                  props: {
+                                                    'score': profileScore,
+                                                  },
+                                                ),
+                                              );
+                                              FeedbackHelper.showInfo(
+                                                context,
+                                                'Marca $profileScore% — foto, CREF, especialidade, bio, Instagram, paleta e PIX.',
                                               );
                                             },
                                           ),
@@ -430,23 +477,27 @@ class _PerfilBody extends StatelessWidget {
                                 context,
                                 onSessionCleared: onLogout,
                               ),
-                          debugTools:
-                              kDebugMode
-                                  ? _PerfilDebugTools(
-                                    accent: accent,
-                                    actionInk: actionInk,
-                                    mute: mute,
-                                    line: line,
-                                  )
-                                  : null,
                         ),
                       ),
+                      if (kDebugMode) ...[
+                        const SizedBox(height: TokensStrip.s3),
+                        FxStaggerItem(
+                          index: 7,
+                          child: _PerfilDebugTools(
+                            accent: accent,
+                            actionInk: actionInk,
+                            mute: mute,
+                            line: line,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ]),
               ),
             ),
           ],
+        ),
         ),
       ),
     );

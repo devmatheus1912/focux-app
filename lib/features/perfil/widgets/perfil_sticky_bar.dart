@@ -1,13 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
 
-/// Sticky do hub Perfil — peso visual equilibrado quando o perfil está completo.
+/// Sticky do hub Perfil — paridade Home: 1 CTA primário, IA só no dock.
 class PerfilStickyBar extends StatelessWidget {
   const PerfilStickyBar({
     super.key,
@@ -21,6 +24,15 @@ class PerfilStickyBar extends StatelessWidget {
   final Color actionInk;
   final bool isDark;
   final bool profileComplete;
+
+  void _track(String cta) {
+    unawaited(
+      AnalyticsService.instance.track(
+        ProductEvents.perfilStickyTapped,
+        props: {'cta': cta, 'profileComplete': profileComplete},
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,11 +73,14 @@ class PerfilStickyBar extends StatelessWidget {
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
                           foregroundColor: actionInk,
-                          side: BorderSide(color: accent.withValues(alpha: 0.45)),
+                          side: BorderSide(
+                            color: accent.withValues(alpha: 0.45),
+                          ),
                           minimumSize: const Size(0, 48),
                         ),
                         onPressed: () {
                           HapticFeedback.selectionClick();
+                          _track('alunos');
                           goPersonalShellTab(context, '/alunos');
                         },
                         icon: const Icon(Icons.groups_2_outlined, size: 18),
@@ -78,28 +93,21 @@ class PerfilStickyBar extends StatelessWidget {
                     child: Semantics(
                       button: true,
                       label:
-                          profileComplete
-                              ? 'Copiloto IA'
-                              : 'Completar perfil',
+                          profileComplete ? 'Abrir Hoje' : 'Completar perfil',
                       child:
                           profileComplete
-                              ? OutlinedButton.icon(
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: actionInk,
-                                  side: BorderSide(
-                                    color: accent.withValues(alpha: 0.55),
-                                  ),
-                                  minimumSize: const Size(0, 48),
-                                ),
+                              ? FxLiquidPrimaryButton(
+                                expand: true,
+                                icon: Icons.today_outlined,
+                                label: 'Hoje',
                                 onPressed: () {
                                   HapticFeedback.selectionClick();
-                                  goPersonalShellTab(context, '/ia/copiloto');
+                                  _track('hoje');
+                                  goPersonalShellTab(
+                                    context,
+                                    '/dashboard/personal',
+                                  );
                                 },
-                                icon: const Icon(
-                                  Icons.auto_awesome_outlined,
-                                  size: 18,
-                                ),
-                                label: const Text('Copiloto IA'),
                               )
                               : FxLiquidPrimaryButton(
                                 expand: true,
@@ -107,6 +115,7 @@ class PerfilStickyBar extends StatelessWidget {
                                 label: 'Completar perfil',
                                 onPressed: () {
                                   HapticFeedback.selectionClick();
+                                  _track('completar');
                                   context.push('/identidade-visual');
                                 },
                               ),

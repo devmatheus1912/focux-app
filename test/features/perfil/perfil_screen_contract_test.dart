@@ -49,10 +49,59 @@ void main() {
 
     expect(find.text('Operação'), findsOneWidget);
     expect(find.text('Meus alunos'), findsOneWidget);
-    // Fixture incompleto (WhatsApp pendente) → sticky pede completar, não Copiloto.
+    // Fixture incompleto (WhatsApp pendente) → sticky pede completar, não Copiloto/Hoje.
     expect(find.text('Completar perfil'), findsOneWidget);
+    expect(find.text('Copiloto IA'), findsNothing);
+    // Conta quiet + debug fora do card LGPD.
+    expect(find.text('Conta e segurança'), findsOneWidget);
+  });
+
+  testWidgets('perfil completo usa sticky Hoje (sem teaser de IA)', (
+    tester,
+  ) async {
+    DashboardHomeClientCache.clear();
+    tester.view.physicalSize = const Size(390, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(DashboardHomeClientCache.clear);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          perfilProvider.overrideWith((ref) async => _perfilCompletoFixture),
+          dashboardProvider.overrideWith((ref) async => _dashboardFixture),
+        ],
+        child: const MaterialApp(home: PerfilScreen()),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 800));
+
+    expect(find.text('Hoje'), findsOneWidget);
+    expect(find.text('Copiloto IA'), findsNothing);
+    expect(find.text('Meus alunos'), findsOneWidget);
   });
 }
+
+final _perfilCompletoFixture = PerfilPersonal(
+  id: 7,
+  nome: 'QA Coach',
+  email: 'qa@example.com',
+  telefone: '62982213003',
+  cref: '123456-G/SP',
+  especialidade: 'Hipertrofia',
+  corPrimaria: '#2D4FB7',
+  corSecundaria: '#3F63E4',
+  slug: 'qa-demo-coach',
+  plano: 'ENTERPRISE',
+  chavePix: 'qa@example.com',
+  descricaoProfissional: 'Especializado em biomecanica.',
+  especialidades: 'Hipertrofia',
+  instagram: '@qacoach',
+  logoUrl: 'https://cdn.example.com/logo.png',
+);
 
 final _perfilFixture = PerfilPersonal(
   id: 7,

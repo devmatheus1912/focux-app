@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/legal/focux_legal.dart';
@@ -17,7 +16,6 @@ class PerfilContaSegurancaSection extends StatelessWidget {
     required this.line,
     required this.onLogout,
     required this.onDeleteAccount,
-    this.debugTools,
   });
 
   final bool isDark;
@@ -27,16 +25,17 @@ class PerfilContaSegurancaSection extends StatelessWidget {
   final Color line;
   final VoidCallback onLogout;
   final VoidCallback onDeleteAccount;
-  final Widget? debugTools;
 
   @override
   Widget build(BuildContext context) {
+    // Quiet chrome — seção secundária (paridade Home: secundário recede).
     return PerfilCardSection(
       title: 'Conta e segurança',
       subtitle: 'Documentos legais, sessão e exclusão LGPD.',
       isDark: isDark,
       accent: accent,
       actionInk: actionInk,
+      quiet: true,
       child: Column(
         children: [
           PerfilActionTile(
@@ -77,10 +76,9 @@ class PerfilContaSegurancaSection extends StatelessWidget {
             mute: mute,
             line: line,
             danger: true,
-            showDivider: kDebugMode,
+            showDivider: false,
             onTap: onDeleteAccount,
           ),
-          if (kDebugMode && debugTools != null) debugTools!,
         ],
       ),
     );

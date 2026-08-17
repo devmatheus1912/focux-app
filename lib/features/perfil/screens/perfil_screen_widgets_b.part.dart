@@ -1,32 +1,43 @@
 part of 'perfil_screen.dart';
 
 class _HeroMarcaChip extends StatelessWidget {
-  const _HeroMarcaChip({required this.score, required this.onTap});
+  const _HeroMarcaChip({
+    required this.score,
+    required this.onTap,
+    this.onShowHint,
+  });
 
   final int score;
   final VoidCallback onTap;
+  final VoidCallback? onShowHint;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Marca $score por cento',
+      label:
+          'Marca $score por cento. Toque longo para ver como calculamos.',
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
+          onLongPress: onShowHint,
           borderRadius: BorderRadius.circular(TokensStrip.rPill),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(TokensStrip.rPill),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-            ),
-            child: Text(
-              'Marca $score%',
-              style: TokensStrip.bodyMuted(color: Colors.white).copyWith(
-                fontWeight: FontWeight.w800,
+          child: Tooltip(
+            message:
+                'Como calculamos: foto, CREF, especialidade, bio, Instagram, paleta e PIX.',
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(TokensStrip.rPill),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+              ),
+              child: Text(
+                'Marca $score%',
+                style: TokensStrip.bodyMuted(color: Colors.white).copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ),
@@ -295,51 +306,67 @@ class _PerfilDebugTools extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.forDark(isDark);
     return Material(
-      color: Colors.transparent,
-      child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          tilePadding: EdgeInsets.zero,
-          childrenPadding: EdgeInsets.zero,
-          initiallyExpanded: false,
-          iconColor: mute,
-          collapsedIconColor: mute,
-          title: Text(
-            'Ferramentas de desenvolvimento',
-            style: TokensStrip.bodyMuted(color: mute).copyWith(
-              fontWeight: FontWeight.w700,
+      color: chrome.cardFill,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: chrome.line.withValues(alpha: 0.85)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          TokensStrip.s4,
+          TokensStrip.s2,
+          TokensStrip.s4,
+          TokensStrip.s2,
+        ),
+        child: Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            tilePadding: EdgeInsets.zero,
+            childrenPadding: EdgeInsets.zero,
+            initiallyExpanded: false,
+            iconColor: mute,
+            collapsedIconColor: mute,
+            title: Text(
+              'Ferramentas de desenvolvimento',
+              style: TokensStrip.bodyMuted(color: mute).copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
+            subtitle: Text(
+              'Só em debug — fora do fluxo do personal',
+              style: TokensStrip.bodyMuted(
+                color: mute.withValues(alpha: 0.85),
+              ),
+            ),
+            children: [
+              PerfilActionTile(
+                icon: Icons.palette_outlined,
+                label: 'TOKENS STRIP',
+                value: 'Design system',
+                accent: accent,
+                actionInk: actionInk,
+                mute: mute,
+                line: line,
+                onTap: () => context.go('/qa/tokens-strip'),
+              ),
+              PerfilActionTile(
+                icon: Icons.science_outlined,
+                label: 'QA Smoke Test',
+                value: 'Smoke',
+                accent: accent,
+                actionInk: actionInk,
+                mute: mute,
+                line: line,
+                showDivider: false,
+                onTap: () => context.go('/qa/smoke'),
+              ),
+            ],
           ),
-          subtitle: Text(
-            'Só em debug — fora do fluxo do personal',
-            style: TokensStrip.bodyMuted(
-              color: mute.withValues(alpha: 0.85),
-            ),
-          ),
-          children: [
-            PerfilActionTile(
-              icon: Icons.palette_outlined,
-              label: 'TOKENS STRIP',
-              value: 'Design system',
-              accent: accent,
-              actionInk: actionInk,
-              mute: mute,
-              line: line,
-              onTap: () => context.go('/qa/tokens-strip'),
-            ),
-            PerfilActionTile(
-              icon: Icons.science_outlined,
-              label: 'QA Smoke Test',
-              value: 'Smoke',
-              accent: accent,
-              actionInk: actionInk,
-              mute: mute,
-              line: line,
-              showDivider: false,
-              onTap: () => context.go('/qa/smoke'),
-            ),
-          ],
         ),
       ),
     );

@@ -292,6 +292,11 @@ class _PerfilPublicLinkCard extends StatelessWidget {
                   child: FilledButton.icon(
                   onPressed: () {
                     HapticFeedback.selectionClick();
+                    unawaited(
+                      AnalyticsService.instance.track(
+                        ProductEvents.perfilShareTapped,
+                      ),
+                    );
                     copyLandingLink(
                       context,
                       url: copyUrl,

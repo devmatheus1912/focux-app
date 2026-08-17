@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -6,8 +7,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/config/env.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 
 import '../../../core/api/api_client.dart';
 import '../../../core/api/media_upload_service.dart';
@@ -60,6 +63,34 @@ class PerfilScreen extends ConsumerStatefulWidget {
 
 class _PerfilScreenState extends ConsumerState<PerfilScreen> {
   bool _uploadingPhoto = false;
+  var _viewTracked = false;
+  DateTime? _fetchedAt;
+
+  Future<void> _refreshHub() async {
+    ref.invalidate(perfilProvider);
+    ref.invalidate(dashboardHomeProvider);
+    ref.invalidate(dashboardProvider);
+    invalidatePacotesCaches(ref);
+    unawaited(
+      AnalyticsService.instance.track(ProductEvents.perfilRefreshed),
+    );
+    setState(() => _fetchedAt = DateTime.now());
+  }
+
+  void _markFetched() {
+    _fetchedAt ??= DateTime.now();
+  }
+
+  void _trackViewedOnce({required bool profileComplete}) {
+    if (_viewTracked) return;
+    _viewTracked = true;
+    unawaited(
+      AnalyticsService.instance.track(
+        ProductEvents.perfilViewed,
+        props: {'profileComplete': profileComplete},
+      ),
+    );
+  }
 
   Future<void> _pickAndUploadPhoto() async {
     final picker = ImagePicker();
@@ -189,11 +220,29 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
               onRetry: () => ref.invalidate(perfilProvider),
             ),
         data: (perfil) {
+          _markFetched();
+          final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+          final readiness = PerfilReadinessView.from(
+            perfil: perfil,
+            dashboard:
+                cachedPersonal ??
+                DashboardData(
+                  totalAlunos: 0,
+                  alunosAtivos: 0,
+                  planoAtual: perfil.plano,
+                  limiteAlunos: 0,
+                  nomePersonal: perfil.nome,
+                ),
+          );
+          _trackViewedOnce(profileComplete: readiness.score >= 100);
+
           if (cachedPersonal != null) {
             return _PerfilBody(
               perfil: perfil,
               dashboard: cachedPersonal,
               uploadingPhoto: _uploadingPhoto,
+              freshnessLabel: freshnessLabel,
+              onRefresh: _refreshHub,
               onPickPhoto: _pickAndUploadPhoto,
               onEditPerfil: () => _openEditPerfil(perfil),
               onLogout: _logout,
@@ -223,6 +272,8 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                   ),
                   uploadingPhoto: _uploadingPhoto,
                   loadingMetrics: true,
+                  freshnessLabel: freshnessLabel,
+                  onRefresh: _refreshHub,
                   onPickPhoto: _pickAndUploadPhoto,
                   onEditPerfil: () => _openEditPerfil(perfil),
                   onLogout: _logout,
@@ -247,6 +298,8 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                     instagram: perfil.instagram,
                   ),
                   uploadingPhoto: _uploadingPhoto,
+                  freshnessLabel: freshnessLabel,
+                  onRefresh: _refreshHub,
                   onPickPhoto: _pickAndUploadPhoto,
                   onEditPerfil: () => _openEditPerfil(perfil),
                   onLogout: _logout,
@@ -260,6 +313,8 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                   perfil: perfil,
                   dashboard: dashboard,
                   uploadingPhoto: _uploadingPhoto,
+                  freshnessLabel: freshnessLabel,
+                  onRefresh: _refreshHub,
                   onPickPhoto: _pickAndUploadPhoto,
                   onEditPerfil: () => _openEditPerfil(perfil),
                   onLogout: _logout,

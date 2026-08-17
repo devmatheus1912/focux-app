@@ -17,6 +17,7 @@ class PerfilCardSection extends StatelessWidget {
     this.onTrailingTap,
     required this.accent,
     required this.actionInk,
+    this.quiet = false,
   });
 
   final String title;
@@ -27,6 +28,8 @@ class PerfilCardSection extends StatelessWidget {
   final Color accent;
   final Color actionInk;
   final Widget child;
+  /// Secundário: menos glow (paridade Home quietChrome).
+  final bool quiet;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +42,11 @@ class PerfilCardSection extends StatelessWidget {
       container: true,
       label: a11yTitle,
       child: Container(
-        decoration: chrome.panel(radius: 16, accent: accent),
+        decoration: chrome.panel(
+          radius: 16,
+          accent: quiet ? null : accent,
+          elevationLevel: quiet ? 2 : 3,
+        ),
         child: Padding(
           padding: const EdgeInsets.all(TokensStrip.s4),
           child: Column(
