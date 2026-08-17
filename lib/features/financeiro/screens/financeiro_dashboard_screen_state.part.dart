@@ -13,17 +13,17 @@ class _FinanceiroDashboardScreenState
     _load();
   }
 
-  Future<void> _load() async {
+  Future<void> _load({bool force = false}) async {
     setState(() {
       _loading = true;
       _erro = null;
     });
     try {
-      final repo = FinanceiroRepository(ref.read(apiClientProvider));
-      final dashboard = await repo.dashboard();
+      if (force) ref.invalidate(financeiroHomeProvider);
+      final home = await ref.read(financeiroHomeProvider.future);
       if (mounted) {
         setState(() {
-          _data = dashboard;
+          _data = home.dashboard;
           _loading = false;
         });
       }
@@ -48,7 +48,7 @@ class _FinanceiroDashboardScreenState
         chromeOnDark: Theme.of(context).brightness == Brightness.dark,
         primary: Theme.of(context).colorScheme.primary,
         message: _erro ?? 'Verifique sua conexão e tente novamente.',
-        onRetry: _load,
+        onRetry: () => _load(force: true),
       );
     }
 
@@ -61,7 +61,7 @@ class _FinanceiroDashboardScreenState
     return fxScreenA11yScope(
       label: 'Dashboard financeiro',
       child: RefreshIndicator(
-        onRefresh: _load,
+        onRefresh: () => _load(force: true),
         child: ListView(
           padding: const EdgeInsets.only(bottom: 110),
           children: [

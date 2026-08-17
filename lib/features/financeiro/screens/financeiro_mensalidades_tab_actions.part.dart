@@ -210,7 +210,7 @@ extension FinanceiroMensalidadesTabActions on _FinanceiroMensalidadesTabState {
                                         if (ctx.mounted) {
                                           Navigator.of(ctx).pop();
                                         }
-                                        _load();
+                                        _load(force: true);
                                         if (mounted) {
                                           FeedbackHelper.showSuccess(
                                             context,
@@ -242,7 +242,7 @@ extension FinanceiroMensalidadesTabActions on _FinanceiroMensalidadesTabState {
       await FinanceiroRepository(
         ref.read(apiClientProvider),
       ).atualizarAtrasos();
-      _load();
+      _load(force: true);
       if (mounted) {
         FeedbackHelper.showSuccess(context, 'Mensalidades atualizadas!');
       }
@@ -332,7 +332,7 @@ extension FinanceiroMensalidadesTabActions on _FinanceiroMensalidadesTabState {
   Future<void> _pagar(int id) async {
     try {
       await FinanceiroRepository(ref.read(apiClientProvider)).pagar(id);
-      _load();
+      _load(force: true);
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
@@ -602,7 +602,7 @@ extension FinanceiroMensalidadesTabActions on _FinanceiroMensalidadesTabState {
                                         if (ctx.mounted) {
                                           Navigator.of(ctx).pop();
                                         }
-                                        _load();
+                                        _load(force: true);
                                         if (mounted) {
                                           FeedbackHelper.showSuccess(
                                             context,

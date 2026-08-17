@@ -19,6 +19,7 @@ import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/widgets/dashboard_error_state.dart';
 import '../data/financeiro_repository.dart';
+import '../providers/financeiro_provider.dart';
 import '../utils/financeiro_mensalidade_status.dart';
 
 part 'financeiro_mensalidades_tab_actions.part.dart';
@@ -89,14 +90,17 @@ class _FinanceiroMensalidadesTabState
     });
   }
 
-  Future<void> _load() async {
+  Future<void> _load({bool force = false}) async {
     setState(() {
       _loading = true;
       _erro = null;
     });
     try {
-      final r =
-          await FinanceiroRepository(ref.read(apiClientProvider)).listar();
+      if (force) {
+        invalidateFinanceiroCaches(ref);
+      }
+      final home = await ref.read(financeiroHomeProvider.future);
+      final r = home.mensalidades;
       final alunoFilter = widget.initialAlunoId;
       final filtered =
           alunoFilter == null
@@ -216,7 +220,7 @@ class _FinanceiroMensalidadesTabState
                       chromeOnDark: chrome.isDark,
                       primary: primary,
                       message: _erro!,
-                      onRetry: _load,
+                      onRetry: () => _load(force: true),
                     )
                     : _filtered.isEmpty
                     ? _buildMensalidadesEmpty(context)

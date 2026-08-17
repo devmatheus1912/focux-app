@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
+import '../providers/financeiro_provider.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
@@ -59,9 +60,17 @@ class _FinanceiroResumoScreenState
       _erro = null;
     });
     try {
-      final r = await FinanceiroRepository(
-        ref.read(apiClientProvider),
-      ).resumoMensal(_ano, _mes);
+      final now = DateTime.now();
+      final isCurrentMonth = _ano == now.year && _mes == now.month;
+      final ResumoMensal r;
+      if (isCurrentMonth) {
+        final home = await ref.read(financeiroHomeProvider.future);
+        r = home.resumoMesAtual;
+      } else {
+        r = await FinanceiroRepository(
+          ref.read(apiClientProvider),
+        ).resumoMensal(_ano, _mes);
+      }
       if (mounted) {
         setState(() {
           _resumo = r;
