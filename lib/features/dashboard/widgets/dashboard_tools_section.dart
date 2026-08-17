@@ -101,7 +101,7 @@ class DashboardCollapsibleToolsSection extends ConsumerWidget {
                   decoration: fxStripCardDecoration(
                     context,
                     radius: TokensStrip.rCard,
-                    glowStrength: 0.08,
+                    glowStrength: 0.06,
                   ),
                   child: Row(
                     children: [

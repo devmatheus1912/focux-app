@@ -98,7 +98,8 @@ class DashboardHomeFocusRules {
       focusMode: focusMode,
       dayFocusCoversRetention: covers,
       collapseAttention: focusMode || covers || riscoAlto > 3,
-      collapseAderencia: focusMode,
+      // Retenção: ranking vazio compete com o Foco — começa recolhido.
+      collapseAderencia: focusMode || covers,
       collapseFinance: focusMode || covers || receitaAtual <= 0,
       hideSecondaryRiskCtas: focusMode || covers,
       hidePromoBanners: retentionGuard || focusMode,
@@ -118,14 +119,14 @@ abstract final class DashboardAderenciaCopy {
 
   static String emptyBody({required bool retentionFocus}) {
     if (retentionFocus) {
-      return 'Ranking volta com treinos. Prioridade de contato já está no topo.';
+      return 'Ranking volta com treinos na semana.';
     }
     return 'Quando alunos treinarem, a aderência aparece aqui com ranking automático.';
   }
 
   static String stoppedBody({required bool retentionFocus}) {
     if (retentionFocus) {
-      return 'Sem treinos na semana. Prioridade de contato já está no topo.';
+      return 'Sem check-ins nesta semana.';
     }
     return 'Acione alunos sem treino esta semana pela agenda ou pela base.';
   }

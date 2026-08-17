@@ -72,7 +72,8 @@ void main() {
       expect(rules.omitSecondarySections, isFalse);
       expect(rules.hideFeaturedTools, isFalse);
       expect(rules.collapsePulseBody, isFalse);
-      expect(rules.collapseAderencia, isFalse);
+      // Ranking vazio não compete com o Foco — começa recolhido.
+      expect(rules.collapseAderencia, isTrue);
       expect(rules.maxVisibleNextActions, 2);
     });
 
@@ -224,6 +225,14 @@ void main() {
     test('does not echo foco do dia when retention focus', () {
       final body = DashboardAderenciaCopy.stoppedBody(retentionFocus: true);
       expect(body.toLowerCase().contains('foco do dia'), isFalse);
+      expect(body.toLowerCase().contains('prioridade'), isFalse);
+      expect(body.toLowerCase().contains('topo'), isFalse);
+    });
+
+    test('retention empty copy stays short', () {
+      final empty = DashboardAderenciaCopy.emptyBody(retentionFocus: true);
+      expect(empty.length, lessThan(48));
+      expect(empty.toLowerCase().contains('topo'), isFalse);
     });
   });
 }

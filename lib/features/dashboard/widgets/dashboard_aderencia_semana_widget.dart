@@ -44,6 +44,7 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
         body: DashboardAderenciaCopy.emptyBody(
           retentionFocus: retentionFocus,
         ),
+        quiet: retentionFocus,
         primaryAction:
             suppressEmptyActions
                 ? null
@@ -67,6 +68,7 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
         body: DashboardAderenciaCopy.stoppedBody(
           retentionFocus: retentionFocus,
         ),
+        quiet: retentionFocus,
         primaryAction:
             suppressEmptyActions
                 ? null
@@ -189,6 +191,7 @@ class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
     required this.mute,
     required this.title,
     required this.body,
+    this.quiet = false,
     this.primaryAction,
     this.onPrimary,
     this.secondaryAction,
@@ -200,6 +203,8 @@ class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
   final Color mute;
   final String title;
   final String body;
+  /// Dia de retenção: card sem ícone/CTA — não compete com o Foco.
+  final bool quiet;
   final String? primaryAction;
   final VoidCallback? onPrimary;
   final String? secondaryAction;
@@ -208,13 +213,16 @@ class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
+    final showActions =
+        !quiet && primaryAction != null && onPrimary != null;
 
     return Container(
-      padding: const EdgeInsets.all(TokensStrip.s4),
+      padding: EdgeInsets.all(quiet ? TokensStrip.s3 : TokensStrip.s4),
       decoration: fxStripCardDecoration(
         context,
-        accent: primary,
+        accent: quiet ? null : primary,
         radius: TokensStrip.rCard,
+        glowStrength: quiet ? 0.06 : 0.44,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,29 +230,38 @@ class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: primary.withValues(alpha: isDark ? 0.18 : 0.10),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Center(
-                  child: FxIcon(
-                    name: 'calendar',
-                    size: 18,
-                    color: BrandPalette.sectionAccent(primary, dark: isDark),
+              if (!quiet) ...[
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: primary.withValues(alpha: isDark ? 0.18 : 0.10),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Center(
+                    child: FxIcon(
+                      name: 'calendar',
+                      size: 18,
+                      color: BrandPalette.sectionAccent(primary, dark: isDark),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
+                const SizedBox(width: 12),
+              ],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      style: FocuxHubTypography.cardTitle(color: ink),
+                      style:
+                          quiet
+                              ? FocuxHubTypography.bodyMuted(
+                                color: ink,
+                                height: 1.3,
+                                fontWeight: FontWeight.w600,
+                              )
+                              : FocuxHubTypography.cardTitle(color: ink),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -259,7 +276,7 @@ class DashboardAderenciaSemanaEmptyCard extends StatelessWidget {
               ),
             ],
           ),
-          if (primaryAction != null && onPrimary != null) ...[
+          if (showActions) ...[
             const SizedBox(height: 14),
             LayoutBuilder(
               builder: (context, constraints) {

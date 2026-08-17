@@ -223,31 +223,31 @@ class DashboardPrioritiesOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     final chipFg = dashboardPrioritiesChipForeground(primary, isDark: isDark);
     final chipBg = dashboardPrioritiesChipBackground(primary, isDark: isDark);
-    // Align + Material sem Center: evita o chip esticar na largura do Stack.
+    // bottomEnd: não cobre o miolo do grid de ferramentas (antes centrado).
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         TokensStrip.s4,
         0,
         TokensStrip.s4,
-        8,
+        10,
       ),
       child: Align(
-        alignment: Alignment.center,
+        alignment: AlignmentDirectional.bottomEnd,
         child: Semantics(
           button: true,
           label: label,
           child: Material(
             color: chipBg,
-            elevation: isDark ? 6 : 3,
-            shadowColor: primary.withValues(alpha: isDark ? 0.55 : 0.28),
+            elevation: isDark ? 5 : 2,
+            shadowColor: primary.withValues(alpha: isDark ? 0.45 : 0.18),
             shape: const StadiumBorder(),
             child: InkWell(
               onTap: onTap,
               customBorder: const StadiumBorder(),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 14,
+                  horizontal: 16,
+                  vertical: 11,
                 ),
                 child: Text(
                   label,
