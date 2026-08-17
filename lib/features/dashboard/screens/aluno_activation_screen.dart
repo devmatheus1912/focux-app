@@ -9,12 +9,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../alunos/data/aluno_repository.dart';
-import '../../alunos/providers/alunos_provider.dart';
-import '../../chat/data/chat_repository.dart';
-import '../../checkin/data/checkin_repository.dart';
-import '../../checkin/providers/checkin_provider.dart';
-import '../../evolucao/data/evolucao_repository.dart';
-import 'aluno_dashboard_screen.dart';
+import '../providers/dashboard_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -51,10 +46,7 @@ class AlunoActivationScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final alunoAsync = ref.watch(alunoMeProvider);
-    final medidasAsync = ref.watch(minhasMedidasDashboardProvider);
-    final historicoAsync = ref.watch(historicoCheckinProvider);
-    final chatAsync = ref.watch(chatAlunoDashboardProvider);
+    final homeAsync = ref.watch(alunoDashboardHomeProvider);
 
     return fxScreenA11yScope(
       label: 'Boas-vindas',
@@ -64,11 +56,11 @@ class AlunoActivationScreen extends ConsumerWidget {
           title: 'Boas-vindas',
           leading: const SizedBox(width: 8),
           actions: [
-            alunoAsync.when(
+            homeAsync.when(
               data:
-                  (aluno) => TextButton(
+                  (home) => TextButton(
                     onPressed: () async {
-                      await _markSeen(aluno.id);
+                      await _markSeen(home.aluno.id);
                       if (context.mounted) {
                         context.go('/dashboard/aluno');
                       }
@@ -80,7 +72,7 @@ class AlunoActivationScreen extends ConsumerWidget {
             ),
           ],
         ),
-        body: alunoAsync.when(
+        body: homeAsync.when(
           loading: () => const FxLoading(),
           error:
               (e, _) => Center(
@@ -120,7 +112,8 @@ class AlunoActivationScreen extends ConsumerWidget {
                         expand: false,
                         icon: Icons.refresh_rounded,
                         label: 'Tentar novamente',
-                        onPressed: () => ref.invalidate(alunoMeProvider),
+                        onPressed:
+                            () => ref.invalidate(alunoDashboardHomeProvider),
                       ),
                       const SizedBox(height: 8),
                       TextButton(
@@ -131,12 +124,8 @@ class AlunoActivationScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-          data: (aluno) {
-            final medidas =
-                medidasAsync.valueOrNull ?? const <MedidaCorporal>[];
-            final historico =
-                historicoAsync.valueOrNull ?? const <ExecucaoTreino>[];
-            final mensagens = chatAsync.valueOrNull ?? const <ChatMsg>[];
+          data: (home) {
+            final aluno = home.aluno;
             final profileCompletion = _profileCompletion(aluno);
 
             final steps = <_ActivationStep>[
@@ -153,7 +142,7 @@ class AlunoActivationScreen extends ConsumerWidget {
                 title: 'Registrar a primeira medida',
                 description:
                     'Seu corpo precisa de um ponto de partida para mostrar evolucao de verdade.',
-                done: medidas.isNotEmpty,
+                done: home.medidas.isNotEmpty,
                 icon: Icons.straighten_outlined,
                 cta: 'Registrar medida',
                 route: '/aluno/perfil',
@@ -162,7 +151,7 @@ class AlunoActivationScreen extends ConsumerWidget {
                 title: 'Fazer o primeiro treino',
                 description:
                     'Quando voce treina pelo app, o personal ganha historico para ajustar carga e frequencia.',
-                done: historico.any(
+                done: home.historico.any(
                   (item) => item.status.toUpperCase() == 'CONCLUIDO',
                 ),
                 icon: Icons.play_circle_outline,
@@ -173,7 +162,7 @@ class AlunoActivationScreen extends ConsumerWidget {
                 title: 'Abrir seu chat com o personal',
                 description:
                     'Duvidas, feedback e alinhamento precisam acontecer no mesmo lugar do treino.',
-                done: mensagens.isNotEmpty,
+                done: home.chat.possuiMensagemDoAluno,
                 icon: Icons.chat_bubble_outline,
                 cta: 'Abrir chat',
                 route: '/chat/aluno',
