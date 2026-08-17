@@ -14,9 +14,9 @@ import '../../../features/alunos/utils/alunos_list_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../data/retencao_repository.dart';
 
 final retencaoRepositoryProvider = Provider(
@@ -116,7 +116,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
         ),
         body:
             _loading
-                ? Center(child: FxLoading(color: primary))
+                ? const SkeletonList(count: 6)
                 : _error != null
                 ? FxErrorState(
                   chromeOnDark: chrome.isDark,

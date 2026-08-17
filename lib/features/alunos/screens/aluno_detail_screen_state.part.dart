@@ -151,7 +151,6 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                         title: 'Não conseguimos carregar o aluno',
                       ),
                   data: (aluno) {
-                    ref.watch(alertasConfigProvider);
                     final perfilCompletion = copilotProfileCompletion(aluno);
                     final operacao = ref.watch(
                       aluno360OperacaoProvider(alunoId),

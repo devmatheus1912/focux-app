@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../planos/data/planos_repository.dart';
 
 class PixData {
   final int paymentId;
@@ -214,7 +215,7 @@ class FinanceiroRepository {
     return FinanceiroDashboard.fromJson(r.data as Map<String, dynamic>);
   }
 
-  /// BFF first paint — dashboard + mensalidades + resumo do mês corrente.
+  /// BFF first paint — dashboard + mensalidades + resumo + planoFeatures.
   Future<FinanceiroHomeBundle> getHome() async {
     final r = await _dio.get('/api/financeiro/home');
     return FinanceiroHomeBundle.fromJson(r.data as Map<String, dynamic>);
@@ -305,16 +306,19 @@ class FinanceiroHomeBundle {
   final FinanceiroDashboard dashboard;
   final List<Mensalidade> mensalidades;
   final ResumoMensal resumoMesAtual;
+  final PlanoFeatures? planoFeatures;
   final DateTime fetchedAt;
 
   FinanceiroHomeBundle({
     required this.dashboard,
     required this.mensalidades,
     required this.resumoMesAtual,
+    this.planoFeatures,
     DateTime? fetchedAt,
   }) : fetchedAt = fetchedAt ?? DateTime.now();
 
   factory FinanceiroHomeBundle.fromJson(Map<String, dynamic> j) {
+    final planoRaw = j['planoFeatures'];
     return FinanceiroHomeBundle(
       dashboard: FinanceiroDashboard.fromJson(
         j['dashboard'] as Map<String, dynamic>,
@@ -326,6 +330,10 @@ class FinanceiroHomeBundle {
       resumoMesAtual: ResumoMensal.fromJson(
         j['resumoMesAtual'] as Map<String, dynamic>? ?? const {},
       ),
+      planoFeatures:
+          planoRaw is Map
+              ? PlanoFeatures.fromJson(Map<String, dynamic>.from(planoRaw))
+              : null,
     );
   }
 }

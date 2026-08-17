@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -23,6 +24,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
   bool _loading = true;
   String? _erro;
   String? _slug;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -43,6 +45,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
         _pacotes = home.pacotes;
         _slug = home.perfil?.slug;
         _loading = false;
+        _fetchedAt = DateTime.now();
       });
     } catch (e) {
       if (mounted) {
@@ -86,12 +89,15 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+
     return fxScreenA11yScope(
       label: 'Planos & link de vendas',
       child: FxShellScaffold(
         appBar: FxShellAppBar(
           title: 'Planos & link de vendas',
-          subtitle: 'Planos com preço e link para WhatsApp',
+          subtitle:
+              freshnessLabel ?? 'Planos com preço e link para WhatsApp',
           actions: [
             IconButton(
               icon: const Icon(Icons.link_rounded),

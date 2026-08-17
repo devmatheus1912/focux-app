@@ -11,9 +11,9 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_celebration_overlay.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/feature_gate.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/landing_growth_repository.dart';
@@ -629,7 +629,7 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
           loading:
               () => const FxShellScaffold(
                 appBar: FxShellAppBar(title: 'Editor da landing'),
-                body: Center(child: FxLoading()),
+                body: SkeletonList(count: 6),
               ),
           error:
               (e, _) => FxShellScaffold(

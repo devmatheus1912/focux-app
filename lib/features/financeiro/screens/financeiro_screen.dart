@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/utils/motion_preferences.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../alunos/providers/alunos_provider.dart';
+import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
+import '../providers/financeiro_provider.dart';
 import 'financeiro_dashboard_screen.dart';
 import 'financeiro_mensalidades_tab.dart';
 import 'financeiro_resumo_screen.dart';
-import '../../../core/brand/focux_microcopy.dart';
-import '../../../core/widgets/fx_screen_a11y.dart';
 
 class FinanceiroScreen extends ConsumerStatefulWidget {
   const FinanceiroScreen({super.key, this.initialAlunoId});
@@ -65,19 +68,30 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
 
   @override
   Widget build(BuildContext context) {
+    final homeAsync = ref.watch(financeiroHomeProvider);
+    final home = homeAsync.valueOrNull;
+    final planoFromHome = home?.planoFeatures;
+    if (planoFromHome != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(planoFeaturesProvider.notifier).seedFromHome(planoFromHome);
+      });
+    }
+
     return FeatureGate(
       featureName: 'Financeiro',
       requiredPlan: SubscriptionPlan.PREMIUM,
       capability: 'financeiro',
-      child: _buildContent(context),
+      child: _buildContent(context, home?.fetchedAt),
     );
   }
 
-  Widget _buildContent(BuildContext context) {
+  Widget _buildContent(BuildContext context, DateTime? fetchedAt) {
     final chrome = ShellChrome.of(context);
     final ink = chrome.ink;
     final mute = chrome.mute;
     final primary = Theme.of(context).colorScheme.primary;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Financeiro',
@@ -92,7 +106,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen>
               children: [
                 FxShellAppBar(
                   title: 'Financeiro',
-                  subtitle: FocuxMicrocopy.financeiroEsteMes,
+                  subtitle: freshnessLabel ?? FocuxMicrocopy.financeiroEsteMes,
                   onBack: () => safePopOrGo(context, '/dashboard/personal'),
                   actions: [
                     PopupMenuButton<String>(

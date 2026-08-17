@@ -2,11 +2,13 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/screen_source_bundle.dart';
+
 void main() {
   test('relatorio usa polish: cards, erro amigavel e a11y', () {
-    final screen = File(
+    final screen = readScreenSourceBundle(
       'lib/features/relatorio/screens/relatorio_screen.dart',
-    ).readAsStringSync();
+    );
     final global = File(
       'lib/features/relatorio/screens/relatorio_global_screen.dart',
     ).readAsStringSync();

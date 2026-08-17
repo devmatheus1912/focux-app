@@ -5,16 +5,17 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/dunning_repository.dart';
-import '../../../core/widgets/fx_screen_a11y.dart';
 
 final dunningRepositoryProvider = Provider(
   (ref) => DunningRepository(ref.read(apiClientProvider)),
@@ -33,6 +34,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
   bool _loading = true;
   String? _erro;
   int? _marcandoId;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -46,12 +48,12 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
       _erro = null;
     });
     try {
-      final repo = ref.read(dunningRepositoryProvider);
-      final results = await Future.wait([repo.me(), repo.falhas()]);
+      final home = await ref.read(dunningRepositoryProvider).getHome();
       if (!mounted) return;
       setState(() {
-        _snapshot = results[0] as DunningSnapshot;
-        _falhas = results[1] as List<DunningFalha>;
+        _snapshot = home.snapshot;
+        _falhas = home.falhas;
+        _fetchedAt = DateTime.now();
         _loading = false;
       });
     } catch (e) {
@@ -83,6 +85,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
     final snap = _snapshot;
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Recuperação de pagamentos',
@@ -90,7 +93,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Recuperação de pagamentos',
-          subtitle: 'Falhas e taxa de recuperação',
+          subtitle: freshnessLabel ?? 'Falhas e taxa de recuperação',
           onBack: () => context.pop(),
         ),
         body:

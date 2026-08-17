@@ -8,6 +8,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
   bool _isSearching = false;
   List<ChatMsg>? _searchResults;
   final Set<int> _selectedAlunoIds = <int>{};
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -154,6 +155,17 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
     final primary = Theme.of(context).colorScheme.primary;
     final ink = chrome.ink;
     final mute = chrome.mute;
+    ref.listen<AsyncValue<ChatInboxHomeBundle>>(chatInboxHomeProvider, (
+      _,
+      next,
+    ) {
+      if (!next.isLoading && next.hasValue) {
+        setState(() => _fetchedAt = DateTime.now());
+      }
+    });
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final showFreshness =
+        !_isSearching && !_selectionActive && freshnessLabel != null;
 
     return fxScreenA11yScope(
       label: 'Mensagens',
@@ -169,7 +181,9 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
                 ),
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(
-            _isSearching || _selectionActive ? 56 : 104,
+            _isSearching || _selectionActive
+                ? 56
+                : (showFreshness ? 112 : 104),
           ),
           child:
               _selectionActive || _isSearching
@@ -249,6 +263,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
                     children: [
                       FxShellAppBar(
                         title: 'Mensagens',
+                        subtitle: freshnessLabel,
                         onBack:
                             () => safePopOrGo(context, '/dashboard/personal'),
                         actions: [

@@ -14,6 +14,7 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/white_label_repository.dart';
 
@@ -107,7 +108,7 @@ class _WhiteLabelSettingsScreenState
         ),
         body: FxContentWidthLimiter(
           child: configAsync.when(
-            loading: () => const Center(child: FxLoading()),
+            loading: () => const SkeletonList(count: 5),
             error:
                 (e, _) => FxErrorState(
                   chromeOnDark: Theme.of(context).brightness == Brightness.dark,

@@ -5,11 +5,11 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../constants/aluno_360_layout.dart';
-import '../data/aluno_followup_store.dart';
 import '../data/aluno_repository.dart';
 import '../data/aluno_contact_utils.dart';
 import '../providers/aluno_detail_providers.dart';
-import '../providers/aluno_followup_provider.dart';
+import '../providers/alunos_provider.dart';
+import '../utils/alertas_config_from_home.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../widgets/aluno_operacao_adherence_bars.dart';
 import '../widgets/aluno_operacao_adherence_legend.dart';
@@ -96,10 +96,19 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ink = fxScreenInk(context);
-    final configAsync = ref.watch(alertasConfigProvider);
-    final diasLimite =
-        configAsync.valueOrNull?.diasSemTreino ??
-        AlunoFollowUpStore.diasSemTreinoLimite;
+    final homeInitialized = ref.exists(alunosHomeProvider);
+    final cachedDias =
+        homeInitialized
+            ? ref
+                .watch(alunosHomeProvider)
+                .valueOrNull
+                ?.alertasConfig
+                .diasSemTreino
+            : null;
+    final diasLimite = resolveDiasSemTreinoLimiteFromHome(
+      alunosHomeInitialized: homeInitialized,
+      cachedDiasSemTreino: cachedDias,
+    );
     final week = summarizeAderenciaWeek(
       parseAderenciaSemanal(aderenciaSemanal),
     );

@@ -741,6 +741,9 @@ class AlunoRepository {
 }
 
 class AlunosHomeBundle {
+  static const fallbackDiasSemTreino = 7;
+  static const fallbackAderenciaMinima = 50;
+
   final List<Aluno> alunos;
   final AlunosStats stats;
   final AlertasConfiguracao alertasConfig;
@@ -761,7 +764,10 @@ class AlunosHomeBundle {
     ),
     alertasConfig: AlertasConfiguracao.fromJson(
       (j['alertasConfig'] as Map<String, dynamic>?) ??
-          const {'diasSemTreino': 7, 'aderenciaMinima': 50},
+          const {
+            'diasSemTreino': fallbackDiasSemTreino,
+            'aderenciaMinima': fallbackAderenciaMinima,
+          },
     ),
   );
 }

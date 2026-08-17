@@ -71,6 +71,33 @@ class ComparativoPeriodo {
       );
 }
 
+class RelatoriosHomeBundle {
+  final AderenciaData aderencia;
+  final ComparativoPeriodo? comparativo;
+
+  const RelatoriosHomeBundle({required this.aderencia, this.comparativo});
+
+  factory RelatoriosHomeBundle.fromJson(Map<String, dynamic> j) {
+    final aderenciaJson = j['aderencia'];
+    final comparativoJson = j['comparativo'];
+    return RelatoriosHomeBundle(
+      aderencia:
+          aderenciaJson is Map<String, dynamic>
+              ? AderenciaData.fromJson(aderenciaJson)
+              : AderenciaData(
+                diasAnalisados: 0,
+                treinosConcluidos: 0,
+                treinosTotal: 0,
+                taxaAderenciaPercent: 0,
+              ),
+      comparativo:
+          comparativoJson is Map<String, dynamic>
+              ? ComparativoPeriodo.fromJson(comparativoJson)
+              : null,
+    );
+  }
+}
+
 class ResumoGlobal {
   final double aderenciaMediaGeral;
   final int totalAlunos;
@@ -103,26 +130,45 @@ class RelatorioRepository {
 
   RelatorioRepository(ApiClient c) : _dio = c.dio;
 
+  static String _isoDate(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  static Map<String, dynamic> _periodoParams({
+    required int dias,
+    DateTime? inicio,
+    DateTime? fim,
+  }) {
+    final params = <String, dynamic>{'dias': dias};
+    if (inicio != null) params['inicio'] = _isoDate(inicio);
+    if (fim != null) params['fim'] = _isoDate(fim);
+    return params;
+  }
+
   Future<AderenciaData> aderencia(
     int alunoId, {
     int dias = 30,
     DateTime? inicio,
     DateTime? fim,
   }) async {
-    final Map<String, dynamic> params = {'dias': dias};
-    if (inicio != null) {
-      params['inicio'] =
-          '${inicio.year.toString().padLeft(4, '0')}-${inicio.month.toString().padLeft(2, '0')}-${inicio.day.toString().padLeft(2, '0')}';
-    }
-    if (fim != null) {
-      params['fim'] =
-          '${fim.year.toString().padLeft(4, '0')}-${fim.month.toString().padLeft(2, '0')}-${fim.day.toString().padLeft(2, '0')}';
-    }
     final r = await _dio.get(
       '/api/relatorios/aderencia/$alunoId',
-      queryParameters: params,
+      queryParameters: _periodoParams(dias: dias, inicio: inicio, fim: fim),
     );
     return AderenciaData.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  /// BFF tipado — first paint da tela Relatório (aderência + comparativo).
+  Future<RelatoriosHomeBundle> getHome(
+    int alunoId, {
+    int dias = 30,
+    DateTime? inicio,
+    DateTime? fim,
+  }) async {
+    final r = await _dio.get(
+      '/api/relatorios/$alunoId/home',
+      queryParameters: _periodoParams(dias: dias, inicio: inicio, fim: fim),
+    );
+    return RelatoriosHomeBundle.fromJson(r.data as Map<String, dynamic>);
   }
 
   Future<List<ResumoAluno>> resumo() async {

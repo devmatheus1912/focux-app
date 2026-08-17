@@ -11,6 +11,7 @@ import '../providers/leads_provider.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import 'package:focux_app/core/widgets/fx_empty_state.dart';
 import 'package:focux_app/core/widgets/fx_error_state.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
@@ -28,6 +29,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
   bool _loading = true;
   String? _erro;
   String? _filtroStatus;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -52,6 +54,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
         setState(() {
           _leads = leads;
           _loading = false;
+          _fetchedAt = DateTime.now();
         });
       }
     } catch (e) {
@@ -85,6 +88,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
     final plano = ref.watch(planoFeaturesProvider).valueOrNull;
     final showLeadsLimitBanner =
         plano?.plano == SubscriptionPlan.FREE && _leads.length >= 4;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Funil de Leads',
@@ -92,6 +96,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Funil de Leads',
+          subtitle: freshnessLabel,
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
           actions: [
             IconButton(

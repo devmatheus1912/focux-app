@@ -132,6 +132,9 @@ void main() {
     expect(screen, contains('aluno360Provider'));
     expect(screen, contains('shouldWatchAlunoDetailFallback'));
     expect(screen, contains('resolveAlunoDetailAlunoAsync'));
+    expect(screen, contains('resolveDiasSemTreinoLimiteFromHome'));
+    expect(screen, contains('ref.exists(alunosHomeProvider)'));
+    expect(screen, isNot(contains('alertasConfigProvider')));
     expect(screen, contains('buscarAluno360'));
     expect(screen, contains('class Timeline360Tile'));
     expect(screen, contains('alunoCopilotoActionProvider'));

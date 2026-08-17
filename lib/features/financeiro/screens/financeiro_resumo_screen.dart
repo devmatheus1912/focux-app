@@ -9,8 +9,8 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/financeiro_repository.dart';
 import '../providers/financeiro_provider.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class FinanceiroResumoScreen extends ConsumerStatefulWidget {
@@ -158,7 +158,7 @@ class _FinanceiroResumoScreenState
             Expanded(
               child:
                   _loading
-                      ? const FxLoading()
+                      ? const SkeletonList(count: 5)
                       : _erro != null
                       ? FxErrorState(
                         chromeOnDark: isDark,

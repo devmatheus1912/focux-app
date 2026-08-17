@@ -11,7 +11,6 @@ import '../../health/data/health_repository.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
-import '../providers/aluno_followup_provider.dart';
 import '../providers/alunos_provider.dart';
 import '../utils/aluno360_copilot_logic.dart';
 import '../utils/aluno360_operacao_logic.dart';

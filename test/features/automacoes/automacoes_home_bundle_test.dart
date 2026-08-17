@@ -1,0 +1,41 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/automacoes/data/automacao_repository.dart';
+
+void main() {
+  test('AutomacoesHomeBundle parses fluxos + templates', () {
+    final bundle = AutomacoesHomeBundle.fromJson({
+      'fluxos': [
+        {
+          'id': 1,
+          'nome': 'Onboarding 7 dias',
+          'descricao': 'Sequência de boas-vindas',
+          'triggerTipo': 'ALUNO_CRIADO',
+          'ativo': true,
+          'templateId': 'ONBOARDING_7D',
+        },
+      ],
+      'templates': [
+        {
+          'id': 'ONBOARDING_7D',
+          'nome': 'Onboarding 7 dias',
+          'descricao': 'Sequência de boas-vindas para aluno novo',
+          'triggerTipo': 'ALUNO_CRIADO',
+        },
+      ],
+    });
+
+    expect(bundle.fluxos, hasLength(1));
+    expect(bundle.fluxos.first.nome, 'Onboarding 7 dias');
+    expect(bundle.fluxos.first.ativo, isTrue);
+    expect(bundle.fluxos.first.templateId, 'ONBOARDING_7D');
+    expect(bundle.templates, hasLength(1));
+    expect(bundle.templates.first.id, 'ONBOARDING_7D');
+    expect(bundle.templates.first.nome, 'Onboarding 7 dias');
+  });
+
+  test('AutomacoesHomeBundle tolerates missing lists', () {
+    final bundle = AutomacoesHomeBundle.fromJson({});
+    expect(bundle.fluxos, isEmpty);
+    expect(bundle.templates, isEmpty);
+  });
+}

@@ -10,6 +10,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   String _query = '';
   bool _ignoredDeepLinkFiltro = false;
   bool _listaCompacta = false;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -642,11 +643,17 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   @override
   Widget build(BuildContext context) {
     final homeAsync = ref.watch(alunosHomeProvider);
+    ref.listen<AsyncValue<AlunosHomeBundle>>(alunosHomeProvider, (_, next) {
+      if (!next.isLoading && next.hasValue) {
+        setState(() => _fetchedAt = DateTime.now());
+      }
+    });
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
     final ink = chrome.ink;
     final mute = chrome.mute;
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Lista de alunos',
@@ -792,6 +799,19 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                                         height: 1.15,
                                       ),
                                     ),
+                                    if (freshnessLabel != null) ...[
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        freshnessLabel,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: AppTypography.inter(
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.w600,
+                                          color: mute,
+                                        ),
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),
@@ -1170,7 +1190,6 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
                             : RefreshIndicator(
                               onRefresh: () async {
                                 invalidateAlunosCaches(ref);
-                                ref.invalidate(alertasConfigProvider);
                               },
                               child: ListView.separated(
                                 padding: EdgeInsets.only(

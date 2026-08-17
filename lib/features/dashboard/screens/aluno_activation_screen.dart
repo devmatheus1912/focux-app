@@ -12,10 +12,10 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../providers/dashboard_provider.dart';
 
@@ -78,7 +78,7 @@ class AlunoActivationScreen extends ConsumerWidget {
           ],
         ),
         body: homeAsync.when(
-          loading: () => const FxLoading(),
+          loading: () => const SkeletonList(count: 5),
           error:
               (e, _) => FxErrorState(
                 chromeOnDark: isDark,

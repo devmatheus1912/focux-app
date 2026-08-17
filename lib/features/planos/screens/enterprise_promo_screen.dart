@@ -10,10 +10,10 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
@@ -118,7 +118,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
           child: SafeArea(
             child:
                 _starting
-                    ? const FxLoading()
+                    ? const SkeletonList(count: 4)
                     : _error != null
                     ? FxErrorState(
                       chromeOnDark: true,

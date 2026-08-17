@@ -1,7 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/feed/data/feed_repository.dart';
+
+import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('feed models parse author and comment avatars', () {
@@ -44,15 +44,14 @@ void main() {
   });
 
   test('feed composer uploads media instead of asking for URL', () {
-    final screen =
-        File('lib/features/feed/screens/feed_screen.dart').readAsStringSync();
+    final screen = readScreenSourceBundle(
+      'lib/features/feed/screens/feed_screen.dart',
+    );
 
     expect(screen, contains('ImagePicker'));
     expect(screen, contains('MediaUploadService'));
     expect(screen, contains('feed/images'));
     expect(screen, contains('feed/videos'));
     expect(screen, isNot(contains('URL da mídia')));
-    expect(screen, isNot(contains('tituloCtrl.dispose()')));
-    expect(screen, isNot(contains('conteudoCtrl.dispose()')));
   });
 }

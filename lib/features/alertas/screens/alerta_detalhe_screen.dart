@@ -8,7 +8,7 @@ import '../data/alertas_repository.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -83,7 +83,10 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
         ),
         body:
             _loading
-                ? const FxLoading()
+                ? const Padding(
+                  padding: EdgeInsets.all(TokensStrip.s4),
+                  child: SkeletonList(count: 6),
+                )
                 : _erro != null
                 ? FxErrorState(
                   chromeOnDark: chrome.isDark,

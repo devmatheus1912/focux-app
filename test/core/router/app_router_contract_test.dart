@@ -150,10 +150,9 @@ void main() {
         File(
           'lib/features/leads/screens/leads_kanban_screen.dart',
         ).readAsStringSync();
-    final leadDetail =
-        File(
-          'lib/features/leads/screens/lead_detail_screen.dart',
-        ).readAsStringSync();
+    final leadDetail = readScreenSourceBundle(
+      'lib/features/leads/screens/lead_detail_screen.dart',
+    );
     final assinatura =
         File(
           'lib/features/assinatura/screens/assinatura_screen.dart',

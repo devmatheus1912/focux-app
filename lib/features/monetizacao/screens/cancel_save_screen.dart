@@ -11,10 +11,10 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/planos/paywall/paywall_catalog.dart';
 import '../../../features/planos/paywall/paywall_components.dart';
 import '../../../features/subscription/store_subscription_policy.dart';
@@ -264,8 +264,8 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
                   _carregandoOferta
                       ? const Padding(
                         key: ValueKey('loading'),
-                        padding: EdgeInsets.symmetric(vertical: 24),
-                        child: Center(child: FxLoading()),
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: SkeletonList(count: 3),
                       )
                       : _erroOferta != null
                       ? Padding(

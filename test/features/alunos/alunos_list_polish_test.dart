@@ -42,5 +42,7 @@ void main() {
     expect(screen, contains('SingleChildScrollView'));
     expect(screen, isNot(contains('aluno(s) selecionado(s)')));
     expect(screen, isNot(contains('DropdownButtonFormField')));
+    expect(screen, contains('home.alertasConfig'));
+    expect(screen, isNot(contains('alertasConfigProvider')));
   });
 }

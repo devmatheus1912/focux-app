@@ -13,6 +13,7 @@ import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -20,9 +21,9 @@ import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../utils/brand_slogan_display.dart';
 import '../../subscription/utils/landing_editor_access.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
@@ -198,7 +199,7 @@ class _IdentidadeVisualScreenState
                     message: friendlyError(perfilAsync.error!),
                     onRetry: () => ref.invalidate(perfilProvider),
                   )
-                  : const Center(child: FxLoading()),
+                  : const SkeletonList(count: 6),
         ),
       );
     }

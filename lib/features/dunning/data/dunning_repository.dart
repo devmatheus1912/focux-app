@@ -56,6 +56,32 @@ class DunningFalha {
   );
 }
 
+class DunningHomeBundle {
+  final DunningSnapshot snapshot;
+  final List<DunningFalha> falhas;
+
+  const DunningHomeBundle({required this.snapshot, required this.falhas});
+
+  factory DunningHomeBundle.fromJson(Map<String, dynamic> j) {
+    final snapshotJson = j['snapshot'];
+    return DunningHomeBundle(
+      snapshot:
+          snapshotJson is Map<String, dynamic>
+              ? DunningSnapshot.fromJson(snapshotJson)
+              : DunningSnapshot(
+                total: 0,
+                abertas: 0,
+                recuperadas: 0,
+                recoveryRate: 0,
+              ),
+      falhas:
+          ((j['falhas'] as List?) ?? const [])
+              .map((e) => DunningFalha.fromJson(e as Map<String, dynamic>))
+              .toList(),
+    );
+  }
+}
+
 class DunningRepository {
   final Dio _dio;
 
@@ -71,6 +97,12 @@ class DunningRepository {
     return (r.data as List<dynamic>)
         .map((e) => DunningFalha.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  /// BFF tipado — first paint da tela Dunning (snapshot + falhas).
+  Future<DunningHomeBundle> getHome() async {
+    final r = await _dio.get('/api/dunning/home');
+    return DunningHomeBundle.fromJson(r.data as Map<String, dynamic>);
   }
 
   Future<void> marcarRecuperado(int falhaId) async {

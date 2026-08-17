@@ -6,7 +6,8 @@ import '../data/aluno_repository.dart';
 import 'aluno_detail_providers.dart';
 import 'alunos_provider.dart';
 
-/// Config dedicada — 360 e outras telas não devem forçar o BFF da lista.
+/// Dedicated GET `/api/alertas/configuracao` — config screen only.
+/// List and 360 first paint must read `AlunosHomeBundle.alertasConfig`.
 final alertasConfigProvider = FutureProvider<AlertasConfiguracao>((ref) async {
   return AlertasRepository(ref.read(apiClientProvider)).getConfiguracao();
 });

@@ -13,13 +13,15 @@ void main() {
 
     expect(shell, contains('FxContentWidthLimiter'));
     expect(shell, contains('FinanceiroMensalidadesTab'));
+    expect(shell, contains('FxHubFreshness'));
+    expect(shell, contains('seedFromHome'));
     expect(shell, contains('TabBarView'));
     expect(shell, isNot(contains('class _MensalidadesTab')));
     expect(shell, isNot(contains('_MiniAction')));
 
     expect(tab, contains('class FinanceiroMensalidadesTab'));
     expect(tab, contains('class _MiniAction'));
-    expect(tab, contains('DashboardErrorState'));
+    expect(tab, contains('FxErrorState'));
     expect(tab, contains('FeedbackHelper.showSuccess'));
   });
 }

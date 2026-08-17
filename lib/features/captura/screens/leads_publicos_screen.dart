@@ -8,9 +8,9 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/captura_repository.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -82,7 +82,7 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
                 ),
         body:
             _loading
-                ? const Center(child: FxLoading())
+                ? const SkeletonList(count: 5)
                 : _erro != null
                 ? FxErrorState(
                   chromeOnDark: chrome.isDark,

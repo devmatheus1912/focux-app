@@ -78,9 +78,36 @@ class AlertaDetalhe {
   );
 }
 
+class AlertasHomeBundle {
+  final List<AlertaRisco> riscos;
+  final AlertasConfiguracao configuracao;
+
+  const AlertasHomeBundle({required this.riscos, required this.configuracao});
+
+  factory AlertasHomeBundle.fromJson(Map<String, dynamic> j) {
+    final configJson = j['configuracao'];
+    return AlertasHomeBundle(
+      riscos:
+          ((j['riscos'] as List?) ?? const [])
+              .map((e) => AlertaRisco.fromJson(e as Map<String, dynamic>))
+              .toList(),
+      configuracao:
+          configJson is Map<String, dynamic>
+              ? AlertasConfiguracao.fromJson(configJson)
+              : AlertasConfiguracao(diasSemTreino: 7, aderenciaMinima: 60),
+    );
+  }
+}
+
 class AlertasRepository {
   final Dio _dio;
   AlertasRepository(ApiClient c) : _dio = c.dio;
+
+  /// BFF tipado — first paint da tela Alertas (riscos + configuração).
+  Future<AlertasHomeBundle> getHome() async {
+    final r = await _dio.get('/api/alertas/home');
+    return AlertasHomeBundle.fromJson(r.data as Map<String, dynamic>);
+  }
 
   Future<List<AlertaRisco>> listarRiscos() async {
     final r = await _dio.get('/api/alertas/risco');

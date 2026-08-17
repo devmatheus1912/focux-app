@@ -6,6 +6,8 @@ void main() {
   test('financeiro cumpre contrato Tier S+', () {
     final screen = readScreenSourceBundle('lib/features/financeiro/screens/financeiro_screen.dart');
     expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
+    expect(screen, contains('FxHubFreshness'));
+    expect(screen, contains('seedFromHome'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });

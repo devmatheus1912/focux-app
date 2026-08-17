@@ -28,7 +28,8 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
     final ink = chrome.ink;
     final mute = chrome.mute;
     final bottom = MediaQuery.of(context).viewInsets.bottom;
-    final async = ref.watch(alunosProvider);
+    final homeAsync = ref.watch(alunosHomeProvider);
+    final alunos = alunoPickerAlunosFromHome(homeAsync);
 
     return SafeArea(
       top: false,
@@ -87,56 +88,11 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
                 ),
                 const SizedBox(height: 12),
                 Expanded(
-                  child: async.when(
-                    loading: () => Center(child: FxLoading(color: primary)),
-                    error:
-                        (e, _) => FxErrorState(
-                          chromeOnDark: isDark,
-                          primary: primary,
-                          message: friendlyError(e),
-                          onRetry: () => ref.invalidate(alunosProvider),
-                        ),
-                    data: (alunos) {
-                      final q = _query.toLowerCase();
-                      final filtered =
-                          q.isEmpty
-                              ? alunos
-                              : alunos
-                                  .where(
-                                    (a) =>
-                                        a.nome.toLowerCase().contains(q) ||
-                                        a.email.toLowerCase().contains(q),
-                                  )
-                                  .toList();
-                      if (filtered.isEmpty) {
-                        return FxEmptyState(
-                          icon: q.isEmpty ? 'users' : 'search',
-                          title:
-                              q.isEmpty
-                                  ? 'Nenhum aluno cadastrado'
-                                  : 'Nenhum aluno encontrado',
-                          subtitle:
-                              q.isEmpty
-                                  ? 'Cadastre um aluno para poder conversar por aqui.'
-                                  : 'Tente outro nome ou e-mail.',
-                        );
-                      }
-                      return ListView.separated(
-                        keyboardDismissBehavior:
-                            ScrollViewKeyboardDismissBehavior.onDrag,
-                        itemCount: filtered.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 8),
-                        itemBuilder: (_, index) {
-                          final aluno = filtered[index];
-                          return _AlunoContactTile(
-                            aluno: aluno,
-                            isDark: isDark,
-                            primary: primary,
-                            onTap: () => widget.onSelect(aluno),
-                          );
-                        },
-                      );
-                    },
+                  child: _buildAlunosBody(
+                    homeAsync: homeAsync,
+                    alunos: alunos,
+                    isDark: isDark,
+                    primary: primary,
                   ),
                 ),
               ],
@@ -145,6 +101,53 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
         ),
       ),
     );
+  }
+
+  Widget _buildAlunosBody({
+    required AsyncValue<AlunosHomeBundle> homeAsync,
+    required List<Aluno>? alunos,
+    required bool isDark,
+    required Color primary,
+  }) {
+    if (alunos != null) {
+      final filtered = filterAlunoPickerAlunos(alunos, _query);
+      if (filtered.isEmpty) {
+        return FxEmptyState(
+          icon: _query.isEmpty ? 'users' : 'search',
+          title:
+              _query.isEmpty
+                  ? 'Nenhum aluno cadastrado'
+                  : 'Nenhum aluno encontrado',
+          subtitle:
+              _query.isEmpty
+                  ? 'Cadastre um aluno para poder conversar por aqui.'
+                  : 'Tente outro nome ou e-mail.',
+        );
+      }
+      return ListView.separated(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        itemCount: filtered.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 8),
+        itemBuilder: (_, index) {
+          final aluno = filtered[index];
+          return _AlunoContactTile(
+            aluno: aluno,
+            isDark: isDark,
+            primary: primary,
+            onTap: () => widget.onSelect(aluno),
+          );
+        },
+      );
+    }
+    if (homeAsync.hasError) {
+      return FxErrorState(
+        chromeOnDark: isDark,
+        primary: primary,
+        message: friendlyError(homeAsync.error ?? 'Erro ao carregar alunos'),
+        onRetry: () => ref.invalidate(alunosHomeProvider),
+      );
+    }
+    return const SkeletonList(count: 6);
   }
 }
 

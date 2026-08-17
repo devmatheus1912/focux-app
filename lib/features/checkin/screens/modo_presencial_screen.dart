@@ -9,8 +9,8 @@ import '../providers/checkin_provider.dart';
 import '../../../core/utils/friendly_error.dart';
 import 'package:focux_app/core/widgets/fx_empty_state.dart';
 import 'package:focux_app/core/widgets/fx_error_state.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
@@ -139,7 +139,7 @@ class _State extends ConsumerState<ModoPresencialScreen> {
         label: 'Modo Presencial',
         child: Scaffold(
           backgroundColor: EagleTokens.darkBg,
-          body: Center(child: FxLoading(color: primary)),
+          body: const SkeletonList(count: 4),
         ),
       );
     }

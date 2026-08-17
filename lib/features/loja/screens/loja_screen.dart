@@ -7,6 +7,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -39,6 +40,7 @@ class _LojaScreenState extends ConsumerState<LojaScreen>
   List<LojaPedido> _pedidos = [];
   bool _loading = true;
   String? _error;
+  DateTime? _fetchedAt;
 
   @override
   void initState() {
@@ -60,12 +62,12 @@ class _LojaScreenState extends ConsumerState<LojaScreen>
     });
 
     try {
-      final repo = ref.read(lojaRepositoryProvider);
-      final results = await Future.wait([repo.listarPacotes(), repo.pedidos()]);
+      final home = await ref.read(lojaRepositoryProvider).getHome();
       if (!mounted) return;
       setState(() {
-        _pacotes = results[0] as List<Pacote>;
-        _pedidos = results[1] as List<LojaPedido>;
+        _pacotes = home.pacotes;
+        _pedidos = home.pedidos;
+        _fetchedAt = DateTime.now();
         _loading = false;
       });
     } catch (e) {
@@ -162,6 +164,7 @@ class _LojaScreenState extends ConsumerState<LojaScreen>
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final chrome = ShellChrome.of(context);
+    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     return fxScreenA11yScope(
       label: 'Loja digital',
@@ -170,9 +173,9 @@ class _LojaScreenState extends ConsumerState<LojaScreen>
         requiredPlan: SubscriptionPlan.ENTERPRISE_PRO,
         capability: 'lojaDigital',
         child: FxShellScaffold(
-          appBar: const FxShellAppBar(
+          appBar: FxShellAppBar(
             title: 'Loja digital',
-            subtitle: 'Vitrine de pacotes e pedidos PIX',
+            subtitle: freshnessLabel ?? 'Vitrine de pacotes e pedidos PIX',
           ),
           body: _loading
               ? const Padding(

@@ -12,7 +12,7 @@ import '../analytics/analytics_service.dart';
 import '../router/role_home.dart';
 import '../router/safe_navigation.dart';
 import 'fx_motion.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'skeleton_loader.dart';
 
 class FeatureGate extends ConsumerWidget {
   final SubscriptionPlan requiredPlan;
@@ -38,7 +38,7 @@ class FeatureGate extends ConsumerWidget {
     final featuresAsync = ref.watch(planoFeaturesProvider);
 
     if (featuresAsync.isLoading) {
-      return const Center(child: FxLoading());
+      return const SkeletonList();
     }
 
     if (featuresAsync.hasError) {
@@ -61,7 +61,7 @@ class FeatureGate extends ConsumerWidget {
 
     final features = featuresAsync.value;
     if (features == null) {
-      return const Center(child: FxLoading());
+      return const SkeletonList();
     }
 
     final gated = features.normalizeForTier();

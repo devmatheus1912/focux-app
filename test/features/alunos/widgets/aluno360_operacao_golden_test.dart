@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:focux_app/features/alertas/data/alertas_repository.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
-import 'package:focux_app/features/alunos/providers/aluno_followup_provider.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_copilot_logic.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_copilot_executar_confirm.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_copilot_prescription.dart';
@@ -52,12 +50,6 @@ void main() {
   }) {
     return ProviderScope(
       overrides: [
-        alertasConfigProvider.overrideWith(
-          (ref) async => AlertasConfiguracao(
-            diasSemTreino: 7,
-            aderenciaMinima: 70,
-          ),
-        ),
         aluno360OperacaoProvider(42).overrideWith((ref) => null),
       ],
       child: MaterialApp(

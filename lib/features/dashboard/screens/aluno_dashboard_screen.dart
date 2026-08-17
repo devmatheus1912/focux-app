@@ -16,6 +16,7 @@ import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -98,7 +99,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
           ],
         ),
         body: homeAsync.when(
-          loading: () => const Center(child: FxLoading()),
+          loading: () => const SkeletonList(count: 6),
           error:
               (e, _) => FxErrorState(
                 chromeOnDark: isDark,

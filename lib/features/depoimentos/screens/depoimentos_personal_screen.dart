@@ -6,12 +6,12 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/depoimento_repository.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 
 class DepoimentosPersonalScreen extends ConsumerStatefulWidget {
   const DepoimentosPersonalScreen({super.key});
@@ -88,7 +88,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
         ),
         body:
             _loading
-                ? const Center(child: FxLoading())
+                ? const SkeletonList(count: 5)
                 : _erro != null
                 ? FxErrorState(
                   chromeOnDark: chrome.isDark,

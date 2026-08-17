@@ -50,6 +50,30 @@ class AutomacaoTemplate {
       );
 }
 
+/// BFF `GET /api/automacoes/home` — fluxos + templates em um round-trip.
+class AutomacoesHomeBundle {
+  final List<AutomacaoFluxo> fluxos;
+  final List<AutomacaoTemplate> templates;
+
+  const AutomacoesHomeBundle({
+    required this.fluxos,
+    required this.templates,
+  });
+
+  factory AutomacoesHomeBundle.fromJson(Map<String, dynamic> j) {
+    return AutomacoesHomeBundle(
+      fluxos:
+          ((j['fluxos'] as List?) ?? const [])
+              .map((e) => AutomacaoFluxo.fromJson(e as Map<String, dynamic>))
+              .toList(),
+      templates:
+          ((j['templates'] as List?) ?? const [])
+              .map((e) => AutomacaoTemplate.fromJson(e as Map<String, dynamic>))
+              .toList(),
+    );
+  }
+}
+
 class AutomacaoRepository {
   final Dio _dio;
   AutomacaoRepository(ApiClient c) : _dio = c.dio;
@@ -66,6 +90,12 @@ class AutomacaoRepository {
     return (r.data as List)
         .map((e) => AutomacaoTemplate.fromJson(e as Map<String, dynamic>))
         .toList();
+  }
+
+  /// BFF tipado — first paint da tela Automações (fluxos + templates).
+  Future<AutomacoesHomeBundle> getHome() async {
+    final r = await _dio.get('/api/automacoes/home');
+    return AutomacoesHomeBundle.fromJson(r.data as Map<String, dynamic>);
   }
 
   Future<void> ativarTemplate(String templateId) async {
