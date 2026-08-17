@@ -21,6 +21,7 @@ import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 
 part 'chat_inbox_screen_state.part.dart';
 part 'chat_inbox_screen_widgets.part.dart';

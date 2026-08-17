@@ -13,8 +13,8 @@ import '../../subscription/models/subscription_plan.dart';
 import '../../../core/utils/friendly_error.dart';
 import 'package:focux_app/core/widgets/fx_empty_state.dart';
 import 'package:focux_app/core/widgets/fx_error_state.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import 'package:focux_app/core/widgets/skeleton_loader.dart';
 
 class LeadsListScreen extends ConsumerStatefulWidget {
   const LeadsListScreen({super.key});
@@ -184,7 +184,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
             Expanded(
               child:
                   _loading
-                      ? Center(child: FxLoading(color: primary))
+                      ? const SkeletonList(count: 6)
                       : _erro != null
                       ? FxErrorState(
                         chromeOnDark: isDark,

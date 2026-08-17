@@ -15,8 +15,8 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import 'package:focux_app/core/widgets/skeleton_loader.dart';
 
 final iaActionsProvider = FutureProvider.family<List<FilaAcaoResumo>, String>((
   ref,
@@ -101,7 +101,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
             ),
             Expanded(
               child: actionsAsync.when(
-                loading: () => const Center(child: FxLoading()),
+                loading: () => const SkeletonList(count: 6),
                 error:
                     (e, _) => FxErrorState(
                       chromeOnDark: dark,

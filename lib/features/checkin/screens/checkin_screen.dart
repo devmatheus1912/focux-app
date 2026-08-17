@@ -14,9 +14,9 @@ import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
-import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_celebration_overlay.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../widgets/checkin_header_widgets.dart';
 import '../widgets/checkin_exercise_widgets.dart';
 import '../widgets/checkin_serie_detail_widgets.dart';
@@ -444,7 +444,12 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen> {
         label: 'Checkin',
         child: Scaffold(
           backgroundColor: Colors.transparent,
-          body: Center(child: FxLoading(color: brand)),
+          body: const SafeArea(
+            child: Padding(
+              padding: EdgeInsets.all(TokensStrip.s4),
+              child: SkeletonList(count: 5),
+            ),
+          ),
         ),
       );
     }

@@ -4,16 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../pacotes/data/pacote_repository.dart';
 import '../../subscription/models/subscription_plan.dart';
@@ -160,7 +161,7 @@ class _LojaScreenState extends ConsumerState<LojaScreen>
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.of(context);
 
     return fxScreenA11yScope(
       label: 'Loja digital',
@@ -174,10 +175,13 @@ class _LojaScreenState extends ConsumerState<LojaScreen>
             subtitle: 'Vitrine de pacotes e pedidos PIX',
           ),
           body: _loading
-              ? const Center(child: FxLoading())
+              ? const Padding(
+                  padding: EdgeInsets.all(TokensStrip.s4),
+                  child: SkeletonList(count: 5),
+                )
               : _error != null
               ? FxErrorState(
-                  chromeOnDark: isDark,
+                  chromeOnDark: chrome.isDark,
                   primary: scheme.primary,
                   message: _error!,
                   onRetry: _load,

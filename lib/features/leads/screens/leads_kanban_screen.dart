@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
@@ -180,10 +182,12 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.of(context);
+    final isDark = chrome.isDark;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final brand = Theme.of(context).colorScheme.primary;
+    final boardEmpty = _cols.values.every((leads) => leads.isEmpty);
 
     return fxScreenA11yScope(
       label: 'Funil de Leads',
@@ -240,7 +244,12 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                 ),
 
               if (_loading)
-                const Expanded(child: FxLoading())
+                const Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.all(TokensStrip.s4),
+                    child: SkeletonList(count: 5),
+                  ),
+                )
               else if (_erro != null)
                 Expanded(
                   child: FxErrorState(
@@ -248,6 +257,19 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                     primary: brand,
                     message: _erro!,
                     onRetry: _load,
+                  ),
+                )
+              else if (boardEmpty)
+                Expanded(
+                  child: FxEmptyState(
+                    icon: 'users',
+                    title: 'Nenhum lead no funil',
+                    subtitle:
+                        'Cadastre o primeiro lead para começar a acompanhar o funil.',
+                    action: FxEmptyAction(
+                      label: 'Novo lead',
+                      onTap: _novoLeadRapido,
+                    ),
                   ),
                 )
               else ...[

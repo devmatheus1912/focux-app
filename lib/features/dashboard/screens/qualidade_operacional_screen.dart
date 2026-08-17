@@ -69,7 +69,24 @@ class QualidadeOperacionalScreen extends ConsumerWidget {
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
         ),
         body: asyncData.when(
-          loading: () => const Center(child: FxLoading()),
+          loading:
+              () => ListView(
+                padding: const EdgeInsets.fromLTRB(
+                  TokensStrip.s4,
+                  TokensStrip.s2,
+                  TokensStrip.s4,
+                  40,
+                ),
+                children: [
+                  FxLoading.sectionShimmer(context, height: 200),
+                  const SizedBox(height: TokensStrip.s5),
+                  FxLoading.sectionShimmer(context, height: 140),
+                  const SizedBox(height: TokensStrip.s4),
+                  FxLoading.sectionShimmer(context, height: 128),
+                  const SizedBox(height: 12),
+                  FxLoading.sectionShimmer(context, height: 128),
+                ],
+              ),
           error:
               (e, _) => FxErrorState(
                 chromeOnDark: isDark,

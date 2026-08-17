@@ -11,9 +11,9 @@ import '../data/alertas_repository.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
@@ -283,7 +283,12 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (_loading)
-                const Expanded(child: FxLoading())
+                const Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.all(TokensStrip.s4),
+                    child: SkeletonList(count: 6),
+                  ),
+                )
               else if (_erro != null)
                 Expanded(
                   child: FxErrorState(

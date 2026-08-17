@@ -41,7 +41,10 @@ class _FinanceiroDashboardScreenState
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const FxLoading();
+      return const Padding(
+        padding: EdgeInsets.all(TokensStrip.s4),
+        child: SkeletonList(count: 5),
+      );
     }
     if (_data == null) {
       return DashboardErrorState(
@@ -57,6 +60,24 @@ class _FinanceiroDashboardScreenState
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final primaryDeep = BrandPalette.deep(primary);
+    final zeroData =
+        d.receitaMes <= 0 &&
+        d.vencimentosProximos.isEmpty &&
+        d.topAlunos.isEmpty;
+
+    if (zeroData) {
+      return fxScreenA11yScope(
+        label: 'Dashboard financeiro',
+        child: FxEmptyState(
+          icon: 'coin',
+          title: 'Sem dados financeiros',
+          subtitle:
+              d.zeroCta?.trim().isNotEmpty == true
+                  ? d.zeroCta!
+                  : 'Lance cobranças e mensalidades para ver o dashboard.',
+        ),
+      );
+    }
 
     return fxScreenA11yScope(
       label: 'Dashboard financeiro',

@@ -628,7 +628,7 @@ class _MeusTicketsTabState extends ConsumerState<_MeusTicketsTab> {
   }
 
   Widget _buildContent(BuildContext context) {
-    if (_loading) return const Center(child: FxLoading());
+    if (_loading) return const SkeletonList(count: 5);
     if (_erro != null) {
       return FxErrorState(
         chromeOnDark: Theme.of(context).brightness == Brightness.dark,

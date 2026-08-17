@@ -20,6 +20,7 @@ import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 
 part 'feed_screen_widgets.part.dart';
 
@@ -486,7 +487,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         body: SafeArea(
           child:
               _loading
-                  ? Center(child: FxLoading(color: primary))
+                  ? const Padding(
+                    padding: EdgeInsets.all(TokensStrip.s4),
+                    child: SkeletonList(count: 4),
+                  )
                   : _erro != null
                   ? FxErrorState(
                     chromeOnDark: isDark,

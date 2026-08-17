@@ -380,7 +380,11 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen>
     bool isArchived = false,
   }) {
     return async.when(
-      loading: () => Center(child: FxLoading(color: primary)),
+      loading:
+          () => const Padding(
+            padding: EdgeInsets.all(TokensStrip.s4),
+            child: SkeletonList(count: 6),
+          ),
       error:
           (e, _) => FxErrorState(
             chromeOnDark: isDark,

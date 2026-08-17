@@ -12,6 +12,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class GaleriaScreen extends ConsumerStatefulWidget {
@@ -140,7 +141,10 @@ class _State extends ConsumerState<GaleriaScreen> {
         ),
         body:
             _loading
-                ? const FxLoading()
+                ? const Padding(
+                  padding: EdgeInsets.all(TokensStrip.s4),
+                  child: SkeletonList(count: 4),
+                )
                 : _erro != null
                 ? FxErrorState(
                   chromeOnDark: chrome.isDark,
